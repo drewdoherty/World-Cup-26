@@ -227,43 +227,70 @@ def test_goal_difference_breaks_equal_points():
         assert res.group_position[teams[3]][3] == 1.0  # always last
 
 
-def test_head_to_head_tiebreak_orders_a_circular_group():
-    """When three teams tie on points, head-to-head among them decides order.
+def test_head_to_head_applied_before_overall_goal_difference():
+    """FIFA 2026: among teams level on points, head-to-head precedes overall GD.
 
-    Construct a group where the round-robin gives all teams equal points but
-    distinct head-to-head records by fixing every result, then check the final
-    ordering follows the FIFA mini-table.
+    Construct a group where exactly two teams (t0, t1) tie on 6 points; t1 beat
+    t0 head-to-head but t0 has a far larger *overall* goal difference. Under the
+    pre-2026 "overall GD first" rule t0 would top the group; under the 2026
+    "head-to-head first" rule t1 must finish ahead. We assert the 2026 behaviour.
     """
 
     groups = standard_groups()
     g = "A"
     t0, t1, t2, t3 = groups[g]
 
-    # Fix all 6 matches so t0, t1, t2 finish on equal points but with a clear
-    # head-to-head pecking order, and t3 loses everything.
-    # listed orientation home=lower-local-index.
     results = [
-        Result(t0, t1, 1, 0),  # t0 beats t1
-        Result(t2, t3, 3, 0),  # t2 beats t3
-        Result(t0, t2, 0, 1),  # t2 beats t0
-        Result(t1, t3, 3, 0),  # t1 beats t3
-        Result(t0, t3, 3, 0),  # t0 beats t3
-        Result(t1, t2, 1, 0),  # t1 beats t2
+        Result(t0, t1, 0, 1),  # t1 beats t0 head-to-head
+        Result(t2, t3, 0, 1),  # t3 beats t2
+        Result(t0, t2, 5, 0),  # t0 rolls up overall GD
+        Result(t1, t3, 2, 0),
+        Result(t0, t3, 5, 0),  # t0 overall GD now huge
+        Result(t1, t2, 0, 1),  # t2 beats t1
     ]
-    # Among {t0,t1,t2}: each has one win/one loss vs the others -> 3 H2H pts each.
-    # H2H goal difference: t0 (+1-1)=0, t1 (-1+1)=0, t2 (+1-1)=0 -> still level.
-    # H2H goals scored: t0=1, t1=1, t2=1 -> level; overall GD then decides.
-    # Overall: t0 = 1-0,0-1,3-0 => GF4 GA1 GD+3 ; t1 = 0-1,3-0,1-0 => GF4 GA1 +3 ;
-    #          t2 = 1-3?? recompute below in the assertion-free spirit: we only
-    # assert that t3 is last and the top three are a permutation of {t0,t1,t2}.
+    # Points: t0 = win t2, win t3, lose t1 -> 6 ; t1 = win t0, win t3, lose t2 -> 6
+    #         t2 = win t1, lose t0, lose t3 -> 3 ; t3 = win t2, lose t0, lose t1 -> 3
+    # Overall GD: t0 = +9, t1 = +2. Head-to-head: t1 beat t0.
     sim = TournamentSimulator(groups, make_prob_fn(groups), results=results)
-    res = sim.simulate(n_sims=300, rng_seed=8)
+    res = sim.simulate(n_sims=200, rng_seed=8)
 
-    # t3 lost all three -> always 4th.
-    assert res.group_position[t3][3] == 1.0
-    # The three tied teams occupy positions 1-3 with probability 1 collectively.
-    top3 = res.group_position[t0][:3].sum() + res.group_position[t1][:3].sum() + res.group_position[t2][:3].sum()
-    assert math.isclose(top3, 3.0, abs_tol=1e-9)
+    # Despite t0's much larger overall GD, t1 tops the group on head-to-head.
+    assert res.group_position[t1][0] == 1.0
+    assert res.group_position[t0][1] == 1.0
+    # t2 and t3 (level on 3 pts) take 3rd/4th.
+    assert math.isclose(res.group_position[t2][2:].sum(), 1.0, abs_tol=1e-9)
+    assert math.isclose(res.group_position[t3][2:].sum(), 1.0, abs_tol=1e-9)
+
+
+def test_three_way_tie_resolved_by_head_to_head_subtable():
+    """A three-way tie on points is ordered by the head-to-head mini-table.
+
+    t0, t1, t3 all finish on 6 points; their head-to-head GDs are +4, 0, -4
+    respectively, so the order among them is t0 > t1 > t3.
+    """
+
+    groups = standard_groups()
+    g = "A"
+    t0, t1, t2, t3 = groups[g]
+
+    results = [
+        Result(t0, t1, 0, 1),  # t1 beats t0
+        Result(t2, t3, 0, 1),  # t3 beats t2
+        Result(t0, t2, 5, 0),
+        Result(t1, t3, 0, 1),  # t3 beats t1
+        Result(t0, t3, 5, 0),  # t0 smashes t3
+        Result(t1, t2, 1, 0),
+    ]
+    # Points: t0 = win t2, win t3, lose t1 -> 6 ; t1 = win t0, win t2, lose t3 -> 6
+    #         t3 = win t2, win t1, lose t0 -> 6 ; t2 = 0.
+    # Mini-table among {t0,t1,t3}: H2H points all 3; H2H GD t0=+4, t1=0, t3=-4.
+    sim = TournamentSimulator(groups, make_prob_fn(groups), results=results)
+    res = sim.simulate(n_sims=200, rng_seed=8)
+
+    assert res.group_position[t0][0] == 1.0  # best H2H GD -> 1st
+    assert res.group_position[t1][1] == 1.0  # middle -> 2nd
+    assert res.group_position[t3][2] == 1.0  # worst H2H GD -> 3rd
+    assert res.group_position[t2][3] == 1.0  # 0 points -> 4th
 
 
 # ---------------------------------------------------------------------------
