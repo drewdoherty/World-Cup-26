@@ -169,3 +169,36 @@ def test_estimate_in_game_calls_scale_linearly():
     one = estimate_monthly_calls(1.0, policy)["in_game_calls"]
     three = estimate_monthly_calls(3.0, policy)["in_game_calls"]
     assert abs(three - 3.0 * one) < 1e-6
+
+
+def test_idle_never_sleeps_past_pre_close_window():
+    """Regression: idle delay must be capped so the daemon wakes when the
+    pre-close window opens, not an hour later mid-match."""
+    from wca.pollsched import PollPolicy, next_poll_delay
+
+    pol = PollPolicy()
+    # Kickoff 13 minutes away: outside the 10-min pre-close window, so the
+    # tier is idle — but a full 3600s sleep would miss the close. The delay
+    # must be ~180s (13min - 10min window).
+    delay, reason = next_poll_delay(
+        "2026-06-11T18:47:00", ["2026-06-11T19:00:00"], 10000, pol)
+    assert reason == "idle-capped-to-close"
+    assert 150 <= delay <= 200
+
+    # Far from any kickoff: plain idle.
+    delay2, reason2 = next_poll_delay(
+        "2026-06-11T10:00:00", ["2026-06-11T19:00:00"], 10000, pol)
+    assert reason2 == "idle"
+    assert delay2 == pol.idle_seconds
+
+    # Pre-close window further away than a full idle cycle: not capped.
+    delay3, reason3 = next_poll_delay(
+        "2026-06-11T17:00:00", ["2026-06-11T19:00:00"], 10000, pol)
+    assert reason3 == "idle"
+    assert delay3 == pol.idle_seconds
+
+    # 45 minutes out: capped to wake at the window opening (~35 min).
+    delay4, reason4 = next_poll_delay(
+        "2026-06-11T18:15:00", ["2026-06-11T19:00:00"], 10000, pol)
+    assert reason4 == "idle-capped-to-close"
+    assert 2000 <= delay4 <= 2200

@@ -130,6 +130,18 @@ def next_poll_delay(
         base_delay, reason = policy.pre_close_seconds, "pre_close"
     else:
         base_delay, reason = policy.idle_seconds, "idle"
+        # Never sleep PAST the start of the next pre-close window: an hour-long
+        # idle delay issued 13 minutes before kickoff would wake up mid-match
+        # and miss the closing line entirely (the single most valuable poll).
+        # Cap the idle sleep so the daemon wakes exactly when the pre-close
+        # window opens for the nearest future kickoff.
+        future = [ko for ko in parsed if ko > now]
+        if future:
+            next_ko = min(future)
+            until_pre_close = (next_ko - pre_close_window - now).total_seconds()
+            if 0 < until_pre_close < base_delay:
+                base_delay = max(int(until_pre_close), 30)
+                reason = "idle-capped-to-close"
 
     # --- Budget guards (layered on top of cadence) ------------------------
     if quota_remaining is not None:
