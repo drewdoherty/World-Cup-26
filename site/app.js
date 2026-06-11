@@ -71,10 +71,16 @@
   }
   function timeOnly(ts) {
     if (!ts) return "—";
-    var t = String(ts);
-    var idx = t.indexOf("T");
-    if (idx >= 0) return t.slice(idx + 1, idx + 6); // HH:MM
-    return t;
+    // Parse as UTC and render in the viewer's local timezone (consistent
+    // with the chart axis). Falls back to the raw string if unparseable.
+    var ms = Date.parse(String(ts).indexOf("T") >= 0 &&
+      !/[zZ]|[+\-]\d\d:?\d\d$/.test(String(ts)) ? String(ts) + "Z" : String(ts));
+    if (!isNaN(ms)) {
+      var dt = new Date(ms);
+      function p(n) { return (n < 10 ? "0" : "") + n; }
+      return p(dt.getHours()) + ":" + p(dt.getMinutes());
+    }
+    return String(ts);
   }
 
   // Minimal text escaping for any value sourced from data.json before it goes
@@ -341,11 +347,23 @@
     var v = Date.parse(s);
     return isNaN(v) ? NaN : v;
   }
-  // HH:MM (UTC) for an epoch-ms value.
+  // HH:MM in the VIEWER'S local timezone for an epoch-ms value. Timestamps
+  // are stored UTC (tsMs appends Z); rendering local means the chart axis
+  // matches the clock on the wall wherever the page is opened.
   function hhmm(ms) {
     var dt = new Date(ms);
     function p(n) { return (n < 10 ? "0" : "") + n; }
-    return p(dt.getUTCHours()) + ":" + p(dt.getUTCMinutes());
+    return p(dt.getHours()) + ":" + p(dt.getMinutes());
+  }
+  // Short viewer-timezone label for the axis (e.g. "UTC+3"), so two people
+  // in different timezones reading the same chart aren't confused.
+  function tzLabel() {
+    var mins = -new Date().getTimezoneOffset();
+    if (mins === 0) return "UTC";
+    var sign = mins > 0 ? "+" : "-";
+    var h = Math.floor(Math.abs(mins) / 60);
+    var m = Math.abs(mins) % 60;
+    return "UTC" + sign + h + (m ? ":" + (m < 10 ? "0" : "") + m : "");
   }
 
   function chartEmpty(el, msg) {
@@ -383,6 +401,11 @@
     for (var i = 0; i < n; i++) {
       var t = t0 + (t1 - t0) * (i / (n - 1));
       ticks.push({ x: scaleX(t), text: hhmm(t) });
+    }
+    // Tag the final tick with the viewer's timezone so the axis is
+    // self-describing (times are rendered local, storage stays UTC).
+    if (ticks.length) {
+      ticks[ticks.length - 1].text += " " + tzLabel();
     }
     return ticks;
   }
