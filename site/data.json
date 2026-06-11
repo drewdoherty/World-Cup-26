@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generated": "2026-06-11T21:08:35"
+    "generated": "2026-06-11 21:10:58 UTC"
   },
   "totals": {
     "wagered": 168.56,
-    "open_stake": 148.56,
-    "settled_pl": 42.75,
+    "open_stake": 126.56,
+    "settled_pl": 52.628,
     "n_bets": 14
   },
   "totals_by_currency": {
@@ -17,8 +17,8 @@
     },
     "USD": {
       "wagered": 106.31,
-      "open_stake": 106.31,
-      "settled_pl": 0.0,
+      "open_stake": 84.31,
+      "settled_pl": 9.878000000000002,
       "n_bets": 5
     }
   },
@@ -32,8 +32,8 @@
     },
     "polymarket": {
       "wagered": 106.31,
-      "open_stake": 106.31,
-      "settled_pl": 0.0,
+      "open_stake": 84.31,
+      "settled_pl": 9.878000000000002,
       "n_bets": 5,
       "currency": "USD"
     },
@@ -50,8 +50,8 @@
       "venue": "polymarket",
       "currency": "USD",
       "wagered": 106.31,
-      "open_stake": 106.31,
-      "settled_pl": 0.0,
+      "open_stake": 84.31,
+      "settled_pl": 9.878000000000002,
       "n_bets": 5
     },
     "paddypower": {
@@ -103,6 +103,22 @@
       "status": "won",
       "pl": 25.0,
       "clv": null
+    },
+    {
+      "id": 6,
+      "ts_utc": "2026-06-11T12:58:42",
+      "settled_ts": "2026-06-11T21:10:02",
+      "match": "Mexico vs South Africa",
+      "market": "pm_moneyline",
+      "selection": "Mexico Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "currency": "USD",
+      "decimal_odds": 1.449,
+      "stake": 22.0,
+      "status": "won",
+      "pl": 9.878000000000002,
+      "clv": 0.03500000000000014
     },
     {
       "id": 4,
@@ -157,13 +173,18 @@
     },
     "prediction_markets": {
       "currency": "USD",
-      "points": []
+      "points": [
+        [
+          "2026-06-11T21:10:02",
+          9.88
+        ]
+      ]
     }
   },
   "clv": {
-    "avg_clv": null,
-    "pct_beat_close": null,
-    "n_with_close": 0
+    "avg_clv": 0.03500000000000014,
+    "pct_beat_close": 1.0,
+    "n_with_close": 1
   },
   "positions": [
     {
@@ -263,20 +284,6 @@
       "stake": 13.78,
       "model_prob": 0.574,
       "ev": 0.08313799999999993
-    },
-    {
-      "id": 6,
-      "ts_utc": "2026-06-11T12:58:42",
-      "match": "Mexico vs South Africa",
-      "market": "pm_moneyline",
-      "selection": "Mexico Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "currency": "USD",
-      "decimal_odds": 1.449,
-      "stake": 22.0,
-      "model_prob": 0.713,
-      "ev": 0.03313699999999997
     },
     {
       "id": 5,
