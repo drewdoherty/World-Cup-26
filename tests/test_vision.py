@@ -321,7 +321,7 @@ def test_to_dict_roundtrip() -> None:
     assert set(d.keys()) == {
         "match_desc", "market", "selection", "bookmaker", "decimal_odds",
         "stake", "potential_returns", "status", "is_boost", "confidence",
-        "raw_text",
+        "raw_text", "currency",
     }
 
 
