@@ -75,6 +75,34 @@ def _authorized(chat_id: int | str, allowed: Optional[str]) -> bool:
     return str(chat_id) in allowed_ids
 
 
+READ_ONLY_MSG = (
+    "🔒 Read-only: bets and order confirmations are admin-only in this chat. "
+    "You can use /scores, /card, /summary, /bets, /clv, /ping."
+)
+
+# Lone yes/no (betslip confirm) or Y/N BET-<id> / PM-<n> (order confirm) —
+# anything that can write the ledger or execute an order.
+_MONEY_RE = re.compile(
+    r"^\s*(yes|no|[yn]\s+(bet|pm)-\d+)\s*$", re.IGNORECASE
+)
+
+
+def _is_money_action(text: str) -> bool:
+    return bool(_MONEY_RE.match(text or ""))
+
+
+def _is_admin(user_id: str, admin: Optional[str]) -> bool:
+    """True when the sender may perform money-touching actions.
+
+    With TELEGRAM_ADMIN_USER_ID unset, everyone in an authorized chat is
+    treated as admin (single-user setups, original behaviour). Once set, only
+    that user id can confirm orders or log bets.
+    """
+    if not admin:
+        return True
+    return str(user_id) == str(admin)
+
+
 # ---------------------------------------------------------------------------
 # Command handlers — each returns the reply text.
 # ---------------------------------------------------------------------------
@@ -855,6 +883,11 @@ def run(
     allowed = allowed_chat_id or os.environ.get("TELEGRAM_CHAT_ID")
     if not allowed:
         print("WARNING: TELEGRAM_CHAT_ID unset — all messages will be rejected.")
+    admin = os.environ.get("TELEGRAM_ADMIN_USER_ID")
+    if admin:
+        print("Admin gate active: money actions restricted to user %s" % admin)
+    else:
+        print("WARNING: TELEGRAM_ADMIN_USER_ID unset — all chat members can confirm orders.")
 
     print("World Cup Alpha bot started. Polling...")
     offset: Optional[int] = None
@@ -885,19 +918,26 @@ def run(
                     pass
                 continue
 
+            from_user = str((message.get("from") or {}).get("id") or "")
+
             # 1) Betslip screenshot -> parse + park for confirmation.
+            #    Admin-only: a ledger write follows the confirm, so only the
+            #    admin's screenshots are parsed at all.
             if "photo" in message:
-                try:
-                    image = client.download_photo(message)
-                    reply = (
-                        handle_photo(image, chat_id)
-                        if image
-                        else "No photo found in that message."
-                    )
-                except TelegramError as exc:
-                    reply = "Couldn't download the image: %s" % exc
-                except Exception as exc:
-                    reply = "Error reading image: %s" % exc
+                if not _is_admin(from_user, admin):
+                    reply = READ_ONLY_MSG
+                else:
+                    try:
+                        image = client.download_photo(message)
+                        reply = (
+                            handle_photo(image, chat_id)
+                            if image
+                            else "No photo found in that message."
+                        )
+                    except TelegramError as exc:
+                        reply = "Couldn't download the image: %s" % exc
+                    except Exception as exc:
+                        reply = "Error reading image: %s" % exc
                 try:
                     client.send_message(chat_id, reply)
                 except TelegramError as exc:
@@ -908,11 +948,18 @@ def run(
                 continue
             text = message["text"]
 
-            # 2) Pending betslip confirmation (lone yes/no) takes priority.
-            try:
-                reply = handle_photo_confirmation(text, chat_id, db_path)
-            except Exception as exc:
-                reply = "Error logging bets: %s" % exc
+            # 2) Money-touching text (yes/no betslip confirms, Y/N BET-/PM-
+            #    order confirms) is admin-gated; everything else is read-only
+            #    and available to any authorized chat member.
+            reply = None
+            is_money = _is_money_action(text)
+            if is_money and not _is_admin(from_user, admin):
+                reply = READ_ONLY_MSG
+            if reply is None:
+                try:
+                    reply = handle_photo_confirmation(text, chat_id, db_path)
+                except Exception as exc:
+                    reply = "Error logging bets: %s" % exc
             if reply is None:
                 try:
                     reply = dispatch(text, db_path)

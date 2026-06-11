@@ -299,3 +299,22 @@ def test_authorized_accepts_comma_separated_list():
     assert not _authorized(99999, "12345,-100987")
     assert not _authorized(12345, "")
     assert not _authorized(12345, None)
+
+
+def test_money_action_detection():
+    from wca.bot.app import _is_money_action
+    assert _is_money_action("yes")
+    assert _is_money_action("  NO ")
+    assert _is_money_action("Y PM-3")
+    assert _is_money_action("n bet-12")
+    assert not _is_money_action("/summary")
+    assert not _is_money_action("yes please")
+    assert not _is_money_action("/scores")
+
+
+def test_admin_gate():
+    from wca.bot.app import _is_admin
+    assert _is_admin("123", None)        # unset -> everyone (single-user mode)
+    assert _is_admin("123", "123")
+    assert not _is_admin("456", "123")
+    assert not _is_admin("", "123")
