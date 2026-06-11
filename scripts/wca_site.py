@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import glob
 import os
 import sys
 
@@ -25,13 +26,27 @@ _SRC = os.path.join(os.path.dirname(_HERE), "src")
 if _SRC not in sys.path:
     sys.path.insert(0, _SRC)
 
-from wca import sitedata  # noqa: E402
+from wca import linemove, sitedata  # noqa: E402
 
 
 def _now_utc_str() -> str:
     """Return the current UTC time as an ISO-ish display string."""
     now = datetime.datetime.now(datetime.timezone.utc)
     return now.strftime("%Y-%m-%d %H:%M:%S UTC")
+
+
+def _newest_snapshot_file(snapshots_dir: str) -> str:
+    """Return the path of the newest raw h2h snapshot JSON, or ``""``.
+
+    Filenames look like ``oddsapi_h2h_uk_20260611T134608Z.json``; their
+    embedded UTC stamp sorts lexicographically, so the lexically-greatest name
+    is the newest snapshot.
+    """
+    pattern = os.path.join(snapshots_dir, "oddsapi_h2h_uk_*.json")
+    matches = glob.glob(pattern)
+    if not matches:
+        return ""
+    return max(matches)
 
 
 def main(argv=None) -> int:
@@ -53,12 +68,43 @@ def main(argv=None) -> int:
         default="site/data.json",
         help="Destination JSON file (default: site/data.json).",
     )
+    parser.add_argument(
+        "--snapshots-dir",
+        default="data/raw/snapshots",
+        help="Directory of raw h2h snapshot JSON files used to derive event "
+             "metadata for the line-movement export (default: "
+             "data/raw/snapshots).",
+    )
+    parser.add_argument(
+        "--linemove-out",
+        default="site/linemove.json",
+        help="Destination for the line-movement JSON "
+             "(default: site/linemove.json).",
+    )
+    parser.add_argument(
+        "--no-linemove",
+        action="store_true",
+        help="Skip the line-movement (linemove.json) export.",
+    )
     args = parser.parse_args(argv)
 
     now_utc = _now_utc_str()
     out_path = sitedata.write_site_data(
         args.db, out_path=args.out, card_path=args.card, now_utc=now_utc,
     )
+
+    if not args.no_linemove:
+        snap_file = _newest_snapshot_file(args.snapshots_dir)
+        event_meta = (
+            linemove.event_meta_from_snapshot_file(snap_file) if snap_file else {}
+        )
+        lm_path = linemove.write_linemove(
+            args.db,
+            out_path=args.linemove_out,
+            event_meta=event_meta,
+            now_utc=now_utc,
+        )
+        print(lm_path)
 
     data = sitedata.build_site_data(args.db, card_path=args.card, now_utc=now_utc)
     totals = data["totals"]

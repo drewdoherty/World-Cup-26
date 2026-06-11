@@ -149,12 +149,14 @@ body {
   margin-top: 14px;
   grid-template-columns: 1fr 1fr;
   grid-template-areas:
-    "venues      positions"
-    "predictions predictions";
+    "venues      predictions"
+    "positions   positions"
+    "charts      charts";
 }
 .panel-venues { grid-area: venues; }
 .panel-positions { grid-area: positions; }
 .panel-predictions { grid-area: predictions; }
+.panel-charts { grid-area: charts; }
 
 .panel {
   background:
@@ -232,10 +234,13 @@ body {
 
 /* -------------------------------------------------------------- Positions */
 
-.pos-table { width: 100%; border-collapse: collapse; }
+/* The positions panel spans the full grid width, so the table itself never
+   needs to scroll on desktop — a horizontal scroller only kicks in on very
+   narrow viewports (see the <520px rule near the foot of this file). */
+.pos-table { width: 100%; border-collapse: collapse; table-layout: auto; }
 .pos-table th, .pos-table td {
   text-align: left;
-  padding: 6px 8px;
+  padding: 6px 10px;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
@@ -253,13 +258,24 @@ body {
 .pos-table td { font-size: 12px; }
 .pos-table td.r, .pos-table th.r { text-align: right; }
 .pos-table tr:last-child td { border-bottom: none; }
+/* A thin per-book accent rail sits on the first cell of each row; the colour
+   is supplied inline by app.js so unknown books degrade to the fallback. */
+.pos-table td.pos-time { border-left: 2px solid var(--border-2); }
+/* Match/Selection are the prose columns — let them take the slack the
+   full-width row provides instead of being clipped at a fixed width. */
 .pos-match {
-  max-width: 200px;
+  max-width: 340px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.pos-sel { color: var(--text-dim); }
+.pos-sel {
+  color: var(--text-dim);
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .pill {
   display: inline-block;
   padding: 1px 6px;
@@ -362,13 +378,22 @@ body {
     grid-template-columns: 1fr;
     grid-template-areas:
       "venues"
+      "predictions"
       "positions"
-      "predictions";
+      "charts";
   }
   .brand { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
   .tick { flex: 1 1 33%; padding: 8px 12px; }
-  .pos-match { max-width: 120px; }
   #app { padding: 0 8px 24px; }
+}
+
+/* Only below ~520px does the dense positions table need a horizontal
+   scroller; above that the full-width row holds every column comfortably. */
+@media (max-width: 520px) {
+  .panel-positions .panel-scroll { overflow-x: auto; }
+  .pos-table { min-width: 520px; }
+  .pos-match { max-width: 160px; }
+  .pos-sel { max-width: 140px; }
 }
 
 /* ============================================================ Scores page */
@@ -906,6 +931,81 @@ body {
   .kpi-desc { grid-column: 2; }
   .money-flow { flex-direction: column; }
   .money-arrow { align-self: flex-start; transform: rotate(90deg); }
+}
+
+/* ================================================================= Polish */
+/* Per-book colour map, charts panel and small terminal refinements.        */
+/* Appended — does not alter any rule above.                                */
+
+/* --- per-book pills (positions venue column) ---
+   The pill text/border colour is supplied INLINE by app.js (BOOK_COLOR map)
+   so an unknown book degrades to the fallback grey without a CSS rule per
+   book. These rules only carry the shared chrome. */
+.pill.book {
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* --- charts panel --- */
+.panel-charts .panel-body { padding: 12px; }
+.chart-block { margin-bottom: 16px; }
+.chart-block:last-child { margin-bottom: 0; }
+.chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.chart-title {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.chart-select {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--text);
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 2px;
+  padding: 3px 6px;
+  max-width: 60%;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.chart-select:focus { outline: none; border-color: var(--accent); }
+.chart-select[hidden] { display: none; }
+.chart-canvas { width: 100%; }
+.chart-canvas svg { width: 100%; height: auto; display: block; }
+
+/* SVG chart primitives (classes referenced by app.js-built markup). */
+.cx-grid { stroke: var(--border); stroke-width: 1; }
+.cx-axis { stroke: var(--border-2); stroke-width: 1; }
+.cx-tick {
+  fill: var(--muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.5px;
+}
+.cx-kick { stroke: var(--warn); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.8; }
+.cx-kick-lbl { fill: var(--warn); font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.5px; }
+.cx-series { fill: none; stroke-width: 1.6; }
+.cx-legend { fill: var(--text-dim); font-family: var(--mono); font-size: 9px; letter-spacing: 0.5px; }
+.cx-final { font-family: var(--mono); font-size: 9.5px; font-weight: 600; letter-spacing: 0.3px; }
+.chart-empty {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 20px 2px;
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  .chart-select { max-width: 50%; }
 }
 
 /* hidden attribute must win over the flex display above */

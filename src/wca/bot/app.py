@@ -120,8 +120,25 @@ def handle_summary(db_path: str) -> str:
     def pct(v: float) -> str:
         return "N/A" if v != v else "%.2f%%" % (v * 100)
 
+    pools = _pool_rows(db_path)
+
+    # Build a compact code-block table for the pool rows.
+    pool_table_rows = []
+    for v in ("sportsbook", "polymarket", "kalshi"):
+        if v not in pools:
+            continue
+        d = pools[v]
+        sym = _VENUE_SYMBOL[v]
+        bank = d["deposited"] + d["settled_pl"]
+        at_risk = d["open"]
+        pl = d["settled_pl"]
+        pool_table_rows.append(
+            "%-12s %s%9.2f  %s%8.2f  %s%+8.2f"
+            % (v, sym, bank, sym, at_risk, sym, pl)
+        )
+
     lines = [
-        "*Portfolio summary*",
+        "\U0001f4b0 *World Cup Alpha — portfolio*",
         "Bets: %d (open %d / won %d / lost %d / void %d)"
         % (s["total_bets"], s["open_bets"], s["won_bets"], s["lost_bets"], s["void_bets"]),
         "At risk (open): %.2f   Settled staked: %.2f   P&L: %.2f   ROI: %s"
@@ -130,7 +147,13 @@ def handle_summary(db_path: str) -> str:
         "",
         "*Bankroll by pool*",
     ]
-    pools = _pool_rows(db_path)
+
+    if pool_table_rows:
+        lines.append("```")
+        lines.append("%-12s %10s  %9s  %9s" % ("POOL", "BANK", "AT RISK", "P&L"))
+        lines.extend(pool_table_rows)
+        lines.append("```")
+
     for v in ("sportsbook", "polymarket", "kalshi"):
         if v not in pools:
             continue
@@ -170,7 +193,7 @@ def handle_bets(db_path: str) -> str:
     for r in rows:
         by_venue.setdefault(_venue_of(r["platform"]), []).append(r)
 
-    lines = ["*Open bets* (%d)" % len(rows)]
+    lines = ["\U0001f3af *Open bets* (%d)" % len(rows)]
     grand_win = {}
     grand_loss = {}
     for venue in ("sportsbook", "polymarket", "kalshi"):
@@ -180,6 +203,9 @@ def handle_bets(db_path: str) -> str:
         v_win = v_loss = 0.0
         lines.append("")
         lines.append("*%s*" % venue.upper())
+        # Code-block table header: ID | match (20ch) | sel (12ch) | odds | stake | to-win
+        lines.append("```")
+        lines.append("%-4s %-20s %-12s %6s %8s %8s" % ("ID", "Match", "Sel", "Odds", "Stake", "To-win"))
         for r in by_venue[venue]:
             stake = float(r["stake"] or 0.0)
             odds = float(r["decimal_odds"] or 0.0)
@@ -188,11 +214,15 @@ def handle_bets(db_path: str) -> str:
             loss = 0.0 if is_free else stake
             v_win += win
             v_loss += loss
+            match_trunc = (r["match_desc"] or "")[:20]
+            sel_trunc = (r["selection"] or "")[:12]
+            free_marker = "(free)" if is_free else ""
+            stake_str = "%s%.2f%s" % (sym, stake, " " + free_marker if free_marker else "")
             lines.append(
-                "#%d %s — %s @ %.2f | %s%.2f%s → win %s%.2f"
-                % (r["id"], r["match_desc"], r["selection"], odds,
-                   sym, stake, " (free)" if is_free else "", sym, win)
+                "%-4s %-20s %-12s %6.2f %-14s %s%.2f"
+                % ("#%d" % r["id"], match_trunc, sel_trunc, odds, stake_str, sym, win)
             )
+        lines.append("```")
         lines.append("max win %s%.2f / max loss %s%.2f" % (sym, v_win, sym, v_loss))
         grand_win[sym] = grand_win.get(sym, 0.0) + v_win
         grand_loss[sym] = grand_loss.get(sym, 0.0) + v_loss
@@ -303,9 +333,7 @@ def handle_scores(
             "The build may not have included scoreline predictions."
         )
 
-    header = "*Predicted scores*"
-    if generated:
-        header += " — %s" % generated
+    header = "⚽ *Predicted scores* — %s" % generated if generated else "⚽ *Predicted scores*"
 
     lines = [header, ""]
     for fx in fixtures:
@@ -315,7 +343,7 @@ def handle_scores(
         # Top score (most likely).
         top = scores[0]
         top_str = "*%s* (%s%%)" % (top["score"], _fmt_prob(top["prob"]))
-        # Up to 4 runner-ups (indices 1-4).
+        # Up to 4 runner-ups (indices 1-4) — kept inline to satisfy existing assertions.
         runners = scores[1:5]
         runner_strs = [
             "%s %s%%" % (s["score"], _fmt_prob(s["prob"])) for s in runners
@@ -325,7 +353,7 @@ def handle_scores(
             fixture_line += "  | " + " | ".join(runner_strs)
         lines.append(fixture_line)
 
-        # O/U + BTTS line.
+        # O/U + BTTS dimmed line (indented).
         ou = fx.get("over_under")
         btts = fx.get("btts")
         if ou is not None:
@@ -337,6 +365,7 @@ def handle_scores(
             if btts is not None:
                 ou_str += "   BTTS %s%%" % _fmt_prob(btts)
             lines.append("    " + ou_str)
+        # Blank line between fixtures.
         lines.append("")
 
     # Remove trailing blank line if present.

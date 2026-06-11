@@ -32,20 +32,40 @@
   <main class="grid">
     <!-- Venues -->
     <section class="panel panel-venues">
-      <div class="panel-head"><span class="panel-label">Venues</span><span class="panel-meta" id="venues-meta"></span></div>
+      <div class="panel-head"><span class="panel-label">💰 Venues</span><span class="panel-meta" id="venues-meta"></span></div>
       <div class="panel-body" id="venues"></div>
-    </section>
-
-    <!-- Positions -->
-    <section class="panel panel-positions">
-      <div class="panel-head"><span class="panel-label">Positions // Open</span><span class="panel-meta" id="positions-meta"></span></div>
-      <div class="panel-body panel-scroll" id="positions"></div>
     </section>
 
     <!-- Predictions -->
     <section class="panel panel-predictions">
-      <div class="panel-head"><span class="panel-label">Predictions // Scorelines</span><span class="panel-meta" id="predictions-meta"></span></div>
+      <div class="panel-head"><span class="panel-label">🔮 Predictions // Scorelines</span><span class="panel-meta" id="predictions-meta"></span></div>
       <div class="panel-body" id="predictions"></div>
+    </section>
+
+    <!-- Positions (full-width row: dense table needs to breathe) -->
+    <section class="panel panel-positions">
+      <div class="panel-head"><span class="panel-label">🎯 Positions // Open</span><span class="panel-meta" id="positions-meta"></span></div>
+      <div class="panel-body panel-scroll" id="positions"></div>
+    </section>
+
+    <!-- Charts (full-width row) -->
+    <section class="panel panel-charts">
+      <div class="panel-head"><span class="panel-label">📈 Charts // Market &amp; Book</span><span class="panel-meta" id="charts-meta"></span></div>
+      <div class="panel-body" id="charts">
+        <div class="chart-block" id="chart-linemove">
+          <div class="chart-head">
+            <span class="chart-title">Line Movement // Implied Probability</span>
+            <select class="chart-select" id="linemove-select" aria-label="Fixture"></select>
+          </div>
+          <div class="chart-canvas" id="linemove-canvas"></div>
+        </div>
+        <div class="chart-block" id="chart-cumstake">
+          <div class="chart-head">
+            <span class="chart-title">Cumulative Staked // By Currency</span>
+          </div>
+          <div class="chart-canvas" id="cumstake-canvas"></div>
+        </div>
+      </div>
     </section>
   </main>
 

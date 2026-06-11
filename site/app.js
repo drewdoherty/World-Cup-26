@@ -127,6 +127,32 @@
 
   var VENUE_COLOR = { sportsbook: "#4ade80", polymarket: "#60a5fa", kalshi: "#2dd4bf" };
 
+  // Per-book accent colours. Keyed by the lower-cased platform string; any
+  // book not in the map (and any null/blank) degrades to BOOK_FALLBACK so the
+  // pill/rail still renders. Several Betfair surfaces share one orange.
+  var BOOK_FALLBACK = "#9ca3af";
+  var BOOK_COLOR = {
+    paddypower: "#16a34a",
+    bet365: "#fde047",
+    virginbet: "#ef4444",
+    skybet: "#3b82f6",
+    betfair: "#f97316",
+    betfair_ex_uk: "#f97316",
+    betfair_sportsbook: "#f97316",
+    williamhill: "#1d4ed8",
+    smarkets: "#a78bfa",
+    matchbook: "#f472b6",
+    coral: "#fb923c",
+    ladbrokes: "#dc2626",
+    polymarket: "#60a5fa",
+    kalshi: "#2dd4bf"
+  };
+  function bookColor(name) {
+    var k = String(name === null || name === undefined ? "" : name)
+      .toLowerCase().trim();
+    return BOOK_COLOR[k] || BOOK_FALLBACK;
+  }
+
   function renderVenues(d) {
     var venues = d.venues || {};
     var order = ["sportsbook", "polymarket", "kalshi"];
@@ -180,8 +206,14 @@
 
     var rows = pos.map(function (p) {
       var venue = esc(p.venue || "sportsbook");
+      var book = p.platform || p.venue || "";
+      // Colour is keyed off the actual book (platform), falling back to the
+      // venue, then to the neutral grey. Used for both the left rail and the
+      // pill so the row is identifiable at a glance.
+      var col = bookColor(book || venue);
       return '<tr>' +
-        '<td class="num dim">' + esc(timeOnly(p.ts_utc)) + '</td>' +
+        '<td class="num dim pos-time" style="border-left-color:' + col + '">' +
+          esc(timeOnly(p.ts_utc)) + '</td>' +
         '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
         '<td class="pos-sel" title="' + esc(p.selection) + '">' + esc(dash(p.selection)) + '</td>' +
         '<td class="r num">' + esc(num(p.decimal_odds)) + '</td>' +
@@ -189,7 +221,8 @@
         '<td class="r num">' + esc(pct(p.model_prob, 0)) + '</td>' +
         '<td class="r num ' + evClass(p.ev) + '">' +
           esc(p.ev === null || p.ev === undefined ? '—' : pct(p.ev, 1)) + '</td>' +
-        '<td><span class="pill ' + venue + '">' + esc(p.platform || venue) + '</span></td>' +
+        '<td><span class="pill book ' + venue + '" style="color:' + col +
+          ';border-color:' + col + '">' + esc(p.platform || venue) + '</span></td>' +
         '</tr>';
     }).join("");
 
@@ -260,6 +293,367 @@
     $("foot-gen").textContent = gen ? ("Generated " + gen) : "Generated —";
   }
 
+  // ---- charts (pure inline SVG) ------------------------------------------
+  // Shared geometry. viewBox is fixed ~640x220; the stylesheet stretches the
+  // SVG to the panel width while preserving aspect ratio.
+  var CHART_W = 640, CHART_H = 220;
+  var CHART_M = { top: 14, right: 58, bottom: 26, left: 38 };
+  var PLOT_W = CHART_W - CHART_M.left - CHART_M.right;
+  var PLOT_H = CHART_H - CHART_M.top - CHART_M.bottom;
+
+  // Round to a tidy number of decimals for SVG coordinates (keeps markup small
+  // and avoids float noise like 123.4000001).
+  function r2(n) { return Math.round(n * 100) / 100; }
+
+  // Parse an ISO-ish timestamp ("2026-06-11T12:58:42", optionally trailing Z)
+  // to epoch ms. Returns NaN on anything unparseable so callers can filter.
+  function tsMs(ts) {
+    if (!ts) return NaN;
+    var s = String(ts);
+    if (s.indexOf("T") >= 0 && !/[zZ]|[+\-]\d\d:?\d\d$/.test(s)) s += "Z";
+    var v = Date.parse(s);
+    return isNaN(v) ? NaN : v;
+  }
+  // HH:MM (UTC) for an epoch-ms value.
+  function hhmm(ms) {
+    var dt = new Date(ms);
+    function p(n) { return (n < 10 ? "0" : "") + n; }
+    return p(dt.getUTCHours()) + ":" + p(dt.getUTCMinutes());
+  }
+
+  function chartEmpty(el, msg) {
+    el.innerHTML = '<div class="chart-empty">' + esc(msg) + '</div>';
+  }
+
+  // Build the shared chart frame (background grid + y/x axes). yLabels is an
+  // array of {y, text}; xTicks an array of {x, text}. Returns an SVG string of
+  // just the frame; series are appended by the caller.
+  function chartFrame(yLabels, xTicks) {
+    var s = '';
+    yLabels.forEach(function (yl) {
+      s += '<line class="cx-grid" x1="' + r2(CHART_M.left) + '" y1="' + r2(yl.y) +
+        '" x2="' + r2(CHART_M.left + PLOT_W) + '" y2="' + r2(yl.y) + '"/>';
+      s += '<text class="cx-tick" x="' + r2(CHART_M.left - 6) + '" y="' + r2(yl.y + 3) +
+        '" text-anchor="end">' + esc(yl.text) + '</text>';
+    });
+    // axes
+    s += '<line class="cx-axis" x1="' + r2(CHART_M.left) + '" y1="' + r2(CHART_M.top) +
+      '" x2="' + r2(CHART_M.left) + '" y2="' + r2(CHART_M.top + PLOT_H) + '"/>';
+    s += '<line class="cx-axis" x1="' + r2(CHART_M.left) + '" y1="' + r2(CHART_M.top + PLOT_H) +
+      '" x2="' + r2(CHART_M.left + PLOT_W) + '" y2="' + r2(CHART_M.top + PLOT_H) + '"/>';
+    xTicks.forEach(function (xt) {
+      s += '<text class="cx-tick" x="' + r2(xt.x) + '" y="' + r2(CHART_M.top + PLOT_H + 14) +
+        '" text-anchor="middle">' + esc(xt.text) + '</text>';
+    });
+    return s;
+  }
+
+  // Pick 4-6 evenly spaced x ticks across [t0,t1], mapped through scaleX.
+  function timeTicks(t0, t1, scaleX) {
+    var n = 5;
+    if (t1 <= t0) return [{ x: scaleX(t0), text: hhmm(t0) }];
+    var ticks = [];
+    for (var i = 0; i < n; i++) {
+      var t = t0 + (t1 - t0) * (i / (n - 1));
+      ticks.push({ x: scaleX(t), text: hhmm(t) });
+    }
+    return ticks;
+  }
+
+  // (a) LINE MOVEMENT ------------------------------------------------------
+  // linemove.json shape (tolerant). Two event shapes are accepted:
+  //   * the producer (wca.linemove) shape — an object with .events[], each
+  //     event {fixture, kickoff?, series:{home:[[ts,prob],...], draw:[...],
+  //     away:[...]}} (three parallel [ts, prob] arrays); and
+  //   * a legacy point-list shape — {id?, fixture|match|label, kickoff?,
+  //     points:[{ts, home, draw, away}]}.
+  // home/draw/away probs may be 0..1 fractions or 0..100 percentages
+  // (auto-detected downstream).
+  var LINEMOVE = { events: [], idx: 0, wired: false };
+
+  // Zip the producer's three parallel {leg: [[ts, prob], ...]} arrays into the
+  // internal [{t, home, draw, away}] point list, joining legs by timestamp.
+  // Returns null if `series` is not that shape so the caller can fall back.
+  function pointsFromSeries(series) {
+    if (!series || typeof series !== "object" || Array.isArray(series)) return null;
+    var legs = ["home", "draw", "away"];
+    var hasLeg = legs.some(function (k) { return Array.isArray(series[k]); });
+    if (!hasLeg) return null;
+    var byTs = {};
+    legs.forEach(function (leg) {
+      var arr = series[leg];
+      if (!Array.isArray(arr)) return;
+      arr.forEach(function (pair) {
+        if (!Array.isArray(pair) || pair.length < 2) return;
+        var ts = pair[0];
+        var pt = byTs[ts];
+        if (!pt) { pt = byTs[ts] = { ts: ts }; }
+        pt[leg] = pair[1];
+      });
+    });
+    return Object.keys(byTs).map(function (ts) { return byTs[ts]; });
+  }
+
+  function normLineMove(raw) {
+    var events = [];
+    var list = [];
+    if (Array.isArray(raw)) list = raw;
+    else if (raw && Array.isArray(raw.events)) list = raw.events;
+    else if (raw && typeof raw === "object") {
+      // map keyed by fixture -> points/event
+      Object.keys(raw).forEach(function (k) {
+        var v = raw[k];
+        if (v && (Array.isArray(v) || v.points || v.series)) {
+          list.push({ fixture: k,
+            points: Array.isArray(v) ? v : v.points,
+            series: v && v.series,
+            kickoff: v && v.kickoff });
+        }
+      });
+    }
+    list.forEach(function (ev) {
+      if (!ev || typeof ev !== "object") return;
+      var label = ev.fixture || ev.match || ev.label || ev.id || "Fixture";
+      // Prefer an explicit point list; otherwise zip the producer's series.
+      var rawPts = ev.points;
+      if (!Array.isArray(rawPts)) rawPts = pointsFromSeries(ev.series);
+      if (!Array.isArray(rawPts)) return;
+      var pts = rawPts.map(function (pt) {
+        var t = tsMs(pt.ts || pt.time || pt.t);
+        return {
+          t: t,
+          home: numOrNull(pt.home),
+          draw: numOrNull(pt.draw),
+          away: numOrNull(pt.away)
+        };
+      }).filter(function (pt) { return !isNaN(pt.t); });
+      pts.sort(function (a, b) { return a.t - b.t; });
+      if (!pts.length) return;
+      events.push({
+        label: String(label),
+        kickoff: tsMs(ev.kickoff || ev.commence_time || ev.start),
+        points: pts
+      });
+    });
+    return events;
+  }
+  function numOrNull(v) {
+    if (v === null || v === undefined || v === "" || isNaN(v)) return null;
+    return Number(v);
+  }
+  // Detect whether prob values are fractions (<=1) or percentages and return a
+  // function that maps a raw value to 0..100.
+  function pctScaler(events) {
+    var max = 0;
+    events.forEach(function (ev) {
+      ev.points.forEach(function (pt) {
+        ["home", "draw", "away"].forEach(function (k) {
+          if (pt[k] !== null) max = Math.max(max, pt[k]);
+        });
+      });
+    });
+    var asPct = max > 1.5; // values already in 0..100
+    return function (v) { return v === null ? null : (asPct ? v : v * 100); };
+  }
+
+  function lineSeries(points, key, scaleX, scaleY, toPct) {
+    var segs = [], cur = [];
+    points.forEach(function (pt) {
+      var v = toPct(pt[key]);
+      if (v === null) { if (cur.length) { segs.push(cur); cur = []; } return; }
+      cur.push(r2(scaleX(pt.t)) + "," + r2(scaleY(v)));
+    });
+    if (cur.length) segs.push(cur);
+    return segs;
+  }
+
+  function drawLineMove() {
+    var el = $("linemove-canvas");
+    if (!el) return;
+    var events = LINEMOVE.events;
+    if (!events.length) { chartEmpty(el, "No line-movement data"); return; }
+    var ev = events[Math.min(LINEMOVE.idx, events.length - 1)] || events[0];
+    var pts = ev.points;
+    if (!pts.length) { chartEmpty(el, "No line-movement data"); return; }
+
+    var toPct = pctScaler(events);
+    var t0 = pts[0].t, t1 = pts[pts.length - 1].t;
+    var span = t1 - t0 || 1;
+    function scaleX(t) { return CHART_M.left + ((t - t0) / span) * PLOT_W; }
+    function scaleY(v) { return CHART_M.top + (1 - (v / 100)) * PLOT_H; }
+
+    var yLabels = [0, 25, 50, 75, 100].map(function (p) {
+      return { y: scaleY(p), text: p + "%" };
+    });
+    var svg = chartFrame(yLabels, timeTicks(t0, t1, scaleX));
+
+    var SERIES = [
+      { key: "home", color: "#4ade80", name: "Home" },
+      { key: "draw", color: "#9ca3af", name: "Draw" },
+      { key: "away", color: "#ef4444", name: "Away" }
+    ];
+    SERIES.forEach(function (sr) {
+      lineSeries(pts, sr.key, scaleX, scaleY, toPct).forEach(function (seg) {
+        svg += '<polyline class="cx-series" stroke="' + sr.color +
+          '" points="' + seg.join(" ") + '"/>';
+      });
+    });
+
+    // kickoff marker if within range
+    if (!isNaN(ev.kickoff) && ev.kickoff >= t0 && ev.kickoff <= t1) {
+      var kx = scaleX(ev.kickoff);
+      svg += '<line class="cx-kick" x1="' + r2(kx) + '" y1="' + r2(CHART_M.top) +
+        '" x2="' + r2(kx) + '" y2="' + r2(CHART_M.top + PLOT_H) + '"/>';
+      svg += '<text class="cx-kick-lbl" x="' + r2(kx + 3) + '" y="' +
+        r2(CHART_M.top + 8) + '">KO</text>';
+    }
+
+    // legend (top-right inside the right margin)
+    var lx = CHART_M.left + PLOT_W + 8, ly = CHART_M.top + 4;
+    SERIES.forEach(function (sr, i) {
+      var y = ly + i * 14;
+      svg += '<rect x="' + r2(lx) + '" y="' + r2(y - 6) + '" width="8" height="8" rx="1" fill="' +
+        sr.color + '"/>';
+      svg += '<text class="cx-legend" x="' + r2(lx + 12) + '" y="' + r2(y + 1) + '">' +
+        esc(sr.name) + '</text>';
+    });
+
+    el.innerHTML = '<svg viewBox="0 0 ' + CHART_W + ' ' + CHART_H +
+      '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Line movement">' +
+      svg + '</svg>';
+  }
+
+  function wireLineMoveSelect() {
+    var sel = $("linemove-select");
+    if (!sel) return;
+    var events = LINEMOVE.events;
+    if (events.length > 1) {
+      sel.hidden = false;
+      sel.innerHTML = events.map(function (ev, i) {
+        return '<option value="' + i + '">' + esc(ev.label) + '</option>';
+      }).join("");
+      sel.value = String(LINEMOVE.idx);
+      if (!LINEMOVE.wired) {
+        sel.addEventListener("change", function () {
+          LINEMOVE.idx = Number(sel.value) || 0;
+          drawLineMove();
+        });
+        LINEMOVE.wired = true;
+      }
+    } else {
+      sel.hidden = true;
+      sel.innerHTML = "";
+    }
+  }
+
+  function loadLineMove() {
+    var el = $("linemove-canvas");
+    if (!el || typeof fetch !== "function") { if (el) chartEmpty(el, "No line-movement data"); return; }
+    var url = "./linemove.json?t=" + Date.now();
+    fetch(url, { cache: "no-store" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (raw) {
+        LINEMOVE.events = normLineMove(raw);
+        LINEMOVE.idx = 0;
+        if (!LINEMOVE.events.length) {
+          // present but empty -> clean empty state
+          var s = $("linemove-select"); if (s) { s.hidden = true; }
+          chartEmpty(el, "No line-movement data");
+          return;
+        }
+        wireLineMoveSelect();
+        drawLineMove();
+      })
+      .catch(function () {
+        // 404 / blocked / malformed -> hide the whole block per spec.
+        var blk = $("chart-linemove");
+        if (blk) { blk.hidden = true; }
+      });
+  }
+
+  // (b) CUMULATIVE STAKED --------------------------------------------------
+  // Step-line of cumulative stake over time, one series per currency
+  // (GBP solid, USD dashed), built from positions[].ts_utc + stake.
+  var CUM_STYLE = {
+    GBP: { color: "#4ade80", dash: "" },
+    USD: { color: "#60a5fa", dash: "4 3" },
+    EUR: { color: "#a78bfa", dash: "1 3" }
+  };
+
+  function drawCumStake(d) {
+    var el = $("cumstake-canvas");
+    if (!el) return;
+    var pos = (d.positions || []).filter(function (p) {
+      return !isNaN(tsMs(p.ts_utc)) && !isNaN(Number(p.stake));
+    });
+    if (!pos.length) { chartEmpty(el, "No staked positions"); return; }
+
+    // group by currency, sort by time, accumulate
+    var byCcy = {};
+    pos.forEach(function (p) {
+      var ccy = p.currency || "GBP";
+      (byCcy[ccy] = byCcy[ccy] || []).push({ t: tsMs(p.ts_utc), stake: Number(p.stake) });
+    });
+    var ccys = Object.keys(byCcy);
+    var series = {}, tMin = Infinity, tMax = -Infinity, vMax = 0;
+    ccys.forEach(function (ccy) {
+      var arr = byCcy[ccy].slice().sort(function (a, b) { return a.t - b.t; });
+      var cum = 0, steps = [];
+      arr.forEach(function (e) {
+        cum += e.stake;
+        steps.push({ t: e.t, v: cum });
+        tMin = Math.min(tMin, e.t); tMax = Math.max(tMax, e.t);
+      });
+      vMax = Math.max(vMax, cum);
+      series[ccy] = steps;
+    });
+    if (!isFinite(tMin)) { chartEmpty(el, "No staked positions"); return; }
+    var span = (tMax - tMin) || 1;
+    var top = vMax > 0 ? vMax * 1.08 : 1;
+    function scaleX(t) { return CHART_M.left + ((t - tMin) / span) * PLOT_W; }
+    function scaleY(v) { return CHART_M.top + (1 - (v / top)) * PLOT_H; }
+
+    var yLabels = [0, 0.5, 1].map(function (f) {
+      return { y: scaleY(top * f), text: Math.round(top * f).toString() };
+    });
+    var svg = chartFrame(yLabels, timeTicks(tMin, tMax, scaleX));
+
+    ccys.forEach(function (ccy) {
+      var st = CUM_STYLE[ccy] || { color: "#9ca3af", dash: "" };
+      var steps = series[ccy];
+      // build a step (left-continuous) path: hold then rise
+      var pts = [];
+      pts.push(r2(scaleX(tMin)) + "," + r2(scaleY(0)));
+      var prevV = 0;
+      steps.forEach(function (s) {
+        pts.push(r2(scaleX(s.t)) + "," + r2(scaleY(prevV)));
+        pts.push(r2(scaleX(s.t)) + "," + r2(scaleY(s.v)));
+        prevV = s.v;
+      });
+      pts.push(r2(scaleX(tMax)) + "," + r2(scaleY(prevV)));
+      svg += '<polyline class="cx-series" stroke="' + st.color + '"' +
+        (st.dash ? ' stroke-dasharray="' + st.dash + '"' : '') +
+        ' points="' + pts.join(" ") + '"/>';
+      // final value label at the right edge
+      var fy = scaleY(prevV);
+      svg += '<text class="cx-final" fill="' + st.color + '" x="' +
+        r2(CHART_M.left + PLOT_W + 6) + '" y="' + r2(fy + 3) +
+        '">' + esc(money(prevV, ccy)) + '</text>';
+    });
+
+    el.innerHTML = '<svg viewBox="0 0 ' + CHART_W + ' ' + CHART_H +
+      '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Cumulative staked">' +
+      svg + '</svg>';
+  }
+
+  function renderCharts(d) {
+    drawCumStake(d);
+    loadLineMove();
+  }
+
   function showNoData(msg) {
     var el = $("nodata");
     $("nodata-msg").textContent = msg || "NO DATA FEED";
@@ -271,6 +665,7 @@
     renderVenues(d);
     renderPositions(d);
     renderPredictions(d);
+    renderCharts(d);
     renderFooter(d);
   }
 
@@ -301,7 +696,8 @@
 
   // ---- boot ---------------------------------------------------------------
 
-  function load() {
+  function load(attempt) {
+    attempt = attempt || 1;
     var url = "./data.json?t=" + Date.now();
     fetch(url, { cache: "no-store" })
       .then(function (r) {
@@ -310,10 +706,18 @@
       })
       .then(function (d) {
         if (!d || typeof d !== "object") throw new Error("bad payload");
+        var nd = $("nodata");
+        if (nd) nd.hidden = true; // success always clears the banner
         render(d);
         enrichPolymarket(d);
       })
       .catch(function (err) {
+        // A load during a mid-deploy window can transiently 404 — retry with
+        // backoff before declaring the feed down, and never strand the page.
+        if (attempt < 4) {
+          setTimeout(function () { load(attempt + 1); }, attempt * 2000);
+          return;
+        }
         showNoData("DATA FEED UNAVAILABLE");
         // Still render an all-zero shell so the terminal is never blank.
         render({ totals: {}, venues: {}, clv: {}, positions: [], predictions: [], meta: {} });
