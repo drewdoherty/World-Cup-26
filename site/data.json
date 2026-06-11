@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-11 20:00:00 UTC"
+    "generated": "2026-06-11 20:01:53 UTC"
   },
   "totals": {
-    "wagered": 103.56,
-    "open_stake": 103.56,
-    "settled_pl": 0.0,
-    "n_bets": 12
+    "wagered": 108.56,
+    "open_stake": 98.56,
+    "settled_pl": 10.0,
+    "n_bets": 13
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 57.25,
-      "open_stake": 57.25,
-      "settled_pl": 0.0,
-      "n_bets": 8
+      "wagered": 62.25,
+      "open_stake": 52.25,
+      "settled_pl": 10.0,
+      "n_bets": 9
     },
     "USD": {
       "wagered": 46.31,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 57.25,
-      "open_stake": 57.25,
-      "settled_pl": 0.0,
-      "n_bets": 8,
+      "wagered": 62.25,
+      "open_stake": 52.25,
+      "settled_pl": 10.0,
+      "n_bets": 9,
       "currency": "GBP"
     },
     "polymarket": {
@@ -46,6 +46,14 @@
     }
   },
   "platforms": {
+    "paddypower": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 15.0,
+      "open_stake": 5.0,
+      "settled_pl": 10.0,
+      "n_bets": 2
+    },
     "virginbet": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -77,21 +85,35 @@
       "open_stake": 46.31,
       "settled_pl": 0.0,
       "n_bets": 4
-    },
-    "paddypower": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 10.0,
-      "open_stake": 10.0,
-      "settled_pl": 0.0,
-      "n_bets": 1
     }
   },
-  "closed_positions": [],
+  "closed_positions": [
+    {
+      "id": 4,
+      "ts_utc": "2026-06-11T10:28:09",
+      "settled_ts": "2026-06-11T19:06:00",
+      "match": "Mexico vs South Africa",
+      "market": "player_shots_on_target",
+      "selection": "Raul Jimenez 1+ SOT Yes",
+      "platform": "paddypower",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 2.0,
+      "stake": 10.0,
+      "status": "won",
+      "pl": 10.0,
+      "clv": null
+    }
+  ],
   "pnl_series": {
     "sportsbook": {
       "currency": "GBP",
-      "points": []
+      "points": [
+        [
+          "2026-06-11T19:06:00",
+          10.0
+        ]
+      ]
     },
     "prediction_markets": {
       "currency": "USD",
@@ -104,6 +126,20 @@
     "n_with_close": 0
   },
   "positions": [
+    {
+      "id": 13,
+      "ts_utc": "2026-06-11T20:01:53",
+      "match": "Mexico vs South Africa",
+      "market": "player_second_goalscorer",
+      "selection": "Raul Jimenez",
+      "platform": "paddypower",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 6.0,
+      "stake": 5.0,
+      "model_prob": null,
+      "ev": null
+    },
     {
       "id": 12,
       "ts_utc": "2026-06-11T16:47:02",
@@ -215,20 +251,6 @@
       "stake": 2.0,
       "model_prob": null,
       "ev": null
-    },
-    {
-      "id": 4,
-      "ts_utc": "2026-06-11T10:28:09",
-      "match": "Mexico vs South Africa",
-      "market": "player_shots_on_target",
-      "selection": "Raul Jimenez 1+ SOT Yes",
-      "platform": "paddypower",
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "decimal_odds": 2.0,
-      "stake": 10.0,
-      "model_prob": 0.8,
-      "ev": 0.6000000000000001
     },
     {
       "id": 3,
