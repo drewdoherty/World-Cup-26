@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-11 15:54:16 UTC"
+    "generated": "2026-06-11 17:03:47 UTC"
   },
   "totals": {
-    "wagered": 95.56,
-    "open_stake": 95.56,
+    "wagered": 103.56,
+    "open_stake": 103.56,
     "settled_pl": 0.0,
-    "n_bets": 11
+    "n_bets": 12
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 49.25,
-      "open_stake": 49.25,
+      "wagered": 57.25,
+      "open_stake": 57.25,
       "settled_pl": 0.0,
-      "n_bets": 7
+      "n_bets": 8
     },
     "USD": {
       "wagered": 46.31,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 49.25,
-      "open_stake": 49.25,
+      "wagered": 57.25,
+      "open_stake": 57.25,
       "settled_pl": 0.0,
-      "n_bets": 7,
+      "n_bets": 8,
       "currency": "GBP"
     },
     "polymarket": {
@@ -46,6 +46,14 @@
     }
   },
   "platforms": {
+    "ladbrokes": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 8.0,
+      "open_stake": 8.0,
+      "settled_pl": 0.0,
+      "n_bets": 1
+    },
     "betfair_sportsbook": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -93,6 +101,20 @@
     "n_with_close": 0
   },
   "positions": [
+    {
+      "id": 12,
+      "ts_utc": "2026-06-11T16:47:02",
+      "match": "South Korea vs Czech Republic",
+      "market": "Both Teams To Score",
+      "selection": "No",
+      "platform": "Ladbrokes",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 1.95,
+      "stake": 8.0,
+      "model_prob": 0.549,
+      "ev": 0.07055000000000011
+    },
     {
       "id": 11,
       "ts_utc": "2026-06-11T15:52:42",

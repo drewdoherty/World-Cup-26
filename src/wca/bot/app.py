@@ -52,11 +52,13 @@ HELP_TEXT = (
     "/card — today's recommended bet card\n"
     "/scores — predicted FT scorelines per fixture\n"
     "/structure — project structure metrics\n"
+    "/pm — Polymarket parked orders + trader status\n"
     "/ping — liveness check\n"
     "/help — this message\n\n"
     "\U0001F4F8 Send a betslip *screenshot* and I'll parse the selections, then "
     "log them to the ledger once you reply `yes`.\n"
-    "Confirm a pushed bet with `Y BET-<id>`, decline with `N BET-<id>`."
+    "Confirm a pushed bet with `Y BET-<id>`, decline with `N BET-<id>`.\n"
+    "Execute a parked Polymarket order with `Y PM-<n>`, discard with `N PM-<n>`."
 )
 
 
@@ -525,17 +527,265 @@ def handle_photo_confirmation(
     return "Logged %d to the ledger:\n%s" % (len(logged), "\n".join(logged))
 
 
-def handle_confirmation(text: str, db_path: str) -> Optional[str]:
-    """Route `Y BET-<id>` / `N BET-<id>` replies. Returns None if not a confirm."""
+# ---------------------------------------------------------------------------
+# Polymarket parked-order confirmation gate.
+#
+# A proposed Polymarket trade is *parked* (never auto-executed): the bot pushes
+# a one-line summary with a token like ``PM-1`` and waits for an explicit
+# ``Y PM-1`` (execute) / ``N PM-1`` (discard).  This is the same human-in-the-
+# loop pattern as betslip screenshots and pushed ``BET-<id>`` recommendations,
+# applied to live order placement so no order ever fires without a reply.
+# ---------------------------------------------------------------------------
+
+# Module-level registry of parked orders awaiting confirmation.  Keyed by the
+# integer token suffix; value is the proposal dict.  In-process only: an
+# unconfirmed order simply evaporates on restart (fail-safe — never auto-fires).
+_PENDING_ORDERS: Dict[int, Dict[str, Any]] = {}
+_PM_SEQ = {"n": 0}
+
+
+def park_order(proposal: Dict[str, Any]) -> str:
+    """Park a proposed Polymarket order and return its ``PM-<n>`` token.
+
+    ``proposal`` must carry at least ``token_id``, ``price``, ``size`` and
+    ``side`` (BUY/SELL); ``label`` and ``outcome`` are used for the human
+    summary, ``neg_risk`` flows through to signing.  The caller pushes the
+    returned text to the user.
+
+    Example
+    -------
+    >>> tok, text = park_order({"label": "Mexico", "outcome": "Yes",
+    ...                         "side": "BUY", "price": 0.69, "size": 31.88,
+    ...                         "token_id": "123"})  # doctest: +SKIP
+    """
+    _PM_SEQ["n"] += 1
+    n = _PM_SEQ["n"]
+    _PENDING_ORDERS[n] = dict(proposal)
+    return "PM-%d" % n
+
+
+def format_parked_order(token: str, proposal: Dict[str, Any]) -> str:
+    """Human confirmation prompt for one parked Polymarket order."""
+    side = str(proposal.get("side", "BUY")).upper()
+    price = float(proposal.get("price", 0.0))
+    size = float(proposal.get("size", 0.0))
+    notional = price * size
+    label = proposal.get("label") or proposal.get("market") or "market"
+    outcome = proposal.get("outcome") or proposal.get("selection") or ""
+    sel = ("%s %s" % (label, outcome)).strip()
+    return (
+        "place $%.2f %s %s @ %.2f? "
+        "Reply `Y %s` to execute, `N %s` to discard."
+        % (notional, sel, side, price, token, token)
+    )
+
+
+def push_parked_order(proposal: Dict[str, Any]) -> str:
+    """Park a proposal and return the user-facing confirmation message."""
+    token = park_order(proposal)
+    return format_parked_order(token, _PENDING_ORDERS[int(token.split("-")[1])])
+
+
+def _pm_dry_run() -> bool:
+    """Polymarket dry-run flag from env (default ON for safety)."""
+    return os.environ.get("PM_DRY_RUN", "1").strip().lower() not in {"0", "false", "no", ""}
+
+
+def _execute_parked_order(
+    n: int,
+    proposal: Dict[str, Any],
+    db_path: str,
+    *,
+    ts_utc: Optional[str] = None,
+    trader: Optional[Any] = None,
+) -> str:
+    """Sign + (maybe) submit a parked order, then record it to the ledger.
+
+    The trader is imported lazily (and may be injected for tests).  Honours the
+    ``PM_DRY_RUN`` env flag: in dry-run the order is signed but not POSTed.  The
+    ledger row is tagged ``platform='polymarket'`` with the order id / dry-run
+    flag in its notes so the CLV pipeline and ``/summary`` pools pick it up.
+    """
+    if ts_utc is None:
+        ts_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    dry_run = _pm_dry_run()
+
+    if trader is None:
+        try:
+            from wca.pm.trader import ClobTrader
+        except Exception as exc:
+            return "PM-%d: trader unavailable (%s). Order not placed." % (n, exc)
+        key = os.environ.get("POLYMARKET_PRIVATE_KEY")
+        if not key:
+            return (
+                "PM-%d: POLYMARKET_PRIVATE_KEY not set — cannot place. "
+                "Add it to .env (see scripts/wca_pm_probe.py)." % n
+            )
+        funder = os.environ.get("POLYMARKET_FUNDER") or None
+        st = os.environ.get("POLYMARKET_SIG_TYPE")
+        sig_type = int(st) if st not in (None, "") else None
+        try:
+            trader = ClobTrader(key, funder=funder, signature_type=sig_type)
+        except Exception as exc:
+            return "PM-%d: could not init trader (%s)." % (n, exc)
+
+    price = float(proposal.get("price", 0.0))
+    size = float(proposal.get("size", 0.0))
+    side = str(proposal.get("side", "BUY")).upper()
+    try:
+        result = trader.place_order(
+            proposal["token_id"],
+            price,
+            size,
+            side,
+            neg_risk=bool(proposal.get("neg_risk", False)),
+            dry_run=dry_run,
+        )
+    except Exception as exc:
+        return "PM-%d: order failed — %s" % (n, exc)
+
+    order_id = (result or {}).get("orderID") or (result or {}).get("orderId") or "dry-run"
+    label = proposal.get("label") or proposal.get("market") or "market"
+    outcome = proposal.get("outcome") or proposal.get("selection") or ""
+    match_desc = proposal.get("match_desc") or ("%s %s" % (label, outcome)).strip()
+    match_id = proposal.get("match_id") or ("PM_" + _slug(match_desc))
+    decimal_odds = (1.0 / price) if price > 0 else 0.0
+    notes = "polymarket order; token=%s; side=%s; %s; order_id=%s" % (
+        proposal["token_id"],
+        side,
+        "DRY-RUN (not submitted)" if dry_run else "LIVE",
+        order_id,
+    )
+    try:
+        bid = record_bet(
+            ts_utc,
+            match_id,
+            match_desc,
+            proposal.get("market") or "polymarket",
+            outcome or label,
+            "polymarket",
+            decimal_odds,
+            round(price * size, 2),
+            notes=notes,
+            db_path=db_path,
+        )
+    except Exception as exc:
+        return "PM-%d: order ok but ledger write failed — %s" % (n, exc)
+
+    mode = "DRY-RUN (signed, not submitted)" if dry_run else "LIVE — submitted"
+    return (
+        "Order PM-%d %s.\n$%.2f %s %s @ %.2f | order id %s | ledger #%d"
+        % (n, mode, price * size, side, (outcome or label), price, order_id, bid)
+    )
+
+
+def handle_confirmation(
+    text: str,
+    db_path: str,
+    *,
+    pending_orders: Optional[Dict[int, Dict[str, Any]]] = None,
+    ts_utc: Optional[str] = None,
+    trader: Optional[Any] = None,
+) -> Optional[str]:
+    """Route `Y/N BET-<id>` and `Y/N PM-<n>` replies. None if not a confirm.
+
+    ``BET-<id>`` keeps its existing acknowledgement behaviour.  ``PM-<n>``
+    executes (Y) or discards (N) a parked Polymarket order via
+    :func:`_execute_parked_order`.  ``pending_orders`` / ``trader`` / ``ts_utc``
+    are injectable for tests; production uses the module-level registry.
+    """
+    if pending_orders is None:
+        pending_orders = _PENDING_ORDERS
     parts = text.strip().split()
     if len(parts) != 2:
         return None
     verb, token = parts[0].upper(), parts[1].upper()
-    if verb not in {"Y", "N"} or not token.startswith("BET-"):
+    if verb not in {"Y", "N"}:
         return None
-    # Stake placement against the ledger is wired with the card generator.
-    action = "confirmed" if verb == "Y" else "declined"
-    return "Bet %s %s. (Ledger write pending card-generator wiring.)" % (token, action)
+
+    if token.startswith("BET-"):
+        # Stake placement against the ledger is wired with the card generator.
+        action = "confirmed" if verb == "Y" else "declined"
+        return "Bet %s %s. (Ledger write pending card-generator wiring.)" % (token, action)
+
+    if token.startswith("PM-"):
+        try:
+            n = int(token[len("PM-"):])
+        except ValueError:
+            return None
+        proposal = pending_orders.pop(n, None)
+        if proposal is None:
+            return "PM-%d is not a parked order (expired or already handled)." % n
+        if verb == "N":
+            label = proposal.get("label") or proposal.get("market") or "order"
+            return "Discarded parked order PM-%d (%s)." % (n, label)
+        return _execute_parked_order(
+            n, proposal, db_path, ts_utc=ts_utc, trader=trader
+        )
+
+    return None
+
+
+def handle_pm(db_path: str) -> str:
+    """`/pm` — parked Polymarket orders + trader status (configured? dry-run?).
+
+    Shows the in-process parked-order queue, whether a private key is
+    configured, the dry-run flag, and today's Polymarket spend if a
+    ``pm_order_log`` table exists in the ledger.
+    """
+    lines = ["\U0001f4c8 *Polymarket*"]
+
+    configured = bool(os.environ.get("POLYMARKET_PRIVATE_KEY"))
+    dry = _pm_dry_run()
+    lines.append(
+        "Trader: %s | mode: %s"
+        % ("configured" if configured else "NOT configured", "DRY-RUN" if dry else "LIVE")
+    )
+    funder = os.environ.get("POLYMARKET_FUNDER")
+    if funder:
+        st = os.environ.get("POLYMARKET_SIG_TYPE", "?")
+        lines.append("Funder: `%s` (sig type %s)" % (funder, st))
+
+    spend = _pm_daily_spend(db_path)
+    if spend is not None:
+        lines.append("Spend today: $%.2f" % spend)
+
+    if _PENDING_ORDERS:
+        lines.append("")
+        lines.append("*Parked orders*")
+        for n in sorted(_PENDING_ORDERS):
+            lines.append("  " + format_parked_order("PM-%d" % n, _PENDING_ORDERS[n]))
+    else:
+        lines.append("")
+        lines.append("No parked orders.")
+    return "\n".join(lines)
+
+
+def _pm_daily_spend(db_path: str, *, day_utc: Optional[str] = None) -> Optional[float]:
+    """Today's Polymarket spend from a ``pm_order_log`` table, or None if absent.
+
+    Tolerant of a missing table / column (the order log is optional): returns
+    ``None`` so ``/pm`` simply omits the line rather than erroring.
+    """
+    import sqlite3
+
+    if day_utc is None:
+        day_utc = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    con = sqlite3.connect(db_path)
+    try:
+        cur = con.execute(
+            "SELECT COALESCE(SUM(notional), 0.0) FROM pm_order_log "
+            "WHERE substr(ts_utc, 1, 10) = ?",
+            (day_utc,),
+        )
+        row = cur.fetchone()
+        return float(row[0]) if row and row[0] is not None else 0.0
+    except sqlite3.OperationalError:
+        return None  # table not created yet
+    except Exception:
+        return None
+    finally:
+        con.close()
 
 
 def dispatch(text: str, db_path: str) -> str:
@@ -562,6 +812,8 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_scores(card_path=CARD_PATH)
     if cmd == "/structure":
         return handle_structure()
+    if cmd == "/pm":
+        return handle_pm(db_path)
     if cmd == "/ping":
         return "pong"
     return "Unknown command. Send /help for the list."

@@ -27,9 +27,15 @@ ALIASES = {
     "Côte d'Ivoire": "Ivory Coast",
     "Cote d'Ivoire": "Ivory Coast",
     "Türkiye": "Turkey",
+    "Turkiye": "Turkey",
     "Czechia": "Czech Republic",
     "Cabo Verde": "Cape Verde",
     "DR Congo": "DR Congo",
+    "Congo DR": "DR Congo",
+    "DR Congo (Congo DR)": "DR Congo",
+    "Democratic Republic of the Congo": "DR Congo",
+    # Polymarket renders Curaçao without the cedilla in some events.
+    "Curacao": "Curaçao",
     "Republic of Ireland": "Republic of Ireland",
 }
 
