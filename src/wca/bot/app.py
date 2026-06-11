@@ -1,9 +1,10 @@
 """World Cup Alpha management bot — long-polling command loop.
 
-The bot exposes the ledger read-only reports over Telegram and provides the
-human-confirmation gate for staking. It is intentionally simple: one process,
-one authorized chat, synchronous long-polling. Heavy work (model refits, odds
-pulls) runs elsewhere on cron and only *pushes* results here.
+The bot exposes the ledger read-only reports over Telegram, serves the cached
+matchday card, and ingests betslip screenshots into the ledger. It is
+intentionally simple: one process, one authorized chat, synchronous
+long-polling. Heavy work (model refits, odds pulls, card builds) runs elsewhere
+on cron and only *pushes* / caches results for the bot to read.
 
 Commands
 --------
@@ -11,24 +12,37 @@ Commands
 ``/help``         show command list
 ``/summary``      portfolio summary (P&L, ROI, CLV, bankroll)
 ``/clv``          closing-line-value report
-``/card``         today's recommended bet card (placeholder until wired)
+``/card``         today's recommended bet card (read from cache)
 ``/structure``    latest project-structure metrics snapshot
 ``/ping``         liveness check
 
-Confirmation flow (future): when a recommendation is pushed it carries a token
-like ``BET-12``; replying ``Y BET-12`` / ``N BET-12`` confirms or declines.
-This module already routes such replies to :func:`handle_confirmation`.
+Screenshot ingestion
+--------------------
+Send a betslip photo and the bot extracts every selection via Claude vision,
+replies with what it parsed, and waits for a ``yes`` / ``no`` confirmation
+before writing anything to the ledger. This keeps an OCR misread from silently
+poisoning the CLV / calibration data.
+
+Confirmation flow: a pushed recommendation carries a token like ``BET-12``;
+replying ``Y BET-12`` / ``N BET-12`` confirms or declines.
 """
 
 from __future__ import annotations
 
 import glob
 import os
+import re
 import time
-from typing import Any, Dict, Optional
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
+from wca import cardcache
 from wca.bot.telegram import TelegramClient, TelegramError
 from wca.ledger import reports
+from wca.ledger.store import record_bet
+
+CARD_PATH = "data/card_latest.md"
+CARD_MAX_AGE_HOURS = 6.0
 
 HELP_TEXT = (
     "*World Cup Alpha* — manager console\n\n"
@@ -38,6 +52,8 @@ HELP_TEXT = (
     "/structure — project structure metrics\n"
     "/ping — liveness check\n"
     "/help — this message\n\n"
+    "\U0001F4F8 Send a betslip *screenshot* and I'll parse the selections, then "
+    "log them to the ledger once you reply `yes`.\n"
     "Confirm a pushed bet with `Y BET-<id>`, decline with `N BET-<id>`."
 )
 
@@ -107,20 +123,36 @@ def render_card(recs, pools, score_cards=None) -> str:
     return "\n".join(parts)
 
 
-def handle_card(db_path: str) -> str:
-    # Placeholder: the matchday card generator (blend model -> EV -> Kelly per
-    # pool) runs on cron and *pushes* the formatted card here. Until that push is
-    # wired, the bot reports its absence honestly. When wired, the cron job calls
-    # render_card(recs, pools, score_cards) and sends the result, so the same
-    # message carries both the +EV bets and the reconciled scoreline section
-    # (top correct scores, O/U 2.5, BTTS) per fixture.
-    return (
-        "*Today's card*\n"
-        "Card generator not wired into the bot loop yet. The cron build emits "
-        "blended model probs vs de-vigged best price per match, EV, "
-        "quarter-Kelly stakes per pool (Polymarket / Kalshi / sportsbook), plus "
-        "a reconciled scoreline section (top correct scores, O/U 2.5, BTTS)."
+def handle_card(
+    db_path: str,
+    card_path: str = CARD_PATH,
+    now_utc: Optional[str] = None,
+) -> str:
+    """Serve the most recent cached card written by ``scripts/wca_build_card.py``.
+
+    The card generator (model blend -> EV -> Kelly per pool, plus the reconciled
+    scoreline section) is too slow to run inline on every Telegram poll, so it
+    runs on cron and caches its formatted output. This handler reads that cache
+    and flags staleness; if no cache exists yet it says so honestly.
+    """
+    if now_utc is None:
+        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    cached = cardcache.read_card(
+        card_path, now_utc=now_utc, max_age_hours=CARD_MAX_AGE_HOURS
     )
+    if cached is None:
+        return (
+            "*Today's card*\n"
+            "No card cached yet. The cron build (`scripts/wca_build_card.py`) "
+            "fits the models, pulls live odds and writes the card here."
+        )
+    header = "*Today's card*"
+    if cached.get("generated"):
+        header += " — generated %s UTC" % cached["generated"]
+        if cached.get("stale"):
+            header += "  ⚠️ STALE"
+    body = cached.get("text") or "(empty card)"
+    return header + "\n\n" + body
 
 
 def handle_structure(docs_dir: Optional[str] = None) -> str:
@@ -156,6 +188,112 @@ def handle_structure(docs_dir: Optional[str] = None) -> str:
     return "*Project structure* (%s)\n\n%s" % (date, metrics_part)
 
 
+# ---------------------------------------------------------------------------
+# Betslip-screenshot ingestion.
+# ---------------------------------------------------------------------------
+
+# Per-chat parked extractions awaiting a yes/no confirmation. Kept in-process:
+# the bot is single-instance and a pending slip that is never confirmed simply
+# expires when the process restarts.
+_PENDING_PHOTO_BETS: Dict[Any, List[Any]] = {}
+
+
+def _slug(text: str) -> str:
+    """Compact, deterministic match id fragment from a free-text description."""
+    s = re.sub(r"[^A-Za-z0-9]+", "_", (text or "").strip()).strip("_").upper()
+    return s[:48] or "UNKNOWN"
+
+
+def _format_extracted(bets: List[Any]) -> str:
+    """Human-readable confirmation prompt for parsed selections."""
+    lines = ["*Parsed %d selection(s) from your slip:*" % len(bets)]
+    for i, b in enumerate(bets, 1):
+        odds = ("%.2f" % b.decimal_odds) if b.decimal_odds else "?"
+        stake = ("£%.2f" % b.stake) if b.stake is not None else "£?"
+        book = b.bookmaker or "?"
+        flag = "  ⚡boost" if getattr(b, "is_boost", False) else ""
+        warn = "" if getattr(b, "confidence", 1.0) >= 0.6 else "  ⚠️low-conf"
+        lines.append(
+            "%d. %s — *%s* @ %s | stake %s | %s%s%s"
+            % (i, b.match_desc, b.selection, odds, stake, book, flag, warn)
+        )
+    lines.append("\nReply *yes* to log all to the ledger, *no* to discard.")
+    return "\n".join(lines)
+
+
+def handle_photo(
+    image_bytes: bytes,
+    chat_id: Any,
+    pending: Optional[Dict[Any, List[Any]]] = None,
+    *,
+    api_key: Optional[str] = None,
+    model: Optional[str] = None,
+) -> str:
+    """Extract bets from a betslip image and park them for confirmation."""
+    if pending is None:
+        pending = _PENDING_PHOTO_BETS
+    from wca.bot.vision import extract_bets_from_image, VisionError
+
+    try:
+        bets = extract_bets_from_image(image_bytes, api_key=api_key, model=model)
+    except VisionError as exc:
+        return "Couldn't read that slip: %s" % exc
+    except Exception as exc:  # never crash the loop on a vision hiccup
+        return "Vision error: %s" % exc
+    if not bets:
+        return "No bets detected. Send a clearer screenshot of the full slip."
+    pending[chat_id] = bets
+    return _format_extracted(bets)
+
+
+def handle_photo_confirmation(
+    text: str,
+    chat_id: Any,
+    db_path: str,
+    pending: Optional[Dict[Any, List[Any]]] = None,
+    *,
+    ts_utc: Optional[str] = None,
+) -> Optional[str]:
+    """Resolve a parked betslip on a lone ``yes`` / ``no``. None if not applicable."""
+    if pending is None:
+        pending = _PENDING_PHOTO_BETS
+    if chat_id not in pending:
+        return None
+    ans = text.strip().lower()
+    if ans not in {"yes", "y", "no", "n"}:
+        return None  # leave the slip parked; let normal command routing proceed
+    bets = pending.pop(chat_id)
+    if ans in {"no", "n"}:
+        return "Discarded %d parsed selection(s)." % len(bets)
+
+    if ts_utc is None:
+        ts_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    logged: List[str] = []
+    for b in bets:
+        match_id = "MANUAL_" + _slug(b.match_desc)
+        note = "screenshot ingest; conf %.2f%s" % (
+            getattr(b, "confidence", 0.0),
+            "; boost" if getattr(b, "is_boost", False) else "",
+        )
+        try:
+            bid = record_bet(
+                ts_utc,
+                match_id,
+                b.match_desc,
+                b.market or "unknown",
+                b.selection,
+                b.bookmaker or "unknown",
+                float(b.decimal_odds or 0.0),
+                float(b.stake or 0.0),
+                notes=note,
+                db_path=db_path,
+            )
+            logged.append("#%d %s @ %s" % (bid, b.selection, b.decimal_odds or "?"))
+        except Exception as exc:  # report per-bet failure, keep going
+            logged.append("ERR %s: %s" % (b.selection, exc))
+    return "Logged %d to the ledger:\n%s" % (len(logged), "\n".join(logged))
+
+
 def handle_confirmation(text: str, db_path: str) -> Optional[str]:
     """Route `Y BET-<id>` / `N BET-<id>` replies. Returns None if not a confirm."""
     parts = text.strip().split()
@@ -170,7 +308,7 @@ def handle_confirmation(text: str, db_path: str) -> Optional[str]:
 
 
 def dispatch(text: str, db_path: str) -> str:
-    """Map an incoming message to a reply."""
+    """Map an incoming text message to a reply."""
     confirm = handle_confirmation(text, db_path)
     if confirm is not None:
         return confirm
@@ -224,10 +362,9 @@ def run(
         for update in updates:
             offset = int(update["update_id"]) + 1
             message = update.get("message") or update.get("edited_message")
-            if not message or "text" not in message:
+            if not message:
                 continue
             chat_id = message["chat"]["id"]
-            text = message["text"]
 
             if not _authorized(chat_id, allowed):
                 # Reply once so an unknown chat learns its own id (for setup),
@@ -241,10 +378,40 @@ def run(
                     pass
                 continue
 
+            # 1) Betslip screenshot -> parse + park for confirmation.
+            if "photo" in message:
+                try:
+                    image = client.download_photo(message)
+                    reply = (
+                        handle_photo(image, chat_id)
+                        if image
+                        else "No photo found in that message."
+                    )
+                except TelegramError as exc:
+                    reply = "Couldn't download the image: %s" % exc
+                except Exception as exc:
+                    reply = "Error reading image: %s" % exc
+                try:
+                    client.send_message(chat_id, reply)
+                except TelegramError as exc:
+                    print("send error: %s" % exc)
+                continue
+
+            if "text" not in message:
+                continue
+            text = message["text"]
+
+            # 2) Pending betslip confirmation (lone yes/no) takes priority.
             try:
-                reply = dispatch(text, db_path)
-            except Exception as exc:  # never let one bad command kill the loop
-                reply = "Error handling command: %s" % exc
+                reply = handle_photo_confirmation(text, chat_id, db_path)
+            except Exception as exc:
+                reply = "Error logging bets: %s" % exc
+            if reply is None:
+                try:
+                    reply = dispatch(text, db_path)
+                except Exception as exc:  # never let one bad command kill the loop
+                    reply = "Error handling command: %s" % exc
+
             try:
                 client.send_message(chat_id, reply)
             except TelegramError as exc:

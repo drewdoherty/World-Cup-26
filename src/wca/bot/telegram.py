@@ -86,6 +86,50 @@ class TelegramClient:
             last = self._call("sendMessage", payload)
         return last
 
+    # -- file / photo download ---------------------------------------------
+
+    def get_file(self, file_id: str) -> Dict[str, Any]:
+        """Call the ``getFile`` Bot API method for *file_id*.
+
+        Returns the ``result`` dict which includes ``file_path`` (a relative
+        path used to construct the CDN download URL).
+        """
+        return self._call("getFile", {"file_id": file_id})
+
+    def download_file(self, file_path: str) -> bytes:
+        """Download a file from the Telegram CDN using its *file_path*.
+
+        *file_path* is the value returned by :meth:`get_file`.  The bot token
+        is embedded in the URL; it is **not** logged.
+
+        Raises :class:`TelegramError` on transport failures or non-200
+        HTTP responses.
+        """
+        url = "https://api.telegram.org/file/bot{token}/{file_path}".format(
+            token=self._token, file_path=file_path
+        )
+        try:
+            resp = self._session.get(url, timeout=self._timeout)
+        except requests.RequestException as exc:
+            raise TelegramError("telegram file download failed: %s" % exc) from exc
+        if resp.status_code != 200:
+            raise TelegramError(
+                "telegram file download returned HTTP %d" % resp.status_code
+            )
+        return resp.content
+
+    def download_photo(self, message: Dict[str, Any]) -> Optional[bytes]:
+        """Download the largest photo attached to *message*.
+
+        Returns the raw image bytes, or ``None`` if the message contains no
+        ``photo`` field.
+        """
+        file_id = largest_photo_file_id(message)
+        if file_id is None:
+            return None
+        file_info = self.get_file(file_id)
+        return self.download_file(file_info["file_path"])
+
     # -- receiving ---------------------------------------------------------
 
     def get_updates(
@@ -102,6 +146,25 @@ class TelegramClient:
             payload["allowed_updates"] = allowed_updates
         # HTTP timeout must exceed the server-side long-poll window.
         return self._call("getUpdates", payload, timeout=poll_timeout + 10)
+
+
+def largest_photo_file_id(message: Dict[str, Any]) -> Optional[str]:
+    """Return the ``file_id`` of the highest-resolution photo in *message*.
+
+    Telegram sends photos as a list of :class:`PhotoSize` dicts (one entry per
+    resolution).  We pick the entry with the greatest ``width * height``
+    product; ties are broken by ``file_size`` (larger wins).
+
+    Returns ``None`` if *message* has no ``photo`` field or the list is empty.
+    """
+    photos: Optional[List[Dict[str, Any]]] = message.get("photo")
+    if not photos:
+        return None
+    best = max(
+        photos,
+        key=lambda p: (p.get("width", 0) * p.get("height", 0), p.get("file_size", 0)),
+    )
+    return best.get("file_id")
 
 
 def _split_message(text: str, limit: int = MAX_MESSAGE_LEN) -> List[str]:
