@@ -1,5 +1,7 @@
 # Architecture: World Cup Alpha
 
+> **Deep companion:** see [`architecture/SYSTEM_MAP.md`](architecture/SYSTEM_MAP.md) for the full code-verified pipeline map (per-stage Mermaid diagrams, exact default parameter values, a datapoint origin/consumer table, and an improvement map).
+
 ## Data Flow
 
 ```

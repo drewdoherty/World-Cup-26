@@ -516,3 +516,394 @@ body {
   .sc-body { grid-template-columns: 1fr; }
   .scores-nav { width: 100%; border-top: 1px solid var(--border); }
 }
+
+/* ====================================================== Architecture page */
+/* Appended for site/architecture.html — does not alter any rule above.    */
+
+.arch-intro { margin-top: 14px; }
+.panel + .panel,
+#stages .panel,
+#stages + #money-section,
+#money-section,
+#improve-section { margin-top: 12px; }
+
+.arch-lead {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.arch-mental {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.arch-mental-lbl {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.arch-mental-code {
+  font-size: 11px;
+  color: var(--accent);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 4px 8px;
+}
+
+/* ------------------------------------------------------- Pipeline (SVG) */
+
+.arch-pipe-wrap { overflow-x: auto; }
+.pipe-svg {
+  width: 100%;
+  min-width: 520px;
+  height: auto;
+  display: block;
+}
+.pipe-box {
+  fill: var(--panel);
+  stroke: var(--border-2);
+  stroke-width: 1.2;
+  transition: fill 0.15s ease, stroke 0.15s ease;
+}
+.pipe-stage { cursor: pointer; outline: none; }
+.pipe-stage:hover .pipe-box,
+.pipe-stage:focus .pipe-box {
+  fill: var(--panel-2);
+  stroke: var(--accent);
+}
+.pipe-stage:hover .pipe-title,
+.pipe-stage:focus .pipe-title { fill: var(--accent); }
+.pipe-n {
+  fill: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+.pipe-title {
+  fill: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+}
+.pipe-tag {
+  fill: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.5px;
+}
+
+/* ------------------------------------------------------- Stage sections */
+
+.arch-stage-n {
+  color: var(--accent);
+  font-weight: 700;
+  margin-right: 2px;
+}
+.arch-top {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+}
+.arch-top:hover { color: var(--accent); }
+.arch-blurb {
+  margin: 0 0 12px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.arch-card-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.arch-card {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--panel);
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+}
+.arch-card-name {
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+.arch-card-role {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.arch-params {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+  padding: 8px 9px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+.arch-param {
+  display: grid;
+  grid-template-columns: minmax(70px, auto) 1fr;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 10.5px;
+}
+.arch-pk {
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.arch-pv {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  word-break: break-word;
+}
+
+.arch-io {
+  margin-bottom: 10px;
+}
+.arch-io-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+.arch-io-lbl {
+  font-size: 8.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 2px;
+}
+.arch-io-arrow {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+  margin: 3px 0 3px 18px;
+}
+.arch-chip {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 2px;
+  font-size: 9.5px;
+  letter-spacing: 0.3px;
+  border: 1px solid var(--border-2);
+  color: var(--text-dim);
+}
+.chip-in { border-color: #243650; color: var(--sportsbook); }
+.chip-out { border-color: #1f4030; color: var(--accent); }
+
+.arch-file {
+  margin-top: auto;
+  font-size: 10px;
+  color: var(--text-dim);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 4px 7px;
+  word-break: break-all;
+}
+
+/* ------------------------------------------------------------ Money flow */
+
+.money-pools {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 14px;
+}
+.money-pool {
+  border: 1px solid var(--border);
+  border-left-width: 2px;
+  border-radius: 3px;
+  background: var(--panel);
+  padding: 10px 11px;
+}
+.money-sportsbook { border-left-color: var(--sportsbook); }
+.money-polymarket { border-left-color: var(--polymarket); }
+.money-kalshi { border-left-color: var(--kalshi); }
+.money-pool-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.money-pool-name {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.money-pool-amt { font-size: 15px; font-weight: 700; }
+.money-sportsbook .money-pool-amt { color: var(--sportsbook); }
+.money-polymarket .money-pool-amt { color: var(--polymarket); }
+.money-kalshi .money-pool-amt { color: var(--kalshi); }
+.money-pool-sub {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 2px 0 7px;
+}
+.money-pool-notes {
+  margin: 0;
+  padding-left: 14px;
+  list-style: none;
+}
+.money-pool-notes li {
+  position: relative;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin-bottom: 2px;
+}
+.money-pool-notes li::before {
+  content: "›";
+  position: absolute;
+  left: -12px;
+  color: var(--muted);
+}
+
+.money-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.money-step {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 140px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--bg-2);
+}
+.money-step-h {
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.money-step-d {
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+.money-arrow {
+  align-self: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.money-kill {
+  border: 1px solid var(--border-2);
+  border-left: 2px solid var(--neg);
+  border-radius: 2px;
+  background: var(--panel);
+  padding: 9px 12px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.kpi-block {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.kpi-head {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.kpi-row {
+  display: grid;
+  grid-template-columns: 20px minmax(120px, auto) 1fr;
+  align-items: baseline;
+  gap: 10px;
+  padding: 4px 0;
+}
+.kpi-rank {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 12px;
+}
+.kpi-name {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.kpi-desc { font-size: 10.5px; color: var(--text-dim); }
+
+/* ------------------------------------------------------- Improvement map */
+
+.imp-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+.imp-group {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--panel);
+  padding: 10px 12px;
+}
+.imp-stage {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.imp-list {
+  margin: 0;
+  padding-left: 14px;
+  list-style: none;
+}
+.imp-list li {
+  position: relative;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.imp-list li:last-child { margin-bottom: 0; }
+.imp-list li::before {
+  content: "+";
+  position: absolute;
+  left: -13px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .kpi-row { grid-template-columns: 18px 1fr; }
+  .kpi-desc { grid-column: 2; }
+  .money-flow { flex-direction: column; }
+  .money-arrow { align-self: flex-start; transform: rotate(90deg); }
+}

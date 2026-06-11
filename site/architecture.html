@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark">
+<title>WORLD CUP ALPHA // UNDER THE HOOD</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div id="app">
+  <!-- Ticker bar -->
+  <header class="ticker" id="ticker">
+    <div class="brand">
+      <span class="brand-mark">WCA</span>
+      <span class="brand-sub">WORLD CUP ALPHA</span>
+    </div>
+    <nav class="scores-nav">
+      <a class="scores-nav-link" href="./index.html">&larr; Terminal</a>
+      <a class="scores-nav-link" href="./scores.html">Scores &amp; Markets</a>
+      <span class="scores-nav-here">Under The Hood</span>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Intro / one-line mental model -->
+    <section class="panel arch-intro">
+      <div class="panel-head">
+        <span class="panel-label">System Map // How The Alpha Is Made</span>
+        <span class="panel-meta">code-verified</span>
+      </div>
+      <div class="panel-body">
+        <p class="arch-lead" id="arch-lead"></p>
+        <p class="arch-mental" id="arch-mental"></p>
+      </div>
+    </section>
+
+    <!-- Pipeline banner (inline SVG) -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">Pipeline // Five Stages</span>
+        <span class="panel-meta">click a stage</span>
+      </div>
+      <div class="panel-body arch-pipe-wrap" id="pipeline"></div>
+    </section>
+
+    <!-- Per-stage detail sections injected here -->
+    <div id="stages"></div>
+
+    <!-- Money flow strip -->
+    <section class="panel" id="money-section">
+      <div class="panel-head">
+        <span class="panel-label">Money Flow // Pools &rarr; Stake &rarr; Settle &rarr; CLV</span>
+        <span class="panel-meta">quarter-Kelly</span>
+      </div>
+      <div class="panel-body" id="money"></div>
+    </section>
+
+    <!-- Improvement map -->
+    <section class="panel" id="improve-section">
+      <div class="panel-head">
+        <span class="panel-label">Improvement Map // Planned Upgrades</span>
+        <span class="panel-meta">per stage</span>
+      </div>
+      <div class="panel-body" id="improve"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span class="foot-gen" id="foot-gen"></span>
+    <span class="foot-mark">WORLD CUP ALPHA</span>
+  </footer>
+</div>
+<script src="./architecture.js"></script>
+</body>
+</html>
