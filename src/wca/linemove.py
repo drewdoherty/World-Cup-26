@@ -320,6 +320,19 @@ def write_linemove(
         now_utc=now_utc,
     )
 
+    # Never clobber a populated file with an empty payload: an empty events
+    # list here almost always means a transient input problem (e.g. the
+    # newest raw snapshot was read mid-write by the daemon and failed to
+    # parse), not that line history genuinely vanished.
+    if not data.get("events"):
+        try:
+            with open(out_path, "r", encoding="utf-8") as fh:
+                existing = json.load(fh)
+            if existing.get("events"):
+                return out_path  # keep the good file
+        except Exception:
+            pass  # no existing file / unreadable -> write the empty payload
+
     parent = os.path.dirname(os.path.abspath(out_path))
     if parent:
         os.makedirs(parent, exist_ok=True)
@@ -329,6 +342,23 @@ def write_linemove(
         fh.write("\n")
 
     return out_path
+
+
+def robust_event_meta(snapshots_dir: str, max_files: int = 4) -> Dict[str, Dict[str, Any]]:
+    """Event meta from the newest parseable snapshot file in a directory.
+
+    The daemon may be mid-write on the newest file (truncated JSON parses to
+    nothing), so walk backwards through up to ``max_files`` recent snapshots
+    until one yields a non-empty meta map.
+    """
+    import glob as _glob
+
+    files = sorted(_glob.glob(os.path.join(snapshots_dir, "oddsapi_h2h_uk_*.json")))
+    for path in reversed(files[-max_files:]):
+        meta = event_meta_from_snapshot_file(path)
+        if meta:
+            return meta
+    return {}
 
 
 def event_meta_from_snapshot_file(path: str) -> Dict[str, Dict[str, Any]]:

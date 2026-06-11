@@ -94,10 +94,7 @@ def main(argv=None) -> int:
     )
 
     if not args.no_linemove:
-        snap_file = _newest_snapshot_file(args.snapshots_dir)
-        event_meta = (
-            linemove.event_meta_from_snapshot_file(snap_file) if snap_file else {}
-        )
+        event_meta = linemove.robust_event_meta(args.snapshots_dir)
         lm_path = linemove.write_linemove(
             args.db,
             out_path=args.linemove_out,

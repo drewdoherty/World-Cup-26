@@ -362,3 +362,34 @@ def test_end_to_end_with_derived_meta(tmp_path):
     assert len(out["events"]) == 1
     assert out["events"][0]["kickoff"] == "2026-06-11T19:00:00Z"
     assert len(out["events"][0]["series"]["home"]) == 3
+
+
+def test_write_linemove_never_clobbers_good_file_with_empty(tmp_path):
+    """Regression: a truncated snapshot read mid-write produced an empty meta
+    and the empty linemove overwrote (and got pushed over) a healthy file."""
+    import json
+    from wca.linemove import write_linemove
+
+    out = tmp_path / "linemove.json"
+    good = {"meta": {"generated": "t"}, "events": [{"fixture": "A vs B",
+            "kickoff": "2026-06-11T19:00:00", "series": {"home": [["t", 0.5]],
+            "draw": [["t", 0.3]], "away": [["t", 0.2]]}}]}
+    out.write_text(json.dumps(good))
+    # Empty meta + missing db -> empty payload; must keep the good file.
+    write_linemove(str(tmp_path / "missing.db"), out_path=str(out),
+                   event_meta={}, now_utc="x")
+    kept = json.loads(out.read_text())
+    assert len(kept["events"]) == 1
+
+
+def test_robust_event_meta_skips_truncated_newest(tmp_path):
+    import json
+    from wca.linemove import robust_event_meta
+
+    older = tmp_path / "oddsapi_h2h_uk_20260611T100000Z.json"
+    older.write_text(json.dumps([{"id": "e1", "home_team": "A", "away_team": "B",
+                                  "commence_time": "2026-06-11T19:00:00Z"}]))
+    newest = tmp_path / "oddsapi_h2h_uk_20260611T110000Z.json"
+    newest.write_text('[{"id": "e2", "home_te')  # truncated mid-write
+    meta = robust_event_meta(str(tmp_path))
+    assert "e1" in meta and meta["e1"]["fixture"] == "A vs B"
