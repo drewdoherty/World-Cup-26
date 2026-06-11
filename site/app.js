@@ -462,6 +462,12 @@
         points: pts
       });
     });
+    // Chronological by kickoff (soonest first); unknown kickoffs sink to the end.
+    events.sort(function (a, b) {
+      var ka = isNaN(a.kickoff) ? Infinity : a.kickoff;
+      var kb = isNaN(b.kickoff) ? Infinity : b.kickoff;
+      return ka - kb;
+    });
     return events;
   }
   function numOrNull(v) {
