@@ -289,3 +289,13 @@ class TestScoresFormat:
         assert "BTTS" in out
         assert "45.8%" in out
         assert "39.0%" in out
+
+
+def test_authorized_accepts_comma_separated_list():
+    from wca.bot.app import _authorized
+    assert _authorized(12345, "12345")
+    assert _authorized(12345, "12345,-100987")
+    assert _authorized(-100987, "12345, -100987")
+    assert not _authorized(99999, "12345,-100987")
+    assert not _authorized(12345, "")
+    assert not _authorized(12345, None)

@@ -63,10 +63,16 @@ HELP_TEXT = (
 
 
 def _authorized(chat_id: int | str, allowed: Optional[str]) -> bool:
-    """Only the configured chat may drive the bot. Empty config = lock out."""
+    """Only configured chats may drive the bot. Empty config = lock out.
+
+    ``allowed`` is a comma-separated list of chat ids (TELEGRAM_CHAT_ID), so a
+    private chat and a group chat can both be authorized, e.g.
+    ``TELEGRAM_CHAT_ID=12345678,-1001234567890``. Group ids are negative.
+    """
     if not allowed:
         return False
-    return str(chat_id) == str(allowed)
+    allowed_ids = {part.strip() for part in str(allowed).split(",") if part.strip()}
+    return str(chat_id) in allowed_ids
 
 
 # ---------------------------------------------------------------------------
