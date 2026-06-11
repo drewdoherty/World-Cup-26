@@ -90,14 +90,36 @@ def handle_clv(db_path: str) -> str:
     )
 
 
+def render_card(recs, pools, score_cards=None) -> str:
+    """Render the bet card (+ optional scoreline section) as one Telegram message.
+
+    Thin adapter so the bot loop and any cron pusher format cards identically.
+    ``recs`` / ``pools`` are the outputs/config of :func:`wca.card.build_card`;
+    ``score_cards`` (if given) is the list from :func:`wca.card.build_score_cards`,
+    appended below the bets via :func:`wca.card.format_scores`.
+    """
+    from wca.card import format_card, format_scores
+
+    parts = [format_card(recs, pools)]
+    if score_cards:
+        parts.append("")
+        parts.append(format_scores(score_cards))
+    return "\n".join(parts)
+
+
 def handle_card(db_path: str) -> str:
     # Placeholder: the matchday card generator (blend model -> EV -> Kelly per
-    # pool) is the next build. Until then the bot reports its absence honestly.
+    # pool) runs on cron and *pushes* the formatted card here. Until that push is
+    # wired, the bot reports its absence honestly. When wired, the cron job calls
+    # render_card(recs, pools, score_cards) and sends the result, so the same
+    # message carries both the +EV bets and the reconciled scoreline section
+    # (top correct scores, O/U 2.5, BTTS) per fixture.
     return (
         "*Today's card*\n"
-        "Card generator not wired yet. Coming next: blended model probs vs "
-        "de-vigged best price per match, EV, and quarter-Kelly stakes per pool "
-        "(Polymarket / Kalshi / sportsbook)."
+        "Card generator not wired into the bot loop yet. The cron build emits "
+        "blended model probs vs de-vigged best price per match, EV, "
+        "quarter-Kelly stakes per pool (Polymarket / Kalshi / sportsbook), plus "
+        "a reconciled scoreline section (top correct scores, O/U 2.5, BTTS)."
     )
 
 

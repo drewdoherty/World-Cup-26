@@ -37,6 +37,7 @@ from wca.markets import devig as devig_mod
 from wca.markets import kelly as kelly_mod
 from wca.models.dixon_coles import DixonColesModel
 from wca.models.elo import EloOutcomeModel, EloRater
+from wca.models.scores import ScorelineCard, scoreline_card
 
 # 1X2 outcome order used throughout: home, draw, away.
 OUTCOMES = ("home", "draw", "away")
@@ -244,42 +245,30 @@ def best_price(books: Dict[str, Dict[str, float]], outcome: str) -> Tuple[Option
     return best_book, best
 
 
-def build_card(
-    models: FittedModels,
-    odds_df: pd.DataFrame,
-    pools: Sequence[PoolConfig],
-    fixtures_meta: pd.DataFrame,
-    weights: BlendWeights = BlendWeights(),
-    min_edge: float = 0.02,
-    host_nations: Sequence[str] = ("United States", "Mexico", "Canada", "USA"),
-) -> List[Recommendation]:
-    """Generate ranked recommendations for every +EV outcome in the slate.
+@dataclass
+class _FixtureBlend:
+    """Per-fixture blend state shared by the recommendation and score pipelines."""
 
-    Parameters
-    ----------
-    models:
-        Fitted Elo + DC models.
-    odds_df:
-        Flat odds frame from ``theoddsapi.get_odds`` (needs h2h rows).
-    pools:
-        Bankroll pools to size stakes for.
-    fixtures_meta:
-        Results-schedule rows for the upcoming fixtures, used for the
-        ``neutral`` flag and host nation (columns: home_team, away_team,
-        neutral, optionally country).
-    weights:
-        Blend weights (Elo, DC, market).
-    min_edge:
-        Minimum edge (EV per unit) to include a recommendation.
-    host_nations:
-        Nations that receive host advantage on a neutral venue.
+    fx: Dict[str, object]
+    home: str  # canonical
+    away: str  # canonical
+    neutral: bool
+    host: Optional[str]
+    books: Dict[str, Dict[str, float]]
+    blended: Dict[str, float]  # home/draw/away
+    elo_map: Dict[str, float]
+    dc_map: Dict[str, float]
+    mkt_map: Dict[str, float]
+
+
+def _meta_lookup(
+    fixtures_meta: Optional[pd.DataFrame],
+) -> Dict[Tuple[str, str], Dict[str, object]]:
+    """Build the neutral/host lookup keyed by canonical team pair.
+
+    Prefer *unplayed* (scheduled) rows so a historical friendly between the same
+    two teams can't overwrite the World Cup fixture's neutral/host flags.
     """
-    w = weights.normalised()
-    fixtures = _index_odds(odds_df)
-
-    # Build a quick lookup of neutral/host from the schedule by team pair.
-    # Prefer *unplayed* (scheduled) rows so a historical friendly between the
-    # same two teams can't overwrite the World Cup fixture's neutral/host flags.
     meta_lookup: Dict[Tuple[str, str], Dict[str, object]] = {}
     if fixtures_meta is not None and not fixtures_meta.empty:
         fm = fixtures_meta.copy()
@@ -291,8 +280,27 @@ def build_card(
                 "neutral": bool(r["neutral"]) if "neutral" in r else True,
                 "country": str(r.get("country", "")),
             }
+    return meta_lookup
 
-    recs: List[Recommendation] = []
+
+def _iter_fixture_blends(
+    models: FittedModels,
+    odds_df: pd.DataFrame,
+    fixtures_meta: pd.DataFrame,
+    weights: BlendWeights,
+    host_nations: Sequence[str],
+) -> List[_FixtureBlend]:
+    """Compute the blended 1X2 for every fixture with a usable market.
+
+    Shared by :func:`build_card` and :func:`build_score_cards` so both pipelines
+    bet against the *same* blended probabilities. Fixtures without a complete
+    market consensus are skipped (no blend is well-defined).
+    """
+    w = weights.normalised()
+    fixtures = _index_odds(odds_df)
+    meta_lookup = _meta_lookup(fixtures_meta)
+
+    out: List[_FixtureBlend] = []
     for fx in fixtures.values():
         # Display names come from the odds feed; model/meta lookups MUST use the
         # canonical results-dataset spelling or they fall back to default
@@ -325,16 +333,67 @@ def build_card(
             "draw": w.elo * e_d + w.dc * d_d + w.market * m_d,
             "away": w.elo * e_a + w.dc * d_a + w.market * m_a,
         }
-        elo_map = {"home": e_h, "draw": e_d, "away": e_a}
-        dc_map = {"home": d_h, "draw": d_d, "away": d_a}
-        mkt_map = {"home": m_h, "draw": m_d, "away": m_a}
+        out.append(
+            _FixtureBlend(
+                fx=fx,
+                home=home,
+                away=away,
+                neutral=neutral,
+                host=host,
+                books=books,  # type: ignore[arg-type]
+                blended=blended,
+                elo_map={"home": e_h, "draw": e_d, "away": e_a},
+                dc_map={"home": d_h, "draw": d_d, "away": d_a},
+                mkt_map={"home": m_h, "draw": m_d, "away": m_a},
+            )
+        )
+    return out
+
+
+def build_card(
+    models: FittedModels,
+    odds_df: pd.DataFrame,
+    pools: Sequence[PoolConfig],
+    fixtures_meta: pd.DataFrame,
+    weights: BlendWeights = BlendWeights(),
+    min_edge: float = 0.02,
+    host_nations: Sequence[str] = ("United States", "Mexico", "Canada", "USA"),
+) -> List[Recommendation]:
+    """Generate ranked recommendations for every +EV outcome in the slate.
+
+    Parameters
+    ----------
+    models:
+        Fitted Elo + DC models.
+    odds_df:
+        Flat odds frame from ``theoddsapi.get_odds`` (needs h2h rows).
+    pools:
+        Bankroll pools to size stakes for.
+    fixtures_meta:
+        Results-schedule rows for the upcoming fixtures, used for the
+        ``neutral`` flag and host nation (columns: home_team, away_team,
+        neutral, optionally country).
+    weights:
+        Blend weights (Elo, DC, market).
+    min_edge:
+        Minimum edge (EV per unit) to include a recommendation.
+    host_nations:
+        Nations that receive host advantage on a neutral venue.
+    """
+    blends = _iter_fixture_blends(
+        models, odds_df, fixtures_meta, weights, host_nations
+    )
+
+    recs: List[Recommendation] = []
+    for fb in blends:
+        home, away = fb.home, fb.away
         team_map = {"home": home, "draw": "Draw", "away": away}
 
         for outcome in OUTCOMES:
-            book, odds = best_price(books, outcome)  # type: ignore[arg-type]
+            book, odds = best_price(fb.books, outcome)
             if book is None or odds <= 1.0:
                 continue
-            p = blended[outcome]
+            p = fb.blended[outcome]
             e = kelly_mod.edge(p, odds)
             if e < min_edge:
                 continue
@@ -346,17 +405,17 @@ def build_card(
                 )
             recs.append(
                 Recommendation(
-                    match_id=str(fx["event_id"]),
+                    match_id=str(fb.fx["event_id"]),
                     match_desc="%s vs %s" % (home, away),
-                    commence_time=str(fx["commence_time"]),
+                    commence_time=str(fb.fx["commence_time"]),
                     selection=outcome,
                     selection_team=team_map[outcome],
                     best_book=book,
                     best_odds=odds,
                     model_prob=p,
-                    market_prob=mkt_map[outcome],
-                    elo_prob=elo_map[outcome],
-                    dc_prob=dc_map[outcome],
+                    market_prob=fb.mkt_map[outcome],
+                    elo_prob=fb.elo_map[outcome],
+                    dc_prob=fb.dc_map[outcome],
                     edge=e,
                     ev_per_unit=e,
                     stakes=stakes,
@@ -365,6 +424,59 @@ def build_card(
 
     recs.sort(key=lambda r: r.edge, reverse=True)
     return recs
+
+
+def build_score_cards(
+    models: FittedModels,
+    odds_df: pd.DataFrame,
+    fixtures_meta: pd.DataFrame,
+    weights: BlendWeights = BlendWeights(),
+    min_edge: float = 0.02,
+    host_nations: Sequence[str] = ("United States", "Mexico", "Canada", "USA"),
+    top_k: int = 6,
+) -> List[ScorelineCard]:
+    """Full-time scoreline cards reconciled to the *same* blended 1X2 as the bets.
+
+    For every fixture with a usable market this builds the Dixon-Coles score
+    matrix and reconciles it (via :func:`wca.models.scores.reconcile_scoreline_matrix`)
+    to the blended ``(home, draw, away)`` probability the card pipeline bets
+    against, then derives the top scorelines, over/under and BTTS from the
+    reconciled matrix. The returned list is aligned one-to-one with the fixtures
+    that survive market filtering, in odds-feed order.
+
+    Parameters
+    ----------
+    models, odds_df, fixtures_meta, weights, host_nations:
+        Same as :func:`build_card`; ``weights`` MUST match those used for the
+        recommendations so the scorelines are consistent with the picks.
+    min_edge:
+        Edge threshold stored on each card for its ``min_price`` helper.
+    top_k:
+        Number of top scorelines per fixture (default 6).
+    """
+    blends = _iter_fixture_blends(
+        models, odds_df, fixtures_meta, weights, host_nations
+    )
+
+    cards: List[ScorelineCard] = []
+    for fb in blends:
+        pred = models.dc.predict(fb.home, fb.away, neutral=fb.neutral, warn=False)
+        target = (
+            fb.blended["home"],
+            fb.blended["draw"],
+            fb.blended["away"],
+        )
+        cards.append(
+            scoreline_card(
+                pred,
+                target,
+                home=fb.home,
+                away=fb.away,
+                top_k=top_k,
+                min_edge=min_edge,
+            )
+        )
+    return cards
 
 
 def apply_daily_exposure_caps(
@@ -400,5 +512,37 @@ def format_card(recs: Sequence[Recommendation], pools: Sequence[PoolConfig]) -> 
                 r.model_prob * 100, r.market_prob * 100, r.edge * 100,
                 r.elo_prob * 100, r.dc_prob * 100, stake_str,
             )
+        )
+    return "\n".join(lines)
+
+
+def format_scores(
+    cards: Sequence[ScorelineCard], min_edge: float = 0.02
+) -> str:
+    """Human-readable scoreline card for the terminal or Telegram (Markdown).
+
+    Per fixture: the top-6 scorelines (``"2-1  12.3%  fair 8.13  back >= 8.46"``)
+    followed by one line with over/under 2.5 and BTTS probabilities. The
+    ``back >=`` price is the minimum decimal odds at which backing that
+    scoreline clears ``min_edge`` (each card's own ``min_edge`` is used; the
+    argument is a display-only fallback for cards that predate it).
+    """
+    if not cards:
+        return "*No scoreline cards* for the current slate."
+    lines: List[str] = ["*World Cup Alpha — scorelines* (%d fixtures)" % len(cards)]
+    for c in cards:
+        me = getattr(c, "min_edge", min_edge)
+        lines.append("")
+        lines.append("*%s vs %s*" % (c.home, c.away))
+        for h, a, p in c.top_scorelines:
+            lines.append(
+                "    %d-%d  %.1f%%  fair %.2f  back >= %.2f"
+                % (h, a, p * 100, c.fair_odds(p), c.min_price(p, me))
+            )
+        ou25 = c.over_under.get(2.5)
+        p_over = ou25[0] if ou25 is not None else float("nan")
+        lines.append(
+            "    O/U 2.5: over %.1f%% / under %.1f%%   BTTS %.1f%%"
+            % (p_over * 100, (1.0 - p_over) * 100, c.btts * 100)
         )
     return "\n".join(lines)

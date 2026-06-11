@@ -197,6 +197,35 @@ def clv_report(db_path: str) -> Dict[str, Any]:
     }
 
 
+def staking_stats(db_path: str) -> Dict[str, Any]:
+    """Evidence inputs for the pre-registered Kelly ladder (KellyPolicy).
+
+    Counts only *settled* bets (won/lost) that also have closing odds
+    recorded — the ladder promotes on demonstrated CLV, and CLV requires a
+    closing line. Bets are ordered by id (insertion order) for the rolling
+    window.
+
+    Returns
+    -------
+    dict with keys:
+        ``"n_settled"``     settled bets with closing odds (int)
+        ``"clv_to_date"``   mean CLV over those bets, or ``None`` if zero bets
+        ``"rolling50_clv"`` mean CLV over the most recent 50, or ``None`` if
+                            fewer than 50 exist
+    """
+    df = _bets_df(db_path)
+    eligible = df[
+        df["status"].str.lower().isin(["won", "lost"]) & df["clv"].notna()
+    ].sort_values("id")
+
+    n = len(eligible)
+    if n == 0:
+        return {"n_settled": 0, "clv_to_date": None, "rolling50_clv": None}
+    clv_to_date = float(eligible["clv"].mean())
+    rolling50 = float(eligible["clv"].tail(50).mean()) if n >= 50 else None
+    return {"n_settled": n, "clv_to_date": clv_to_date, "rolling50_clv": rolling50}
+
+
 def calibration_report(db_path: str, n_bins: int = 5) -> Dict[str, Any]:
     """Calibration analysis comparing model probability to market probability.
 

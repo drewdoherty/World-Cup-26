@@ -32,7 +32,8 @@ the slate would otherwise breach the cap.
 
 from __future__ import annotations
 
-from typing import List, Sequence
+from dataclasses import dataclass, field
+from typing import List, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -192,3 +193,110 @@ def simultaneous_exposure_scale(
 
     scale = budget / total
     return s * scale
+
+
+# ---------------------------------------------------------------------------
+# Pre-registered staking policy: the CLV-gated Kelly ladder.
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class LadderRung:
+    """One rung of the Kelly ladder.
+
+    ``min_settled`` is the number of settled bets *with closing odds recorded*
+    required before this rung can be earned; promotion additionally requires
+    positive to-date CLV (the rung must be *earned* by evidence, not time).
+    """
+
+    min_settled: int
+    fraction: float
+
+
+@dataclass(frozen=True)
+class KellyPolicy:
+    """Pre-registered, CLV-gated fractional-Kelly ladder.
+
+    Registered 2026-06-11, before the first bet was placed. The rationale is
+    documented in ``docs/policy/staking_policy.md``; the short version:
+
+    * The Kelly growth curve ``c (2 - c)`` is flat near the optimum while the
+      drawdown curve ``x ** (2/c - 1)`` is exponentially steep, so with noisy
+      edge estimates the rational multiplier sits well below 1. With edge
+      noise ~1.7x the edge itself (honest for an unbacktested model),
+      quarter Kelly is growth-optimal.
+    * Bets are selected where model and market disagree most, so estimated
+      edges are biased upward (winner's curse); the fraction is shrinkage.
+    * The ladder is pre-registered so the multiplier can only rise on CLV
+      evidence — never on a hot streak.
+
+    Rules enforced by :meth:`evaluate`:
+
+    * rung 0 (c=0.25) until 50 settled bets with closing odds;
+    * rung 1 (c=0.35) once 50+ settled AND to-date CLV > 0;
+    * rung 2 (c=0.50) once 100+ settled AND to-date CLV > 0 — the tournament
+      ceiling, never exceeded;
+    * demotion one rung (floored at rung 0) whenever rolling-50 CLV < 0.
+      (Negative CLV at rung 0 is the kill rule's jurisdiction — pause, not
+      resize.)
+    * while on rung 0, recommendations above ``max_odds_unvalidated`` are
+      filtered out entirely: longshots are where selection bias is worst and
+      the blend weights are not yet fitted.
+
+    Arbitrage bets are exempt from Kelly sizing altogether (sized to book
+    limits) and never count toward the ladder's exposure arithmetic.
+    """
+
+    rungs: Tuple[LadderRung, ...] = (
+        LadderRung(min_settled=0, fraction=0.25),
+        LadderRung(min_settled=50, fraction=0.35),
+        LadderRung(min_settled=100, fraction=0.50),
+    )
+    max_odds_unvalidated: float = 10.0
+
+    def evaluate(
+        self,
+        n_settled: int,
+        clv_to_date: Optional[float],
+        rolling50_clv: Optional[float] = None,
+    ) -> Tuple[float, int, str]:
+        """Return ``(fraction, rung_index, reason)`` for the current evidence.
+
+        Parameters
+        ----------
+        n_settled:
+            Settled bets with closing odds recorded.
+        clv_to_date:
+            Mean CLV across all such bets (``None`` when there are none).
+        rolling50_clv:
+            Mean CLV over the most recent 50 such bets (``None`` if fewer
+            than 50 exist).
+        """
+        if n_settled < 0:
+            raise ValueError("n_settled must be non-negative")
+
+        rung = 0
+        for i, r in enumerate(self.rungs):
+            if i == 0:
+                continue
+            if (
+                n_settled >= r.min_settled
+                and clv_to_date is not None
+                and clv_to_date > 0.0
+            ):
+                rung = i
+
+        reason = "rung %d earned: %d settled, CLV %s" % (
+            rung,
+            n_settled,
+            ("%.4f" % clv_to_date) if clv_to_date is not None else "n/a",
+        )
+        if rolling50_clv is not None and rolling50_clv < 0.0 and rung > 0:
+            rung -= 1
+            reason += "; demoted one rung (rolling-50 CLV %.4f < 0)" % rolling50_clv
+
+        return self.rungs[rung].fraction, rung, reason
+
+    def odds_cap(self, rung: int) -> Optional[float]:
+        """Max odds allowed at this rung; ``None`` means uncapped."""
+        return self.max_odds_unvalidated if rung == 0 else None
