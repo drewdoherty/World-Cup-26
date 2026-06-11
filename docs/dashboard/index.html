@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>World Cup Alpha &mdash; Dashboard</title>
+<style>
+:root {
+  --bg: #0b0f17;
+  --panel: #151c28;
+  --panel-2: #1c2535;
+  --border: #27313f;
+  --text: #e6edf3;
+  --muted: #8b97a7;
+  --accent: #4fd1c5;
+  --pos: #46d18a;
+  --neg: #f2738c;
+  --sportsbook: #4f8ff7;
+  --polymarket: #9d7bff;
+  --kalshi: #4fd1c5;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  line-height: 1.45;
+}
+.wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+header.app { display: flex; flex-wrap: wrap; align-items: baseline;
+  justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+header.app h1 { font-size: 1.7rem; margin: 0; letter-spacing: 0.3px; }
+header.app h1 .dot { color: var(--accent); }
+.generated { color: var(--muted); font-size: 0.82rem; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px; margin: 22px 0 10px; }
+.tile { background: var(--panel); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 18px; }
+.tile-value { font-size: 1.5rem; font-weight: 650; }
+.tile-label { color: var(--muted); font-size: 0.8rem; margin-top: 4px;
+  text-transform: uppercase; letter-spacing: 0.6px; }
+.tile-sub { color: var(--muted); font-size: 0.78rem; margin-top: 6px; }
+.tile.pl-pos .tile-value { color: var(--pos); }
+.tile.pl-neg .tile-value { color: var(--neg); }
+.clv-tile .tile-value { color: var(--accent); }
+section.card { background: var(--panel); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px 20px; margin-top: 22px; }
+section.card > h2 { margin: 0 0 14px; font-size: 1.05rem;
+  font-weight: 600; }
+.venue-chart { display: block; }
+.venue-chart .bar-track { fill: var(--panel-2); }
+.venue-chart .bar-sportsbook { fill: var(--sportsbook); }
+.venue-chart .bar-polymarket { fill: var(--polymarket); }
+.venue-chart .bar-kalshi { fill: var(--kalshi); }
+.venue-chart .bar-label { fill: var(--text); font-size: 14px;
+  font-weight: 600; }
+.venue-chart .bar-value { fill: var(--muted); font-size: 13px; }
+table.bets { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+table.bets th, table.bets td { text-align: left; padding: 9px 10px;
+  border-bottom: 1px solid var(--border); }
+table.bets th { color: var(--muted); font-weight: 600; font-size: 0.76rem;
+  text-transform: uppercase; letter-spacing: 0.5px; }
+table.bets td.num, table.bets th.num { text-align: right;
+  font-variant-numeric: tabular-nums; }
+table.bets tr:last-child td { border-bottom: none; }
+.empty-row { color: var(--muted); text-align: center; padding: 18px 10px; }
+.status { display: inline-block; padding: 2px 9px; border-radius: 999px;
+  font-size: 0.74rem; text-transform: capitalize; border: 1px solid var(--border); }
+.status-open { color: var(--accent); border-color: var(--accent); }
+.banner { background: var(--panel-2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 14px; color: var(--muted);
+  font-size: 0.85rem; margin-top: 18px; }
+footer.app { color: var(--muted); font-size: 0.78rem; margin-top: 34px;
+  text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="app">
+<h1>World Cup Alpha <span class="dot">&bull;</span> Betting Dashboard</h1>
+<div class="generated">Generated 2026-06-11 11:43:29 UTC</div>
+</header>
+
+<div class="tiles"><div class="tile"><div class="tile-value">£32.25</div><div class="tile-label">Total Wagered</div></div><div class="tile"><div class="tile-value">£32.25</div><div class="tile-label">Open Exposure</div></div><div class="tile pl-pos"><div class="tile-value">+£0.00</div><div class="tile-label">Settled P&amp;L</div></div><div class="tile"><div class="tile-value">5</div><div class="tile-label">Bets Placed</div></div><div class="tile clv-tile"><div class="tile-value">N/A</div><div class="tile-label">Avg CLV</div><div class="tile-sub">no closing lines yet</div></div></div>
+<section class="card">
+<h2>Wagered by venue</h2>
+<svg viewBox="0 0 660 170" width="100%" preserveAspectRatio="xMinYMin meet" role="img" aria-label="Wagered by venue" xmlns="http://www.w3.org/2000/svg" class="venue-chart"><rect x="120" y="26.0" width="430" height="26" rx="4" class="bar-track" /><rect x="120" y="26.0" width="430.0" height="26" rx="4" class="bar bar-sportsbook" /><text x="110" y="39.0" class="bar-label" text-anchor="end" dominant-baseline="middle">sportsbook</text><text x="558.0" y="39.0" class="bar-value" dominant-baseline="middle">£32.25</text><rect x="120" y="72.0" width="430" height="26" rx="4" class="bar-track" /><text x="110" y="85.0" class="bar-label" text-anchor="end" dominant-baseline="middle">polymarket</text><text x="128.0" y="85.0" class="bar-value" dominant-baseline="middle">£0.00</text><rect x="120" y="118.0" width="430" height="26" rx="4" class="bar-track" /><text x="110" y="131.0" class="bar-label" text-anchor="end" dominant-baseline="middle">kalshi</text><text x="128.0" y="131.0" class="bar-value" dominant-baseline="middle">£0.00</text></svg>
+</section>
+<section class="card">
+<h2>Open bets</h2>
+<table class="bets">
+<thead><tr><th>Match</th><th>Selection</th><th class="num">Odds</th><th class="num">Stake</th><th>Platform</th><th>Status</th></tr></thead>
+<tbody><tr><td>Treble: S.Korea + Paraguay + Canada</td><td>Korea/Paraguay/Canada all win</td><td class="num">20.41</td><td class="num">£2.00</td><td>betfair_sportsbook</td><td><span class="status status-open">open</span></td></tr><tr><td>Mexico vs South Africa</td><td>Raul Jimenez 1+ SOT Yes</td><td class="num">2.00</td><td class="num">£10.00</td><td>paddypower</td><td><span class="status status-open">open</span></td></tr><tr><td>Mexico vs South Africa</td><td>Raul Jimenez Yes</td><td class="num">2.55</td><td class="num">£5.00</td><td>virginbet</td><td><span class="status status-open">open</span></td></tr><tr><td>Canada vs Bosnia and Herzegovina</td><td>Canada</td><td class="num">1.80</td><td class="num">£9.57</td><td>virginbet</td><td><span class="status status-open">open</span></td></tr><tr><td>USA vs Paraguay</td><td>Paraguay</td><td class="num">4.20</td><td class="num">£5.68</td><td>virginbet</td><td><span class="status status-open">open</span></td></tr></tbody>
+</table>
+</section>
+<footer class="app">World Cup Alpha &mdash; static ledger snapshot. No external assets, no tracking.</footer>
+</div>
+</body>
+</html>

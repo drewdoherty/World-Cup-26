@@ -132,7 +132,7 @@ def main() -> None:
     # ------------------------------------------------------------------
     try:
         odds_df, quota = theoddsapi.get_odds(
-            sport="soccer_fifa_world_cup",
+            "soccer_fifa_world_cup",
             regions=args.regions,
             markets="h2h",
         )
@@ -145,18 +145,16 @@ def main() -> None:
     # ------------------------------------------------------------------
     import pandas as pd
 
-    if odds_df.empty:
-        fixtures_meta = odds_df.copy()
-    else:
-        # The odds feed has a 'commence_time' column (ISO string or datetime).
-        if "commence_time" in odds_df.columns:
-            ct = pd.to_datetime(odds_df["commence_time"], errors="coerce", utc=True)
-            # Convert to naive UTC for comparison.
-            ct_naive = ct.dt.tz_localize(None) if ct.dt.tz is None else ct.dt.tz_convert(None)
-            mask = (ct_naive >= now_dt) & (ct_naive <= cutoff_dt)
-            fixtures_meta = odds_df[mask].copy()
-        else:
-            fixtures_meta = odds_df.copy()
+    if not odds_df.empty and "commence_time" in odds_df.columns:
+        ct = pd.to_datetime(odds_df["commence_time"], errors="coerce", utc=True)
+        # Convert to naive UTC for comparison.
+        ct_naive = ct.dt.tz_localize(None) if ct.dt.tz is None else ct.dt.tz_convert(None)
+        mask = (ct_naive >= now_dt) & (ct_naive <= cutoff_dt)
+        odds_df = odds_df[mask].copy()
+
+    # Neutral/host resolution comes from the results dataframe (scheduled
+    # fixture rows carry neutral/country), NOT from the odds feed.
+    fixtures_meta = results
 
     # ------------------------------------------------------------------
     # Build card.
@@ -165,7 +163,7 @@ def main() -> None:
     pools = [pool]
 
     try:
-        recs = build_card(models, odds_df, fixtures_meta, pools=pools)
+        recs = build_card(models, odds_df, pools, fixtures_meta=fixtures_meta)
         recs = apply_daily_exposure_caps(recs, pools)
         score_cards = build_score_cards(models, odds_df, fixtures_meta)
     except Exception as exc:
