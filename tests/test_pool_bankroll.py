@@ -3,7 +3,7 @@
 ``wca.card.resolve_pool_bankroll`` reads the ledger's settled-with-close CLV
 statistics (``wca.ledger.reports.staking_stats``), runs the pre-registered
 ``wca.markets.kelly.KellyPolicy`` ladder to find the earned rung, and maps the
-rung index onto the governance bankroll ladder £1000 / £2500 / £5000.
+rung index onto the governance bankroll ladder £1500 / £2500 / £5000.
 
 These tests drive the wiring two ways:
 
@@ -141,7 +141,7 @@ def test_reason_mentions_rung_and_counts(monkeypatch):
     res = resolve_pool_bankroll("ignored.db")
     assert "rung 0" in res.reason
     assert "0/50" in res.reason          # progress toward the next rung
-    assert "1000" in res.reason
+    assert "1500" in res.reason
     assert "n/a" in res.reason           # CLV not yet available
 
 
@@ -179,7 +179,7 @@ def test_e2e_empty_ledger_rung0() -> None:
     store.init_db(db)
     res = resolve_pool_bankroll(db)
     assert res.rung == 0
-    assert res.bankroll == 1000.0
+    assert res.bankroll == 1500.0
     assert res.n_settled == 0
 
 
@@ -213,7 +213,7 @@ def test_e2e_50_negative_clv_stays_rung0() -> None:
     assert res.n_settled == 50
     assert res.clv_to_date is not None and res.clv_to_date < 0
     assert res.rung == 0
-    assert res.bankroll == 1000.0
+    assert res.bankroll == 1500.0
 
 
 def test_e2e_demotion_recent_losses() -> None:

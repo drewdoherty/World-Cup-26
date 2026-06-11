@@ -98,15 +98,18 @@ class PoolConfig:
 # which notional pool the desk is cleared to deploy. This is the bankroll
 # governance agreed with the user:
 #
-#   rung 0  ->  £1,000   (start; until 50 settled-with-close bets)
-#   rung 1  ->  £2,500   (50+ settled AND to-date CLV > 0)
+#   rung 0  ->  £1,500   (base; raised from £1,000 by user instruction
+#                         2026-06-12 after funding sportsbook balances to
+#                         ~£1,500 — base reflects deployable cash, while
+#                         PROMOTION beyond it stays CLV-gated)
+#   rung 1  ->  £2,500   (50+ settled-with-close AND to-date CLV > 0)
 #   rung 2  ->  £5,000   (100+ settled AND to-date CLV > 0; ceiling)
 #
 # Demotion (rolling-50 CLV < 0) steps the index back down and so the bankroll
 # down with it. The *kill rule* (pause real money if avg CLV < 0 after ~50
 # bets) is the desk's jurisdiction, not encoded here — it is a pause, not a
 # resize, and the ladder simply holds rung 0 in that regime.
-LADDER_BANKROLLS: Tuple[float, ...] = (1000.0, 2500.0, 5000.0)
+LADDER_BANKROLLS: Tuple[float, ...] = (1500.0, 2500.0, 5000.0)
 
 
 @dataclass
@@ -141,7 +144,7 @@ def resolve_pool_bankroll(
     (``wca.ledger.reports.staking_stats``), runs the pre-registered
     :class:`~wca.markets.kelly.KellyPolicy` ladder to find the earned rung, and
     maps that rung index onto the governance bankroll ladder
-    (:data:`LADDER_BANKROLLS`: £1000 / £2500 / £5000).
+    (:data:`LADDER_BANKROLLS`: £1500 / £2500 / £5000).
 
     The rung is *earned* by evidence, never by time or a hot streak: rung 1
     needs 50+ settled-with-close bets and positive to-date CLV; rung 2 needs
@@ -157,7 +160,7 @@ def resolve_pool_bankroll(
         :class:`~wca.markets.kelly.KellyPolicy` (the pre-registered ladder).
     bankrolls:
         Notional pool per rung, index-aligned with ``policy.rungs``. Defaults
-        to the governance ladder £1000 / £2500 / £5000.
+        to the governance ladder £1500 / £2500 / £5000.
     override:
         If not ``None``, use this bankroll verbatim (the ``--bankroll`` CLI
         override). The ledger is still read so the card can report the rung the
