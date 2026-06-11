@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-11 15:33:59 UTC"
+    "generated": "2026-06-11 15:54:16 UTC"
   },
   "totals": {
-    "wagered": 85.56,
-    "open_stake": 85.56,
+    "wagered": 95.56,
+    "open_stake": 95.56,
     "settled_pl": 0.0,
-    "n_bets": 10
+    "n_bets": 11
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 39.25,
-      "open_stake": 39.25,
+      "wagered": 49.25,
+      "open_stake": 49.25,
       "settled_pl": 0.0,
-      "n_bets": 6
+      "n_bets": 7
     },
     "USD": {
       "wagered": 46.31,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 39.25,
-      "open_stake": 39.25,
+      "wagered": 49.25,
+      "open_stake": 49.25,
       "settled_pl": 0.0,
-      "n_bets": 6,
+      "n_bets": 7,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,12 +45,68 @@
       "currency": "USD"
     }
   },
+  "platforms": {
+    "betfair_sportsbook": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 12.0,
+      "open_stake": 12.0,
+      "settled_pl": 0.0,
+      "n_bets": 2
+    },
+    "bet365": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 7.0,
+      "open_stake": 7.0,
+      "settled_pl": 0.0,
+      "n_bets": 1
+    },
+    "polymarket": {
+      "venue": "polymarket",
+      "currency": "USD",
+      "wagered": 46.31,
+      "open_stake": 46.31,
+      "settled_pl": 0.0,
+      "n_bets": 4
+    },
+    "paddypower": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 10.0,
+      "open_stake": 10.0,
+      "settled_pl": 0.0,
+      "n_bets": 1
+    },
+    "virginbet": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 20.25,
+      "open_stake": 20.25,
+      "settled_pl": 0.0,
+      "n_bets": 3
+    }
+  },
   "clv": {
     "avg_clv": null,
     "pct_beat_close": null,
     "n_with_close": 0
   },
   "positions": [
+    {
+      "id": 11,
+      "ts_utc": "2026-06-11T15:52:42",
+      "match": "FIFA World Cup 2026 Golden Boot",
+      "market": "outright_golden_boot",
+      "selection": "Harry Kane (England)",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 7.5,
+      "stake": 10.0,
+      "model_prob": null,
+      "ev": null
+    },
     {
       "id": 10,
       "ts_utc": "2026-06-11T15:32:26",

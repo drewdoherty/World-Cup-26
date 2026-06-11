@@ -50,7 +50,9 @@ PROMPT = (
     '  "bookmaker": the sportsbook name. Infer it from any visible logo, '
     "branding, wordmark, or distinctive brand colour (e.g. green=bet365, "
     "blue=Sky Bet/William Hill, etc.). null if you truly cannot tell.\n"
-    '  "match": the event/fixture description, e.g. "England vs France". null if absent.\n'
+    '  "match": the event/fixture description, e.g. "England vs France". For '
+    "OUTRIGHT/futures bets (Golden Boot, Tournament Winner, Top Scorer) use "
+    'the competition + market, e.g. "FIFA World Cup 2026 Golden Boot". null if absent.\n'
     '  "market": the market, e.g. "Match Result", "Over/Under 2.5", "Anytime Goalscorer".\n'
     '  "selection": the picked outcome, e.g. "England", "Over 2.5", "Harry Kane".\n'
     '  "odds_decimal": the price as a DECIMAL number. Convert fractional odds '

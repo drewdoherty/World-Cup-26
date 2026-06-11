@@ -336,6 +336,26 @@ def build_site_data(
 
     positions = _positions_from_bets(stats.get("bets") or [])
 
+    # Per-bookmaker breakdown within each venue (all bets, not just open),
+    # so the site can show which books the money actually sits at.
+    platforms: Dict[str, Any] = {}
+    for b in stats.get("bets") or []:
+        plat = (b.get("platform") or "unknown").lower()
+        venue = dashboard.venue_for_platform(plat)
+        blk = platforms.setdefault(plat, {
+            "venue": venue,
+            "currency": VENUE_CURRENCY.get(venue, "GBP"),
+            "wagered": 0.0, "open_stake": 0.0, "settled_pl": 0.0, "n_bets": 0,
+        })
+        stake = float(b.get("stake") or 0.0)
+        status = (b.get("status") or "").lower()
+        blk["wagered"] += stake
+        blk["n_bets"] += 1
+        if status == "open":
+            blk["open_stake"] += stake
+        elif status in ("won", "lost"):
+            blk["settled_pl"] += float(b.get("settled_pl") or 0.0)
+
     predictions = parse_scorelines(_read_card_body(card_path))
 
     return {
@@ -343,6 +363,7 @@ def build_site_data(
         "totals": totals,
         "totals_by_currency": totals_by_currency,
         "venues": venues,
+        "platforms": platforms,
         "clv": clv,
         "positions": positions,
         "predictions": predictions,

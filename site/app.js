@@ -170,6 +170,32 @@
 
     $("venues-meta").textContent = moneyByCcy(d.totals_by_currency, "wagered");
 
+    // Per-bookmaker rows nested under each venue, coloured by book.
+    var plats = d.platforms || {};
+
+    function platformRows(venueKey, venueWagered, ccy) {
+      var rows = Object.keys(plats).filter(function (p) {
+        return (plats[p].venue || "sportsbook") === venueKey && Number(plats[p].wagered || 0) > 0;
+      }).sort(function (a, b) { return plats[b].wagered - plats[a].wagered; });
+      if (!rows.length) return "";
+      return '<div class="venue-books">' + rows.map(function (p) {
+        var blk = plats[p];
+        var frac = venueWagered > 0 ? (blk.wagered / venueWagered) : 0;
+        var pl = Number(blk.settled_pl || 0);
+        var plBit = pl !== 0
+          ? ' · <span class="' + (pl >= 0 ? "pos" : "neg") + '">' + signedMoney(pl, ccy) + '</span>'
+          : "";
+        return '<div class="venue-book-row">' +
+          '<span class="book-dot" style="background:' + bookColor(p) + '"></span>' +
+          '<span class="book-name">' + esc(p) + '</span>' +
+          '<span class="book-bar"><span style="display:block;height:100%;width:' +
+            (frac * 100).toFixed(1) + '%;background:' + bookColor(p) + ';opacity:.55"></span></span>' +
+          '<span class="book-amt num">' + money(blk.wagered, ccy) +
+            ' <span class="dim">(' + blk.n_bets + ')</span>' + plBit + '</span>' +
+        '</div>';
+      }).join("") + '</div>';
+    }
+
     var html = active.map(function (k, i) {
       var v = venues[k] || {};
       var ccy = v.currency || "GBP";
@@ -189,6 +215,7 @@
           '</div>' +
           '<div class="venue-sub num">' + nb + ' bet' + (nb === 1 ? '' : 's') +
             ' · open ' + money(v.open_stake || 0, ccy) + '</div>' +
+          platformRows(k, amt, ccy) +
         '</div>';
     }).join("");
 

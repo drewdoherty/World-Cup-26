@@ -179,7 +179,7 @@ class TestBuildSiteData:
         data = sitedata.build_site_data(db, card_path=card, now_utc="2026-06-11 15:00:00 UTC")
 
         assert set(data.keys()) == {
-            "meta", "totals", "totals_by_currency", "venues", "clv", "positions", "predictions"
+            "meta", "totals", "totals_by_currency", "venues", "platforms", "clv", "positions", "predictions"
         }
         assert data["meta"]["generated"] == "2026-06-11 15:00:00 UTC"
 

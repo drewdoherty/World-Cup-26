@@ -1010,3 +1010,11 @@ body {
 
 /* hidden attribute must win over the flex display above */
 .nodata[hidden] { display: none !important; }
+
+/* ------------------------------------------------- Venue book breakdown */
+.venue-books { margin: 6px 0 2px; display: flex; flex-direction: column; gap: 3px; }
+.venue-book-row { display: flex; align-items: center; gap: 7px; font-size: 11px; }
+.book-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
+.book-name { color: var(--text-dim, #9ca3af); min-width: 110px; }
+.book-bar { flex: 1 1 auto; height: 5px; background: rgba(255,255,255,.04); border-radius: 2px; overflow: hidden; }
+.book-amt { white-space: nowrap; }
