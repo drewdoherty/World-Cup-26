@@ -350,6 +350,12 @@ def summary(db_path: str) -> Dict[str, Any]:
     total_pl = float(settled["settled_pl"].sum()) if not settled.empty else 0.0
     roi = (total_pl / total_staked) if total_staked > 0 else float("nan")
 
+    # Money currently at risk: stakes of open (unsettled) bets. total_staked
+    # deliberately stays settled-only so ROI is realised-return over realised
+    # stakes; the bot surfaces both.
+    open_df = df[df["status"] == "open"]
+    open_staked = float(open_df["stake"].sum()) if not open_df.empty else 0.0
+
     clv_data = clv_report(db_path)
     avg_clv = clv_data["avg_clv"]
     pct_beat = clv_data["pct_beat_close"]
@@ -370,6 +376,7 @@ def summary(db_path: str) -> Dict[str, Any]:
         "lost_bets": lost_bets,
         "void_bets": void_bets,
         "total_staked": total_staked,
+        "open_staked": open_staked,
         "total_pl": total_pl,
         "roi": roi,
         "avg_clv": avg_clv,

@@ -370,3 +370,149 @@ body {
   .pos-match { max-width: 120px; }
   #app { padding: 0 8px 24px; }
 }
+
+/* ============================================================ Scores page */
+/* Appended for site/scores.html — does not alter any rule above. */
+
+/* --- top nav (back to terminal) --- */
+.scores-nav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1 1 auto;
+  padding: 9px 18px;
+  min-width: 0;
+}
+.scores-nav-link {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.scores-nav-link:hover { text-decoration: underline; }
+.scores-nav-here {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* This page links here from the terminal header. */
+.terminal-nav-link {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+  align-self: center;
+  padding: 0 18px;
+}
+.terminal-nav-link:hover { text-decoration: underline; }
+
+/* --- fixture card --- */
+.sc-card {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--panel);
+  margin-bottom: 12px;
+}
+.sc-card:last-child { margin-bottom: 0; }
+.sc-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sc-title {
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.sc-kick { font-size: 11px; color: var(--text-dim); }
+.sc-body {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.4fr);
+  padding: 12px;
+}
+.sc-ladder { min-width: 0; }
+.sc-venues { min-width: 0; }
+
+/* Scoreline ladder rows carry an extra fair-odds column on this page. */
+.sc-ladder .score-row {
+  grid-template-columns: 42px 1fr 52px 44px;
+}
+.score-fair { text-align: right; font-size: 11px; }
+
+/* --- venue comparison table --- */
+.venue-table { width: 100%; border-collapse: collapse; }
+.venue-table th, .venue-table td {
+  text-align: right;
+  padding: 5px 7px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  font-size: 11px;
+}
+.venue-table th {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+.venue-table td.vt-venue, .venue-table th.vt-venue {
+  text-align: left;
+  color: var(--text-dim);
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.venue-table tr:last-child td { border-bottom: none; }
+
+.vt-model-row td { border-bottom: 1px solid var(--border-2); }
+.vt-model-row .vt-venue { color: var(--text); text-transform: uppercase; letter-spacing: 1px; font-size: 10px; }
+.vt-fair { color: var(--text); font-weight: 600; }
+
+.vt-cell { position: relative; }
+.vt-imp, .vt-edge {
+  display: block;
+  font-size: 9px;
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* Edge tinting: green when the venue price beats the model fair value,
+   red-dim when it misses, flat otherwise. */
+.edge-up { color: var(--pos); }
+.edge-up .vt-edge { color: var(--pos); opacity: 0.85; }
+.edge-down { color: var(--neg); opacity: 0.7; }
+.edge-down .vt-edge { color: var(--neg); }
+.edge-flat { color: var(--text); }
+
+.vt-note {
+  margin-top: 7px;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  font-style: italic;
+}
+.venue-empty {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 10px 2px;
+}
+
+@media (max-width: 760px) {
+  .sc-body { grid-template-columns: 1fr; }
+  .scores-nav { width: 100%; border-top: 1px solid var(--border); }
+}

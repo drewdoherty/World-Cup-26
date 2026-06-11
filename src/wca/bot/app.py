@@ -46,9 +46,11 @@ CARD_MAX_AGE_HOURS = 6.0
 
 HELP_TEXT = (
     "*World Cup Alpha* — manager console\n\n"
-    "/summary — portfolio P&L, ROI, CLV, bankroll\n"
+    "/summary — portfolio P&L, ROI, CLV, bankroll by pool\n"
+    "/bets — open bets, stakes, max win / max loss by venue\n"
     "/clv — closing-line-value report\n"
     "/card — today's recommended bet card\n"
+    "/scores — predicted FT scorelines per fixture\n"
     "/structure — project structure metrics\n"
     "/ping — liveness check\n"
     "/help — this message\n\n"
@@ -70,25 +72,136 @@ def _authorized(chat_id: int | str, allowed: Optional[str]) -> bool:
 # ---------------------------------------------------------------------------
 
 
+def _venue_of(platform: str) -> str:
+    p = (platform or "").lower()
+    if "polymarket" in p:
+        return "polymarket"
+    if "kalshi" in p:
+        return "kalshi"
+    return "sportsbook"
+
+
+_VENUE_SYMBOL = {"sportsbook": "£", "polymarket": "$", "kalshi": "$"}
+
+
+def _pool_rows(db_path: str) -> Dict[str, Dict[str, float]]:
+    """Per-venue money picture from the ledger (deposits tagged in reason)."""
+    import sqlite3
+
+    pools: Dict[str, Dict[str, float]] = {}
+    con = sqlite3.connect(db_path)
+    con.row_factory = sqlite3.Row
+    try:
+        for r in con.execute("SELECT platform, status, stake, settled_pl, decimal_odds, notes FROM bets"):
+            v = _venue_of(r["platform"])
+            d = pools.setdefault(v, {"open": 0.0, "settled_pl": 0.0, "deposited": 0.0, "n": 0})
+            d["n"] += 1
+            if r["status"] == "open":
+                d["open"] += float(r["stake"] or 0.0)
+            elif r["status"] in ("won", "lost"):
+                d["settled_pl"] += float(r["settled_pl"] or 0.0)
+        for e in con.execute("SELECT amount, reason FROM bankroll_events"):
+            reason = (e["reason"] or "").lower()
+            for v in ("polymarket", "kalshi", "sportsbook"):
+                if "pool=" + v in reason:
+                    pools.setdefault(v, {"open": 0.0, "settled_pl": 0.0, "deposited": 0.0, "n": 0})
+                    pools[v]["deposited"] += float(e["amount"] or 0.0)
+                    break
+    except Exception:
+        pass
+    finally:
+        con.close()
+    return pools
+
+
 def handle_summary(db_path: str) -> str:
     s = reports.summary(db_path=db_path)
 
     def pct(v: float) -> str:
         return "N/A" if v != v else "%.2f%%" % (v * 100)
 
-    return (
-        "*Portfolio summary*\n"
-        "Bets: %d (open %d / won %d / lost %d / void %d)\n"
-        "Staked: %.2f   P&L: %.2f   ROI: %s\n"
-        "Avg CLV: %s   Beat close: %s\n"
-        "Bankroll: %.2f (deposited %.2f)"
-        % (
-            s["total_bets"], s["open_bets"], s["won_bets"], s["lost_bets"], s["void_bets"],
-            s["total_staked"], s["total_pl"], pct(s["roi"]),
-            pct(s["avg_clv"]), pct(s["pct_beat_close"]),
-            s["current_bankroll"], s["total_deposited"],
+    lines = [
+        "*Portfolio summary*",
+        "Bets: %d (open %d / won %d / lost %d / void %d)"
+        % (s["total_bets"], s["open_bets"], s["won_bets"], s["lost_bets"], s["void_bets"]),
+        "At risk (open): %.2f   Settled staked: %.2f   P&L: %.2f   ROI: %s"
+        % (s.get("open_staked", 0.0), s["total_staked"], s["total_pl"], pct(s["roi"])),
+        "Avg CLV: %s   Beat close: %s" % (pct(s["avg_clv"]), pct(s["pct_beat_close"])),
+        "",
+        "*Bankroll by pool*",
+    ]
+    pools = _pool_rows(db_path)
+    for v in ("sportsbook", "polymarket", "kalshi"):
+        if v not in pools:
+            continue
+        d = pools[v]
+        sym = _VENUE_SYMBOL[v]
+        bank = d["deposited"] + d["settled_pl"]
+        lines.append(
+            "%s: %s%.2f (deposited %s%.2f, P&L %s%+.2f, at risk %s%.2f)"
+            % (v, sym, bank, sym, d["deposited"], sym, d["settled_pl"], sym, d["open"])
         )
-    )
+    if not pools:
+        lines.append("(no pools yet — record deposits with `bankroll add`)")
+    return "\n".join(lines)
+
+
+def handle_bets(db_path: str) -> str:
+    """All open bets — odds, stake per bet grouped by venue, max win / max loss.
+
+    Free bets (notes containing "FREE") risk no cash: they count toward max
+    win but contribute zero to max loss.
+    """
+    import sqlite3
+
+    con = sqlite3.connect(db_path)
+    con.row_factory = sqlite3.Row
+    try:
+        rows = con.execute(
+            "SELECT id, match_desc, selection, platform, decimal_odds, stake, notes "
+            "FROM bets WHERE status = 'open' ORDER BY platform, id"
+        ).fetchall()
+    finally:
+        con.close()
+    if not rows:
+        return "*Open bets*\nNone — the book is flat."
+
+    by_venue: Dict[str, List[Any]] = {}
+    for r in rows:
+        by_venue.setdefault(_venue_of(r["platform"]), []).append(r)
+
+    lines = ["*Open bets* (%d)" % len(rows)]
+    grand_win = {}
+    grand_loss = {}
+    for venue in ("sportsbook", "polymarket", "kalshi"):
+        if venue not in by_venue:
+            continue
+        sym = _VENUE_SYMBOL[venue]
+        v_win = v_loss = 0.0
+        lines.append("")
+        lines.append("*%s*" % venue.upper())
+        for r in by_venue[venue]:
+            stake = float(r["stake"] or 0.0)
+            odds = float(r["decimal_odds"] or 0.0)
+            is_free = "free" in (r["notes"] or "").lower()
+            win = stake * (odds - 1.0)
+            loss = 0.0 if is_free else stake
+            v_win += win
+            v_loss += loss
+            lines.append(
+                "#%d %s — %s @ %.2f | %s%.2f%s → win %s%.2f"
+                % (r["id"], r["match_desc"], r["selection"], odds,
+                   sym, stake, " (free)" if is_free else "", sym, win)
+            )
+        lines.append("max win %s%.2f / max loss %s%.2f" % (sym, v_win, sym, v_loss))
+        grand_win[sym] = grand_win.get(sym, 0.0) + v_win
+        grand_loss[sym] = grand_loss.get(sym, 0.0) + v_loss
+
+    tot_win = " + ".join("%s%.2f" % (s, a) for s, a in grand_win.items())
+    tot_loss = " + ".join("%s%.2f" % (s, a) for s, a in grand_loss.items())
+    lines.append("")
+    lines.append("*TOTAL*  max win %s / max loss %s" % (tot_win, tot_loss))
+    return "\n".join(lines)
 
 
 def handle_clv(db_path: str) -> str:
@@ -153,6 +266,91 @@ def handle_card(
             header += "  ⚠️ STALE"
     body = cached.get("text") or "(empty card)"
     return header + "\n\n" + body
+
+
+def handle_scores(
+    card_path: str = CARD_PATH,
+    now_utc: Optional[str] = None,
+) -> str:
+    """Return predicted full-time scorelines per fixture from the cached card.
+
+    Reads the card written by ``scripts/wca_build_card.py``, parses the
+    scorelines section via :func:`wca.sitedata.parse_scorelines`, and formats
+    a compact Telegram message.  If no card is cached yet returns an honest
+    message telling the user the cron build has not run.
+    """
+    if now_utc is None:
+        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+
+    cached = cardcache.read_card(card_path, now_utc=now_utc, max_age_hours=CARD_MAX_AGE_HOURS)
+    if cached is None:
+        return (
+            "*Predicted scores*\n"
+            "No card cached yet. The cron build (`scripts/wca_build_card.py`) "
+            "has not run — try again after the next scheduled build."
+        )
+
+    from wca.sitedata import parse_scorelines
+
+    card_text = cached.get("text") or ""
+    generated = cached.get("generated") or ""
+    fixtures = parse_scorelines(card_text)
+
+    if not fixtures:
+        return (
+            "*Predicted scores*\n"
+            "No scorelines section found in the current card. "
+            "The build may not have included scoreline predictions."
+        )
+
+    header = "*Predicted scores*"
+    if generated:
+        header += " — %s" % generated
+
+    lines = [header, ""]
+    for fx in fixtures:
+        scores = fx.get("scores") or []
+        if not scores:
+            continue
+        # Top score (most likely).
+        top = scores[0]
+        top_str = "*%s* (%s%%)" % (top["score"], _fmt_prob(top["prob"]))
+        # Up to 4 runner-ups (indices 1-4).
+        runners = scores[1:5]
+        runner_strs = [
+            "%s %s%%" % (s["score"], _fmt_prob(s["prob"])) for s in runners
+        ]
+        fixture_line = "*%s*: %s" % (fx["fixture"], top_str)
+        if runner_strs:
+            fixture_line += "  | " + " | ".join(runner_strs)
+        lines.append(fixture_line)
+
+        # O/U + BTTS line.
+        ou = fx.get("over_under")
+        btts = fx.get("btts")
+        if ou is not None:
+            ou_str = "O/U %.1f: over %s%% / under %s%%" % (
+                ou.get("line") or 2.5,
+                _fmt_prob(ou.get("over")),
+                _fmt_prob(ou.get("under")),
+            )
+            if btts is not None:
+                ou_str += "   BTTS %s%%" % _fmt_prob(btts)
+            lines.append("    " + ou_str)
+        lines.append("")
+
+    # Remove trailing blank line if present.
+    while lines and lines[-1] == "":
+        lines.pop()
+
+    return "\n".join(lines)
+
+
+def _fmt_prob(prob: Optional[float]) -> str:
+    """Format a probability as a compact percentage string (1 d.p.)."""
+    if prob is None:
+        return "?"
+    return "%.1f" % prob
 
 
 def handle_structure(docs_dir: Optional[str] = None) -> str:
@@ -325,10 +523,14 @@ def dispatch(text: str, db_path: str) -> str:
         return HELP_TEXT
     if cmd == "/summary":
         return handle_summary(db_path)
+    if cmd == "/bets":
+        return handle_bets(db_path)
     if cmd == "/clv":
         return handle_clv(db_path)
     if cmd == "/card":
         return handle_card(db_path)
+    if cmd == "/scores":
+        return handle_scores(card_path=CARD_PATH)
     if cmd == "/structure":
         return handle_structure()
     if cmd == "/ping":

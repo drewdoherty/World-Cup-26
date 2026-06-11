@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark">
+<title>WORLD CUP ALPHA // SCORES</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div id="app">
+  <!-- Ticker bar -->
+  <header class="ticker" id="ticker">
+    <div class="brand">
+      <span class="brand-mark">WCA</span>
+      <span class="brand-sub">WORLD CUP ALPHA</span>
+    </div>
+    <nav class="scores-nav">
+      <a class="scores-nav-link" href="./index.html">&larr; Terminal</a>
+      <span class="scores-nav-here">Scores &amp; Markets</span>
+    </nav>
+  </header>
+
+  <!-- Connection / no-data banner -->
+  <div class="nodata" id="nodata" hidden>
+    <span class="nodata-dot"></span>
+    <span id="nodata-msg">NO DATA FEED</span>
+  </div>
+
+  <main>
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">Scorelines // Model vs Market</span>
+        <span class="panel-meta" id="scores-meta"></span>
+      </div>
+      <div class="panel-body" id="scores"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span class="foot-gen" id="foot-gen"></span>
+    <span class="foot-mark">WORLD CUP ALPHA</span>
+  </footer>
+</div>
+<script src="./scores.js"></script>
+</body>
+</html>
