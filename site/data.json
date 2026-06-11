@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-11 13:59:12 UTC"
+    "generated": "2026-06-11 14:12:33 UTC"
   },
   "totals": {
     "wagered": 78.56,
@@ -8,24 +8,41 @@
     "settled_pl": 0.0,
     "n_bets": 9
   },
-  "venues": {
-    "sportsbook": {
+  "totals_by_currency": {
+    "GBP": {
       "wagered": 32.25,
       "open_stake": 32.25,
       "settled_pl": 0.0,
       "n_bets": 5
     },
-    "polymarket": {
+    "USD": {
       "wagered": 46.31,
       "open_stake": 46.31,
       "settled_pl": 0.0,
       "n_bets": 4
+    }
+  },
+  "venues": {
+    "sportsbook": {
+      "wagered": 32.25,
+      "open_stake": 32.25,
+      "settled_pl": 0.0,
+      "n_bets": 5,
+      "currency": "GBP"
+    },
+    "polymarket": {
+      "wagered": 46.31,
+      "open_stake": 46.31,
+      "settled_pl": 0.0,
+      "n_bets": 4,
+      "currency": "USD"
     },
     "kalshi": {
       "wagered": 0.0,
       "open_stake": 0.0,
       "settled_pl": 0.0,
-      "n_bets": 0
+      "n_bets": 0,
+      "currency": "USD"
     }
   },
   "clv": {
@@ -42,6 +59,7 @@
       "selection": "Paraguay Yes",
       "platform": "polymarket",
       "venue": "polymarket",
+      "currency": "USD",
       "decimal_odds": 4.348,
       "stake": 2.53,
       "model_prob": 0.259,
@@ -55,6 +73,7 @@
       "selection": "Korea Republic Yes",
       "platform": "polymarket",
       "venue": "polymarket",
+      "currency": "USD",
       "decimal_odds": 2.778,
       "stake": 8.0,
       "model_prob": 0.376,
@@ -68,6 +87,7 @@
       "selection": "Canada Yes",
       "platform": "polymarket",
       "venue": "polymarket",
+      "currency": "USD",
       "decimal_odds": 1.887,
       "stake": 13.78,
       "model_prob": 0.574,
@@ -81,6 +101,7 @@
       "selection": "Mexico Yes",
       "platform": "polymarket",
       "venue": "polymarket",
+      "currency": "USD",
       "decimal_odds": 1.449,
       "stake": 22.0,
       "model_prob": 0.713,
@@ -94,6 +115,7 @@
       "selection": "Korea/Paraguay/Canada all win",
       "platform": "betfair_sportsbook",
       "venue": "sportsbook",
+      "currency": "GBP",
       "decimal_odds": 20.41,
       "stake": 2.0,
       "model_prob": null,
@@ -107,6 +129,7 @@
       "selection": "Raul Jimenez 1+ SOT Yes",
       "platform": "paddypower",
       "venue": "sportsbook",
+      "currency": "GBP",
       "decimal_odds": 2.0,
       "stake": 10.0,
       "model_prob": 0.8,
@@ -120,6 +143,7 @@
       "selection": "Raul Jimenez Yes",
       "platform": "virginbet",
       "venue": "sportsbook",
+      "currency": "GBP",
       "decimal_odds": 2.55,
       "stake": 5.0,
       "model_prob": 0.5,
@@ -133,6 +157,7 @@
       "selection": "Canada",
       "platform": "virginbet",
       "venue": "sportsbook",
+      "currency": "GBP",
       "decimal_odds": 1.8,
       "stake": 9.57,
       "model_prob": 0.573,
@@ -146,6 +171,7 @@
       "selection": "Paraguay",
       "platform": "virginbet",
       "venue": "sportsbook",
+      "currency": "GBP",
       "decimal_odds": 4.2,
       "stake": 5.68,
       "model_prob": 0.255,

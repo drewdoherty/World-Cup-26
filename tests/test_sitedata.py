@@ -179,7 +179,7 @@ class TestBuildSiteData:
         data = sitedata.build_site_data(db, card_path=card, now_utc="2026-06-11 15:00:00 UTC")
 
         assert set(data.keys()) == {
-            "meta", "totals", "venues", "clv", "positions", "predictions"
+            "meta", "totals", "totals_by_currency", "venues", "clv", "positions", "predictions"
         }
         assert data["meta"]["generated"] == "2026-06-11 15:00:00 UTC"
 
@@ -211,7 +211,7 @@ class TestBuildSiteData:
         for p in positions:
             assert set(p.keys()) == {
                 "id", "ts_utc", "match", "market", "selection", "platform",
-                "venue", "decimal_odds", "stake", "model_prob", "ev",
+                "venue", "currency", "decimal_odds", "stake", "model_prob", "ev",
             }
         # Every position has a known venue.
         venues = {p["venue"] for p in positions}

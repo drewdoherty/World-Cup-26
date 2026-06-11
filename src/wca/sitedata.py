@@ -203,6 +203,12 @@ def _read_card_body(card_path: str) -> str:
 # ---------------------------------------------------------------------------
 
 
+# Venue -> currency of money actually held there. Pools are PER-CURRENCY and
+# must never be summed across currencies (GBP + USD is not a number).
+VENUE_CURRENCY = {"sportsbook": "GBP", "polymarket": "USD", "kalshi": "USD"}
+CURRENCY_SYMBOL = {"GBP": "£", "USD": "$", "EUR": "€"}
+
+
 def _positions_from_bets(bets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Project the open bets into the compact terminal "positions" shape.
 
@@ -213,6 +219,7 @@ def _positions_from_bets(bets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         status = (b.get("status") or "").strip().lower()
         if status != "open":
             continue
+        venue = dashboard.venue_for_platform(b.get("platform"))
         positions.append({
             "id": b.get("id"),
             "ts_utc": b.get("ts_utc"),
@@ -220,7 +227,8 @@ def _positions_from_bets(bets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             "market": b.get("market"),
             "selection": b.get("selection"),
             "platform": b.get("platform"),
-            "venue": dashboard.venue_for_platform(b.get("platform")),
+            "venue": venue,
+            "currency": VENUE_CURRENCY.get(venue, "GBP"),
             "decimal_odds": _opt_num(b.get("decimal_odds")),
             "stake": _opt_num(b.get("stake")),
             "model_prob": _opt_num(b.get("model_prob")),
@@ -294,7 +302,22 @@ def build_site_data(
             "open_stake": float(block.get("open_stake", 0.0)),
             "settled_pl": float(block.get("settled_pl", 0.0)),
             "n_bets": int(block.get("n_bets", 0)),
+            "currency": VENUE_CURRENCY.get(v, "GBP"),
         }
+
+    # Totals PER CURRENCY — £ and $ are never added together. The legacy
+    # single-number "totals" block is kept for backward compatibility but the
+    # front-end should prefer totals_by_currency.
+    totals_by_currency: Dict[str, Any] = {}
+    for v, block in venues.items():
+        ccy = block["currency"]
+        agg = totals_by_currency.setdefault(
+            ccy, {"wagered": 0.0, "open_stake": 0.0, "settled_pl": 0.0, "n_bets": 0}
+        )
+        agg["wagered"] += block["wagered"]
+        agg["open_stake"] += block["open_stake"]
+        agg["settled_pl"] += block["settled_pl"]
+        agg["n_bets"] += block["n_bets"]
 
     totals_in = stats.get("totals") or {}
     totals = {
@@ -318,6 +341,7 @@ def build_site_data(
     return {
         "meta": {"generated": now_utc},
         "totals": totals,
+        "totals_by_currency": totals_by_currency,
         "venues": venues,
         "clv": clv,
         "positions": positions,

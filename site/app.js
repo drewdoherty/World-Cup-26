@@ -15,19 +15,35 @@
 
   // ---- formatting helpers -------------------------------------------------
 
-  function money(n) {
-    if (n === null || n === undefined || isNaN(n)) return "£0.00";
+  var SYM = { GBP: "£", USD: "$", EUR: "€" };
+  function sym(ccy) { return SYM[ccy] || "£"; }
+
+  function money(n, ccy) {
+    if (n === null || n === undefined || isNaN(n)) return sym(ccy) + "0.00";
     var sign = n < 0 ? "-" : "";
-    return sign + "£" + Math.abs(n).toLocaleString("en-GB", {
+    return sign + sym(ccy) + Math.abs(n).toLocaleString("en-GB", {
       minimumFractionDigits: 2, maximumFractionDigits: 2
     });
   }
-  function signedMoney(n) {
+  function signedMoney(n, ccy) {
     if (n === null || n === undefined || isNaN(n)) n = 0;
     var sign = n < 0 ? "-" : "+";
-    return sign + "£" + Math.abs(n).toLocaleString("en-GB", {
+    return sign + sym(ccy) + Math.abs(n).toLocaleString("en-GB", {
       minimumFractionDigits: 2, maximumFractionDigits: 2
     });
+  }
+  // Render a per-currency map {GBP: {...}, USD: {...}} field as "£a + $b".
+  // Currencies are NEVER summed — £ and $ are different units.
+  function moneyByCcy(byCcy, field, signed) {
+    var parts = [];
+    ["GBP", "USD", "EUR"].forEach(function (ccy) {
+      var blk = (byCcy || {})[ccy];
+      if (!blk) return;
+      var v = Number(blk[field] || 0);
+      if (v === 0 && field !== "settled_pl") return;
+      parts.push(signed ? signedMoney(v, ccy) : money(v, ccy));
+    });
+    return parts.length ? parts.join(" + ") : money(0);
   }
   function pct(n, dp) {
     if (n === null || n === undefined || isNaN(n)) return "—";
@@ -74,6 +90,7 @@
 
   function renderTicker(d) {
     var t = d.totals || {};
+    var byCcy = d.totals_by_currency || null;
     var clv = d.clv || {};
     var pl = Number(t.settled_pl || 0);
     var plCls = pl >= 0 ? "pos" : "neg";
@@ -86,10 +103,16 @@
       clvVal = (a >= 0 ? "+" : "") + (a * 100).toFixed(2) + "%";
     }
 
+    // Per-currency display when available (never sums £ with $); falls back
+    // to the legacy single-currency totals for old data files.
+    var wagered = byCcy ? moneyByCcy(byCcy, "wagered") : money(t.wagered || 0);
+    var openExp = byCcy ? moneyByCcy(byCcy, "open_stake") : money(t.open_stake || 0);
+    var plStr = byCcy ? moneyByCcy(byCcy, "settled_pl", true) : signedMoney(pl);
+
     var ticks = [
-      ["Total Wagered", money(t.wagered || 0), ""],
-      ["Open Exposure", money(t.open_stake || 0), ""],
-      ["Settled P&L", signedMoney(pl), plCls],
+      ["Total Wagered", wagered, ""],
+      ["Open Exposure", openExp, ""],
+      ["Settled P&L", plStr, plCls],
       ["Avg CLV", clvVal, hasClv ? (Number(clv.avg_clv) >= 0 ? "pos" : "neg") : "dim"],
       ["Bet Count", String(t.n_bets || 0), ""]
     ];
@@ -102,34 +125,44 @@
     }).join("");
   }
 
+  var VENUE_COLOR = { sportsbook: "#4ade80", polymarket: "#60a5fa", kalshi: "#2dd4bf" };
+
   function renderVenues(d) {
     var venues = d.venues || {};
     var order = ["sportsbook", "polymarket", "kalshi"];
-    var amounts = order.map(function (k) {
+    // Hide venues with no bets yet (e.g. kalshi pre-launch); bars are scaled
+    // within-currency only, so a £ bar and a $ bar are not length-comparable —
+    // the per-row amount label carries the truth.
+    var active = order.filter(function (k) {
+      return Number((venues[k] || {}).n_bets || 0) > 0;
+    });
+    if (!active.length) active = ["sportsbook"];
+    var amounts = active.map(function (k) {
       return Number((venues[k] || {}).wagered || 0);
     });
     var max = Math.max.apply(null, amounts.concat([0]));
-    var total = amounts.reduce(function (a, b) { return a + b; }, 0);
 
-    $("venues-meta").textContent = money(total);
+    $("venues-meta").textContent = moneyByCcy(d.totals_by_currency, "wagered");
 
-    var html = order.map(function (k, i) {
+    var html = active.map(function (k, i) {
       var v = venues[k] || {};
+      var ccy = v.currency || "GBP";
       var amt = amounts[i];
       var frac = max > 0 ? (amt / max) : 0;
       var nb = Number(v.n_bets || 0);
+      var color = VENUE_COLOR[k] || "#9ca3af";
       return '' +
         '<div class="venue-row">' +
           '<div class="venue-top">' +
             '<span class="venue-name">' + esc(k) + '</span>' +
-            '<span class="venue-amt num">' + money(amt) + '</span>' +
+            '<span class="venue-amt num">' + money(amt, ccy) + '</span>' +
           '</div>' +
           '<div class="venue-track">' +
             '<div class="venue-fill ' + k + '" style="width:' +
-              (frac * 100).toFixed(1) + '%"></div>' +
+              (frac * 100).toFixed(1) + '%;background:' + color + ';opacity:.75"></div>' +
           '</div>' +
           '<div class="venue-sub num">' + nb + ' bet' + (nb === 1 ? '' : 's') +
-            ' · open ' + money(v.open_stake || 0) + '</div>' +
+            ' · open ' + money(v.open_stake || 0, ccy) + '</div>' +
         '</div>';
     }).join("");
 
@@ -152,7 +185,7 @@
         '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
         '<td class="pos-sel" title="' + esc(p.selection) + '">' + esc(dash(p.selection)) + '</td>' +
         '<td class="r num">' + esc(num(p.decimal_odds)) + '</td>' +
-        '<td class="r num">' + esc(money(p.stake)) + '</td>' +
+        '<td class="r num">' + esc(money(p.stake, p.currency)) + '</td>' +
         '<td class="r num">' + esc(pct(p.model_prob, 0)) + '</td>' +
         '<td class="r num ' + evClass(p.ev) + '">' +
           esc(p.ev === null || p.ev === undefined ? '—' : pct(p.ev, 1)) + '</td>' +
@@ -190,10 +223,12 @@
       var scoreHtml = scores.map(function (s) {
         var p = Number(s.prob || 0);
         var frac = maxProb > 0 ? (p / maxProb) : 0;
+        // Inline background: the stylesheet fill colour is too close to the
+        // track on dark displays, which made every bar look identical.
         return '<div class="score-row">' +
           '<span class="score-label">' + esc(s.score) + '</span>' +
           '<span class="score-bar"><span class="score-fill" style="width:' +
-            (frac * 100).toFixed(1) + '%"></span></span>' +
+            (frac * 100).toFixed(1) + '%;background:#4ade80;opacity:.85"></span></span>' +
           '<span class="score-prob">' + p.toFixed(1) + '%</span>' +
         '</div>';
       }).join("");
