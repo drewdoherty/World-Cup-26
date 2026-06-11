@@ -1,40 +1,40 @@
 {
   "meta": {
-    "generated": "2026-06-11T17:17:04"
+    "generated": "2026-06-11 17:19:13 UTC"
   },
   "totals": {
-    "wagered": 4.0,
-    "open_stake": 4.0,
+    "wagered": 103.56,
+    "open_stake": 103.56,
     "settled_pl": 0.0,
-    "n_bets": 1
+    "n_bets": 12
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 0.0,
-      "open_stake": 0.0,
+      "wagered": 57.25,
+      "open_stake": 57.25,
       "settled_pl": 0.0,
-      "n_bets": 0
+      "n_bets": 8
     },
     "USD": {
-      "wagered": 4.0,
-      "open_stake": 4.0,
+      "wagered": 46.31,
+      "open_stake": 46.31,
       "settled_pl": 0.0,
-      "n_bets": 1
+      "n_bets": 4
     }
   },
   "venues": {
     "sportsbook": {
-      "wagered": 0.0,
-      "open_stake": 0.0,
+      "wagered": 57.25,
+      "open_stake": 57.25,
       "settled_pl": 0.0,
-      "n_bets": 0,
+      "n_bets": 8,
       "currency": "GBP"
     },
     "polymarket": {
-      "wagered": 4.0,
-      "open_stake": 4.0,
+      "wagered": 46.31,
+      "open_stake": 46.31,
       "settled_pl": 0.0,
-      "n_bets": 1,
+      "n_bets": 4,
       "currency": "USD"
     },
     "kalshi": {
@@ -46,11 +46,43 @@
     }
   },
   "platforms": {
+    "virginbet": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 28.25,
+      "open_stake": 28.25,
+      "settled_pl": 0.0,
+      "n_bets": 4
+    },
+    "betfair_sportsbook": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 12.0,
+      "open_stake": 12.0,
+      "settled_pl": 0.0,
+      "n_bets": 2
+    },
+    "bet365": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 7.0,
+      "open_stake": 7.0,
+      "settled_pl": 0.0,
+      "n_bets": 1
+    },
     "polymarket": {
       "venue": "polymarket",
       "currency": "USD",
-      "wagered": 4.0,
-      "open_stake": 4.0,
+      "wagered": 46.31,
+      "open_stake": 46.31,
+      "settled_pl": 0.0,
+      "n_bets": 4
+    },
+    "paddypower": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 10.0,
+      "open_stake": 10.0,
       "settled_pl": 0.0,
       "n_bets": 1
     }
@@ -62,18 +94,172 @@
   },
   "positions": [
     {
-      "id": 1,
-      "ts_utc": "2026-06-11T17:17:04",
-      "match": "Mexico vs Canada",
-      "market": "polymarket",
-      "selection": "Yes",
+      "id": 12,
+      "ts_utc": "2026-06-11T16:47:02",
+      "match": "South Korea vs Czech Republic",
+      "market": "Both Teams To Score",
+      "selection": "BTTS - No",
+      "platform": "virginbet",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 1.95,
+      "stake": 8.0,
+      "model_prob": 0.549,
+      "ev": 0.07055000000000011
+    },
+    {
+      "id": 11,
+      "ts_utc": "2026-06-11T15:52:42",
+      "match": "FIFA World Cup 2026 Golden Boot",
+      "market": "outright_golden_boot",
+      "selection": "Harry Kane (England)",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 7.5,
+      "stake": 10.0,
+      "model_prob": null,
+      "ev": null
+    },
+    {
+      "id": 10,
+      "ts_utc": "2026-06-11T15:32:26",
+      "match": "South Korea v Czechia",
+      "market": "Full Time Result",
+      "selection": "South Korea",
+      "platform": "bet365",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 2.71,
+      "stake": 7.0,
+      "model_prob": 0.376,
+      "ev": 0.018960000000000088
+    },
+    {
+      "id": 9,
+      "ts_utc": "2026-06-11T12:58:42",
+      "match": "USA vs Paraguay",
+      "market": "pm_moneyline",
+      "selection": "Paraguay Yes",
       "platform": "polymarket",
       "venue": "polymarket",
       "currency": "USD",
-      "decimal_odds": 2.5,
-      "stake": 4.0,
+      "decimal_odds": 4.348,
+      "stake": 2.53,
+      "model_prob": 0.259,
+      "ev": 0.1261319999999999
+    },
+    {
+      "id": 8,
+      "ts_utc": "2026-06-11T12:58:42",
+      "match": "South Korea vs Czech Republic",
+      "market": "pm_moneyline",
+      "selection": "Korea Republic Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "currency": "USD",
+      "decimal_odds": 2.778,
+      "stake": 8.0,
+      "model_prob": 0.376,
+      "ev": 0.0445279999999999
+    },
+    {
+      "id": 7,
+      "ts_utc": "2026-06-11T12:58:42",
+      "match": "Canada vs Bosnia and Herzegovina",
+      "market": "pm_moneyline",
+      "selection": "Canada Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "currency": "USD",
+      "decimal_odds": 1.887,
+      "stake": 13.78,
+      "model_prob": 0.574,
+      "ev": 0.08313799999999993
+    },
+    {
+      "id": 6,
+      "ts_utc": "2026-06-11T12:58:42",
+      "match": "Mexico vs South Africa",
+      "market": "pm_moneyline",
+      "selection": "Mexico Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "currency": "USD",
+      "decimal_odds": 1.449,
+      "stake": 22.0,
+      "model_prob": 0.713,
+      "ev": 0.03313699999999997
+    },
+    {
+      "id": 5,
+      "ts_utc": "2026-06-11T11:16:29",
+      "match": "Treble: S.Korea + Paraguay + Canada",
+      "market": "acca_treble",
+      "selection": "Korea/Paraguay/Canada all win",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 20.41,
+      "stake": 2.0,
       "model_prob": null,
       "ev": null
+    },
+    {
+      "id": 4,
+      "ts_utc": "2026-06-11T10:28:09",
+      "match": "Mexico vs South Africa",
+      "market": "player_shots_on_target",
+      "selection": "Raul Jimenez 1+ SOT Yes",
+      "platform": "paddypower",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 2.0,
+      "stake": 10.0,
+      "model_prob": 0.8,
+      "ev": 0.6000000000000001
+    },
+    {
+      "id": 3,
+      "ts_utc": "2026-06-11T10:12:38",
+      "match": "Mexico vs South Africa",
+      "market": "player_score_or_assist",
+      "selection": "Raul Jimenez Yes",
+      "platform": "virginbet",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 2.55,
+      "stake": 5.0,
+      "model_prob": 0.5,
+      "ev": 0.2749999999999999
+    },
+    {
+      "id": 2,
+      "ts_utc": "2026-06-11T10:12:38",
+      "match": "Canada vs Bosnia and Herzegovina",
+      "market": "h2h",
+      "selection": "Canada",
+      "platform": "virginbet",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 1.8,
+      "stake": 9.57,
+      "model_prob": 0.573,
+      "ev": 0.03139999999999987
+    },
+    {
+      "id": 1,
+      "ts_utc": "2026-06-11T10:12:38",
+      "match": "USA vs Paraguay",
+      "market": "h2h",
+      "selection": "Paraguay",
+      "platform": "virginbet",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 4.2,
+      "stake": 5.68,
+      "model_prob": 0.255,
+      "ev": 0.07100000000000017
     }
   ],
   "predictions": [
