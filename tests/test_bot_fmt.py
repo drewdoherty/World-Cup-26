@@ -176,10 +176,8 @@ class TestBetsFormat:
         assert "\u2192" in out      # stake->win arrow rows
         # match names render on the id line (no fixed header row anymore)
         assert "USA v Paraguay" in out
-        assert "Sel" in out
-        assert "Odds" in out
-        assert "Stake" in out
-        assert "To-win" in out
+        # selection + odds + stake all live on the indented second line
+        assert "Paraguay      4.20" in out
 
     # Legacy substrings from test_bot_bets.py must still hold verbatim.
 
