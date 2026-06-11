@@ -1,12 +1,12 @@
 {
   "meta": {
-    "generated": "2026-06-11T20:59:22"
+    "generated": "2026-06-11T21:00:40"
   },
   "totals": {
-    "wagered": 108.56,
-    "open_stake": 88.56,
+    "wagered": 168.56,
+    "open_stake": 148.56,
     "settled_pl": 42.75,
-    "n_bets": 13
+    "n_bets": 14
   },
   "totals_by_currency": {
     "GBP": {
@@ -16,10 +16,10 @@
       "n_bets": 9
     },
     "USD": {
-      "wagered": 46.31,
-      "open_stake": 46.31,
+      "wagered": 106.31,
+      "open_stake": 106.31,
       "settled_pl": 0.0,
-      "n_bets": 4
+      "n_bets": 5
     }
   },
   "venues": {
@@ -31,10 +31,10 @@
       "currency": "GBP"
     },
     "polymarket": {
-      "wagered": 46.31,
-      "open_stake": 46.31,
+      "wagered": 106.31,
+      "open_stake": 106.31,
       "settled_pl": 0.0,
-      "n_bets": 4,
+      "n_bets": 5,
       "currency": "USD"
     },
     "kalshi": {
@@ -46,6 +46,14 @@
     }
   },
   "platforms": {
+    "polymarket": {
+      "venue": "polymarket",
+      "currency": "USD",
+      "wagered": 106.31,
+      "open_stake": 106.31,
+      "settled_pl": 0.0,
+      "n_bets": 5
+    },
     "paddypower": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -77,14 +85,6 @@
       "open_stake": 7.0,
       "settled_pl": 0.0,
       "n_bets": 1
-    },
-    "polymarket": {
-      "venue": "polymarket",
-      "currency": "USD",
-      "wagered": 46.31,
-      "open_stake": 46.31,
-      "settled_pl": 0.0,
-      "n_bets": 4
     }
   },
   "closed_positions": [
@@ -166,6 +166,20 @@
     "n_with_close": 0
   },
   "positions": [
+    {
+      "id": 14,
+      "ts_utc": "2026-06-11T21:00:40",
+      "match": "2026 FIFA World Cup - Japan Round of 16",
+      "market": "Will Japan reach the Round of 16 at the 2026 FIFA World Cup?",
+      "selection": "No",
+      "platform": "Polymarket",
+      "venue": "polymarket",
+      "currency": "USD",
+      "decimal_odds": 1.6667,
+      "stake": 60.0,
+      "model_prob": null,
+      "ev": null
+    },
     {
       "id": 12,
       "ts_utc": "2026-06-11T16:47:02",
