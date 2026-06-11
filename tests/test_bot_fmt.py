@@ -172,8 +172,10 @@ class TestBetsFormat:
         _seed(db)
         out = app.handle_bets(db)
         # Table header columns.
-        assert "ID" in out
-        assert "Match" in out
+        assert "#" in out          # per-bet id prefix
+        assert "\u2192" in out      # stake->win arrow rows
+        # match names render on the id line (no fixed header row anymore)
+        assert "USA v Paraguay" in out
         assert "Sel" in out
         assert "Odds" in out
         assert "Stake" in out

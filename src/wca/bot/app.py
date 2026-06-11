@@ -239,25 +239,37 @@ def handle_bets(db_path: str) -> str:
         v_win = v_loss = 0.0
         lines.append("")
         lines.append("*%s*" % venue.upper())
-        # Code-block table header: ID | match (20ch) | sel (12ch) | odds | stake | to-win
+        # Two lines per bet, max ~34 chars wide, so the code block survives a
+        # phone screen without wrapping into soup:
+        #   #12 S Korea v Czech Republic
+        #       BTTS - No    1.95 £8→£7.60
         lines.append("```")
-        lines.append("%-4s %-20s %-12s %6s %8s %8s" % ("ID", "Match", "Sel", "Odds", "Stake", "To-win"))
+        first = True
         for r in by_venue[venue]:
             stake = float(r["stake"] or 0.0)
             odds = float(r["decimal_odds"] or 0.0)
-            is_free = "free" in (r["notes"] or "").lower()
+            # Free-stake convention: notes BEGIN with "FREE" or contain "SNR"
+            # (stake-not-returned). A loose substring match falsely flagged
+            # real-money bets whose notes merely mention a free-bet promo.
+            note_l = (r["notes"] or "").lower()
+            is_free = note_l.startswith("free") or "snr" in note_l
             win = stake * (odds - 1.0)
             loss = 0.0 if is_free else stake
             v_win += win
             v_loss += loss
-            match_trunc = (r["match_desc"] or "")[:20]
-            sel_trunc = (r["selection"] or "")[:12]
-            free_marker = "(free)" if is_free else ""
-            stake_str = "%s%.2f%s" % (sym, stake, " " + free_marker if free_marker else "")
-            lines.append(
-                "%-4s %-20s %-12s %6.2f %-14s %s%.2f"
-                % ("#%d" % r["id"], match_trunc, sel_trunc, odds, stake_str, sym, win)
-            )
+            match = (r["match_desc"] or "").replace(" vs ", " v ")
+            if len(match) > 28:
+                match = match[:27] + "…"
+            sel = (r["selection"] or "")
+            if len(sel) > 12:
+                sel = sel[:11] + "…"
+            if not first:
+                lines.append("")
+            first = False
+            lines.append("#%-3d %s" % (r["id"], match))
+            lines.append("     %-12s %5.2f %s%g%s→%s%.2f" % (
+                sel, odds, sym, round(stake, 2),
+                "(free)" if is_free else "", sym, win))
         lines.append("```")
         lines.append("max win %s%.2f / max loss %s%.2f" % (sym, v_win, sym, v_loss))
         grand_win[sym] = grand_win.get(sym, 0.0) + v_win
