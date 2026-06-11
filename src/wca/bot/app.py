@@ -206,10 +206,13 @@ def _slug(text: str) -> str:
 
 def _format_extracted(bets: List[Any]) -> str:
     """Human-readable confirmation prompt for parsed selections."""
+    from wca.bot.vision import currency_symbol
+
     lines = ["*Parsed %d selection(s) from your slip:*" % len(bets)]
     for i, b in enumerate(bets, 1):
+        sym = currency_symbol(getattr(b, "currency", None))
         odds = ("%.2f" % b.decimal_odds) if b.decimal_odds else "?"
-        stake = ("£%.2f" % b.stake) if b.stake is not None else "£?"
+        stake = ("%s%.2f" % (sym, b.stake)) if b.stake is not None else sym + "?"
         book = b.bookmaker or "?"
         flag = "  ⚡boost" if getattr(b, "is_boost", False) else ""
         warn = "" if getattr(b, "confidence", 1.0) >= 0.6 else "  ⚠️low-conf"
@@ -271,7 +274,8 @@ def handle_photo_confirmation(
     logged: List[str] = []
     for b in bets:
         match_id = "MANUAL_" + _slug(b.match_desc)
-        note = "screenshot ingest; conf %.2f%s" % (
+        note = "screenshot ingest; currency=%s; conf %.2f%s" % (
+            getattr(b, "currency", None) or "GBP",
             getattr(b, "confidence", 0.0),
             "; boost" if getattr(b, "is_boost", False) else "",
         )

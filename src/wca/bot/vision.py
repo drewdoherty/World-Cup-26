@@ -54,8 +54,15 @@ PROMPT = (
     '  "market": the market, e.g. "Match Result", "Over/Under 2.5", "Anytime Goalscorer".\n'
     '  "selection": the picked outcome, e.g. "England", "Over 2.5", "Harry Kane".\n'
     '  "odds_decimal": the price as a DECIMAL number. Convert fractional odds '
-    '(e.g. "31/20" -> 2.55, "2/9" -> 1.2222) and "EVS"/"Evens" -> 2.0. null if not visible.\n'
-    '  "stake": the amount staked as a number (no currency symbol). null if not visible.\n'
+    '(e.g. "31/20" -> 2.55, "2/9" -> 1.2222) and "EVS"/"Evens" -> 2.0. On '
+    "prediction-market screenshots (Polymarket/Kalshi) prices are cents per "
+    'share (e.g. "69c", "$0.69", "avg 69c"): convert to decimal odds as '
+    "1/price, so 69c -> 1.449. null if not visible.\n"
+    '  "stake": the amount staked/traded as a number (no currency symbol). '
+    "null if not visible.\n"
+    '  "currency": ISO code of the money on the slip, inferred from symbols '
+    'and platform: "£" -> "GBP", "$" -> "USD", "€" -> "EUR". '
+    'Polymarket and Kalshi are ALWAYS "USD". null if unclear.\n'
     '  "returns": the potential/total returns as a number. null if not visible.\n'
     '  "status": one of "open", "won", "lost", "void" based on any settlement '
     'marker on the slip; default "open" if unsettled.\n'
@@ -89,6 +96,7 @@ class ExtractedBet:
     is_boost: bool = False
     confidence: float = 0.0
     raw_text: str = ""
+    currency: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -282,7 +290,35 @@ def _bet_from_obj(obj: Dict[str, Any], raw_text: str) -> ExtractedBet:
         is_boost=_coerce_bool(obj.get("is_boost")),
         confidence=_coerce_confidence(obj.get("confidence")),
         raw_text=raw_text,
+        currency=_coerce_currency(obj.get("currency"), obj.get("bookmaker")),
     )
+
+
+_CURRENCY_SYMBOLS = {"GBP": "£", "USD": "$", "EUR": "€"}
+
+
+def currency_symbol(code: Optional[str]) -> str:
+    """Display symbol for an ISO currency code; falls back to the code or £."""
+    if not code:
+        return "£"
+    return _CURRENCY_SYMBOLS.get(code.upper(), code.upper() + " ")
+
+
+def _coerce_currency(value: Any, bookmaker: Any) -> Optional[str]:
+    """Normalize a currency hint; prediction-market platforms are always USD."""
+    book = str(bookmaker or "").lower()
+    if "polymarket" in book or "kalshi" in book:
+        return "USD"
+    if value is None:
+        return None
+    s = str(value).strip().upper()
+    if s in {"£", "GBP"}:
+        return "GBP"
+    if s in {"$", "USD", "USDC"}:
+        return "USD"
+    if s in {"€", "EUR"}:
+        return "EUR"
+    return s[:3] if s else None
 
 
 def _parse_message_body(body: Dict[str, Any]) -> List[ExtractedBet]:
