@@ -907,3 +907,6 @@ body {
   .money-flow { flex-direction: column; }
   .money-arrow { align-self: flex-start; transform: rotate(90deg); }
 }
+
+/* hidden attribute must win over the flex display above */
+.nodata[hidden] { display: none !important; }
