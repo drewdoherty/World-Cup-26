@@ -513,11 +513,33 @@
     var t0 = pts[0].t, t1 = pts[pts.length - 1].t;
     var span = t1 - t0 || 1;
     function scaleX(t) { return CHART_M.left + ((t - t0) / span) * PLOT_W; }
-    function scaleY(v) { return CHART_M.top + (1 - (v / 100)) * PLOT_H; }
 
-    var yLabels = [0, 25, 50, 75, 100].map(function (p) {
-      return { y: scaleY(p), text: p + "%" };
+    // Auto-fit the y-axis to THIS fixture's actual prob range so small but real
+    // moves (pre-match shifts are often <1pp) are visible instead of a flat
+    // line pinned to a 0-100% axis. Enforce a minimum window so a near-static
+    // fixture isn't absurdly magnified, and pad the extremes.
+    var vals = [];
+    pts.forEach(function (pt) {
+      ["home", "draw", "away"].forEach(function (k) {
+        var v = toPct(pt[k]);
+        if (v !== null && !isNaN(v)) vals.push(v);
+      });
     });
+    var lo = vals.length ? Math.min.apply(null, vals) : 0;
+    var hi = vals.length ? Math.max.apply(null, vals) : 100;
+    var pad = Math.max((hi - lo) * 0.15, 1);   // 15% padding, >=1pp
+    lo = Math.max(0, lo - pad);
+    hi = Math.min(100, hi + pad);
+    if (hi - lo < 6) {                          // minimum 6pp window
+      var mid = (hi + lo) / 2;
+      lo = Math.max(0, mid - 3);
+      hi = Math.min(100, mid + 3);
+    }
+    var yrange = hi - lo || 1;
+    function scaleY(v) { return CHART_M.top + (1 - ((v - lo) / yrange)) * PLOT_H; }
+
+    var yLabels = [lo, lo + yrange * 0.25, lo + yrange * 0.5, lo + yrange * 0.75, hi]
+      .map(function (p) { return { y: scaleY(p), text: p.toFixed(1) + "%" }; });
     var svg = chartFrame(yLabels, timeTicks(t0, t1, scaleX));
 
     var SERIES = [
