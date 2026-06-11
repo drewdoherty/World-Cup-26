@@ -41,20 +41,20 @@ flowchart TD
 
 | Metric | Value |
 | --- | --- |
-| Modules (src + scripts, excl. __init__) | 18 |
-| Code lines (LOC, total) | 7347 |
-| LOC: wca (top-level) | 322 |
-| LOC: wca.data | 625 |
-| LOC: wca.models | 1058 |
-| LOC: wca.markets | 433 |
-| LOC: wca.ledger | 634 |
-| LOC: wca.bot | 277 |
+| Modules (src + scripts, excl. __init__) | 42 |
+| Code lines (LOC, total) | 19569 |
+| LOC: wca (top-level) | 3268 |
+| LOC: wca.data | 1405 |
+| LOC: wca.models | 1404 |
+| LOC: wca.markets | 518 |
+| LOC: wca.ledger | 677 |
+| LOC: wca.bot | 1302 |
 | LOC: wca.sim | 1253 |
-| LOC: scripts | 567 |
-| LOC: tests | 2178 |
-| Tests (def test_) | 166 |
+| LOC: scripts | 2213 |
+| LOC: tests | 6882 |
+| Tests (def test_) | 540 |
 | Data sources | 3 |
-| Model classes | 4 |
-| Bot commands | 6 |
+| Model classes | 5 |
+| Bot commands | 9 |
 
-**Complexity index: 40.6** (modules + tests/10 + data sources × 2)
+**Complexity index: 102.0** (modules + tests/10 + data sources × 2)

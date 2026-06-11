@@ -1,6 +1,10 @@
 # World Cup Alpha
 
-A $??,000-bankroll quantitative betting research platform for the 2026 FIFA World Cup. This project tests whether systematic +EV betting on international football is achievable through disciplined modelling, market analysis, and staking discipline. Can we beat the bookies and prediction markets with <24h before the tournament starts?
+A quantitative betting **research platform and live operation** for the 2026 FIFA World Cup. Built from zero in the ~25 hours before the opening match; now running through the tournament. It tests one question with real money and pre-registered metrics: **can systematic +EV betting on international football be demonstrated — and measured honestly — across bookmakers and prediction markets?**
+
+**Live dashboard:** https://fifa-world-cup-2026-betting-gamblin.vercel.app ([scores & markets](https://fifa-world-cup-2026-betting-gamblin.vercel.app/scores) · [under the hood](https://fifa-world-cup-2026-betting-gamblin.vercel.app/architecture))
+
+Three bankroll pools: UK sportsbooks (£1,000 notional, CLV-gated ladder to £5,000), Polymarket ($1,310 USDC), Kalshi (planned). Recommendations-only at the sportsbooks; semi-automated with a human confirm gate on prediction markets.
 
 <!-- WCA:STRUCTURE:START -->
 ## Project Structure Analytics
@@ -42,164 +46,127 @@ flowchart TD
 
 | Metric | Value |
 | --- | --- |
-| Modules (src + scripts, excl. __init__) | 18 |
-| Code lines (LOC, total) | 7347 |
-| LOC: wca (top-level) | 322 |
-| LOC: wca.data | 625 |
-| LOC: wca.models | 1058 |
-| LOC: wca.markets | 433 |
-| LOC: wca.ledger | 634 |
-| LOC: wca.bot | 277 |
+| Modules (src + scripts, excl. __init__) | 42 |
+| Code lines (LOC, total) | 19569 |
+| LOC: wca (top-level) | 3268 |
+| LOC: wca.data | 1405 |
+| LOC: wca.models | 1404 |
+| LOC: wca.markets | 518 |
+| LOC: wca.ledger | 677 |
+| LOC: wca.bot | 1302 |
 | LOC: wca.sim | 1253 |
-| LOC: scripts | 567 |
-| LOC: tests | 2178 |
-| Tests (def test_) | 166 |
+| LOC: scripts | 2213 |
+| LOC: tests | 6882 |
+| Tests (def test_) | 540 |
 | Data sources | 3 |
-| Model classes | 4 |
-| Bot commands | 6 |
+| Model classes | 5 |
+| Bot commands | 9 |
 
-**Complexity index: 40.6** (modules + tests/10 + data sources × 2)
+**Complexity index: 102.0** (modules + tests/10 + data sources × 2)
 <!-- WCA:STRUCTURE:END -->
 
-## Mission
+## Mission & KPIs (pre-registered)
 
-- **Primary goal**: Demonstrate that closing-line value (CLV) can be generated through a combination of international Elo ratings, time-decayed Dixon-Coles modelling, market de-vigging, and data-driven blending.
-- **Secondary goal**: Measure calibration (Brier score, log-loss) against a de-vigged market baseline.
-- **Bankroll outcome**: Track P&L only as a lagging, noisy confirmation signal (100–300 bets at these stakes cannot statistically resolve an ROI edge).
+1. **Closing-Line Value** — the primary KPI. Beating the close over a meaningful sample is the fastest honest evidence of edge; ROI at this stake count is noise.
+2. **Calibration** — Brier / log-loss of the blend vs. the Shin-de-vigged market baseline. A model that can't beat the market's Brier score has no business staking on it.
+3. **Bankroll** — lagging, variance-dominated confirmation only.
 
-## Design: V1
+**Pre-registered pause rule:** if aggregate CLV is negative after ~50 settled-with-close bets, real-money model bets pause for diagnostic review. **Bankroll ladder:** the sportsbook pool starts at £1,000 notional and is promoted (£2,500 at 50 settled-with-close bets with positive CLV, £5,000 at 100) or demoted by the same evidence — wired into the card generator, not enforced by willpower.
 
-### Models
-- **International Elo** (World Football Elo Ratings conventions): home advantage baked in, K-factor weighted by match importance.
-- **Time-decayed Dixon-Coles**: zero-inflated Poisson model for goal counts, with exponential decay of older matches.
-- **Market baseline**: Shin-de-vigged odds (controls for informed trading) against which all other forecasts are benchmarked.
-- **Blend**: Logistic or ensemble combination of Elo, Dixon-Coles, and market priors; no ML-heavy features unless CLV proves a signal.
+## The system
 
-### Staking
-- **Quarter-Kelly default**: 25% of full-Kelly stake, hard-capped at 5% of bankroll per bet.
-- **Same-day portfolio cap**: 5% total daily exposure across all concurrent bets.
-- **Kill-rule**: Recommendations-only; system never places bets automatically. Human review required for each stake.
+### Models — with the evidence behind every default
+- **International Elo** (World Football Elo conventions: importance-weighted K, goal-margin multiplier, host advantage) + ordered-logit draw model.
+- **Time-decayed Dixon-Coles** with L2 shrinkage for 200+ sparse national teams. Deployed half-life **8y** — backtested across WC2018/WC2022/Euro+Copa2024 holdouts (211 matches); hl=4 wins by a non-decision-grade +0.0016 log-loss and the deployed Elo+DC blend is best *at* 8y ([backtest](docs/research/backtests/halflife.md)).
+- **Market baseline**: Shin de-vig per book → consensus median.
+- **Blend**: 25/25/50 Elo/DC/market. Fitted weights on real WC2022 closing odds (pulled via historical API) do **not** beat market-only with confidence (n=64, CI straddles zero) — so the prior stands, documented, until WC2026 group-stage data re-fits it ([backtest](docs/research/backtests/blend_weights.md)).
+- **Scoreline engine**: DC score matrix reconciled exactly to the blended 1X2 → correct scores, O/U, BTTS that never contradict the headline card.
+- **48-team Monte Carlo tournament simulator** (official R32 bracket + third-place allocation) → per-team advancement probabilities, compared against Polymarket stage markets.
 
-## Key Performance Indicators
+### Decision & scanning
+- **Card generator**: blend vs. best price across ~19 books, EV floor, quarter-Kelly stakes per pool with per-bet and daily exposure caps.
+- **Derivative EV scanner** (`wca_event_ev`): BTTS / totals / DNB / alternate lines priced off the reconciled matrix vs. live books + Polymarket, commission- and fee-adjusted.
+- **Arbitrage scanner** (`wca_arb`): cross-book, Polymarket-internal, and book-vs-PM — with a hard **settlement-key guard** so 90-minute markets are never "arbed" against ET/pens-inclusive ones (the classic fake-arb trap).
+- **Promo/boost evaluation** as a first-class edge source (2-up early payout, super subs, odds boosts) — frequently the largest genuine +EV available to a small bankroll.
 
-1. **Closing-Line Value (CLV)**: The primary KPI. Measured as the log-ratio of closing odds vs. model-implied fair odds at recommendation time.
-2. **Calibration**: Brier score and log-loss vs. de-vigged market baseline; measures forecast accuracy.
-3. **Bankroll**: P&L per stake and cumulative ROI; lagging and noisy at this sample size (use for sanity checks only).
+### Operations
+- **Adaptive odds daemon** (`wca_snapshotd`): hourly idle → 5-min closing window → 3-min in-play, quota-aware with a hard reserve, never sleeps past a closing line. Snapshots feed the CLV ledger and the live line-movement charts.
+- **Telegram bot**: `/card` `/scores` `/bets` `/summary` `/clv` + **betslip-screenshot ingestion** (Claude vision reads any slip → confirm → ledger) and a **Y/N confirm gate** for Polymarket orders. Multi-chat with an **admin gate**: money-touching actions are restricted to one user id; groups get read-only commands.
+- **Auto-publishing**: every ledger write and every in-play polling cycle regenerates the site data and pushes — the public dashboard tracks the ledger with no manual steps.
+- **Polymarket CLOB client** (no SDK): raw EIP-712 signing for EOA *and* proxy-wallet account classes (works around the official SDKs' signer-address bug), dry-run by default, per-order/daily caps, World-Cup-only allowlist.
 
-### Pre-Registered Pause Rule
-If aggregate CLV is negative after 50 consecutive bets, pause real-money recommendations pending diagnostic review.
-
-## Repository Structure
+## Repository map
 
 ```
-World Cup Alpha
-├── src/wca/                      # Main package (import as wca.*)
-│   ├── models/
-│   │   ├── elo.py                # World Football Elo + ordered-logistic outcomes
-│   │   └── dixon_coles.py        # Zero-inflated Poisson goal model
-│   ├── markets/
-│   │   ├── devig.py              # Multiplicative, power, Shin de-vigging
-│   │   └── kelly.py              # Fractional Kelly & staking discipline
-│   ├── data/
-│   │   ├── results.py            # Historical match data ingestion
-│   │   ├── theoddsapi.py         # Live odds snapshot capture
-│   │   ├── polymarket.py         # Onchain / crypto market sources
-│   │   └── snapshot.py           # Market snapshots (for CLV replay)
-│   ├── ledger/
-│   │   ├── store.py              # Bet recording & balance tracking
-│   │   └── reports.py            # CLV, calibration & P&L reports
-│   └── sim/
-│       └── __init__.py           # Simulation harness (planned)
-├── docs/
-│   ├── ARCHITECTURE.md           # Component map & design decisions
-│   ├── research/                 # Literature & methodology notes
-│   └── recon/                    # Market & live data analysis
-├── tests/                        # pytest suite
-├── data/                         # Historical match results, snapshots
-├── backtests/                    # Replay logs & CLV analysis
-├── notebooks/                    # Exploratory analysis
-├── scripts/                      # CLI tools & batch jobs
-├── pyproject.toml                # Package config & dependencies
-├── .env.example                  # Template for API keys
-└── README.md                     # This file
+src/wca/
+├── card.py            # blend → EV → Kelly card; CLV-gated bankroll ladder
+├── models/            # elo.py, dixon_coles.py, scores.py (reconciled scorelines)
+├── markets/           # devig.py (mult/power/Shin), kelly.py (+KellyPolicy ladder)
+├── sim/               # tournament2026.py — 48-team Monte Carlo
+├── data/              # theoddsapi, polymarket (gamma), results, snapshot, teamnames
+├── pm/                # Polymarket CLOB trader: EIP-712 signing, guardrails
+├── ledger/            # store (bets/CLV/bankroll events), reports (calibration)
+├── bot/               # Telegram app, vision betslip ingestion, telegram client
+├── arb.py             # settlement-guarded arbitrage engine
+├── advancement.py     # sim vs Polymarket stage markets
+├── linemove.py        # consensus line-history for the charts
+├── sitedata.py        # ledger → site data.json (per-currency, never summed)
+├── pollsched.py       # adaptive polling cadence (pure, clock-injected)
+└── sync.py            # auto regenerate + push site on ledger writes
+scripts/               # wca_bot, wca_snapshotd, wca_build_card, wca_site,
+                       # wca_event_ev, wca_arb, wca_advancement, wca_pm_probe, wca_cli
+site/                  # static terminal dashboard (Vercel): positions open/closed,
+                       # P&L, line-movement & staking charts, scores vs market, architecture
+backtests/             # halflife sweep, blend fit, WC2022 closing-odds pull
+docs/                  # SYSTEM_MAP, recon (7 verified reports), research + bibliography
+tests/                 # 600+ tests
 ```
 
 ## Quickstart
 
-### 1. Set up environment
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate  # or on Windows: .venv\Scripts\activate
-pip install -e ".[dev]"
+python3 -m venv .venv && ./.venv/bin/pip install -e ".[dev]"
+./.venv/bin/pytest                                   # 600+ tests
+cp .env.example .env                                 # add your keys
+
+./.venv/bin/python scripts/wca_build_card.py         # fit models, build today's card
+./.venv/bin/python scripts/wca_event_ev.py           # derivative-market EV sweep
+./.venv/bin/python scripts/wca_arb.py                # arbitrage scan
+./.venv/bin/python scripts/wca_snapshotd.py          # adaptive odds daemon
+./.venv/bin/python scripts/wca_bot.py                # Telegram ops bot
+./.venv/bin/python scripts/wca_site.py               # regenerate dashboard data
 ```
 
-### 2. Configure API keys
-```bash
-cp .env.example .env
-# Edit .env with your keys (see below)
-```
+## Environment
 
-### 3. Run tests
-```bash
-pytest
-```
+| Key | Purpose |
+|---|---|
+| `ODDS_API_KEY` | the-odds-api.com (20k credits/mo tier recommended for in-play cadence) |
+| `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | bot auth; chat id is comma-separable (private + group) |
+| `TELEGRAM_ADMIN_USER_ID` | admin gate — only this user can confirm orders / log bets |
+| `ANTHROPIC_API_KEY` | Claude vision for betslip-screenshot ingestion |
+| `POLYMARKET_PRIVATE_KEY` / `POLYMARKET_FUNDER` | CLOB order signing (dry-run default: `PM_DRY_RUN=1`) |
+| `BETFAIR_APP_KEY` … | exchange API (planned: correct-score markets + execution) |
 
-### 4. Compute a forecast
-```python
-from wca.models.elo import EloRatings
-from wca.markets.devig import devig_shin
-from wca.markets.kelly import stake
+**Never commit `.env`.** It is gitignored; the private key controls real funds.
 
-# Load ratings, compute win probability, de-vig market odds, compute stake
-ratings = EloRatings()
-p_home = 0.55  # from model
-decimal_odds = 1.90  # market
-fair_prob = devig_shin([1/decimal_odds])
-stake_amt = stake(p=p_home, odds=decimal_odds, bankroll=1000.0, fraction=0.25, cap=0.05)
-```
+## Honest expectations
 
-## Environment & API Keys
+This repository is a measurement instrument first. The backtests in `docs/research/backtests/` repeatedly conclude "keep the simple default" because the data could not justify more — that is the point. Sources of edge, in realistic order: promos/boosts → line shopping → novelty markets (48-team format) → derivative/prop pricing → model alpha vs. the close (unproven until the CLV sample says otherwise). A few hundred bets cannot prove an ROI edge; CLV and calibration can move first.
 
-Copy `.env.example` to `.env` and fill in your credentials:
+## Responsible gambling
 
-```bash
-# TheOddsAPI (market snapshot capture)
-ODDS_API_KEY=your_key_here
-
-# Betfair (live exchange data)
-BETFAIR_APP_KEY=your_app_key
-BETFAIR_USERNAME=your_username
-BETFAIR_PASSWORD=your_password
-```
-
-- **ODDS_API_KEY**: Request from https://theoddsapi.com (free tier available).
-- **Betfair credentials**: Register at https://www.betfair.com (UK-based, requires verification).
-
-## Responsible Gambling
-
-⚠️ **This is a research platform for disciplined, data-informed decision-making. Use responsibly.**
-
-- Only risk money you can afford to lose.
-- Minimum age: 18+.
-- If gambling becomes a problem, visit [GambleAware](https://www.gambleaware.co.uk).
-- The $1,000 bankroll is allocated strictly for research; the system never auto-executes bets.
-- **Jurisdiction**: This tool is licensed for use in the UK (Paddy Power, Sky Bet, Virgin Bet, Bet365, Betfair). Availability outside the UK depends on local regulations.
-
-## Dependencies
-
-- **numpy** 2.0, **scipy** 1.13, **pandas** 2.3 – numerical computing & data wrangling.
-- **requests** – HTTP for API calls.
-- **pytest** – testing framework (dev only).
-
-No additional dependencies will be added without justification.
+18+. Only stake money you can afford to lose. The system never places sportsbook bets automatically; prediction-market orders require an explicit human confirmation and are capped in code. If gambling stops being research, visit [GambleAware](https://www.gambleaware.org). Platform availability depends on your jurisdiction; nothing here is legal or financial advice.
 
 ## References
 
-- **Elo System**: https://www.eloratings.net/about
-- **Dixon-Coles**: Dixon & Coles (1997), "Modelling association football scores and inefficiencies in the football betting market", *Journal of the Royal Statistical Society* 160(2):357–388.
-- **De-vigging**: Clarke, Kovalchik & Ingram (2017), "Adjusting bookmaker's odds to allow for overround", *American Journal of Sports Science* 5(6):45–49. Štrumbelj (2014), "On determining probability forecasts from betting odds", *International Journal of Forecasting* 30(4):934–943.
-- **Kelly Criterion**: MacLean, Thorp & Ziemba (2011), *The Kelly Capital Growth Investment Criterion*.
+- Dixon & Coles (1997), *Modelling association football scores…*, JRSS-C 46(2).
+- Shin (1993); Štrumbelj (2014), *On determining probability forecasts from betting odds*, IJF 30(4).
+- Hvattum & Arntzen (2010), *Using ELO ratings for match result prediction*, IJF 26(3).
+- MacLean, Thorp & Ziemba (2011), *The Kelly Capital Growth Investment Criterion*.
+- Buchdahl, *Squares & Sharps* — closing-line value as the edge proxy.
+- Full annotated bibliography: [docs/research/annotated_bibliography.md](docs/research/annotated_bibliography.md)
 
 ## License
 
-Research use only. See LICENSE file for details.
+Research use only.
