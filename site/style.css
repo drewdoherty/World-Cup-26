@@ -1,0 +1,372 @@
+/* World Cup Alpha — trading-terminal static site.
+   Pure static, no external fonts/CDNs. System monospace stack only. */
+
+:root {
+  --bg: #0a0b0d;
+  --bg-2: #0d0f12;
+  --panel: #0e1014;
+  --panel-2: #111419;
+  --border: #1e2126;
+  --border-2: #262a31;
+  --text: #d4dae0;
+  --text-dim: #6b7480;
+  --muted: #4a525c;
+  --accent: #3fe08a;
+  --pos: #3fe08a;
+  --neg: #ff5c6c;
+  --warn: #f2c14e;
+  --sportsbook: #4f8ff7;
+  --polymarket: #9d7bff;
+  --kalshi: #3fe0c5;
+  --track: #15181d;
+  --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, #10151c 0%, rgba(16,21,28,0) 60%),
+    var(--bg);
+  min-height: 100vh;
+}
+
+#app {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 14px 28px;
+}
+
+.num { font-variant-numeric: tabular-nums; }
+.pos { color: var(--pos); }
+.neg { color: var(--neg); }
+.dim { color: var(--text-dim); }
+
+/* ----------------------------------------------------------------- Ticker */
+
+.ticker {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--bg-2), var(--bg));
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 12px 18px 12px 4px;
+  border-right: 1px solid var(--border);
+  white-space: nowrap;
+}
+.brand-mark {
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--accent);
+  font-size: 15px;
+}
+.brand-sub {
+  color: var(--text-dim);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.ticker-stats {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  overflow: hidden;
+}
+
+.tick {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 9px 18px;
+  border-right: 1px solid var(--border);
+  min-width: 0;
+}
+.tick-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.tick-value {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- No data */
+
+.nodata {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  border: 1px solid var(--border-2);
+  border-left: 2px solid var(--warn);
+  background: var(--panel);
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.nodata-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--warn);
+  box-shadow: 0 0 8px var(--warn);
+}
+
+/* ------------------------------------------------------------------- Grid */
+
+.grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "venues      positions"
+    "predictions predictions";
+}
+.panel-venues { grid-area: venues; }
+.panel-positions { grid-area: positions; }
+.panel-predictions { grid-area: predictions; }
+
+.panel {
+  background:
+    linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.panel-meta {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+.panel-body { padding: 12px; }
+.panel-scroll { max-height: 360px; overflow-y: auto; }
+
+.empty {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 14px 2px;
+}
+
+/* ----------------------------------------------------------------- Venues */
+
+.venue-row { margin-bottom: 13px; }
+.venue-row:last-child { margin-bottom: 0; }
+.venue-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+.venue-name {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.venue-amt { font-size: 13px; font-weight: 600; }
+.venue-sub { font-size: 10px; color: var(--muted); }
+.venue-track {
+  height: 8px;
+  background: var(--track);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.venue-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  min-width: 1px;
+}
+.venue-fill.sportsbook { background: var(--sportsbook); }
+.venue-fill.polymarket { background: var(--polymarket); }
+.venue-fill.kalshi { background: var(--kalshi); }
+
+/* -------------------------------------------------------------- Positions */
+
+.pos-table { width: 100%; border-collapse: collapse; }
+.pos-table th, .pos-table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.pos-table th {
+  position: sticky;
+  top: 0;
+  background: var(--panel-2);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+  z-index: 1;
+}
+.pos-table td { font-size: 12px; }
+.pos-table td.r, .pos-table th.r { text-align: right; }
+.pos-table tr:last-child td { border-bottom: none; }
+.pos-match {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pos-sel { color: var(--text-dim); }
+.pill {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid var(--border-2);
+  color: var(--text-dim);
+}
+.pill.sportsbook { color: var(--sportsbook); border-color: #243650; }
+.pill.polymarket { color: var(--polymarket); border-color: #2e2750; }
+.pill.kalshi { color: var(--kalshi); border-color: #1f4040; }
+
+/* ------------------------------------------------------------ Predictions */
+
+.pred-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.pred-card {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--panel);
+  padding: 11px 12px;
+}
+.pred-title {
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 9px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--border);
+}
+.score-row {
+  display: grid;
+  grid-template-columns: 42px 1fr 48px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.score-label {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.score-bar {
+  height: 7px;
+  background: var(--track);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.score-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  min-width: 1px;
+}
+.score-prob {
+  text-align: right;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.pred-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+.pred-foot b { color: var(--text-dim); font-weight: 600; }
+
+/* --------------------------------------------------------------- Footer */
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.foot-mark { color: var(--text-dim); letter-spacing: 2.5px; }
+
+/* ------------------------------------------------------------ Responsive */
+
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "venues"
+      "positions"
+      "predictions";
+  }
+  .brand { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+  .tick { flex: 1 1 33%; padding: 8px 12px; }
+  .pos-match { max-width: 120px; }
+  #app { padding: 0 8px 24px; }
+}

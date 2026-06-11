@@ -1,0 +1,199 @@
+{
+  "meta": {
+    "generated": "2026-06-11 12:45:53 UTC"
+  },
+  "totals": {
+    "wagered": 32.25,
+    "open_stake": 32.25,
+    "settled_pl": 0.0,
+    "n_bets": 5
+  },
+  "venues": {
+    "sportsbook": {
+      "wagered": 32.25,
+      "open_stake": 32.25,
+      "settled_pl": 0.0,
+      "n_bets": 5
+    },
+    "polymarket": {
+      "wagered": 0.0,
+      "open_stake": 0.0,
+      "settled_pl": 0.0,
+      "n_bets": 0
+    },
+    "kalshi": {
+      "wagered": 0.0,
+      "open_stake": 0.0,
+      "settled_pl": 0.0,
+      "n_bets": 0
+    }
+  },
+  "clv": {
+    "avg_clv": null,
+    "pct_beat_close": null,
+    "n_with_close": 0
+  },
+  "positions": [
+    {
+      "id": 5,
+      "ts_utc": "2026-06-11T11:16:29",
+      "match": "Treble: S.Korea + Paraguay + Canada",
+      "market": "acca_treble",
+      "selection": "Korea/Paraguay/Canada all win",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "decimal_odds": 20.41,
+      "stake": 2.0,
+      "model_prob": null,
+      "ev": null
+    },
+    {
+      "id": 4,
+      "ts_utc": "2026-06-11T10:28:09",
+      "match": "Mexico vs South Africa",
+      "market": "player_shots_on_target",
+      "selection": "Raul Jimenez 1+ SOT Yes",
+      "platform": "paddypower",
+      "venue": "sportsbook",
+      "decimal_odds": 2.0,
+      "stake": 10.0,
+      "model_prob": 0.8,
+      "ev": 0.6000000000000001
+    },
+    {
+      "id": 3,
+      "ts_utc": "2026-06-11T10:12:38",
+      "match": "Mexico vs South Africa",
+      "market": "player_score_or_assist",
+      "selection": "Raul Jimenez Yes",
+      "platform": "virginbet",
+      "venue": "sportsbook",
+      "decimal_odds": 2.55,
+      "stake": 5.0,
+      "model_prob": 0.5,
+      "ev": 0.2749999999999999
+    },
+    {
+      "id": 2,
+      "ts_utc": "2026-06-11T10:12:38",
+      "match": "Canada vs Bosnia and Herzegovina",
+      "market": "h2h",
+      "selection": "Canada",
+      "platform": "virginbet",
+      "venue": "sportsbook",
+      "decimal_odds": 1.8,
+      "stake": 9.57,
+      "model_prob": 0.573,
+      "ev": 0.03139999999999987
+    },
+    {
+      "id": 1,
+      "ts_utc": "2026-06-11T10:12:38",
+      "match": "USA vs Paraguay",
+      "market": "h2h",
+      "selection": "Paraguay",
+      "platform": "virginbet",
+      "venue": "sportsbook",
+      "decimal_odds": 4.2,
+      "stake": 5.68,
+      "model_prob": 0.255,
+      "ev": 0.07100000000000017
+    }
+  ],
+  "predictions": [
+    {
+      "fixture": "Mexico vs South Africa",
+      "scores": [
+        {
+          "score": "1-0",
+          "prob": 16.9,
+          "fair": 5.91,
+          "back": 6.03
+        },
+        {
+          "score": "2-0",
+          "prob": 15.5,
+          "fair": 6.45,
+          "back": 6.57
+        },
+        {
+          "score": "2-1",
+          "prob": 10.2,
+          "fair": 9.84,
+          "back": 10.03
+        },
+        {
+          "score": "3-0",
+          "prob": 9.1,
+          "fair": 10.94,
+          "back": 11.16
+        },
+        {
+          "score": "1-1",
+          "prob": 8.8,
+          "fair": 11.4,
+          "back": 11.63
+        },
+        {
+          "score": "0-0",
+          "prob": 7.6,
+          "fair": 13.09,
+          "back": 13.36
+        }
+      ],
+      "over_under": {
+        "line": 2.5,
+        "over": 45.8,
+        "under": 54.2
+      },
+      "btts": 39.0
+    },
+    {
+      "fixture": "South Korea vs Czech Republic",
+      "scores": [
+        {
+          "score": "1-1",
+          "prob": 13.8,
+          "fair": 7.24,
+          "back": 7.39
+        },
+        {
+          "score": "1-0",
+          "prob": 13.0,
+          "fair": 7.69,
+          "back": 7.84
+        },
+        {
+          "score": "0-0",
+          "prob": 11.5,
+          "fair": 8.66,
+          "back": 8.83
+        },
+        {
+          "score": "0-1",
+          "prob": 10.2,
+          "fair": 9.81,
+          "back": 10.01
+        },
+        {
+          "score": "2-1",
+          "prob": 8.4,
+          "fair": 11.87,
+          "back": 12.11
+        },
+        {
+          "score": "2-0",
+          "prob": 7.0,
+          "fair": 14.3,
+          "back": 14.59
+        }
+      ],
+      "over_under": {
+        "line": 2.5,
+        "over": 38.0,
+        "under": 62.0
+      },
+      "btts": 45.1
+    }
+  ]
+}

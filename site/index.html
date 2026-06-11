@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark">
+<title>WORLD CUP ALPHA // TERMINAL</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div id="app">
+  <!-- Ticker bar -->
+  <header class="ticker" id="ticker">
+    <div class="brand">
+      <span class="brand-mark">WCA</span>
+      <span class="brand-sub">WORLD CUP ALPHA</span>
+    </div>
+    <div class="ticker-stats" id="ticker-stats">
+      <!-- ticker tiles injected here -->
+    </div>
+  </header>
+
+  <!-- Connection / no-data banner -->
+  <div class="nodata" id="nodata" hidden>
+    <span class="nodata-dot"></span>
+    <span id="nodata-msg">NO DATA FEED</span>
+  </div>
+
+  <main class="grid">
+    <!-- Venues -->
+    <section class="panel panel-venues">
+      <div class="panel-head"><span class="panel-label">Venues</span><span class="panel-meta" id="venues-meta"></span></div>
+      <div class="panel-body" id="venues"></div>
+    </section>
+
+    <!-- Positions -->
+    <section class="panel panel-positions">
+      <div class="panel-head"><span class="panel-label">Positions // Open</span><span class="panel-meta" id="positions-meta"></span></div>
+      <div class="panel-body panel-scroll" id="positions"></div>
+    </section>
+
+    <!-- Predictions -->
+    <section class="panel panel-predictions">
+      <div class="panel-head"><span class="panel-label">Predictions // Scorelines</span><span class="panel-meta" id="predictions-meta"></span></div>
+      <div class="panel-body" id="predictions"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span class="foot-gen" id="foot-gen"></span>
+    <span class="foot-mark">WORLD CUP ALPHA</span>
+  </footer>
+</div>
+<script src="./app.js"></script>
+</body>
+</html>
