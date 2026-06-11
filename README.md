@@ -1,6 +1,6 @@
 # World Cup Alpha
 
-A $??,000-bankroll quantitative betting research platform for the 2026 FIFA World Cup. This project tests whether systematic +EV betting on international football is achievable through disciplined modelling, market analysis, and staking discipline. We report evidence first, money second.
+A $??,000-bankroll quantitative betting research platform for the 2026 FIFA World Cup. This project tests whether systematic +EV betting on international football is achievable through disciplined modelling, market analysis, and staking discipline. Can we beat the bookies and prediction markets with <24h before the tournament starts?
 
 <!-- WCA:STRUCTURE:START -->
 ## Project Structure Analytics
