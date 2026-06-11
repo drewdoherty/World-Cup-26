@@ -1,40 +1,40 @@
 {
   "meta": {
-    "generated": "2026-06-11T17:15:53"
+    "generated": "2026-06-11T17:16:23"
   },
   "totals": {
-    "wagered": 4.0,
-    "open_stake": 4.0,
+    "wagered": 5.0,
+    "open_stake": 5.0,
     "settled_pl": 0.0,
     "n_bets": 1
   },
   "totals_by_currency": {
     "GBP": {
+      "wagered": 5.0,
+      "open_stake": 5.0,
+      "settled_pl": 0.0,
+      "n_bets": 1
+    },
+    "USD": {
       "wagered": 0.0,
       "open_stake": 0.0,
       "settled_pl": 0.0,
       "n_bets": 0
-    },
-    "USD": {
-      "wagered": 4.0,
-      "open_stake": 4.0,
-      "settled_pl": 0.0,
-      "n_bets": 1
     }
   },
   "venues": {
     "sportsbook": {
+      "wagered": 5.0,
+      "open_stake": 5.0,
+      "settled_pl": 0.0,
+      "n_bets": 1,
+      "currency": "GBP"
+    },
+    "polymarket": {
       "wagered": 0.0,
       "open_stake": 0.0,
       "settled_pl": 0.0,
       "n_bets": 0,
-      "currency": "GBP"
-    },
-    "polymarket": {
-      "wagered": 4.0,
-      "open_stake": 4.0,
-      "settled_pl": 0.0,
-      "n_bets": 1,
       "currency": "USD"
     },
     "kalshi": {
@@ -46,11 +46,11 @@
     }
   },
   "platforms": {
-    "polymarket": {
-      "venue": "polymarket",
-      "currency": "USD",
-      "wagered": 4.0,
-      "open_stake": 4.0,
+    "virginbet": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 5.0,
+      "open_stake": 5.0,
       "settled_pl": 0.0,
       "n_bets": 1
     }
@@ -63,15 +63,15 @@
   "positions": [
     {
       "id": 1,
-      "ts_utc": "2026-06-11T17:15:53",
-      "match": "Mexico vs Canada",
-      "market": "polymarket",
-      "selection": "Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "currency": "USD",
-      "decimal_odds": 2.5,
-      "stake": 4.0,
+      "ts_utc": "2026-06-11T18:00:00",
+      "match": "USA vs Paraguay",
+      "market": "h2h",
+      "selection": "Paraguay",
+      "platform": "virginbet",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 4.2,
+      "stake": 5.0,
       "model_prob": null,
       "ev": null
     }
