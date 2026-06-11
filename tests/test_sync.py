@@ -19,7 +19,24 @@ def test_refresh_site_data_writes_json(tmp_path, monkeypatch):
     assert (tmp_path / "site" / "data.json").exists()
 
 
+def test_push_site_skips_entirely_under_pytest(tmp_path, monkeypatch):
+    # PYTEST_CURRENT_TEST is always set during a test run, so push_site must
+    # be a no-op: no git, no refresh of the (real) repo. This is the guard that
+    # stops bot tests from clobbering the live site.
+    db = str(tmp_path / "t.db")
+    record_bet("2026-06-11T10:00:00", "M", "A vs B", "h2h", "A", "virginbet",
+               2.0, 5.0, db_path=db)
+
+    def boom(*a, **k):
+        raise AssertionError("git must not run under pytest")
+
+    monkeypatch.setattr(sync, "_git", boom)
+    assert sync.push_site(reason="x", db_path=db, enabled=True) is False
+
+
 def test_push_site_disabled_only_refreshes(tmp_path, monkeypatch):
+    # Opt out of the pytest guard to exercise the real enabled=False path.
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
     db = str(tmp_path / "t.db")
     record_bet("2026-06-11T10:00:00", "M", "A vs B", "h2h", "A", "virginbet",
                2.0, 5.0, db_path=db)
@@ -40,6 +57,7 @@ def test_push_site_disabled_only_refreshes(tmp_path, monkeypatch):
 
 
 def test_push_site_never_raises_on_git_failure(tmp_path, monkeypatch):
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
     db = str(tmp_path / "t.db")
     record_bet("2026-06-11T10:00:00", "M", "A vs B", "h2h", "A", "virginbet",
                2.0, 5.0, db_path=db)
