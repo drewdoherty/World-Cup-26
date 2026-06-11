@@ -60,8 +60,13 @@ def main() -> None:
     parser.add_argument(
         "--bankroll",
         type=float,
-        default=1000.0,
-        help="Bankroll in GBP (default: 1000.0)",
+        default=None,
+        help=(
+            "Override the sportsbook-pool bankroll in GBP. By default the "
+            "bankroll is resolved from the ledger's settled-with-close CLV via "
+            "the pre-registered Kelly ladder (rungs £1000/£2500/£5000); pass "
+            "this to force a flat figure instead."
+        ),
     )
     parser.add_argument(
         "--now",
@@ -109,6 +114,7 @@ def main() -> None:
             apply_daily_exposure_caps,
             format_card,
             format_scores,
+            resolve_pool_bankroll,
             PoolConfig,
         )
         from wca.data import theoddsapi
@@ -157,9 +163,28 @@ def main() -> None:
     fixtures_meta = results
 
     # ------------------------------------------------------------------
-    # Build card.
+    # Resolve the sportsbook-pool bankroll from the ledger via the Kelly
+    # ladder (rungs £1000/£2500/£5000, earned by settled-with-close CLV).
+    # --bankroll, when supplied, overrides the figure but the rung the
+    # evidence would have earned is still reported.
     # ------------------------------------------------------------------
-    pool = PoolConfig(name="main", bankroll=args.bankroll)
+    try:
+        pool_bank = resolve_pool_bankroll(args.db, override=args.bankroll)
+    except Exception as exc:
+        print("ERROR: bankroll resolution failed: %s" % exc, file=sys.stderr)
+        sys.exit(1)
+
+    print("Pool bankroll: %s" % pool_bank.reason)
+
+    # ------------------------------------------------------------------
+    # Build card. The pool uses the rung's authorised Kelly fraction so
+    # sizing tracks the same ladder that set the bankroll.
+    # ------------------------------------------------------------------
+    pool = PoolConfig(
+        name="main",
+        bankroll=pool_bank.bankroll,
+        kelly_fraction=pool_bank.kelly_fraction,
+    )
     pools = [pool]
 
     try:
@@ -170,7 +195,11 @@ def main() -> None:
         print("ERROR: card generation failed: %s" % exc, file=sys.stderr)
         sys.exit(1)
 
-    card_text = format_card(recs, pools) + "\n\n" + format_scores(score_cards)
+    card_text = (
+        format_card(recs, pools)
+        + "\n\n_Pool: %s_\n\n" % pool_bank.reason
+        + format_scores(score_cards)
+    )
 
     # ------------------------------------------------------------------
     # Write to cache.

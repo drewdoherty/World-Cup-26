@@ -45,7 +45,25 @@ OUTCOMES = ("home", "draw", "away")
 
 @dataclass
 class BlendWeights:
-    """Convex weights over (Elo, Dixon-Coles, market). Must sum to 1."""
+    """Convex weights over (Elo, Dixon-Coles, market). Must sum to 1.
+
+    Defaults are **0.25 / 0.25 / 0.50** and were *kept* after the blend backtest
+    (see ``backtests/`` and ``docs/research/backtests/``). The fitted blend does
+    NOT beat the de-vigged market with confidence: delta mean -0.0031 nats,
+    95% CI [-0.0224, +0.0155], P(fitted beats market)=60.2% on n=64. The
+    deployed weights are statistically indistinguishable from both the fitted
+    blend and market-only (all within ~0.003 nats, heavily overlapping bootstrap
+    CIs), so there is no decision-grade reason to change them.
+
+    There is a weak, directionally consistent signal that DC > Elo (Step 1 LOTO
+    and Step 3 both favour DC; fitted w_elo=0.00, pooled relative optimum
+    w_elo/(w_elo+w_dc)=0.15). If the desk wants to act on it, the single
+    conservative move is ``BlendWeights(elo=0.10, dc=0.30, market=0.60)`` —
+    shift weight from Elo to DC and nudge market up. Do NOT zero out Elo or
+    adopt the raw single-tournament fit (0.00/0.32/0.68); that over-fits one
+    World Cup. Re-fit after a second tournament with closing odds (WC2026 group
+    stage) before any larger change.
+    """
 
     elo: float = 0.25
     dc: float = 0.25
@@ -68,6 +86,152 @@ class PoolConfig:
     kelly_fraction: float = 0.25
     per_bet_cap: float = 0.05
     daily_exposure_cap: float = 0.05
+
+
+# ---------------------------------------------------------------------------
+# CLV-gated bankroll ladder (governance wiring for the sportsbook pool).
+# ---------------------------------------------------------------------------
+
+# Notional sportsbook-pool bankroll for each rung of the pre-registered Kelly
+# ladder (``wca.markets.kelly.KellyPolicy``). The ladder's rung *index* —
+# earned by settled-with-close bet count AND positive to-date CLV — selects
+# which notional pool the desk is cleared to deploy. This is the bankroll
+# governance agreed with the user:
+#
+#   rung 0  ->  £1,000   (start; until 50 settled-with-close bets)
+#   rung 1  ->  £2,500   (50+ settled AND to-date CLV > 0)
+#   rung 2  ->  £5,000   (100+ settled AND to-date CLV > 0; ceiling)
+#
+# Demotion (rolling-50 CLV < 0) steps the index back down and so the bankroll
+# down with it. The *kill rule* (pause real money if avg CLV < 0 after ~50
+# bets) is the desk's jurisdiction, not encoded here — it is a pause, not a
+# resize, and the ladder simply holds rung 0 in that regime.
+LADDER_BANKROLLS: Tuple[float, ...] = (1000.0, 2500.0, 5000.0)
+
+
+@dataclass
+class PoolBankroll:
+    """Resolved sportsbook-pool bankroll and the evidence that earned it.
+
+    ``bankroll`` is the notional pool the ladder clears; ``kelly_fraction`` is
+    the rung's fractional-Kelly multiplier (so callers can size with the *same*
+    fraction the ladder authorises). ``reason`` is a one-line human-readable
+    explanation suitable for the card header, e.g.
+    ``"rung £1000 — 0/50 settled-with-close bets (CLV n/a)"``.
+    """
+
+    bankroll: float
+    rung: int
+    kelly_fraction: float
+    reason: str
+    n_settled: int
+    clv_to_date: Optional[float]
+
+
+def resolve_pool_bankroll(
+    db_path: str,
+    policy: Optional["kelly_mod.KellyPolicy"] = None,
+    bankrolls: Sequence[float] = LADDER_BANKROLLS,
+    override: Optional[float] = None,
+    currency_symbol: str = "£",
+) -> PoolBankroll:
+    """Resolve the sportsbook-pool bankroll from ledger CLV via the Kelly ladder.
+
+    Reads the settled-with-close CLV statistics from the ledger
+    (``wca.ledger.reports.staking_stats``), runs the pre-registered
+    :class:`~wca.markets.kelly.KellyPolicy` ladder to find the earned rung, and
+    maps that rung index onto the governance bankroll ladder
+    (:data:`LADDER_BANKROLLS`: £1000 / £2500 / £5000).
+
+    The rung is *earned* by evidence, never by time or a hot streak: rung 1
+    needs 50+ settled-with-close bets and positive to-date CLV; rung 2 needs
+    100+ and positive CLV; a negative rolling-50 CLV demotes one rung. See the
+    policy's docstring for the full rules.
+
+    Parameters
+    ----------
+    db_path:
+        SQLite ledger path.
+    policy:
+        The Kelly ladder to apply. Defaults to a fresh
+        :class:`~wca.markets.kelly.KellyPolicy` (the pre-registered ladder).
+    bankrolls:
+        Notional pool per rung, index-aligned with ``policy.rungs``. Defaults
+        to the governance ladder £1000 / £2500 / £5000.
+    override:
+        If not ``None``, use this bankroll verbatim (the ``--bankroll`` CLI
+        override). The ledger is still read so the card can report the rung the
+        evidence *would* have earned alongside the manual figure.
+    currency_symbol:
+        Symbol used in the ``reason`` string (display only).
+
+    Returns
+    -------
+    PoolBankroll
+        The resolved bankroll plus the rung, Kelly fraction and a one-line
+        reason for the card header.
+    """
+    from wca.ledger.reports import staking_stats
+
+    if policy is None:
+        policy = kelly_mod.KellyPolicy()
+
+    if len(bankrolls) != len(policy.rungs):
+        raise ValueError(
+            "bankrolls (%d) must align one-to-one with policy.rungs (%d)"
+            % (len(bankrolls), len(policy.rungs))
+        )
+
+    stats = staking_stats(db_path)
+    n_settled = int(stats["n_settled"])
+    clv_to_date = stats["clv_to_date"]
+    rolling50 = stats["rolling50_clv"]
+
+    fraction, rung, _policy_reason = policy.evaluate(
+        n_settled=n_settled,
+        clv_to_date=clv_to_date,
+        rolling50_clv=rolling50,
+    )
+
+    ladder_bankroll = float(bankrolls[rung])
+
+    # Threshold of the *next* rung, for the "X/Y settled" progress hint.
+    if rung + 1 < len(policy.rungs):
+        next_threshold = policy.rungs[rung + 1].min_settled
+    else:
+        next_threshold = policy.rungs[rung].min_settled
+
+    clv_str = ("%+.4f" % clv_to_date) if clv_to_date is not None else "n/a"
+
+    if override is not None:
+        bankroll = float(override)
+        reason = (
+            "%s%.0f (manual override) — ladder would set rung %d "
+            "(%s%.0f) from %d/%d settled-with-close bets, CLV %s"
+            % (
+                currency_symbol, bankroll, rung, currency_symbol,
+                ladder_bankroll, n_settled, next_threshold, clv_str,
+            )
+        )
+    else:
+        bankroll = ladder_bankroll
+        reason = (
+            "rung %d %s%.0f — %d/%d settled-with-close bets, CLV %s, "
+            "Kelly fraction %.2f"
+            % (
+                rung, currency_symbol, bankroll, n_settled, next_threshold,
+                clv_str, fraction,
+            )
+        )
+
+    return PoolBankroll(
+        bankroll=bankroll,
+        rung=rung,
+        kelly_fraction=fraction,
+        reason=reason,
+        n_settled=n_settled,
+        clv_to_date=clv_to_date,
+    )
 
 
 @dataclass
@@ -121,7 +285,27 @@ def fit_models(
     half_life_years: float = 8.0,
     reference_date: Optional[str] = None,
 ) -> FittedModels:
-    """Fit Elo (rating + outcome) and Dixon-Coles on the results history."""
+    """Fit Elo (rating + outcome) and Dixon-Coles on the results history.
+
+    Dixon-Coles half-life
+    ---------------------
+    ``half_life_years`` defaults to **8.0**, deliberately *kept* after the
+    half-life backtest (see ``backtests/`` and ``docs/research/backtests/``).
+    The evidence does not support moving it:
+
+    * DC-only: the pooled best is hl=4 (log-loss 0.9773) but it beats the
+      deployed hl=8 (0.9789) by only **+0.0016 log-loss** — not decision-grade
+      on ~211 holdout matches. Only 2 of 3 holdouts favour 4 over 8
+      (deployed-minus-best per block: WC2018 +0.0028, WC2022 -0.0143,
+      Euro2024+Copa2024 +0.0130); WC2022 strongly prefers *longer* memory (16).
+    * Blend (the 50/50 Elo+DC mix the card actually deploys): the pooled best
+      *is* hl=8 (0.9817); hl=4 only ties (0.9824 vs 0.9817).
+
+    8.0 is a sensible compromise between the divergent per-tournament optima
+    (2-4 for European-summer tournaments vs 16 for the anomalous Qatar winter
+    WC), not a value that should move. Revisit only with a larger holdout
+    (more tournaments / club-data augmentation).
+    """
     played = _played(results)
 
     # -- Elo ratings --------------------------------------------------------
