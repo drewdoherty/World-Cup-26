@@ -56,7 +56,10 @@ def download_results(
         # Resolve relative to cwd at call time
         dest_path = Path(os.getcwd()) / dest_path
 
-    today_str = date.today().isoformat()
+    # Compare in UTC on BOTH sides: date.today() is the machine's LOCAL date,
+    # which disagrees with the UTC mtime for a few hours around local
+    # midnight (e.g. Bahrain UTC+3) and made fresh files look stale.
+    today_str = datetime.utcnow().date().isoformat()
 
     if not force and dest_path.exists():
         mtime = datetime.utcfromtimestamp(dest_path.stat().st_mtime).date()
