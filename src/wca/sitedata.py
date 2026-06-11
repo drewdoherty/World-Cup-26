@@ -336,6 +336,57 @@ def build_site_data(
 
     positions = _positions_from_bets(stats.get("bets") or [])
 
+    # Closed (settled/void) positions with realized P&L per bet.
+    closed_positions: List[Dict[str, Any]] = []
+    for b in stats.get("bets") or []:
+        status = (b.get("status") or "").strip().lower()
+        if status not in ("won", "lost", "void"):
+            continue
+        venue = dashboard.venue_for_platform(b.get("platform"))
+        closed_positions.append({
+            "id": b.get("id"),
+            "ts_utc": b.get("ts_utc"),
+            "settled_ts": b.get("settled_ts"),
+            "match": b.get("match_desc"),
+            "market": b.get("market"),
+            "selection": b.get("selection"),
+            "platform": b.get("platform"),
+            "venue": venue,
+            "currency": VENUE_CURRENCY.get(venue, "GBP"),
+            "decimal_odds": _opt_num(b.get("decimal_odds")),
+            "stake": _opt_num(b.get("stake")),
+            "status": status,
+            "pl": _opt_num(b.get("settled_pl")),
+            "clv": _opt_num(b.get("clv")),
+        })
+
+    # Realized P&L curves: cumulative settled P&L over settlement time, one
+    # series for the sportsbook pool (GBP) and one for prediction markets
+    # combined (polymarket + kalshi, USD). Currencies are separate lines —
+    # never summed.
+    def _pnl_series(rows: List[Dict[str, Any]]) -> List[List[Any]]:
+        pts = [(r.get("settled_ts") or r.get("ts_utc"), r.get("pl") or 0.0)
+               for r in rows if r.get("pl") is not None]
+        pts.sort(key=lambda x: str(x[0]))
+        cum, out = 0.0, []
+        for ts, pl in pts:
+            cum += float(pl)
+            out.append([ts, round(cum, 2)])
+        return out
+
+    pnl_series = {
+        "sportsbook": {
+            "currency": "GBP",
+            "points": _pnl_series([r for r in closed_positions
+                                   if r["venue"] == "sportsbook"]),
+        },
+        "prediction_markets": {
+            "currency": "USD",
+            "points": _pnl_series([r for r in closed_positions
+                                   if r["venue"] in ("polymarket", "kalshi")]),
+        },
+    }
+
     # Per-bookmaker breakdown within each venue (all bets, not just open),
     # so the site can show which books the money actually sits at.
     platforms: Dict[str, Any] = {}
@@ -364,6 +415,8 @@ def build_site_data(
         "totals_by_currency": totals_by_currency,
         "venues": venues,
         "platforms": platforms,
+        "closed_positions": closed_positions,
+        "pnl_series": pnl_series,
         "clv": clv,
         "positions": positions,
         "predictions": predictions,

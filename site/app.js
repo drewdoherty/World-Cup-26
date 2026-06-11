@@ -291,11 +291,15 @@
         var frac = maxProb > 0 ? (p / maxProb) : 0;
         // Inline background: the stylesheet fill colour is too close to the
         // track on dark displays, which made every bar look identical.
+        var fair = (s.fair !== null && s.fair !== undefined && !isNaN(s.fair))
+          ? Number(s.fair) : (p > 0 ? 100 / p : null);
         return '<div class="score-row">' +
           '<span class="score-label">' + esc(s.score) + '</span>' +
           '<span class="score-bar"><span class="score-fill" style="width:' +
             (frac * 100).toFixed(1) + '%;background:#4ade80;opacity:.85"></span></span>' +
-          '<span class="score-prob">' + p.toFixed(1) + '%</span>' +
+          '<span class="score-prob">' + p.toFixed(1) + '%' +
+            (fair ? ' <span class="dim">· ' + fair.toFixed(1) + '</span>' : '') +
+          '</span>' +
         '</div>';
       }).join("");
 
@@ -727,7 +731,72 @@
       svg + '</svg>';
   }
 
+  // P&L // Realized: one step-line per pool. Sportsbook (£, solid green/red
+  // by sign) and prediction markets combined (USD, dashed blue). Currencies
+  // are separate lines, never summed; y-axis spans negative territory.
+  function drawPnl(d) {
+    var el = $("pnl-canvas");
+    if (!el) return;
+    var ps = d.pnl_series || {};
+    var seriesDefs = [
+      { key: "sportsbook", color: "#4ade80", dash: null, ccy: (ps.sportsbook || {}).currency || "GBP" },
+      { key: "prediction_markets", color: "#60a5fa", dash: "4 3", ccy: (ps.prediction_markets || {}).currency || "USD" }
+    ];
+    var all = [];
+    seriesDefs.forEach(function (sd) {
+      sd.pts = (((ps[sd.key] || {}).points) || []).map(function (pt) {
+        return { t: tsMs(pt[0]), v: Number(pt[1]) };
+      }).filter(function (p) { return !isNaN(p.t) && !isNaN(p.v); });
+      all = all.concat(sd.pts);
+    });
+    if (!all.length) { chartEmpty(el, "No realized P&L yet — appears after settlement"); return; }
+
+    var tMin = Infinity, tMax = -Infinity, vMin = 0, vMax = 0;
+    all.forEach(function (p) {
+      tMin = Math.min(tMin, p.t); tMax = Math.max(tMax, p.t);
+      vMin = Math.min(vMin, p.v); vMax = Math.max(vMax, p.v);
+    });
+    var pad = Math.max((vMax - vMin) * 0.15, 1);
+    vMin -= pad; vMax += pad;
+    var span = (tMax - tMin) || 1, vSpan = (vMax - vMin) || 1;
+    function scaleX(t) { return CHART_M.left + ((t - tMin) / span) * PLOT_W; }
+    function scaleY(v) { return CHART_M.top + (1 - ((v - vMin) / vSpan)) * PLOT_H; }
+
+    var yLabels = [vMin, (vMin + vMax) / 2, vMax].map(function (v) {
+      return { y: scaleY(v), text: v.toFixed(0) };
+    });
+    var svg = chartFrame(yLabels, timeTicks(tMin, tMax, scaleX));
+    // zero line for sign orientation
+    if (vMin < 0 && vMax > 0) {
+      svg += '<line class="cx-grid" stroke-dasharray="2 3" x1="' + r2(CHART_M.left) +
+        '" y1="' + r2(scaleY(0)) + '" x2="' + r2(CHART_M.left + PLOT_W) +
+        '" y2="' + r2(scaleY(0)) + '"/>';
+    }
+    seriesDefs.forEach(function (sd) {
+      if (!sd.pts.length) return;
+      var arr = sd.pts.slice().sort(function (a, b) { return a.t - b.t; });
+      var pts = [], prevV = 0;
+      pts.push(r2(scaleX(tMin)) + "," + r2(scaleY(0)));
+      arr.forEach(function (p) {
+        pts.push(r2(scaleX(p.t)) + "," + r2(scaleY(prevV)));  // step
+        pts.push(r2(scaleX(p.t)) + "," + r2(scaleY(p.v)));
+        prevV = p.v;
+      });
+      pts.push(r2(scaleX(tMax)) + "," + r2(scaleY(prevV)));
+      svg += '<polyline class="cx-series" stroke="' + sd.color + '"' +
+        (sd.dash ? ' stroke-dasharray="' + sd.dash + '"' : '') +
+        ' points="' + pts.join(" ") + '"/>';
+      svg += '<text class="cx-final" fill="' + sd.color + '" x="' +
+        r2(CHART_M.left + PLOT_W + 6) + '" y="' + r2(scaleY(prevV) + 3) +
+        '">' + esc(signedMoney(prevV, sd.ccy)) + '</text>';
+    });
+    el.innerHTML = '<svg viewBox="0 0 ' + CHART_W + ' ' + CHART_H +
+      '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Realized P&L">' +
+      svg + '</svg>';
+  }
+
   function renderCharts(d) {
+    drawPnl(d);
     drawCumStake(d);
     loadLineMove();
   }
@@ -742,9 +811,57 @@
     renderTicker(d);
     renderVenues(d);
     renderPositions(d);
+    renderClosedPositions(d);
     renderPredictions(d);
     renderCharts(d);
     renderFooter(d);
+  }
+
+  function renderClosedPositions(d) {
+    var el = $("positions-closed");
+    if (!el) return;
+    var pos = d.closed_positions || [];
+    var meta = $("positions-closed-meta");
+    if (!pos.length) {
+      el.innerHTML = '<div class="empty">No settled bets yet — P&L appears here after results</div>';
+      if (meta) meta.textContent = "0";
+      return;
+    }
+    // Per-currency realized totals for the panel meta (never summed across).
+    var tot = {};
+    pos.forEach(function (p) {
+      var c = p.currency || "GBP";
+      tot[c] = (tot[c] || 0) + Number(p.pl || 0);
+    });
+    if (meta) {
+      meta.textContent = pos.length + " settled · " +
+        Object.keys(tot).map(function (c) { return signedMoney(tot[c], c); }).join(" + ");
+    }
+    var rows = pos.map(function (p) {
+      var pl = Number(p.pl);
+      var plCls = p.status === "void" ? "dim" : (pl >= 0 ? "pos" : "neg");
+      var plTxt = p.status === "void" ? "void" : signedMoney(pl, p.currency);
+      return '<tr style="border-left:2px solid ' + bookColor(p.platform) + '">' +
+        '<td class="num dim">' + esc(timeOnly(p.settled_ts || p.ts_utc)) + '</td>' +
+        '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
+        '<td class="pos-sel" title="' + esc(p.selection) + '">' + esc(dash(p.selection)) + '</td>' +
+        '<td class="r num">' + esc(num(p.decimal_odds)) + '</td>' +
+        '<td class="r num">' + esc(money(p.stake, p.currency)) + '</td>' +
+        '<td class="r num ' + plCls + '">' + esc(plTxt) + '</td>' +
+        '<td class="r num ' + evClass(p.clv) + '">' +
+          esc(p.clv === null || p.clv === undefined ? "—" : pct(p.clv, 1)) + '</td>' +
+        '<td><span class="pill ' + esc(p.venue || "sportsbook") + '">' + esc(p.platform || "") + '</span></td>' +
+        '</tr>';
+    }).join("");
+    el.innerHTML =
+      '<table class="pos-table">' +
+        '<thead><tr>' +
+          '<th>Settled</th><th>Match</th><th>Selection</th>' +
+          '<th class="r">Odds</th><th class="r">Stake</th>' +
+          '<th class="r">P&L</th><th class="r">CLV</th><th>Venue</th>' +
+        '</tr></thead>' +
+        '<tbody>' + rows + '</tbody>' +
+      '</table>';
   }
 
   // ---- optional Polymarket enrichment (graceful, never required) ---------

@@ -179,7 +179,7 @@ class TestBuildSiteData:
         data = sitedata.build_site_data(db, card_path=card, now_utc="2026-06-11 15:00:00 UTC")
 
         assert set(data.keys()) == {
-            "meta", "totals", "totals_by_currency", "venues", "platforms", "clv", "positions", "predictions"
+            "meta", "totals", "totals_by_currency", "venues", "platforms", "closed_positions", "pnl_series", "clv", "positions", "predictions"
         }
         assert data["meta"]["generated"] == "2026-06-11 15:00:00 UTC"
 
@@ -393,3 +393,46 @@ class TestCli:
         assert data["totals"]["n_bets"] == 5
         assert out in proc.stdout
         assert "totals:" in proc.stdout
+
+
+class TestClosedPositionsAndPnl:
+    def test_closed_positions_and_pnl_series(self, tmp_path):
+        from wca.ledger.store import record_bet, settle_bet
+        from wca.sitedata import build_site_data
+
+        db = str(tmp_path / "t.db")
+        b1 = record_bet("2026-06-11T10:00:00", "M1", "A vs B", "h2h", "A",
+                        "virginbet", 2.0, 10.0, db_path=db)
+        b2 = record_bet("2026-06-11T11:00:00", "M2", "C vs D", "pm", "C Yes",
+                        "polymarket", 1.5, 20.0, db_path=db)
+        b3 = record_bet("2026-06-11T12:00:00", "M3", "E vs F", "h2h", "E",
+                        "bet365", 3.0, 5.0, db_path=db)  # stays open
+        settle_bet(b1, "won", db_path=db, settled_ts_utc="2026-06-11T21:00:00")
+        settle_bet(b2, "lost", db_path=db, settled_ts_utc="2026-06-11T22:00:00")
+
+        d = build_site_data(db, card_path=str(tmp_path / "none.md"))
+        closed = d["closed_positions"]
+        assert len(closed) == 2
+        by_id = {c["id"]: c for c in closed}
+        assert by_id[b1]["pl"] == 10.0 and by_id[b1]["currency"] == "GBP"
+        assert by_id[b2]["pl"] == -20.0 and by_id[b2]["currency"] == "USD"
+        assert by_id[b1]["settled_ts"] == "2026-06-11T21:00:00"
+        # open bet not in closed
+        assert b3 not in by_id
+
+        ps = d["pnl_series"]
+        assert ps["sportsbook"]["points"] == [["2026-06-11T21:00:00", 10.0]]
+        assert ps["prediction_markets"]["points"] == [["2026-06-11T22:00:00", -20.0]]
+        assert ps["sportsbook"]["currency"] == "GBP"
+
+    def test_void_counts_as_closed_zero_pl(self, tmp_path):
+        from wca.ledger.store import record_bet, void_bet
+        from wca.sitedata import build_site_data
+
+        db = str(tmp_path / "t.db")
+        b = record_bet("2026-06-11T10:00:00", "M", "A vs B", "h2h", "A",
+                       "virginbet", 2.0, 10.0, db_path=db)
+        void_bet(b, db_path=db)
+        d = build_site_data(db, card_path=str(tmp_path / "none.md"))
+        assert d["closed_positions"][0]["status"] == "void"
+        assert d["closed_positions"][0]["pl"] == 0.0

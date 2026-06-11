@@ -223,10 +223,19 @@ def record_bet(
         return cur.lastrowid
 
 
+def _ensure_settled_ts_column(conn) -> None:
+    """Add the settled_ts column to pre-existing databases (idempotent)."""
+    try:
+        conn.execute("ALTER TABLE bets ADD COLUMN settled_ts TEXT")
+    except Exception:
+        pass  # already present
+
+
 def settle_bet(
     bet_id: int,
     result: str,
     db_path: str = _DEFAULT_DB,
+    settled_ts_utc: Optional[str] = None,
 ) -> None:
     """Mark a bet as won or lost and compute the profit/loss.
 
@@ -238,6 +247,9 @@ def settle_bet(
         ``"won"`` or ``"lost"``; case-insensitive.
     db_path:
         Path to the SQLite database file.
+    settled_ts_utc:
+        ISO timestamp of settlement; defaults to the current UTC time. Stored
+        so realized-P&L curves can be plotted over settlement time.
 
     Raises
     ------
@@ -273,9 +285,14 @@ def settle_bet(
         else:
             pl = -stake_val
 
+        _ensure_settled_ts_column(conn)
+        if settled_ts_utc is None:
+            import datetime as _dt
+
+            settled_ts_utc = _dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
         conn.execute(
-            "UPDATE bets SET status = ?, settled_pl = ? WHERE id = ?",
-            (result_lower, pl, bet_id),
+            "UPDATE bets SET status = ?, settled_pl = ?, settled_ts = ? WHERE id = ?",
+            (result_lower, pl, settled_ts_utc, bet_id),
         )
 
 
@@ -307,9 +324,12 @@ def void_bet(bet_id: int, db_path: str = _DEFAULT_DB) -> None:
             raise ValueError(
                 "bet %d has status %r; only open bets can be voided" % (bet_id, row["status"])
             )
+        _ensure_settled_ts_column(conn)
+        import datetime as _dt
+
         conn.execute(
-            "UPDATE bets SET status = 'void', settled_pl = 0.0 WHERE id = ?",
-            (bet_id,),
+            "UPDATE bets SET status = 'void', settled_pl = 0.0, settled_ts = ? WHERE id = ?",
+            (_dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"), bet_id),
         )
 
 

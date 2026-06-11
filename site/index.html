@@ -48,6 +48,12 @@
       <div class="panel-body panel-scroll" id="positions"></div>
     </section>
 
+    <!-- Closed positions (full-width row, mirrors the open table + P&L) -->
+    <section class="panel panel-positions">
+      <div class="panel-head"><span class="panel-label">🏁 Positions // Closed</span><span class="panel-meta" id="positions-closed-meta"></span></div>
+      <div class="panel-body panel-scroll" id="positions-closed"></div>
+    </section>
+
     <!-- Charts (full-width row) -->
     <section class="panel panel-charts">
       <div class="panel-head"><span class="panel-label">📈 Charts // Market &amp; Book</span><span class="panel-meta" id="charts-meta"></span></div>
@@ -58,6 +64,12 @@
             <select class="chart-select" id="linemove-select" aria-label="Fixture"></select>
           </div>
           <div class="chart-canvas" id="linemove-canvas"></div>
+        </div>
+        <div class="chart-block" id="chart-pnl">
+          <div class="chart-head">
+            <span class="chart-title">P&amp;L // Realized (Sportsbook £ vs Prediction Markets $)</span>
+          </div>
+          <div class="chart-canvas" id="pnl-canvas"></div>
         </div>
         <div class="chart-block" id="chart-cumstake">
           <div class="chart-head">

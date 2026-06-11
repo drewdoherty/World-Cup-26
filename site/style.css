@@ -331,6 +331,7 @@ body {
   overflow: hidden;
 }
 .score-fill {
+  display: block; /* spans ignore height while inline — bars rendered 0-tall */
   height: 100%;
   background: var(--accent);
   border-radius: 2px;
