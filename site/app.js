@@ -131,27 +131,30 @@
     }).join("");
   }
 
-  var VENUE_COLOR = { sportsbook: "#4ade80", polymarket: "#60a5fa", kalshi: "#2dd4bf" };
+  var VENUE_COLOR = { sportsbook: "#4ade80", polymarket: "#60a5fa", kalshi: "#a855f7" };
 
   // Per-book accent colours. Keyed by the lower-cased platform string; any
   // book not in the map (and any null/blank) degrades to BOOK_FALLBACK so the
   // pill/rail still renders. Several Betfair surfaces share one orange.
   var BOOK_FALLBACK = "#9ca3af";
+  // Single source of truth for book/venue colours (mirrors the CSS vars):
+  // paddy light green, bet365 dark green, betfair yellow, polymarket light
+  // blue, kalshi purple.
   var BOOK_COLOR = {
-    paddypower: "#16a34a",
-    bet365: "#fde047",
+    paddypower: "#4ade80",
+    bet365: "#15803d",
     virginbet: "#ef4444",
     skybet: "#3b82f6",
-    betfair: "#f97316",
-    betfair_ex_uk: "#f97316",
-    betfair_sportsbook: "#f97316",
+    betfair: "#fde047",
+    betfair_ex_uk: "#fde047",
+    betfair_sportsbook: "#fde047",
     williamhill: "#1d4ed8",
-    smarkets: "#a78bfa",
+    smarkets: "#2dd4bf",
     matchbook: "#f472b6",
     coral: "#fb923c",
     ladbrokes: "#dc2626",
     polymarket: "#60a5fa",
-    kalshi: "#2dd4bf"
+    kalshi: "#a855f7"
   };
   function bookColor(name) {
     var k = String(name === null || name === undefined ? "" : name)
