@@ -53,6 +53,12 @@ def push_site(reason: str = "ledger update", db_path: str = "data/wca.db",
     Set ``WCA_AUTOPUSH=0`` to disable pushing (regenerate only). Returns True
     only if a push actually succeeded.
     """
+    # HARD GUARD: never push during a test run. pytest sets PYTEST_CURRENT_TEST
+    # for every test, so any bot test that exercises the confirm path cannot
+    # regenerate+push the real site from a temp database. (This regression
+    # pushed a 1-bet test data.json to the live site.)
+    if os.environ.get("PYTEST_CURRENT_TEST"):
+        return False
     if enabled is None:
         enabled = os.environ.get("WCA_AUTOPUSH", "1") != "0"
     refreshed = refresh_site_data(db_path)
