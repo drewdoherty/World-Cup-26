@@ -154,10 +154,6 @@ cp .env.example .env                                 # add your keys
 
 This repository is a measurement instrument first. The backtests in `docs/research/backtests/` repeatedly conclude "keep the simple default" because the data could not justify more — that is the point. Sources of edge, in realistic order: promos/boosts → line shopping → novelty markets (48-team format) → derivative/prop pricing → model alpha vs. the close (unproven until the CLV sample says otherwise). A few hundred bets cannot prove an ROI edge; CLV and calibration can move first.
 
-## Responsible gambling
-
-18+. Only stake money you can afford to lose. The system never places sportsbook bets automatically; prediction-market orders require an explicit human confirmation and are capped in code. If gambling stops being research, visit [GambleAware](https://www.gambleaware.org). Platform availability depends on your jurisdiction; nothing here is legal or financial advice.
-
 ## References
 
 - Dixon & Coles (1997), *Modelling association football scores…*, JRSS-C 46(2).
