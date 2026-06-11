@@ -151,10 +151,12 @@ body {
   grid-template-areas:
     "venues      predictions"
     "positions   positions"
+    "closed      closed"
     "charts      charts";
 }
 .panel-venues { grid-area: venues; }
 .panel-positions { grid-area: positions; }
+.panel-closed { grid-area: closed; }
 .panel-predictions { grid-area: predictions; }
 .panel-charts { grid-area: charts; }
 
@@ -381,6 +383,7 @@ body {
       "venues"
       "predictions"
       "positions"
+      "closed"
       "charts";
   }
   .brand { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
