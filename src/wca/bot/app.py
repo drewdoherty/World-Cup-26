@@ -524,7 +524,20 @@ def handle_photo_confirmation(
             logged.append("#%d %s @ %s" % (bid, b.selection, b.decimal_odds or "?"))
         except Exception as exc:  # report per-bet failure, keep going
             logged.append("ERR %s: %s" % (b.selection, exc))
+    _autosync(db_path, "screenshot ingest")
     return "Logged %d to the ledger:\n%s" % (len(logged), "\n".join(logged))
+
+
+def _autosync(db_path: str, reason: str) -> None:
+    """Regenerate + push the site after a ledger write. Never raises."""
+    try:
+        from wca import sync
+
+        ok = sync.push_site(reason=reason, db_path=db_path)
+        if ok:
+            print("[bot] site auto-synced (%s)" % reason)
+    except Exception as exc:  # the bot must survive any sync failure
+        print("[bot] autosync skipped: %s" % exc)
 
 
 # ---------------------------------------------------------------------------
@@ -672,6 +685,7 @@ def _execute_parked_order(
     except Exception as exc:
         return "PM-%d: order ok but ledger write failed — %s" % (n, exc)
 
+    _autosync(db_path, "polymarket order")
     mode = "DRY-RUN (signed, not submitted)" if dry_run else "LIVE — submitted"
     return (
         "Order PM-%d %s.\n$%.2f %s %s @ %.2f | order id %s | ledger #%d"
