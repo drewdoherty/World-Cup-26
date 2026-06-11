@@ -12,6 +12,7 @@ Commands
 ``/summary``      portfolio summary (P&L, ROI, CLV, bankroll)
 ``/clv``          closing-line-value report
 ``/card``         today's recommended bet card (placeholder until wired)
+``/structure``    latest project-structure metrics snapshot
 ``/ping``         liveness check
 
 Confirmation flow (future): when a recommendation is pushed it carries a token
@@ -21,6 +22,7 @@ This module already routes such replies to :func:`handle_confirmation`.
 
 from __future__ import annotations
 
+import glob
 import os
 import time
 from typing import Any, Dict, Optional
@@ -33,6 +35,7 @@ HELP_TEXT = (
     "/summary — portfolio P&L, ROI, CLV, bankroll\n"
     "/clv — closing-line-value report\n"
     "/card — today's recommended bet card\n"
+    "/structure — project structure metrics\n"
     "/ping — liveness check\n"
     "/help — this message\n\n"
     "Confirm a pushed bet with `Y BET-<id>`, decline with `N BET-<id>`."
@@ -98,6 +101,39 @@ def handle_card(db_path: str) -> str:
     )
 
 
+def handle_structure(docs_dir: Optional[str] = None) -> str:
+    """Latest project-structure metrics from docs/architecture/structure_*.md.
+
+    Sends only the metrics table + complexity index (the Mermaid chart is
+    useless in Telegram).
+    """
+    if docs_dir is None:
+        # src/wca/bot/app.py -> repo root is four levels up.
+        root = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        )
+        docs_dir = os.path.join(root, "docs", "architecture")
+
+    snapshots = sorted(glob.glob(os.path.join(docs_dir, "structure_*.md")))
+    if not snapshots:
+        return (
+            "*Project structure*\n"
+            "No structure snapshot found. Run `scripts/wca_structure.py` first."
+        )
+
+    latest = snapshots[-1]
+    date = os.path.basename(latest)[len("structure_"):-len(".md")]
+    with open(latest, "r", encoding="utf-8") as fh:
+        content = fh.read()
+
+    # Keep only the metrics section (table + complexity index line).
+    marker = "## Metrics"
+    idx = content.find(marker)
+    metrics_part = content[idx + len(marker):].strip() if idx >= 0 else content.strip()
+
+    return "*Project structure* (%s)\n\n%s" % (date, metrics_part)
+
+
 def handle_confirmation(text: str, db_path: str) -> Optional[str]:
     """Route `Y BET-<id>` / `N BET-<id>` replies. Returns None if not a confirm."""
     parts = text.strip().split()
@@ -129,6 +165,8 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_clv(db_path)
     if cmd == "/card":
         return handle_card(db_path)
+    if cmd == "/structure":
+        return handle_structure()
     if cmd == "/ping":
         return "pong"
     return "Unknown command. Send /help for the list."
