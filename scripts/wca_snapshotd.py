@@ -161,6 +161,10 @@ def _jsonable(record: dict) -> dict:
     return out
 
 
+# In-game site-sync cadence tracker (module-level so poll_once stays simple).
+_SYNC_STATE: dict = {}
+
+
 def poll_once(db_path: str, repo_root: Path, policy: PollPolicy) -> int:
     """Run a single poll: pull, persist, and return the next delay in seconds.
 
@@ -203,6 +207,22 @@ def poll_once(db_path: str, repo_root: Path, policy: PollPolicy) -> int:
         delay,
         reason,
     )
+
+    # During live/pre-close phases, periodically regenerate + push the site's
+    # line-history so the chart tracks the match (every 3rd fast poll ≈ 9 min,
+    # well inside Vercel's deploy limits). Best-effort by design.
+    if reason in ("in_game", "pre_close"):
+        _SYNC_STATE["fast_polls"] = _SYNC_STATE.get("fast_polls", 0) + 1
+        if _SYNC_STATE["fast_polls"] % 3 == 1:  # 1st, 4th, 7th... fast poll
+            try:
+                from wca import sync
+
+                if sync.push_site(reason="in-game line history", db_path=db_path):
+                    logger.info("site line-history pushed")
+            except Exception:  # noqa: BLE001
+                logger.exception("site sync failed (continuing)")
+    else:
+        _SYNC_STATE["fast_polls"] = 0
     return delay
 
 

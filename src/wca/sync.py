@@ -35,10 +35,20 @@ def refresh_site_data(db_path: str = "data/wca.db") -> bool:
         write_site_data(db_path, out_path=os.path.join(_REPO, "site", "data.json"),
                          card_path=os.path.join(_REPO, "data", "card_latest.md"),
                          now_utc=now)
-        return True
     except Exception as exc:  # never propagate to the bot
         _log("refresh failed: %s" % exc)
         return False
+    try:
+        # Line-movement history too (cheap: sqlite + newest parseable snapshot).
+        from wca import linemove
+
+        meta = linemove.robust_event_meta(os.path.join(_REPO, "data", "raw", "snapshots"))
+        linemove.write_linemove(db_path,
+                                out_path=os.path.join(_REPO, "site", "linemove.json"),
+                                event_meta=meta, now_utc=now)
+    except Exception as exc:
+        _log("linemove refresh failed (non-fatal): %s" % exc)
+    return True
 
 
 def _git(args: List[str], timeout: float = 45.0) -> subprocess.CompletedProcess:
