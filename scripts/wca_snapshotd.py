@@ -31,7 +31,7 @@ import os
 import signal
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import List, Optional
 
@@ -51,7 +51,11 @@ logger = logging.getLogger("wca.snapshotd")
 
 _SPORT_KEY = "soccer_fifa_world_cup"
 _REGIONS = "uk"
-_MARKETS = "h2h"
+# Closing lines are captured for every market we hold a position in, else no
+# CLV point. Bulk /odds supports h2h/totals; btts is per-event only (422 on
+# bulk), pulled in a second pass. Upgraded key (~19k credits) covers both.
+_MARKETS = "h2h,totals"
+_EVENT_MARKETS = "btts"
 _SOURCE = "theoddsapi"
 
 # Flag flipped by the signal handler so the loop can break cleanly.
@@ -84,7 +88,7 @@ def _save_raw_json(events_df: pd.DataFrame, repo_root: Path) -> Path:
     """Dump the pulled DataFrame to a raw JSON snapshot file."""
     snap_dir = repo_root / "data" / "raw" / "snapshots"
     snap_dir.mkdir(parents=True, exist_ok=True)
-    out_path = snap_dir / ("oddsapi_h2h_uk_" + _utc_stamp() + ".json")
+    out_path = snap_dir / ("oddsapi_multi_uk_" + _utc_stamp() + ".json")
     # ``to_json`` handles the datetime columns; orient=records keeps it flat.
     out_path.write_text(events_df.to_json(orient="records", date_format="iso"))
     return out_path
@@ -116,24 +120,35 @@ def _kickoffs_from_df(df: pd.DataFrame) -> List[str]:
 
 
 def _rows_from_df(df: pd.DataFrame, ts_utc: str) -> List[SnapshotRow]:
-    """Build SnapshotRow objects for every h2h outcome in the DataFrame."""
+    """Build SnapshotRow objects for every tracked-market outcome in the frame.
+
+    Totals/BTTS selections need the line (point) folded into the selection
+    key — "Over" alone is ambiguous across 2.5/3.5 lines; "Over 2.5" is a
+    closing line we can match a bet against.
+    """
+    tracked = {m.strip() for m in (_MARKETS + "," + _EVENT_MARKETS).split(",")}
     rows: List[SnapshotRow] = []
     if df.empty:
         return rows
     for record in df.to_dict(orient="records"):
-        if record.get("market") != "h2h":
+        market = record.get("market")
+        if market not in tracked:
             continue
         odds = record.get("decimal_odds")
         try:
             odds = float(odds) if odds is not None and not pd.isna(odds) else None
         except (TypeError, ValueError):
             odds = None
+        selection = str(record.get("outcome_name"))
+        point = record.get("outcome_point")
+        if point is not None and not pd.isna(point):
+            selection = "%s %g" % (selection, float(point))
         rows.append(
             SnapshotRow(
                 source=_SOURCE,
                 match_id=str(record.get("event_id")),
-                market="h2h",
-                selection=str(record.get("outcome_name")),
+                market=str(market),
+                selection=selection,
                 decimal_odds=odds,
                 raw=_jsonable(record),
                 ts_utc=ts_utc,
@@ -161,6 +176,33 @@ def _jsonable(record: dict) -> dict:
     return out
 
 
+def _pull_event_markets(bulk_df: pd.DataFrame, window_h: float = 36.0) -> pd.DataFrame:
+    """Pull per-event-only markets (btts) for events within ``window_h`` of kickoff.
+
+    Uses the unique event ids from the bulk frame so no extra listing call is
+    spent. Per-event failures are logged and skipped — one bad event must not
+    cost the rest of the snapshot.
+    """
+    if bulk_df.empty:
+        return pd.DataFrame()
+    now = datetime.now(timezone.utc)
+    horizon = now + timedelta(hours=window_h)
+    upcoming = bulk_df[
+        (bulk_df["commence_time"] >= now) & (bulk_df["commence_time"] <= horizon)
+    ]
+    frames = []
+    for event_id in upcoming["event_id"].dropna().unique():
+        try:
+            df, _ = theoddsapi.get_event_odds(
+                _SPORT_KEY, str(event_id), regions=_REGIONS, markets=_EVENT_MARKETS
+            )
+            if not df.empty:
+                frames.append(df)
+        except Exception:  # noqa: BLE001
+            logger.exception("event-market pull failed for %s (skipping)", event_id)
+    return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+
 # In-game site-sync cadence tracker (module-level so poll_once stays simple).
 _SYNC_STATE: dict = {}
 
@@ -186,6 +228,14 @@ def poll_once(db_path: str, repo_root: Path, policy: PollPolicy) -> int:
         _save_raw_json(df, repo_root)
     except Exception:  # noqa: BLE001
         logger.exception("failed to write raw JSON snapshot (continuing)")
+
+    # 1b. per-event markets (btts is 422 on the bulk endpoint). Restricted to
+    # events kicking off within 36h to keep credit spend bounded; failures
+    # never block the h2h/totals snapshot.
+    try:
+        df = pd.concat([df, _pull_event_markets(df)], ignore_index=True)
+    except Exception:  # noqa: BLE001
+        logger.exception("per-event market pull failed (continuing with bulk)")
 
     # 2. SQLite append via the verified schema helper.
     rows = _rows_from_df(df, ts)

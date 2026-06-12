@@ -160,6 +160,42 @@ def get_odds(
     return df, quota
 
 
+def get_event_odds(
+    sport_key: str,
+    event_id: str,
+    regions: str = "uk",
+    markets: str = "btts",
+    odds_format: str = "decimal",
+) -> Tuple[pd.DataFrame, QuotaInfo]:
+    """Fetch odds for ONE event via the per-event endpoint.
+
+    Some markets (btts, player props) return 422 from the bulk ``/odds``
+    endpoint and are only served per-event. Returns the same flat DataFrame
+    shape as :func:`get_odds`.
+    """
+    params: Dict[str, Any] = {
+        "apiKey": _get_api_key(),
+        "regions": regions,
+        "markets": markets,
+        "oddsFormat": odds_format,
+        "dateFormat": "iso",
+    }
+    resp = requests.get(
+        f"{_BASE_URL}/sports/{sport_key}/events/{event_id}/odds",
+        params=params,
+        headers=_HEADERS,
+        timeout=_TIMEOUT,
+    )
+    resp.raise_for_status()
+    quota = _extract_quota(resp.headers)
+    rows = _parse_events([resp.json()])
+    df = pd.DataFrame(rows)
+    if not df.empty:
+        df["commence_time"] = pd.to_datetime(df["commence_time"], utc=True, errors="coerce")
+        df["retrieved_at"] = pd.to_datetime(df["retrieved_at"], utc=True, errors="coerce")
+    return df, quota
+
+
 def _parse_events(events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Flatten the nested Odds API response into a list of row dicts."""
     rows: List[Dict[str, Any]] = []
