@@ -645,3 +645,27 @@ class TestMaterialGate:
         out = format_trade_idea(it, odds)
         assert "NEW TRADE IDEA" in out and "Japan" in out
         assert "unmoved" in out.lower() and "Angle" in out
+
+
+class TestCricketDisambiguation:
+    """Cricket/rugby stories about footballing nations must never read as
+    material 2026 FIFA WC squad events (the Joe Root / Bumrah trap)."""
+    def _m(self, title):
+        from wca.news import is_material_squad_event, NewsItem
+        return is_material_squad_event(NewsItem(title=title, link="x", source="s"))
+
+    def test_cricket_collisions_rejected(self):
+        assert not self._m("Joe Root Returns as England Captain After Stokes Suspension")
+        assert not self._m("India star Bumrah ruled out of World Cup with back injury")
+        assert not self._m("England ruled out of T20 World Cup after injury")
+        assert not self._m("South Africa cricket captain suspended for World Cup")
+        assert not self._m("Rohit Sharma withdraws from World Cup squad")
+
+    def test_rugby_collisions_rejected(self):
+        assert not self._m("England fly-half ruled out of Rugby World Cup")
+        assert not self._m("France withdraw captain from Six Nations squad")
+
+    def test_real_football_survives(self):
+        assert self._m("England defender ruled out of FIFA World Cup 2026")
+        assert self._m("Japan captain Endo ruled out of World Cup, retires from internationals")
+        assert self._m("Morocco's Aguerd withdrawn from 2026 World Cup squad")
