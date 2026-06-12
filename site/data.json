@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-12T14:50:27"
+    "generated": "2026-06-12T15:14:12"
   },
   "totals": {
-    "wagered": 193.16,
-    "open_stake": 128.16,
+    "wagered": 211.22,
+    "open_stake": 146.22,
     "settled_pl": 70.822,
-    "n_bets": 21
+    "n_bets": 22
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 86.85,
-      "open_stake": 51.85,
+      "wagered": 104.91,
+      "open_stake": 69.91,
       "settled_pl": 46.72,
-      "n_bets": 16
+      "n_bets": 17
     },
     "USD": {
       "wagered": 106.31,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 86.85,
-      "open_stake": 51.85,
+      "wagered": 104.91,
+      "open_stake": 69.91,
       "settled_pl": 46.72,
-      "n_bets": 16,
+      "n_bets": 17,
       "currency": "GBP"
     },
     "polymarket": {
@@ -46,6 +46,14 @@
     }
   },
   "platforms": {
+    "unknown": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 18.06,
+      "open_stake": 18.06,
+      "settled_pl": 0.0,
+      "n_bets": 1
+    },
     "ladbrokes": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -263,6 +271,20 @@
     "n_with_close": 3
   },
   "positions": [
+    {
+      "id": 22,
+      "ts_utc": "2026-06-12T15:14:12",
+      "match": "",
+      "market": "Outright / Tournament Winner",
+      "selection": "Australia",
+      "platform": "unknown",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 5.5,
+      "stake": 18.06,
+      "model_prob": null,
+      "ev": null
+    },
     {
       "id": 21,
       "ts_utc": "2026-06-12T14:50:27",
