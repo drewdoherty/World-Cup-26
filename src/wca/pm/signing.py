@@ -846,7 +846,9 @@ def build_signed_order(
     # ``expiration`` is wire-only ("0"), NOT signed; taker/nonce/feeRateBps are
     # gone in V2.
     payload = {
-        "salt": str(order_msg["salt"]),
+        # NUMERIC on the wire (spec: order_to_json_v2 emits salt as int; the
+        # server's parser rejects a string salt with "Invalid order payload").
+        "salt": int(order_msg["salt"]),
         "maker": maker,
         "signer": signer,
         "tokenId": str(order_msg["tokenId"]),

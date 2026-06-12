@@ -229,7 +229,8 @@ def test_build_order_signature_recovers_and_fields(throwaway_key):
     # 50 shares @ 0.60.
     order = t.build_order(token_id="987654321", side="BUY", price=0.60, size=50.0)
     assert order["side"] == "BUY"  # string in server form
-    assert isinstance(order["salt"], str)
+    # salt is NUMERIC on the wire (order_to_json_v2; string salt -> 400)
+    assert isinstance(order["salt"], int)
     assert isinstance(order["signatureType"], int)
     assert order["signatureType"] == pmt.SIG_TYPE_EOA
     assert order["signer"] == t.address
