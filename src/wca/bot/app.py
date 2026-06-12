@@ -30,6 +30,7 @@ replying ``Y BET-12`` / ``N BET-12`` confirms or declines.
 from __future__ import annotations
 
 import glob
+import logging
 import os
 import re
 import time
@@ -40,6 +41,8 @@ from wca import cardcache
 from wca.bot.telegram import TelegramClient, TelegramError
 from wca.ledger import reports
 from wca.ledger.store import record_bet
+
+logger = logging.getLogger(__name__)
 
 CARD_PATH = "data/card_latest.md"
 CARD_MAX_AGE_HOURS = 6.0
@@ -680,9 +683,19 @@ def _execute_parked_order(
                 "PM-%d: POLYMARKET_PRIVATE_KEY not set — cannot place. "
                 "Add it to .env (see scripts/wca_pm_probe.py)." % n
             )
-        funder = os.environ.get("POLYMARKET_FUNDER") or None
-        st = os.environ.get("POLYMARKET_SIG_TYPE")
-        sig_type = int(st) if st not in (None, "") else None
+        # Resolve the funder from env, falling back to the known proxy (Gnosis
+        # safe) — never the empty EOA — when POLYMARKET_FUNDER is unset.  The
+        # USDC lives in the proxy, so a live order must sign with maker=proxy.
+        from wca.pm.trader import resolve_funder_from_env
+
+        funder, sig_type, used_fallback = resolve_funder_from_env()
+        if used_fallback:
+            logger.warning(
+                "POLYMARKET_FUNDER unset; using known proxy %s (sig type %s). "
+                "Set POLYMARKET_FUNDER in .env to silence.",
+                funder,
+                sig_type,
+            )
         try:
             trader = ClobTrader(key, funder=funder, signature_type=sig_type)
         except Exception as exc:
@@ -699,6 +712,17 @@ def _execute_parked_order(
             side,
             neg_risk=bool(proposal.get("neg_risk", False)),
             dry_run=dry_run,
+            # Forward the resolved market question (plus the WC event slug, which
+            # carries the "fifwc" provenance keyword) so the trader's WC-keyword
+            # allowlist actually gates the live path. Single-match questions like
+            # "Will X win on <date>?" have no WC keyword on their own.
+            market_question=(
+                "%s %s"
+                % (
+                    proposal.get("market_question") or proposal.get("label") or "",
+                    proposal.get("event_slug") or "",
+                )
+            ).strip(),
         )
     except Exception as exc:
         return "PM-%d: order failed — %s" % (n, exc)
@@ -824,8 +848,10 @@ def handle_pm(db_path: str) -> str:
 def _pm_daily_spend(db_path: str, *, day_utc: Optional[str] = None) -> Optional[float]:
     """Today's Polymarket spend from a ``pm_order_log`` table, or None if absent.
 
-    Tolerant of a missing table / column (the order log is optional): returns
-    ``None`` so ``/pm`` simply omits the line rather than erroring.
+    Counts only *live* (``dry_run = 0``) notional so dry-run signings — which
+    the trader also logs — never inflate the reported spend.  Tolerant of a
+    missing table / column (the order log is optional): returns ``None`` so
+    ``/pm`` simply omits the line rather than erroring.
     """
     import sqlite3
 
@@ -833,11 +859,20 @@ def _pm_daily_spend(db_path: str, *, day_utc: Optional[str] = None) -> Optional[
         day_utc = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     con = sqlite3.connect(db_path)
     try:
-        cur = con.execute(
-            "SELECT COALESCE(SUM(notional), 0.0) FROM pm_order_log "
-            "WHERE substr(ts_utc, 1, 10) = ?",
-            (day_utc,),
-        )
+        # Prefer the live-only sum (canonical schema has a dry_run column).
+        try:
+            cur = con.execute(
+                "SELECT COALESCE(SUM(notional), 0.0) FROM pm_order_log "
+                "WHERE substr(ts_utc, 1, 10) = ? AND dry_run = 0",
+                (day_utc,),
+            )
+        except sqlite3.OperationalError:
+            # Older / hand-rolled table without a dry_run column.
+            cur = con.execute(
+                "SELECT COALESCE(SUM(notional), 0.0) FROM pm_order_log "
+                "WHERE substr(ts_utc, 1, 10) = ?",
+                (day_utc,),
+            )
         row = cur.fetchone()
         return float(row[0]) if row and row[0] is not None else 0.0
     except sqlite3.OperationalError:

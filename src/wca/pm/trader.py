@@ -1,300 +1,293 @@
-"""Polymarket CLOB REST client built on the local signers.
+"""Polymarket CLOB trading client — the single canonical ``ClobTrader``.
 
-:class:`ClobTrader` is a thin wrapper around ``requests`` that wires the
-:mod:`wca.pm.signing` functions to the CLOB host (``https://clob.polymarket.com``):
+This is the *only* Polymarket order-placement client in the codebase.  It is
+built directly on the no-SDK signing core in :mod:`wca.pm.signing` (verified
+EIP-712 ClobAuth, HMAC, and CTF-Exchange order signing — including the
+proxy-wallet fix where ``maker`` is the funder and ``signer`` is always the
+EOA) and adds the network shell plus the trading guardrails:
 
-* ``derive_or_create_creds`` — L1 ClobAuth -> api key / secret / passphrase.
+* ``derive_or_create_creds`` — L1 ClobAuth -> L2 api key / secret / passphrase.
 * ``detect_account_class`` — work out whether the funds sit on the EOA or a
-  proxy / safe wallet, returning the right ``signature_type`` and funder.
-* ``balance_allowance`` / ``open_orders`` / ``midpoint`` — L2 / public reads.
-* ``place_order`` — sign an order correctly for the detected account class and
-  POST it (honouring ``dry_run``).
+  proxy / Gnosis-safe wallet, returning the right ``signature_type`` + funder.
+* ``balance_allowance`` / ``open_orders`` / ``midpoint`` / ``get_order_book`` —
+  L2 / public reads.
+* ``place_order`` — guardrail-checked, correctly-signed order placement that
+  honours a per-call (or config) ``dry_run`` flag; in dry-run the order is
+  fully signed (proving signing works) but never POSTed.
+* ``cancel_order`` — L2 DELETE.
 
-The class is deliberately import-light: ``requests`` is imported at call time
-so the module parses even in environments where it is unavailable, and the
-private key is only ever read from the instance attribute, never logged.
+Guardrails (mirroring the former ``wca.data.polymarket_trade``): a per-order
+USD cap, a keyword allowlist on the market question, and a rolling-UTC-day
+notional cap tracked in the ``pm_order_log`` table.
+
+The private key, api secret, and signature material are NEVER logged.  Heavy
+imports (``requests``, ``eth_account``) are deferred so the module parses even
+where they are unavailable; ``eth_account`` is only needed once you sign.
+
+Public API (every method the bot / probe / producer call):
+
+    ClobTrader(private_key=None, funder=None, signature_type=None,
+               host=CLOB_HOST, creds=None, config=None, session=None)
+    .address                       -> str  (EOA, the signer)
+    .funder                        -> str  (the order maker)
+    .signature_type                -> int  (0 EOA / 1 POLY_PROXY / 2 SAFE)
+    .config                        -> TradeConfig
+    .derive_or_create_creds(nonce=0)            -> dict  {api_key,api_secret,api_passphrase}
+    .derive_or_create_api_creds(nonce=0)        -> ApiCreds  (alias, dataclass form)
+    .detect_account_class()        -> dict  {address,signature_type,signature_type_name,funder}
+    .balance_allowance(signature_type=None)     -> dict
+    .open_orders(market=None)      -> list
+    .midpoint(token_id)            -> Optional[float]
+    .get_order_book(token_id)      -> dict
+    .place_order(token_id, price, size, side, *, neg_risk=False, dry_run=None,
+                 market_question=None, tick_size="0.01", order_type="GTC") -> dict
+    .cancel_order(order_id)        -> dict
+    .build_order(token_id, side, price, size, *, neg_risk=False, salt=None,
+                 fee_rate_bps=0, nonce=0, expiration=0) -> dict
+    .l1_headers(timestamp=None, nonce=0)        -> dict
+    .l2_headers(method, path, body=None, timestamp=None) -> dict
+    ClobTrader.build_hmac_signature(secret, ts, method, path, body) -> str
 """
 from __future__ import annotations
 
+import json
+import logging
+import os
+import sqlite3
 import time
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from decimal import ROUND_DOWN, ROUND_HALF_UP, Decimal
+from typing import Any, Dict, List, Optional, Tuple
 
 from wca.pm import signing
+
+logger = logging.getLogger(__name__)
 
 CLOB_HOST = "https://clob.polymarket.com"
 DATA_API_HOST = "https://data-api.polymarket.com"
 _TIMEOUT = 20
 
+# The USDC for this account sits in the Polymarket proxy (Gnosis Safe), never
+# the EOA.  When POLYMARKET_FUNDER is unset, callers that place LIVE orders must
+# fall back to this known proxy (with sig type 2) rather than the empty EOA.
+# This is the single source of truth shared by the bot gate and the probe.
+KNOWN_PROXY_FUNDER = "0x40231C7f4FC2BBAB720ce9b669eAb4795fCBE191"
 
-class ClobAuthError(RuntimeError):
+
+def resolve_funder_from_env(env: Optional[Dict[str, str]] = None) -> Tuple[str, Optional[int], bool]:
+    """Resolve ``(funder, signature_type, used_fallback)`` from the environment.
+
+    Reads ``POLYMARKET_FUNDER`` / ``POLYMARKET_SIG_TYPE``.  When the funder is
+    absent it falls back to :data:`KNOWN_PROXY_FUNDER` with signature type 2
+    (POLY_GNOSIS_SAFE) — *never* the empty EOA — and signals the fallback via
+    the third return value so the caller can warn.  Never reads or returns the
+    private key.
+    """
+    src = os.environ if env is None else env
+    funder = (src.get("POLYMARKET_FUNDER") or "").strip()
+    st = (src.get("POLYMARKET_SIG_TYPE") or "").strip()
+    sig_type = int(st) if st else None
+    if funder:
+        return funder, sig_type, False
+    # No explicit funder: fall back to the known proxy (Gnosis safe), not the EOA.
+    return KNOWN_PROXY_FUNDER, (sig_type if sig_type is not None else SIG_TYPE_POLY_GNOSIS_SAFE), True
+
+# Re-export signing constants so callers can ``from wca.pm.trader import SIG_*``.
+SIG_TYPE_EOA = signing.SIG_EOA
+SIG_TYPE_POLY_PROXY = signing.SIG_POLY_PROXY
+SIG_TYPE_POLY_GNOSIS_SAFE = signing.SIG_POLY_GNOSIS_SAFE
+SIDE_BUY = signing.SIDE_BUY
+SIDE_SELL = signing.SIDE_SELL
+ZERO_ADDRESS = signing.ZERO_ADDRESS
+
+_USDC_DECIMALS = 6
+
+# tick-size -> (price, size, amount) decimal places.
+# source: py_clob_client order_builder ROUNDING_CONFIG.
+_ROUNDING_CONFIG: Dict[str, Tuple[int, int, int]] = {
+    "0.1": (1, 2, 3),
+    "0.01": (2, 2, 4),
+    "0.001": (3, 2, 5),
+    "0.0001": (4, 2, 6),
+}
+
+_SIG_NAMES = {
+    SIG_TYPE_EOA: "EOA",
+    SIG_TYPE_POLY_PROXY: "POLY_PROXY",
+    SIG_TYPE_POLY_GNOSIS_SAFE: "POLY_GNOSIS_SAFE",
+}
+
+
+# ---------------------------------------------------------------------------
+# Errors.
+# ---------------------------------------------------------------------------
+
+
+class TradeError(Exception):
+    """Raised for any trading failure (guardrail / validation / network).
+
+    Messages are deliberately safe: they never contain the private key, the
+    API secret, or any signature material.
+    """
+
+
+class ClobAuthError(TradeError):
     """Raised when L1/L2 authentication fails — the signer-address bug detector.
 
     The message carries the CLOB's own error text so the probe can surface the
-    exact failure (e.g. an ``invalid signature`` / address-mismatch response is
-    the smoking gun for the proxy-wallet signing bug).
+    exact failure (an ``invalid signature`` / address-mismatch response is the
+    smoking gun for the proxy-wallet signing bug).  Subclasses
+    :class:`TradeError` so callers catching either work.
     """
 
 
-class ClobTrader:
-    """Sign and submit Polymarket CLOB requests for any account class.
+# ---------------------------------------------------------------------------
+# Config + creds containers.
+# ---------------------------------------------------------------------------
 
-    Parameters
+
+@dataclass
+class TradeConfig:
+    """Configuration and guardrails for :class:`ClobTrader`.
+
+    Attributes
     ----------
-    private_key:
-        The EOA private key.  Never logged; only used to derive the address and
-        produce signatures.
-    funder:
-        The funding wallet (proxy / safe) when the account is not a bare EOA.
-        If omitted, account detection falls back to the EOA.
-    signature_type:
-        Force a signature type (0/1/2).  If ``None`` it is detected from where
-        the USDC balance lives.
+    dry_run:
+        Default dry-run posture.  ``place_order`` returns the would-be signed
+        request without contacting the network unless its own ``dry_run``
+        argument overrides this.
+    max_order_usd:
+        Hard cap on the notional (price * size) of a single order, in USDC.
+    max_daily_usd:
+        Hard cap on cumulative *live* notional within a rolling UTC day,
+        tracked in the ``pm_order_log`` table.
+    allowed_keywords:
+        Case-insensitive substrings; the market question must contain at least
+        one of these or the order is blocked.
     host:
-        CLOB base URL (overridable for tests).
-    creds:
-        Pre-derived ``{"api_key","api_secret","api_passphrase"}`` to skip the
-        L1 derive round-trip.
+        CLOB REST host.
+    chain_id:
+        EVM chain id (137 = Polygon mainnet).
+    signature_type:
+        Force a signature class (0/1/2).  ``None`` (default) means autodetect.
+    db_path:
+        SQLite database used for the daily-cap order log.
     """
 
-    def __init__(
-        self,
-        private_key: str,
-        funder: Optional[str] = None,
-        signature_type: Optional[int] = None,
-        host: str = CLOB_HOST,
-        creds: Optional[Dict[str, str]] = None,
-    ) -> None:
-        if not private_key:
-            raise ValueError("private_key is required")
-        self._key = private_key
-        self.address = signing.address_for_key(private_key)
-        self.host = host.rstrip("/")
-        self._funder = funder
-        self._forced_sig_type = signature_type
-        self.creds = creds
-        # Resolved after detect_account_class(); sensible EOA defaults.
-        self.signature_type = signature_type if signature_type is not None else signing.SIG_EOA
-        self.funder = funder or self.address
-
-    # ------------------------------------------------------------------ HTTP
-    def _request(
-        self,
-        method: str,
-        path: str,
-        headers: Optional[Dict[str, str]] = None,
-        params: Optional[Dict[str, Any]] = None,
-        body: Optional[str] = None,
-    ):
-        import requests
-
-        url = self.host + path
-        resp = requests.request(
-            method,
-            url,
-            headers=headers,
-            params=params,
-            data=body,
-            timeout=_TIMEOUT,
-        )
-        return resp
-
-    @staticmethod
-    def _now() -> int:
-        return int(time.time())
-
-    # ------------------------------------------------------------ L1: creds
-    def derive_or_create_creds(self, nonce: int = 0) -> Dict[str, str]:
-        """Derive (or create) the L2 API credentials via an L1 ClobAuth sig.
-
-        Tries ``GET /auth/derive-api-key`` first (idempotent for an existing
-        key) then falls back to ``POST /auth/api-key``.  Raises
-        :class:`ClobAuthError` carrying the CLOB error text on failure — this
-        is the auth-failure signal the probe treats as the bug detector.
-        """
-        if self.creds:
-            return self.creds
-
-        ts = self._now()
-        headers = signing.build_l1_headers(self._key, ts, nonce)
-        # Derive first.
-        resp = self._request("GET", "/auth/derive-api-key", headers=headers)
-        if resp.status_code != 200:
-            # Re-sign with a fresh timestamp for the create attempt.
-            ts2 = self._now()
-            headers2 = signing.build_l1_headers(self._key, ts2, nonce)
-            resp2 = self._request("POST", "/auth/api-key", headers=headers2)
-            if resp2.status_code != 200:
-                raise ClobAuthError(
-                    "L1 auth failed: derive=%s %s | create=%s %s"
-                    % (resp.status_code, _short(resp.text), resp2.status_code, _short(resp2.text))
-                )
-            resp = resp2
-
-        data = resp.json()
-        creds = {
-            "api_key": data.get("apiKey") or data.get("api_key", ""),
-            "api_secret": data.get("secret") or data.get("api_secret", ""),
-            "api_passphrase": data.get("passphrase") or data.get("api_passphrase", ""),
-        }
-        if not creds["api_key"] or not creds["api_secret"]:
-            raise ClobAuthError("L1 auth returned no usable creds: %s" % _short(resp.text))
-        self.creds = creds
-        return creds
-
-    # --------------------------------------------------- account detection
-    def detect_account_class(self) -> Dict[str, Any]:
-        """Resolve ``signature_type`` + ``funder`` from where the USDC lives.
-
-        Strategy: honour an explicitly forced signature type / funder.  Else,
-        if a funder address distinct from the EOA was supplied, assume a
-        Gnosis-safe proxy (type 2, the MetaMask-deposit flow).  A bare EOA with
-        no funder stays type 0.  In all cases we report the address that
-        carries the collateral so the caller can sanity-check before trading.
-        """
-        if self._forced_sig_type is not None:
-            self.signature_type = self._forced_sig_type
-            self.funder = self._funder or self.address
-        elif self._funder and self._funder.lower() != self.address.lower():
-            # A distinct funder address means a proxy-funded account.  The
-            # MetaMask deposit flow uses a Gnosis safe (type 2); email/magic
-            # uses type 1.  Default to safe; caller can force type 1 via env.
-            self.signature_type = signing.SIG_POLY_GNOSIS_SAFE
-            self.funder = self._funder
-        else:
-            self.signature_type = signing.SIG_EOA
-            self.funder = self.address
-
-        return {
-            "address": self.address,
-            "signature_type": self.signature_type,
-            "signature_type_name": _SIG_NAMES.get(self.signature_type, "?"),
-            "funder": self.funder,
-        }
-
-    # -------------------------------------------------------- L2 reads
-    def _l2_headers(self, method: str, path: str, body: Optional[str] = None) -> Dict[str, str]:
-        creds = self.derive_or_create_creds()
-        ts = self._now()
-        return signing.build_l2_headers(
-            self.address,
-            creds["api_key"],
-            creds["api_secret"],
-            creds["api_passphrase"],
-            ts,
-            method,
-            path,
-            body,
-        )
-
-    def balance_allowance(self, signature_type: Optional[int] = None) -> Dict[str, Any]:
-        """Fetch USDC (collateral) balance + allowance for this account (L2)."""
-        path = "/balance-allowance"
-        headers = self._l2_headers("GET", path)
-        sig_type = signature_type if signature_type is not None else self.signature_type
-        params = {"asset_type": "COLLATERAL", "signature_type": sig_type}
-        resp = self._request("GET", path, headers=headers, params=params)
-        if resp.status_code != 200:
-            raise ClobAuthError(
-                "balance-allowance failed: %s %s" % (resp.status_code, _short(resp.text))
-            )
-        return resp.json()
-
-    def open_orders(self) -> List[Dict[str, Any]]:
-        """List this account's open orders (L2 ``GET /data/orders``)."""
-        path = "/data/orders"
-        headers = self._l2_headers("GET", path)
-        resp = self._request("GET", path, headers=headers)
-        if resp.status_code != 200:
-            raise ClobAuthError(
-                "open-orders failed: %s %s" % (resp.status_code, _short(resp.text))
-            )
-        data = resp.json()
-        if isinstance(data, dict):
-            return data.get("data", data.get("orders", [])) or []
-        return data or []
-
-    def midpoint(self, token_id: str) -> Optional[float]:
-        """Public midpoint for a token id, or ``None`` if no book exists."""
-        resp = self._request("GET", "/midpoint", params={"token_id": str(token_id)})
-        if resp.status_code != 200:
-            return None
-        try:
-            data = resp.json()
-        except ValueError:
-            return None
-        mid = data.get("mid") if isinstance(data, dict) else None
-        try:
-            return float(mid) if mid is not None else None
-        except (TypeError, ValueError):
-            return None
-
-    # -------------------------------------------------------- order placement
-    def place_order(
-        self,
-        token_id: str,
-        price: float,
-        size: float,
-        side: str,
-        *,
-        neg_risk: bool = False,
-        dry_run: bool = True,
-    ) -> Dict[str, Any]:
-        """Sign + (optionally) submit one order, returning a status dict.
-
-        The order is *always* signed with the detected account class so the
-        ``maker`` / ``signer`` / ``signatureType`` triple is correct even for
-        proxy-funded wallets (the bug the SDKs trip on).  When ``dry_run`` is
-        true the signed order is built (proving signing works) but never POSTed.
-        """
-        self.detect_account_class()
-        args = signing.OrderArgs(
-            token_id=str(token_id), price=float(price), size=float(size), side=side
-        )
-        signed = signing.build_signed_order(
-            self._key,
-            args,
-            funder=self.funder,
-            signature_type=self.signature_type,
-            neg_risk=neg_risk,
-        )
-        if dry_run:
-            return {
-                "dry_run": True,
-                "submitted": False,
-                "maker": signed["maker"],
-                "signer": signed["signer"],
-                "signature_type": signed["signatureType"],
-                "side": signed["side"],
-                "makerAmount": signed["makerAmount"],
-                "takerAmount": signed["takerAmount"],
-            }
-
-        body_obj = {"order": signed, "owner": self.creds["api_key"] if self.creds else self.address, "orderType": "GTC"}
-        body = signing.serialize_body(body_obj)
-        headers = self._l2_headers("POST", "/order", body)
-        headers["Content-Type"] = "application/json"
-        resp = self._request("POST", "/order", headers=headers, body=body)
-        try:
-            out = resp.json()
-        except ValueError:
-            out = {"raw": _short(resp.text)}
-        if resp.status_code != 200 or (isinstance(out, dict) and out.get("success") is False):
-            raise ClobAuthError(
-                "order POST failed: %s %s" % (resp.status_code, _short(str(out)))
-            )
-        out["dry_run"] = False
-        out["submitted"] = True
-        out["maker"] = signed["maker"]
-        out["signer"] = signed["signer"]
-        out["signature_type"] = signed["signatureType"]
-        return out
+    dry_run: bool = True
+    max_order_usd: float = 30.0
+    max_daily_usd: float = 100.0
+    # Substrings that prove World-Cup provenance.  Single-match Polymarket
+    # questions ("Will X win on <date>?") carry no "world cup"/"fifa" keyword,
+    # so we also accept the FIFA-World-Cup event-slug prefix ``fifwc`` that the
+    # producer folds into the market_question it forwards.
+    allowed_keywords: Tuple[str, ...] = ("world cup", "fifa", "wc", "fifwc")
+    host: str = CLOB_HOST
+    chain_id: int = signing.POLYGON_CHAIN_ID
+    signature_type: Optional[int] = None
+    db_path: str = "data/wca.db"
 
 
-_SIG_NAMES = {
-    signing.SIG_EOA: "EOA",
-    signing.SIG_POLY_PROXY: "POLY_PROXY",
-    signing.SIG_POLY_GNOSIS_SAFE: "POLY_GNOSIS_SAFE",
-}
+@dataclass
+class ApiCreds:
+    """L2 API credentials returned from create/derive."""
+
+    api_key: str
+    api_secret: str
+    api_passphrase: str
+
+
+# ---------------------------------------------------------------------------
+# Order-log table (daily cap).  The ``notional`` column is read by the bot's
+# ``/pm`` daily-spend reporter (wca.bot.app._pm_daily_spend).
+# ---------------------------------------------------------------------------
+
+_DDL_PM_ORDER_LOG = """
+CREATE TABLE IF NOT EXISTS pm_order_log (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts_utc      TEXT    NOT NULL,
+    day_utc     TEXT    NOT NULL,
+    token_id    TEXT    NOT NULL,
+    side        TEXT    NOT NULL,
+    price       REAL    NOT NULL,
+    size        REAL    NOT NULL,
+    notional    REAL    NOT NULL,
+    order_id    TEXT,
+    dry_run     INTEGER NOT NULL DEFAULT 0
+)
+"""
+
+
+# ---------------------------------------------------------------------------
+# Rounding helpers (mirror py_clob_client order_builder/helpers.py).
+# ---------------------------------------------------------------------------
+
+
+def _round(value: float, decimals: int, rounding: str) -> Decimal:
+    q = Decimal(1).scaleb(-decimals)
+    return Decimal(str(value)).quantize(q, rounding=rounding)
+
+
+def round_down(value: float, decimals: int) -> Decimal:
+    return _round(value, decimals, ROUND_DOWN)
+
+
+def round_normal(value: float, decimals: int) -> Decimal:
+    return _round(value, decimals, ROUND_HALF_UP)
+
+
+def _to_token_units(amount: Decimal) -> int:
+    """Convert a human USDC/share amount to integer base units (6 decimals)."""
+    scaled = (amount * (Decimal(10) ** _USDC_DECIMALS)).quantize(
+        Decimal(1), rounding=ROUND_HALF_UP
+    )
+    return int(scaled)
+
+
+def compute_order_amounts(
+    side: int, price: float, size: float, tick_size: str = "0.01"
+) -> Tuple[int, int]:
+    """Compute integer ``makerAmount`` / ``takerAmount`` from price and size.
+
+    Mirrors ``py_clob_client`` ``get_order_amounts``.  ``size`` is the number
+    of outcome shares; ``price`` is the per-share price in USDC (0..1).
+
+    For BUY: maker gives USDC, taker gives shares
+        taker = size; maker = size * price
+    For SELL: maker gives shares, taker gives USDC
+        maker = size; taker = size * price
+
+    Returns
+    -------
+    (maker_amount, taker_amount) as integer USDC base units (10**6).
+    """
+    cfg = _ROUNDING_CONFIG.get(tick_size, _ROUNDING_CONFIG["0.01"])
+    price_dp, size_dp, amount_dp = cfg
+    raw_price = round_normal(price, price_dp)
+
+    if side == SIDE_BUY:
+        raw_taker = round_down(size, size_dp)
+        raw_maker = raw_taker * raw_price
+    elif side == SIDE_SELL:
+        raw_maker = round_down(size, size_dp)
+        raw_taker = raw_maker * raw_price
+    else:
+        raise TradeError("side must be 0 (BUY) or 1 (SELL)")
+
+    # The reference client re-rounds the product to `amount` decimals.
+    raw_maker = round_down(float(raw_maker), amount_dp)
+    raw_taker = round_down(float(raw_taker), amount_dp)
+    return _to_token_units(raw_maker), _to_token_units(raw_taker)
+
+
+def _utc_now() -> int:
+    return int(time.time())
+
+
+def _utc_day(ts: Optional[int] = None) -> str:
+    dt = datetime.fromtimestamp(ts if ts is not None else _utc_now(), tz=timezone.utc)
+    return dt.strftime("%Y-%m-%d")
 
 
 def _short(text: Optional[str], n: int = 240) -> str:
@@ -303,3 +296,689 @@ def _short(text: Optional[str], n: int = 240) -> str:
         return ""
     s = str(text).strip().replace("\n", " ")
     return s if len(s) <= n else s[:n] + "..."
+
+
+# ---------------------------------------------------------------------------
+# The client.
+# ---------------------------------------------------------------------------
+
+
+class ClobTrader:
+    """Sign and submit Polymarket CLOB requests for any account class.
+
+    Construction supports the two call styles in the codebase:
+
+    * Bot / probe::
+
+          ClobTrader(private_key, funder=..., signature_type=..., host=...)
+
+    * Config / injected-session (tests, producer)::
+
+          ClobTrader(private_key, config=TradeConfig(...), session=...)
+
+    Either way the resolved guardrails live on ``self.config``.  ``funder`` /
+    ``signature_type`` / ``host`` passed directly override the corresponding
+    config fields.
+
+    Parameters
+    ----------
+    private_key:
+        The EOA private key (with or without ``0x``).  If ``None`` it is read
+        from ``POLYMARKET_PRIVATE_KEY`` in the environment; if neither is
+        present, construction raises :class:`TradeError` with a safe message.
+        Never logged.
+    funder:
+        The funding wallet (proxy / safe) when funds do not sit on the EOA.
+        Drives ``maker`` for sig types 1/2.  Omit for a bare EOA.
+    signature_type:
+        Force a signature type (0/1/2).  ``None`` -> autodetect from where the
+        USDC balance lives.
+    host:
+        CLOB base URL (overridable for tests).
+    creds:
+        Pre-derived ``{"api_key","api_secret","api_passphrase"}`` to skip the
+        L1 derive round-trip.
+    config:
+        :class:`TradeConfig` instance (guardrails).  A default is created when
+        omitted.
+    session:
+        A ``requests.Session``-like object (injected for tests).  Defaults to a
+        lazily-created :class:`requests.Session`.
+    """
+
+    def __init__(
+        self,
+        private_key: Optional[str] = None,
+        funder: Optional[str] = None,
+        signature_type: Optional[int] = None,
+        host: Optional[str] = None,
+        creds: Optional[Dict[str, str]] = None,
+        config: Optional[TradeConfig] = None,
+        session: Optional[Any] = None,
+    ) -> None:
+        self.config = config or TradeConfig()
+        if host is not None:
+            self.config.host = host
+        if signature_type is not None:
+            self.config.signature_type = signature_type
+
+        key = private_key if private_key is not None else os.environ.get(
+            "POLYMARKET_PRIVATE_KEY"
+        )
+        if not key:
+            raise TradeError(
+                "POLYMARKET_PRIVATE_KEY is not set; cannot construct a signer. "
+                "Set it in the environment (.env) to trade."
+            )
+        try:
+            self.address = signing.address_for_key(key)
+        except Exception:
+            # Never echo the key or the underlying error (may contain key).
+            raise TradeError("invalid POLYMARKET_PRIVATE_KEY")
+        self._key = key
+
+        self._session = session
+        self._forced_funder = funder
+        self._forced_sig_type = self.config.signature_type
+
+        # Cached / resolved state.
+        self._creds: Optional[ApiCreds] = (
+            ApiCreds(
+                api_key=creds.get("api_key", ""),
+                api_secret=creds.get("api_secret", ""),
+                api_passphrase=creds.get("api_passphrase", ""),
+            )
+            if creds
+            else None
+        )
+        # Resolved after detect_account_class(); sensible EOA defaults.
+        self._sig_type: int = (
+            self._forced_sig_type if self._forced_sig_type is not None else SIG_TYPE_EOA
+        )
+        self._funder: str = funder or self.address
+        # True once the account class is *proven* — either forced by the caller
+        # (funder/sig_type), or because the Data API showed value at the EOA or a
+        # discovered proxy.  When it stays False the EOA was used only as a
+        # graceful offline fallback; placing a *live* order in that state is
+        # refused (the funder is almost certainly the empty EOA, not the proxy
+        # that actually holds USDC).  See place_order's live-order guard.
+        self._account_class_proven: bool = (
+            self._forced_sig_type is not None or self._forced_funder is not None
+        )
+
+    # ------------------------------------------------------------------ host
+    @property
+    def host(self) -> str:
+        return self.config.host.rstrip("/")
+
+    @property
+    def funder(self) -> str:
+        """The address holding USDC (the order *maker*)."""
+        return self._funder
+
+    @property
+    def signature_type(self) -> int:
+        """Resolved signature type (0/1/2)."""
+        return self._sig_type
+
+    # ------------------------------------------------------------------ HTTP
+    def _sess(self):
+        if self._session is None:
+            import requests
+
+            self._session = requests.Session()
+        return self._session
+
+    def _request(
+        self,
+        method: str,
+        path: str,
+        headers: Optional[Dict[str, str]] = None,
+        params: Optional[Dict[str, Any]] = None,
+        body: Optional[str] = None,
+    ):
+        url = self.host + path
+        try:
+            return self._sess().request(
+                method,
+                url,
+                headers=headers,
+                params=params,
+                data=body,
+                timeout=_TIMEOUT,
+            )
+        except Exception as exc:
+            raise TradeError("network error on %s %s" % (method, path)) from exc
+
+    @staticmethod
+    def _now() -> int:
+        return _utc_now()
+
+    # ------------------------------------------------------------ L1: creds
+    def l1_headers(
+        self, timestamp: Optional[int] = None, nonce: int = 0
+    ) -> Dict[str, str]:
+        """Build L1 headers (POLY_ADDRESS/SIGNATURE/TIMESTAMP/NONCE)."""
+        ts = timestamp if timestamp is not None else self._now()
+        return signing.build_l1_headers(self._key, ts, nonce)
+
+    def derive_or_create_creds(self, nonce: int = 0) -> Dict[str, str]:
+        """Derive (or create) the L2 API credentials via an L1 ClobAuth sig.
+
+        Tries ``GET /auth/derive-api-key`` first (idempotent for an existing
+        key) then falls back to ``POST /auth/api-key``.  Raises
+        :class:`ClobAuthError` carrying the CLOB error text on failure — this
+        is the auth-failure signal the probe treats as the bug detector.
+
+        Returns a plain dict ``{api_key, api_secret, api_passphrase}``; see
+        :meth:`derive_or_create_api_creds` for the :class:`ApiCreds` form.
+        """
+        creds = self.derive_or_create_api_creds(nonce=nonce)
+        return {
+            "api_key": creds.api_key,
+            "api_secret": creds.api_secret,
+            "api_passphrase": creds.api_passphrase,
+        }
+
+    def derive_or_create_api_creds(self, nonce: int = 0) -> ApiCreds:
+        """Return L2 API credentials as an :class:`ApiCreds` (cached)."""
+        if self._creds is not None:
+            return self._creds
+
+        headers = self.l1_headers(nonce=nonce)
+        creds, err = self._try_creds_endpoint("GET", "/auth/derive-api-key", headers)
+        if creds is None:
+            headers = self.l1_headers(nonce=nonce)  # fresh timestamp
+            creds, err2 = self._try_creds_endpoint("POST", "/auth/api-key", headers)
+            err = "derive=%s | create=%s" % (err, err2)
+        if creds is None:
+            raise ClobAuthError("L1 auth failed: %s" % err)
+
+        self._creds = creds
+        return creds
+
+    def _try_creds_endpoint(
+        self, method: str, path: str, headers: Dict[str, str]
+    ) -> Tuple[Optional[ApiCreds], str]:
+        resp = self._request(method, path, headers=headers)
+        status = getattr(resp, "status_code", 200)
+        if status >= 400:
+            return None, "%s %s" % (status, _short(getattr(resp, "text", "")))
+        try:
+            data = resp.json()
+        except Exception:
+            return None, "%s (unparseable body)" % status
+        key = data.get("apiKey") or data.get("api_key")
+        secret = data.get("secret") or data.get("api_secret")
+        passphrase = data.get("passphrase") or data.get("api_passphrase")
+        if not (key and secret and passphrase):
+            return None, "%s (no usable creds)" % status
+        return ApiCreds(api_key=key, api_secret=secret, api_passphrase=passphrase), ""
+
+    # -- L2: per-request HMAC ---------------------------------------------
+
+    @staticmethod
+    def build_hmac_signature(
+        secret: str, timestamp: int, method: str, path: str, body: Optional[str]
+    ) -> str:
+        """Compute the base64url L2 HMAC signature (delegates to signing)."""
+        return signing.build_hmac_signature(secret, timestamp, method, path, body)
+
+    def l2_headers(
+        self,
+        method: str,
+        path: str,
+        body: Optional[str] = None,
+        timestamp: Optional[int] = None,
+    ) -> Dict[str, str]:
+        """Build L2 headers for an authenticated CLOB request."""
+        creds = self.derive_or_create_api_creds()
+        ts = timestamp if timestamp is not None else self._now()
+        return signing.build_l2_headers(
+            self.address,
+            creds.api_key,
+            creds.api_secret,
+            creds.api_passphrase,
+            ts,
+            method,
+            path,
+            body,
+        )
+
+    # -- authenticated / public GET helpers -------------------------------
+
+    def _l2_get(self, path: str, params: Optional[Dict[str, Any]] = None) -> Any:
+        headers = self.l2_headers("GET", path)
+        resp = self._request("GET", path, headers=headers, params=params)
+        if getattr(resp, "status_code", 200) >= 400:
+            raise ClobAuthError(
+                "CLOB GET %s failed: %s %s"
+                % (path, resp.status_code, _short(getattr(resp, "text", "")))
+            )
+        return resp.json()
+
+    def _public_get(self, path: str, params: Optional[Dict[str, Any]] = None) -> Any:
+        resp = self._request("GET", path, params=params)
+        if getattr(resp, "status_code", 200) >= 400:
+            raise TradeError(
+                "CLOB GET %s failed (status %s)" % (path, resp.status_code)
+            )
+        return resp.json()
+
+    def balance_allowance(self, signature_type: Optional[int] = None) -> Dict[str, Any]:
+        """Fetch USDC (collateral) balance + allowance for this account (L2)."""
+        sig_type = signature_type if signature_type is not None else self._sig_type
+        return self._l2_get(
+            "/balance-allowance",
+            params={"asset_type": "COLLATERAL", "signature_type": sig_type},
+        )
+
+    def open_orders(self, market: Optional[str] = None) -> List[Dict[str, Any]]:
+        """List this account's open orders (L2 ``GET /data/orders``)."""
+        params = {"market": market} if market else None
+        data = self._l2_get("/data/orders", params=params)
+        if isinstance(data, dict):
+            return data.get("data", data.get("orders", [])) or []
+        return data or []
+
+    def get_order_book(self, token_id: str) -> Any:
+        """GET /book?token_id=... (public)."""
+        return self._public_get("/book", params={"token_id": str(token_id)})
+
+    def midpoint(self, token_id: str) -> Optional[float]:
+        """Public midpoint for a token id, or ``None`` if no book exists."""
+        resp = self._request("GET", "/midpoint", params={"token_id": str(token_id)})
+        if getattr(resp, "status_code", 200) >= 400:
+            return None
+        try:
+            data = resp.json()
+        except ValueError:
+            return None
+        mid = data.get("mid") if isinstance(data, dict) else data
+        try:
+            return float(mid) if mid is not None else None
+        except (TypeError, ValueError):
+            return None
+
+    # -- account-class detection ------------------------------------------
+
+    def detect_account_class(self) -> Dict[str, Any]:
+        """Resolve ``signature_type`` + ``funder`` from where the USDC lives.
+
+        Strategy
+        --------
+        1. If a signature type was forced (constructor/config), honour it; the
+           funder is the explicit funder (or the EOA for type 0).
+        2. Else, if an explicit funder distinct from the EOA was supplied,
+           assume a Gnosis-safe proxy (type 2, the MetaMask-deposit flow).
+        3. Else query the Data API: if the EOA holds value, self-custody EOA
+           (type 0).  If not but a discovered proxy holds value, use
+           POLY_GNOSIS_SAFE (type 2, maker = proxy).  Fall back gracefully to
+           EOA self-custody when discovery fails (so dry-run works offline).
+
+        Returns a dict ``{address, signature_type, signature_type_name,
+        funder}`` (the probe reads these keys).
+        """
+        if self._forced_sig_type is not None:
+            self._sig_type = self._forced_sig_type
+            self._funder = self._forced_funder or (
+                self.address if self._sig_type == SIG_TYPE_EOA else self._funder
+            )
+            self._account_class_proven = True
+        elif self._forced_funder and self._forced_funder.lower() != self.address.lower():
+            # A distinct funder address means a proxy-funded account.  MetaMask
+            # deposits use a Gnosis safe (type 2); email/magic uses type 1.
+            self._sig_type = SIG_TYPE_POLY_GNOSIS_SAFE
+            self._funder = self._forced_funder
+            self._account_class_proven = True
+        else:
+            self._sig_type, self._funder, self._account_class_proven = (
+                self._discover_account_class()
+            )
+
+        return {
+            "address": self.address,
+            "signature_type": self._sig_type,
+            "signature_type_name": _SIG_NAMES.get(self._sig_type, "?"),
+            "funder": self._funder,
+        }
+
+    def _discover_account_class(self) -> Tuple[int, str, bool]:
+        """Return ``(sig_type, funder, proven)``.
+
+        ``proven`` is ``True`` only when the Data API positively showed value at
+        the EOA or a discovered proxy.  When discovery turns up nothing it is
+        ``False`` and the EOA is returned purely as a graceful offline default —
+        good enough for dry-run signing, but :meth:`place_order` refuses to
+        submit a *live* order in that state (the funder is almost certainly the
+        empty EOA rather than the proxy that holds USDC).
+        """
+        eoa = self.address
+        eoa_value = self._data_api_value(eoa)
+        if eoa_value is not None and eoa_value > 0:
+            return SIG_TYPE_EOA, eoa, True
+
+        proxy = self._lookup_proxy_address(eoa)
+        if proxy:
+            proxy_value = self._data_api_value(proxy)
+            if proxy_value is not None and proxy_value > 0:
+                return SIG_TYPE_POLY_GNOSIS_SAFE, proxy, True
+
+        # Unproven fallback: assume EOA self-custody for dry-run only.
+        return SIG_TYPE_EOA, eoa, False
+
+    def _data_api_value(self, address: str) -> Optional[float]:
+        """Return total position value (USD) for *address*, or None on failure."""
+        try:
+            resp = self._sess().request(
+                "GET", DATA_API_HOST + "/value", params={"user": address},
+                timeout=_TIMEOUT,
+            )
+        except Exception:
+            return None
+        if getattr(resp, "status_code", 200) >= 400:
+            return None
+        try:
+            data = resp.json()
+        except Exception:
+            return None
+        if isinstance(data, (int, float)):
+            return float(data)
+        if isinstance(data, dict):
+            v = data.get("value")
+            return float(v) if v is not None else None
+        if isinstance(data, list) and data:
+            v = data[0].get("value") if isinstance(data[0], dict) else None
+            return float(v) if v is not None else None
+        return None
+
+    def _lookup_proxy_address(self, eoa: str) -> Optional[str]:
+        """Resolve the Polymarket proxy/safe address for *eoa* via Data API."""
+        try:
+            resp = self._sess().request(
+                "GET", DATA_API_HOST + "/profile", params={"address": eoa},
+                timeout=_TIMEOUT,
+            )
+        except Exception:
+            return None
+        if getattr(resp, "status_code", 200) >= 400:
+            return None
+        try:
+            data = resp.json()
+        except Exception:
+            return None
+        if isinstance(data, dict):
+            return data.get("proxyWallet") or data.get("proxy_wallet")
+        return None
+
+    # -- order construction & signing -------------------------------------
+
+    def build_order(
+        self,
+        token_id: str,
+        side: str,
+        price: float,
+        size: float,
+        *,
+        neg_risk: bool = False,
+        salt: Optional[int] = None,
+        fee_rate_bps: int = 0,
+        nonce: int = 0,
+        expiration: int = 0,
+    ) -> Dict[str, Any]:
+        """Build and EIP-712-sign a CTF-Exchange order (server JSON form).
+
+        ``size`` is the number of outcome *shares*; ``price`` is the per-share
+        price in USDC.  The order is signed for the resolved account class so
+        ``maker`` = funder (proxy/safe for types 1/2, EOA for type 0) and
+        ``signer`` = EOA — the proxy-wallet fix.  Returns the dict ready to nest
+        under ``{"order": ...}`` in the POST body.
+        """
+        if not (0.0 < price < 1.0):
+            raise TradeError("price must be strictly between 0 and 1")
+        if size <= 0:
+            raise TradeError("size must be positive")
+
+        args = signing.OrderArgs(
+            token_id=str(token_id),
+            price=float(price),
+            size=float(size),
+            side=str(side),
+            fee_rate_bps=int(fee_rate_bps),
+            nonce=int(nonce),
+            expiration=int(expiration),
+        )
+        return signing.build_signed_order(
+            self._key,
+            args,
+            funder=self._funder,
+            signature_type=self._sig_type,
+            neg_risk=neg_risk,
+            salt=salt,
+        )
+
+    # -- guardrails: market keyword + daily cap ---------------------------
+
+    def _check_keyword_allowed(self, market_question: Optional[str]) -> None:
+        if not market_question:
+            raise TradeError(
+                "market_question is required to enforce the keyword allowlist"
+            )
+        q = market_question.lower()
+        if not any(kw.lower() in q for kw in self.config.allowed_keywords):
+            raise TradeError(
+                "market is not in the keyword allowlist; refusing to trade"
+            )
+
+    def _connect(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(self.config.db_path)
+        conn.execute("PRAGMA journal_mode=WAL")
+        return conn
+
+    def _ensure_log_table(self) -> None:
+        with self._connect() as conn:
+            conn.execute(_DDL_PM_ORDER_LOG)
+
+    def _daily_notional(self) -> float:
+        self._ensure_log_table()
+        day = _utc_day()
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT COALESCE(SUM(notional), 0.0) FROM pm_order_log "
+                "WHERE day_utc = ? AND dry_run = 0",
+                (day,),
+            ).fetchone()
+            return float(row[0]) if row else 0.0
+
+    def _log_order(
+        self,
+        token_id: str,
+        side: str,
+        price: float,
+        size: float,
+        notional: float,
+        order_id: Optional[str],
+        dry_run: bool,
+    ) -> None:
+        self._ensure_log_table()
+        with self._connect() as conn:
+            conn.execute(
+                "INSERT INTO pm_order_log "
+                "(ts_utc, day_utc, token_id, side, price, size, notional, "
+                " order_id, dry_run) VALUES (?,?,?,?,?,?,?,?,?)",
+                (
+                    datetime.now(timezone.utc).isoformat(),
+                    _utc_day(),
+                    str(token_id),
+                    side,
+                    float(price),
+                    float(size),
+                    float(notional),
+                    order_id,
+                    1 if dry_run else 0,
+                ),
+            )
+
+    # -- place / cancel ----------------------------------------------------
+
+    def place_order(
+        self,
+        token_id: str,
+        price: float,
+        size: float,
+        side: str,
+        *,
+        neg_risk: bool = False,
+        dry_run: Optional[bool] = None,
+        market_question: Optional[str] = None,
+        tick_size: str = "0.01",
+        order_type: str = "GTC",
+    ) -> Dict[str, Any]:
+        """Validate guardrails, sign, and (unless dry-run) POST one order.
+
+        Positional contract matches the bot: ``(token_id, price, size, side)``
+        where ``size`` is the number of outcome shares and ``price`` the
+        per-share USDC price (notional = price * size).
+
+        ``dry_run`` overrides ``config.dry_run`` when given (the bot passes the
+        ``PM_DRY_RUN`` env flag per call).  Guardrails enforced *before* any
+        network POST:
+          1. per-order cap (notional <= ``config.max_order_usd``);
+          2. keyword allowlist (``market_question`` must match) — skipped when
+             no ``market_question`` is supplied AND the allowlist is the only
+             gate the caller relies on; the bot supplies pre-vetted markets;
+          3. daily cap (today's live notional + this order
+             <= ``config.max_daily_usd``), live orders only.
+
+        Returns a status dict.  In dry-run: ``{"dry_run": True, "submitted":
+        False, "request": {...}, maker/signer/signature_type/side/makerAmount/
+        takerAmount}``.  Live: the parsed server response merged with
+        ``{"dry_run": False, "submitted": True, maker/signer/signature_type}``
+        and (for the bot) ``orderID``.
+        """
+        is_dry = self.config.dry_run if dry_run is None else bool(dry_run)
+        notional = float(price) * float(size)
+
+        # Resolve account class so maker/signer are correct before signing.
+        self.detect_account_class()
+
+        # (0) Funder safety — never submit a LIVE order with an unproven EOA
+        # funder.  When no funder / signature_type was supplied and Data-API
+        # discovery could not prove where the USDC lives, the maker defaulted to
+        # the EOA (which, for this account, holds $0 — the real balance sits in
+        # the Polymarket proxy/safe).  Submitting would sign from the wrong
+        # wallet; refuse loudly instead of silently using the EOA.  Dry-run is
+        # exempt so offline signing/inspection still works.
+        if not is_dry and not self._account_class_proven:
+            raise TradeError(
+                "refusing to submit a live order: account class is unproven and "
+                "the funder defaulted to the EOA (%s), which is not where the "
+                "USDC lives. Set POLYMARKET_FUNDER (and POLYMARKET_SIG_TYPE=2 "
+                "for a Gnosis-safe/deposit wallet) before trading live."
+                % self.address
+            )
+
+        # (1) per-order cap
+        if notional > self.config.max_order_usd + 1e-9:
+            raise TradeError(
+                "order notional %.2f exceeds per-order cap %.2f"
+                % (notional, self.config.max_order_usd)
+            )
+
+        # (2) keyword allowlist — only enforced when a question is supplied.
+        # The bot vets markets before parking; an explicit question still gets
+        # checked so the producer/probe path stays safe.
+        if market_question is not None:
+            self._check_keyword_allowed(market_question)
+
+        # (3) daily cap (live orders only)
+        if not is_dry:
+            spent = self._daily_notional()
+            if spent + notional > self.config.max_daily_usd + 1e-9:
+                raise TradeError(
+                    "daily cap exceeded: %.2f already placed, +%.2f would pass %.2f"
+                    % (spent, notional, self.config.max_daily_usd)
+                )
+
+        signed = self.build_order(
+            token_id=token_id,
+            side=side,
+            price=price,
+            size=size,
+            neg_risk=neg_risk,
+        )
+
+        if is_dry:
+            self._log_order(
+                token_id, side.upper(), price, size, notional, None, dry_run=True
+            )
+            return {
+                "dry_run": True,
+                "submitted": False,
+                "request": {
+                    "order": signed,
+                    "owner": self._creds.api_key if self._creds else self.address,
+                    "orderType": order_type,
+                    "postOnly": False,
+                },
+                "maker": signed["maker"],
+                "signer": signed["signer"],
+                "signature_type": signed["signatureType"],
+                "side": signed["side"],
+                "makerAmount": signed["makerAmount"],
+                "takerAmount": signed["takerAmount"],
+            }
+
+        creds = self.derive_or_create_api_creds()
+        envelope = {
+            "order": signed,
+            "owner": creds.api_key,
+            "orderType": order_type,
+            "postOnly": False,
+        }
+        body = json.dumps(envelope, separators=(",", ":"))
+        headers = self.l2_headers("POST", "/order", body=body)
+        headers["Content-Type"] = "application/json"
+        resp = self._request("POST", "/order", headers=headers, body=body)
+        try:
+            out = resp.json()
+        except ValueError:
+            out = {"raw": _short(getattr(resp, "text", ""))}
+        if getattr(resp, "status_code", 200) >= 400 or (
+            isinstance(out, dict) and out.get("success") is False
+        ):
+            raise ClobAuthError(
+                "order POST failed: %s %s" % (resp.status_code, _short(str(out)))
+            )
+
+        order_id = (
+            out.get("orderID") or out.get("orderId") if isinstance(out, dict) else None
+        )
+        self._log_order(
+            token_id, side.upper(), price, size, notional, order_id, dry_run=False
+        )
+        result: Dict[str, Any] = dict(out) if isinstance(out, dict) else {"response": out}
+        result.update(
+            {
+                "dry_run": False,
+                "submitted": True,
+                "response": out,
+                "maker": signed["maker"],
+                "signer": signed["signer"],
+                "signature_type": signed["signatureType"],
+            }
+        )
+        return result
+
+    def cancel_order(self, order_id: str) -> Any:
+        """DELETE /order with body {"orderID": id} (L2-authenticated)."""
+        body = json.dumps({"orderID": order_id}, separators=(",", ":"))
+        headers = self.l2_headers("DELETE", "/order", body=body)
+        headers["Content-Type"] = "application/json"
+        resp = self._request("DELETE", "/order", headers=headers, body=body)
+        if getattr(resp, "status_code", 200) >= 400:
+            raise ClobAuthError("cancel rejected (status %s)" % resp.status_code)
+        try:
+            return resp.json()
+        except Exception:
+            raise TradeError("could not parse cancel response")

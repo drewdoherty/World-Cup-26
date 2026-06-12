@@ -123,6 +123,154 @@ def get_event(event_id: str) -> Dict[str, Any]:
     return event
 
 
+def _parse_json_array(raw: Any) -> Optional[List[Any]]:
+    """Decode a JSON-string-encoded array (``'["a","b"]'``), tolerantly.
+
+    Polymarket encodes ``clobTokenIds``/``outcomes``/``outcomePrices`` as
+    JSON strings inside the JSON response. Returns the decoded list, the value
+    unchanged if it is already a list, or ``None`` if it cannot be decoded.
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, str):
+        try:
+            decoded = json.loads(raw)
+        except json.JSONDecodeError:
+            return None
+        return decoded if isinstance(decoded, list) else None
+    return None
+
+
+def _yes_token_and_price(
+    market: Dict[str, Any], event: Optional[Dict[str, Any]] = None
+) -> Optional[Dict[str, Any]]:
+    """Resolve the YES clobTokenId + best price for a binary Yes/No market.
+
+    Price preference: the mid of ``bestBid``/``bestAsk`` when both are present,
+    otherwise the YES ``outcomePrices`` entry. Returns ``None`` when no YES
+    token id can be parsed or no usable price exists.
+
+    When *event* is supplied its ``slug``/``title`` are returned as
+    ``event_slug``/``event_title`` so downstream callers can prove World-Cup
+    provenance (single-match questions like "Will X win on <date>?" carry no
+    "world cup"/"fifa" keyword, but the event slug is ``fifwc-...``).
+    """
+    token_ids = _parse_json_array(market.get("clobTokenIds"))
+    if not token_ids:
+        return None
+    outcomes = _parse_json_array(market.get("outcomes")) or []
+    # The YES token is the one paired with the "Yes" outcome (index 0 by
+    # Polymarket convention, but resolve by name when outcomes are present).
+    yes_idx = 0
+    for i, o in enumerate(outcomes):
+        if str(o).strip().lower() == "yes":
+            yes_idx = i
+            break
+    if yes_idx >= len(token_ids):
+        return None
+    token_id = str(token_ids[yes_idx])
+
+    # Best price: mid of bestBid/bestAsk if both present, else outcomePrices.
+    price: Optional[float] = None
+    bb, ba = market.get("bestBid"), market.get("bestAsk")
+    try:
+        if bb is not None and ba is not None:
+            bb_f, ba_f = float(bb), float(ba)
+            if bb_f > 0.0 and ba_f > 0.0:
+                price = (bb_f + ba_f) / 2.0
+    except (TypeError, ValueError):
+        price = None
+    if price is None:
+        prices = _parse_json_array(market.get("outcomePrices")) or []
+        if yes_idx < len(prices):
+            try:
+                price = float(prices[yes_idx])
+            except (TypeError, ValueError):
+                price = None
+    if price is None or not (0.0 < price < 1.0):
+        return None
+
+    return {
+        "token_id": token_id,
+        "price": price,
+        "neg_risk": bool(market.get("negRisk", False)),
+        "market_question": market.get("question") or "",
+        "outcome": "Yes",
+        "event_slug": (event or {}).get("slug") or "",
+        "event_title": (event or {}).get("title") or "",
+    }
+
+
+def resolve_outcome_token(
+    fixture_home: str,
+    fixture_away: str,
+    selection: str,
+    *,
+    events: Optional[List[Dict[str, Any]]] = None,
+) -> Optional[Dict[str, Any]]:
+    """Resolve a card selection to its Polymarket YES token + best price.
+
+    Matches the fixture ``(fixture_home, fixture_away)`` to a live single-match
+    World Cup event, then picks the market for ``selection``:
+
+    * a team name -> the ``"Will <Team> win on <date>?"`` market for that team;
+    * ``"Draw"`` (case-insensitive) -> the ``"... end in a draw?"`` market.
+
+    Team names are compared on their *canonical* spelling
+    (:func:`wca.data.teamnames.canonical`) so the odds-feed / results spelling
+    and Polymarket's spelling line up. ``events`` may be supplied to avoid a
+    network call (tests, batch runs); otherwise the live World Cup events are
+    fetched.
+
+    Returns ``{token_id, price, neg_risk, market_question, outcome}`` for the
+    YES outcome, or ``None`` when no event / market / token can be resolved.
+    """
+    from wca.data.teamnames import canonical
+
+    if events is None:
+        events = find_world_cup_markets(include_closed=False)
+
+    home_c = canonical(fixture_home)
+    away_c = canonical(fixture_away)
+    sel = (selection or "").strip()
+    is_draw = sel.lower() == "draw"
+    sel_c = canonical(sel) if not is_draw else None
+
+    # Find the event whose two teams (from per-team win markets) canonically
+    # match the fixture pair, order-independent.
+    for event in events:
+        markets = event.get("markets") or []
+        # Collect the per-team win markets and the draw market for this event.
+        team_markets: Dict[str, Dict[str, Any]] = {}
+        draw_market: Optional[Dict[str, Any]] = None
+        for m in markets:
+            git = (m.get("groupItemTitle") or "").strip()
+            question = (m.get("question") or "")
+            if git.lower().startswith("draw") or "end in a draw" in question.lower():
+                draw_market = m
+                continue
+            if git:
+                team_markets[canonical(git)] = m
+
+        event_teams = set(team_markets.keys())
+        if {home_c, away_c} != event_teams:
+            continue
+
+        if is_draw:
+            if draw_market is None:
+                return None
+            return _yes_token_and_price(draw_market, event)
+
+        market = team_markets.get(sel_c)
+        if market is None:
+            return None
+        return _yes_token_and_price(market, event)
+
+    return None
+
+
 def find_world_cup_markets(include_closed: bool = False) -> List[Dict[str, Any]]:
     """Return all active Polymarket 2026 FIFA World Cup markets.
 

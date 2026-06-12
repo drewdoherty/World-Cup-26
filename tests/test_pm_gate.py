@@ -39,10 +39,13 @@ class _FakeTrader:
     def __init__(self):
         self.calls = []
 
-    def place_order(self, token_id, price, size, side, *, neg_risk=False, dry_run=True):
+    def place_order(
+        self, token_id, price, size, side, *, neg_risk=False, dry_run=True,
+        market_question=None,
+    ):
         self.calls.append(
             dict(token_id=token_id, price=price, size=size, side=side,
-                 neg_risk=neg_risk, dry_run=dry_run)
+                 neg_risk=neg_risk, dry_run=dry_run, market_question=market_question)
         )
         if dry_run:
             return {"dry_run": True, "submitted": False, "maker": PROXY,
@@ -149,6 +152,24 @@ def test_confirm_yes_forwards_neg_risk_and_side(tmp_path):
     call = trader.calls[0]
     assert call["side"] == "SELL" and call["neg_risk"] is True
     assert call["token_id"] == "123456789"
+
+
+def test_confirm_yes_forwards_market_question_with_event_slug(tmp_path):
+    """The bot must forward the question + WC event slug so the trader's
+    keyword allowlist can gate the live path (single-match questions carry no
+    WC keyword on their own; the ``fifwc-...`` slug does)."""
+    db = str(tmp_path / "t.db")
+    app.park_order(
+        _proposal(
+            market_question="Will Canada win on 2026-06-12?",
+            event_slug="fifwc-can-par-2026-06-12",
+        )
+    )
+    trader = _FakeTrader()
+    app.handle_confirmation("Y PM-1", db, trader=trader)
+    fwd = trader.calls[0]["market_question"]
+    assert "Will Canada win on 2026-06-12?" in fwd
+    assert "fifwc-can-par-2026-06-12" in fwd
 
 
 # ---------------------------------------------------------------------------

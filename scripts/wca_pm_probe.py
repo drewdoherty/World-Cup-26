@@ -106,16 +106,22 @@ def main() -> int:
         print(_MISSING_KEY_MESSAGE)
         return 0
 
-    funder = os.environ.get("POLYMARKET_FUNDER") or None
-    sig_type_env = os.environ.get("POLYMARKET_SIG_TYPE")
-    sig_type = int(sig_type_env) if sig_type_env not in (None, "") else None
-
     # Lazy import so the script still parses if the trader lands later.
     try:
-        from wca.pm.trader import ClobTrader, ClobAuthError
+        from wca.pm.trader import ClobTrader, ClobAuthError, resolve_funder_from_env
     except Exception as exc:
         print("ERROR: could not import ClobTrader: %s" % exc)
         return 2
+
+    # Resolve the funder, falling back to the known proxy (Gnosis safe) — never
+    # the empty EOA — when POLYMARKET_FUNDER is unset.  This makes the probe
+    # report the account class an actual live order would use.
+    funder, sig_type, used_fallback = resolve_funder_from_env()
+    if used_fallback:
+        print(
+            "  NOTE: POLYMARKET_FUNDER unset — using known proxy %s (sig type %s)."
+            % (funder, sig_type)
+        )
 
     try:
         trader = ClobTrader(key, funder=funder, signature_type=sig_type)
