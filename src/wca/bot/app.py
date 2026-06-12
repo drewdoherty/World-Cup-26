@@ -269,19 +269,37 @@ def _pool_rows(db_path: str) -> Dict[str, Dict[str, float]]:
             # Split them so auto vs manual P&L is legible.
             if v == "polymarket":
                 v = "polymarket-auto" if str(r["account"]) == "2" else "polymarket"
-            d = pools.setdefault(v, {"open": 0.0, "settled_pl": 0.0, "deposited": 0.0, "n": 0})
+            d = pools.setdefault(
+                v, {"open": 0.0, "settled_pl": 0.0, "settled_staked": 0.0, "deposited": 0.0, "n": 0}
+            )
             d["n"] += 1
             if r["status"] == "open":
                 d["open"] += float(r["stake"] or 0.0)
             elif r["status"] in ("won", "lost"):
                 d["settled_pl"] += float(r["settled_pl"] or 0.0)
+                d["settled_staked"] += float(r["stake"] or 0.0)
         for e in con.execute("SELECT amount, reason FROM bankroll_events"):
             reason = (e["reason"] or "").lower()
-            for v in ("polymarket", "kalshi", "sportsbook"):
+            # Longest tag first: "pool=polymarket" is a substring of
+            # "pool=polymarket-auto", so the sub-pool must be checked first.
+            for v in ("polymarket-auto", "polymarket", "kalshi", "sportsbook"):
                 if "pool=" + v in reason:
-                    pools.setdefault(v, {"open": 0.0, "settled_pl": 0.0, "deposited": 0.0, "n": 0})
+                    pools.setdefault(
+                        v, {"open": 0.0, "settled_pl": 0.0, "settled_staked": 0.0, "deposited": 0.0, "n": 0}
+                    )
                     pools[v]["deposited"] += float(e["amount"] or 0.0)
                     break
+        # The auto wallet is funded out of the manual polymarket pool. Until a
+        # transfer is ledgered as pool=polymarket-auto, impute the minimum
+        # transfer that covers its open stakes and losses, so the sub-pool's
+        # bank never goes negative and the two rows still sum to the truth.
+        auto = pools.get("polymarket-auto")
+        parent = pools.get("polymarket")
+        if auto is not None and parent is not None:
+            transfer = auto["open"] - (auto["deposited"] + auto["settled_pl"])
+            if transfer > 0:
+                auto["deposited"] += transfer
+                parent["deposited"] -= transfer
     except Exception:
         pass
     finally:
@@ -308,24 +326,49 @@ def handle_summary(db_path: str) -> str:
         at_risk = d["open"]
         pl = d["settled_pl"]
         pool_table_rows.append(
-            "%-12s %s%9.2f  %s%8.2f  %s%+8.2f"
+            "%-15s %s%9.2f  %s%8.2f  %s%+8.2f"
             % (v, sym, bank, sym, at_risk, sym, pl)
         )
+
+    # Never sum across currencies: aggregate per symbol (£ pools vs $ pools).
+    by_ccy: Dict[str, Dict[str, float]] = {}
+    for v, d in pools.items():
+        sym = _VENUE_SYMBOL.get(v, "$")
+        c = by_ccy.setdefault(sym, {"open": 0.0, "settled_staked": 0.0, "settled_pl": 0.0})
+        c["open"] += d["open"]
+        c["settled_staked"] += d.get("settled_staked", 0.0)
+        c["settled_pl"] += d["settled_pl"]
+
+    def per_ccy(fmt: str, key: str) -> str:
+        return " / ".join(
+            fmt % (sym, by_ccy[sym][key]) for sym in ("£", "$") if sym in by_ccy
+        ) or "0.00"
+
+    def roi_per_ccy() -> str:
+        parts = []
+        for sym in ("£", "$"):
+            if sym not in by_ccy:
+                continue
+            staked = by_ccy[sym]["settled_staked"]
+            r = (by_ccy[sym]["settled_pl"] / staked) if staked else float("nan")
+            parts.append("%s %s" % (sym, pct(r)))
+        return " / ".join(parts) or "N/A"
 
     lines = [
         "\U0001f4b0 *World Cup Alpha — portfolio*",
         "Bets: %d (open %d / won %d / lost %d / void %d)"
         % (s["total_bets"], s["open_bets"], s["won_bets"], s["lost_bets"], s["void_bets"]),
-        "At risk (open): %.2f   Settled staked: %.2f   P&L: %.2f   ROI: %s"
-        % (s.get("open_staked", 0.0), s["total_staked"], s["total_pl"], pct(s["roi"])),
-        "Avg CLV: %s   Beat close: %s" % (pct(s["avg_clv"]), pct(s["pct_beat_close"])),
+        "At risk (open): %s" % per_ccy("%s%.2f", "open"),
+        "Settled staked: %s   P&L: %s" % (per_ccy("%s%.2f", "settled_staked"), per_ccy("%s%+.2f", "settled_pl")),
+        "ROI: %s   Avg CLV: %s   Beat close: %s"
+        % (roi_per_ccy(), pct(s["avg_clv"]), pct(s["pct_beat_close"])),
         "",
         "*Bankroll by pool*",
     ]
 
     if pool_table_rows:
         lines.append("```")
-        lines.append("%-12s %10s  %9s  %9s" % ("POOL", "BANK", "AT RISK", "P&L"))
+        lines.append("%-15s %10s  %9s  %9s" % ("POOL", "BANK", "AT RISK", "P&L"))
         lines.extend(pool_table_rows)
         lines.append("```")
 
