@@ -318,25 +318,51 @@ class OrderArgs:
     fee_rate_bps: int = 0
     nonce: int = 0
     expiration: int = 0  # 0 == GTC (no expiry)
+    tick_size: str = "0.01"  # market tick; governs amount rounding decimals
 
 
-def order_amounts(side: str, price: float, size: float) -> Dict[str, int]:
+# Per-tick rounding decimals, mirroring py-clob-client's ROUNDING_CONFIG:
+# tick size -> (price decimals, size decimals, amount decimals). The amount
+# decimals MUST be >= price + size decimals so makerAmount/takerAmount stays
+# EXACTLY equal to the on-grid price — the CLOB validates that ratio and
+# rejects inconsistent pairs with "Invalid order payload" (bug found live
+# 2026-06-12: 14.81 sh @ 0.135 floored to $1.99 -> ratio 0.13437 -> 400).
+ROUNDING_CONFIG = {
+    "0.1": (1, 2, 3),
+    "0.01": (2, 2, 4),
+    "0.001": (3, 2, 5),
+    "0.0001": (4, 2, 6),
+}
+
+
+def order_amounts(
+    side: str, price: float, size: float, tick_size: str = "0.01"
+) -> Dict[str, int]:
     """Return ``maker_amount`` / ``taker_amount`` (base units) + side code.
 
-    Mirrors py-clob-client's ``get_order_amounts`` rounding: size rounded down
-    to 2 dp, price to 4 dp.
+    Mirrors py-clob-client's ``get_order_amounts``: price rounded to the
+    market's tick decimals, size down to 2 dp, and the USDC amount kept at
+    full ``price+size`` precision so the implied price stays on-grid.
     """
     s = side.strip().upper()
-    raw_price = _round_normal(price, 4)
-    raw_size = _round_down(size, 2)
+    if tick_size not in ROUNDING_CONFIG:
+        raise ValueError("unsupported tick size %r" % tick_size)
+    price_dp, size_dp, _amount_dp = ROUNDING_CONFIG[tick_size]
+    # Exact integer arithmetic: price in tick units x size in hundredth-shares.
+    # Float multiply-then-floor loses ticks (0.69 * 32 = 22.079999... -> 22.0799),
+    # and any maker/taker pair whose implied price is off-grid is rejected by
+    # the CLOB with "Invalid order payload".
+    p_int = int(round(price * (10 ** price_dp)))  # price on the tick grid
+    s_int = int(math.floor(size * (10 ** size_dp) + 1e-9))  # size floored to 2dp
+    scale = 10 ** (_TOKEN_DECIMALS - price_dp - size_dp)
+    usdc_units = p_int * s_int * scale
+    share_units = s_int * (10 ** (_TOKEN_DECIMALS - size_dp))
     if s == "BUY":
         side_code = SIDE_BUY
-        maker = to_token_units(_round_down(raw_size * raw_price, 2))
-        taker = to_token_units(raw_size)
+        maker, taker = usdc_units, share_units
     elif s == "SELL":
         side_code = SIDE_SELL
-        maker = to_token_units(raw_size)
-        taker = to_token_units(_round_down(raw_size * raw_price, 2))
+        maker, taker = share_units, usdc_units
     else:
         raise ValueError("side must be BUY or SELL, got %r" % side)
     return {"side": side_code, "maker_amount": maker, "taker_amount": taker}
@@ -766,7 +792,7 @@ def build_signed_order(
         maker = funder
         signer = funder
 
-    amounts = order_amounts(args.side, args.price, args.size)
+    amounts = order_amounts(args.side, args.price, args.size, tick_size=args.tick_size)
     use_salt = generate_salt() if salt is None else int(salt)
 
     if exchange_version == EXCHANGE_V1:

@@ -625,6 +625,19 @@ class ClobTrader:
         """GET /book?token_id=... (public)."""
         return self._public_get("/book", params={"token_id": str(token_id)})
 
+    def get_tick_size(self, token_id: str) -> Optional[str]:
+        """GET /tick-size for a token; returns e.g. ``"0.001"`` or None."""
+        try:
+            data = self._public_get("/tick-size", params={"token_id": str(token_id)})
+        except Exception:  # noqa: BLE001 — fall back to caller's tick
+            return None
+        tick = data.get("minimum_tick_size") if isinstance(data, dict) else data
+        if tick is None:
+            return None
+        # Normalise float/str (0.001 -> "0.001") to the ROUNDING_CONFIG keys.
+        s = ("%g" % float(tick))
+        return s if s in signing.ROUNDING_CONFIG else None
+
     def midpoint(self, token_id: str) -> Optional[float]:
         """Public midpoint for a token id, or ``None`` if no book exists."""
         resp = self._request("GET", "/midpoint", params={"token_id": str(token_id)})
@@ -765,6 +778,7 @@ class ClobTrader:
         fee_rate_bps: int = 0,
         nonce: int = 0,
         expiration: int = 0,
+        tick_size: str = "0.01",
     ) -> Dict[str, Any]:
         """Build and EIP-712-sign a CTF-Exchange order (server JSON form).
 
@@ -788,6 +802,7 @@ class ClobTrader:
             fee_rate_bps=int(fee_rate_bps),
             nonce=int(nonce),
             expiration=int(expiration),
+            tick_size=str(tick_size),
         )
         return signing.build_signed_order(
             self._key,
@@ -942,12 +957,20 @@ class ClobTrader:
                     % (spent, notional, self.config.max_daily_usd)
                 )
 
+        # Use the market's LIVE tick size — amount rounding decimals depend on
+        # it, and a stale/wrong tick produces maker/taker pairs whose implied
+        # price is off-grid (server: 400 "Invalid order payload").
+        live_tick = self.get_tick_size(token_id)
+        if live_tick:
+            tick_size = live_tick
+
         signed = self.build_order(
             token_id=token_id,
             side=side,
             price=price,
             size=size,
             neg_risk=neg_risk,
+            tick_size=tick_size,
         )
 
         if is_dry:
