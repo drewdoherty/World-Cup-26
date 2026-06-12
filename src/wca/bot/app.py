@@ -597,18 +597,90 @@ def _slug(text: str) -> str:
     return s[:48] or "UNKNOWN"
 
 
+def _enrich_bets_from_card(
+    bets: List[Any],
+    card_path: str = CARD_PATH,
+) -> List[Any]:
+    """Enrich extracted bets with model_prob and ev from the cached card.
+
+    Matches bets by (match, selection, odds ±0.05) and populates model_prob/ev
+    if found in the card. This allows screenshot bets to have model context
+    even though they were extracted from an image.
+    """
+    if not os.path.exists(card_path):
+        return bets
+
+    try:
+        import re
+        card_text = open(card_path, "r", encoding="utf-8").read()
+
+        # Extract picks: "*1. Match* — Selection @ *odds*" + "model X% ... edge *+Y%*"
+        picks: Dict[str, Dict[str, float]] = {}
+        lines = card_text.split("\n")
+        current_match = None
+
+        for line in lines:
+            # Pick header
+            m = re.match(r"^\*\d+\.\s*(.+?)\*\s*—\s*(.+?)\s*@\s*\*([0-9.]+)\*", line.strip())
+            if m:
+                current_match = {
+                    "match": m.group(1).strip(),
+                    "selection": m.group(2).strip(),
+                    "odds": float(m.group(3)),
+                    "model_prob": None,
+                    "ev": None,
+                }
+                continue
+
+            # Model/edge line
+            if current_match and "model" in line.lower():
+                model_m = re.search(r"model\s+([0-9.]+)%", line)
+                edge_m = re.search(r"edge\s*\*?([+-]?[0-9.]+)", line)
+                if model_m:
+                    current_match["model_prob"] = float(model_m.group(1)) / 100.0
+                if edge_m:
+                    try:
+                        current_match["ev"] = float(edge_m.group(1)) / 100.0
+                    except ValueError:
+                        pass
+
+                key = (current_match["match"], current_match["selection"], current_match["odds"])
+                picks[key] = current_match
+
+        # Enrich bets
+        for bet in bets:
+            bet_match = (getattr(bet, "match_desc", "") or "").lower()
+            bet_sel = (getattr(bet, "selection", "") or "").lower()
+            bet_odds = float(getattr(bet, "decimal_odds", 0) or 0)
+
+            # Fuzzy match against picks
+            for (pm, ps, po), pick in picks.items():
+                pm_lower = pm.lower()
+                ps_lower = ps.lower()
+
+                if (pm_lower in bet_match or bet_match in pm_lower) and \
+                   (ps_lower in bet_sel or bet_sel in ps_lower) and \
+                   abs(bet_odds - po) < 0.05:
+                    bet.model_prob = pick["model_prob"]
+                    bet.ev = pick["ev"]
+                    break
+    except Exception:
+        pass  # Silently fail; enrichment is optional
+
+    return bets
+
+
 def resolve_tags(
     text: Optional[str],
     *,
     default_account: str = "1",
-    default_source: str = "punt",
+    default_source: str = "model",
     allow_bare_account: bool = False,
 ) -> Dict[str, str]:
     """Parse account/source tags out of a screenshot caption or yes-reply.
 
-    Screenshot ingests are manual placements by default (source=punt,
-    account=1) — model bets enter via the card/PM pipeline, so an untagged
-    slip is presumed discretionary; a caption can override either dimension. Recognised tokens
+    Screenshot ingests default to source=model (recommended from the card),
+    account=1; a caption can override either dimension. Recognised tokens
     (case-insensitive, word-boundary matched anywhere in the text):
 
       account: ``account 2`` / ``acc2`` / ``a2`` -> account="2"
@@ -716,6 +788,8 @@ def handle_photo(
         return "Vision error: %s" % exc
     if not bets:
         return "No bets detected. Send a clearer screenshot of the full slip."
+    # Enrich with model data from the card (optional — silently skipped if not found)
+    bets = _enrich_bets_from_card(bets, card_path=CARD_PATH)
     tags = resolve_tags(caption)
     pending[chat_id] = bets
     pending_tags[chat_id] = tags
