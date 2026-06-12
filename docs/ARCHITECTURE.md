@@ -156,6 +156,15 @@ cd "/Users/andrewdoherty/Desktop/Coding/World Cup Alpha"
 - **Minimal external libs**: numpy, scipy, pandas, requests only. No sklearn, no TensorFlow.
 - **Scientific code**: All algorithms cited (source/paper in docstrings).
 
+## Infra Costs
+
+| Service | Cost |
+|---------|------|
+| Dedicated UK IP Address & VPN | £136 |
+| Claude Max 20x | £270 |
+| Extra Credits + Odds API | £37 |
+| **Total** | **£443** |
+
 ## References
 
 1. Elo ratings: https://www.eloratings.net/about
