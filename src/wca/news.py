@@ -39,6 +39,7 @@ Everything here is stdlib + ``requests`` only. RSS is parsed with
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 import sqlite3
 import time
@@ -883,14 +884,28 @@ def odds_context(
             if not as_of:
                 continue
             sel_rows = conn.execute(
-                "SELECT selection, decimal_odds FROM odds_snapshots "
+                "SELECT selection, decimal_odds, raw FROM odds_snapshots "
                 "WHERE match_id = ? AND market = 'h2h' AND ts_utc = ?",
                 (mid, as_of),
             ).fetchall()
+            # One snapshot ts holds one row per (selection, bookmaker); keep
+            # the BEST price per selection (the line-shopped quote a trader
+            # can actually hit) and remember which book offers it.
             lines: Dict[str, float] = {}
+            books: Dict[str, str] = {}
             for sr in sel_rows:
-                if sr["decimal_odds"] is not None:
-                    lines[sr["selection"]] = float(sr["decimal_odds"])
+                if sr["decimal_odds"] is None:
+                    continue
+                sel = sr["selection"]
+                o = float(sr["decimal_odds"])
+                if sel not in lines or o > lines[sel]:
+                    lines[sel] = o
+                    book = ""
+                    try:
+                        book = json.loads(sr["raw"] or "{}").get("bookmaker_key", "")
+                    except (ValueError, TypeError):
+                        pass
+                    books[sel] = book
             if not lines:
                 continue
             meta = (event_meta or {}).get(mid, {})
@@ -903,6 +918,7 @@ def odds_context(
                 "team": team,
                 "team_odds": team_odds,
                 "lines": lines,
+                "books": books,
                 "as_of": as_of,
                 # Additive movement context: a fresh story + a *flat* line is the
                 # Endo-style tradable signature, so the alert surfaces this.
@@ -1159,13 +1175,25 @@ def format_trade_idea(item: "NewsItem", odds: Dict[str, Any]) -> str:
     if kickoff:
         line2 += " (k/o %s)" % _md_escape(_short_kickoff(kickoff))
     lines.append(line2)
+    books = odds.get("books") or {}
     if odds.get("team_odds") is not None:
         tail = " (%.1f%%)" % (float(implied) * 100.0) if implied else ""
+        team_book = next(
+            (books[s] for s in books
+             if abs((odds.get("lines") or {}).get(s, 0.0) - float(odds["team_odds"])) < 1e-9),
+            "",
+        )
+        if team_book:
+            tail += " @ %s" % _md_escape(team_book)
         lines.append("   *%s*: %s%s" % (_md_escape(team), _fmt_odds(odds.get("team_odds")), tail))
     odds_lines = odds.get("lines") or {}
     if odds_lines:
-        lines.append("   line: %s" % " | ".join(
-            "%s %s" % (_md_escape(s), _fmt_odds(o)) for s, o in odds_lines.items()))
+        lines.append("   line (best price): %s" % " | ".join(
+            "%s %s%s" % (
+                _md_escape(s), _fmt_odds(o),
+                (" @ %s" % _md_escape(books[s])) if books.get(s) else "",
+            )
+            for s, o in odds_lines.items()))
     verdict = odds.get("move_verdict")
     if verdict == "flat" and delta is not None:
         lines.append("   ✅ line *unmoved* %gh (%+.1fpp) — likely NOT priced" % (win, delta))
