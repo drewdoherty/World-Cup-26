@@ -101,6 +101,10 @@ def main() -> None:
         # Generate match_id from home/away team names
         match_id = f"{parsed['home_team'].upper().replace(' ', '')}_{parsed['away_team'].upper().replace(' ', '')}"
 
+        # Convert Polymarket price (probability 0-1) to decimal odds
+        # Price 0.09 (9%) → Decimal odds 1/0.09 = 11.11
+        decimal_odds = 1.0 / price if price > 0 else None
+
         try:
             con.execute(
                 """INSERT INTO bets
@@ -115,7 +119,7 @@ def main() -> None:
                     parsed["market"],
                     selection,
                     "polymarket",
-                    price,  # decimal_odds = the current market price
+                    decimal_odds,  # Converted to decimal odds
                     stake,
                     "open",  # Status is OPEN (not yet settled)
                     "1",  # account 1 (default polymarket account)
