@@ -518,7 +518,13 @@ def order_struct_hash(
 
     typed = build_order_typed_data(order, exchange_version=exchange_version)
     signable = encode_typed_data(full_message=typed)
-    # signable.body == domainSeparator(32) || hashStruct(32); take the tail.
+    # eth-account >= 0.13 puts the domain separator in .header and the bare
+    # 32-byte hashStruct in .body — return it directly. (The old slice/keccak
+    # fallback double-hashed the contents and corrupted every ERC-7739
+    # signature: live 400 "Invalid order payload" on all sig-3 orders,
+    # root-caused by the SDK parity test 2026-06-12.)
+    if len(signable.body) == 32:
+        return signable.body
     return signable.body[32:64] if len(signable.body) >= 64 else keccak(signable.body)
 
 
