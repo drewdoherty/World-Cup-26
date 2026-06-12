@@ -249,7 +249,7 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--commission", type=float, default=None,
                    help="Lay commission fraction (e.g. 0.02); overrides --venue")
     q.add_argument("--venue", default=None,
-                   help="Exchange venue (smarkets, smarkets_commfree, betfair, "
+                   help="Exchange venue (smarkets, smarkets_2pc, betfair, "
                         "betfair_basic, matchbook)")
 
     f = calc_sub.add_parser("freebet", help="Free bet (default: stake NOT returned)")
@@ -259,7 +259,7 @@ def build_parser() -> argparse.ArgumentParser:
     f.add_argument("--commission", type=float, default=None,
                    help="Lay commission fraction (e.g. 0.02); overrides --venue")
     f.add_argument("--venue", default=None,
-                   help="Exchange venue (smarkets, smarkets_commfree, betfair, "
+                   help="Exchange venue (smarkets, smarkets_2pc, betfair, "
                         "betfair_basic, matchbook)")
     f.add_argument("--stake-returned", dest="stake_returned", action="store_true",
                    help="Treat as a stake-RETURNED free bet (rare)")

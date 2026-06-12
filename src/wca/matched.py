@@ -64,8 +64,9 @@ from typing import Dict
 # ---------------------------------------------------------------------------
 
 _VENUE_COMMISSION: Dict[str, float] = {
-    "smarkets": 0.02,
-    "smarkets_commfree": 0.0,
+    # Our Smarkets account is on the 0% commission tier.
+    "smarkets": 0.0,
+    "smarkets_2pc": 0.02,
     "betfair": 0.06,
     "betfair_basic": 0.02,
     "matchbook": 0.02,
@@ -80,8 +81,8 @@ def best_lay_commission(venue: str) -> float:
     ======================  ============
     venue                   commission
     ======================  ============
-    ``smarkets``            0.02
-    ``smarkets_commfree``   0.00
+    ``smarkets``            0.00
+    ``smarkets_2pc``        0.02
     ``betfair``             0.06
     ``betfair_basic``       0.02
     ``matchbook``           0.02

@@ -24,14 +24,14 @@ from wca import matched
 
 class TestBestLayCommission:
     def test_known_venues(self) -> None:
-        assert matched.best_lay_commission("smarkets") == 0.02
-        assert matched.best_lay_commission("smarkets_commfree") == 0.0
+        assert matched.best_lay_commission("smarkets") == 0.0
+        assert matched.best_lay_commission("smarkets_2pc") == 0.02
         assert matched.best_lay_commission("betfair") == 0.06
         assert matched.best_lay_commission("betfair_basic") == 0.02
         assert matched.best_lay_commission("matchbook") == 0.02
 
     def test_case_insensitive(self) -> None:
-        assert matched.best_lay_commission("Smarkets") == 0.02
+        assert matched.best_lay_commission("Smarkets") == 0.0
         assert matched.best_lay_commission("  BETFAIR  ") == 0.06
 
     def test_unknown_raises(self) -> None:
