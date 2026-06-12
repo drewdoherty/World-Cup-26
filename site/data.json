@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-12T19:31:53"
+    "generated": "2026-06-12 19:49:30 UTC"
   },
   "totals": {
-    "wagered": 240.20600000000002,
-    "open_stake": 175.20600000000002,
+    "wagered": 249.236,
+    "open_stake": 184.236,
     "settled_pl": 70.822,
-    "n_bets": 34
+    "n_bets": 36
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 121.53,
-      "open_stake": 86.53,
+      "wagered": 130.56,
+      "open_stake": 95.56,
       "settled_pl": 46.72,
-      "n_bets": 20
+      "n_bets": 22
     },
     "USD": {
       "wagered": 118.676,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 121.53,
-      "open_stake": 86.53,
+      "wagered": 130.56,
+      "open_stake": 95.56,
       "settled_pl": 46.72,
-      "n_bets": 20,
+      "n_bets": 22,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 99.53,
-      "open_stake": 64.53,
+      "wagered": 108.56,
+      "open_stake": 73.56,
       "settled_pl": 46.72,
-      "n_bets": 17,
+      "n_bets": 19,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -64,10 +64,10 @@
   "source_summary": {
     "model": {
       "GBP": {
-        "wagered": 49.47,
-        "open_stake": 34.47,
+        "wagered": 58.5,
+        "open_stake": 43.50000000000001,
         "settled_pl": 3.969999999999999,
-        "n_bets": 11
+        "n_bets": 13
       },
       "USD": {
         "wagered": 106.31,
@@ -100,6 +100,14 @@
     }
   },
   "platforms": {
+    "betfair": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 32.2,
+      "open_stake": 32.2,
+      "settled_pl": 0.0,
+      "n_bets": 4
+    },
     "smarkets": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -107,14 +115,6 @@
       "open_stake": 12.110000000000001,
       "settled_pl": 0.0,
       "n_bets": 4
-    },
-    "betfair": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 23.169999999999998,
-      "open_stake": 23.169999999999998,
-      "settled_pl": 0.0,
-      "n_bets": 2
     },
     "polymarket": {
       "venue": "polymarket",
@@ -331,6 +331,38 @@
     "n_with_close": 3
   },
   "positions": [
+    {
+      "id": 54,
+      "ts_utc": "2026-06-12T19:49:30",
+      "match": "Brazil vs Morocco",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 4.0,
+      "stake": 3.23,
+      "model_prob": 0.26,
+      "ev": 0.04
+    },
+    {
+      "id": 53,
+      "ts_utc": "2026-06-12T19:49:30",
+      "match": "Australia vs Turkey",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 3.9,
+      "stake": 5.8,
+      "model_prob": 0.275,
+      "ev": 0.0725
+    },
     {
       "id": 52,
       "ts_utc": "2026-06-12T19:24:30",
