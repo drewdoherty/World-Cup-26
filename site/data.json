@@ -1,12 +1,12 @@
 {
   "meta": {
-    "generated": "2026-06-12 19:54:29 UTC"
+    "generated": "2026-06-12T20:09:21"
   },
   "totals": {
-    "wagered": 249.236,
-    "open_stake": 184.236,
+    "wagered": 251.176,
+    "open_stake": 186.176,
     "settled_pl": 70.822,
-    "n_bets": 36
+    "n_bets": 38
   },
   "totals_by_currency": {
     "GBP": {
@@ -16,10 +16,10 @@
       "n_bets": 22
     },
     "USD": {
-      "wagered": 118.676,
-      "open_stake": 88.676,
+      "wagered": 120.616,
+      "open_stake": 90.616,
       "settled_pl": 24.102000000000004,
-      "n_bets": 14
+      "n_bets": 16
     }
   },
   "venues": {
@@ -31,10 +31,10 @@
       "currency": "GBP"
     },
     "polymarket": {
-      "wagered": 118.676,
-      "open_stake": 88.676,
+      "wagered": 120.616,
+      "open_stake": 90.616,
       "settled_pl": 24.102000000000004,
-      "n_bets": 14,
+      "n_bets": 16,
       "currency": "USD"
     },
     "kalshi": {
@@ -63,25 +63,25 @@
   },
   "source_summary": {
     "model": {
+      "USD": {
+        "wagered": 107.25,
+        "open_stake": 77.25,
+        "settled_pl": 24.102000000000004,
+        "n_bets": 6
+      },
       "GBP": {
         "wagered": 58.5,
         "open_stake": 43.50000000000001,
         "settled_pl": 3.969999999999999,
         "n_bets": 13
-      },
-      "USD": {
-        "wagered": 106.31,
-        "open_stake": 76.31,
-        "settled_pl": 24.102000000000004,
-        "n_bets": 5
       }
     },
     "punt": {
       "USD": {
-        "wagered": 12.366,
-        "open_stake": 12.366,
+        "wagered": 13.366,
+        "open_stake": 13.366,
         "settled_pl": 0.0,
-        "n_bets": 9
+        "n_bets": 10
       },
       "GBP": {
         "wagered": 23.06,
@@ -100,6 +100,14 @@
     }
   },
   "platforms": {
+    "polymarket": {
+      "venue": "polymarket",
+      "currency": "USD",
+      "wagered": 120.616,
+      "open_stake": 90.616,
+      "settled_pl": 24.102000000000004,
+      "n_bets": 16
+    },
     "betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -115,14 +123,6 @@
       "open_stake": 12.110000000000001,
       "settled_pl": 0.0,
       "n_bets": 4
-    },
-    "polymarket": {
-      "venue": "polymarket",
-      "currency": "USD",
-      "wagered": 118.676,
-      "open_stake": 88.676,
-      "settled_pl": 24.102000000000004,
-      "n_bets": 14
     },
     "virginbet": {
       "venue": "sportsbook",
@@ -331,6 +331,38 @@
     "n_with_close": 3
   },
   "positions": [
+    {
+      "id": 58,
+      "ts_utc": "2026-06-12T20:03:20",
+      "match": "Canada vs Bosnia and Herzegovina",
+      "market": "polymarket",
+      "selection": "Canada win - Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "2",
+      "source": "model",
+      "currency": "USD",
+      "decimal_odds": 4.0,
+      "stake": 0.94,
+      "model_prob": null,
+      "ev": null
+    },
+    {
+      "id": 57,
+      "ts_utc": "2026-06-12T20:03:20",
+      "match": "Ghana eliminated R32 of the World Cup",
+      "market": "polymarket",
+      "selection": "Ghana eliminated R32 - No",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "2",
+      "source": "punt",
+      "currency": "USD",
+      "decimal_odds": 1.4708,
+      "stake": 1.0,
+      "model_prob": null,
+      "ev": null
+    },
     {
       "id": 54,
       "ts_utc": "2026-06-12T19:49:30",
