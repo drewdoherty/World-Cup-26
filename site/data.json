@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-12 21:22:31 UTC"
+    "generated": "2026-06-12 22:02:44 UTC"
   },
   "totals": {
-    "wagered": 251.176,
-    "open_stake": 146.786,
+    "wagered": 253.07600000000002,
+    "open_stake": 148.686,
     "settled_pl": 31.432000000000002,
-    "n_bets": 38
+    "n_bets": 39
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 130.56,
-      "open_stake": 71.99000000000001,
+      "wagered": 132.46,
+      "open_stake": 73.88999999999999,
       "settled_pl": 23.15,
-      "n_bets": 22
+      "n_bets": 23
     },
     "USD": {
       "wagered": 120.616,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 130.56,
-      "open_stake": 71.99000000000001,
+      "wagered": 132.46,
+      "open_stake": 73.88999999999999,
       "settled_pl": 23.15,
-      "n_bets": 22,
+      "n_bets": 23,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 108.56,
-      "open_stake": 59.99,
+      "wagered": 110.46000000000001,
+      "open_stake": 61.88999999999999,
       "settled_pl": 33.15,
-      "n_bets": 19,
+      "n_bets": 20,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -63,17 +63,17 @@
   },
   "source_summary": {
     "model": {
+      "GBP": {
+        "wagered": 60.400000000000006,
+        "open_stake": 33.83,
+        "settled_pl": -7.600000000000001,
+        "n_bets": 14
+      },
       "USD": {
         "wagered": 107.25,
         "open_stake": 62.53,
         "settled_pl": 9.382000000000003,
         "n_bets": 6
-      },
-      "GBP": {
-        "wagered": 58.5,
-        "open_stake": 31.930000000000003,
-        "settled_pl": -7.600000000000001,
-        "n_bets": 13
       }
     },
     "punt": {
@@ -100,6 +100,14 @@
     }
   },
   "platforms": {
+    "smarkets": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 14.01,
+      "open_stake": 14.01,
+      "settled_pl": 0.0,
+      "n_bets": 5
+    },
     "polymarket": {
       "venue": "polymarket",
       "currency": "USD",
@@ -113,14 +121,6 @@
       "currency": "GBP",
       "wagered": 32.2,
       "open_stake": 32.2,
-      "settled_pl": 0.0,
-      "n_bets": 4
-    },
-    "smarkets": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 12.110000000000001,
-      "open_stake": 12.110000000000001,
       "settled_pl": 0.0,
       "n_bets": 4
     },
@@ -507,6 +507,22 @@
     "n_with_close": 6
   },
   "positions": [
+    {
+      "id": 59,
+      "ts_utc": "2026-06-12T22:02:44",
+      "match": "USA vs Paraguay",
+      "market": "Full-time result",
+      "selection": "Paraguay",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 4.1,
+      "stake": 1.9,
+      "model_prob": 0.268,
+      "ev": 0.0988
+    },
     {
       "id": 57,
       "ts_utc": "2026-06-12T20:03:20",
