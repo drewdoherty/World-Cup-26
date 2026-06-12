@@ -33,6 +33,7 @@ import os
 import sys
 import time
 import urllib.request
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 # Make the in-repo package importable when run as a standalone script.
@@ -88,6 +89,19 @@ def _print(line: str = "") -> None:
     print(line)
 
 
+def _load_dotenv(path: str = ".env") -> None:
+    """Tiny .env loader (matches the daemons') so keys load when run directly."""
+    p = Path(path)
+    if not p.exists():
+        return
+    for line in p.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        os.environ.setdefault(key.strip(), value.strip())
+
+
 def main(
     argv: Optional[List[str]] = None,
     env: Optional[Dict[str, str]] = None,
@@ -105,8 +119,11 @@ def main(
         default=120.0,
         help="Seconds to poll relayer transaction status before giving up.",
     )
+    parser.add_argument("--env", default=".env", help="dotenv file to load")
     args = parser.parse_args(argv)
 
+    if env is None:
+        _load_dotenv(args.env)
     src_env = os.environ if env is None else env
     live_env = src_env.get("PM_APPROVE_LIVE") == "1"
     armed = live_env and args.yes
@@ -196,8 +213,14 @@ def main(
     return rc
 
 
-# Public Polygon RPC used for the post-submit on-chain allowance readback.
-_PUBLIC_RPC = "https://polygon-bor-rpc.publicnode.com"
+# Public Polygon RPCs for the post-submit on-chain allowance readback; tried
+# in order (some 403 plain-urllib clients, hence the UA header + fallbacks).
+_PUBLIC_RPCS = (
+    "https://polygon-bor-rpc.publicnode.com",
+    "https://1rpc.io/matic",
+    "https://polygon.llamarpc.com",
+    "https://polygon-rpc.com",
+)
 _ALLOWANCE_SELECTOR = "dd62ed3e"  # allowance(address,uint256) -> allowance(owner,spender)
 
 
@@ -218,18 +241,31 @@ def _read_allowance(token: str, owner: str, spender: str) -> int:
         "method": "eth_call",
         "params": [{"to": token, "data": data}, "latest"],
     }
-    req = urllib.request.Request(
-        _PUBLIC_RPC,
-        data=json.dumps(body).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
-    with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310 (trusted RPC)
-        out = json.loads(resp.read().decode("utf-8"))
-    result = out.get("result")
-    if not result or result == "0x":
-        return 0
-    return int(result, 16)
+    last_exc: Optional[Exception] = None
+    for rpc_url in _PUBLIC_RPCS:
+        req = urllib.request.Request(
+            rpc_url,
+            data=json.dumps(body).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "wca/1.0",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310
+                out = json.loads(resp.read().decode("utf-8"))
+        except Exception as exc:  # noqa: BLE001 - try the next RPC
+            last_exc = exc
+            continue
+        result = out.get("result")
+        if result is None:
+            last_exc = RuntimeError(str(out.get("error")))
+            continue
+        if result == "0x":
+            return 0
+        return int(result, 16)
+    raise last_exc if last_exc is not None else RuntimeError("no RPC reachable")
 
 
 def _poll(client: relayer.RelayerClient, tx_id: str, timeout: float) -> None:
