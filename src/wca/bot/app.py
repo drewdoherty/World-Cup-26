@@ -601,13 +601,14 @@ def resolve_tags(
     text: Optional[str],
     *,
     default_account: str = "1",
-    default_source: str = "model",
+    default_source: str = "punt",
     allow_bare_account: bool = False,
 ) -> Dict[str, str]:
     """Parse account/source tags out of a screenshot caption or yes-reply.
 
-    Screenshot ingests are model recommendations by default (source=model,
-    account=1); a caption can override either dimension. Recognised tokens
+    Screenshot ingests are manual placements by default (source=punt,
+    account=1) — model bets enter via the card/PM pipeline, so an untagged
+    slip is presumed discretionary; a caption can override either dimension. Recognised tokens
     (case-insensitive, word-boundary matched anywhere in the text):
 
       account: ``account 2`` / ``acc2`` / ``a2`` -> account="2"
@@ -823,10 +824,78 @@ def _autosync(db_path: str, reason: str) -> None:
 # ---------------------------------------------------------------------------
 
 # Module-level registry of parked orders awaiting confirmation.  Keyed by the
-# integer token suffix; value is the proposal dict.  In-process only: an
-# unconfirmed order simply evaporates on restart (fail-safe — never auto-fires).
+# integer token suffix; value is the proposal dict.  Backed by the
+# ``pm_parked`` SQLite table so proposals survive bot restarts and cross the
+# process boundary (the propose CLI parks; the bot daemon executes).  The
+# in-memory dict remains the test seam.
 _PENDING_ORDERS: Dict[int, Dict[str, Any]] = {}
 _PM_SEQ = {"n": 0}
+
+_PARKED_DB_ENV = "WCA_DB"
+_PARKED_DB_DEFAULT = "data/wca.db"
+
+
+def _parked_db_path() -> str:
+    return os.environ.get(_PARKED_DB_ENV, _PARKED_DB_DEFAULT)
+
+
+def _parked_conn(db_path: Optional[str] = None):
+    import sqlite3
+
+    conn = sqlite3.connect(db_path or _parked_db_path())
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS pm_parked ("
+        " n INTEGER PRIMARY KEY AUTOINCREMENT,"
+        " proposal_json TEXT NOT NULL,"
+        " status TEXT NOT NULL DEFAULT 'parked',"
+        " ts_utc TEXT NOT NULL)"
+    )
+    return conn
+
+
+def _parked_load(n: int, db_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    import json as _json
+
+    try:
+        conn = _parked_conn(db_path)
+        try:
+            row = conn.execute(
+                "SELECT proposal_json FROM pm_parked WHERE n=? AND status='parked'",
+                (n,),
+            ).fetchone()
+        finally:
+            conn.close()
+    except Exception:  # noqa: BLE001 - DB issues degrade to in-memory only
+        return None
+    return _json.loads(row[0]) if row else None
+
+
+def _parked_set_status(n: int, status: str, db_path: Optional[str] = None) -> None:
+    try:
+        conn = _parked_conn(db_path)
+        try:
+            conn.execute("UPDATE pm_parked SET status=? WHERE n=?", (status, n))
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _parked_list(db_path: Optional[str] = None) -> List[Any]:
+    import json as _json
+
+    try:
+        conn = _parked_conn(db_path)
+        try:
+            rows = conn.execute(
+                "SELECT n, proposal_json FROM pm_parked WHERE status='parked' ORDER BY n"
+            ).fetchall()
+        finally:
+            conn.close()
+    except Exception:  # noqa: BLE001
+        return []
+    return [(n, _json.loads(pj)) for n, pj in rows]
 
 
 def park_order(proposal: Dict[str, Any]) -> str:
@@ -843,8 +912,32 @@ def park_order(proposal: Dict[str, Any]) -> str:
     ...                         "side": "BUY", "price": 0.69, "size": 31.88,
     ...                         "token_id": "123"})  # doctest: +SKIP
     """
-    _PM_SEQ["n"] += 1
-    n = _PM_SEQ["n"]
+    import json as _json
+
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    # Under pytest, never persist to the real ledger unless a test DB is
+    # explicitly pointed at via WCA_DB (mirrors the sync.push_site guard).
+    if "PYTEST_CURRENT_TEST" in os.environ and _PARKED_DB_ENV not in os.environ:
+        _PM_SEQ["n"] += 1
+        n = _PM_SEQ["n"]
+        _PENDING_ORDERS[n] = dict(proposal)
+        return "PM-%d" % n
+    try:
+        conn = _parked_conn()
+        try:
+            cur = conn.execute(
+                "INSERT INTO pm_parked (proposal_json, status, ts_utc) "
+                "VALUES (?, 'parked', ?)",
+                (_json.dumps(dict(proposal)), ts),
+            )
+            conn.commit()
+            n = int(cur.lastrowid)
+        finally:
+            conn.close()
+    except Exception:  # noqa: BLE001 - degrade to in-memory sequencing
+        _PM_SEQ["n"] += 1
+        n = _PM_SEQ["n"]
+    _PM_SEQ["n"] = max(_PM_SEQ["n"], n)
     _PENDING_ORDERS[n] = dict(proposal)
     return "PM-%d" % n
 
@@ -1023,14 +1116,24 @@ def handle_confirmation(
         except ValueError:
             return None
         proposal = pending_orders.pop(n, None)
+        from_db = False
+        if proposal is None and pending_orders is _PENDING_ORDERS:
+            # Cross-process / post-restart: fall back to the persisted queue.
+            proposal = _parked_load(n, db_path)
+            from_db = proposal is not None
         if proposal is None:
             return "PM-%d is not a parked order (expired or already handled)." % n
         if verb == "N":
+            if pending_orders is _PENDING_ORDERS:
+                _parked_set_status(n, "discarded", db_path)
             label = proposal.get("label") or proposal.get("market") or "order"
             return "Discarded parked order PM-%d (%s)." % (n, label)
-        return _execute_parked_order(
+        result = _execute_parked_order(
             n, proposal, db_path, ts_utc=ts_utc, trader=trader
         )
+        if pending_orders is _PENDING_ORDERS or from_db:
+            _parked_set_status(n, "executed", db_path)
+        return result
 
     return None
 
@@ -1059,11 +1162,13 @@ def handle_pm(db_path: str) -> str:
     if spend is not None:
         lines.append("Spend today: $%.2f" % spend)
 
-    if _PENDING_ORDERS:
+    merged: Dict[int, Dict[str, Any]] = {n: p for n, p in _parked_list(db_path)}
+    merged.update(_PENDING_ORDERS)
+    if merged:
         lines.append("")
         lines.append("*Parked orders*")
-        for n in sorted(_PENDING_ORDERS):
-            lines.append("  " + format_parked_order("PM-%d" % n, _PENDING_ORDERS[n]))
+        for n in sorted(merged):
+            lines.append("  " + format_parked_order("PM-%d" % n, merged[n]))
     else:
         lines.append("")
         lines.append("No parked orders.")
