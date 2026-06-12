@@ -61,6 +61,11 @@ if str(_SRC) not in sys.path:
 
 _SNAP_DIR = str(_REPO_ROOT / "data" / "raw" / "snapshots")
 
+# A trade-idea ping requires the team's line to be FLAT over this wide window —
+# not just the last 6h. A line that drifted to its settled level over the past
+# day is already PRICED even though it looks flat right now (the Morocco trap).
+PING_WINDOW_HOURS = 18.0
+
 # Flag flipped by the signal handler so the loop can break cleanly.
 _STOP = {"requested": False}
 
@@ -260,7 +265,7 @@ def run_cycle(
     """
     from wca import linemove, news
 
-    stats = {"teams": 0, "fetched": 0, "new": 0, "eligible": 0,
+    stats = {"teams": 0, "fetched": 0, "new": 0, "material": 0, "eligible": 0,
              "pushed": 0, "overflow": 0, "stale": 0}
 
     teams = compute_teams_of_interest(db_path, horizon_h, now=now)
@@ -291,59 +296,25 @@ def run_cycle(
         fresh = news.new_items(conn, items, scores=scores)
         stats["new"] = len(fresh)
 
-        # Eligible = new AND score>=min AND not pushed AND recent enough.
+        # --- Ping ONLY trade ideas; LOG everything else --------------------
+        # new_items() already STORED every scraped item. We ping only when a
+        # MATERIAL squad change meets a line that is genuinely UNMOVED over the
+        # wide window (likely not yet priced). Material-but-priced events are
+        # flagged + logged, never pinged. Non-material news is silent.
         cutoff = None
         if max_age_hours is not None:
             cutoff = (now or _now()) - timedelta(hours=max_age_hours)
-        eligible = []
-        for r in fresh:
-            if int(r["score"]) < min_score or int(r["pushed"]) != 0:
-                continue
-            if cutoff is not None:
-                pub = news.parse_published(r["published"] or "")
-                if pub is not None and pub < cutoff:
-                    stats["stale"] += 1
-                    continue  # too old to be actionable; already stored
-            eligible.append(r)
-        eligible.sort(key=lambda r: int(r["score"]), reverse=True)
-        stats["eligible"] = len(eligible)
 
-        if len(eligible) > max_per_cycle:
-            overflow = eligible[max_per_cycle:]
-            stats["overflow"] = len(overflow)
-            _log(
-                "%d eligible items exceed cap %d; deferring %d (will re-alert "
-                "next cycle): %s"
-                % (
-                    len(eligible),
-                    max_per_cycle,
-                    len(overflow),
-                    "; ".join("[s%d] %s" % (int(r["score"]), (r["title"] or "")[:60])
-                              for r in overflow),
-                )
-            )
-        to_push = eligible[:max_per_cycle]
-
-        # Resolve odds-context meta once.
         try:
             event_meta = linemove.robust_event_meta(_SNAP_DIR)
         except Exception:  # noqa: BLE001
             event_meta = {}
 
-        # HARD GUARD: never contact Telegram during a test run. Mirrors
-        # wca.sync.push_site — a test exercising this path must not ping the
-        # real phone. We still mark items so the test can assert the bookkeeping.
-        under_pytest = bool(os.environ.get("PYTEST_CURRENT_TEST"))
-
-        if not under_pytest:
-            if client is None:
-                client = _build_client()
-            if chat_id is None:
-                chat_id = resolve_chat_id()
-
-        pushed_uids: List[str] = []
-        for r in to_push:
-            uid = r["uid"]
+        material_uids: List[str] = []
+        trade_ideas = []  # (row, item, odds)
+        for r in fresh:
+            if int(r["pushed"]) != 0:
+                continue
             item = news.NewsItem(
                 title=r["title"] or "",
                 link=r["link"] or "",
@@ -352,21 +323,71 @@ def run_cycle(
                 published=r["published"] or "",
                 teams=[t for t in (r["teams"] or "").split(",") if t],
             )
+            if not news.is_material_squad_event(item):
+                continue  # stored, not material -> never pings
+            material_uids.append(r["uid"])
+            if cutoff is not None:
+                pub = news.parse_published(r["published"] or "")
+                if pub is not None and pub < cutoff:
+                    stats["stale"] += 1
+                    continue  # recycled old story -> log only
             odds = _odds_for_item(db_path, item, event_meta)
-            text = news.format_alert(item, int(r["score"]), odds)
+            if not odds or not odds.get("match_id") or odds.get("team_odds") is None:
+                continue  # material but no tradeable fixture line -> log only
+            wide = news.team_line_movement(
+                conn, odds["match_id"], odds.get("team", ""),
+                odds.get("team_odds"), odds.get("as_of") or "",
+                window_hours=PING_WINDOW_HOURS,
+            )
+            odds = dict(odds)
+            odds["move_verdict"] = wide.get("verdict")
+            odds["move_delta_pp"] = wide.get("delta_pp")
+            odds["move_window_h"] = wide.get("window_h", PING_WINDOW_HOURS)
+            # Suppress ONLY a confirmed move (the Morocco trap: the line already
+            # drifted to its settled level). 'flat' and 'n/a' (no movement
+            # evidence) both ping — a material change with no sign the market
+            # reacted is exactly what we want to surface.
+            if wide.get("verdict") == "MOVED":
+                continue  # already priced -> material, logged, not pinged
+            trade_ideas.append((r, item, odds))
 
+        if material_uids:
+            news.mark_material(conn, material_uids)
+        stats["material"] = len(material_uids)
+
+        trade_ideas.sort(
+            key=lambda t: (t[0]["published"] or t[0]["ts_utc"] or ""), reverse=True)
+        stats["eligible"] = len(trade_ideas)
+        if len(trade_ideas) > max_per_cycle:
+            stats["overflow"] = len(trade_ideas) - max_per_cycle
+            _log("%d trade ideas exceed cap %d; deferring %d to next cycle"
+                 % (len(trade_ideas), max_per_cycle, stats["overflow"]))
+        to_push = trade_ideas[:max_per_cycle]
+        if material_uids:
+            _log("material squad events: %d (logged) | trade ideas (unmoved line): %d"
+                 % (len(material_uids), len(trade_ideas)))
+
+        # HARD GUARD: never contact Telegram during a test run.
+        under_pytest = bool(os.environ.get("PYTEST_CURRENT_TEST"))
+        if not under_pytest:
+            if client is None:
+                client = _build_client()
+            if chat_id is None:
+                chat_id = resolve_chat_id()
+
+        pushed_uids: List[str] = []
+        for r, item, odds in to_push:
+            text = news.format_trade_idea(item, odds)
             if under_pytest:
-                # Compute everything (so format_alert/odds_context are exercised)
-                # but never send. Do NOT mark pushed: nothing actually went out.
-                continue
+                continue  # exercised, never sent
             if client is None or not chat_id:
-                _log("no telegram client/chat configured; skipping send of %s" % uid)
+                _log("no telegram client/chat configured; skipping send of %s" % r["uid"])
                 continue
             try:
                 client.send_message(chat_id, text)
-                pushed_uids.append(uid)
+                pushed_uids.append(r["uid"])
             except Exception as exc:  # noqa: BLE001 - one bad send != dead cycle
-                _log("send failed for %s (%s); will retry next cycle" % (uid, exc))
+                _log("send failed for %s (%s); will retry next cycle" % (r["uid"], exc))
 
         if pushed_uids:
             news.mark_pushed(conn, pushed_uids)
@@ -375,10 +396,10 @@ def run_cycle(
         conn.close()
 
     _log(
-        "cycle done: teams=%d fetched=%d new=%d eligible=%d pushed=%d "
-        "overflow=%d stale=%d"
-        % (stats["teams"], stats["fetched"], stats["new"], stats["eligible"],
-           stats["pushed"], stats["overflow"], stats["stale"])
+        "cycle done: teams=%d fetched=%d new=%d material=%d trade_ideas=%d "
+        "pushed=%d overflow=%d stale=%d"
+        % (stats["teams"], stats["fetched"], stats["new"], stats["material"],
+           stats["eligible"], stats["pushed"], stats["overflow"], stats["stale"])
     )
     return stats
 

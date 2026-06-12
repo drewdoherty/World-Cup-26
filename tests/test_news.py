@@ -596,3 +596,52 @@ def test_gather_items_injected_fetch_isolates_failures():
     items = news.gather_items(["Japan"], fetch=flaky_fetch, include_core=True)
     # The Sky failure is isolated; the BBC item still comes through.
     assert any(i.link == "https://bbc/a" for i in items)
+
+
+class TestMaterialGate:
+    def _item(self, title, summary=""):
+        from wca.news import NewsItem
+        return NewsItem(title=title, link="http://x", source="s", summary=summary)
+
+    def test_material_squad_events_pass(self):
+        from wca.news import is_material_squad_event
+        assert is_material_squad_event(self._item(
+            "Japan captain Endo withdraws from World Cup squad"))
+        assert is_material_squad_event(self._item(
+            "Morocco ruled out: Aguerd cut from 2026 World Cup roster"))
+        assert is_material_squad_event(self._item(
+            "Star striker suspended for World Cup opener after FIFA ban"))
+
+    def test_soft_chatter_is_not_material(self):
+        from wca.news import is_material_squad_event
+        assert not is_material_squad_event(self._item(
+            "Brazil forward a doubt for World Cup opener with minor knock"))
+        assert not is_material_squad_event(self._item(
+            "Coach to assess fitness of defender ahead of World Cup"))
+        assert not is_material_squad_event(self._item(
+            "Player backs teammates to shine at the World Cup"))
+
+    def test_off_topic_material_words_rejected(self):
+        from wca.news import is_material_squad_event
+        assert not is_material_squad_event(self._item(
+            "Rugby star ruled out of Six Nations with injury"))
+        assert not is_material_squad_event(self._item(
+            "Player withdrawn from Euro 2024 squad"))
+
+    def test_material_needs_wc_anchor(self):
+        from wca.news import is_material_squad_event
+        # 'withdraws' but no WC/2026/FIFA anchor -> not material
+        assert not is_material_squad_event(self._item(
+            "Midfielder withdraws from friendly with knock"))
+
+    def test_format_trade_idea_has_direction_and_escapes(self):
+        from wca.news import NewsItem, format_trade_idea
+        it = NewsItem(title="Japan captain Endo withdraws", link="http://x",
+                      source="s", teams=["Japan"])
+        odds = {"team": "Japan", "fixture": "Netherlands vs Japan",
+                "kickoff": "2026-06-14T20:00:00Z", "team_odds": 4.0,
+                "team_implied_now": 0.25, "lines": {"Japan": 4.0, "Draw": 3.2},
+                "move_window_h": 18.0, "move_delta_pp": 0.1, "match_id": "M"}
+        out = format_trade_idea(it, odds)
+        assert "NEW TRADE IDEA" in out and "Japan" in out
+        assert "unmoved" in out.lower() and "Angle" in out

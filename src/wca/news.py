@@ -279,6 +279,22 @@ CREATE TABLE IF NOT EXISTS news_items (
 def ensure_schema(conn: sqlite3.Connection) -> None:
     """Create the ``news_items`` table if absent. Idempotent."""
     conn.execute(_SCHEMA)
+    # `material` flags a confirmed squad change (logged whether or not it
+    # produced a ping); added to pre-existing tables idempotently.
+    try:
+        conn.execute("ALTER TABLE news_items ADD COLUMN material INTEGER NOT NULL DEFAULT 0")
+    except Exception:
+        pass
+    conn.commit()
+
+
+def mark_material(conn: sqlite3.Connection, uids: Sequence[str]) -> None:
+    """Flag items as material squad events (for the log / digest)."""
+    if not uids:
+        return
+    conn.executemany(
+        "UPDATE news_items SET material = 1 WHERE uid = ?", [(u,) for u in uids]
+    )
     conn.commit()
 
 
@@ -655,6 +671,44 @@ def score_item(item: NewsItem, teams: Sequence[str]) -> int:
     if is_off_topic(blob):
         score = min(score, _OFF_TOPIC_CEILING)
     return score
+
+
+# Phrases that mark a MATERIAL squad change — a confirmed availability swing,
+# not soft chatter. Only these (on an on-topic 2026-WC story about a relevant
+# team) clear the bar to even be considered for a phone ping. "doubt", "knock",
+# "fitness test", "assessed", "could miss" deliberately do NOT qualify — they
+# are uncertainty, not a change.
+_KW_MATERIAL = (
+    "ruled out", "ruled-out", "ruled out of",
+    "withdraw", "withdrawn", "withdraws",
+    "out of the world cup", "out for the tournament", "out of the squad",
+    "cut from", "dropped from the squad", "left out of the squad",
+    "replaced in the squad", "replaces", "called up to replace",
+    "miss the world cup", "will miss the world cup", "out of world cup",
+    "suspended", "suspension", "banned", "ban rules",
+    "confirmed lineup", "confirmed line-up", "starting xi confirmed",
+    "retires from international", "international retirement",
+)
+
+
+def is_material_squad_event(item: "NewsItem", teams: Optional[Sequence[str]] = None) -> bool:
+    """True only for a confirmed, material squad/availability change.
+
+    The high bar that gates phone pings: a real availability swing (withdrawal,
+    ruled out, suspension, confirmed XI, retirement) on an on-topic 2026 World
+    Cup story. Uncertainty words ("doubt", "knock", "assessed") return False —
+    they are logged, never pinged. Off-topic (wrong tournament) returns False.
+    """
+    blob = "%s. %s" % (item.title or "", item.summary or "")
+    low = blob.lower()
+    if is_off_topic(blob):
+        return False
+    if not any(m in low for m in _KW_MATERIAL):
+        return False
+    # Must be anchored to the 2026 men's WC, not generic football.
+    if not ("world cup" in low or "2026" in low or "fifa" in low):
+        return False
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -1053,6 +1107,46 @@ def format_alert(
     if item.link:
         lines.append("🔗 %s" % item.link)  # raw URL; not markdown-escaped
 
+    return "\n".join(lines)
+
+
+def format_trade_idea(item: "NewsItem", odds: Dict[str, Any]) -> str:
+    """Render a TRADE IDEA ping: a material squad change on an unmoved line.
+
+    Only fired when a confirmed availability swing meets a line that has stayed
+    flat over the wide window (so the news is plausibly *not yet priced* — the
+    Endo signature, not the Morocco trap). Leads with a suggested direction.
+    """
+    team = odds.get("team", "")
+    fixture = odds.get("fixture") or odds.get("match_id", "")
+    kickoff = odds.get("kickoff") or ""
+    implied = odds.get("team_implied_now")
+    win = odds.get("move_window_h", 18.0)
+    delta = odds.get("move_delta_pp")
+
+    head = "🎯 *NEW TRADE IDEA* — %s" % _md_escape(team)
+    lines = [head, _md_escape(item.title.strip())]
+    line2 = "📊 %s" % _md_escape(str(fixture))
+    if kickoff:
+        line2 += " (k/o %s)" % _md_escape(_short_kickoff(kickoff))
+    lines.append(line2)
+    if odds.get("team_odds") is not None:
+        tail = " (%.1f%%)" % (float(implied) * 100.0) if implied else ""
+        lines.append("   *%s*: %s%s" % (_md_escape(team), _fmt_odds(odds.get("team_odds")), tail))
+    odds_lines = odds.get("lines") or {}
+    if odds_lines:
+        lines.append("   line: %s" % " | ".join(
+            "%s %s" % (_md_escape(s), _fmt_odds(o)) for s, o in odds_lines.items()))
+    verdict = odds.get("move_verdict")
+    if verdict == "flat" and delta is not None:
+        lines.append("   ✅ line *unmoved* %gh (%+.1fpp) — likely NOT priced" % (win, delta))
+    else:  # n/a — no movement history yet; still worth flagging fast
+        lines.append("   ✅ line *unmoved / untracked* — no sign the market has reacted")
+    lines.append(
+        "   *Angle:* material squad change weakens %s — fade them / back the opponent "
+        "before the line corrects." % _md_escape(team))
+    if item.link:
+        lines.append("🔗 %s" % item.link)
     return "\n".join(lines)
 
 

@@ -424,20 +424,31 @@ def test_cycle_pushes_eligible_and_marks(tmp_path, monkeypatch):
     assert client2.sent == []
 
 
-def test_cycle_only_pushes_at_or_above_min_score(tmp_path, monkeypatch):
+def test_cycle_only_pings_material_events(tmp_path, monkeypatch):
+    # Gating is now MATERIAL-based, not score-based: a non-material story
+    # (soft chatter) is still scraped + stored but never pinged.
     db = _cycle_db(tmp_path)
     import wca.linemove as lm
     monkeypatch.setattr(lm, "robust_event_meta", lambda *a, **k: _META)
     monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
 
+    def soft_fetch(url, name=""):
+        if "news.google.com" in url and "Japan" in url:
+            return news.parse_feed(
+                _rss([("Japan boss praises squad spirit ahead of World Cup opener",
+                       "http://x/soft", "fitness looks good, no fresh injury")]),
+                name,
+            )
+        return []
+
     client = RecordingClient()
-    # min-score absurdly high: nothing qualifies even though items inserted.
     stats = newsd.run_cycle(
-        db, min_score=99, horizon_h=72, max_per_cycle=5,
-        client=client, chat_id="1", fetch=_fake_fetch_factory(),
+        db, min_score=4, horizon_h=72, max_per_cycle=5,
+        client=client, chat_id="1", fetch=soft_fetch,
     )
-    assert stats["new"] >= 1
-    assert stats["pushed"] == 0
+    assert stats["new"] >= 1          # stored
+    assert stats["material"] == 0     # not a material squad change
+    assert stats["pushed"] == 0       # so never pinged
     assert client.sent == []
 
 
@@ -454,7 +465,7 @@ def test_cycle_respects_cap_and_logs_overflow(tmp_path, monkeypatch, capsys):
                 _rss([
                     ("Japan star A ruled out of World Cup injured withdraws", "http://x/a", "injury blow ruled out"),
                     ("Japan star B suspended banned for World Cup", "http://x/b", "suspension banned red card"),
-                    ("Japan star C ruled out injured withdraws", "http://x/c", "injury blow ruled out"),
+                    ("Japan star C ruled out of World Cup injured withdraws", "http://x/c", "world cup injury blow ruled out"),
                 ]),
                 name,
             )
