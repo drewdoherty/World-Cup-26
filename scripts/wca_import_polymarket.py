@@ -90,7 +90,6 @@ def main() -> None:
             skipped += 1
             continue
 
-        selection = bet_data.get("selection", "").strip()
         shares = float(bet_data.get("shares", 0))
         price = float(bet_data.get("price", 0))
         ts_utc = bet_data.get("ts_utc", "")
@@ -100,6 +99,9 @@ def main() -> None:
 
         # Generate match_id from home/away team names
         match_id = f"{parsed['home_team'].upper().replace(' ', '')}_{parsed['away_team'].upper().replace(' ', '')}"
+
+        # Format selection as "HomeTeam X-Y AwayTeam"
+        selection = f"{parsed['home_team']} {parsed['home_goals']}-{parsed['away_goals']} {parsed['away_team']}"
 
         # Convert Polymarket price (probability 0-1) to decimal odds
         # Price 0.09 (9%) → Decimal odds 1/0.09 = 11.11
