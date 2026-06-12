@@ -15,10 +15,12 @@ price at settlement).
 
 The script computes::
 
-    settled_pl = stake * (decimal_odds - 1)  if outcome='won' else -stake
-    clv = log(closing_odds / fair_odds)      if fair_odds is known
+    settled_pl = stake * (decimal_odds - 1)   if outcome='won' else -stake
+    clv = decimal_odds / closing_odds - 1
 
-where fair_odds is derived from model_prob via the implicit Kelly devigging.
+where decimal_odds is the price the bet was BACKED at. CLV > 0 means the
+backed price beat the closing line. This matches the convention used by
+every other CLV producer in the ledger.
 """
 from __future__ import annotations
 
@@ -69,23 +71,19 @@ def main() -> None:
         odds_backed = float(row["decimal_odds"] or 0.0)
         model_prob = float(row["model_prob"] or 0.0)
 
-        # Compute realized P&L
+        # Compute realized P&L — a win pays at the odds the bet was BACKED
+        # at, not the closing price (the close only matters for CLV).
         if args.outcome == "won":
-            settled_pl = stake * (args.closing_odds - 1)
+            settled_pl = stake * (odds_backed - 1)
         elif args.outcome == "lost":
             settled_pl = -stake
         else:  # void
             settled_pl = 0.0
 
-        # Compute CLV if possible
+        # CLV: backed price vs closing line (ledger convention: ratio - 1).
         clv = None
-        if model_prob > 0 and args.closing_odds and args.closing_odds > 0:
-            import math
-            fair_odds = 1.0 / model_prob
-            try:
-                clv = math.log(args.closing_odds / fair_odds)
-            except (ValueError, ZeroDivisionError):
-                clv = None
+        if odds_backed > 0 and args.closing_odds and args.closing_odds > 0:
+            clv = odds_backed / args.closing_odds - 1
 
         # Update the ledger
         now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
