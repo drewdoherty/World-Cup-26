@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-12T06:14:48"
+    "generated": "2026-06-12T13:05:52"
   },
   "totals": {
-    "wagered": 168.56,
-    "open_stake": 103.56,
+    "wagered": 168.86,
+    "open_stake": 103.86000000000001,
     "settled_pl": 70.822,
-    "n_bets": 14
+    "n_bets": 15
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 62.25,
-      "open_stake": 27.25,
+      "wagered": 62.55,
+      "open_stake": 27.55,
       "settled_pl": 46.72,
-      "n_bets": 9
+      "n_bets": 10
     },
     "USD": {
       "wagered": 106.31,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 62.25,
-      "open_stake": 27.25,
+      "wagered": 62.55,
+      "open_stake": 27.55,
       "settled_pl": 46.72,
-      "n_bets": 9,
+      "n_bets": 10,
       "currency": "GBP"
     },
     "polymarket": {
@@ -46,6 +46,14 @@
     }
   },
   "platforms": {
+    "smarkets": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 0.3,
+      "open_stake": 0.3,
+      "settled_pl": 0.0,
+      "n_bets": 1
+    },
     "polymarket": {
       "venue": "polymarket",
       "currency": "USD",
@@ -248,6 +256,20 @@
   },
   "positions": [
     {
+      "id": 15,
+      "ts_utc": "2026-06-12T13:05:52",
+      "match": "Brazil vs Morocco",
+      "market": "Full-time result",
+      "selection": "Morocco",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 6.2,
+      "stake": 0.3,
+      "model_prob": null,
+      "ev": null
+    },
+    {
       "id": 14,
       "ts_utc": "2026-06-11T21:00:40",
       "match": "2026 FIFA World Cup - Japan Round of 16",
@@ -346,100 +368,5 @@
       "ev": 0.07100000000000017
     }
   ],
-  "predictions": [
-    {
-      "fixture": "Canada vs Bosnia and Herzegovina",
-      "scores": [
-        {
-          "score": "1-0",
-          "prob": 14.4,
-          "fair": 6.94,
-          "back": 7.08
-        },
-        {
-          "score": "1-1",
-          "prob": 11.5,
-          "fair": 8.71,
-          "back": 8.89
-        },
-        {
-          "score": "2-1",
-          "prob": 11.3,
-          "fair": 8.86,
-          "back": 9.03
-        },
-        {
-          "score": "2-0",
-          "prob": 10.9,
-          "fair": 9.14,
-          "back": 9.32
-        },
-        {
-          "score": "0-0",
-          "prob": 8.0,
-          "fair": 12.56,
-          "back": 12.81
-        },
-        {
-          "score": "0-1",
-          "prob": 5.7,
-          "fair": 17.51,
-          "back": 17.86
-        }
-      ],
-      "over_under": {
-        "line": 2.5,
-        "over": 46.3,
-        "under": 53.7
-      },
-      "btts": 48.5
-    },
-    {
-      "fixture": "United States vs Paraguay",
-      "scores": [
-        {
-          "score": "1-1",
-          "prob": 13.6,
-          "fair": 7.37,
-          "back": 7.52
-        },
-        {
-          "score": "1-0",
-          "prob": 12.6,
-          "fair": 7.92,
-          "back": 8.08
-        },
-        {
-          "score": "0-0",
-          "prob": 10.5,
-          "fair": 9.53,
-          "back": 9.72
-        },
-        {
-          "score": "0-1",
-          "prob": 8.9,
-          "fair": 11.28,
-          "back": 11.51
-        },
-        {
-          "score": "2-1",
-          "prob": 8.8,
-          "fair": 11.38,
-          "back": 11.61
-        },
-        {
-          "score": "2-0",
-          "prob": 8.8,
-          "fair": 11.41,
-          "back": 11.64
-        }
-      ],
-      "over_under": {
-        "line": 2.5,
-        "over": 40.9,
-        "under": 59.1
-      },
-      "btts": 46.9
-    }
-  ]
+  "predictions": []
 }
