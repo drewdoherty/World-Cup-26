@@ -162,16 +162,43 @@
     return BOOK_COLOR[k] || BOOK_FALLBACK;
   }
 
+  // Default display labels for the known venue keys. A venue block may also
+  // carry its own .label (e.g. "SPORTSBOOK 1"); that wins when present.
+  var VENUE_LABEL = {
+    sportsbook: "sportsbook",
+    sportsbook_1: "sportsbook 1",
+    sportsbook_2: "sportsbook 2",
+    polymarket: "polymarket",
+    kalshi: "kalshi"
+  };
+  function venueLabel(key, blk) {
+    if (blk && blk.label) return String(blk.label);
+    return VENUE_LABEL[key] || key;
+  }
+  // Map a venue display key back to the platforms[].venue value used for the
+  // per-book breakdown. Both sportsbook_1/_2 split out of the combined
+  // "sportsbook" venue, which the platforms block is keyed by (no account
+  // split there) — so the book breakdown is rendered under Sportsbook 1 only.
+  function platformVenueKey(key) {
+    return (key === "sportsbook_1" || key === "sportsbook_2") ? "sportsbook" : key;
+  }
+
   function renderVenues(d) {
     var venues = d.venues || {};
-    var order = ["sportsbook", "polymarket", "kalshi"];
+    // When the data layer splits sportsbook by account it emits sportsbook_1 /
+    // sportsbook_2 (each with a .label) and drops the combined "sportsbook"
+    // row. Old data.json has only "sportsbook" — fall back to it.
+    var hasSplit = !!(venues.sportsbook_1 || venues.sportsbook_2);
+    var order = hasSplit
+      ? ["sportsbook_1", "sportsbook_2", "polymarket", "kalshi"]
+      : ["sportsbook", "polymarket", "kalshi"];
     // Hide venues with no bets yet (e.g. kalshi pre-launch); bars are scaled
     // within-currency only, so a £ bar and a $ bar are not length-comparable —
     // the per-row amount label carries the truth.
     var active = order.filter(function (k) {
       return Number((venues[k] || {}).n_bets || 0) > 0;
     });
-    if (!active.length) active = ["sportsbook"];
+    if (!active.length) active = [hasSplit ? "sportsbook_1" : "sportsbook"];
     var amounts = active.map(function (k) {
       return Number((venues[k] || {}).wagered || 0);
     });
@@ -211,24 +238,82 @@
       var amt = amounts[i];
       var frac = max > 0 ? (amt / max) : 0;
       var nb = Number(v.n_bets || 0);
-      var color = VENUE_COLOR[k] || "#9ca3af";
+      // Colour and book-breakdown both key off the underlying venue, so the
+      // two sportsbook accounts share the sportsbook colour and the breakdown
+      // sits under Sportsbook 1 only.
+      var pvk = platformVenueKey(k);
+      // Sportsbook splits share the green family but are visually distinct:
+      // account 1 keeps the canonical green, account 2 uses a teal-green.
+      var color = (k === "sportsbook_2") ? "#34d399"
+        : (VENUE_COLOR[pvk] || "#9ca3af");
+      // Per-book rows only under sportsbook_1 (or the combined sportsbook /
+      // non-sportsbook venues) — never duplicated under sportsbook_2.
+      var books = (k === "sportsbook_2") ? "" : platformRows(pvk, amt, ccy);
       return '' +
         '<div class="venue-row">' +
           '<div class="venue-top">' +
-            '<span class="venue-name">' + esc(k) + '</span>' +
+            '<span class="venue-name">' + esc(venueLabel(k, v)) + '</span>' +
             '<span class="venue-amt num">' + money(amt, ccy) + '</span>' +
           '</div>' +
           '<div class="venue-track">' +
-            '<div class="venue-fill ' + k + '" style="width:' +
+            '<div class="venue-fill ' + pvk + '" style="width:' +
               (frac * 100).toFixed(1) + '%;background:' + color + ';opacity:.75"></div>' +
           '</div>' +
           '<div class="venue-sub num">' + nb + ' bet' + (nb === 1 ? '' : 's') +
             ' · open ' + money(v.open_stake || 0, ccy) + '</div>' +
-          platformRows(k, amt, ccy) +
+          books +
         '</div>';
     }).join("");
 
+    html += sourceSummaryLine(d);
+
     $("venues").innerHTML = html;
+  }
+
+  // Optional "SOURCE // P&L" footer line built from d.source_summary, a map
+  // {model:{GBP:{settled_pl},USD:{...}}, offer:{...}, punt:{...}}. Per-currency
+  // settled P&L is shown separately (never summing £ with $). Absent feed (old
+  // data.json) -> empty string, so the panel is unchanged.
+  function sourceSummaryLine(d) {
+    var ss = d.source_summary;
+    if (!ss || typeof ss !== "object") return "";
+    var SRC = [
+      { key: "model", label: "model" },
+      { key: "offer", label: "offer" },
+      { key: "punt", label: "punt" }
+    ];
+    var parts = [];
+    SRC.forEach(function (s) {
+      var byCcy = ss[s.key];
+      if (!byCcy || typeof byCcy !== "object") return;
+      var amt = moneyByCcy(byCcy, "settled_pl", true);
+      var any = ["GBP", "USD", "EUR"].some(function (c) { return byCcy[c]; });
+      if (!any) return;
+      parts.push('<span class="src-pl-item">' +
+        '<span class="src-chip src-' + s.key + '">' + esc(s.label) + '</span> ' +
+        esc(amt) + '</span>');
+    });
+    if (!parts.length) return "";
+    return '<div class="venue-source-pl"><span class="dim">SOURCE // P&L</span> ' +
+      parts.join('<span class="dim"> · </span>') + '</div>';
+  }
+
+  // Small terminal chip for a bet's source (model/offer/punt). Unknown/absent
+  // source -> em-dash cell so old data.json rows stay clean.
+  var SRC_ABBR = { model: "MDL", offer: "OFR", punt: "PNT" };
+  function sourceChip(src) {
+    var s = String(src === null || src === undefined ? "" : src).toLowerCase().trim();
+    if (s !== "model" && s !== "offer" && s !== "punt") {
+      return '<span class="dim">—</span>';
+    }
+    return '<span class="src-chip src-' + s + '" title="' + esc(s) + '">' +
+      SRC_ABBR[s] + '</span>';
+  }
+  // "A2" suffix chip on the venue pill, ONLY for account-2 rows. Account 1 (or
+  // an absent account on old data) renders nothing, keeping those pills clean.
+  function accountSuffix(account) {
+    var a = String(account === null || account === undefined ? "" : account).trim();
+    return a === "2" ? ' <span class="acct-chip">A2</span>' : '';
   }
 
   function renderPositions(d) {
@@ -257,8 +342,10 @@
         '<td class="r num">' + esc(pct(p.model_prob, 0)) + '</td>' +
         '<td class="r num ' + evClass(p.ev) + '">' +
           esc(p.ev === null || p.ev === undefined ? '—' : pct(p.ev, 1)) + '</td>' +
+        '<td class="pos-src">' + sourceChip(p.source) + '</td>' +
         '<td><span class="pill book ' + venue + '" style="color:' + col +
-          ';border-color:' + col + '">' + esc(p.platform || venue) + '</span></td>' +
+          ';border-color:' + col + '">' + esc(p.platform || venue) +
+          accountSuffix(p.account) + '</span></td>' +
         '</tr>';
     }).join("");
 
@@ -267,7 +354,8 @@
         '<thead><tr>' +
           '<th>Time</th><th>Match</th><th>Selection</th>' +
           '<th class="r">Odds</th><th class="r">Stake</th>' +
-          '<th class="r">Model</th><th class="r">EV</th><th>Venue</th>' +
+          '<th class="r">Model</th><th class="r">EV</th>' +
+          '<th>Source</th><th>Venue</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
       '</table>';
@@ -853,7 +941,9 @@
         '<td class="r num ' + plCls + '">' + esc(plTxt) + '</td>' +
         '<td class="r num ' + evClass(p.clv) + '">' +
           esc(p.clv === null || p.clv === undefined ? "—" : pct(p.clv, 1)) + '</td>' +
-        '<td><span class="pill ' + esc(p.venue || "sportsbook") + '">' + esc(p.platform || "") + '</span></td>' +
+        '<td class="pos-src">' + sourceChip(p.source) + '</td>' +
+        '<td><span class="pill ' + esc(p.venue || "sportsbook") + '">' +
+          esc(p.platform || "") + accountSuffix(p.account) + '</span></td>' +
         '</tr>';
     }).join("");
     el.innerHTML =
@@ -861,7 +951,8 @@
         '<thead><tr>' +
           '<th>Settled</th><th>Match</th><th>Selection</th>' +
           '<th class="r">Odds</th><th class="r">Stake</th>' +
-          '<th class="r">P&L</th><th class="r">CLV</th><th>Venue</th>' +
+          '<th class="r">P&L</th><th class="r">CLV</th>' +
+          '<th>Source</th><th>Venue</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
       '</table>';

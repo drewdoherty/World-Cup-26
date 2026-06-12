@@ -81,7 +81,7 @@ _BET_COLUMNS = (
     "id", "ts_utc", "match_id", "match_desc", "market", "selection",
     "platform", "decimal_odds", "stake", "model_prob", "market_prob_devig",
     "ev", "kelly_fraction", "status", "settled_pl", "settled_ts",
-    "closing_odds", "clv", "notes",
+    "closing_odds", "clv", "notes", "account", "source",
 )
 
 

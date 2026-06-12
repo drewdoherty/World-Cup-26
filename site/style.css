@@ -1023,3 +1023,44 @@ body {
 .book-name { color: var(--text-dim, #9ca3af); min-width: 110px; }
 .book-bar { flex: 1 1 auto; height: 5px; background: rgba(255,255,255,.04); border-radius: 2px; overflow: hidden; }
 .book-amt { white-space: nowrap; }
+
+/* ----------------------------------------- bet source / account dimensions */
+/* Small muted terminal chips for the bet source (model/offer/punt) shown in
+   the positions tables and the venues "SOURCE // P&L" footer. */
+.src-chip {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 2px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid var(--border-2);
+  color: var(--text-dim);
+  line-height: 14px;
+}
+.src-chip.src-model { color: #4ade80; border-color: #1d3a2a; }   /* green-ish */
+.src-chip.src-offer { color: #f5b454; border-color: #4a3a1d; }   /* amber */
+.src-chip.src-punt  { color: #60a5fa; border-color: #1d2a45; }   /* blue */
+.pos-table td.pos-src { white-space: nowrap; }
+
+/* "A2" suffix chip on the venue pill — only emitted for account-2 rows. */
+.acct-chip {
+  display: inline-block;
+  margin-left: 3px;
+  padding: 0 3px;
+  border-radius: 2px;
+  font-size: 8px;
+  letter-spacing: .5px;
+  border: 1px solid #3a3550;
+  color: #b59be0;
+}
+
+/* "SOURCE // P&L" footer line inside the venues panel. */
+.venue-source-pl {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-2);
+  font-size: 10px;
+  letter-spacing: .5px;
+}
+.venue-source-pl .src-pl-item { white-space: nowrap; }

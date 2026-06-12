@@ -60,6 +60,8 @@ HELP_TEXT = (
     "/help — this message\n\n"
     "\U0001F4F8 Send a betslip *screenshot* and I'll parse the selections, then "
     "log them to the ledger once you reply `yes`.\n"
+    "Tag the photo caption (or yes-reply) to set provenance: `a2` (account 2), "
+    "`offer`, `punt`, `model` — default is account 1 / punt.\n"
     "Confirm a pushed bet with `Y BET-<id>`, decline with `N BET-<id>`.\n"
     "Execute a parked Polymarket order with `Y PM-<n>`, discard with `N PM-<n>`."
 )
@@ -85,8 +87,17 @@ READ_ONLY_MSG = (
 
 # Lone yes/no (betslip confirm) or Y/N BET-<id> / PM-<n> (order confirm) —
 # anything that can write the ledger or execute an order.
+# ``yes``/``no`` (optionally trailed by account/source tag overrides such as
+# ``yes a2 offer``) confirm a parked betslip; ``Y/N BET-<id>`` / ``Y/N PM-<n>``
+# confirm a pushed bet or parked order. All of these can move money / write the
+# ledger, so they are admin-gated.
+_TAG_TOKEN = r"(?:account\s*[12]|acc[12]|a[12]|[12]|model|offer|punt)"
 _MONEY_RE = re.compile(
-    r"^\s*(yes|no|[yn]\s+(bet|pm)-\d+)\s*$", re.IGNORECASE
+    r"^\s*(?:"
+    r"[yn]\s+(?:bet|pm)-\d+"            # Y/N BET-<id> | Y/N PM-<n>
+    r"|(?:yes|no|y|n)(?:\s+" + _TAG_TOKEN + r")*"  # yes/no [+ tag overrides]
+    r")\s*$",
+    re.IGNORECASE,
 )
 
 
@@ -219,9 +230,13 @@ def handle_bets(db_path: str) -> str:
     con = sqlite3.connect(db_path)
     con.row_factory = sqlite3.Row
     try:
+        cols = {r[1] for r in con.execute("PRAGMA table_info(bets)")}
+        acc_sel = "account" if "account" in cols else "'1' AS account"
+        src_sel = "source" if "source" in cols else "'model' AS source"
         rows = con.execute(
-            "SELECT id, match_desc, selection, platform, decimal_odds, stake, notes "
-            "FROM bets WHERE status = 'open' ORDER BY platform, id"
+            "SELECT id, match_desc, selection, platform, decimal_odds, stake, notes, "
+            "%s, %s FROM bets WHERE status = 'open' ORDER BY platform, id"
+            % (acc_sel, src_sel)
         ).fetchall()
     finally:
         con.close()
@@ -260,16 +275,23 @@ def handle_bets(db_path: str) -> str:
             loss = 0.0 if is_free else stake
             v_win += win
             v_loss += loss
+            # Compact provenance tag: source initial (m/o/p) glued to the id,
+            # plus an "A2" marker for second-account bets. Stays inside the
+            # ~34-char phone width, e.g. "#17p A2 Canada v Bosnia".
+            src_tag = (r["source"] or "model")[:1].lower()
+            a2 = " A2" if str(r["account"]) == "2" else ""
+            head = "#%d%s%s " % (r["id"], src_tag, a2)
+            budget = 34 - len(head)
             match = (r["match_desc"] or "").replace(" vs ", " v ")
-            if len(match) > 28:
-                match = match[:27] + "…"
+            if len(match) > budget:
+                match = match[: budget - 1] + "…"
             sel = (r["selection"] or "")
             if len(sel) > 12:
                 sel = sel[:11] + "…"
             if not first:
                 lines.append("")
             first = False
-            lines.append("#%-3d %s" % (r["id"], match))
+            lines.append("%s%s" % (head, match))
             lines.append("     %-12s %5.2f %s%g%s→%s%.2f" % (
                 sel, odds, sym, round(stake, 2),
                 "(free)" if is_free else "", sym, win))
@@ -475,6 +497,12 @@ def handle_structure(docs_dir: Optional[str] = None) -> str:
 # expires when the process restarts.
 _PENDING_PHOTO_BETS: Dict[Any, List[Any]] = {}
 
+# Resolved account/source tags for each parked slip, keyed by chat id and kept
+# in lockstep with ``_PENDING_PHOTO_BETS``. Caption tags are remembered here so
+# a bare ``yes`` reply still logs with the tags shown at parse time, while a
+# tagged reply (``yes a2 offer``) can override them.
+_PENDING_PHOTO_TAGS: Dict[Any, Dict[str, str]] = {}
+
 
 def _slug(text: str) -> str:
     """Compact, deterministic match id fragment from a free-text description."""
@@ -482,8 +510,63 @@ def _slug(text: str) -> str:
     return s[:48] or "UNKNOWN"
 
 
-def _format_extracted(bets: List[Any]) -> str:
-    """Human-readable confirmation prompt for parsed selections."""
+def resolve_tags(
+    text: Optional[str],
+    *,
+    default_account: str = "1",
+    default_source: str = "punt",
+    allow_bare_account: bool = False,
+) -> Dict[str, str]:
+    """Parse account/source tags out of a screenshot caption or yes-reply.
+
+    Screenshot ingests are discretionary in-play bets by default (source=punt,
+    account=1); a caption can override either dimension. Recognised tokens
+    (case-insensitive, word-boundary matched anywhere in the text):
+
+      account: ``account 2`` / ``acc2`` / ``a2`` -> account="2"
+               ``account 1`` / ``acc1`` / ``a1`` -> account="1"
+      source : ``model`` -> "model", ``offer`` -> "offer", ``punt`` -> "punt"
+
+    With ``allow_bare_account=True`` (the yes-reply path), a bare digit token is
+    also accepted, e.g. ``yes 2`` / ``yes 2 punt`` / ``yes punt 2`` -> account
+    "2". This is opt-in so caption text (which may contain stray digits like a
+    stake) never false-matches an account.
+
+    Last matching token wins for each dimension. Returns
+    ``{"account": ..., "source": ...}``.
+    """
+    account = default_account
+    source = default_source
+    t = " " + (text or "").lower() + " "
+    bare2 = bare1 = False
+    if allow_bare_account:
+        # Strip the leading verb so ``yes``/``y`` is never read as a token, then
+        # look for a standalone account digit anywhere in the remainder.
+        rest = re.sub(r"^\s*(?:yes|y|no|n)\b", " ", t, flags=re.IGNORECASE)
+        bare2 = bool(re.search(r"\b2\b", rest))
+        bare1 = bool(re.search(r"\b1\b", rest))
+    if re.search(r"\b(account\s*2|acc2|a2)\b", t) or bare2:
+        account = "2"
+    elif re.search(r"\b(account\s*1|acc1|a1)\b", t) or bare1:
+        account = "1"
+    if re.search(r"\bmodel\b", t):
+        source = "model"
+    elif re.search(r"\boffer\b", t):
+        source = "offer"
+    elif re.search(r"\bpunt\b", t):
+        source = "punt"
+    return {"account": account, "source": source}
+
+
+_SOURCE_WORD = {"model": "model", "offer": "offer", "punt": "punt"}
+
+
+def _format_extracted(bets: List[Any], tags: Optional[Dict[str, str]] = None) -> str:
+    """Human-readable confirmation prompt for parsed selections.
+
+    ``tags`` (resolved account/source) is echoed so the user can correct a
+    mis-tag in the yes-reply before anything is written.
+    """
     from wca.bot.vision import currency_symbol
 
     lines = ["*Parsed %d selection(s) from your slip:*" % len(bets)]
@@ -498,7 +581,18 @@ def _format_extracted(bets: List[Any]) -> str:
             "%d. %s — *%s* @ %s | stake %s | %s%s%s"
             % (i, b.match_desc, b.selection, odds, stake, book, flag, warn)
         )
-    lines.append("\nReply *yes* to log all to the ledger, *no* to discard.")
+    if tags:
+        acct = tags.get("account", "1")
+        src = _SOURCE_WORD.get(tags.get("source", "punt"), tags.get("source", "punt"))
+        lines.append(
+            "\nTags: account *%s* | source *%s*  "
+            "(override in your reply, e.g. `yes a2 offer`)" % (acct, src)
+        )
+    lines.append(
+        "\nReply *yes* to log all to the ledger, *no* to discard. "
+        "Tag the reply to set provenance, e.g. `yes 2 offer` / `yes punt` "
+        "(account `1`/`2`, source `model`/`offer`/`punt`; default 1 / punt)."
+    )
     return "\n".join(lines)
 
 
@@ -507,12 +601,23 @@ def handle_photo(
     chat_id: Any,
     pending: Optional[Dict[Any, List[Any]]] = None,
     *,
+    caption: Optional[str] = None,
+    pending_tags: Optional[Dict[Any, Dict[str, str]]] = None,
     api_key: Optional[str] = None,
     model: Optional[str] = None,
 ) -> str:
-    """Extract bets from a betslip image and park them for confirmation."""
+    """Extract bets from a betslip image and park them for confirmation.
+
+    ``caption`` is the photo's message caption; account/source tags in it
+    (``a2``, ``offer``, ``punt``, ``model`` …) are resolved via
+    :func:`resolve_tags` and echoed in the confirmation prompt. Screenshot
+    ingests default to ``account="1"`` / ``source="punt"`` unless the caption
+    says otherwise.
+    """
     if pending is None:
         pending = _PENDING_PHOTO_BETS
+    if pending_tags is None:
+        pending_tags = _PENDING_PHOTO_TAGS
     from wca.bot.vision import extract_bets_from_image, VisionError
 
     try:
@@ -523,8 +628,13 @@ def handle_photo(
         return "Vision error: %s" % exc
     if not bets:
         return "No bets detected. Send a clearer screenshot of the full slip."
+    tags = resolve_tags(caption)
     pending[chat_id] = bets
-    return _format_extracted(bets)
+    pending_tags[chat_id] = tags
+    return _format_extracted(bets, tags)
+
+
+_YESNO_RE = re.compile(r"^\s*(yes|y|no|n)\b", re.IGNORECASE)
 
 
 def handle_photo_confirmation(
@@ -533,19 +643,40 @@ def handle_photo_confirmation(
     db_path: str,
     pending: Optional[Dict[Any, List[Any]]] = None,
     *,
+    pending_tags: Optional[Dict[Any, Dict[str, str]]] = None,
     ts_utc: Optional[str] = None,
 ) -> Optional[str]:
-    """Resolve a parked betslip on a lone ``yes`` / ``no``. None if not applicable."""
+    """Resolve a parked betslip on a ``yes`` / ``no`` reply. None if not applicable.
+
+    The reply may carry tag overrides, e.g. ``yes a2 offer``; these take
+    precedence over the tags resolved from the caption at parse time. A bare
+    ``yes`` logs with the parse-time (caption) tags, defaulting to
+    ``account="1"`` / ``source="punt"`` for an untagged screenshot.
+    """
     if pending is None:
         pending = _PENDING_PHOTO_BETS
+    if pending_tags is None:
+        pending_tags = _PENDING_PHOTO_TAGS
     if chat_id not in pending:
         return None
-    ans = text.strip().lower()
-    if ans not in {"yes", "y", "no", "n"}:
+    m = _YESNO_RE.match(text or "")
+    if not m:
         return None  # leave the slip parked; let normal command routing proceed
+    ans = m.group(1).lower()
     bets = pending.pop(chat_id)
+    parked_tags = pending_tags.pop(chat_id, None) or {"account": "1", "source": "punt"}
     if ans in {"no", "n"}:
         return "Discarded %d parsed selection(s)." % len(bets)
+
+    # Reply tags override the parked (caption) tags for each dimension.
+    tags = resolve_tags(
+        text,
+        default_account=parked_tags.get("account", "1"),
+        default_source=parked_tags.get("source", "punt"),
+        allow_bare_account=True,
+    )
+    account = tags["account"]
+    source = tags["source"]
 
     if ts_utc is None:
         ts_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
@@ -568,13 +699,18 @@ def handle_photo_confirmation(
                 float(b.decimal_odds or 0.0),
                 float(b.stake or 0.0),
                 notes=note,
+                account=account,
+                source=source,
                 db_path=db_path,
             )
             logged.append("#%d %s @ %s" % (bid, b.selection, b.decimal_odds or "?"))
         except Exception as exc:  # report per-bet failure, keep going
             logged.append("ERR %s: %s" % (b.selection, exc))
     _autosync(db_path, "screenshot ingest")
-    return "Logged %d to the ledger:\n%s" % (len(logged), "\n".join(logged))
+    a2 = " (A2)" if account == "2" else ""
+    return "Logged %d to the ledger [%s%s]:\n%s" % (
+        len(logged), source, a2, "\n".join(logged)
+    )
 
 
 def _autosync(db_path: str, reason: str) -> None:
@@ -750,6 +886,8 @@ def _execute_parked_order(
             decimal_odds,
             round(price * size, 2),
             notes=notes,
+            account="1",
+            source="model",
             db_path=db_path,
         )
     except Exception as exc:
@@ -977,7 +1115,9 @@ def run(
                     try:
                         image = client.download_photo(message)
                         reply = (
-                            handle_photo(image, chat_id)
+                            handle_photo(
+                                image, chat_id, caption=message.get("caption")
+                            )
                             if image
                             else "No photo found in that message."
                         )

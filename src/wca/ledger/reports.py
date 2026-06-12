@@ -369,7 +369,31 @@ def summary(db_path: str) -> Dict[str, Any]:
     total_deposited = float(sum(float(e["amount"]) for e in events))
     current_bankroll = total_deposited + total_pl
 
+    # Per-source breakdown: n (all bets), staked (all bets), settled_pl
+    # (settled won/lost only). The three canonical sources are always present
+    # so downstream consumers can index them unconditionally. This is purely
+    # additive and does not touch the CLV / calibration keys above.
+    by_source: Dict[str, Any] = {
+        s: {"n": 0, "staked": 0.0, "settled_pl": 0.0}
+        for s in ("model", "offer", "punt")
+    }
+    if "source" in df.columns:
+        src_series = df["source"].fillna("model").astype(str)
+    else:
+        src_series = pd.Series(["model"] * len(df), index=df.index)
+    for src, grp in df.groupby(src_series):
+        blk = by_source.setdefault(
+            str(src), {"n": 0, "staked": 0.0, "settled_pl": 0.0}
+        )
+        blk["n"] = int(len(grp))
+        blk["staked"] = float(grp["stake"].sum()) if not grp.empty else 0.0
+        settled_grp = grp[grp["status"].isin(("won", "lost"))]
+        blk["settled_pl"] = (
+            float(settled_grp["settled_pl"].sum()) if not settled_grp.empty else 0.0
+        )
+
     return {
+        "by_source": by_source,
         "total_bets": total_bets,
         "open_bets": open_bets,
         "won_bets": won_bets,

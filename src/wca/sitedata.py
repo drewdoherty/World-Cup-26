@@ -228,6 +228,8 @@ def _positions_from_bets(bets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             "selection": b.get("selection"),
             "platform": b.get("platform"),
             "venue": venue,
+            "account": str(b.get("account") or "1"),
+            "source": str(b.get("source") or "model"),
             "currency": VENUE_CURRENCY.get(venue, "GBP"),
             "decimal_odds": _opt_num(b.get("decimal_odds")),
             "stake": _opt_num(b.get("stake")),
@@ -305,11 +307,54 @@ def build_site_data(
             "currency": VENUE_CURRENCY.get(v, "GBP"),
         }
 
+    # Split the sportsbook venue (GBP) by physical account -> "sportsbook_1" /
+    # "sportsbook_2". The legacy combined "sportsbook" key above is retained so
+    # old front-ends keep working. polymarket/kalshi are not split (single
+    # account each for now). source_summary aggregates per source x currency.
+    def _acct_block() -> Dict[str, Any]:
+        return {"wagered": 0.0, "open_stake": 0.0, "settled_pl": 0.0,
+                "n_bets": 0, "currency": "GBP"}
+
+    sb_by_account: Dict[str, Dict[str, Any]] = {"1": _acct_block(), "2": _acct_block()}
+    source_summary: Dict[str, Any] = {}
+    for b in stats.get("bets") or []:
+        stake = float(b.get("stake") or 0.0)
+        status = (b.get("status") or "").strip().lower()
+        venue = dashboard.venue_for_platform(b.get("platform"))
+        ccy = VENUE_CURRENCY.get(venue, "GBP")
+        is_open = status == "open"
+        pl = float(b.get("settled_pl") or 0.0) if status in ("won", "lost") else 0.0
+
+        if venue == "sportsbook":
+            acct = str(b.get("account") or "1")
+            blk = sb_by_account.setdefault(acct, _acct_block())
+            blk["wagered"] += stake
+            blk["n_bets"] += 1
+            if is_open:
+                blk["open_stake"] += stake
+            blk["settled_pl"] += pl
+
+        src = str(b.get("source") or "model")
+        sblk = source_summary.setdefault(src, {}).setdefault(
+            ccy, {"wagered": 0.0, "open_stake": 0.0, "settled_pl": 0.0, "n_bets": 0}
+        )
+        sblk["wagered"] += stake
+        sblk["n_bets"] += 1
+        if is_open:
+            sblk["open_stake"] += stake
+        sblk["settled_pl"] += pl
+
+    for acct, label in (("1", "Sportsbook 1"), ("2", "Sportsbook 2")):
+        blk = sb_by_account.get(acct) or _acct_block()
+        blk["label"] = label
+        venues["sportsbook_%s" % acct] = blk
+
     # Totals PER CURRENCY — £ and $ are never added together. The legacy
     # single-number "totals" block is kept for backward compatibility but the
     # front-end should prefer totals_by_currency.
     totals_by_currency: Dict[str, Any] = {}
-    for v, block in venues.items():
+    for v in dashboard.VENUES:
+        block = venues[v]
         ccy = block["currency"]
         agg = totals_by_currency.setdefault(
             ccy, {"wagered": 0.0, "open_stake": 0.0, "settled_pl": 0.0, "n_bets": 0}
@@ -352,6 +397,8 @@ def build_site_data(
             "selection": b.get("selection"),
             "platform": b.get("platform"),
             "venue": venue,
+            "account": str(b.get("account") or "1"),
+            "source": str(b.get("source") or "model"),
             "currency": VENUE_CURRENCY.get(venue, "GBP"),
             "decimal_odds": _opt_num(b.get("decimal_odds")),
             "stake": _opt_num(b.get("stake")),
@@ -414,6 +461,7 @@ def build_site_data(
         "totals": totals,
         "totals_by_currency": totals_by_currency,
         "venues": venues,
+        "source_summary": source_summary,
         "platforms": platforms,
         "closed_positions": closed_positions,
         "pnl_series": pnl_series,

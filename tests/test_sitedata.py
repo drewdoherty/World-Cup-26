@@ -179,7 +179,9 @@ class TestBuildSiteData:
         data = sitedata.build_site_data(db, card_path=card, now_utc="2026-06-11 15:00:00 UTC")
 
         assert set(data.keys()) == {
-            "meta", "totals", "totals_by_currency", "venues", "platforms", "closed_positions", "pnl_series", "clv", "positions", "predictions"
+            "meta", "totals", "totals_by_currency", "venues", "source_summary",
+            "platforms", "closed_positions", "pnl_series", "clv", "positions",
+            "predictions"
         }
         assert data["meta"]["generated"] == "2026-06-11 15:00:00 UTC"
 
@@ -188,10 +190,20 @@ class TestBuildSiteData:
         _seed(db)
         data = sitedata.build_site_data(db, card_path=_write_card(tmp_path))
         venues = data["venues"]
-        assert set(venues.keys()) == {"sportsbook", "polymarket", "kalshi"}
+        # Canonical venues plus the per-account sportsbook split.
+        assert set(venues.keys()) == {
+            "sportsbook", "polymarket", "kalshi",
+            "sportsbook_1", "sportsbook_2",
+        }
 
-        venue_sum = sum(v["wagered"] for v in venues.values())
+        # Sum only the canonical venues (the split keys would double-count).
+        venue_sum = sum(venues[v]["wagered"]
+                        for v in ("sportsbook", "polymarket", "kalshi"))
         assert venue_sum == pytest.approx(data["totals"]["wagered"])
+        # Legacy combined sportsbook == sum of its account splits.
+        assert venues["sportsbook"]["wagered"] == pytest.approx(
+            venues["sportsbook_1"]["wagered"] + venues["sportsbook_2"]["wagered"]
+        )
         # sportsbook = virginbet(10+5) + paddypower(20) = 35
         assert venues["sportsbook"]["wagered"] == pytest.approx(35.0)
         assert venues["polymarket"]["wagered"] == pytest.approx(30.0)
@@ -211,7 +223,8 @@ class TestBuildSiteData:
         for p in positions:
             assert set(p.keys()) == {
                 "id", "ts_utc", "match", "market", "selection", "platform",
-                "venue", "currency", "decimal_odds", "stake", "model_prob", "ev",
+                "venue", "account", "source", "currency", "decimal_odds",
+                "stake", "model_prob", "ev",
             }
         # Every position has a known venue.
         venues = {p["venue"] for p in positions}
@@ -240,7 +253,10 @@ class TestBuildSiteData:
         # Card still parsed even with no db.
         assert len(data["predictions"]) == 2
         # Venues present and zeroed.
-        assert set(data["venues"].keys()) == {"sportsbook", "polymarket", "kalshi"}
+        assert set(data["venues"].keys()) == {
+            "sportsbook", "polymarket", "kalshi",
+            "sportsbook_1", "sportsbook_2",
+        }
         for v in data["venues"].values():
             assert v["wagered"] == pytest.approx(0.0)
 

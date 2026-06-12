@@ -152,9 +152,18 @@ def record_bet(
     ev: Optional[float] = None,
     kelly_fraction: Optional[float] = None,
     notes: Optional[str] = None,
+    account: str = "1",
+    source: str = "model",
     db_path: str = _DEFAULT_DB,
 ) -> int:
     """Insert a new open bet into the ledger and return its row ID.
+
+    ``account`` separates physical betting accounts (e.g. "1" = own, "2" = a
+    second account) so analytics can split a single venue across them.
+    ``source`` tags WHY the bet was placed — "model" (from the card/scanners),
+    "offer" (free-bet / promo extraction), or "punt" (a directional bet made on
+    judgement, not the model). Keeps the CLV experiment separable from promo
+    and discretionary activity.
 
     Parameters
     ----------
@@ -197,11 +206,12 @@ def record_bet(
         INSERT INTO bets
             (ts_utc, match_id, match_desc, market, selection, platform,
              decimal_odds, stake, model_prob, market_prob_devig, ev,
-             kelly_fraction, status, notes)
+             kelly_fraction, status, notes, account, source)
         VALUES
-            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', ?)
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', ?, ?, ?)
     """
     with _connect(db_path) as conn:
+        _ensure_account_source_columns(conn)
         cur = conn.execute(
             sql,
             (
@@ -218,9 +228,20 @@ def record_bet(
                 float(ev) if ev is not None else None,
                 float(kelly_fraction) if kelly_fraction is not None else None,
                 notes,
+                str(account or "1"),
+                str(source or "model"),
             ),
         )
         return cur.lastrowid
+
+
+def _ensure_account_source_columns(conn) -> None:
+    """Add account/source columns to pre-existing databases (idempotent)."""
+    for col, ddl in (("account", "TEXT DEFAULT '1'"), ("source", "TEXT DEFAULT 'model'")):
+        try:
+            conn.execute("ALTER TABLE bets ADD COLUMN %s %s" % (col, ddl))
+        except Exception:
+            pass
 
 
 def _ensure_settled_ts_column(conn) -> None:
