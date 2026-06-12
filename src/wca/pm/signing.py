@@ -125,6 +125,11 @@ ZERO_BYTES32 = "0x" + "00" * 32
 SIG_EOA = 0
 SIG_POLY_PROXY = 1
 SIG_POLY_GNOSIS_SAFE = 2
+# Deposit-wallet ERC-1271 (Solady ERC-7739 TypedDataSign) — our proxy's class.
+# NOT the default; selected explicitly (e.g. via POLYMARKET_SIG_TYPE=3) because
+# our trading proxy is an ERC-1967 "DepositWallet", which validates orders via
+# ERC-1271 over an ERC-7739-wrapped digest rather than a plain EOA ECDSA sig.
+SIG_POLY_1271 = 3
 
 # BUY/SELL encoded as the on-chain uint8 side.
 SIDE_BUY = 0
@@ -434,6 +439,162 @@ def _order_typed_data_v2(order: Dict[str, Any], verifying_contract: str) -> Dict
     }
 
 
+# ---------------------------------------------------------------------------
+# Deposit-wallet ERC-1271 (Solady ERC-7739 TypedDataSign) signing — sig type 3.
+#
+# A deposit wallet validates an order via ERC-1271.  Per Solady's ERC-7739
+# defensive nesting the contract recovers the EOA from a *wrapped* digest:
+#
+#   digest = keccak(0x1901 || appDomainSeparator || hashStruct(TypedDataSign))
+#   TypedDataSign(Order contents,string name,string version,uint256 chainId,
+#                 address verifyingContract,bytes salt)... — but Solady's
+#   compact form hashes the wrapper as
+#   keccak(TYPED_DATA_SIGN_TYPEHASH_for_contents || contentsHash || accountDomainFields)
+#
+# and the on-chain check re-derives it from the appended trailer.  The wire
+# signature the CLOB stores is the ERC-7739 "compact" encoding:
+#
+#   innerSig(65) || appDomainSeparator(32) || contentsHash(32)
+#       || contentsType(string) || uint16(len(contentsType))
+#
+# where appDomainSeparator is the *order exchange's* EIP-712 domain separator
+# (the "contents" / app domain), contentsHash is the order struct hash, and
+# contentsType is the EIP-712 type string of the contents ("Order(...)").  The
+# trailing uint16 is the byte length of contentsType.
+# ---------------------------------------------------------------------------
+
+
+def _eip712_domain_separator(name: str, version: str, chain_id: int, verifying: str) -> bytes:
+    from eth_utils import keccak
+
+    type_hash = keccak(
+        b"EIP712Domain(string name,string version,uint256 chainId,"
+        b"address verifyingContract)"
+    )
+    addr = verifying[2:] if verifying.lower().startswith("0x") else verifying
+    return keccak(
+        type_hash
+        + keccak(name.encode("utf-8"))
+        + keccak(version.encode("utf-8"))
+        + chain_id.to_bytes(32, "big")
+        + bytes.fromhex(addr.lower().rjust(64, "0"))
+    )
+
+
+def order_struct_hash(
+    order: Dict[str, Any],
+    *,
+    exchange_version: int = EXCHANGE_V2,
+) -> bytes:
+    """keccak hashStruct of the order ``contents`` (no domain wrapping)."""
+    from eth_account.messages import encode_typed_data
+    from eth_utils import keccak
+
+    typed = build_order_typed_data(order, exchange_version=exchange_version)
+    signable = encode_typed_data(full_message=typed)
+    # signable.body == domainSeparator(32) || hashStruct(32); take the tail.
+    return signable.body[32:64] if len(signable.body) >= 64 else keccak(signable.body)
+
+
+# DepositWallet (account) EIP-712 domain — the wallet whose ERC-1271
+# implementation validates the order.  These are the account domain fields the
+# ERC-7739 TypedDataSign struct embeds (eip712Domain() on the deposit wallet:
+# name "DepositWallet", version "1", salt = 0).
+DEPOSIT_WALLET_DOMAIN_NAME = "DepositWallet"
+DEPOSIT_WALLET_DOMAIN_VERSION = "1"
+
+
+def _typed_data_sign_type_string(contents_type: str) -> bytes:
+    """ERC-7739 ``TypedDataSign`` type string with the contents type appended.
+
+    Per ERC-7739: ``"TypedDataSign(" + contentsName + " contents," + accountFields
+    + ")" + contentsType`` where contentsName is contentsType up to the first
+    ``"("`` and the account fields are name/version/chainId/verifyingContract/salt.
+    """
+    contents_name = contents_type[: contents_type.index("(")]
+    return (
+        "TypedDataSign(" + contents_name + " contents,"
+        "string name,string version,uint256 chainId,"
+        "address verifyingContract,bytes32 salt)" + contents_type
+    ).encode("utf-8")
+
+
+def build_erc7739_1271_signature(
+    private_key: str,
+    order: Dict[str, Any],
+    *,
+    deposit_wallet: str,
+    neg_risk: bool = False,
+    exchange_version: int = EXCHANGE_V2,
+) -> str:
+    """Return the ERC-7739 compact ERC-1271 signature for a deposit-wallet order.
+
+    Layout (hex, 0x-prefixed):
+        innerSig(65) || appDomainSeparator(32) || contentsHash(32)
+            || contentsType(bytes) || uint16_be(len(contentsType))
+
+    The inner signature is a secp256k1 sig over the ERC-7739 *TypedDataSign*
+    nested digest::
+
+        keccak(0x1901 || APP_DOMAIN_SEPARATOR || hashStruct(TypedDataSign))
+
+    where ``APP_DOMAIN_SEPARATOR`` is the CTF Exchange order domain separator and
+    the ``TypedDataSign`` struct embeds the order ``contents`` hash plus the
+    deposit wallet's *own* EIP-712 domain fields (name "DepositWallet", version
+    "1", chainId, verifyingContract = deposit wallet, salt = 0) — this is what
+    the deposit wallet's ERC-1271 ``isValidSignature`` re-derives.  The wire
+    trailer (appDomainSep || contentsHash || contentsType || uint16 len) lets
+    the contract reconstruct that digest.  ``maker == signer == deposit wallet``.
+    """
+    verifying = verifying_contract_for(exchange_version, neg_risk)
+    app_domain_sep = _eip712_domain_separator(
+        ORDER_DOMAIN_NAME,
+        ORDER_DOMAIN_VERSION_V2 if exchange_version == EXCHANGE_V2 else ORDER_DOMAIN_VERSION,
+        POLYGON_CHAIN_ID,
+        verifying,
+    )
+    contents_hash = order_struct_hash(order, exchange_version=exchange_version)
+    contents_type = (
+        ORDER_TYPE_STRING_V2 if exchange_version == EXCHANGE_V2 else ORDER_TYPE_STRING_V1
+    ).encode("utf-8")
+
+    from eth_utils import keccak
+
+    # hashStruct(TypedDataSign) — the account (deposit wallet) domain fields are
+    # hashed inline (string name/version -> keccak, salt = bytes32(0)).
+    dw = deposit_wallet[2:] if deposit_wallet.lower().startswith("0x") else deposit_wallet
+    typed_data_sign_typehash = keccak(_typed_data_sign_type_string(contents_type.decode()))
+    typed_data_sign_struct_hash = keccak(
+        typed_data_sign_typehash
+        + contents_hash
+        + keccak(DEPOSIT_WALLET_DOMAIN_NAME.encode("utf-8"))
+        + keccak(DEPOSIT_WALLET_DOMAIN_VERSION.encode("utf-8"))
+        + POLYGON_CHAIN_ID.to_bytes(32, "big")
+        + bytes.fromhex(dw.lower().rjust(64, "0"))
+        + (b"\x00" * 32)  # salt
+    )
+
+    # The signer signs the ERC-7739 TypedDataSign digest under the APP domain;
+    # the wrapper/trailer lets the on-chain ERC-1271 check re-derive it.
+    digest = keccak(b"\x19\x01" + app_domain_sep + typed_data_sign_struct_hash)
+    acct = _account_from_key(private_key)
+    if hasattr(acct, "unsafe_sign_hash"):
+        signed = acct.unsafe_sign_hash(digest)
+    else:  # pragma: no cover - older eth-account
+        signed = acct._sign_hash(digest)
+    v = signed.v if signed.v >= 27 else signed.v + 27
+    inner = signed.r.to_bytes(32, "big") + signed.s.to_bytes(32, "big") + bytes([v])
+
+    wrapped = (
+        inner
+        + app_domain_sep
+        + contents_hash
+        + contents_type
+        + len(contents_type).to_bytes(2, "big")
+    )
+    return "0x" + wrapped.hex()
+
+
 def verifying_contract_for(exchange_version: int, neg_risk: bool) -> str:
     """Return the EIP-712 ``verifyingContract`` for ``(version, neg_risk)``.
 
@@ -576,17 +737,34 @@ def build_signed_order(
         and ``metadata``/``builder`` are bytes32 hex.  For V1: the legacy
         12-field shape (taker/expiration/nonce/feeRateBps present).
     """
-    if signature_type not in (SIG_EOA, SIG_POLY_PROXY, SIG_POLY_GNOSIS_SAFE):
+    if signature_type not in (
+        SIG_EOA,
+        SIG_POLY_PROXY,
+        SIG_POLY_GNOSIS_SAFE,
+        SIG_POLY_1271,
+    ):
         raise ValueError("invalid signature_type %r" % signature_type)
     if exchange_version not in (EXCHANGE_V1, EXCHANGE_V2):
         raise ValueError(
             "invalid exchange_version %r (use EXCHANGE_V1/EXCHANGE_V2)"
             % exchange_version
         )
+    if signature_type == SIG_POLY_1271 and exchange_version != EXCHANGE_V2:
+        raise ValueError("sig type 3 (POLY_1271) is only defined for EXCHANGE_V2")
 
     acct = _account_from_key(private_key)
     signer = acct.address
     maker = funder if funder else signer
+    # For the deposit-wallet 1271 path the maker AND signer are the deposit
+    # wallet itself (the contract that validates via ERC-1271), not the EOA.
+    if signature_type == SIG_POLY_1271:
+        if not funder:
+            raise ValueError(
+                "sig type 3 (POLY_1271) requires funder= (the deposit wallet); "
+                "maker == signer == deposit wallet"
+            )
+        maker = funder
+        signer = funder
 
     amounts = order_amounts(args.side, args.price, args.size)
     use_salt = generate_salt() if salt is None else int(salt)
@@ -621,12 +799,22 @@ def build_signed_order(
         "builder": builder,
     }
 
-    sig = _sign_typed(
-        acct,
-        build_order_typed_data(
-            order_msg, exchange_version=EXCHANGE_V2, neg_risk=neg_risk
-        ),
-    )
+    if signature_type == SIG_POLY_1271:
+        # Deposit-wallet: ERC-1271 over an ERC-7739-wrapped digest.
+        sig = build_erc7739_1271_signature(
+            private_key,
+            order_msg,
+            deposit_wallet=maker,  # maker == signer == deposit wallet here
+            neg_risk=neg_risk,
+            exchange_version=EXCHANGE_V2,
+        )
+    else:
+        sig = _sign_typed(
+            acct,
+            build_order_typed_data(
+                order_msg, exchange_version=EXCHANGE_V2, neg_risk=neg_risk
+            ),
+        )
 
     # The CLOB POST /order body wants string amounts and the literal side.
     # ``expiration`` is wire-only ("0"), NOT signed; taker/nonce/feeRateBps are

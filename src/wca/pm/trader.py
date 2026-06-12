@@ -97,6 +97,9 @@ def resolve_funder_from_env(env: Optional[Dict[str, str]] = None) -> Tuple[str, 
 SIG_TYPE_EOA = signing.SIG_EOA
 SIG_TYPE_POLY_PROXY = signing.SIG_POLY_PROXY
 SIG_TYPE_POLY_GNOSIS_SAFE = signing.SIG_POLY_GNOSIS_SAFE
+# Deposit-wallet ERC-1271 (POLY_1271).  Not a default; the user opts in via
+# POLYMARKET_SIG_TYPE=3 because the trading proxy is an ERC-1967 DepositWallet.
+SIG_TYPE_POLY_1271 = signing.SIG_POLY_1271
 SIDE_BUY = signing.SIDE_BUY
 SIDE_SELL = signing.SIDE_SELL
 ZERO_ADDRESS = signing.ZERO_ADDRESS
@@ -135,6 +138,7 @@ _SIG_NAMES = {
     SIG_TYPE_EOA: "EOA",
     SIG_TYPE_POLY_PROXY: "POLY_PROXY",
     SIG_TYPE_POLY_GNOSIS_SAFE: "POLY_GNOSIS_SAFE",
+    SIG_TYPE_POLY_1271: "POLY_1271",
 }
 
 
