@@ -38,7 +38,11 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from wca import cardcache
-from wca.bot.telegram import TelegramClient, TelegramError
+from wca.bot.telegram import (
+    TelegramClient,
+    TelegramError,
+    image_document_file_id,
+)
 from wca.ledger import reports
 from wca.ledger.store import record_bet
 
@@ -132,7 +136,7 @@ def _venue_of(platform: str) -> str:
     return "sportsbook"
 
 
-_VENUE_SYMBOL = {"sportsbook": "£", "polymarket": "$", "kalshi": "$"}
+_VENUE_SYMBOL = {"sportsbook": "£", "polymarket": "$", "polymarket-auto": "$", "kalshi": "$"}
 
 
 def _pool_rows(db_path: str) -> Dict[str, Dict[str, float]]:
@@ -143,8 +147,13 @@ def _pool_rows(db_path: str) -> Dict[str, Dict[str, float]]:
     con = sqlite3.connect(db_path)
     con.row_factory = sqlite3.Row
     try:
-        for r in con.execute("SELECT platform, status, stake, settled_pl, decimal_odds, notes FROM bets"):
+        for r in con.execute("SELECT platform, status, stake, settled_pl, decimal_odds, notes, account FROM bets"):
             v = _venue_of(r["platform"])
+            # Polymarket runs two physical accounts: acct 1 = manual (MetaMask),
+            # acct 2 = the automated bot (World-Cup-26 deposit wallet, Mac mini).
+            # Split them so auto vs manual P&L is legible.
+            if v == "polymarket":
+                v = "polymarket-auto" if str(r["account"]) == "2" else "polymarket"
             d = pools.setdefault(v, {"open": 0.0, "settled_pl": 0.0, "deposited": 0.0, "n": 0})
             d["n"] += 1
             if r["status"] == "open":
@@ -175,7 +184,7 @@ def handle_summary(db_path: str) -> str:
 
     # Build a compact code-block table for the pool rows.
     pool_table_rows = []
-    for v in ("sportsbook", "polymarket", "kalshi"):
+    for v in ("sportsbook", "polymarket", "polymarket-auto", "kalshi"):
         if v not in pools:
             continue
         d = pools[v]
@@ -205,7 +214,7 @@ def handle_summary(db_path: str) -> str:
         lines.extend(pool_table_rows)
         lines.append("```")
 
-    for v in ("sportsbook", "polymarket", "kalshi"):
+    for v in ("sportsbook", "polymarket", "polymarket-auto", "kalshi"):
         if v not in pools:
             continue
         d = pools[v]
@@ -251,7 +260,7 @@ def handle_bets(db_path: str) -> str:
     lines = ["\U0001f3af *Open bets* (%d)" % len(rows)]
     grand_win = {}
     grand_loss = {}
-    for venue in ("sportsbook", "polymarket", "kalshi"):
+    for venue in ("sportsbook", "polymarket", "polymarket-auto", "kalshi"):
         if venue not in by_venue:
             continue
         sym = _VENUE_SYMBOL[venue]
@@ -934,7 +943,8 @@ def _parked_load(n: int, db_path: Optional[str] = None) -> Optional[Dict[str, An
         conn = _parked_conn(db_path)
         try:
             row = conn.execute(
-                "SELECT proposal_json FROM pm_parked WHERE n=? AND status='parked'",
+                "SELECT proposal_json FROM pm_parked WHERE n=? "
+                "AND status IN ('parked','failed')",
                 (n,),
             ).fetchone()
         finally:
@@ -1205,6 +1215,15 @@ def handle_confirmation(
         result = _execute_parked_order(
             n, proposal, db_path, ts_utc=ts_utc, trader=trader
         )
+        # A failed POST must NOT consume the proposal: keep it retryable
+        # (live bug 2026-06-12: CLOB 400 marked the order "executed" and the
+        # user's retry got "not a parked order").
+        failed = isinstance(result, str) and "order failed" in result
+        if failed:
+            pending_orders[n] = proposal
+            if pending_orders is _PENDING_ORDERS or from_db:
+                _parked_set_status(n, "failed", db_path)
+            return result + "\nStill parked — retry with Y PM-%d once fixed." % n
         if pending_orders is _PENDING_ORDERS or from_db:
             _parked_set_status(n, "executed", db_path)
         return result
@@ -1376,7 +1395,7 @@ def run(
             # 1) Betslip screenshot -> parse + park for confirmation.
             #    Admin-only: a ledger write follows the confirm, so only the
             #    admin's screenshots are parsed at all.
-            if "photo" in message:
+            if "photo" in message or image_document_file_id(message):
                 if not _is_admin(from_user, admin):
                     reply = READ_ONLY_MSG
                 else:
