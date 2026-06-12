@@ -749,7 +749,9 @@
 
   // (b) CUMULATIVE STAKED --------------------------------------------------
   // Step-line of cumulative stake over time, one series per currency
-  // (GBP solid, USD dashed), built from positions[].ts_utc + stake.
+  // (GBP solid, USD dashed), built from ts_utc + stake of ALL bets — open
+  // positions plus closed ones — so the curve is true turnover and history
+  // does not vanish as bets settle.
   var CUM_STYLE = {
     GBP: { color: "#4ade80", dash: "" },
     USD: { color: "#60a5fa", dash: "4 3" },
@@ -759,7 +761,7 @@
   function drawCumStake(d) {
     var el = $("cumstake-canvas");
     if (!el) return;
-    var pos = (d.positions || []).filter(function (p) {
+    var pos = (d.positions || []).concat(d.closed_positions || []).filter(function (p) {
       return !isNaN(tsMs(p.ts_utc)) && !isNaN(Number(p.stake));
     });
     if (!pos.length) { chartEmpty(el, "No staked positions"); return; }
