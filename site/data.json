@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-12T18:50:13"
+    "generated": "2026-06-12T19:03:13"
   },
   "totals": {
-    "wagered": 223.586,
-    "open_stake": 158.58599999999998,
+    "wagered": 232.516,
+    "open_stake": 167.516,
     "settled_pl": 70.822,
-    "n_bets": 31
+    "n_bets": 32
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 104.91,
-      "open_stake": 69.91,
+      "wagered": 113.84,
+      "open_stake": 78.84,
       "settled_pl": 46.72,
-      "n_bets": 17
+      "n_bets": 18
     },
     "USD": {
       "wagered": 118.676,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 104.91,
-      "open_stake": 69.91,
+      "wagered": 113.84,
+      "open_stake": 78.84,
       "settled_pl": 46.72,
-      "n_bets": 17,
+      "n_bets": 18,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 82.91,
-      "open_stake": 47.91,
+      "wagered": 91.84,
+      "open_stake": 56.84,
       "settled_pl": 46.72,
-      "n_bets": 14,
+      "n_bets": 15,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,20 @@
     }
   },
   "source_summary": {
+    "model": {
+      "GBP": {
+        "wagered": 41.48,
+        "open_stake": 26.48,
+        "settled_pl": 3.969999999999999,
+        "n_bets": 8
+      },
+      "USD": {
+        "wagered": 106.31,
+        "open_stake": 76.31,
+        "settled_pl": 24.102000000000004,
+        "n_bets": 5
+      }
+    },
     "punt": {
       "USD": {
         "wagered": 12.366,
@@ -76,20 +90,6 @@
         "n_bets": 3
       }
     },
-    "model": {
-      "GBP": {
-        "wagered": 32.55,
-        "open_stake": 17.55,
-        "settled_pl": 3.969999999999999,
-        "n_bets": 7
-      },
-      "USD": {
-        "wagered": 106.31,
-        "open_stake": 76.31,
-        "settled_pl": 24.102000000000004,
-        "n_bets": 5
-      }
-    },
     "offer": {
       "GBP": {
         "wagered": 49.0,
@@ -100,6 +100,14 @@
     }
   },
   "platforms": {
+    "betfair": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 23.169999999999998,
+      "open_stake": 23.169999999999998,
+      "settled_pl": 0.0,
+      "n_bets": 2
+    },
     "polymarket": {
       "venue": "polymarket",
       "currency": "USD",
@@ -107,14 +115,6 @@
       "open_stake": 88.676,
       "settled_pl": 24.102000000000004,
       "n_bets": 14
-    },
-    "betfair": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 18.06,
-      "open_stake": 18.06,
-      "settled_pl": 0.0,
-      "n_bets": 1
     },
     "virginbet": {
       "venue": "sportsbook",
@@ -135,8 +135,8 @@
     "smarkets": {
       "venue": "sportsbook",
       "currency": "GBP",
-      "wagered": 0.6,
-      "open_stake": 0.6,
+      "wagered": 4.42,
+      "open_stake": 4.42,
       "settled_pl": 0.0,
       "n_bets": 2
     },
@@ -331,6 +331,22 @@
     "n_with_close": 3
   },
   "positions": [
+    {
+      "id": 50,
+      "ts_utc": "2026-06-12T19:03:13",
+      "match": "Qatar vs Switzerland",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 7.2,
+      "stake": 5.11,
+      "model_prob": null,
+      "ev": null
+    },
     {
       "id": 49,
       "ts_utc": "2026-06-12T13:40:00",
@@ -583,7 +599,7 @@
       "source": "model",
       "currency": "GBP",
       "decimal_odds": 17.0,
-      "stake": 0.3,
+      "stake": 4.12,
       "model_prob": 0.077,
       "ev": 0.305
     },
