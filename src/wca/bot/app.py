@@ -49,6 +49,7 @@ from wca.ledger.store import record_bet
 logger = logging.getLogger(__name__)
 
 CARD_PATH = "data/card_latest.md"
+NEXT_PATH = "data/next_latest.md"
 CARD_MAX_AGE_HOURS = 6.0
 
 HELP_TEXT = (
@@ -57,6 +58,7 @@ HELP_TEXT = (
     "/bets — open bets, stakes, max win / max loss by venue\n"
     "/clv — closing-line-value report\n"
     "/card — today's recommended bet card\n"
+    "/next — next match preview: winner, corners, scorers, scorelines\n"
     "/scores — predicted FT scorelines per fixture\n"
     "/structure — project structure metrics\n"
     "/pm — Polymarket parked orders + trader status\n"
@@ -87,7 +89,7 @@ def _authorized(chat_id: int | str, allowed: Optional[str]) -> bool:
 
 READ_ONLY_MSG = (
     "🔒 Read-only: bets and order confirmations are admin-only in this chat. "
-    "You can use /scores, /card, /summary, /bets, /clv, /ping."
+    "You can use /next, /scores, /card, /summary, /bets, /clv, /ping."
 )
 
 # Lone yes/no (betslip confirm) or Y/N BET-<id> / PM-<n> (order confirm) —
@@ -456,6 +458,33 @@ def handle_scores(
         lines.pop()
 
     return "\n".join(lines)
+
+
+def handle_next(
+    next_path: str = NEXT_PATH,
+    now_utc: Optional[str] = None,
+) -> str:
+    """Serve the cached next-match preview written by ``scripts/wca_build_card.py``.
+
+    The preview (blended winner probs, corners model, market anytime scorers,
+    reconciled scoreline distribution) is built on cron alongside the main
+    card; this handler only reads the cache and flags staleness.
+    """
+    if now_utc is None:
+        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    cached = cardcache.read_card(
+        next_path, now_utc=now_utc, max_age_hours=CARD_MAX_AGE_HOURS
+    )
+    if cached is None:
+        return (
+            "*Next match*\n"
+            "No preview cached yet. The cron build (`scripts/wca_build_card.py`) "
+            "writes it alongside the main card — try again after the next build."
+        )
+    body = cached.get("text") or "(empty preview)"
+    if cached.get("stale"):
+        body = "⚠️ STALE (generated %s UTC)\n\n%s" % (cached.get("generated"), body)
+    return body
 
 
 def _fmt_prob(prob: Optional[float]) -> str:
@@ -1326,6 +1355,8 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_clv(db_path)
     if cmd == "/card":
         return handle_card(db_path)
+    if cmd == "/next":
+        return handle_next(next_path=NEXT_PATH)
     if cmd == "/scores":
         return handle_scores(card_path=CARD_PATH)
     if cmd == "/structure":
