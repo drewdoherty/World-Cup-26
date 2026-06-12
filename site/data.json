@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-12 15:39:41 UTC"
+    "generated": "2026-06-12 17:08:27 UTC"
   },
   "totals": {
     "wagered": 211.22,
@@ -62,12 +62,20 @@
     }
   },
   "source_summary": {
+    "punt": {
+      "GBP": {
+        "wagered": 23.36,
+        "open_stake": 18.36,
+        "settled_pl": 25.0,
+        "n_bets": 3
+      }
+    },
     "model": {
       "GBP": {
-        "wagered": 50.61,
-        "open_stake": 35.61,
+        "wagered": 32.55,
+        "open_stake": 17.55,
         "settled_pl": 3.969999999999999,
-        "n_bets": 8
+        "n_bets": 7
       },
       "USD": {
         "wagered": 106.31,
@@ -83,18 +91,10 @@
         "settled_pl": 17.75,
         "n_bets": 7
       }
-    },
-    "punt": {
-      "GBP": {
-        "wagered": 5.3,
-        "open_stake": 0.3,
-        "settled_pl": 25.0,
-        "n_bets": 2
-      }
     }
   },
   "platforms": {
-    "unknown": {
+    "betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 18.06,
@@ -336,13 +336,13 @@
     {
       "id": 22,
       "ts_utc": "2026-06-12T15:14:12",
-      "match": "",
+      "match": "Australia vs Turkey",
       "market": "Outright / Tournament Winner",
       "selection": "Australia",
-      "platform": "unknown",
+      "platform": "betfair",
       "venue": "sportsbook",
       "account": "1",
-      "source": "model",
+      "source": "punt",
       "currency": "GBP",
       "decimal_odds": 5.5,
       "stake": 18.06,
