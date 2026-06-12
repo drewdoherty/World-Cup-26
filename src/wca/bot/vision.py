@@ -360,6 +360,25 @@ def _parse_message_body(body: Dict[str, Any]) -> List[ExtractedBet]:
 # ---------------------------------------------------------------------------
 
 
+def sniff_media_type(image_bytes: bytes) -> Optional[str]:
+    """Detect the image MIME type from magic bytes.
+
+    Telegram (and screenshots in general) often carry a misleading file
+    extension — e.g. a PNG stored as ``.jpg`` — and the Anthropic API rejects
+    a mismatched ``media_type``, so the declared type must come from the
+    bytes themselves.  Returns ``None`` if the format is unrecognised.
+    """
+    if image_bytes.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if image_bytes.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    if image_bytes.startswith(b"GIF8"):
+        return "image/gif"
+    if image_bytes[:4] == b"RIFF" and image_bytes[8:12] == b"WEBP":
+        return "image/webp"
+    return None
+
+
 def extract_bets_from_image(
     image_bytes: bytes,
     *,
@@ -402,6 +421,10 @@ def extract_bets_from_image(
 
     mdl = model or os.environ.get("ANTHROPIC_VISION_MODEL") or DEFAULT_MODEL
     sess = session or _SESSION
+
+    # Trust the bytes over the caller's declared type: Telegram documents
+    # frequently arrive as PNGs with .jpg names, and the API 400s on mismatch.
+    media_type = sniff_media_type(image_bytes) or media_type
 
     b64 = base64.b64encode(image_bytes).decode("ascii")
 

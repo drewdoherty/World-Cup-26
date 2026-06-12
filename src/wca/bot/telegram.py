@@ -119,12 +119,19 @@ class TelegramClient:
         return resp.content
 
     def download_photo(self, message: Dict[str, Any]) -> Optional[bytes]:
-        """Download the largest photo attached to *message*.
+        """Download the image attached to *message*.
+
+        Handles both compressed photos (``photo`` field) and images sent as
+        files (``document`` field with an ``image/*`` mime type — Telegram
+        uses this when the sender picks "send as file", which macOS drag-drop
+        does by default for screenshots).
 
         Returns the raw image bytes, or ``None`` if the message contains no
-        ``photo`` field.
+        image.
         """
         file_id = largest_photo_file_id(message)
+        if file_id is None:
+            file_id = image_document_file_id(message)
         if file_id is None:
             return None
         file_info = self.get_file(file_id)
@@ -165,6 +172,26 @@ def largest_photo_file_id(message: Dict[str, Any]) -> Optional[str]:
         key=lambda p: (p.get("width", 0) * p.get("height", 0), p.get("file_size", 0)),
     )
     return best.get("file_id")
+
+
+def image_document_file_id(message: Dict[str, Any]) -> Optional[str]:
+    """Return the ``file_id`` of an image sent as a *file* (document).
+
+    Telegram delivers uncompressed images as a ``document`` with an
+    ``image/*`` mime type instead of a ``photo``.  Returns ``None`` if the
+    message has no document or the document is not an image.
+    """
+    doc: Optional[Dict[str, Any]] = message.get("document")
+    if not doc:
+        return None
+    mime = (doc.get("mime_type") or "").lower()
+    name = (doc.get("file_name") or "").lower()
+    if not (
+        mime.startswith("image/")
+        or name.endswith((".png", ".jpg", ".jpeg", ".webp"))
+    ):
+        return None
+    return doc.get("file_id")
 
 
 def _split_message(text: str, limit: int = MAX_MESSAGE_LEN) -> List[str]:
