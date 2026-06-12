@@ -98,15 +98,19 @@ def main() -> None:
         # Compute stake (cost to open the position)
         stake = shares * price
 
+        # Generate match_id from home/away team names
+        match_id = f"{parsed['home_team'].upper().replace(' ', '')}_{parsed['away_team'].upper().replace(' ', '')}"
+
         try:
             con.execute(
                 """INSERT INTO bets
-                   (ts_utc, match_desc, market, selection, platform,
+                   (ts_utc, match_id, match_desc, market, selection, platform,
                     decimal_odds, stake, status,
                     account, source)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     ts_utc,
+                    match_id,
                     parsed["match_desc"],
                     parsed["market"],
                     selection,
