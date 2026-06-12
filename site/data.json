@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-12T19:13:04"
+    "generated": "2026-06-12 19:27:12 UTC"
   },
   "totals": {
-    "wagered": 232.516,
-    "open_stake": 167.516,
+    "wagered": 240.20600000000002,
+    "open_stake": 175.20600000000002,
     "settled_pl": 70.822,
-    "n_bets": 32
+    "n_bets": 34
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 113.84,
-      "open_stake": 78.84,
+      "wagered": 121.53,
+      "open_stake": 86.53,
       "settled_pl": 46.72,
-      "n_bets": 18
+      "n_bets": 20
     },
     "USD": {
       "wagered": 118.676,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 113.84,
-      "open_stake": 78.84,
+      "wagered": 121.53,
+      "open_stake": 86.53,
       "settled_pl": 46.72,
-      "n_bets": 18,
+      "n_bets": 20,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 91.84,
-      "open_stake": 56.84,
+      "wagered": 99.53,
+      "open_stake": 64.53,
       "settled_pl": 46.72,
-      "n_bets": 15,
+      "n_bets": 17,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -64,10 +64,10 @@
   "source_summary": {
     "model": {
       "GBP": {
-        "wagered": 41.48,
-        "open_stake": 26.48,
+        "wagered": 49.47,
+        "open_stake": 34.47,
         "settled_pl": 3.969999999999999,
-        "n_bets": 8
+        "n_bets": 11
       },
       "USD": {
         "wagered": 106.31,
@@ -84,10 +84,10 @@
         "n_bets": 9
       },
       "GBP": {
-        "wagered": 23.36,
-        "open_stake": 18.36,
+        "wagered": 23.06,
+        "open_stake": 18.06,
         "settled_pl": 25.0,
-        "n_bets": 3
+        "n_bets": 2
       }
     },
     "offer": {
@@ -100,6 +100,14 @@
     }
   },
   "platforms": {
+    "smarkets": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 12.110000000000001,
+      "open_stake": 12.110000000000001,
+      "settled_pl": 0.0,
+      "n_bets": 4
+    },
     "betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -131,14 +139,6 @@
       "open_stake": 34.0,
       "settled_pl": 0.0,
       "n_bets": 5
-    },
-    "smarkets": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 4.42,
-      "open_stake": 4.42,
-      "settled_pl": 0.0,
-      "n_bets": 2
     },
     "paddypower": {
       "venue": "sportsbook",
@@ -331,6 +331,38 @@
     "n_with_close": 3
   },
   "positions": [
+    {
+      "id": 52,
+      "ts_utc": "2026-06-12T19:24:30",
+      "match": "Brazil vs Morocco",
+      "market": "Full-time result",
+      "selection": "Morocco",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 6.0,
+      "stake": 3.47,
+      "model_prob": 0.175,
+      "ev": 0.05
+    },
+    {
+      "id": 51,
+      "ts_utc": "2026-06-12T19:24:30",
+      "match": "Haiti vs Scotland",
+      "market": "Full-time result",
+      "selection": "Draw",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 4.4,
+      "stake": 3.92,
+      "model_prob": 0.235,
+      "ev": 0.034
+    },
     {
       "id": 50,
       "ts_utc": "2026-06-12T19:03:13",
@@ -599,7 +631,7 @@
       "source": "model",
       "currency": "GBP",
       "decimal_odds": 17.0,
-      "stake": 4.12,
+      "stake": 4.42,
       "model_prob": 0.077,
       "ev": 0.305
     },
@@ -612,7 +644,7 @@
       "platform": "Smarkets",
       "venue": "sportsbook",
       "account": "1",
-      "source": "punt",
+      "source": "model",
       "currency": "GBP",
       "decimal_odds": 6.2,
       "stake": 0.3,
