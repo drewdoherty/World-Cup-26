@@ -1003,6 +1003,13 @@ class ClobTrader:
             "deferExec": False,
             "postOnly": False,
         }
+        # Neg-risk markets require an explicit top-level negRisk flag in the
+        # POST envelope; without it the server rejects with a generic
+        # "Invalid order payload" even for a correctly-signed order. Verified
+        # live 2026-06-12 (first filled bot order). Standard markets must NOT
+        # carry the flag.
+        if neg_risk:
+            envelope["negRisk"] = True
         body = json.dumps(envelope, separators=(",", ":"))
         headers = self.l2_headers("POST", "/order", body=body)
         headers["Content-Type"] = "application/json"
