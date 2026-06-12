@@ -26,13 +26,27 @@ L2 — per-request HMAC-SHA256
     Headers: POLY_ADDRESS, POLY_SIGNATURE, POLY_TIMESTAMP, POLY_API_KEY,
     POLY_PASSPHRASE.
 
-Order — CTF Exchange order (EIP-712 typed data)
+Order (V1) — CTF Exchange order (EIP-712 typed data)
     domain = {name:"Polymarket CTF Exchange", version:"1", chainId:137,
               verifyingContract:<exchange>}
     struct field order (load-bearing — EIP-712 hashes are order-sensitive):
         salt, maker, signer, taker, tokenId, makerAmount, takerAmount,
         expiration, nonce, feeRateBps, side, signatureType
     THE BUG FIX: maker = funder (proxy) for sig types 1/2, signer = EOA always.
+
+Order (V2) — CTF Exchange V2 order (EIP-712 typed data); the current default.
+    domain = {name:"Polymarket CTF Exchange", version:"2", chainId:137,
+              verifyingContract:<v2 exchange, standard or neg-risk>}
+    11 signed fields (V1's taker/expiration/nonce/feeRateBps are GONE;
+    timestamp/metadata/builder are NEW), field order load-bearing:
+        salt, maker, signer, tokenId, makerAmount, takerAmount, side,
+        signatureType, timestamp, metadata, builder
+    ORDER_TYPEHASH = keccak256(ORDER_TYPE_STRING_V2) =
+        0xbb86318a2138f5fa8ae32fbe8e659f8fcf13cc6ae4014a707893055433818589
+    Verified byte-for-byte against the deployed exchange's on-chain typehash.
+    Collateral is pUSD (6 dp); fees are off-chain (no feeRateBps field).  The
+    proxy-wallet rule is unchanged: maker = funder for sig types 1/2, signer =
+    EOA always.  For sig_type 2 (our account) signing is plain EIP-712 ECDSA.
 """
 from __future__ import annotations
 
@@ -52,9 +66,24 @@ from typing import Any, Dict, Optional
 
 POLYGON_CHAIN_ID = 137
 
+# --- V1 (deprecated for new orders; kept for regression safety) -------------
 CTF_EXCHANGE = "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E"
 NEG_RISK_EXCHANGE = "0xC5d563A36AE78145C45a50134d48A1215220f80a"
 USDC_COLLATERAL = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+
+# --- V2 (current default) ---------------------------------------------------
+# verifyingContract is chosen by (negRisk); name/version are shared.
+CTF_EXCHANGE_V2 = "0xE111180000d2663C0091e4f400237545B87B996B"
+NEG_RISK_EXCHANGE_V2 = "0xe2222d279d744050d28e00520010520000310F59"
+# pUSD is the V2 order-denomination collateral (6 dp).  USDC.e survives only as
+# the CTF position-id derivation collateral, not as what orders are priced in.
+PUSD_COLLATERAL = "0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB"
+CONDITIONAL_TOKENS = "0x4D97DCd97eC945f40cF65F87097ACe5EA0476045"
+FEE_RECEIVER_V2 = "0x115F48dc2a731Aa16251C6d6e1bEFc42f92AccC9"
+
+# Exchange-version selector.  V2 is the default the trader signs against.
+EXCHANGE_V1 = 1
+EXCHANGE_V2 = 2
 
 CLOB_DOMAIN_NAME = "ClobAuthDomain"
 CLOB_DOMAIN_VERSION = "1"
@@ -62,8 +91,35 @@ CLOB_AUTH_MESSAGE = "This message attests that I control the given wallet"
 
 ORDER_DOMAIN_NAME = "Polymarket CTF Exchange"
 ORDER_DOMAIN_VERSION = "1"
+# V2 shares the name; only the version string and verifyingContract differ.
+ORDER_DOMAIN_VERSION_V2 = "2"
+
+# The exact V1 EIP-712 type string (field order + Solidity types).  Kept for
+# regression parity with the deprecated V1 path; keccak256 of this is the V1
+# ORDER_TYPEHASH (asserted in tests).
+ORDER_TYPE_STRING_V1 = (
+    "Order(uint256 salt,address maker,address signer,address taker,"
+    "uint256 tokenId,uint256 makerAmount,uint256 takerAmount,"
+    "uint256 expiration,uint256 nonce,uint256 feeRateBps,uint8 side,"
+    "uint8 signatureType)"
+)
+ORDER_TYPEHASH_V1 = (
+    "0xa852566c4e14d00869b6db0220888a9090a13eccdaea03713ff0a3d27bf9767c"
+)
+
+# The exact V2 EIP-712 type string (field order + Solidity types).  keccak256 of
+# this equals the on-chain ORDER_TYPEHASH below — asserted in tests.
+ORDER_TYPE_STRING_V2 = (
+    "Order(uint256 salt,address maker,address signer,uint256 tokenId,"
+    "uint256 makerAmount,uint256 takerAmount,uint8 side,uint8 signatureType,"
+    "uint256 timestamp,bytes32 metadata,bytes32 builder)"
+)
+ORDER_TYPEHASH_V2 = (
+    "0xbb86318a2138f5fa8ae32fbe8e659f8fcf13cc6ae4014a707893055433818589"
+)
 
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
+ZERO_BYTES32 = "0x" + "00" * 32
 
 # Signature types (py_order_utils/model/signatures.py).
 SIG_EOA = 0
@@ -286,8 +342,19 @@ def generate_salt() -> int:
     return secrets.randbelow(2 ** 64)
 
 
+def _now_ms() -> int:
+    """Current unix time in milliseconds (V2 order ``timestamp`` is ms)."""
+    import time
+
+    return int(time.time() * 1000)
+
+
 def _order_typed_data(order: Dict[str, Any], verifying_contract: str) -> Dict[str, Any]:
-    """Full EIP-712 typed-data document for a CTF Exchange Order."""
+    """Full EIP-712 typed-data document for a V1 CTF Exchange Order.
+
+    Kept for regression coverage of the deprecated V1 path; new orders use
+    :func:`_order_typed_data_v2`.
+    """
     return {
         "types": {
             "EIP712Domain": [
@@ -322,6 +389,117 @@ def _order_typed_data(order: Dict[str, Any], verifying_contract: str) -> Dict[st
     }
 
 
+def _order_typed_data_v2(order: Dict[str, Any], verifying_contract: str) -> Dict[str, Any]:
+    """Full EIP-712 typed-data document for a V2 CTF Exchange Order.
+
+    The ``Order`` member list below is the byte-for-byte image of the on-chain
+    ``ORDER_TYPEHASH`` (verified: keccak256 of the concatenated type string
+    equals :data:`ORDER_TYPEHASH_V2`).  Field order is load-bearing — EIP-712
+    struct hashes are order-sensitive — and matches Structs.sol exactly:
+    salt, maker, signer, tokenId, makerAmount, takerAmount, side,
+    signatureType, timestamp, metadata, builder.  ``signature`` is *not* part
+    of the signed struct.  The domain uses version "2" and the V2
+    verifyingContract (standard or neg-risk).
+    """
+    return {
+        "types": {
+            "EIP712Domain": [
+                {"name": "name", "type": "string"},
+                {"name": "version", "type": "string"},
+                {"name": "chainId", "type": "uint256"},
+                {"name": "verifyingContract", "type": "address"},
+            ],
+            "Order": [
+                {"name": "salt", "type": "uint256"},
+                {"name": "maker", "type": "address"},
+                {"name": "signer", "type": "address"},
+                {"name": "tokenId", "type": "uint256"},
+                {"name": "makerAmount", "type": "uint256"},
+                {"name": "takerAmount", "type": "uint256"},
+                {"name": "side", "type": "uint8"},
+                {"name": "signatureType", "type": "uint8"},
+                {"name": "timestamp", "type": "uint256"},
+                {"name": "metadata", "type": "bytes32"},
+                {"name": "builder", "type": "bytes32"},
+            ],
+        },
+        "primaryType": "Order",
+        "domain": {
+            "name": ORDER_DOMAIN_NAME,
+            "version": ORDER_DOMAIN_VERSION_V2,
+            "chainId": POLYGON_CHAIN_ID,
+            "verifyingContract": verifying_contract,
+        },
+        "message": order,
+    }
+
+
+def verifying_contract_for(exchange_version: int, neg_risk: bool) -> str:
+    """Return the EIP-712 ``verifyingContract`` for ``(version, neg_risk)``.
+
+    The four cases are the exact addresses in the V2 spec / SDK config.  V2 is
+    the default the trader signs against; V1 is reachable for regression.
+    """
+    if exchange_version == EXCHANGE_V2:
+        return NEG_RISK_EXCHANGE_V2 if neg_risk else CTF_EXCHANGE_V2
+    if exchange_version == EXCHANGE_V1:
+        return NEG_RISK_EXCHANGE if neg_risk else CTF_EXCHANGE
+    raise ValueError("unknown exchange_version %r (use EXCHANGE_V1/EXCHANGE_V2)" % exchange_version)
+
+
+def build_order_typed_data(
+    order: Dict[str, Any],
+    *,
+    exchange_version: int = EXCHANGE_V2,
+    neg_risk: bool = False,
+) -> Dict[str, Any]:
+    """Return the full EIP-712 typed-data document for an order.
+
+    Selects the struct (V1's 12-field vs V2's 11-field) *and* the domain
+    (version string + verifyingContract) by ``(exchange_version, neg_risk)``.
+    ``order`` must already carry the message fields for the chosen version
+    (V1: salt/maker/signer/taker/tokenId/makerAmount/takerAmount/expiration/
+    nonce/feeRateBps/side/signatureType; V2: salt/maker/signer/tokenId/
+    makerAmount/takerAmount/side/signatureType/timestamp/metadata/builder).
+    """
+    verifying = verifying_contract_for(exchange_version, neg_risk)
+    if exchange_version == EXCHANGE_V2:
+        return _order_typed_data_v2(order, verifying)
+    if exchange_version == EXCHANGE_V1:
+        return _order_typed_data(order, verifying)
+    raise ValueError("unknown exchange_version %r" % exchange_version)
+
+
+def build_order_hash(
+    order: Dict[str, Any],
+    *,
+    exchange_version: int = EXCHANGE_V2,
+    neg_risk: bool = False,
+) -> bytes:
+    """Return the EIP-712 digest (``keccak(0x1901 || domainSep || structHash)``).
+
+    This is the exact 32-byte hash the EOA signs and that the deployed exchange
+    recovers against (``hashOrder()`` on-chain).  Selects struct + domain by
+    ``(exchange_version, neg_risk)`` via :func:`build_order_typed_data`.  Useful
+    for parity checks against the contract without producing a signature.
+    """
+    from eth_account.messages import encode_typed_data
+
+    typed = build_order_typed_data(
+        order, exchange_version=exchange_version, neg_risk=neg_risk
+    )
+    signable = encode_typed_data(full_message=typed)
+    # SignableMessage: header (b"\x01") + body (domainSep || structHash).
+    return _eip712_digest(signable)
+
+
+def _eip712_digest(signable: Any) -> bytes:
+    """keccak256 of the EIP-712 preimage (0x19 || version || header || body)."""
+    from eth_utils import keccak
+
+    return keccak(b"\x19" + signable.version + signable.header + signable.body)
+
+
 def build_signed_order(
     private_key: str,
     args: OrderArgs,
@@ -329,16 +507,37 @@ def build_signed_order(
     funder: Optional[str] = None,
     signature_type: int = SIG_EOA,
     neg_risk: bool = False,
+    exchange_version: int = EXCHANGE_V2,
     taker: str = ZERO_ADDRESS,
     salt: Optional[int] = None,
+    timestamp_ms: Optional[int] = None,
+    metadata: str = ZERO_BYTES32,
+    builder: str = ZERO_BYTES32,
 ) -> Dict[str, Any]:
-    """Build and EIP-712-sign one CTF Exchange order.
+    """Build and EIP-712-sign one CTF Exchange order (V2 by default).
 
-    This is where the proxy-wallet bug is fixed.  The on-chain ``maker`` (the
-    address whose USDC / shares move) is the *funder*: for an EOA account that
-    is the EOA itself, but for a Polymarket proxy (sig type 1) or Gnosis safe
-    (sig type 2) it is the proxy/safe wallet.  The ``signer`` — the key that
-    actually produces the ECDSA signature — is *always* the EOA.
+    The on-chain ``maker`` (the address whose pUSD / shares move) is the
+    *funder*: for an EOA account that is the EOA itself, but for a Polymarket
+    proxy (sig type 1) or Gnosis safe (sig type 2) it is the proxy/safe wallet.
+    The ``signer`` — the key that actually produces the ECDSA signature — is
+    *always* the EOA.  For sig type 2 (our account) signing is plain EIP-712
+    ECDSA (the Solady TypedDataSign 1271 wrapper is *only* for sig type 3).
+
+    ``exchange_version`` selects which struct + domain to sign against:
+
+    * :data:`EXCHANGE_V2` (default) — the 11-field struct (salt, maker, signer,
+      tokenId, makerAmount, takerAmount, side, signatureType, timestamp,
+      metadata, builder) against the version-"2" domain + V2 verifyingContract.
+      V1's taker/expiration/nonce/feeRateBps are gone from the signed struct;
+      ``taker`` is dropped entirely and ``expiration`` survives only as a
+      wire-only default ("0") that is *not* signed.
+    * :data:`EXCHANGE_V1` — the deprecated 12-field struct (salt, maker, signer,
+      taker, tokenId, makerAmount, takerAmount, expiration, nonce, feeRateBps,
+      side, signatureType) against the version-"1" domain + V1 verifyingContract.
+      Kept reachable for regression safety; not used for new orders.
+
+    Either way the verifyingContract is chosen by ``(exchange_version,
+    neg_risk)`` via :func:`verifying_contract_for`.
 
     Parameters
     ----------
@@ -352,21 +551,38 @@ def build_signed_order(
     signature_type:
         0 EOA, 1 POLY_PROXY, 2 POLY_GNOSIS_SAFE.
     neg_risk:
-        If *True* sign against the Neg-Risk CTF Exchange verifying contract.
+        If *True* sign against the Neg-Risk CTF Exchange verifying contract for
+        the chosen ``exchange_version``.
+    exchange_version:
+        :data:`EXCHANGE_V2` (default) or :data:`EXCHANGE_V1`.
     taker:
-        Counterparty; zero address means a public order.
+        V1 counterparty (signed in V1; wire-only/unused in V2).
     salt:
         Override the random salt (tests pass a fixed value for determinism).
+    timestamp_ms:
+        Override the V2 order ``timestamp`` (unix **milliseconds**); defaults to
+        now.  Ignored by V1.  Tests pass a fixed value for determinism.
+    metadata / builder:
+        V2 ``bytes32`` attribution fields (default zero); part of the V2 signed
+        struct.  Ignored by V1.
 
     Returns
     -------
     dict
-        The order payload ready to POST to ``/order`` under ``"order"`` plus
-        the ``"signature"`` and the resolved ``"owner"`` semantics.  All
-        amount fields are decimal strings as the CLOB expects.
+        The order payload ready to nest under ``{"order": ...}`` in the POST
+        body, plus the ``"signature"``.  For V2: amount / id fields are decimal
+        strings, ``timestamp`` is a millisecond string, ``side`` is the literal
+        ``"BUY"``/``"SELL"``, ``expiration`` is the wire-only default ``"0"``,
+        and ``metadata``/``builder`` are bytes32 hex.  For V1: the legacy
+        12-field shape (taker/expiration/nonce/feeRateBps present).
     """
     if signature_type not in (SIG_EOA, SIG_POLY_PROXY, SIG_POLY_GNOSIS_SAFE):
         raise ValueError("invalid signature_type %r" % signature_type)
+    if exchange_version not in (EXCHANGE_V1, EXCHANGE_V2):
+        raise ValueError(
+            "invalid exchange_version %r (use EXCHANGE_V1/EXCHANGE_V2)"
+            % exchange_version
+        )
 
     acct = _account_from_key(private_key)
     signer = acct.address
@@ -375,8 +591,93 @@ def build_signed_order(
     amounts = order_amounts(args.side, args.price, args.size)
     use_salt = generate_salt() if salt is None else int(salt)
 
+    if exchange_version == EXCHANGE_V1:
+        return _build_signed_order_v1(
+            acct,
+            args=args,
+            maker=maker,
+            signer=signer,
+            amounts=amounts,
+            salt=use_salt,
+            signature_type=signature_type,
+            neg_risk=neg_risk,
+            taker=taker,
+        )
+
+    ts_ms = _now_ms() if timestamp_ms is None else int(timestamp_ms)
+
+    # The signed V2 struct — field order load-bearing (matches ORDER_TYPEHASH).
     order_msg: Dict[str, Any] = {
         "salt": int(use_salt),
+        "maker": maker,
+        "signer": signer,
+        "tokenId": int(args.token_id),
+        "makerAmount": int(amounts["maker_amount"]),
+        "takerAmount": int(amounts["taker_amount"]),
+        "side": int(amounts["side"]),
+        "signatureType": int(signature_type),
+        "timestamp": int(ts_ms),
+        "metadata": metadata,
+        "builder": builder,
+    }
+
+    sig = _sign_typed(
+        acct,
+        build_order_typed_data(
+            order_msg, exchange_version=EXCHANGE_V2, neg_risk=neg_risk
+        ),
+    )
+
+    # The CLOB POST /order body wants string amounts and the literal side.
+    # ``expiration`` is wire-only ("0"), NOT signed; taker/nonce/feeRateBps are
+    # gone in V2.
+    payload = {
+        "salt": str(order_msg["salt"]),
+        "maker": maker,
+        "signer": signer,
+        "tokenId": str(order_msg["tokenId"]),
+        "makerAmount": str(order_msg["makerAmount"]),
+        "takerAmount": str(order_msg["takerAmount"]),
+        "side": "BUY" if order_msg["side"] == SIDE_BUY else "SELL",
+        "signatureType": int(signature_type),
+        "timestamp": str(order_msg["timestamp"]),
+        "metadata": metadata,
+        "builder": builder,
+        "expiration": "0",
+        "signature": sig,
+    }
+    return payload
+
+
+def _sign_typed(acct: Any, typed: Dict[str, Any]) -> str:
+    """Sign an EIP-712 typed-data document; return a 0x-prefixed signature."""
+    from eth_account.messages import encode_typed_data
+
+    signed = acct.sign_message(encode_typed_data(full_message=typed))
+    sig = signed.signature.hex()
+    return sig if sig.startswith("0x") else "0x" + sig
+
+
+def _build_signed_order_v1(
+    acct: Any,
+    *,
+    args: OrderArgs,
+    maker: str,
+    signer: str,
+    amounts: Dict[str, int],
+    salt: int,
+    signature_type: int,
+    neg_risk: bool,
+    taker: str,
+) -> Dict[str, Any]:
+    """Build + sign a deprecated **V1** 12-field CTF Exchange order.
+
+    Reachable only via ``exchange_version=EXCHANGE_V1``; kept for regression
+    parity with the legacy signer.  Field order is load-bearing and matches the
+    V1 ORDER_TYPEHASH.  ``maker`` = funder, ``signer`` = EOA (the proxy fix).
+    """
+    order_msg: Dict[str, Any] = {
+        "salt": int(salt),
         "maker": maker,
         "signer": signer,
         "taker": taker,
@@ -390,18 +691,14 @@ def build_signed_order(
         "signatureType": int(signature_type),
     }
 
-    verifying = NEG_RISK_EXCHANGE if neg_risk else CTF_EXCHANGE
+    sig = _sign_typed(
+        acct,
+        build_order_typed_data(
+            order_msg, exchange_version=EXCHANGE_V1, neg_risk=neg_risk
+        ),
+    )
 
-    from eth_account.messages import encode_typed_data
-
-    typed = _order_typed_data(order_msg, verifying)
-    signable = encode_typed_data(full_message=typed)
-    signed = acct.sign_message(signable)
-    sig = signed.signature.hex()
-    sig = sig if sig.startswith("0x") else "0x" + sig
-
-    # The CLOB POST /order body wants string amounts and the literal side.
-    payload = {
+    return {
         "salt": str(order_msg["salt"]),
         "maker": maker,
         "signer": signer,
@@ -416,7 +713,6 @@ def build_signed_order(
         "signatureType": int(signature_type),
         "signature": sig,
     }
-    return payload
 
 
 def serialize_body(payload: Dict[str, Any]) -> str:

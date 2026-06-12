@@ -100,6 +100,25 @@ SIG_TYPE_POLY_GNOSIS_SAFE = signing.SIG_POLY_GNOSIS_SAFE
 SIDE_BUY = signing.SIDE_BUY
 SIDE_SELL = signing.SIDE_SELL
 ZERO_ADDRESS = signing.ZERO_ADDRESS
+EXCHANGE_V1 = signing.EXCHANGE_V1
+EXCHANGE_V2 = signing.EXCHANGE_V2
+
+
+def resolve_exchange_version_from_env(
+    env: Optional[Dict[str, str]] = None,
+) -> int:
+    """Resolve the CTF Exchange version from ``POLYMARKET_EXCHANGE_VERSION``.
+
+    Accepts ``"1"``/``"2"`` (or ``"v1"``/``"v2"``).  Defaults to
+    :data:`EXCHANGE_V2` — the current production exchange — when unset or
+    unrecognised.  Never raises (a bad value falls back to V2 so a stray env
+    string can't break order construction).
+    """
+    src = os.environ if env is None else env
+    raw = (src.get("POLYMARKET_EXCHANGE_VERSION") or "").strip().lower().lstrip("v")
+    if raw == "1":
+        return EXCHANGE_V1
+    return EXCHANGE_V2
 
 _USDC_DECIMALS = 6
 
@@ -171,6 +190,10 @@ class TradeConfig:
         EVM chain id (137 = Polygon mainnet).
     signature_type:
         Force a signature class (0/1/2).  ``None`` (default) means autodetect.
+    exchange_version:
+        Which CTF Exchange to sign against — :data:`EXCHANGE_V2` (default, the
+        current production exchange) or :data:`EXCHANGE_V1` (deprecated, kept
+        for regression).  Overridable via ``POLYMARKET_EXCHANGE_VERSION``.
     db_path:
         SQLite database used for the daily-cap order log.
     """
@@ -186,6 +209,7 @@ class TradeConfig:
     host: str = CLOB_HOST
     chain_id: int = signing.POLYGON_CHAIN_ID
     signature_type: Optional[int] = None
+    exchange_version: int = EXCHANGE_V2
     db_path: str = "data/wca.db"
 
 
@@ -355,12 +379,19 @@ class ClobTrader:
         creds: Optional[Dict[str, str]] = None,
         config: Optional[TradeConfig] = None,
         session: Optional[Any] = None,
+        exchange_version: Optional[int] = None,
     ) -> None:
         self.config = config or TradeConfig()
         if host is not None:
             self.config.host = host
         if signature_type is not None:
             self.config.signature_type = signature_type
+        # Exchange-version precedence: explicit arg > explicit config (only when
+        # a config was supplied) > POLYMARKET_EXCHANGE_VERSION env > V2 default.
+        if exchange_version is not None:
+            self.config.exchange_version = exchange_version
+        elif config is None:
+            self.config.exchange_version = resolve_exchange_version_from_env()
 
         key = private_key if private_key is not None else os.environ.get(
             "POLYMARKET_PRIVATE_KEY"
@@ -420,6 +451,11 @@ class ClobTrader:
     def signature_type(self) -> int:
         """Resolved signature type (0/1/2)."""
         return self._sig_type
+
+    @property
+    def exchange_version(self) -> int:
+        """CTF Exchange version orders are signed against (V2 default)."""
+        return self.config.exchange_version
 
     # ------------------------------------------------------------------ HTTP
     def _sess(self):
@@ -731,8 +767,9 @@ class ClobTrader:
         ``size`` is the number of outcome *shares*; ``price`` is the per-share
         price in USDC.  The order is signed for the resolved account class so
         ``maker`` = funder (proxy/safe for types 1/2, EOA for type 0) and
-        ``signer`` = EOA — the proxy-wallet fix.  Returns the dict ready to nest
-        under ``{"order": ...}`` in the POST body.
+        ``signer`` = EOA — the proxy-wallet fix.  Signing targets
+        ``self.exchange_version`` (V2 by default).  Returns the dict ready to
+        nest under ``{"order": ...}`` in the POST body.
         """
         if not (0.0 < price < 1.0):
             raise TradeError("price must be strictly between 0 and 1")
@@ -754,6 +791,7 @@ class ClobTrader:
             funder=self._funder,
             signature_type=self._sig_type,
             neg_risk=neg_risk,
+            exchange_version=self.config.exchange_version,
             salt=salt,
         )
 
@@ -919,6 +957,7 @@ class ClobTrader:
                     "order": signed,
                     "owner": self._creds.api_key if self._creds else self.address,
                     "orderType": order_type,
+                    "deferExec": False,
                     "postOnly": False,
                 },
                 "maker": signed["maker"],
@@ -934,6 +973,7 @@ class ClobTrader:
             "order": signed,
             "owner": creds.api_key,
             "orderType": order_type,
+            "deferExec": False,
             "postOnly": False,
         }
         body = json.dumps(envelope, separators=(",", ":"))

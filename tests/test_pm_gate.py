@@ -292,22 +292,25 @@ def test_proxy_order_maker_is_funder_signer_is_eoa(sig_type):
     """The crux: proxy/safe orders set maker=funder but the EOA signs."""
     args = signing.OrderArgs(token_id="123456789", price=0.69, size=32.0, side="BUY")
     payload = signing.build_signed_order(
-        TEST_KEY, args, funder=PROXY, signature_type=sig_type, salt=42
+        TEST_KEY, args, funder=PROXY, signature_type=sig_type, salt=42,
+        timestamp_ms=1713398400000,
     )
     assert payload["maker"].lower() == PROXY.lower()         # funds move from proxy
     assert payload["signer"].lower() == TEST_EOA.lower()     # EOA holds the key
     assert payload["signatureType"] == sig_type
 
     # The ECDSA signature must recover the EOA (signer), NOT the proxy (maker).
+    # V2 signed struct (no taker/expiration/nonce/feeRateBps).
     order_msg = {
         "salt": 42, "maker": PROXY, "signer": TEST_EOA,
-        "taker": signing.ZERO_ADDRESS, "tokenId": 123456789,
+        "tokenId": 123456789,
         "makerAmount": int(payload["makerAmount"]),
         "takerAmount": int(payload["takerAmount"]),
-        "expiration": 0, "nonce": 0, "feeRateBps": 0,
         "side": signing.SIDE_BUY, "signatureType": sig_type,
+        "timestamp": int(payload["timestamp"]),
+        "metadata": payload["metadata"], "builder": payload["builder"],
     }
-    typed = signing._order_typed_data(order_msg, signing.CTF_EXCHANGE)
+    typed = signing._order_typed_data_v2(order_msg, signing.CTF_EXCHANGE_V2)
     recovered = _recover_typed(typed, payload["signature"])
     assert recovered.lower() == TEST_EOA.lower()
     assert recovered.lower() != PROXY.lower()
@@ -336,10 +339,71 @@ def test_order_amount_maths_buy_and_sell():
 
 def test_order_neg_risk_uses_neg_risk_exchange():
     args = signing.OrderArgs(token_id="1", price=0.5, size=10.0, side="BUY")
-    p_std = signing.build_signed_order(TEST_KEY, args, salt=7, neg_risk=False)
-    p_neg = signing.build_signed_order(TEST_KEY, args, salt=7, neg_risk=True)
+    # Pin the timestamp so the only difference between the two orders is the
+    # verifyingContract (otherwise a clock tick between calls would also differ).
+    p_std = signing.build_signed_order(
+        TEST_KEY, args, salt=7, neg_risk=False, timestamp_ms=1713398400000
+    )
+    p_neg = signing.build_signed_order(
+        TEST_KEY, args, salt=7, neg_risk=True, timestamp_ms=1713398400000
+    )
     # Different verifying contract => different signature for identical order.
     assert p_std["signature"] != p_neg["signature"]
+
+
+def test_v2_typehash_matches_type_string():
+    """ORDER_TYPEHASH_V2 must equal keccak256(ORDER_TYPE_STRING_V2)."""
+    from eth_utils import keccak
+
+    computed = "0x" + keccak(signing.ORDER_TYPE_STRING_V2.encode()).hex()
+    assert computed == signing.ORDER_TYPEHASH_V2
+
+
+def test_v2_order_signs_against_v2_contract_not_v1():
+    """A V2 order must recover under the V2 (version "2") domain, not V1.
+
+    Recovering the same signature against the V1 typed-data / V1 contract must
+    yield a *different* address — proof the order is bound to the V2 domain.
+    """
+    args = signing.OrderArgs(token_id="55", price=0.4, size=10.0, side="BUY")
+    payload = signing.build_signed_order(
+        TEST_KEY, args, salt=99, timestamp_ms=1713398400000
+    )
+    v2_msg = {
+        "salt": 99, "maker": TEST_EOA, "signer": TEST_EOA,
+        "tokenId": 55,
+        "makerAmount": int(payload["makerAmount"]),
+        "takerAmount": int(payload["takerAmount"]),
+        "side": signing.SIDE_BUY, "signatureType": signing.SIG_EOA,
+        "timestamp": int(payload["timestamp"]),
+        "metadata": payload["metadata"], "builder": payload["builder"],
+    }
+    # Correct V2 reconstruction recovers the EOA.
+    v2_typed = signing._order_typed_data_v2(v2_msg, signing.CTF_EXCHANGE_V2)
+    assert _recover_typed(v2_typed, payload["signature"]).lower() == TEST_EOA.lower()
+
+    # Wrong: V1 struct/contract recovers some *other* address (binding proof).
+    v1_msg = {
+        "salt": 99, "maker": TEST_EOA, "signer": TEST_EOA,
+        "taker": signing.ZERO_ADDRESS, "tokenId": 55,
+        "makerAmount": int(payload["makerAmount"]),
+        "takerAmount": int(payload["takerAmount"]),
+        "expiration": 0, "nonce": 0, "feeRateBps": 0,
+        "side": signing.SIDE_BUY, "signatureType": signing.SIG_EOA,
+    }
+    v1_typed = signing._order_typed_data(v1_msg, signing.CTF_EXCHANGE)
+    assert _recover_typed(v1_typed, payload["signature"]).lower() != TEST_EOA.lower()
+
+
+def test_v2_wire_payload_has_no_v1_fields():
+    """The V2 wire payload drops taker/nonce/feeRateBps; expiration is '0'."""
+    args = signing.OrderArgs(token_id="1", price=0.5, size=10.0, side="BUY")
+    p = signing.build_signed_order(TEST_KEY, args, salt=1)
+    assert "taker" not in p and "nonce" not in p and "feeRateBps" not in p
+    assert p["expiration"] == "0"           # wire-only default, not signed
+    assert p["metadata"] == signing.ZERO_BYTES32
+    assert p["builder"] == signing.ZERO_BYTES32
+    assert int(p["timestamp"]) > 0
 
 
 def test_invalid_signature_type_rejected():
