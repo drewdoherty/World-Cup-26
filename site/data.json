@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-12T13:21:05"
+    "generated": "2026-06-12T14:49:04"
   },
   "totals": {
-    "wagered": 169.16,
-    "open_stake": 104.16,
+    "wagered": 192.16,
+    "open_stake": 127.16,
     "settled_pl": 70.822,
-    "n_bets": 16
+    "n_bets": 20
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 62.85,
-      "open_stake": 27.85,
+      "wagered": 85.85,
+      "open_stake": 50.85,
       "settled_pl": 46.72,
-      "n_bets": 11
+      "n_bets": 15
     },
     "USD": {
       "wagered": 106.31,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 62.85,
-      "open_stake": 27.85,
+      "wagered": 85.85,
+      "open_stake": 50.85,
       "settled_pl": 46.72,
-      "n_bets": 11,
+      "n_bets": 15,
       "currency": "GBP"
     },
     "polymarket": {
@@ -46,6 +46,22 @@
     }
   },
   "platforms": {
+    "ladbrokes": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 1.0,
+      "open_stake": 1.0,
+      "settled_pl": 0.0,
+      "n_bets": 1
+    },
+    "betfair_sportsbook": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 34.0,
+      "open_stake": 34.0,
+      "settled_pl": 0.0,
+      "n_bets": 5
+    },
     "smarkets": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -77,14 +93,6 @@
       "open_stake": 15.25,
       "settled_pl": -0.2500000000000009,
       "n_bets": 4
-    },
-    "betfair_sportsbook": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 12.0,
-      "open_stake": 12.0,
-      "settled_pl": 0.0,
-      "n_bets": 2
     },
     "bet365": {
       "venue": "sportsbook",
@@ -256,6 +264,62 @@
   },
   "positions": [
     {
+      "id": 20,
+      "ts_utc": "2026-06-12T14:49:04",
+      "match": "Canada vs Bosnia & Herzegovina",
+      "market": "Total Corners",
+      "selection": "Under 8.5",
+      "platform": "Ladbrokes",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 2.07,
+      "stake": 1.0,
+      "model_prob": null,
+      "ev": null
+    },
+    {
+      "id": 19,
+      "ts_utc": "2026-06-12T12:00:00",
+      "match": "Treble: Netherlands + Brazil + Paraguay",
+      "market": "ACCA",
+      "selection": "Netherlands/Brazil/Paraguay all win",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 12.87,
+      "stake": 2.0,
+      "model_prob": null,
+      "ev": null
+    },
+    {
+      "id": 18,
+      "ts_utc": "2026-06-12T12:00:00",
+      "match": "USA (qualifier)",
+      "market": "MATCH",
+      "selection": "USA",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 2.2,
+      "stake": 10.0,
+      "model_prob": null,
+      "ev": null
+    },
+    {
+      "id": 17,
+      "ts_utc": "2026-06-12T12:00:00",
+      "match": "Canada (qualifier)",
+      "market": "MATCH",
+      "selection": "Canada",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "decimal_odds": 1.88,
+      "stake": 10.0,
+      "model_prob": null,
+      "ev": null
+    },
+    {
       "id": 16,
       "ts_utc": "2026-06-12T13:21:05",
       "match": "Qatar vs Switzerland",
@@ -382,5 +446,288 @@
       "ev": 0.07100000000000017
     }
   ],
-  "predictions": []
+  "predictions": [
+    {
+      "fixture": "Canada vs Bosnia and Herzegovina",
+      "scores": [
+        {
+          "score": "1-0",
+          "prob": 14.5,
+          "fair": 6.91,
+          "back": 7.04
+        },
+        {
+          "score": "1-1",
+          "prob": 11.5,
+          "fair": 8.68,
+          "back": 8.85
+        },
+        {
+          "score": "2-1",
+          "prob": 11.3,
+          "fair": 8.82,
+          "back": 8.99
+        },
+        {
+          "score": "2-0",
+          "prob": 11.0,
+          "fair": 9.1,
+          "back": 9.28
+        },
+        {
+          "score": "0-0",
+          "prob": 8.0,
+          "fair": 12.51,
+          "back": 12.76
+        },
+        {
+          "score": "0-1",
+          "prob": 5.6,
+          "fair": 17.85,
+          "back": 18.21
+        }
+      ],
+      "over_under": {
+        "line": 2.5,
+        "over": 46.3,
+        "under": 53.7
+      },
+      "btts": 48.5
+    },
+    {
+      "fixture": "United States vs Paraguay",
+      "scores": [
+        {
+          "score": "1-1",
+          "prob": 13.8,
+          "fair": 7.26,
+          "back": 7.41
+        },
+        {
+          "score": "1-0",
+          "prob": 12.5,
+          "fair": 8.01,
+          "back": 8.17
+        },
+        {
+          "score": "0-0",
+          "prob": 10.6,
+          "fair": 9.39,
+          "back": 9.58
+        },
+        {
+          "score": "0-1",
+          "prob": 8.9,
+          "fair": 11.26,
+          "back": 11.48
+        },
+        {
+          "score": "2-1",
+          "prob": 8.7,
+          "fair": 11.51,
+          "back": 11.74
+        },
+        {
+          "score": "2-0",
+          "prob": 8.7,
+          "fair": 11.54,
+          "back": 11.77
+        }
+      ],
+      "over_under": {
+        "line": 2.5,
+        "over": 40.8,
+        "under": 59.2
+      },
+      "btts": 47.0
+    },
+    {
+      "fixture": "Qatar vs Switzerland",
+      "scores": [
+        {
+          "score": "0-2",
+          "prob": 15.0,
+          "fair": 6.67,
+          "back": 6.81
+        },
+        {
+          "score": "0-1",
+          "prob": 13.8,
+          "fair": 7.27,
+          "back": 7.42
+        },
+        {
+          "score": "0-3",
+          "prob": 10.5,
+          "fair": 9.54,
+          "back": 9.74
+        },
+        {
+          "score": "1-2",
+          "prob": 10.1,
+          "fair": 9.92,
+          "back": 10.12
+        },
+        {
+          "score": "1-1",
+          "prob": 7.6,
+          "fair": 13.08,
+          "back": 13.34
+        },
+        {
+          "score": "1-3",
+          "prob": 7.0,
+          "fair": 14.18,
+          "back": 14.47
+        }
+      ],
+      "over_under": {
+        "line": 2.5,
+        "over": 54.2,
+        "under": 45.8
+      },
+      "btts": 42.2
+    },
+    {
+      "fixture": "Brazil vs Morocco",
+      "scores": [
+        {
+          "score": "1-0",
+          "prob": 17.8,
+          "fair": 5.61,
+          "back": 5.72
+        },
+        {
+          "score": "2-0",
+          "prob": 13.5,
+          "fair": 7.43,
+          "back": 7.58
+        },
+        {
+          "score": "0-0",
+          "prob": 12.7,
+          "fair": 7.86,
+          "back": 8.01
+        },
+        {
+          "score": "1-1",
+          "prob": 10.9,
+          "fair": 9.17,
+          "back": 9.36
+        },
+        {
+          "score": "0-1",
+          "prob": 8.6,
+          "fair": 11.64,
+          "back": 11.87
+        },
+        {
+          "score": "2-1",
+          "prob": 7.8,
+          "fair": 12.78,
+          "back": 13.04
+        }
+      ],
+      "over_under": {
+        "line": 2.5,
+        "over": 33.8,
+        "under": 66.2
+      },
+      "btts": 34.2
+    },
+    {
+      "fixture": "Haiti vs Scotland",
+      "scores": [
+        {
+          "score": "0-1",
+          "prob": 12.4,
+          "fair": 8.08,
+          "back": 8.24
+        },
+        {
+          "score": "0-2",
+          "prob": 12.2,
+          "fair": 8.17,
+          "back": 8.33
+        },
+        {
+          "score": "1-1",
+          "prob": 11.0,
+          "fair": 9.06,
+          "back": 9.24
+        },
+        {
+          "score": "1-2",
+          "prob": 8.5,
+          "fair": 11.75,
+          "back": 11.98
+        },
+        {
+          "score": "0-0",
+          "prob": 8.5,
+          "fair": 11.78,
+          "back": 12.02
+        },
+        {
+          "score": "0-3",
+          "prob": 7.8,
+          "fair": 12.89,
+          "back": 13.15
+        }
+      ],
+      "over_under": {
+        "line": 2.5,
+        "over": 47.0,
+        "under": 53.0
+      },
+      "btts": 43.9
+    },
+    {
+      "fixture": "Australia vs Turkey",
+      "scores": [
+        {
+          "score": "0-1",
+          "prob": 14.7,
+          "fair": 6.81,
+          "back": 6.94
+        },
+        {
+          "score": "1-1",
+          "prob": 12.8,
+          "fair": 7.8,
+          "back": 7.96
+        },
+        {
+          "score": "0-0",
+          "prob": 10.2,
+          "fair": 9.78,
+          "back": 9.97
+        },
+        {
+          "score": "1-2",
+          "prob": 9.9,
+          "fair": 10.09,
+          "back": 10.29
+        },
+        {
+          "score": "0-2",
+          "prob": 9.4,
+          "fair": 10.66,
+          "back": 10.87
+        },
+        {
+          "score": "1-0",
+          "prob": 8.1,
+          "fair": 12.4,
+          "back": 12.65
+        }
+      ],
+      "over_under": {
+        "line": 2.5,
+        "over": 40.3,
+        "under": 59.7
+      },
+      "btts": 45.7
+    }
+  ]
 }
