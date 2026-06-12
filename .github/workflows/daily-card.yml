@@ -1,0 +1,45 @@
+name: Daily Card Generation
+
+on:
+  schedule:
+    # 8 AM UTC (10 AM CEST, 11 AM GST) — adjust as needed
+    - cron: '0 8 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  build-card:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate matchday card
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: |
+          mkdir -p logs
+          python scripts/wca_build_card.py --hours-ahead 48 >> logs/card.log 2>&1
+
+      - name: Regenerate site data
+        run: |
+          python scripts/wca_site.py >> logs/site.log 2>&1
+
+      - name: Commit changes
+        run: |
+          git config user.email "bot@world-cup-alpha.local"
+          git config user.name "World Cup Alpha Bot"
+          git add data/card_latest.md site/data.json site/linemove.json
+          git commit -m "Auto-sync: daily card + site data" || true
+          git push origin main

@@ -1,0 +1,31 @@
+name: Hourly Odds Snapshot
+
+on:
+  schedule:
+    # Every hour at minute 0 (sync at the top of each hour)
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  snapshot-odds:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Ingest odds snapshot
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: |
+          mkdir -p logs
+          python scripts/wca_snapshot_odds.py >> logs/odds.log 2>&1

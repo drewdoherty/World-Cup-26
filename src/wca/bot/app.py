@@ -56,12 +56,13 @@ HELP_TEXT = (
     "/scores — predicted FT scorelines per fixture\n"
     "/structure — project structure metrics\n"
     "/pm — Polymarket parked orders + trader status\n"
+    "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
     "/ping — liveness check\n"
     "/help — this message\n\n"
     "\U0001F4F8 Send a betslip *screenshot* and I'll parse the selections, then "
     "log them to the ledger once you reply `yes`.\n"
     "Tag the photo caption (or yes-reply) to set provenance: `a2` (account 2), "
-    "`offer`, `punt`, `model` — default is account 1 / punt.\n"
+    "`offer`, `punt`, `model` — default is account 1 / model.\n"
     "Confirm a pushed bet with `Y BET-<id>`, decline with `N BET-<id>`.\n"
     "Execute a parked Polymarket order with `Y PM-<n>`, discard with `N PM-<n>`."
 )
@@ -488,6 +489,92 @@ def handle_structure(docs_dir: Optional[str] = None) -> str:
     return "*Project structure* (%s)\n\n%s" % (date, metrics_part)
 
 
+def handle_settle(text: str, db_path: str) -> str:
+    """Log a bet settlement: ``/settle <bet-id> <outcome> [closing-odds]``."""
+    import sqlite3
+    import math
+
+    parts = text.strip().split()
+    if len(parts) < 3:
+        return (
+            "Usage: `/settle <bet-id> <outcome> [closing-odds]`\n\n"
+            "Examples:\n"
+            "`/settle 42 won 3.20` — bet 42 won at 3.20\n"
+            "`/settle 43 lost` — bet 43 lost\n"
+            "`/settle 44 void` — bet 44 voided"
+        )
+
+    try:
+        bet_id = int(parts[1])
+        outcome = parts[2].lower()
+        closing_odds = None
+        if len(parts) > 3:
+            closing_odds = float(parts[3])
+    except (ValueError, IndexError):
+        return "Invalid syntax. Try: `/settle 42 won 3.20`"
+
+    if outcome not in ("won", "lost", "void"):
+        return "Outcome must be 'won', 'lost', or 'void'."
+
+    if outcome in ("won", "lost") and closing_odds is None:
+        return f"Outcome '{outcome}' requires closing odds. Try: `/settle {bet_id} {outcome} <odds>`"
+
+    con = sqlite3.connect(db_path)
+    con.row_factory = sqlite3.Row
+    try:
+        # Fetch the open bet
+        row = con.execute(
+            "SELECT id, stake, decimal_odds, model_prob FROM bets WHERE id = ? AND status = 'open'",
+            (bet_id,),
+        ).fetchone()
+
+        if not row:
+            return f"No open bet with ID {bet_id}."
+
+        stake = float(row["stake"] or 0.0)
+        model_prob = float(row["model_prob"] or 0.0)
+
+        # Compute realized P&L
+        if outcome == "won":
+            settled_pl = stake * (closing_odds - 1)
+        elif outcome == "lost":
+            settled_pl = -stake
+        else:  # void
+            settled_pl = 0.0
+
+        # Compute CLV
+        clv = None
+        if model_prob > 0 and closing_odds and closing_odds > 0:
+            fair_odds = 1.0 / model_prob
+            try:
+                clv = math.log(closing_odds / fair_odds)
+            except (ValueError, ZeroDivisionError):
+                pass
+
+        # Update ledger
+        from datetime import datetime, timezone
+        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+        con.execute(
+            "UPDATE bets SET status = ?, settled_pl = ?, closing_odds = ?, clv = ?, settled_ts = ? WHERE id = ?",
+            (outcome, settled_pl, closing_odds, clv, now_utc, bet_id),
+        )
+        con.commit()
+
+        # Format reply
+        lines = [f"✅ Bet {bet_id} settled as *{outcome}*"]
+        if closing_odds:
+            lines.append(f"Closing odds: {closing_odds:.2f}")
+        lines.append(f"Realized P&L: {settled_pl:+.2f}")
+        if clv is not None:
+            lines.append(f"CLV: {clv:+.4f} ({clv*100:+.2f}%)")
+        return "\n".join(lines)
+
+    except Exception as exc:
+        return f"Error: {exc}"
+    finally:
+        con.close()
+
+
 # ---------------------------------------------------------------------------
 # Betslip-screenshot ingestion.
 # ---------------------------------------------------------------------------
@@ -514,12 +601,12 @@ def resolve_tags(
     text: Optional[str],
     *,
     default_account: str = "1",
-    default_source: str = "punt",
+    default_source: str = "model",
     allow_bare_account: bool = False,
 ) -> Dict[str, str]:
     """Parse account/source tags out of a screenshot caption or yes-reply.
 
-    Screenshot ingests are discretionary in-play bets by default (source=punt,
+    Screenshot ingests are model recommendations by default (source=model,
     account=1); a caption can override either dimension. Recognised tokens
     (case-insensitive, word-boundary matched anywhere in the text):
 
@@ -583,7 +670,7 @@ def _format_extracted(bets: List[Any], tags: Optional[Dict[str, str]] = None) ->
         )
     if tags:
         acct = tags.get("account", "1")
-        src = _SOURCE_WORD.get(tags.get("source", "punt"), tags.get("source", "punt"))
+        src = _SOURCE_WORD.get(tags.get("source", "model"), tags.get("source", "model"))
         lines.append(
             "\nTags: account *%s* | source *%s*  "
             "(override in your reply, e.g. `yes a2 offer`)" % (acct, src)
@@ -591,7 +678,7 @@ def _format_extracted(bets: List[Any], tags: Optional[Dict[str, str]] = None) ->
     lines.append(
         "\nReply *yes* to log all to the ledger, *no* to discard. "
         "Tag the reply to set provenance, e.g. `yes 2 offer` / `yes punt` "
-        "(account `1`/`2`, source `model`/`offer`/`punt`; default 1 / punt)."
+        "(account `1`/`2`, source `model`/`offer`/`punt`; default 1 / model)."
     )
     return "\n".join(lines)
 
@@ -611,7 +698,7 @@ def handle_photo(
     ``caption`` is the photo's message caption; account/source tags in it
     (``a2``, ``offer``, ``punt``, ``model`` …) are resolved via
     :func:`resolve_tags` and echoed in the confirmation prompt. Screenshot
-    ingests default to ``account="1"`` / ``source="punt"`` unless the caption
+    ingests default to ``account="1"`` / ``source="model"`` unless the caption
     says otherwise.
     """
     if pending is None:
@@ -651,7 +738,7 @@ def handle_photo_confirmation(
     The reply may carry tag overrides, e.g. ``yes a2 offer``; these take
     precedence over the tags resolved from the caption at parse time. A bare
     ``yes`` logs with the parse-time (caption) tags, defaulting to
-    ``account="1"`` / ``source="punt"`` for an untagged screenshot.
+    ``account="1"`` / ``source="model"`` for an untagged screenshot.
     """
     if pending is None:
         pending = _PENDING_PHOTO_BETS
@@ -672,7 +759,7 @@ def handle_photo_confirmation(
     tags = resolve_tags(
         text,
         default_account=parked_tags.get("account", "1"),
-        default_source=parked_tags.get("source", "punt"),
+        default_source=parked_tags.get("source", "model"),
         allow_bare_account=True,
     )
     account = tags["account"]
@@ -1047,6 +1134,8 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_structure()
     if cmd == "/pm":
         return handle_pm(db_path)
+    if cmd == "/settle":
+        return handle_settle(text, db_path)
     if cmd == "/ping":
         return "pong"
     return "Unknown command. Send /help for the list."
