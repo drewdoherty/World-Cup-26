@@ -1,23 +1,23 @@
 {
   "meta": {
-    "generated": "2026-06-13 16:59:52 UTC"
+    "generated": "2026-06-13 18:56:11 UTC"
   },
   "summary": {
-    "fixtures_complete": 3,
-    "model_1x2_correct": 2,
-    "market_1x2_correct": 2,
-    "model_brier": 0.4764,
-    "market_brier": 0.5358,
-    "model_logloss": 0.7443,
-    "market_logloss": 0.8974,
+    "fixtures_complete": 4,
+    "model_1x2_correct": 3,
+    "market_1x2_correct": 3,
+    "model_brier": 0.4755,
+    "market_brier": 0.5105,
+    "model_logloss": 0.7641,
+    "market_logloss": 0.8658,
     "top6_hits": 3,
     "bets": {
-      "settled": 15,
-      "won": 6,
-      "lost": 9,
-      "pl": 31.43,
-      "avg_clv": -0.0248,
-      "clv_count": 6
+      "settled": 23,
+      "won": 8,
+      "lost": 15,
+      "pl": 39.82,
+      "avg_clv": -0.0081,
+      "clv_count": 10
     }
   },
   "fixtures": [
@@ -194,27 +194,58 @@
         }
       ],
       "pending": false
-    }
-  ],
-  "pending": [
+    },
     {
       "fixture": "United States vs Paraguay",
       "date": "2026-06-12",
       "kickoff": "2026-06-13T01:00:00Z",
+      "score": "4-1",
+      "outcome": "home",
+      "card_generated": "2026-06-13 00:12:34 UTC",
       "model_1x2": {
         "home": 0.4389,
         "draw": 0.2949,
         "away": 0.2662
       },
       "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.4627,
+        "draw": 0.2977,
+        "away": 0.2396
+      },
+      "market_source": "closing_devig",
+      "market_books": 20,
       "model_pick": "home",
+      "market_pick": "home",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.4389,
+      "market_prob_outcome": 0.4627,
+      "brier_model": 0.4727,
+      "brier_market": 0.4347,
+      "logloss_model": 0.8235,
+      "logloss_market": 0.7707,
       "top_scoreline": {
         "score": "1-1",
-        "prob": 13.8
+        "prob": 13.8,
+        "hit": false
+      },
+      "top6_hit": false,
+      "ou25": {
+        "model_over": 0.407,
+        "actual_over": true,
+        "hit": false
+      },
+      "btts": {
+        "model": 0.47,
+        "actual": true,
+        "hit": false
       },
       "picks": [],
-      "pending": true
-    },
+      "pending": false
+    }
+  ],
+  "pending": [
     {
       "fixture": "Qatar vs Switzerland",
       "date": null,
@@ -290,6 +321,16 @@
   ],
   "bets": [
     {
+      "id": 1,
+      "match": "USA vs Paraguay",
+      "selection": "Paraguay",
+      "odds": 4.2,
+      "stake": 5.68,
+      "status": "lost",
+      "pl": -5.68,
+      "clv": 0.013692704517961785
+    },
+    {
       "id": 2,
       "match": "Canada vs Bosnia and Herzegovina",
       "selection": "Canada",
@@ -360,6 +401,16 @@
       "clv": 0.01828133776407026
     },
     {
+      "id": 9,
+      "match": "USA vs Paraguay",
+      "selection": "Paraguay Yes",
+      "odds": 4.348,
+      "stake": 2.53,
+      "status": "lost",
+      "pl": -2.53,
+      "clv": 0.04941330458192805
+    },
+    {
       "id": 10,
       "match": "South Korea v Czechia",
       "selection": "South Korea",
@@ -400,6 +451,26 @@
       "clv": -0.03096006302391996
     },
     {
+      "id": 18,
+      "match": "USA (qualifier)",
+      "selection": "USA",
+      "odds": 2.2,
+      "stake": 10.0,
+      "status": "won",
+      "pl": 12.0,
+      "clv": 0.01504387034258503
+    },
+    {
+      "id": 19,
+      "match": "Treble: Netherlands + Brazil + Paraguay",
+      "selection": "Netherlands/Brazil/Paraguay all win",
+      "odds": 12.87,
+      "stake": 2.0,
+      "status": "lost",
+      "pl": -2.0,
+      "clv": null
+    },
+    {
       "id": 20,
       "match": "Canada vs Bosnia & Herzegovina",
       "selection": "Under 8.5",
@@ -420,6 +491,16 @@
       "clv": null
     },
     {
+      "id": 41,
+      "match": "United States vs Paraguay",
+      "selection": "United States 0-1 Paraguay",
+      "odds": 11.11111111111111,
+      "stake": 0.9989999999999999,
+      "status": "lost",
+      "pl": -1.0,
+      "clv": null
+    },
+    {
       "id": 42,
       "match": "Canada vs Bosnia-Herzegovina",
       "selection": "Canada 2-1 Bosnia-Herzegovina",
@@ -430,6 +511,16 @@
       "clv": null
     },
     {
+      "id": 49,
+      "match": "United States vs Paraguay",
+      "selection": "United States 1-1 Paraguay",
+      "odds": 6.666666666666667,
+      "stake": 1.5,
+      "status": "lost",
+      "pl": -1.5,
+      "clv": null
+    },
+    {
       "id": 58,
       "match": "Canada vs Bosnia and Herzegovina",
       "selection": "Canada win - Yes",
@@ -437,6 +528,26 @@
       "stake": 0.94,
       "status": "lost",
       "pl": -0.94,
+      "clv": null
+    },
+    {
+      "id": 59,
+      "match": "USA vs Paraguay",
+      "selection": "Paraguay",
+      "odds": 4.1,
+      "stake": 1.9,
+      "status": "lost",
+      "pl": -1.9,
+      "clv": -0.01044283606579921
+    },
+    {
+      "id": 60,
+      "match": "USA (qualifier, mum/Betfred)",
+      "selection": "USA",
+      "odds": 2.1,
+      "stake": 10.0,
+      "status": "won",
+      "pl": 11.0,
       "clv": null
     }
   ]
