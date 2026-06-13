@@ -57,6 +57,19 @@ def classify(match_desc, selection):
     # straight team win (selection is exactly a team name)
     if sel in TEAM_OUTCOME:
         return TEAM_OUTCOME[sel]
+    # exact-score scoreline punt: "<Home> H-A <Away>" -> draw if H==A else the winner.
+    # These carry real directional exposure the bare-team match misses (e.g. a
+    # "Haiti 1-1 Scotland" punt is draw exposure; "Haiti 0-2 Scotland" is Scotland).
+    sm = re.match(r"\s*(.+?)\s+(\d+)\s*-\s*(\d+)\s+(.+?)\s*$", selection or "")
+    if sm:
+        h_team, h, a, a_team = sm.group(1).lower(), int(sm.group(2)), int(sm.group(3)), sm.group(4).lower()
+        mk2 = mk or (TEAM_OUTCOME.get(h_team) or TEAM_OUTCOME.get(a_team) or (None, None))[0]
+        if mk2:
+            if h == a:
+                return mk2, "Draw"
+            winner = h_team if h > a else a_team
+            if winner in TEAM_OUTCOME:
+                return TEAM_OUTCOME[winner]
     return None, None
 
 
