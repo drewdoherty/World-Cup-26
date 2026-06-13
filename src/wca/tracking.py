@@ -806,8 +806,13 @@ def build_tracking_data(
     won = sum(1 for b in settled if (b.get("status") or "").lower() == "won")
     lost = sum(1 for b in settled if (b.get("status") or "").lower() == "lost")
     pl = sum(float(b.get("settled_pl") or 0.0) for b in settled)
+    # CLV is locked in at the close (kickoff) and is independent of settlement,
+    # so it counts every bet with a captured closing line — including still-open
+    # in-play bets. This matches dashboard.py's terminal CLV; restricting to
+    # settled bets (the old behaviour) froze the metric until results landed,
+    # so a kicked-off fixture's CLV never showed up here.
     clvs = [
-        float(b["clv"]) for b in settled if b.get("clv") is not None
+        float(b["clv"]) for b in bets if b.get("clv") is not None
     ]
     avg_clv = (sum(clvs) / len(clvs)) if clvs else None
 

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-13 19:02:33 UTC"
+    "generated": "2026-06-13 19:27:44 UTC"
   },
   "summary": {
     "fixtures_complete": 4,
@@ -16,8 +16,8 @@
       "won": 8,
       "lost": 15,
       "pl": 39.82,
-      "avg_clv": -0.0081,
-      "clv_count": 10
+      "avg_clv": -0.0039,
+      "clv_count": 12
     }
   },
   "fixtures": [
@@ -247,67 +247,13 @@
   ],
   "pending": [
     {
-      "fixture": "Qatar vs Switzerland",
-      "date": null,
-      "kickoff": "2026-06-13T19:00:00+00:00",
-      "model_1x2": {
-        "home": 0.0765,
-        "draw": 0.1561,
-        "away": 0.7674
-      },
-      "model_source": "card_build",
-      "model_pick": "away",
-      "top_scoreline": {
-        "score": "0-2",
-        "prob": 15.1
-      },
-      "picks": [],
-      "pending": true
-    },
-    {
-      "fixture": "Brazil vs Morocco",
-      "date": null,
-      "kickoff": "2026-06-13T22:00:00+00:00",
-      "model_1x2": {
-        "home": 0.5566,
-        "draw": 0.2647,
-        "away": 0.1787
-      },
-      "model_source": "card_build",
-      "model_pick": "home",
-      "top_scoreline": {
-        "score": "1-0",
-        "prob": 17.6
-      },
-      "picks": [],
-      "pending": true
-    },
-    {
-      "fixture": "Haiti vs Scotland",
-      "date": null,
-      "kickoff": "2026-06-14T01:00:00+00:00",
-      "model_1x2": {
-        "home": 0.1681,
-        "draw": 0.2298,
-        "away": 0.6021
-      },
-      "model_source": "card_build",
-      "model_pick": "away",
-      "top_scoreline": {
-        "score": "0-1",
-        "prob": 12.5
-      },
-      "picks": [],
-      "pending": true
-    },
-    {
       "fixture": "Australia vs Turkey",
       "date": null,
-      "kickoff": "2026-06-14T04:00:00+00:00",
+      "kickoff": null,
       "model_1x2": {
-        "home": 0.2441,
-        "draw": 0.2737,
-        "away": 0.4822
+        "home": 0.2437,
+        "draw": 0.2729,
+        "away": 0.4835
       },
       "model_source": "card_build",
       "model_pick": "away",
@@ -315,7 +261,209 @@
         "score": "0-1",
         "prob": 14.8
       },
+      "picks": [
+        {
+          "fixture": "Australia vs Turkey",
+          "selection": "Australia",
+          "odds": 5.7,
+          "venue": "betfair_ex_uk",
+          "model_prob": 0.244,
+          "market_prob": 0.177
+        },
+        {
+          "fixture": "Australia vs Turkey",
+          "selection": "Draw",
+          "odds": 3.9,
+          "venue": "betfair_ex_uk",
+          "model_prob": 0.273,
+          "market_prob": 0.251
+        }
+      ],
+      "pending": true
+    },
+    {
+      "fixture": "Brazil vs Morocco",
+      "date": null,
+      "kickoff": null,
+      "model_1x2": {
+        "home": 0.5618,
+        "draw": 0.2628,
+        "away": 0.1755
+      },
+      "model_source": "card_build",
+      "model_pick": "home",
+      "top_scoreline": {
+        "score": "1-0",
+        "prob": 17.7
+      },
+      "picks": [
+        {
+          "fixture": "Brazil vs Morocco",
+          "selection": "Morocco",
+          "odds": 6.0,
+          "venue": "betfair_ex_uk",
+          "model_prob": 0.175,
+          "market_prob": 0.16399999999999998
+        },
+        {
+          "fixture": "Brazil vs Morocco",
+          "selection": "Draw",
+          "odds": 4.0,
+          "venue": "williamhill",
+          "model_prob": 0.263,
+          "market_prob": 0.251
+        }
+      ],
+      "pending": true
+    },
+    {
+      "fixture": "Germany vs Cura\u00e7ao",
+      "date": null,
+      "kickoff": null,
+      "model_1x2": {
+        "home": 0.9132,
+        "draw": 0.0607,
+        "away": 0.0261
+      },
+      "model_source": "card_build",
+      "model_pick": "home",
+      "top_scoreline": {
+        "score": "4-0",
+        "prob": 12.2
+      },
+      "picks": [
+        {
+          "fixture": "Germany vs Cura\u00e7ao",
+          "selection": "Draw",
+          "odds": 26.0,
+          "venue": "skybet",
+          "model_prob": 0.061,
+          "market_prob": 0.042
+        },
+        {
+          "fixture": "Germany vs Cura\u00e7ao",
+          "selection": "Cura\u00e7ao",
+          "odds": 56.0,
+          "venue": "betvictor",
+          "model_prob": 0.026000000000000002,
+          "market_prob": 0.016
+        }
+      ],
+      "pending": true
+    },
+    {
+      "fixture": "Haiti vs Scotland",
+      "date": null,
+      "kickoff": null,
+      "model_1x2": {
+        "home": 0.1682,
+        "draw": 0.2278,
+        "away": 0.6039
+      },
+      "model_source": "card_build",
+      "model_pick": "away",
+      "top_scoreline": {
+        "score": "0-1",
+        "prob": 12.6
+      },
+      "picks": [
+        {
+          "fixture": "Haiti vs Scotland",
+          "selection": "Draw",
+          "odds": 4.8,
+          "venue": "betfair_ex_uk",
+          "model_prob": 0.228,
+          "market_prob": 0.20800000000000002
+        },
+        {
+          "fixture": "Haiti vs Scotland",
+          "selection": "Haiti",
+          "odds": 6.4,
+          "venue": "smarkets",
+          "model_prob": 0.168,
+          "market_prob": 0.154
+        }
+      ],
+      "pending": true
+    },
+    {
+      "fixture": "Ivory Coast vs Ecuador",
+      "date": null,
+      "kickoff": null,
+      "model_1x2": {
+        "home": 0.2429,
+        "draw": 0.3095,
+        "away": 0.4477
+      },
+      "model_source": "card_build",
+      "model_pick": "away",
+      "top_scoreline": {
+        "score": "0-1",
+        "prob": 15.6
+      },
+      "picks": [
+        {
+          "fixture": "Ivory Coast vs Ecuador",
+          "selection": "Ecuador",
+          "odds": 2.5,
+          "venue": "betfair_ex_uk",
+          "model_prob": 0.44799999999999995,
+          "market_prob": 0.4
+        }
+      ],
+      "pending": true
+    },
+    {
+      "fixture": "Netherlands vs Japan",
+      "date": null,
+      "kickoff": null,
+      "model_1x2": {
+        "home": 0.4748,
+        "draw": 0.2728,
+        "away": 0.2524
+      },
+      "model_source": "card_build",
+      "model_pick": "home",
+      "top_scoreline": {
+        "score": "1-1",
+        "prob": 12.9
+      },
       "picks": [],
+      "pending": true
+    },
+    {
+      "fixture": "Sweden vs Tunisia",
+      "date": null,
+      "kickoff": null,
+      "model_1x2": {
+        "home": 0.4741,
+        "draw": 0.2861,
+        "away": 0.2398
+      },
+      "model_source": "card_build",
+      "model_pick": "home",
+      "top_scoreline": {
+        "score": "1-0",
+        "prob": 15.5
+      },
+      "picks": [
+        {
+          "fixture": "Sweden vs Tunisia",
+          "selection": "Tunisia",
+          "odds": 4.6,
+          "venue": "betfair_ex_uk",
+          "model_prob": 0.24,
+          "market_prob": 0.213
+        },
+        {
+          "fixture": "Sweden vs Tunisia",
+          "selection": "Draw",
+          "odds": 3.6,
+          "venue": "betfair_ex_uk",
+          "model_prob": 0.28600000000000003,
+          "market_prob": 0.275
+        }
+      ],
       "pending": true
     }
   ],
