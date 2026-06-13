@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-13 16:59:51 UTC"
+    "generated": "2026-06-13T17:23:36"
   },
   "totals": {
-    "wagered": 368.0759999999999,
-    "open_stake": 263.686,
+    "wagered": 378.0759999999999,
+    "open_stake": 273.686,
     "settled_pl": 31.432000000000002,
-    "n_bets": 50
+    "n_bets": 51
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 247.46,
-      "open_stake": 188.89000000000001,
+      "wagered": 257.46,
+      "open_stake": 198.89000000000001,
       "settled_pl": 23.15,
-      "n_bets": 34
+      "n_bets": 35
     },
     "USD": {
       "wagered": 120.616,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 247.46,
-      "open_stake": 188.89000000000001,
+      "wagered": 257.46,
+      "open_stake": 198.89000000000001,
       "settled_pl": 23.15,
-      "n_bets": 34,
+      "n_bets": 35,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 130.46,
-      "open_stake": 81.88999999999999,
+      "wagered": 140.46,
+      "open_stake": 91.88999999999999,
       "settled_pl": 33.15,
-      "n_bets": 21,
+      "n_bets": 22,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,14 @@
     }
   },
   "source_summary": {
+    "offer": {
+      "GBP": {
+        "wagered": 164.0,
+        "open_stake": 137.0,
+        "settled_pl": 5.749999999999999,
+        "n_bets": 18
+      }
+    },
     "model": {
       "GBP": {
         "wagered": 70.4,
@@ -74,14 +82,6 @@
         "open_stake": 62.53,
         "settled_pl": 9.382000000000003,
         "n_bets": 6
-      }
-    },
-    "offer": {
-      "GBP": {
-        "wagered": 154.0,
-        "open_stake": 127.0,
-        "settled_pl": 5.749999999999999,
-        "n_bets": 17
       }
     },
     "punt": {
@@ -100,6 +100,14 @@
     }
   },
   "platforms": {
+    "bet365": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 17.0,
+      "open_stake": 10.0,
+      "settled_pl": 11.969999999999999,
+      "n_bets": 2
+    },
     "betfred": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -163,14 +171,6 @@
       "open_stake": 0.0,
       "settled_pl": 35.0,
       "n_bets": 2
-    },
-    "bet365": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 7.0,
-      "open_stake": 0.0,
-      "settled_pl": 11.969999999999999,
-      "n_bets": 1
     }
   },
   "closed_positions": [
@@ -523,6 +523,22 @@
     "n_with_close": 10
   },
   "positions": [
+    {
+      "id": 71,
+      "ts_utc": "2026-06-13T17:23:36",
+      "match": "Australia vs Türkiye",
+      "market": "Full Time Result",
+      "selection": "Australia",
+      "platform": "bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 5.0,
+      "stake": 10.0,
+      "model_prob": null,
+      "ev": null
+    },
     {
       "id": 70,
       "ts_utc": "2026-06-13T19:55:00",
