@@ -161,6 +161,70 @@ def snapshot_all(
     return total_rows
 
 
+def rows_from_odds_frame(
+    df: Any,
+    ts_utc: str,
+    source: str = "theoddsapi",
+    markets: Optional[List[str]] = None,
+) -> List[SnapshotRow]:
+    """Flatten a ``theoddsapi.get_odds`` DataFrame into :class:`SnapshotRow`s.
+
+    Mirrors the snapshot daemon's conventions: totals/BTTS selections fold the
+    line (``outcome_point``) into the selection key ("Over" alone is ambiguous
+    across 2.5/3.5 lines; "Over 2.5" is a closing line a bet can be matched
+    against).  ``markets`` restricts which market rows are kept (``None``
+    keeps all).  Rows missing an event id are dropped.
+    """
+    import pandas as pd  # local import keeps this module dependency-light
+
+    rows: List[SnapshotRow] = []
+    if df is None or df.empty:
+        return rows
+    keep = set(markets) if markets else None
+    for record in df.to_dict(orient="records"):
+        market = record.get("market")
+        if keep is not None and market not in keep:
+            continue
+        event_id = record.get("event_id")
+        if event_id is None or (isinstance(event_id, float) and pd.isna(event_id)):
+            continue
+        odds = record.get("decimal_odds")
+        try:
+            odds = float(odds) if odds is not None and not pd.isna(odds) else None
+        except (TypeError, ValueError):
+            odds = None
+        selection = str(record.get("outcome_name"))
+        point = record.get("outcome_point")
+        if point is not None and not pd.isna(point):
+            selection = "%s %g" % (selection, float(point))
+        raw = {}
+        for key, value in record.items():
+            if value is None:
+                raw[key] = None
+            elif hasattr(value, "isoformat"):
+                raw[key] = value.isoformat()
+            else:
+                try:
+                    if pd.isna(value):
+                        raw[key] = None
+                        continue
+                except (TypeError, ValueError):
+                    pass
+                raw[key] = value
+        rows.append(
+            SnapshotRow(
+                source=source,
+                match_id=str(event_id),
+                market=str(market),
+                selection=selection,
+                decimal_odds=odds,
+                raw=raw,
+                ts_utc=ts_utc,
+            )
+        )
+    return rows
+
+
 def read_snapshots(
     db_path: Union[str, Path] = "data/wca.db",
 ) -> "List[Dict[str, Any]]":

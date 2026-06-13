@@ -41,20 +41,23 @@ jobs:
           mkdir -p logs
           python scripts/wca_scores_data.py --hours-ahead 48 >> logs/scores.log 2>&1 || true
 
-      - name: Commit refreshed scores feed
-        run: |
-          git config user.email "bot@world-cup-alpha.local"
-          git config user.name "World Cup Alpha Bot"
-          git add site/scores_data.json
-          git diff --cached --quiet || git commit -m "Auto-sync: hourly scores feed"
-          for i in 1 2 3; do
-            git pull --rebase -X theirs origin main && git push origin main && break
-            sleep $((i * 10))
-          done
-
+      # The runner has no ledger DB (gitignored), so the SQLite side goes to
+      # a throwaway file — the durable output is the raw JSON dump in
+      # data/raw/snapshots/ (git-tracked; feeds linemove's event metadata).
       - name: Ingest odds snapshot
-        continue-on-error: true  # no ledger DB on CI runners; best-effort
+        continue-on-error: true  # a transient API failure must not block the scores commit
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: |
           python scripts/wca_snapshot_odds.py >> logs/odds.log 2>&1
+
+      - name: Commit refreshed feeds
+        run: |
+          git config user.email "bot@world-cup-alpha.local"
+          git config user.name "World Cup Alpha Bot"
+          git add site/scores_data.json data/raw/snapshots
+          git diff --cached --quiet || git commit -m "Auto-sync: hourly scores feed + odds snapshot"
+          for i in 1 2 3; do
+            git pull --rebase -X theirs origin main && git push origin main && break
+            sleep $((i * 10))
+          done
