@@ -18,15 +18,22 @@ the **UK VPN for placing sportsbook bets manually** — that work never moves he
 So **do not run this host behind your UK sportsbook VPN.** You only need a VPN
 here to unblock **Telegram**, and that VPN must **not** be UK or US.
 
-**Two ways to get Odds + Polymarket + Telegram all green at once:**
-- **(a) Split-tunnel (best):** keep the host native (Bahrain), route **only
-  `api.telegram.org`** through a VPN. PM/odds stay native; Telegram tunnels.
-- **(b) Full VPN to a neutral region** (e.g. an EU country that is neither UK
-  nor US and where Polymarket is reachable). Simpler, but verify PM isn't blocked
-  there.
+**Chosen approach: full VPN to an EU region** (simplest — one connection for
+everything). Requirements for the region:
+- **Not UK, not US** (both geo-blocked by Polymarket).
+- **Avoid France** (AMF — Polymarket has restricted FR access). Safe picks:
+  **Germany, Netherlands, Ireland, Spain**. Telegram works across all of these.
 
-Run `bash deploy/check_connectivity.sh` to see what's reachable on the current
-network — the goal is Odds + Polymarket + Telegram all `OK`.
+Set the Mac Mini's VPN to e.g. **Germany or Netherlands**, leave it on
+permanently, then verify:
+
+```bash
+bash deploy/check_connectivity.sh
+```
+
+You want **Odds + Polymarket + Telegram all `OK`** in one shot. If Polymarket
+shows blocked, switch EU region and re-run. (Your MacBook keeps its separate UK
+VPN for manual sportsbook betting — the two hosts run different VPNs.)
 
 ## 2. What needs NO VPN
 Odds capture, card build, promos scan, model, site generation, git push,
@@ -42,8 +49,8 @@ Only **Telegram** needs unblocking.
 | `com.wca.bot` | always-on | Telegram bot | **needs Telegram VPN**; sends PM proposals, takes `Y PM-n` confirmations |
 | `com.wca.snapshotd` | always-on | dense odds snapshots near kickoffs | produces the **closing lines** CLV needs |
 | `com.wca.closecapture` | every 10 min | stamp `closing_odds`+CLV after each KO | **this was scheduled nowhere — why your CLV froze** |
-| `com.wca.scores` | hourly | refresh results → drives settlement | |
 | `com.wca.pmpropose` | every 30 min | park PM proposals + notify | needs PM **and** Telegram reachable |
+| `com.wca.publish` | hourly | refresh scores → regen site → **auto-commit & push** | keeps the public site live with no manual push; rebases to absorb cloud-Action commits |
 
 Free-bet accas and Double-Delight bets still need **manual settlement** (the
 auto-settler uses the wrong convention for SNR free bets / boosts) — keep doing
