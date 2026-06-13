@@ -170,8 +170,10 @@
       var net = Number(r.net_pnl || 0);
       var frac = Math.min(Math.abs(net) / maxAbs, 1);
       var side = net >= 0 ? "exp-pos" : "exp-neg";
-      var blind = r.blindspot
-        ? '<span class="exp-blind" title="meaningful probability, no positive exposure">BLIND</span>' : '';
+      var blind = r.soft_only
+        ? '<span class="exp-blind" title="covered only by free-acca EV — no hard cash" style="background:#7a5b00;color:#ffd76a">SOFT</span>'
+        : (r.blindspot
+          ? '<span class="exp-blind" title="meaningful probability, no positive cash exposure">BLIND</span>' : '');
       var plug = "";
       if (r.blindspot && r.plug) {
         plug = '<div class="exp-plug">' +
@@ -244,10 +246,12 @@
       return;
     }
     var p = exp.portfolio, c = exp.correlation || {};
+    var worstLbl = p.conditional ? "live floor" : "cash floor";
     var strip = '<div class="rk-strip">' +
       statChip("EV (slate)", gbp(p.ev), pnlClass(p.ev)) +
       statChip("best case", gbp(p.best), "pos") +
-      statChip("worst case", gbp(p.worst), "neg") +
+      statChip(worstLbl, gbp(p.worst), "neg") +
+      statChip("stake at risk", gbp(p.stake_at_risk), "neg") +
       statChip("P(profit)", prob01(p.p_profit, 0), "pos") +
       statChip("P(loss)", prob01(p.p_loss, 0), "neg") +
       statChip("P(win ≥ £50)", prob01(p.p_big_win, 0), "") +
@@ -268,12 +272,22 @@
             num(b.plug.best_odds) + ' ' + esc(b.plug.best_venue) + ', EV ' +
             (b.plug.ev_pct >= 0 ? "+" : "") + num(b.plug.ev_pct, 1) + '%)</span></div>'
           : (b.plug ? '<div class="rk-plug dim">' + esc(b.plug.note) + '</div>' : '');
+        // Hard cash is what's real. A "soft only" outcome looks covered once you
+        // add free-acca EV, but that EV evaporates the instant any leg slips —
+        // so we surface the cash gap, not the flattering net.
+        var badge = b.soft_only
+          ? '<span class="exp-blind" title="covered only by free-acca EV, which dies if any leg misses" style="background:#7a5b00;color:#ffd76a">SOFT</span>'
+          : '<span class="exp-blind">BLIND</span>';
+        var detail = b.soft_only
+          ? 'cash ' + gbp(b.cash_net) + ' <span class="dim">(only acca EV +' +
+            gbp(b.acca_ev).replace("+", "") + ', evaporates if a leg slips)</span>'
+          : 'cash ' + gbp(typeof b.cash_net === "number" ? b.cash_net : b.net_pnl);
         return '<div class="rk-bs">' +
           '<div class="rk-bs-head">' +
-            '<span class="exp-blind">BLIND</span> ' +
+            badge + ' ' +
             '<b>' + esc(b.fixture) + '</b> — <b>' + esc(b.outcome) + '</b>' +
-            '<span class="dim"> · ' + prob01(b.prob, 0) + ' likely · net ' +
-            gbp(b.net_pnl) + '</span>' +
+            '<span class="dim"> · ' + prob01(b.prob, 0) + ' likely · </span>' +
+            detail +
           '</div>' + plug +
         '</div>';
       }).join("");
@@ -298,6 +312,7 @@
         '</div>' +
       '</div>';
     var off = [];
+    if (exp.real_money_offslate) off.push(gbp(exp.real_money_offslate) + " off-slate at risk");
     if ((exp.off_slate_accas || []).length) off.push((exp.off_slate_accas).length + " off-slate acca");
     if ((exp.unmapped || []).length) off.push((exp.unmapped).length + " unmapped");
     $("risk-meta").textContent = (bs.length + " blind spot" + (bs.length === 1 ? "" : "s")) +

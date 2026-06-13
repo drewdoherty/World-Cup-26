@@ -39,10 +39,25 @@ IN_PLAY_HOURS = 3.0
 BLINDSPOT_MIN_PROB = 0.18
 # Net-P&L at or below this (£) counts as "not covered" for an outcome.
 BLINDSPOT_NET_FLOOR = 0.50
-# Result markets whose single bets settle directly on 1X2.
-_RESULT_MARKETS = {"Full-time result", "Match Odds", "Match Winner", "h2h"}
+# Result markets whose single bets settle directly on 1X2.  Matched case- and
+# punctuation-insensitively so "Full Time Result" / "Full-time result" / "1X2"
+# all resolve — a mislabelled result bet must never leak into the event bucket
+# (that is exactly how a covered outcome reads as a blind spot).
+_RESULT_MARKETS = {
+    "full time result", "fulltime result", "match odds", "match winner",
+    "match result", "h2h", "1x2", "result", "to win", "winner",
+}
 # Team-name aliases seen in bet descriptions vs the model fixture spelling.
 _ALIAS = {"Türkiye": "Turkey", "Turkiye": "Turkey", "Korea Republic": "South Korea"}
+
+
+def _canon_market(market: str) -> str:
+    """Normalise a market label for result-market matching."""
+    return re.sub(r"[^a-z0-9]+", " ", (market or "").lower()).strip()
+
+
+def _is_result_market(market: str) -> bool:
+    return _canon_market(market) in _RESULT_MARKETS
 
 
 def _team_key(name: str) -> str:
@@ -99,6 +114,20 @@ def _is_future_or_inplay(
     return now < ko + datetime.timedelta(hours=IN_PLAY_HOURS)
 
 
+# Split a "Home vs Away" / "Home v Away" fixture string. Both spellings occur in
+# the wild (model feed uses "vs", some card/bet descriptions use a single "v").
+# Missing this is a SILENT floor leak: a real single whose desc reads "A v B"
+# fails to map and vanishes from both the worst case and stake-at-risk.
+_FIXTURE_VS = re.compile(r"\s+vs?\s+", re.IGNORECASE)
+
+
+def _split_fixture(s: str) -> Optional[Tuple[str, str]]:
+    parts = _FIXTURE_VS.split((s or "").strip(), maxsplit=1)
+    if len(parts) == 2 and parts[0].strip() and parts[1].strip():
+        return parts[0].strip(), parts[1].strip()
+    return None
+
+
 def build_slate(
     model_fixtures: List[Dict[str, Any]],
     now: Optional[datetime.datetime] = None,
@@ -112,11 +141,12 @@ def build_slate(
     slate: Dict[str, Dict[str, Any]] = {}
     for f in model_fixtures:
         fixture = f["fixture"]
-        if " vs " not in fixture:
+        ha = _split_fixture(fixture)
+        if not ha:
             continue
         if not _is_future_or_inplay(f.get("kickoff"), now):
             continue
-        home, away = fixture.split(" vs ", 1)
+        home, away = ha
         m = f.get("model") or {}
         slate[fixture] = {
             "home": home,
@@ -136,14 +166,27 @@ def _team_to_fixture(slate: Dict[str, Dict[str, Any]]) -> Dict[str, Tuple[str, s
     return idx
 
 
+def _canon_fixture(s: str) -> str:
+    """Alias-normalise a 'Home vs Away' string so spelling variants match.
+
+    Handles both " vs " and a single " v ", plus team aliases:
+    'Australia v Türkiye' -> 'australia vs turkey'.
+    """
+    ha = _split_fixture(s)
+    if ha:
+        return ("%s vs %s" % (_team_key(ha[0]), _team_key(ha[1]))).lower()
+    return (s or "").strip().lower()
+
+
 def _map_single(bet: Dict[str, Any], slate: Dict[str, Dict[str, Any]]
                 ) -> Optional[Tuple[str, str]]:
     """Map a result single to ``(fixture, winning_selection)`` or None."""
     md = (bet.get("match_desc") or "").strip()
     fx = md if md in slate else None
     if fx is None:
+        md_canon = _canon_fixture(md)
         for k in slate:
-            if k.lower() == md.lower():
+            if _canon_fixture(k) == md_canon:
                 fx = k
                 break
     if fx is None:
@@ -166,6 +209,7 @@ def build_exposure_data(
     model_fixtures: List[Dict[str, Any]],
     odds_index: Optional[Dict[str, Dict[str, Dict[str, float]]]] = None,
     now_utc: Optional[str] = None,
+    results: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Compute the full exposure feed.
 
@@ -173,30 +217,41 @@ def build_exposure_data(
     ----------
     bets:
         Open bets (ledger rows as dicts): match_desc, market, selection,
-        decimal_odds, stake, source, account, status.
+        decimal_odds, stake, source, account, status, model_prob, ev.
     model_fixtures:
         ``data/model_predictions.json`` ``fixtures`` list.
     odds_index:
         ``{fixture: {outcome: {venue: decimal_odds}}}`` for plug suggestions.
     now_utc:
         Display timestamp for the feed header.
+    results:
+        Optional ``{fixture: {"outcome": <home|"Draw"|away>, "score": "h-a"}}``
+        for fixtures that have already finished.  When supplied the headline
+        floor is recomputed *conditional on results so far*: settled fixtures
+        are pinned, accas whose settled leg lost are dead, and event punts on
+        finished games are settled against the actual score.  This is the number
+        that moves the instant a leg breaks — the live floor, not the pre-slate
+        one.
     """
     # Restrict the risk slate to future / in-play games (drop finished ones), so
     # blind spots and per-fixture exposure never cover games already played.
     slate = build_slate(model_fixtures, now=_parse_dt(now_utc))
     team2fx = _team_to_fixture(slate)
     odds_index = odds_index or {}
+    results = _normalise_results(results, slate)
 
     result_bets: List[Dict[str, Any]] = []
     acca_bets: List[Dict[str, Any]] = []
     event_bets: Dict[str, List[Dict[str, Any]]] = {}
+    event_list: List[Dict[str, Any]] = []
     unmapped: List[str] = []
+    unmapped_real_stake = 0.0  # real money on result singles we couldn't map
 
     for b in bets:
         if str(b.get("status") or "open") != "open":
             continue
         market = b.get("market") or ""
-        if market == "ACCA":
+        if _canon_market(market) == "acca":
             legs_raw = _acca_legs(b.get("match_desc") or "")
             legs: List[Tuple[str, str]] = []
             off = False
@@ -210,7 +265,7 @@ def build_exposure_data(
                 "label": b.get("match_desc"), "off": off,
                 "stake": float(b["stake"]), "odds": float(b["decimal_odds"]),
             })
-        elif market in _RESULT_MARKETS:
+        elif _is_result_market(market):
             m = _map_single(b, slate)
             if m:
                 result_bets.append({
@@ -220,21 +275,31 @@ def build_exposure_data(
                 })
             else:
                 unmapped.append("%s / %s" % (b.get("match_desc"), b.get("selection")))
+                if not _is_free(b):
+                    # Never let real money disappear: an unmappable real single
+                    # is surfaced as off-slate exposure rather than silently
+                    # dropped from the risk accounting.
+                    unmapped_real_stake += float(b["stake"])
         else:
             md = (b.get("match_desc") or "")
             fx = None
+            md_canon = _canon_fixture(md)
             for k in slate:
-                if k.lower() in md.lower() or md.lower() in k.lower():
+                kc = _canon_fixture(k)
+                if kc in md_canon or md_canon in kc:
                     fx = k
                     break
             rec = {
                 "type": market, "selection": b.get("selection"),
                 "stake": float(b["stake"]), "profit": _profit(b),
                 "free": _is_free(b), "odds": float(b["decimal_odds"]),
+                "ev": (float(b["ev"]) if b.get("ev") is not None else None),
+                "fx": fx,
             }
             if fx is None:
                 rec["match"] = md
             event_bets.setdefault(fx or "(off-slate)", []).append(rec)
+            event_list.append(rec)
 
     # Fixtures carrying live exposure (>=1 open bet — a result single, an acca
     # leg, or a prop/event bet). A blind spot is only flagged where we actually
@@ -253,8 +318,17 @@ def build_exposure_data(
                           has_bets=fx in fixtures_with_bets)
         for fx in slate
     ]
-    portfolio, correlation = _portfolio_scenarios(slate, result_bets, acca_bets)
+    portfolio, correlation = _portfolio_scenarios(
+        slate, result_bets, acca_bets, event_list, results)
     blindspots = _collect_blindspots(fixtures_out)
+
+    # Real-money positions that the slate scenarios cannot see directly:
+    # off-slate accas/events still cost real money if they lose.
+    offslate_real = round(
+        sum(a["stake"] for a in acca_bets if a["off"] and not a["free"])
+        + sum(e["stake"] for e in event_bets.get("(off-slate)", []) if not e["free"])
+        + unmapped_real_stake,
+        2)
 
     return {
         "meta": {"generated": now_utc},
@@ -265,7 +339,38 @@ def build_exposure_data(
         "unmapped": unmapped,
         "off_slate_accas": [a["label"] for a in acca_bets if a["off"]],
         "off_slate_events": event_bets.get("(off-slate)", []),
+        "real_money_offslate": offslate_real,
+        "settled": results,
     }
+
+
+def _normalise_results(results, slate):
+    """Coerce a results map into ``{fixture: {"outcome", "score"}}``.
+
+    Accepts either ``{fixture: "home"|"draw"|"away"}`` or
+    ``{fixture: {"outcome": ..., "score": "h-a"}}`` and maps home/draw/away to
+    the slate's actual team names.  Pending / unknown fixtures are dropped.
+    """
+    out: Dict[str, Any] = {}
+    for fx, val in (results or {}).items():
+        if fx not in slate:
+            continue
+        d = slate[fx]
+        if isinstance(val, dict):
+            outcome = val.get("outcome")
+            score = val.get("score")
+        else:
+            outcome = val
+            score = None
+        oc = (outcome or "").strip().lower()
+        sel = {"home": d["home"], "draw": "Draw", "away": d["away"]}.get(oc)
+        if sel is None:  # already a team name / "Draw", or pending
+            if outcome in (d["home"], d["away"], "Draw"):
+                sel = outcome
+            else:
+                continue
+        out[fx] = {"outcome": sel, "score": score}
+    return out
 
 
 def _fixture_exposure(fx, slate, result_bets, acca_bets, events, fx_odds,
@@ -304,12 +409,18 @@ def _fixture_exposure(fx, slate, result_bets, acca_bets, events, fx_odds,
                               "ev": round(ev, 2)})
         net = direct + acca_ev
         prob = d["p"].get(X) or 0.0
+        # A blind spot is decided on HARD CASH (direct real-money P&L), never on
+        # the model-conditional acca EV: a free acca that *might* pay does not
+        # cover an outcome in cash, and it evaporates the moment any leg misses.
+        is_blind = bool(direct <= BLINDSPOT_NET_FLOOR and prob >= BLINDSPOT_MIN_PROB)
+        # "soft only" = looks covered once you add acca EV, but is hard-cash thin.
+        soft_only = bool(is_blind and net > BLINDSPOT_NET_FLOOR)
         rows.append({
             "outcome": X, "prob": round(prob, 4),
             "direct_pnl": round(direct, 2), "acca_ev": round(acca_ev, 2),
-            "net_pnl": round(net, 2),
-            "blindspot": bool(has_bets and net <= BLINDSPOT_NET_FLOOR
-                              and prob >= BLINDSPOT_MIN_PROB),
+            "net_pnl": round(net, 2), "cash_net": round(direct, 2),
+            "blindspot": bool(has_bets and is_blind),
+            "soft_only": bool(has_bets and soft_only),
             "live": live + acca_live,
         })
     # plug suggestions for blind-spot outcomes
@@ -317,8 +428,12 @@ def _fixture_exposure(fx, slate, result_bets, acca_bets, events, fx_odds,
         if r["blindspot"]:
             r["plug"] = _plug_for(fx, r["outcome"], r["prob"], fx_odds)
     max_win = max((r["net_pnl"] for r in rows), default=0.0)
-    stake_at_risk = round(sum(rb["stake"] for rb in result_bets
-                              if rb["fx"] == fx and not rb["free"]), 2)
+    # Stake at risk on this fixture = EVERY real-money position riding it:
+    # result singles AND event/scoreline/prop punts (the latter were omitted
+    # before, understating the per-fixture downside).
+    stake_at_risk = round(
+        sum(rb["stake"] for rb in result_bets if rb["fx"] == fx and not rb["free"])
+        + sum(e["stake"] for e in events if not e["free"]), 2)
     best = max(rows, key=lambda r: r["net_pnl"])["outcome"] if rows else None
     worst = min(rows, key=lambda r: r["net_pnl"])["outcome"] if rows else None
     return {
@@ -358,33 +473,150 @@ def _plug_for(fx, outcome, prob, fx_odds):
             "ev_pct": round(ev * 100, 1), "recommendation": rec}
 
 
-def _portfolio_scenarios(slate, result_bets, acca_bets):
-    """Joint result-scenario P&L distribution over the slate."""
+# Scores are written "home-away" with a hyphen ("Brazil 1-0 Morocco", "1-1").
+# Hyphen-only (a ":" would let "Bet #2: 1-0" misparse as 2-1) and we take the
+# LAST match so leading reference numbers in a label can't be read as the score.
+_SCORE_RE = re.compile(r"(\d+)\s*-\s*(\d+)")
+
+
+def _parse_score(text: str) -> Optional[Tuple[str, str]]:
+    ms = _SCORE_RE.findall(text or "")
+    return ms[-1] if ms else None
+
+
+def _event_won(e, res):
+    """Did event bet ``e`` win on a settled fixture with result ``res``?
+
+    Exact-score markets are checked against the actual home-away score; anything
+    we cannot *positively* confirm as a win on a finished fixture is treated as a
+    loss (conservative — it never inflates the floor).
+    """
+    market = _canon_market(e.get("type"))
+    if market in ("exact score", "correct score"):
+        sel = _parse_score(e.get("selection") or "")
+        act = _parse_score(res.get("score") or "")
+        return bool(sel and act and sel == act)
+    return False
+
+
+def _settle_event(e, results):
+    """Realised P&L of an event bet on a SETTLED fixture, else None (still live).
+
+    Free bets: +profit on win, £0 on loss.  Real bets: +profit on win, −stake.
+    """
+    fx = e.get("fx")
+    if not fx or fx not in results:
+        return None
+    if _event_won(e, results[fx]):
+        return e["profit"]
+    return 0.0 if e["free"] else -e["stake"]
+
+
+def _acca_alive(ab, results):
+    """An acca is dead once any *settled* leg has lost."""
+    for (f, s) in ab["legs"]:
+        if f in results and results[f]["outcome"] != s:
+            return False
+    return True
+
+
+def _portfolio_scenarios(slate, result_bets, acca_bets, event_bets=None,
+                         results=None):
+    """Joint result-scenario P&L distribution over the slate.
+
+    The headline ``worst`` is a HARD CASH FLOOR: it counts every real-money
+    position — result singles, accumulators (free or real), and sub-1X2 event
+    punts (exact scores, scorers, props) — and never leans on model-conditional
+    acca EV.  Free bets add profit when they win and cost £0 when they lose.
+    Live exact-score / prop punts are assumed to MISS in the floor (their stake
+    is at risk); ``ev`` credits their model expectation via the ledger EV field.
+
+    ``results`` pins settled fixtures, kills accas whose settled leg lost, and
+    settles event punts on finished games — so the floor is conditional on
+    results so far, not the stale pre-kickoff figure.
+    """
+    results = results or {}
     fxs = list(slate.keys())
+    # Only ON-SLATE event punts belong in the slate floor.  Off-slate bets
+    # (e.g. a tournament-long "reach R16" position) resolve on a different
+    # timeframe and are surfaced separately as real_money_offslate — folding
+    # their stake into tonight's floor would wildly overstate the downside.
+    event_bets = [e for e in (event_bets or []) if e.get("fx") in slate]
+
+    # --- settle / partition the sub-1X2 event punts --------------------------
+    banked_events = 0.0
+    live_events = []
+    for e in event_bets:
+        r = _settle_event(e, results)
+        if r is None:
+            live_events.append(e)
+        else:
+            banked_events += r
+    event_stake_risk = sum(e["stake"] for e in live_events if not e["free"])
+    event_ev = sum((e.get("ev") or 0.0) for e in live_events)
+
+    # --- realised losses from accas already killed by a settled leg ----------
+    banked_accas = sum(-ab["stake"] for ab in acca_bets
+                       if not ab["free"] and not _acca_alive(ab, results))
+    # off-slate real-money accas can't be enumerated — their stake is at risk.
+    offslate_acca_risk = sum(ab["stake"] for ab in acca_bets
+                             if ab["off"] and not ab["free"] and _acca_alive(ab, results))
+
+    # adj shifts every result-state by the cash we already know plus the punt
+    # stakes assumed lost in the floor; it is the same constant for all states.
+    adj = banked_events + banked_accas - event_stake_risk - offslate_acca_risk
+
+    # --- total real money that can still be lost -----------------------------
+    stake_at_risk = round(
+        sum(rb["stake"] for rb in result_bets
+            if not rb["free"] and rb["fx"] not in results)
+        + sum(ab["stake"] for ab in acca_bets
+              if not ab["free"] and _acca_alive(ab, results))
+        + event_stake_risk, 2)
+
     if not fxs:
-        return ({"ev": 0.0, "best": 0.0, "worst": 0.0, "p_profit": 0.0,
-                 "p_loss": 0.0, "p_big_win": 0.0, "n_scenarios": 0},
-                {"worst_states": [], "narrative": "no upcoming fixtures"})
+        worst = round(adj, 2)
+        portfolio = {"ev": round(adj + event_ev, 2), "best": round(adj, 2),
+                     "worst": worst, "p_profit": 0.0, "p_loss": 0.0,
+                     "p_big_win": 0.0, "n_scenarios": 0,
+                     "stake_at_risk": stake_at_risk}
+        return portfolio, {"worst_states": [], "best_states": [],
+                           "narrative": "no upcoming fixtures"}
+
+    def outcomes_for(f):
+        if f in results:
+            return [results[f]["outcome"]]
+        return [slate[f]["home"], "Draw", slate[f]["away"]]
+
+    n_alive_accas = sum(1 for ab in acca_bets
+                        if not ab["off"] and _acca_alive(ab, results))
     scns = []
-    for combo in itertools.product(
-            *[[slate[f]["home"], "Draw", slate[f]["away"]] for f in fxs]):
+    for combo in itertools.product(*[outcomes_for(f) for f in fxs]):
         sel = dict(zip(fxs, combo))
         p = 1.0
         for f in fxs:
-            p *= (slate[f]["p"].get(sel[f]) or 0.0)
-        pnl = 0.0
+            if f not in results:           # settled legs carry probability 1
+                p *= (slate[f]["p"].get(sel[f]) or 0.0)
+        core = 0.0
         for rb in result_bets:
             if sel[rb["fx"]] == rb["sel"]:
-                pnl += rb["profit"]
+                core += rb["profit"]
             elif not rb["free"]:
-                pnl -= rb["stake"]
+                core -= rb["stake"]
         for ab in acca_bets:
-            if ab["off"]:
+            if ab["off"] or not _acca_alive(ab, results):
                 continue
             if all(sel[f] == s for (f, s) in ab["legs"]):
-                pnl += ab["profit"]
-        scns.append((p, pnl, sel))
-    ev = sum(p * pnl for p, pnl, _ in scns)
+                core += ab["profit"]
+            elif not ab["free"]:           # real-money acca loses its stake
+                core -= ab["stake"]
+        scns.append((p, core + adj, sel))
+
+    # EV is an expectation, NOT a floor: it credits the event punts' model EV
+    # (which already nets their stake) and the realised/banked cash — it must
+    # NOT also subtract the punt stakes the floor pessimistically writes off.
+    ev = sum(p * (core_adj - adj) for p, core_adj, _ in scns) \
+        + banked_events + banked_accas + event_ev
     best = max(pnl for _, pnl, _ in scns)
     worst = min(pnl for _, pnl, _ in scns)
     p_profit = sum(p for p, pnl, _ in scns if pnl > 0.5)
@@ -400,17 +632,27 @@ def _portfolio_scenarios(slate, result_bets, acca_bets):
          "results": [sel[f] for f in fxs]}
         for p, pnl, sel in sorted(scns, key=lambda x: -x[1])[:3]
     ]
-    # upside concentration: how much of the win-probability rides the favourites
+    conditional = bool(results)
     narrative = (
-        "Upside is concentrated: the biggest payouts (£%.0f best case) need the "
-        "favourites to land together, while %.0f%% of result-states leave the "
-        "book down. Downside is driven by the real-money singles, not the free "
-        "accas." % (best, p_loss * 100)
+        "Hard cash floor £%.2f across %d result-states%s — this counts EVERY "
+        "real-money position (singles, accas, and £%.2f of exact-score/prop "
+        "punts assumed to miss), not just the singles, and never the free-acca "
+        "EV. %.0f%% of states finish down; £%.2f of real money is still at risk."
+        % (worst, len(scns),
+           " (conditional on results so far)" if conditional else "",
+           event_stake_risk, p_loss * 100, stake_at_risk)
     )
     portfolio = {
         "ev": round(ev, 2), "best": round(best, 2), "worst": round(worst, 2),
         "p_profit": round(p_profit, 4), "p_loss": round(p_loss, 4),
         "p_big_win": round(p_big, 4), "n_scenarios": len(scns),
+        "stake_at_risk": stake_at_risk,
+        "event_stake_at_risk": round(event_stake_risk, 2),
+        "banked": round(banked_events + banked_accas, 2),
+        "alive_accas": n_alive_accas,
+        "dead_accas": sum(1 for ab in acca_bets
+                          if not ab["off"] and not _acca_alive(ab, results)),
+        "conditional": conditional,
     }
     correlation = {"worst_states": worst_states, "best_states": big_states,
                    "narrative": narrative}
@@ -425,6 +667,9 @@ def _collect_blindspots(fixtures_out):
                 out.append({
                     "fixture": fx["fixture"], "outcome": r["outcome"],
                     "prob": r["prob"], "net_pnl": r["net_pnl"],
+                    "cash_net": r.get("cash_net", r["net_pnl"]),
+                    "acca_ev": r.get("acca_ev", 0.0),
+                    "soft_only": r.get("soft_only", False),
                     "plug": r.get("plug"),
                 })
     out.sort(key=lambda b: -b["prob"])

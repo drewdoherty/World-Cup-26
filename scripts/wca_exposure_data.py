@@ -129,11 +129,32 @@ def _odds_index_from_scores(sd_fixtures):
     return idx
 
 
+def _results_index(path: str):
+    """Map finished fixtures to ``{fixture: {"outcome", "score"}}``.
+
+    Reads the manually-maintained results file; rows with outcome ``"pending"``
+    (or missing) are skipped so only genuinely-settled games pin the floor.
+    """
+    if not path or not os.path.exists(path):
+        return {}
+    try:
+        rows = json.load(open(path)).get("results", [])
+    except Exception:
+        return {}
+    out = {}
+    for r in rows:
+        oc = str(r.get("outcome") or "").strip().lower()
+        if oc in ("home", "draw", "away"):
+            out[r.get("fixture")] = {"outcome": oc, "score": r.get("score")}
+    return out
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Generate the exposure feed.")
     ap.add_argument("--db", default="data/wca.db")
     ap.add_argument("--scores", default="site/scores_data.json")
     ap.add_argument("--preds", default="data/model_predictions.json")
+    ap.add_argument("--results", default="data/processed/wc2026_results.json")
     ap.add_argument("--out", default="site/exposure_data.json")
     args = ap.parse_args(argv)
 
@@ -156,10 +177,11 @@ def main(argv=None) -> int:
         odds_index = _odds_index(fixtures)
 
     bets = _open_bets(args.db)
+    results = _results_index(args.results)
 
     data = exposure.build_exposure_data(
         bets=bets, model_fixtures=fixtures,
-        odds_index=odds_index, now_utc=_now_utc_str(),
+        odds_index=odds_index, now_utc=_now_utc_str(), results=results,
     )
 
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
