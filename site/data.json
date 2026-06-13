@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-13 16:12:21 UTC"
+    "generated": "2026-06-13 16:59:51 UTC"
   },
   "totals": {
-    "wagered": 358.0759999999999,
-    "open_stake": 253.686,
+    "wagered": 368.0759999999999,
+    "open_stake": 263.686,
     "settled_pl": 31.432000000000002,
-    "n_bets": 49
+    "n_bets": 50
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 237.46,
-      "open_stake": 178.89000000000001,
+      "wagered": 247.46,
+      "open_stake": 188.89000000000001,
       "settled_pl": 23.15,
-      "n_bets": 33
+      "n_bets": 34
     },
     "USD": {
       "wagered": 120.616,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 237.46,
-      "open_stake": 178.89000000000001,
+      "wagered": 247.46,
+      "open_stake": 188.89000000000001,
       "settled_pl": 23.15,
-      "n_bets": 33,
+      "n_bets": 34,
       "currency": "GBP"
     },
     "polymarket": {
@@ -53,35 +53,35 @@
       "label": "Sportsbook 1"
     },
     "sportsbook_2": {
-      "wagered": 97.0,
-      "open_stake": 87.0,
+      "wagered": 107.0,
+      "open_stake": 97.0,
       "settled_pl": -10.0,
-      "n_bets": 11,
+      "n_bets": 12,
       "currency": "GBP",
       "label": "Sportsbook 2"
     }
   },
   "source_summary": {
-    "offer": {
-      "GBP": {
-        "wagered": 154.0,
-        "open_stake": 127.0,
-        "settled_pl": 5.749999999999999,
-        "n_bets": 17
-      }
-    },
     "model": {
       "GBP": {
-        "wagered": 60.400000000000006,
-        "open_stake": 33.83,
+        "wagered": 70.4,
+        "open_stake": 43.83,
         "settled_pl": -7.600000000000001,
-        "n_bets": 14
+        "n_bets": 15
       },
       "USD": {
         "wagered": 107.25,
         "open_stake": 62.53,
         "settled_pl": 9.382000000000003,
         "n_bets": 6
+      }
+    },
+    "offer": {
+      "GBP": {
+        "wagered": 154.0,
+        "open_stake": 127.0,
+        "settled_pl": 5.749999999999999,
+        "n_bets": 17
       }
     },
     "punt": {
@@ -100,6 +100,14 @@
     }
   },
   "platforms": {
+    "betfred": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 40.0,
+      "open_stake": 40.0,
+      "settled_pl": 0.0,
+      "n_bets": 4
+    },
     "betfair_sportsbook": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -107,14 +115,6 @@
       "open_stake": 92.0,
       "settled_pl": -12.0,
       "n_bets": 11
-    },
-    "betfred": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 30.0,
-      "open_stake": 30.0,
-      "settled_pl": 0.0,
-      "n_bets": 3
     },
     "paddy power": {
       "venue": "sportsbook",
@@ -523,6 +523,22 @@
     "n_with_close": 10
   },
   "positions": [
+    {
+      "id": 70,
+      "ts_utc": "2026-06-13T19:55:00",
+      "match": "Haiti vs Scotland — Shankland First Goalscorer (Double Delight)",
+      "market": "FIRST_GOALSCORER",
+      "selection": "Lawrence Shankland FGS",
+      "platform": "betfred",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 4.5,
+      "stake": 10.0,
+      "model_prob": 0.197,
+      "ev": 1.49
+    },
     {
       "id": 69,
       "ts_utc": "2026-06-13T15:55:00",
