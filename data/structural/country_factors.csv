@@ -1,0 +1,58 @@
+# Socio-economic structural factors per national team (Klement / Hoffmann-Ging-Ramasamy style).
+# Used ONLY as an informative shrinkage prior for low-data teams and as an out-of-model
+# divergence flag. NOT a market signal. Values are approximate (circa 2023-2024) and
+# deliberately coarse: they inform a prior, they are not point estimates.
+#   population_m       : population in millions
+#   gdp_per_capita_usd : nominal GDP per capita, USD
+#   football_culture   : 0..1, how dominant association football is in the country's sporting culture
+#   home_altitude_m    : representative home-venue altitude (capital / main stadium), metres
+# team uses the martj42 results-dataset canonical spelling (see wca.data.teamnames).
+team,confederation,population_m,gdp_per_capita_usd,football_culture,home_altitude_m
+Mexico,CONCACAF,128.0,13000,0.80,2240
+South Africa,CAF,60.0,6200,0.60,1750
+South Korea,AFC,51.7,35000,0.60,40
+Czech Republic,UEFA,10.9,30000,0.70,200
+Canada,CONCACAF,40.0,53000,0.35,80
+Bosnia and Herzegovina,UEFA,3.2,8200,0.85,500
+Qatar,AFC,2.7,80000,0.60,10
+Switzerland,UEFA,8.8,99000,0.70,540
+Brazil,CONMEBOL,216.0,10000,1.00,1170
+Morocco,CAF,37.0,3700,0.85,340
+Haiti,CONCACAF,11.7,1700,0.70,40
+Scotland,UEFA,5.5,49000,0.85,50
+United States,CONCACAF,335.0,81000,0.45,10
+Paraguay,CONMEBOL,6.9,6200,0.85,140
+Australia,AFC,26.6,65000,0.40,20
+Turkey,UEFA,85.0,13000,0.85,850
+Germany,UEFA,84.0,52000,0.85,40
+Curaçao,CONCACAF,0.15,18000,0.70,10
+Ivory Coast,CAF,28.0,2700,0.85,80
+Ecuador,CONMEBOL,18.0,6500,0.80,2850
+Netherlands,UEFA,17.8,62000,0.85,0
+Japan,AFC,125.0,33000,0.60,40
+Sweden,UEFA,10.5,56000,0.65,30
+Tunisia,CAF,12.0,3900,0.80,10
+Belgium,UEFA,11.7,53000,0.80,30
+Egypt,CAF,112.0,3500,0.85,75
+Iran,AFC,89.0,4500,0.75,1200
+New Zealand,OFC,5.2,48000,0.30,20
+Spain,UEFA,48.0,33000,0.90,650
+Cape Verde,CAF,0.6,4300,0.70,30
+Saudi Arabia,AFC,36.9,33000,0.70,600
+Uruguay,CONMEBOL,3.4,22000,0.95,40
+France,UEFA,68.0,46000,0.85,35
+Senegal,CAF,18.0,1700,0.85,20
+Iraq,AFC,44.0,5900,0.75,40
+Norway,UEFA,5.5,87000,0.70,20
+Argentina,CONMEBOL,46.0,13000,1.00,25
+Algeria,CAF,45.0,5000,0.85,220
+Austria,UEFA,9.1,56000,0.70,190
+Jordan,AFC,11.3,4400,0.60,1000
+Portugal,UEFA,10.3,27000,0.90,100
+DR Congo,CAF,102.0,650,0.80,300
+Uzbekistan,AFC,35.0,2500,0.60,450
+Colombia,CONMEBOL,52.0,6800,0.85,2640
+England,UEFA,56.0,49000,0.95,25
+Croatia,UEFA,3.9,21000,0.90,120
+Ghana,CAF,34.0,2200,0.85,60
+Panama,CONCACAF,4.4,18000,0.65,10

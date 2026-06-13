@@ -303,6 +303,16 @@ flowchart TD
 reconstructs each match's pre-game rating diff (adding `home_advantage` on non-neutral venues) and
 the realised ordinal outcome, then fits the `EloOutcomeModel` on those `(diff, outcome)` pairs.
 
+**Host advantage on neutral venues.** `_rating_diff(..., host, host_points)` grants the named host
+its bonus in the correct direction on a neutral venue. The legacy bonus equals the full
+`home_advantage` (≈100 pts). An **optional venue/geography-aware** path
+(`src/wca/models/venues.py`, `data/structural/venues_2026.csv`) supplies a smaller `host_points`
+override: the bonus is **diluted** across the three co-hosts (each is only at home in the group
+stage) and an **altitude tax** is added for sea-level visitors at high-altitude venues — chiefly
+Mexico's group games at Estadio Azteca (~2240 m). It is wired through
+`advancement.make_prob_fn(venue_aware=True)`, **off by default**; it changes only forward 2026 host
+fixtures and leaves the historical Elo fit untouched.
+
 ### 4.2 Time-decayed Dixon-Coles — `src/wca/models/dixon_coles.py`
 
 Bivariate-Poisson-with-`tau`-correction goals model. Means:
@@ -332,6 +342,20 @@ Bivariate-Poisson-with-`tau`-correction goals model. Means:
 > *deployed* DC half-life is **8 years**, while the *library* default is **2 years**. Document the
 > deployed value (8y) when reasoning about the live card; the 2y default applies only to a bare
 > `DixonColesModel()`.
+
+**Optional structural shrinkage prior (`attack_prior`/`defence_prior`; default `None`, off).** By
+default the ridge penalty shrinks attack/defence toward **zero** (the global mean). When per-team
+priors are supplied, the penalty instead shrinks toward those targets:
+`reg_lambda · Σ (attack − attack_prior)² + (defence − defence_prior)²`, with the priors re-centred
+mean-zero over the fitted team set for identifiability. The priors come from
+`src/wca/models/structural.py` (`dc_priors_from_factors`): a socio-economic strength index
+(population × football-culture, an inverted-U in GDP/capita peaking ≈ $60k, confederation offset;
+see `data/structural/country_factors.csv`) following Hoffmann-Ging-Ramasamy (2002) / J. Klement. The
+card enables it via `fit_models(structural_prior=True)`. **It is off by default and not deployed:**
+its holdout is inconclusive by construction (no data-poor teams play in WC/Euro/Copa finals, so the
+prior never engages) and inert on the full set — see
+[structural-prior backtest](../research/backtests/structural_prior.md). Intended for the thin
+Polymarket outright/advancement markets, pending live 2026 minnow data.
 
 ### 4.3 Market baseline (Shin de-vig) — `src/wca/markets/devig.py`
 
@@ -666,8 +690,15 @@ already designed in code but not yet wired.
 - **Player-level ratings → lineup-aware DC inputs** — adjust per-fixture `attack`/`defence`
   (`expected_lambdas`) for confirmed XI / key absences; the biggest single accuracy lever for
   international football, where squad strength swings hugely between fixtures.
-- **Weather / altitude covariates** — add fixture covariates to the DC log-mean (Mexico City
-  altitude, heat in US summer venues) — relevant for a 2026 tournament spanning three countries.
+- **Player-level ratings → lineup-aware DC inputs** is the biggest remaining accuracy lever (above).
+- **Altitude / co-host geography** **(shipped, opt-in)** — `src/wca/models/venues.py` now supplies a
+  venue/geography-aware host advantage (co-host dilution + altitude tax, chiefly Estadio Azteca),
+  wired through `make_prob_fn(venue_aware=True)`, off by default. *Next:* fold the same altitude/heat
+  covariates directly into the DC log-mean (not just the Elo host term) and extend to US-summer heat.
+- **Structural (socio-economic) shrinkage prior** **(shipped, opt-in, off)** —
+  `src/wca/models/structural.py` shrinks low-data teams toward a Klement / Hoffmann-Ging-Ramasamy
+  estimate; default off, holdout inconclusive (no data-poor teams in tournament finals). *Next:*
+  validate on live 2026 group-stage minnows and on thin Polymarket outright/advancement markets.
 - **Fit the blend weights** — replace the fixed `0.25/0.25/0.50` prior with weights fitted on the
   calibration backtest (the comment in `card.py` flags them as unfitted priors).
 - **Backtest harness for `xi`/`reg_lambda`** — pick the DC half-life (currently a hand-set **8y**)
