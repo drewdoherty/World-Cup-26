@@ -63,12 +63,18 @@ HELP_TEXT = (
     "/structure — project structure metrics\n"
     "/pm — Polymarket parked orders + trader status\n"
     "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
+    "/boost — price a bookmaker price-boost vs the model (usage below)\n"
     "/ping — liveness check\n"
     "/help — this message\n\n"
     "\U0001F4F8 Send a betslip *screenshot* and I'll parse the selections, then "
     "log them to the ledger once you reply `yes`.\n"
     "Tag the photo caption (or yes-reply) to set provenance: `a2` (account 2), "
     "`offer`, `punt`, `model` — default is account 1 / model.\n"
+    "⚡ Caption a screenshot with `boost` and I'll read the enhanced price "
+    "and tell you if it beats the model's fair odds (no ledger write).\n"
+    "⚡ Or type it: "
+    "`/boost <site> | <match> | <market> | <selection> | <odds> [was <odds>] [inplay]`\n"
+    "e.g. `/boost bet365 | Brazil vs Morocco | Match Result | Brazil | 2.5 was 1.8`\n"
     "Confirm a pushed bet with `Y BET-<id>`, decline with `N BET-<id>`.\n"
     "Execute a parked Polymarket order with `Y PM-<n>`, discard with `N PM-<n>`."
 )
@@ -622,6 +628,152 @@ def handle_settle(text: str, db_path: str) -> str:
         return f"Error: {exc}"
     finally:
         con.close()
+
+
+# ---------------------------------------------------------------------------
+# Price-boost evaluation.
+#
+# A boost is *priced* against the model, never logged: the reply is the whole
+# deliverable. This keeps the bot decoupled from Component A (the ledger) —
+# we deliberately do NOT write the DB or the ledger from the boost path in v1.
+# Both the `/boost` text command and a `boost`-captioned photo funnel through
+# the same `wca.boosts.evaluate_boost` + `format_boost_verdict`.
+# ---------------------------------------------------------------------------
+
+
+def parse_boost_command(text: str) -> Optional[Any]:
+    """Parse a ``/boost`` command line into a :class:`wca.boosts.Boost`.
+
+    Grammar::
+
+        /boost <site> | <match> | <market> | <selection> | <odds> [was <odds>] [inplay]
+
+    The five pipe-separated fields are required. The last field carries the
+    boosted decimal odds and may be trailed by ``was <odds>`` (the pre-boost
+    price) and/or ``inplay`` (mark the offer as live). Returns ``None`` if the
+    line does not have the five fields or the odds are unparseable.
+    """
+    from wca.boosts import Boost
+    from wca.bot.vision import fractional_to_decimal
+
+    # Drop the leading "/boost" token.
+    body = re.sub(r"^\s*/boost(?:@\S+)?\s*", "", text or "", flags=re.IGNORECASE)
+    parts = [p.strip() for p in body.split("|")]
+    if len(parts) < 5:
+        return None
+    site, match, market, selection, tail = parts[0], parts[1], parts[2], parts[3], parts[4]
+    if not (site and match and market and selection and tail):
+        return None
+
+    # The tail is "<odds> [was <odds>] [inplay]" in any trailing order.
+    is_inplay = False
+    if re.search(r"\binplay\b", tail, re.IGNORECASE) or re.search(r"\bin-?play\b", tail, re.IGNORECASE):
+        is_inplay = True
+        tail = re.sub(r"\bin-?play\b", " ", tail, flags=re.IGNORECASE)
+
+    was_odds: Optional[float] = None
+    was_m = re.search(r"\bwas\s+([0-9/.]+|evs|evens)", tail, re.IGNORECASE)
+    if was_m:
+        try:
+            was_odds = fractional_to_decimal(was_m.group(1))
+        except ValueError:
+            was_odds = None
+        tail = tail[: was_m.start()] + tail[was_m.end():]
+
+    odds_token = tail.strip().split()[0] if tail.strip() else ""
+    try:
+        boosted = fractional_to_decimal(odds_token)
+    except ValueError:
+        return None
+
+    return Boost(
+        site=site,
+        fixture=match,
+        market=market,
+        selection=selection,
+        boosted_odds=boosted,
+        was_odds=was_odds,
+        is_inplay=is_inplay,
+    )
+
+
+def format_boost_verdict(boost: Any, ev: Any) -> str:
+    """Render a Markdown verdict for a priced boost (no ledger write).
+
+    Three shapes: ``✅ +EV`` (edge %, fair odds, model prob), ``❌ not +EV``
+    (same numbers, so the reader sees how far under fair it sits), and
+    ``⚠️ can't price`` (+ the honest reason from :class:`wca.boosts.BoostEval`).
+    """
+    site = (getattr(boost, "site", "") or "?").strip() or "?"
+    fixture = (getattr(boost, "fixture", "") or "?").strip() or "?"
+    market = (getattr(boost, "market", "") or "?").strip() or "?"
+    selection = (getattr(boost, "selection", "") or "?").strip() or "?"
+    boosted = getattr(boost, "boosted_odds", None)
+    was = getattr(boost, "was_odds", None)
+
+    boosted_str = ("%.2f" % boosted) if boosted else "?"
+    was_str = (" (was %.2f)" % was) if was else ""
+    header = "⚡ *Boost* — %s\n%s — *%s* @ %s%s" % (
+        site, fixture, selection, boosted_str, was_str,
+    )
+
+    if not getattr(ev, "priceable", False):
+        return "%s\n⚠️ *can't price* — %s" % (header, getattr(ev, "reason", "no model price"))
+
+    model_prob = getattr(ev, "model_prob", None)
+    fair = getattr(ev, "fair_odds", None)
+    edge = getattr(ev, "edge", None)
+    prob_str = ("%.1f%%" % (model_prob * 100.0)) if model_prob is not None else "?"
+    fair_str = ("%.2f" % fair) if fair else "?"
+    edge_str = ("%+.1f%%" % (edge * 100.0)) if edge is not None else "?"
+
+    tag = "✅ *+EV*" if getattr(ev, "is_plus_ev", False) else "❌ *not +EV*"
+    return "%s\n%s — edge %s | fair %s | model %s\n_%s_" % (
+        header, tag, edge_str, fair_str, prob_str, getattr(ev, "reason", ""),
+    )
+
+
+def handle_boost(text: str, *, scores_path: str = "site/scores_data.json") -> str:
+    """`/boost` — price a typed boost against the model feed (no ledger write)."""
+    from wca import boosts
+
+    boost = parse_boost_command(text)
+    if boost is None:
+        return (
+            "Usage: `/boost <site> | <match> | <market> | <selection> | <odds> "
+            "[was <odds>] [inplay]`\n\n"
+            "Example:\n"
+            "`/boost bet365 | Brazil vs Morocco | Match Result | Brazil | 2.5 was 1.8`\n"
+            "`/boost SkyBet | Qatar vs Switzerland | Over 2.5 Goals | Over | 2.2`"
+        )
+    ev = boosts.evaluate_boost(boost, boosts.load_scores_feed(scores_path))
+    return format_boost_verdict(boost, ev)
+
+
+def handle_boost_photo(
+    image_bytes: bytes,
+    *,
+    scores_path: str = "site/scores_data.json",
+    api_key: Optional[str] = None,
+    model: Optional[str] = None,
+) -> str:
+    """Read a boost screenshot, price it, and return the verdict (no ledger write).
+
+    Used when a photo's caption contains ``boost``: instead of the betslip
+    ingest flow, we extract the single boosted selection via vision and price it
+    against the model. Nothing is parked or written — the verdict is the reply.
+    """
+    from wca import boosts
+    from wca.bot.vision import VisionError, extract_boost
+
+    try:
+        boost = extract_boost(image_bytes, api_key=api_key, model=model)
+    except VisionError as exc:
+        return "Couldn't read that boost: %s" % exc
+    except Exception as exc:  # never crash the loop on a vision hiccup
+        return "Vision error: %s" % exc
+    ev = boosts.evaluate_boost(boost, boosts.load_scores_feed(scores_path))
+    return format_boost_verdict(boost, ev)
 
 
 # ---------------------------------------------------------------------------
@@ -1376,6 +1528,8 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_pm(db_path)
     if cmd == "/settle":
         return handle_settle(text, db_path)
+    if cmd == "/boost":
+        return handle_boost(text)
     if cmd == "/ping":
         return "pong"
     return "Unknown command. Send /help for the list."
@@ -1434,19 +1588,33 @@ def run(
 
             from_user = str((message.get("from") or {}).get("id") or "")
 
-            # 1) Betslip screenshot -> parse + park for confirmation.
-            #    Admin-only: a ledger write follows the confirm, so only the
-            #    admin's screenshots are parsed at all.
+            # 1) Photo. A `boost`-captioned photo is priced against the model
+            #    (read-only: no ledger write, so it is NOT admin-gated). Any
+            #    other photo is treated as a betslip screenshot -> parse + park
+            #    for confirmation, which is admin-only since a ledger write
+            #    follows the confirm.
             if "photo" in message or image_document_file_id(message):
-                if not _is_admin(from_user, admin):
+                caption = message.get("caption") or ""
+                is_boost_photo = bool(re.search(r"\bboost\b", caption, re.IGNORECASE))
+                if is_boost_photo:
+                    try:
+                        image = client.download_photo(message)
+                        reply = (
+                            handle_boost_photo(image)
+                            if image
+                            else "No photo found in that message."
+                        )
+                    except TelegramError as exc:
+                        reply = "Couldn't download the image: %s" % exc
+                    except Exception as exc:
+                        reply = "Error reading image: %s" % exc
+                elif not _is_admin(from_user, admin):
                     reply = READ_ONLY_MSG
                 else:
                     try:
                         image = client.download_photo(message)
                         reply = (
-                            handle_photo(
-                                image, chat_id, caption=message.get("caption")
-                            )
+                            handle_photo(image, chat_id, caption=caption)
                             if image
                             else "No photo found in that message."
                         )
