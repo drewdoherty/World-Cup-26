@@ -1,0 +1,19 @@
+{
+  "_note": "Analyst-estimated player params pending a live xG / penalty-taker feed. Teams absent from the StatsBomb WC2018/2022 dataset (e.g. Scotland 2026) are maintained here by hand. Replace `source: analyst_estimate` records as real data lands.",
+  "_schema": {
+    "name": "string",
+    "npxg_share": "player's share of team NON-penalty xG, 0..1",
+    "penalty_taker": "bool — designated taker gets the pen_xg top-up",
+    "expected_minutes": "0..90",
+    "source": "provenance tag"
+  },
+  "Scotland": [
+    {
+      "name": "Lawrence Shankland",
+      "npxg_share": 0.30,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    }
+  ]
+}
