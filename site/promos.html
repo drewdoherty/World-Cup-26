@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark">
+<title>WORLD CUP ALPHA // PROMOS</title>
+<link rel="stylesheet" href="./style.css">
+<style>
+  /* Promos page — small additions only; reuses the terminal vocabulary above. */
+  main > .panel + .panel { margin-top: 12px; }
+
+  /* "stored locally" hint near the checkbox columns. */
+  .promo-local-note {
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* Account opt-in / used checkboxes. */
+  .promo-chk { display: inline-flex; align-items: center; gap: 5px; }
+  .promo-chk input {
+    width: 13px; height: 13px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    margin: 0;
+  }
+  .promo-chk-lbl {
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .pos-table td.promo-chk-cell, .pos-table th.promo-chk-cell {
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* Watchlist — readable cards. */
+  .promo-watch { display: flex; flex-direction: column; gap: 11px; }
+  .promo-watch-item {
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--warn);
+    border-radius: 3px;
+    background: var(--panel);
+    padding: 10px 12px;
+  }
+  .promo-watch-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .promo-watch-title {
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .promo-watch-site { font-size: 10px; color: var(--text-dim); white-space: nowrap; }
+  .promo-watch-desc { font-size: 12px; color: var(--text); margin-bottom: 5px; }
+  .promo-watch-why {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .promo-watch-why::before { content: "WHY // "; color: var(--warn); font-style: normal; }
+
+  /* +EV marker on boost rows. */
+  .promo-ev {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+  .promo-ev.is-plus { background: var(--pos); box-shadow: 0 0 7px var(--pos); }
+  tr.promo-ev-row td { border-left-color: var(--border-2); }
+  tr.promo-ev-row.is-plus td.pos-time { border-left: 2px solid var(--pos); }
+
+  /* Scrape-health strip — status dots per site. */
+  .promo-health {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .promo-health-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 11px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--panel);
+    min-width: 0;
+  }
+  .promo-health-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex: 0 0 auto;
+    background: var(--muted);
+  }
+  .promo-health-dot.ok { background: var(--pos); box-shadow: 0 0 7px var(--pos); }
+  .promo-health-dot.blocked { background: var(--neg); box-shadow: 0 0 7px var(--neg); }
+  .promo-health-dot.error { background: var(--warn); box-shadow: 0 0 7px var(--warn); }
+  .promo-health-dot.empty { background: var(--muted); }
+  .promo-health-site {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .promo-health-meta { font-size: 9px; letter-spacing: 0.5px; color: var(--muted); }
+
+  /* Inline link styling consistent with the dim aesthetic. */
+  .promo-link { color: var(--polymarket); text-decoration: none; }
+  .promo-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Ticker bar -->
+  <header class="ticker" id="ticker">
+    <div class="brand">
+      <span class="brand-mark">WCA</span>
+      <span class="brand-sub">WORLD CUP ALPHA</span>
+    </div>
+    <nav class="scores-nav">
+      <a class="scores-nav-link" href="./index.html">&larr; Terminal</a>
+      <a class="scores-nav-link" href="./scores.html">Scores &amp; Markets</a>
+      <a class="scores-nav-link" href="./architecture.html">Under The Hood</a>
+      <a class="scores-nav-link" href="./visuals.html">Visuals</a>
+      <a class="scores-nav-link" href="./tracking.html">Tracking</a>
+      <span class="scores-nav-here">Promos &amp; Offers</span>
+    </nav>
+  </header>
+
+  <!-- Connection / no-data banner -->
+  <div class="nodata" id="nodata" hidden>
+    <span class="nodata-dot"></span>
+    <span id="nodata-msg">NO DATA FEED</span>
+  </div>
+
+  <main>
+    <!-- 1. Sign-up offers -->
+    <section class="panel" style="margin-top:14px">
+      <div class="panel-head">
+        <span class="panel-label">01 // Sign-up Offers</span>
+        <span class="panel-meta">
+          <span class="promo-local-note">used-flags stored locally on this device</span>
+          <span id="signup-meta"></span>
+        </span>
+      </div>
+      <div class="panel-body panel-scroll" id="signup-offers"></div>
+    </section>
+
+    <!-- 2. Opt-ins -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">02 // Opt-ins // Ongoing Promos</span>
+        <span class="panel-meta">
+          <span class="promo-local-note">opt-in toggles stored locally on this device</span>
+          <span id="optins-meta"></span>
+        </span>
+      </div>
+      <div class="panel-body panel-scroll" id="optins"></div>
+    </section>
+
+    <!-- 3. Watchlist -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">03 // Watchlist // Stuff To Look Out For</span>
+        <span class="panel-meta" id="watchlist-meta"></span>
+      </div>
+      <div class="panel-body" id="watchlist"></div>
+    </section>
+
+    <!-- 4. Recent +EV boosts -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">04 // Recent Boost Evals</span>
+        <span class="panel-meta" id="boosts-meta"></span>
+      </div>
+      <div class="panel-body panel-scroll" id="boosts"></div>
+    </section>
+
+    <!-- 5. Scrape health -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">05 // Scrape Health</span>
+        <span class="panel-meta">what the scraper actually fetched</span>
+      </div>
+      <div class="panel-body" id="scrape-health"></div>
+    </section>
+
+    <div class="track-note">
+      Sign-up "Used" flags and opt-in toggles are personal trackers held in this
+      browser's localStorage &mdash; per device, not synced. Boost evaluations are
+      graded against the model's fair price at capture time; a green marker means
+      the boosted odds cleared the fair line (+EV). Scrape health is the honest
+      record of which promo pages the scraper could reach.
+    </div>
+  </main>
+
+  <footer class="foot">
+    <span class="foot-gen" id="foot-gen"></span>
+    <span class="foot-mark">WORLD CUP ALPHA</span>
+  </footer>
+</div>
+<script src="./promos.js"></script>
+</body>
+</html>
