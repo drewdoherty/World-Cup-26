@@ -69,7 +69,7 @@ HELP_TEXT = (
     "\U0001F4F8 Send a betslip *screenshot* and I'll parse the selections, then "
     "log them to the ledger once you reply `yes`.\n"
     "Tag the photo caption (or yes-reply) to set provenance: `a2` (account 2), "
-    "`offer`, `punt`, `model` — default is account 1 / model.\n"
+    "`offer`, `punt`, `model` — default is account 1 / punt.\n"
     "⚡ Caption a screenshot with `boost` and I'll read the enhanced price "
     "and tell you if it beats the model's fair odds (no ledger write).\n"
     "⚡ Or type it: "
@@ -875,13 +875,15 @@ def resolve_tags(
     text: Optional[str],
     *,
     default_account: str = "1",
-    default_source: str = "model",
+    default_source: str = "punt",
     allow_bare_account: bool = False,
 ) -> Dict[str, str]:
     """Parse account/source tags out of a screenshot caption or yes-reply.
 
-    Screenshot ingests default to source=model (recommended from the card),
-    account=1; a caption can override either dimension. Recognised tokens
+    Screenshot ingests default to source=punt, account=1 — an untagged slip is
+    treated as a discretionary punt and kept OUT of the model-CLV experiment
+    unless the caption/reply explicitly tags it ``model``. A caption can
+    override either dimension. Recognised tokens
     (case-insensitive, word-boundary matched anywhere in the text):
 
       account: ``account 2`` / ``acc2`` / ``a2`` -> account="2"
@@ -944,7 +946,7 @@ def _format_extracted(bets: List[Any], tags: Optional[Dict[str, str]] = None) ->
         )
     if tags:
         acct = tags.get("account", "1")
-        src = _SOURCE_WORD.get(tags.get("source", "model"), tags.get("source", "model"))
+        src = _SOURCE_WORD.get(tags.get("source", "punt"), tags.get("source", "punt"))
         lines.append(
             "\nTags: account *%s* | source *%s*  "
             "(override in your reply, e.g. `yes a2 offer`)" % (acct, src)
@@ -952,7 +954,7 @@ def _format_extracted(bets: List[Any], tags: Optional[Dict[str, str]] = None) ->
     lines.append(
         "\nReply *yes* to log all to the ledger, *no* to discard. "
         "Tag the reply to set provenance, e.g. `yes 2 offer` / `yes punt` "
-        "(account `1`/`2`, source `model`/`offer`/`punt`; default 1 / model)."
+        "(account `1`/`2`, source `model`/`offer`/`punt`; default 1 / punt)."
     )
     return "\n".join(lines)
 
@@ -972,7 +974,7 @@ def handle_photo(
     ``caption`` is the photo's message caption; account/source tags in it
     (``a2``, ``offer``, ``punt``, ``model`` …) are resolved via
     :func:`resolve_tags` and echoed in the confirmation prompt. Screenshot
-    ingests default to ``account="1"`` / ``source="model"`` unless the caption
+    ingests default to ``account="1"`` / ``source="punt"`` unless the caption
     says otherwise.
     """
     if pending is None:
@@ -1014,7 +1016,7 @@ def handle_photo_confirmation(
     The reply may carry tag overrides, e.g. ``yes a2 offer``; these take
     precedence over the tags resolved from the caption at parse time. A bare
     ``yes`` logs with the parse-time (caption) tags, defaulting to
-    ``account="1"`` / ``source="model"`` for an untagged screenshot.
+    ``account="1"`` / ``source="punt"`` for an untagged screenshot.
     """
     if pending is None:
         pending = _PENDING_PHOTO_BETS
@@ -1035,7 +1037,7 @@ def handle_photo_confirmation(
     tags = resolve_tags(
         text,
         default_account=parked_tags.get("account", "1"),
-        default_source=parked_tags.get("source", "model"),
+        default_source=parked_tags.get("source", "punt"),
         allow_bare_account=True,
     )
     account = tags["account"]
