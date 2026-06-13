@@ -1,39 +1,39 @@
 {
   "meta": {
-    "generated": "2026-06-13T21:12:32"
+    "generated": "2026-06-13 21:39:29 UTC"
   },
   "totals": {
     "wagered": 425.756,
-    "open_stake": 286.757,
-    "settled_pl": 39.822,
+    "open_stake": 235.327,
+    "settled_pl": 65.184,
     "n_bets": 59
   },
   "totals_by_currency": {
     "GBP": {
       "wagered": 305.14,
-      "open_stake": 216.99,
-      "settled_pl": 36.57,
+      "open_stake": 167.46,
+      "settled_pl": 63.832,
       "n_bets": 43
     },
     "USD": {
       "wagered": 120.616,
-      "open_stake": 69.767,
-      "settled_pl": 3.2520000000000024,
+      "open_stake": 67.867,
+      "settled_pl": 1.3520000000000039,
       "n_bets": 16
     }
   },
   "venues": {
     "sportsbook": {
       "wagered": 305.14,
-      "open_stake": 216.99,
-      "settled_pl": 36.57,
+      "open_stake": 167.46,
+      "settled_pl": 63.832,
       "n_bets": 43,
       "currency": "GBP"
     },
     "polymarket": {
       "wagered": 120.616,
-      "open_stake": 69.767,
-      "settled_pl": 3.2520000000000024,
+      "open_stake": 67.867,
+      "settled_pl": 1.3520000000000039,
       "n_bets": 16,
       "currency": "USD"
     },
@@ -46,15 +46,15 @@
     },
     "sportsbook_1": {
       "wagered": 188.14000000000001,
-      "open_stake": 131.99,
-      "settled_pl": 25.57,
+      "open_stake": 122.46000000000001,
+      "settled_pl": 52.831999999999994,
       "n_bets": 30,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
     "sportsbook_2": {
       "wagered": 107.0,
-      "open_stake": 85.0,
+      "open_stake": 45.0,
       "settled_pl": 0.0,
       "n_bets": 12,
       "currency": "GBP",
@@ -65,8 +65,8 @@
     "model": {
       "GBP": {
         "wagered": 108.08000000000001,
-        "open_stake": 73.92999999999999,
-        "settled_pl": -15.180000000000001,
+        "open_stake": 64.39999999999999,
+        "settled_pl": 12.082,
         "n_bets": 22
       },
       "USD": {
@@ -79,7 +79,7 @@
     "offer": {
       "GBP": {
         "wagered": 174.0,
-        "open_stake": 125.0,
+        "open_stake": 85.0,
         "settled_pl": 26.75,
         "n_bets": 19
       }
@@ -87,8 +87,8 @@
     "punt": {
       "USD": {
         "wagered": 13.366,
-        "open_stake": 9.767,
-        "settled_pl": -3.6,
+        "open_stake": 7.867000000000001,
+        "settled_pl": -5.5,
         "n_bets": 10
       },
       "GBP": {
@@ -104,8 +104,8 @@
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 51.690000000000005,
-      "open_stake": 49.790000000000006,
-      "settled_pl": -1.9,
+      "open_stake": 45.370000000000005,
+      "settled_pl": -6.32,
       "n_bets": 12
     },
     "betfair_ex_uk": {
@@ -136,7 +136,7 @@
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 104.0,
-      "open_stake": 80.0,
+      "open_stake": 40.0,
       "settled_pl": -2.0,
       "n_bets": 11
     },
@@ -152,16 +152,16 @@
       "venue": "polymarket",
       "currency": "USD",
       "wagered": 120.616,
-      "open_stake": 69.767,
-      "settled_pl": 3.2520000000000024,
+      "open_stake": 67.867,
+      "settled_pl": 1.3520000000000039,
       "n_bets": 16
     },
     "betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 32.2,
-      "open_stake": 32.2,
-      "settled_pl": 0.0,
+      "open_stake": 27.089999999999996,
+      "settled_pl": 31.682000000000002,
       "n_bets": 4
     },
     "virginbet": {
@@ -182,6 +182,78 @@
     }
   },
   "closed_positions": [
+    {
+      "id": 65,
+      "ts_utc": "2026-06-13T12:55:00",
+      "settled_ts": "2026-06-13T21:00:00",
+      "match": "Acca treble (drop AUS): Switzerland+Brazil+Scotland",
+      "market": "ACCA",
+      "selection": "SUI 1.16 x BRA 1.57 x SCO 1.44",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 2.648,
+      "stake": 10.0,
+      "status": "lost",
+      "pl": 0.0,
+      "clv": null
+    },
+    {
+      "id": 64,
+      "ts_utc": "2026-06-13T12:55:00",
+      "settled_ts": "2026-06-13T21:00:00",
+      "match": "Acca treble (drop HAI): Switzerland+Brazil+Turkey",
+      "market": "ACCA",
+      "selection": "SUI 1.16 x BRA 1.57 x TUR 1.61",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 2.962,
+      "stake": 10.0,
+      "status": "lost",
+      "pl": 0.0,
+      "clv": null
+    },
+    {
+      "id": 63,
+      "ts_utc": "2026-06-13T12:55:00",
+      "settled_ts": "2026-06-13T21:00:00",
+      "match": "Acca treble (drop BRA): Switzerland+Scotland+Turkey",
+      "market": "ACCA",
+      "selection": "SUI 1.16 x SCO 1.44 x TUR 1.61",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 2.722,
+      "stake": 10.0,
+      "status": "lost",
+      "pl": 0.0,
+      "clv": null
+    },
+    {
+      "id": 61,
+      "ts_utc": "2026-06-13T12:55:00",
+      "settled_ts": "2026-06-13T21:00:00",
+      "match": "Acca 4-fold: Switzerland+Brazil+Scotland+Turkey",
+      "market": "ACCA",
+      "selection": "SUI 1.18 x BRA 1.57 x SCO 1.44 x TUR 1.61",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 4.333,
+      "stake": 10.0,
+      "status": "lost",
+      "pl": 0.0,
+      "clv": null
+    },
     {
       "id": 60,
       "ts_utc": "2026-06-12T22:50:00",
@@ -237,6 +309,24 @@
       "clv": null
     },
     {
+      "id": 50,
+      "ts_utc": "2026-06-12T19:03:13",
+      "settled_ts": "2026-06-13T21:00:00",
+      "match": "Qatar vs Switzerland",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 7.2,
+      "stake": 5.11,
+      "status": "won",
+      "pl": 31.682000000000002,
+      "clv": -0.025458720482938735
+    },
+    {
       "id": 49,
       "ts_utc": "2026-06-12T13:40:00",
       "settled_ts": "2026-06-13T18:53:46",
@@ -252,6 +342,24 @@
       "stake": 1.5,
       "status": "lost",
       "pl": -1.5,
+      "clv": null
+    },
+    {
+      "id": 48,
+      "ts_utc": "2026-06-12T13:35:00",
+      "settled_ts": "2026-06-13T21:00:00",
+      "match": "Qatar vs Switzerland",
+      "market": "Exact Score",
+      "selection": "Qatar 0-2 Switzerland",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "punt",
+      "currency": "USD",
+      "decimal_odds": 5.2631578947368425,
+      "stake": 1.9,
+      "status": "lost",
+      "pl": -1.9,
       "clv": null
     },
     {
@@ -379,6 +487,24 @@
       "status": "lost",
       "pl": -10.0,
       "clv": -0.03096006302391996
+    },
+    {
+      "id": 16,
+      "ts_utc": "2026-06-12T13:21:05",
+      "settled_ts": "2026-06-13T21:00:00",
+      "match": "Qatar vs Switzerland",
+      "market": "Full-time result",
+      "selection": "Qatar",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 17.0,
+      "stake": 4.42,
+      "status": "lost",
+      "pl": -4.42,
+      "clv": 0.05989947816046626
     },
     {
       "id": 13,
@@ -660,6 +786,30 @@
         [
           "2026-06-13T18:53:46",
           36.57
+        ],
+        [
+          "2026-06-13T21:00:00",
+          36.57
+        ],
+        [
+          "2026-06-13T21:00:00",
+          36.57
+        ],
+        [
+          "2026-06-13T21:00:00",
+          36.57
+        ],
+        [
+          "2026-06-13T21:00:00",
+          36.57
+        ],
+        [
+          "2026-06-13T21:00:00",
+          68.25
+        ],
+        [
+          "2026-06-13T21:00:00",
+          63.83
         ]
       ]
     },
@@ -697,6 +847,10 @@
         [
           "2026-06-13T18:53:46",
           3.25
+        ],
+        [
+          "2026-06-13T21:00:00",
+          1.35
         ]
       ]
     }
@@ -932,54 +1086,6 @@
       "ev": null
     },
     {
-      "id": 65,
-      "ts_utc": "2026-06-13T12:55:00",
-      "match": "Acca treble (drop AUS): Switzerland+Brazil+Scotland",
-      "market": "ACCA",
-      "selection": "SUI 1.16 x BRA 1.57 x SCO 1.44",
-      "platform": "betfair_sportsbook",
-      "venue": "sportsbook",
-      "account": "2",
-      "source": "offer",
-      "currency": "GBP",
-      "decimal_odds": 2.648,
-      "stake": 10.0,
-      "model_prob": 0.257171,
-      "ev": -0.319011
-    },
-    {
-      "id": 64,
-      "ts_utc": "2026-06-13T12:55:00",
-      "match": "Acca treble (drop HAI): Switzerland+Brazil+Turkey",
-      "market": "ACCA",
-      "selection": "SUI 1.16 x BRA 1.57 x TUR 1.61",
-      "platform": "betfair_sportsbook",
-      "venue": "sportsbook",
-      "account": "2",
-      "source": "offer",
-      "currency": "GBP",
-      "decimal_odds": 2.962,
-      "stake": 10.0,
-      "model_prob": 0.205947,
-      "ev": -0.389985
-    },
-    {
-      "id": 63,
-      "ts_utc": "2026-06-13T12:55:00",
-      "match": "Acca treble (drop BRA): Switzerland+Scotland+Turkey",
-      "market": "ACCA",
-      "selection": "SUI 1.16 x SCO 1.44 x TUR 1.61",
-      "platform": "betfair_sportsbook",
-      "venue": "sportsbook",
-      "account": "2",
-      "source": "offer",
-      "currency": "GBP",
-      "decimal_odds": 2.722,
-      "stake": 10.0,
-      "model_prob": 0.222792,
-      "ev": -0.39356
-    },
-    {
       "id": 62,
       "ts_utc": "2026-06-13T12:55:00",
       "match": "Acca treble (drop QAT): Brazil+Scotland+Turkey",
@@ -994,22 +1100,6 @@
       "stake": 10.0,
       "model_prob": 0.161576,
       "ev": -0.407501
-    },
-    {
-      "id": 61,
-      "ts_utc": "2026-06-13T12:55:00",
-      "match": "Acca 4-fold: Switzerland+Brazil+Scotland+Turkey",
-      "market": "ACCA",
-      "selection": "SUI 1.18 x BRA 1.57 x SCO 1.44 x TUR 1.61",
-      "platform": "betfair_sportsbook",
-      "venue": "sportsbook",
-      "account": "2",
-      "source": "offer",
-      "currency": "GBP",
-      "decimal_odds": 4.333,
-      "stake": 10.0,
-      "model_prob": 0.123999,
-      "ev": -0.462712
     },
     {
       "id": 57,
@@ -1090,38 +1180,6 @@
       "stake": 3.92,
       "model_prob": 0.235,
       "ev": 0.034
-    },
-    {
-      "id": 50,
-      "ts_utc": "2026-06-12T19:03:13",
-      "match": "Qatar vs Switzerland",
-      "market": "Match Odds",
-      "selection": "The Draw",
-      "platform": "Betfair",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 7.2,
-      "stake": 5.11,
-      "model_prob": 0.162,
-      "ev": 0.132
-    },
-    {
-      "id": 48,
-      "ts_utc": "2026-06-12T13:35:00",
-      "match": "Qatar vs Switzerland",
-      "market": "Exact Score",
-      "selection": "Qatar 0-2 Switzerland",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "punt",
-      "currency": "USD",
-      "decimal_odds": 5.2631578947368425,
-      "stake": 1.9,
-      "model_prob": 0.15,
-      "ev": -0.21052631578947367
     },
     {
       "id": 47,
@@ -1218,22 +1276,6 @@
       "stake": 18.06,
       "model_prob": 0.245,
       "ev": 0.35
-    },
-    {
-      "id": 16,
-      "ts_utc": "2026-06-12T13:21:05",
-      "match": "Qatar vs Switzerland",
-      "market": "Full-time result",
-      "selection": "Qatar",
-      "platform": "Smarkets",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 17.0,
-      "stake": 4.42,
-      "model_prob": 0.077,
-      "ev": 0.305
     },
     {
       "id": 15,
