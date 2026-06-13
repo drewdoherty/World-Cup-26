@@ -58,6 +58,19 @@ def main() -> None:
         help="Output path for the cached card (default: data/card_latest.md)",
     )
     parser.add_argument(
+        "--next-out",
+        default="data/next_latest.md",
+        help=(
+            "Output path for the cached next-match preview card "
+            "(default: data/next_latest.md; pass '' to skip)"
+        ),
+    )
+    parser.add_argument(
+        "--skip-scorers",
+        action="store_true",
+        help="Skip the per-event anytime-scorer odds pull (saves API quota)",
+    )
+    parser.add_argument(
         "--bankroll",
         type=float,
         default=None,
@@ -222,6 +235,48 @@ def main() -> None:
         print("Model predictions persisted: %d fixtures" % len(blends))
     except Exception as exc:
         print("WARNING: model prediction dump failed: %s" % exc, file=sys.stderr)
+
+    # ------------------------------------------------------------------
+    # Next-match preview card (/next): winner blend + corners + anytime
+    # scorers + scoreline distribution for the earliest kickoff. Failures
+    # here must never break the main card build.
+    # ------------------------------------------------------------------
+    if args.next_out:
+        try:
+            from wca.nextmatch import (
+                ANYTIME_SCORER_MARKET,
+                build_next_match,
+                format_next_match,
+                select_next_blend,
+            )
+            from wca.card import _iter_fixture_blends, BlendWeights
+
+            scorer_df = None
+            if not args.skip_scorers and not odds_df.empty:
+                # Per-event endpoint needs the event id of the next fixture.
+                blends = _iter_fixture_blends(
+                    models, odds_df, fixtures_meta, BlendWeights(),
+                    ("United States", "Mexico", "Canada", "USA"),
+                )
+                nxt = select_next_blend(blends)
+                if nxt is not None:
+                    try:
+                        scorer_df, quota = theoddsapi.get_event_odds(
+                            "soccer_fifa_world_cup",
+                            str(nxt.fx["event_id"]),
+                            regions=args.regions,
+                            markets=ANYTIME_SCORER_MARKET,
+                        )
+                    except Exception as exc:
+                        print("WARN: scorer odds pull failed: %s" % exc, file=sys.stderr)
+
+            next_card = build_next_match(
+                models, odds_df, fixtures_meta, scorer_df=scorer_df
+            )
+            write_card(format_next_match(next_card), path=args.next_out, ts_utc=now_str)
+            print("Next-match card written: out=%s" % args.next_out)
+        except Exception as exc:
+            print("WARN: next-match card failed: %s" % exc, file=sys.stderr)
 
     quota_str = (
         "quota remaining=%s" % quota.remaining
