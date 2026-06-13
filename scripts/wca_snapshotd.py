@@ -245,6 +245,51 @@ def poll_once(db_path: str, repo_root: Path, policy: PollPolicy) -> int:
         logger.exception("failed to append snapshot rows to SQLite (continuing)")
         n_written = 0
 
+    # 2b. Closing-line capture: any fixture that has now kicked off gets its
+    # open 1X2 bets stamped with closing_odds + CLV from the last pre-kickoff
+    # snapshot (idempotent — already-stamped bets are skipped).
+    captured_now = 0
+    try:
+        from wca.closecapture import ACTIONABLE_SKIPS, capture_closes_db
+
+        skipped: list = []
+        for rec in capture_closes_db(db_path, now_utc=ts, skipped_out=skipped):
+            captured_now += 1
+            logger.info(
+                "close captured: bet %s (%s — %s) backed %.3f close %.3f "
+                "CLV %+.2f%%",
+                rec["bet_id"],
+                rec["match"],
+                rec["selection"],
+                rec["decimal_odds"],
+                rec["closing_odds"],
+                rec["clv"] * 100.0,
+            )
+        # Surface only real coverage gaps (an unsplittable match_desc, an
+        # ambiguous rematch pairing, a 1X2 bet with no odds snapshot) — the
+        # transient "not kicked off yet" / "no close yet" skips are noise.
+        for rec in skipped:
+            if rec["reason"] in ACTIONABLE_SKIPS:
+                logger.warning(
+                    "close NOT captured: bet %s (%s — %s) reason=%s",
+                    rec["bet_id"], rec["match"], rec["selection"], rec["reason"],
+                )
+    except Exception:  # noqa: BLE001
+        logger.exception("close capture failed (continuing)")
+
+    # When a close actually landed, push the site immediately (incl. the
+    # Tracking tab) so the public site reflects the ledger at kickoff rather
+    # than waiting for the next in-game sync tick below.
+    if captured_now:
+        try:
+            from wca import sync
+
+            if sync.push_site(reason="close capture", db_path=db_path,
+                              include_tracking=True):
+                logger.info("site pushed after %d close(s) captured", captured_now)
+        except Exception:  # noqa: BLE001
+            logger.exception("post-capture site sync failed (continuing)")
+
     kickoffs = _kickoffs_from_df(df)
     quota_remaining: Optional[int] = quota.remaining
     delay, reason = next_poll_delay(ts, kickoffs, quota_remaining, policy)

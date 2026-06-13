@@ -18,15 +18,48 @@ import sys
 from typing import List, Optional
 
 _REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-_SITE_FILES = ["site/data.json", "site/scores_data.json", "site/linemove.json"]
+_SITE_FILES = ["site/data.json", "site/scores_data.json", "site/linemove.json",
+               "site/tracking_data.json"]
 
 
 def _log(msg: str) -> None:
     sys.stderr.write("[sync] %s\n" % msg)
 
 
-def refresh_site_data(db_path: str = "data/wca.db") -> bool:
-    """Regenerate site/data.json from the current ledger. Returns success."""
+def refresh_tracking_data(db_path: str = "data/wca.db", timeout: float = 120.0) -> bool:
+    """Rebuild site/tracking_data.json from the ledger + git history.
+
+    Best-effort and subprocessed (the builder needs git archaeology over the
+    card/scores history); its own degraded-overwrite guard prevents a
+    DB-less/shallow run from clobbering a populated feed.  This is the only
+    path that keeps the Tracking tab's CLV current with the ledger, so it is
+    triggered whenever an auto-captured close lands (see the snapshot daemon).
+    """
+    if os.environ.get("PYTEST_CURRENT_TEST"):
+        return False
+    try:
+        script = os.path.join(_REPO, "scripts", "wca_tracking_data.py")
+        proc = subprocess.run(
+            [sys.executable, script, "--db", db_path],
+            cwd=_REPO, capture_output=True, text=True, timeout=timeout,
+        )
+        if proc.returncode != 0:
+            _log("tracking refresh failed: %s" % (proc.stderr.strip()[:200]))
+            return False
+        return True
+    except Exception as exc:  # never propagate
+        _log("tracking refresh error: %s" % exc)
+        return False
+
+
+def refresh_site_data(db_path: str = "data/wca.db",
+                      include_tracking: bool = False) -> bool:
+    """Regenerate site/data.json from the current ledger. Returns success.
+
+    With ``include_tracking`` also rebuilds site/tracking_data.json (slower —
+    git archaeology — so off by default; the daemon enables it only when a
+    close was actually captured).
+    """
     try:
         from wca.sitedata import write_site_data
         import datetime as _dt
@@ -57,6 +90,8 @@ def refresh_site_data(db_path: str = "data/wca.db") -> bool:
                                 model_probs=model_probs)
     except Exception as exc:
         _log("linemove refresh failed (non-fatal): %s" % exc)
+    if include_tracking:
+        refresh_tracking_data(db_path)
     return True
 
 
@@ -66,11 +101,14 @@ def _git(args: List[str], timeout: float = 45.0) -> subprocess.CompletedProcess:
 
 
 def push_site(reason: str = "ledger update", db_path: str = "data/wca.db",
-              enabled: Optional[bool] = None) -> bool:
+              enabled: Optional[bool] = None,
+              include_tracking: bool = False) -> bool:
     """Regenerate site data and push the site JSON files. Best-effort.
 
     Set ``WCA_AUTOPUSH=0`` to disable pushing (regenerate only). Returns True
-    only if a push actually succeeded.
+    only if a push actually succeeded.  ``include_tracking`` also rebuilds and
+    pushes the Tracking-tab feed (slower; the daemon enables it only when a
+    close was captured).
     """
     # HARD GUARD: never push during a test run. pytest sets PYTEST_CURRENT_TEST
     # for every test, so any bot test that exercises the confirm path cannot
@@ -80,7 +118,7 @@ def push_site(reason: str = "ledger update", db_path: str = "data/wca.db",
         return False
     if enabled is None:
         enabled = os.environ.get("WCA_AUTOPUSH", "1") != "0"
-    refreshed = refresh_site_data(db_path)
+    refreshed = refresh_site_data(db_path, include_tracking=include_tracking)
     if not enabled:
         return False
     try:

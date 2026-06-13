@@ -369,8 +369,17 @@ def set_closing_odds(
     line — they "beat the close".  A negative CLV means the line moved
     against them after placement.
 
-    The closing odds should be the last price available immediately before
-    kick-off (or market suspension), representing the sharpest consensus.
+    Closing-odds basis (keep consistent across the column!)
+    -------------------------------------------------------
+    ``closing_odds`` should be the **de-vigged fair consensus** price at the
+    last capture before kick-off — the same basis the automatic capture path
+    (:mod:`wca.closecapture`) and the tracking feed
+    (``scripts/wca_tracking_data.py``) use.  A raw single-book quote (which
+    still carries the bookmaker's vig) is systematically shorter than the
+    fair price and will *overstate* CLV relative to auto-captured rows, so
+    averaging the two bases in one column mixes definitions.  Prefer letting
+    the daemon stamp the fair close automatically; pass an explicit price
+    here only when you have a fair (vig-removed) number.
 
     Parameters
     ----------

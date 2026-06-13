@@ -35,6 +35,15 @@ CREATE TABLE IF NOT EXISTS odds_snapshots (
 );
 """
 
+# Covers the (match_id, market, ts_utc) lookups the closing-line capture and
+# the tracking feed run per fixture against this append-only table (600k+ rows
+# and growing); without it every query is a full table scan.  Additive only —
+# the column/INSERT schema the ledger reads is unchanged.
+_CREATE_INDEX_SQL = """
+CREATE INDEX IF NOT EXISTS idx_odds_snapshots_match_market_ts
+    ON odds_snapshots (match_id, market, ts_utc);
+"""
+
 _INSERT_SQL = """
 INSERT INTO odds_snapshots
     (ts_utc, source, match_id, market, selection, decimal_odds, raw)
@@ -108,6 +117,7 @@ SourceCallable = Callable[[], List[SnapshotRow]]
 
 def _ensure_table(conn: sqlite3.Connection) -> None:
     conn.execute(_CREATE_TABLE_SQL)
+    conn.execute(_CREATE_INDEX_SQL)
     conn.commit()
 
 

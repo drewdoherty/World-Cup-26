@@ -530,7 +530,6 @@ def handle_structure(docs_dir: Optional[str] = None) -> str:
 def handle_settle(text: str, db_path: str) -> str:
     """Log a bet settlement: ``/settle <bet-id> <outcome> [closing-odds]``."""
     import sqlite3
-    import math
 
     parts = text.strip().split()
     if len(parts) < 3:
@@ -554,15 +553,13 @@ def handle_settle(text: str, db_path: str) -> str:
     if outcome not in ("won", "lost", "void"):
         return "Outcome must be 'won', 'lost', or 'void'."
 
-    if outcome in ("won", "lost") and closing_odds is None:
-        return f"Outcome '{outcome}' requires closing odds. Try: `/settle {bet_id} {outcome} <odds>`"
-
     con = sqlite3.connect(db_path)
     con.row_factory = sqlite3.Row
     try:
         # Fetch the open bet
         row = con.execute(
-            "SELECT id, stake, decimal_odds, model_prob FROM bets WHERE id = ? AND status = 'open'",
+            "SELECT id, stake, decimal_odds, model_prob, closing_odds "
+            "FROM bets WHERE id = ? AND status = 'open'",
             (bet_id,),
         ).fetchone()
 
@@ -570,27 +567,41 @@ def handle_settle(text: str, db_path: str) -> str:
             return f"No open bet with ID {bet_id}."
 
         stake = float(row["stake"] or 0.0)
-        model_prob = float(row["model_prob"] or 0.0)
+        odds_backed = float(row["decimal_odds"] or 0.0)
 
-        # Compute realized P&L
+        # Explicit closing odds win; otherwise fall back to the close the
+        # snapshot daemon auto-captured at kickoff (mirrors wca_settle.py, so
+        # /settle never wipes an auto-captured close on void).
+        if closing_odds is None and row["closing_odds"] is not None:
+            closing_odds = float(row["closing_odds"])
+        if outcome in ("won", "lost") and closing_odds is None:
+            return (
+                f"Outcome '{outcome}' needs closing odds and bet {bet_id} has "
+                f"no auto-captured close yet. Try: `/settle {bet_id} {outcome} <odds>`"
+            )
+
+        # Realized P&L pays at the price the bet was BACKED at (the close only
+        # feeds CLV, never the payout).
         if outcome == "won":
-            settled_pl = stake * (closing_odds - 1)
+            settled_pl = stake * (odds_backed - 1)
         elif outcome == "lost":
             settled_pl = -stake
         else:  # void
             settled_pl = 0.0
 
-        # Compute CLV
+        # CLV: backed price vs closing line — the ledger-wide convention
+        # (ratio - 1), shared with wca.ledger.store.set_closing_odds and
+        # wca_settle.py so the clv column means one thing across all rows.
         clv = None
-        if model_prob > 0 and closing_odds and closing_odds > 0:
-            fair_odds = 1.0 / model_prob
-            try:
-                clv = math.log(closing_odds / fair_odds)
-            except (ValueError, ZeroDivisionError):
-                pass
+        if odds_backed > 0 and closing_odds and closing_odds > 0:
+            clv = odds_backed / closing_odds - 1.0
 
-        # Update ledger
+        # Update ledger (ensure the lazily-added settled_ts column exists, so
+        # the bot can settle on a DB whose first settlement came through here).
         from datetime import datetime, timezone
+
+        from wca.ledger import store as _store
+        _store._ensure_settled_ts_column(con)
         now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         con.execute(
             "UPDATE bets SET status = ?, settled_pl = ?, closing_odds = ?, clv = ?, settled_ts = ? WHERE id = ?",
