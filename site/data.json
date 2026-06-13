@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-13 13:50:42 UTC"
+    "generated": "2026-06-13 15:35:09 UTC"
   },
   "totals": {
-    "wagered": 318.07599999999996,
-    "open_stake": 213.68600000000004,
+    "wagered": 338.0759999999999,
+    "open_stake": 233.686,
     "settled_pl": 31.432000000000002,
-    "n_bets": 46
+    "n_bets": 48
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 197.46,
-      "open_stake": 138.89000000000001,
+      "wagered": 217.46,
+      "open_stake": 158.89000000000001,
       "settled_pl": 23.15,
-      "n_bets": 30
+      "n_bets": 32
     },
     "USD": {
       "wagered": 120.616,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 197.46,
-      "open_stake": 138.89000000000001,
+      "wagered": 217.46,
+      "open_stake": 158.89000000000001,
       "settled_pl": 23.15,
-      "n_bets": 30,
+      "n_bets": 32,
       "currency": "GBP"
     },
     "polymarket": {
@@ -53,10 +53,10 @@
       "label": "Sportsbook 1"
     },
     "sportsbook_2": {
-      "wagered": 77.0,
-      "open_stake": 67.0,
+      "wagered": 97.0,
+      "open_stake": 87.0,
       "settled_pl": -10.0,
-      "n_bets": 9,
+      "n_bets": 11,
       "currency": "GBP",
       "label": "Sportsbook 2"
     }
@@ -64,10 +64,10 @@
   "source_summary": {
     "offer": {
       "GBP": {
-        "wagered": 114.0,
-        "open_stake": 87.0,
+        "wagered": 134.0,
+        "open_stake": 107.0,
         "settled_pl": 5.749999999999999,
-        "n_bets": 14
+        "n_bets": 16
       }
     },
     "model": {
@@ -100,6 +100,14 @@
     }
   },
   "platforms": {
+    "betfred": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 30.0,
+      "open_stake": 30.0,
+      "settled_pl": 0.0,
+      "n_bets": 3
+    },
     "paddy power": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -115,14 +123,6 @@
       "open_stake": 72.0,
       "settled_pl": -12.0,
       "n_bets": 10
-    },
-    "betfred": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 10.0,
-      "open_stake": 10.0,
-      "settled_pl": 0.0,
-      "n_bets": 1
     },
     "smarkets": {
       "venue": "sportsbook",
@@ -523,6 +523,38 @@
     "n_with_close": 10
   },
   "positions": [
+    {
+      "id": 68,
+      "ts_utc": "2026-06-13T18:40:00",
+      "match": "Haiti vs Scotland (Betfred BB qualifier #2)",
+      "market": "BETBUILDER",
+      "selection": "Shankland FGS & Under 5.5 & Double Chance Scot/Draw",
+      "platform": "betfred",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 5.05,
+      "stake": 10.0,
+      "model_prob": null,
+      "ev": null
+    },
+    {
+      "id": 67,
+      "ts_utc": "2026-06-13T18:10:00",
+      "match": "Haiti vs Scotland (Betfred BB qualifier)",
+      "market": "BETBUILDER",
+      "selection": "Scotland win & BTTS No & Over 1.5",
+      "platform": "betfred",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 3.94,
+      "stake": 10.0,
+      "model_prob": null,
+      "ev": null
+    },
     {
       "id": 66,
       "ts_utc": "2026-06-13T13:48:29",
