@@ -10,8 +10,10 @@ Logs the result (outcome + closing odds) to the ledger and computes realized P&L
 and closing-line-value (CLV). This is the manual settlement path — intended for
 daily post-match bookkeeping.
 
-Requires: bet ID (from the ledger), outcome (won/lost/void), closing odds (final
-price at settlement).
+Requires: bet ID (from the ledger) and outcome (won/lost/void).  ``--closing-odds``
+is optional when the bet already carries an auto-captured close (the snapshot
+daemon stamps 1X2 bets at kickoff — see ``wca_close_capture.py``); passing it
+explicitly always overrides the stored value.
 
 The script computes::
 
@@ -30,7 +32,7 @@ import sys
 from datetime import datetime, timezone
 
 
-def main() -> None:
+def main(argv=None) -> None:
     parser = argparse.ArgumentParser(
         description="Record match settlement and compute realized P&L + CLV."
     )
@@ -45,21 +47,19 @@ def main() -> None:
     parser.add_argument(
         "--closing-odds",
         type=float,
-        help="Decimal odds at settlement (required for won/lost, ignored for void)",
+        help="De-vigged FAIR decimal close (optional when an auto-captured "
+        "close is already stamped on the bet; overrides it when given). Pass "
+        "a vig-removed consensus, not a raw single-book quote — a raw quote "
+        "overstates CLV vs auto-captured rows. See wca_close_capture.py.",
     )
-    args = parser.parse_args()
-
-    # Validate
-    if args.outcome in ("won", "lost") and args.closing_odds is None:
-        print("ERROR: --closing-odds required for 'won' or 'lost' outcomes", file=sys.stderr)
-        sys.exit(1)
+    args = parser.parse_args(argv)
 
     con = sqlite3.connect(args.db)
     con.row_factory = sqlite3.Row
     try:
         # Fetch the open bet
         row = con.execute(
-            "SELECT id, stake, decimal_odds, model_prob FROM bets WHERE id = ? AND status = 'open'",
+            "SELECT id, stake, decimal_odds, model_prob, closing_odds FROM bets WHERE id = ? AND status = 'open'",
             (args.bet_id,),
         ).fetchone()
 
@@ -70,6 +70,22 @@ def main() -> None:
         stake = float(row["stake"] or 0.0)
         odds_backed = float(row["decimal_odds"] or 0.0)
         model_prob = float(row["model_prob"] or 0.0)
+
+        # Explicit --closing-odds wins; otherwise fall back to the close the
+        # snapshot daemon auto-captured at kickoff.
+        closing_odds = args.closing_odds
+        closing_source = "manual"
+        if closing_odds is None and row["closing_odds"] is not None:
+            closing_odds = float(row["closing_odds"])
+            closing_source = "auto-captured"
+        if args.outcome in ("won", "lost") and closing_odds is None:
+            print(
+                "ERROR: --closing-odds required for 'won'/'lost' (no auto-captured "
+                "close on this bet — run scripts/wca_close_capture.py or pass it "
+                "explicitly)",
+                file=sys.stderr,
+            )
+            sys.exit(1)
 
         # Compute realized P&L — a win pays at the odds the bet was BACKED
         # at, not the closing price (the close only matters for CLV).
@@ -82,21 +98,21 @@ def main() -> None:
 
         # CLV: backed price vs closing line (ledger convention: ratio - 1).
         clv = None
-        if odds_backed > 0 and args.closing_odds and args.closing_odds > 0:
-            clv = odds_backed / args.closing_odds - 1
+        if odds_backed > 0 and closing_odds and closing_odds > 0:
+            clv = odds_backed / closing_odds - 1
 
         # Update the ledger
         now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         con.execute(
             "UPDATE bets SET status = ?, settled_pl = ?, closing_odds = ?, clv = ?, settled_ts = ? WHERE id = ?",
-            (args.outcome, settled_pl, args.closing_odds, clv, now_utc, args.bet_id),
+            (args.outcome, settled_pl, closing_odds, clv, now_utc, args.bet_id),
         )
         con.commit()
 
         # Report
         print(f"✅ Bet {args.bet_id} settled as '{args.outcome}'")
-        if args.closing_odds:
-            print(f"   Closing odds: {args.closing_odds:.2f}")
+        if closing_odds:
+            print(f"   Closing odds: {closing_odds:.2f} ({closing_source})")
         print(f"   Realized P&L: {settled_pl:+.2f}")
         if clv is not None:
             print(f"   CLV: {clv:+.4f} ({clv*100:+.2f}%)")
