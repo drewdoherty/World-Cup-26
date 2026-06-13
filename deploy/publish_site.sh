@@ -22,10 +22,14 @@ if git diff --cached --quiet; then
 fi
 git commit -q -m "Auto-sync site: scheduled publish $(stamp)"
 
-# 3. absorb any cloud-Action commits, then push
-git -c rebase.autoStash=true pull --rebase origin main >/dev/null 2>&1 || true
-if git push origin main >/dev/null 2>&1; then
-  echo "$(stamp) publish: pushed"
+# 3. absorb any cloud-Action commits, then push (gated by WCA_AUTOPUSH; default on)
+if [ "${WCA_AUTOPUSH:-1}" = "1" ]; then
+  git -c rebase.autoStash=true pull --rebase origin main >/dev/null 2>&1 || true
+  if git push origin main >/dev/null 2>&1; then
+    echo "$(stamp) publish: pushed"
+  else
+    echo "$(stamp) publish: push FAILED (will retry next run)"
+  fi
 else
-  echo "$(stamp) publish: push FAILED (will retry next run)"
+  echo "$(stamp) publish: committed locally (WCA_AUTOPUSH=0, push skipped)"
 fi
