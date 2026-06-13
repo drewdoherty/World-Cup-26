@@ -40,7 +40,7 @@ import json
 import os
 from typing import Any, Dict, List, Optional, Tuple
 
-from wca import sitedata
+from wca import modelpreds, sitedata
 from wca.data import teamnames
 
 
@@ -368,6 +368,7 @@ def build_scores_data(
     odds_df: Any = None,
     pm_quotes: Optional[Dict[str, Dict[str, float]]] = None,
     now_utc: str = "",
+    model_preds_path: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Build the scores-page payload.
 
@@ -390,6 +391,12 @@ def build_scores_data(
         are matched both verbatim and after team-name canonicalisation.
     now_utc:
         Pre-formatted generation timestamp (the caller stamps the clock).
+    model_preds_path:
+        Path to the persisted model-predictions snapshot written at card-build
+        time (``data/model_predictions.json``).  When a fixture matches, its
+        exact blended 1X2 replaces the top-k scoreline reconstruction and
+        ``approx_1x2`` is reported as ``False``.  ``None`` uses the default
+        location; a missing/malformed file silently falls back.
 
     Returns
     -------
@@ -433,6 +440,17 @@ def build_scores_data(
             continue
         pm_by_key[_fixture_key(pair[0], pair[1])] = quote
 
+    # Exact blended 1X2 persisted at card-build time, indexed verbatim and by
+    # canonical fixture key for tolerant matching.
+    exact_preds = modelpreds.load_latest(
+        model_preds_path if model_preds_path is not None else modelpreds.LATEST_PATH
+    )
+    exact_by_key: Dict[Tuple[str, str], Dict[str, float]] = {}
+    for fx_str, triple in exact_preds.items():
+        pair = _split_fixture(fx_str)
+        if pair is not None:
+            exact_by_key[_fixture_key(pair[0], pair[1])] = triple
+
     card_body = _read_card_body(card_path)
     parsed = sitedata.parse_scorelines(card_body)
 
@@ -447,7 +465,14 @@ def build_scores_data(
             for s in scores_in
         ]
 
-        model_1x2 = _model_1x2_from_scores(scores_in)
+        exact = exact_preds.get(fixture_str)
+        if exact is None:
+            pair_for_exact = _split_fixture(fixture_str)
+            if pair_for_exact is not None:
+                exact = exact_by_key.get(
+                    _fixture_key(pair_for_exact[0], pair_for_exact[1])
+                )
+        model_1x2 = exact if exact is not None else _model_1x2_from_scores(scores_in)
 
         venues: List[Dict[str, Any]] = []
         kickoff = ""
@@ -477,7 +502,7 @@ def build_scores_data(
             "over_under": fx.get("over_under"),
             "btts": fx.get("btts"),
             "model_1x2": model_1x2,
-            "approx_1x2": True,
+            "approx_1x2": exact is None,
             "venues": venues,
         }
         if kickoff:
@@ -493,13 +518,18 @@ def write_scores_data(
     odds_df: Any = None,
     pm_quotes: Optional[Dict[str, Dict[str, float]]] = None,
     now_utc: str = "",
+    model_preds_path: Optional[str] = None,
 ) -> str:
     """Build the scores payload and write it to ``out_path`` as JSON.
 
     Parent directories are created as needed.  Returns ``out_path``.
     """
     data = build_scores_data(
-        card_path, odds_df=odds_df, pm_quotes=pm_quotes, now_utc=now_utc
+        card_path,
+        odds_df=odds_df,
+        pm_quotes=pm_quotes,
+        now_utc=now_utc,
+        model_preds_path=model_preds_path,
     )
 
     parent = os.path.dirname(os.path.abspath(out_path))

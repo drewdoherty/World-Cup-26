@@ -2,9 +2,15 @@ name: Daily Card Generation
 
 on:
   schedule:
-    # 8 AM UTC (10 AM CEST, 11 AM GST) — adjust as needed
-    - cron: '0 8 * * *'
+    # ~8 AM UTC (10 AM CEST, 11 AM GST). Minute offset so it never shares a
+    # trigger minute with the hourly odds job (both pushing to main).
+    - cron: '17 8 * * *'
   workflow_dispatch:  # Allow manual trigger
+
+# Serialize with the hourly job — both commit site data to main.
+concurrency:
+  group: site-data-push
+  cancel-in-progress: false
 
 jobs:
   build-card:
@@ -36,10 +42,28 @@ jobs:
         run: |
           python scripts/wca_site.py >> logs/site.log 2>&1
 
+      - name: Regenerate scores feed
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: |
+          python scripts/wca_scores_data.py --hours-ahead 48 >> logs/scores.log 2>&1 || true
+
+      # NOTE: the prediction-tracking feed (site/tracking_data.json) is NOT
+      # rebuilt here on purpose — it needs the ledger DB and full git history,
+      # neither of which exists on a CI runner. It is generated locally
+      # (wca_tracking_data.py) and the script refuses degraded overwrites.
+
       - name: Commit changes
         run: |
           git config user.email "bot@world-cup-alpha.local"
           git config user.name "World Cup Alpha Bot"
-          git add data/card_latest.md site/data.json site/linemove.json
+          git add data/card_latest.md data/model_predictions.json data/model_predictions_log.jsonl \
+                  site/data.json site/linemove.json site/scores_data.json
           git commit -m "Auto-sync: daily card + site data" || true
-          git push origin main
+          # Retry around concurrent pushes (local daemons also push to main).
+          # '-X theirs' keeps the freshly regenerated local copy for the
+          # wholesale-rewritten site feeds.
+          for i in 1 2 3; do
+            git pull --rebase -X theirs origin main && git push origin main && break
+            sleep $((i * 10))
+          done

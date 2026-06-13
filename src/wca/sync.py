@@ -43,9 +43,18 @@ def refresh_site_data(db_path: str = "data/wca.db") -> bool:
         from wca import linemove
 
         meta = linemove.robust_event_meta(os.path.join(_REPO, "data", "raw", "snapshots"))
+        # Keep the dashed MODEL reference lines: without model_probs a sync
+        # rebuild would publish a linemove.json with no model blocks, wiping
+        # the overlay until the next wca_site.py run.
+        model_probs = linemove.resolve_model_probs(
+            scores_path=os.path.join(_REPO, "site", "scores_data.json"),
+            card_path=os.path.join(_REPO, "data", "card_latest.md"),
+            preds_path=os.path.join(_REPO, "data", "model_predictions.json"),
+        )
         linemove.write_linemove(db_path,
                                 out_path=os.path.join(_REPO, "site", "linemove.json"),
-                                event_meta=meta, now_utc=now)
+                                event_meta=meta, now_utc=now,
+                                model_probs=model_probs)
     except Exception as exc:
         _log("linemove refresh failed (non-fatal): %s" % exc)
     return True

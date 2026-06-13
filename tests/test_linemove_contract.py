@@ -202,7 +202,7 @@ def test_app_js_reads_documented_keys():
 # ---------------------------------------------------------------------------
 
 # normLineMove's full dependency closure inside the app.js IIFE.
-_JS_HELPERS = ["tsMs", "numOrNull", "pointsFromSeries", "normLineMove"]
+_JS_HELPERS = ["tsMs", "numOrNull", "normModel", "pointsFromSeries", "normLineMove"]
 
 
 @functools.lru_cache(maxsize=1)

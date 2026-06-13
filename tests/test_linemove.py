@@ -393,3 +393,129 @@ def test_robust_event_meta_skips_truncated_newest(tmp_path):
     newest.write_text('[{"id": "e2", "home_te')  # truncated mid-write
     meta = robust_event_meta(str(tmp_path))
     assert "e1" in meta and meta["e1"]["fixture"] == "A vs B"
+
+
+# ---------------------------------------------------------------------------
+# Model 1X2 resolution and the optional per-event "model" block.
+# ---------------------------------------------------------------------------
+
+
+def _write_scores(tmp_path, fixtures):
+    path = tmp_path / "scores_data.json"
+    path.write_text(json.dumps({"meta": {}, "fixtures": fixtures}))
+    return str(path)
+
+
+def _write_card(tmp_path, text):
+    path = tmp_path / "card_latest.md"
+    path.write_text(text, encoding="utf-8")
+    return str(path)
+
+
+CARD = """\
+*World Cup Alpha — bet card* (3 picks)
+
+*1. United States vs Paraguay* — Paraguay @ *4.10* (betfair_ex_uk)
+    model 26.8% / mkt 24.1%  edge *+10.1%*  [elo 31% dc 28%]
+    stake: main 7.55
+*2. Qatar vs Switzerland* — Qatar @ *17.01* (smarkets)
+    model 7.7% / mkt 5.7%  edge *+30.5%*  [elo 9% dc 10%]
+    stake: main 4.42
+*3. Qatar vs Switzerland* — Draw @ *7.00* (betfair_ex_uk)
+    model 16.2% / mkt 14.6%  edge *+13.2%*  [elo 16% dc 20%]
+    stake: main 5.11
+"""
+
+
+def test_models_from_card_partial_legs(tmp_path):
+    card = _write_card(tmp_path, CARD)
+    models = linemove._models_from_card(card)
+
+    # Picked legs only: USA away pick, Qatar home + draw picks.
+    usa = models[("united states", "paraguay")]
+    assert usa == {"away": pytest.approx(0.268)}
+    qat = models[("qatar", "switzerland")]
+    assert qat["home"] == pytest.approx(0.077)
+    assert qat["draw"] == pytest.approx(0.162)
+    assert "away" not in qat
+
+
+def test_models_from_scores_normalised(tmp_path):
+    scores = _write_scores(tmp_path, [{
+        "fixture": "USA vs Paraguay",
+        "model_1x2": {"home": 0.6, "draw": 0.3, "away": 0.3},  # sums to 1.2
+    }])
+    models = linemove._models_from_scores(scores)
+
+    # Keyed by canonical names (USA -> United States) and re-normalised.
+    probs = models[("united states", "paraguay")]
+    assert probs["home"] == pytest.approx(0.5)
+    assert probs["draw"] == pytest.approx(0.25)
+    assert probs["away"] == pytest.approx(0.25)
+
+
+def test_resolve_model_probs_prefers_scores(tmp_path):
+    card = _write_card(tmp_path, CARD)
+    scores = _write_scores(tmp_path, [{
+        "fixture": "United States vs Paraguay",
+        "model_1x2": {"home": 0.5, "draw": 0.35, "away": 0.15},
+    }])
+    models = linemove.resolve_model_probs(
+        scores_path=scores,
+        card_path=card,
+        preds_path=str(tmp_path / "no_preds.json"),
+    )
+
+    # Scores triple wins for USA; the card still fills the Qatar fixture.
+    assert models[("united states", "paraguay")]["away"] == pytest.approx(0.15)
+    assert models[("qatar", "switzerland")]["home"] == pytest.approx(0.077)
+
+
+def test_resolve_model_probs_prefers_predictions_snapshot(tmp_path):
+    card = _write_card(tmp_path, CARD)
+    scores = _write_scores(tmp_path, [{
+        "fixture": "United States vs Paraguay",
+        "model_1x2": {"home": 0.5, "draw": 0.35, "away": 0.15},
+    }])
+    preds = tmp_path / "model_predictions.json"
+    preds.write_text(json.dumps({
+        "meta": {"generated": "2026-06-13T00:00:00"},
+        "fixtures": [{
+            "fixture": "United States vs Paraguay",
+            "model": {"home": 0.439, "draw": 0.295, "away": 0.266},
+        }],
+    }))
+    models = linemove.resolve_model_probs(
+        scores_path=scores, card_path=card, preds_path=str(preds)
+    )
+
+    # The card-build snapshot beats the scores-feed triple for USA; fixtures
+    # it lacks still fall through to the other sources (Qatar from the card).
+    assert models[("united states", "paraguay")]["away"] == pytest.approx(0.266)
+    assert models[("qatar", "switzerland")]["home"] == pytest.approx(0.077)
+
+
+def test_resolve_model_probs_missing_files(tmp_path):
+    assert linemove.resolve_model_probs(
+        scores_path=str(tmp_path / "no_scores.json"),
+        card_path=str(tmp_path / "no_card.md"),
+        preds_path=str(tmp_path / "no_preds.json"),
+    ) == {}
+
+
+def test_build_linemove_model_block(db_path):
+    model_probs = {
+        ("mexico", "south africa"): {"home": 0.55, "draw": 0.25, "away": 0.2},
+    }
+    out = linemove.build_linemove(db_path, EVENT_META, model_probs=model_probs)
+    evt = out["events"][0]
+    assert evt["model"] == {"home": 0.55, "draw": 0.25, "away": 0.2}
+
+    # No matching fixture (or no map at all) -> no "model" key, same series.
+    out_other = linemove.build_linemove(
+        db_path, EVENT_META, model_probs={("a", "b"): {"home": 0.5}}
+    )
+    assert "model" not in out_other["events"][0]
+    out_none = linemove.build_linemove(db_path, EVENT_META)
+    assert "model" not in out_none["events"][0]
+    assert out_other["events"][0]["series"] == out_none["events"][0]["series"]

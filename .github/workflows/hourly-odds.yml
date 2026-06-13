@@ -6,9 +6,16 @@ on:
     - cron: '0 * * * *'
   workflow_dispatch:
 
+# Serialize with the daily card job — both commit site data to main.
+concurrency:
+  group: site-data-push
+  cancel-in-progress: false
+
 jobs:
   snapshot-odds:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -23,9 +30,31 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Ingest odds snapshot
+      # Keep the scores & markets tab fresh between daily card builds: live
+      # venue prices move hourly even though the model side only changes when
+      # the card is rebuilt. Runs BEFORE the snapshot ingest, which is known
+      # to be fragile on a DB-less runner.
+      - name: Refresh scores feed
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: |
           mkdir -p logs
+          python scripts/wca_scores_data.py --hours-ahead 48 >> logs/scores.log 2>&1 || true
+
+      - name: Commit refreshed scores feed
+        run: |
+          git config user.email "bot@world-cup-alpha.local"
+          git config user.name "World Cup Alpha Bot"
+          git add site/scores_data.json
+          git diff --cached --quiet || git commit -m "Auto-sync: hourly scores feed"
+          for i in 1 2 3; do
+            git pull --rebase -X theirs origin main && git push origin main && break
+            sleep $((i * 10))
+          done
+
+      - name: Ingest odds snapshot
+        continue-on-error: true  # no ledger DB on CI runners; best-effort
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: |
           python scripts/wca_snapshot_odds.py >> logs/odds.log 2>&1

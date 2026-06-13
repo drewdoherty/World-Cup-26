@@ -537,6 +537,24 @@ def _iter_fixture_blends(
     return out
 
 
+def fixture_blends(
+    models: FittedModels,
+    odds_df: pd.DataFrame,
+    fixtures_meta: pd.DataFrame,
+    weights: BlendWeights = BlendWeights(),
+    host_nations: Sequence[str] = ("United States", "Mexico", "Canada", "USA"),
+) -> List[_FixtureBlend]:
+    """Public wrapper over :func:`_iter_fixture_blends` for persistence.
+
+    Lets callers (e.g. the card CLI dumping ``data/model_predictions.json``)
+    reuse the exact blended 1X2 the card bets against without reaching into a
+    private helper.
+    """
+    return _iter_fixture_blends(
+        models, odds_df, fixtures_meta, weights, host_nations
+    )
+
+
 def build_card(
     models: FittedModels,
     odds_df: pd.DataFrame,

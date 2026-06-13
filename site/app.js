@@ -514,6 +514,9 @@
   //     points:[{ts, home, draw, away}]}.
   // home/draw/away probs may be 0..1 fractions or 0..100 percentages
   // (auto-detected downstream).
+  // Either shape may also carry an optional model block — {home, draw, away}
+  // pre-match MODEL probabilities (possibly a subset of the three legs) —
+  // drawn as dashed horizontal reference lines.
   var LINEMOVE = { events: [], idx: 0, wired: false };
 
   // Zip the producer's three parallel {leg: [[ts, prob], ...]} arrays into the
@@ -577,7 +580,8 @@
       events.push({
         label: String(label),
         kickoff: tsMs(ev.kickoff || ev.commence_time || ev.start),
-        points: pts
+        points: pts,
+        model: normModel(ev.model)
       });
     });
     // Chronological by kickoff (soonest first); unknown kickoffs sink to the end.
@@ -592,6 +596,20 @@
     if (v === null || v === undefined || v === "" || isNaN(v)) return null;
     return Number(v);
   }
+  // Normalise an event's optional model block to {home, draw, away} (numbers
+  // or null). Returns null when no leg carries a usable value so callers can
+  // skip the model overlay entirely.
+  function normModel(raw) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+    var model = { home: null, draw: null, away: null }, any = false;
+    ["home", "draw", "away"].forEach(function (k) {
+      var v = numOrNull(raw[k]);
+      if (v !== null) { model[k] = v; any = true; }
+    });
+    return any ? model : null;
+  }
+  // Model probs are documented as 0..1 fractions, but tolerate percentages.
+  function modelPct(v) { return v > 1.5 ? v : v * 100; }
   // Detect whether prob values are fractions (<=1) or percentages and return a
   // function that maps a raw value to 0..100.
   function pctScaler(events) {
@@ -643,6 +661,12 @@
         if (v !== null && !isNaN(v)) vals.push(v);
       });
     });
+    var model = ev.model || null;
+    if (model) {
+      ["home", "draw", "away"].forEach(function (k) {
+        if (model[k] !== null) vals.push(modelPct(model[k]));
+      });
+    }
     var lo = vals.length ? Math.min.apply(null, vals) : 0;
     var hi = vals.length ? Math.max.apply(null, vals) : 100;
     var pad = Math.max((hi - lo) * 0.15, 1);   // 15% padding, >=1pp
@@ -672,6 +696,21 @@
       });
     });
 
+    // model reference lines: dashed horizontals at the pre-match MODEL prob
+    // for each leg the producer resolved (the block may be partial / absent).
+    var modelLegs = [];
+    if (model) {
+      SERIES.forEach(function (sr) {
+        if (model[sr.key] === null) return;
+        var my = scaleY(modelPct(model[sr.key]));
+        svg += '<line stroke="' + sr.color + '" stroke-width="1" ' +
+          'stroke-dasharray="5 4" opacity="0.65" x1="' + r2(CHART_M.left) +
+          '" y1="' + r2(my) + '" x2="' + r2(CHART_M.left + PLOT_W) +
+          '" y2="' + r2(my) + '"/>';
+        modelLegs.push(sr);
+      });
+    }
+
     // kickoff marker if within range
     if (!isNaN(ev.kickoff) && ev.kickoff >= t0 && ev.kickoff <= t1) {
       var kx = scaleX(ev.kickoff);
@@ -681,7 +720,8 @@
         r2(CHART_M.top + 8) + '">KO</text>';
     }
 
-    // legend (top-right inside the right margin)
+    // legend (top-right inside the right margin); solid swatches for the
+    // market series, dashed swatches for any model reference lines.
     var lx = CHART_M.left + PLOT_W + 8, ly = CHART_M.top + 4;
     SERIES.forEach(function (sr, i) {
       var y = ly + i * 14;
@@ -690,6 +730,18 @@
       svg += '<text class="cx-legend" x="' + r2(lx + 12) + '" y="' + r2(y + 1) + '">' +
         esc(sr.name) + '</text>';
     });
+    // One dashed row covers all model lines: the colour mapping is already
+    // established by the solid swatches above, and the narrow right margin
+    // (~50px) cannot fit per-leg "Home (model)" labels without clipping.
+    if (modelLegs.length) {
+      var my2 = ly + SERIES.length * 14;
+      var mcolor = modelLegs.length === 1 ? modelLegs[0].color : "#6b7280";
+      svg += '<line stroke="' + mcolor + '" stroke-width="2" ' +
+        'stroke-dasharray="3 2" opacity="0.65" x1="' + r2(lx) + '" y1="' +
+        r2(my2 - 2) + '" x2="' + r2(lx + 8) + '" y2="' + r2(my2 - 2) + '"/>';
+      svg += '<text class="cx-legend" x="' + r2(lx + 12) + '" y="' +
+        r2(my2 + 1) + '">model</text>';
+    }
 
     el.innerHTML = '<svg viewBox="0 0 ' + CHART_W + ' ' + CHART_H +
       '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Line movement">' +
@@ -730,7 +782,12 @@
       })
       .then(function (raw) {
         LINEMOVE.events = normLineMove(raw);
+        // Default to the first event carrying a model overlay (the card's
+        // current slate) rather than whatever happens to sort first.
         LINEMOVE.idx = 0;
+        for (var i = 0; i < LINEMOVE.events.length; i++) {
+          if (LINEMOVE.events[i].model) { LINEMOVE.idx = i; break; }
+        }
         if (!LINEMOVE.events.length) {
           // present but empty -> clean empty state
           var s = $("linemove-select"); if (s) { s.hidden = true; }

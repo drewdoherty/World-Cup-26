@@ -31,20 +31,30 @@ Output shape::
             "home": [[ts, prob], ...],
             "draw": [[ts, prob], ...],
             "away": [[ts, prob], ...]
-          }
+          },
+          "model": {"home": p, "draw": p, "away": p}   # optional, may be partial
         },
         ...
       ]
     }
+
+The optional ``model`` block carries the pre-match MODEL 1X2 probabilities
+(floats in 0..1) resolved by :func:`resolve_model_probs` — from
+``site/scores_data.json`` when the fixture has a ``model_1x2`` entry, else
+parsed out of the cached matchday card (which only quotes the model probability
+for the *picked* selection, so card-derived blocks may cover a subset of the
+three outcomes).
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
 import sqlite3
 from typing import Any, Dict, List, Optional, Tuple
 
+from wca import modelpreds
 from wca.data import teamnames
 
 
@@ -218,6 +228,168 @@ def _series_for_event(
 
 
 # ---------------------------------------------------------------------------
+# Model 1X2 resolution (scores_data.json preferred, matchday card fallback).
+# ---------------------------------------------------------------------------
+
+# ``*4. United States vs Paraguay* — Paraguay @ *4.10* (betfair_ex_uk)``
+_CARD_PICK_RE = re.compile(
+    r"^\*\d+\.\s*(?P<home>.+?)\s+vs\s+(?P<away>.+?)\*\s*[—-]+\s*"
+    r"(?P<selection>.+?)\s*@"
+)
+# ``    model 26.8% / mkt 24.1%  edge *+10.1%*``
+_CARD_MODEL_RE = re.compile(r"^\s*model\s+(?P<pct>\d+(?:\.\d+)?)\s*%")
+
+ModelKey = Tuple[str, str]
+
+
+def _model_key(home: Any, away: Any) -> ModelKey:
+    """Canonical ``(home, away)`` matching key for a fixture."""
+    return (_canon(home), _canon(away))
+
+
+def _opt_prob(value: Any) -> Optional[float]:
+    """Coerce a value to a probability in ``[0, 1]``, else ``None``."""
+    try:
+        result = float(value)
+    except (TypeError, ValueError):
+        return None
+    if result != result:  # NaN
+        return None
+    if result < 0.0 or result > 1.0:
+        return None
+    return result
+
+
+def _models_from_scores(scores_path: str) -> Dict[ModelKey, Dict[str, float]]:
+    """Model 1X2 blocks from ``site/scores_data.json``.
+
+    Reads ``fixtures[].model_1x2`` (already 0..1 per leg) and returns
+    ``(home_c, away_c)`` -> normalised ``{"home", "draw", "away"}``.  A missing
+    / unreadable / malformed file yields an empty dict (never raises).
+    """
+    if not scores_path or not os.path.exists(scores_path):
+        return {}
+    try:
+        with open(scores_path, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (OSError, ValueError):
+        return {}
+
+    fixtures = data.get("fixtures") if isinstance(data, dict) else None
+    if not isinstance(fixtures, list):
+        return {}
+
+    out: Dict[ModelKey, Dict[str, float]] = {}
+    for entry in fixtures:
+        if not isinstance(entry, dict):
+            continue
+        fixture = entry.get("fixture")
+        model = entry.get("model_1x2")
+        if not isinstance(fixture, str) or not isinstance(model, dict):
+            continue
+        parts = fixture.split(" vs ")
+        if len(parts) != 2:
+            continue
+        key = _model_key(parts[0], parts[1])
+        if not key[0] or not key[1] or key in out:
+            continue
+        probs: Dict[str, float] = {}
+        for leg in ("home", "draw", "away"):
+            prob = _opt_prob(model.get(leg))
+            if prob is None:
+                break
+            probs[leg] = prob
+        if len(probs) != 3:
+            continue
+        total = probs["home"] + probs["draw"] + probs["away"]
+        if total <= 0.0:
+            continue
+        out[key] = {leg: probs[leg] / total for leg in ("home", "draw", "away")}
+    return out
+
+
+def _models_from_card(card_path: str) -> Dict[ModelKey, Dict[str, float]]:
+    """Model probabilities parsed from the cached matchday card.
+
+    The card quotes the model probability for the *picked* selection only
+    (``model 26.8% / mkt 24.1%`` on the line after the pick header), so the
+    returned blocks are partial: ``(home_c, away_c)`` -> ``{leg: prob}`` with
+    only the legs that were picked.  The first occurrence of a leg wins (picks
+    are listed best-edge first).  A missing / unreadable file yields an empty
+    dict (never raises).
+    """
+    if not card_path or not os.path.exists(card_path):
+        return {}
+    try:
+        with open(card_path, "r", encoding="utf-8") as fh:
+            lines = fh.read().splitlines()
+    except OSError:
+        return {}
+
+    out: Dict[ModelKey, Dict[str, float]] = {}
+    pending: Optional[Tuple[ModelKey, str]] = None  # (fixture key, leg)
+    for line in lines:
+        pick = _CARD_PICK_RE.match(line)
+        if pick:
+            key = _model_key(pick.group("home"), pick.group("away"))
+            leg = _leg_for_outcome(
+                pick.group("selection").strip(), key[0], key[1]
+            )
+            pending = (key, leg) if (key[0] and key[1] and leg) else None
+            continue
+        model = _CARD_MODEL_RE.match(line)
+        if model and pending:
+            key, leg = pending
+            prob = _opt_prob(float(model.group("pct")) / 100.0)
+            if prob is not None:
+                out.setdefault(key, {}).setdefault(leg, prob)
+            pending = None
+    return out
+
+
+def _models_from_predictions(preds_path: str) -> Dict[ModelKey, Dict[str, float]]:
+    """Exact blended triples from ``data/model_predictions.json``.
+
+    This is the snapshot the card build persists (see :mod:`wca.modelpreds`)
+    — the same probabilities the card bets against, with no top-k scoreline
+    reconstruction involved.  Missing / malformed file yields an empty dict.
+    """
+    out: Dict[ModelKey, Dict[str, float]] = {}
+    for fixture, triple in modelpreds.load_latest(preds_path).items():
+        parts = fixture.split(" vs ")
+        if len(parts) != 2:
+            continue
+        key = _model_key(parts[0], parts[1])
+        if not key[0] or not key[1] or key in out:
+            continue
+        total = sum(triple.values())
+        if total <= 0.0:
+            continue
+        out[key] = {leg: triple[leg] / total for leg in ("home", "draw", "away")}
+    return out
+
+
+def resolve_model_probs(
+    scores_path: str = "site/scores_data.json",
+    card_path: str = "data/card_latest.md",
+    preds_path: str = modelpreds.LATEST_PATH,
+) -> Dict[ModelKey, Dict[str, float]]:
+    """Resolve pre-match MODEL 1X2 probabilities per fixture.
+
+    Source precedence per fixture: the persisted card-build snapshot
+    (``data/model_predictions.json``, exact blended triples), then
+    ``site/scores_data.json`` (full triples, possibly reconstructed from the
+    top-k scorelines), then the matchday card (partial — picked legs only).
+    Returns canonical ``(home, away)`` -> ``{"home"/"draw"/"away": prob}``
+    with probs in 0..1.  Deterministic: pure file reads, no clock or network.
+    """
+    out = _models_from_card(card_path)
+    out.update(_models_from_scores(scores_path))
+    out.update(_models_from_predictions(preds_path))
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Public API.
 # ---------------------------------------------------------------------------
 
@@ -227,6 +399,7 @@ def build_linemove(
     event_meta: Dict[str, Dict[str, Any]],
     max_points: int = 120,
     now_utc: str = "",
+    model_probs: Optional[Dict[ModelKey, Dict[str, float]]] = None,
 ) -> Dict[str, Any]:
     """Build the per-event consensus line-movement payload.
 
@@ -244,6 +417,10 @@ def build_linemove(
         evenly (first & last always retained).
     now_utc:
         Pre-formatted generation timestamp (the caller stamps the clock).
+    model_probs:
+        Optional canonical ``(home, away)`` -> ``{leg: prob}`` map (see
+        :func:`resolve_model_probs`).  Matching events gain a ``"model"``
+        block; events without a match are emitted unchanged.
 
     Returns
     -------
@@ -292,11 +469,22 @@ def build_linemove(
         )
         if series is None:
             continue
-        events.append({
+        event: Dict[str, Any] = {
             "fixture": meta.get("fixture", ""),
             "kickoff": meta.get("kickoff", ""),
             "series": series,
-        })
+        }
+        if model_probs:
+            model = model_probs.get(
+                _model_key(meta.get("home", ""), meta.get("away", ""))
+            )
+            if model:
+                event["model"] = {
+                    leg: model[leg]
+                    for leg in ("home", "draw", "away")
+                    if leg in model
+                }
+        events.append(event)
 
     out["events"] = events
     return out
@@ -308,6 +496,7 @@ def write_linemove(
     event_meta: Optional[Dict[str, Dict[str, Any]]] = None,
     max_points: int = 120,
     now_utc: str = "",
+    model_probs: Optional[Dict[ModelKey, Dict[str, float]]] = None,
 ) -> str:
     """Build the line-movement payload and write it to ``out_path`` as JSON.
 
@@ -318,6 +507,7 @@ def write_linemove(
         event_meta or {},
         max_points=max_points,
         now_utc=now_utc,
+        model_probs=model_probs,
     )
 
     # Never clobber a populated file with an empty payload: an empty events

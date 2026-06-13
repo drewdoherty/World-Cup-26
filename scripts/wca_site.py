@@ -86,6 +86,20 @@ def main(argv=None) -> int:
         action="store_true",
         help="Skip the line-movement (linemove.json) export.",
     )
+    parser.add_argument(
+        "--scores-data",
+        default="site/scores_data.json",
+        help="Path to the scores feed whose model_1x2 blocks supply the model "
+             "probability lines on the line-movement chart "
+             "(default: site/scores_data.json).",
+    )
+    parser.add_argument(
+        "--model-preds",
+        default="data/model_predictions.json",
+        help="Path to the card-build model-prediction snapshot; its exact "
+             "blended triples take precedence over the scores feed for the "
+             "model lines (default: data/model_predictions.json).",
+    )
     args = parser.parse_args(argv)
 
     now_utc = _now_utc_str()
@@ -95,11 +109,17 @@ def main(argv=None) -> int:
 
     if not args.no_linemove:
         event_meta = linemove.robust_event_meta(args.snapshots_dir)
+        model_probs = linemove.resolve_model_probs(
+            scores_path=args.scores_data,
+            card_path=args.card,
+            preds_path=args.model_preds,
+        )
         lm_path = linemove.write_linemove(
             args.db,
             out_path=args.linemove_out,
             event_meta=event_meta,
             now_utc=now_utc,
+            model_probs=model_probs,
         )
         print(lm_path)
 

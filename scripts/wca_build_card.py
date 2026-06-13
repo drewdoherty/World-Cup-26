@@ -208,6 +208,21 @@ def main() -> None:
 
     write_card(card_text, path=args.out, ts_utc=now_str)
 
+    # ------------------------------------------------------------------
+    # Persist the exact blended 1X2 per fixture (latest + append-only log)
+    # so the site and prediction tracking read real model output rather
+    # than the top-k scoreline approximation.
+    # ------------------------------------------------------------------
+    try:
+        from wca.card import fixture_blends
+        from wca.modelpreds import build_predictions, write_predictions
+
+        blends = fixture_blends(models, odds_df, fixtures_meta)
+        write_predictions(build_predictions(blends, now_str))
+        print("Model predictions persisted: %d fixtures" % len(blends))
+    except Exception as exc:
+        print("WARNING: model prediction dump failed: %s" % exc, file=sys.stderr)
+
     quota_str = (
         "quota remaining=%s" % quota.remaining
         if quota is not None and quota.remaining is not None

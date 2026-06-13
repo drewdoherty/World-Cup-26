@@ -1064,3 +1064,122 @@ body {
   letter-spacing: .5px;
 }
 .venue-source-pl .src-pl-item { white-space: nowrap; }
+
+/* ========================================================== Tracking page */
+/* Appended for site/tracking.html — does not alter any rule above.         */
+
+main > .panel + .panel,
+main > .track-grid,
+main > .track-grid + .panel { margin-top: 12px; }
+
+/* Headline stat tiles (reuse the ticker's label/value type scale). */
+.track-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+.track-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 14px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+.track-stat-sub {
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+
+/* Tick / cross marks on the scoreboard. */
+.tr-hit { color: var(--pos); font-weight: 700; }
+.tr-miss { color: var(--neg); font-weight: 700; }
+
+/* Chart 1 — paired model/market bars on the realised outcome. */
+.tr-pair { margin-bottom: 14px; }
+.tr-pair:last-of-type { margin-bottom: 0; }
+.tr-pair-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+.tr-pair-title {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.tr-pair-actual {
+  font-size: 10px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.tr-bar-row {
+  display: grid;
+  grid-template-columns: 52px 1fr 52px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.tr-bar-lbl {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.tr-bar-track {
+  height: 8px;
+  background: var(--track);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.tr-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  min-width: 1px;
+}
+.tr-fill-model-up { background: var(--pos); }
+.tr-fill-model-down { background: var(--neg); }
+.tr-fill-market { background: var(--polymarket); opacity: 0.75; }
+.tr-bar-val {
+  text-align: right;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* Charts 3 + 4 sit side by side on desktop. */
+.track-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* SVG scatter primitives. */
+.tr-diag {
+  stroke: var(--border-2);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 4;
+}
+.tr-quad { stroke: var(--border-2); stroke-width: 1; stroke-dasharray: 2 3; }
+.tr-dot-model { fill: var(--accent); opacity: 0.9; }
+.tr-dot-market { fill: var(--polymarket); opacity: 0.75; }
+.tr-dot-win { fill: var(--pos); opacity: 0.9; }
+.tr-dot-loss { fill: var(--neg); opacity: 0.85; }
+
+/* Footnote under the panels. */
+.track-note {
+  margin-top: 12px;
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+@media (max-width: 760px) {
+  .track-grid { grid-template-columns: 1fr; }
+}
