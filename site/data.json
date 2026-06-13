@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-13 16:07:21 UTC"
+    "generated": "2026-06-13 16:12:21 UTC"
   },
   "totals": {
-    "wagered": 338.0759999999999,
-    "open_stake": 233.686,
+    "wagered": 358.0759999999999,
+    "open_stake": 253.686,
     "settled_pl": 31.432000000000002,
-    "n_bets": 48
+    "n_bets": 49
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 217.46,
-      "open_stake": 158.89000000000001,
+      "wagered": 237.46,
+      "open_stake": 178.89000000000001,
       "settled_pl": 23.15,
-      "n_bets": 32
+      "n_bets": 33
     },
     "USD": {
       "wagered": 120.616,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 217.46,
-      "open_stake": 158.89000000000001,
+      "wagered": 237.46,
+      "open_stake": 178.89000000000001,
       "settled_pl": 23.15,
-      "n_bets": 32,
+      "n_bets": 33,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 110.46000000000001,
-      "open_stake": 61.88999999999999,
+      "wagered": 130.46,
+      "open_stake": 81.88999999999999,
       "settled_pl": 33.15,
-      "n_bets": 20,
+      "n_bets": 21,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -64,10 +64,10 @@
   "source_summary": {
     "offer": {
       "GBP": {
-        "wagered": 134.0,
-        "open_stake": 107.0,
+        "wagered": 154.0,
+        "open_stake": 127.0,
         "settled_pl": 5.749999999999999,
-        "n_bets": 16
+        "n_bets": 17
       }
     },
     "model": {
@@ -100,6 +100,14 @@
     }
   },
   "platforms": {
+    "betfair_sportsbook": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 104.0,
+      "open_stake": 92.0,
+      "settled_pl": -12.0,
+      "n_bets": 11
+    },
     "betfred": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -115,14 +123,6 @@
       "open_stake": 5.0,
       "settled_pl": 0.0,
       "n_bets": 1
-    },
-    "betfair_sportsbook": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 84.0,
-      "open_stake": 72.0,
-      "settled_pl": -12.0,
-      "n_bets": 10
     },
     "smarkets": {
       "venue": "sportsbook",
@@ -523,6 +523,22 @@
     "n_with_close": 10
   },
   "positions": [
+    {
+      "id": 69,
+      "ts_utc": "2026-06-13T15:55:00",
+      "match": "Australia vs Turkey",
+      "market": "BETBUILDER",
+      "selection": "Under 3.5 Goals & DC Australia/Türkiye & Under 4.5 Cards (100% boost)",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 3.2035,
+      "stake": 20.0,
+      "model_prob": 0.4176,
+      "ev": 6.75
+    },
     {
       "id": 68,
       "ts_utc": "2026-06-13T18:40:00",
