@@ -157,6 +157,101 @@
         <p class="viz-note">feeds from data/advancement_history.json (written by the advancement snapshotter)</p>
       </div>
     </section>
+
+    <!-- ===== Exhibit 4: structural prior + venue-aware host advantage (opt-in, OFF) ===== -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">Exhibit 4 // Borrowed From Klement — Structure &amp; Geography</span>
+        <span class="panel-meta">opt-in · default OFF</span>
+      </div>
+      <div class="panel-body viz-grid">
+        <p class="viz-lead">Two ideas adapted from Joachim Klement's socio-economic World Cup model — built as <b style="color:var(--accent)">opt-in priors, off by default</b>. They are not deployed: the market already prices structure on liquid 1X2, and the historical backtest can&rsquo;t test the prior (no minnows play in WC/Euro/Copa finals). They wait for live 2026 evidence.</p>
+
+        <div class="viz-qa">
+          <p class="viz-q">A. Structural strength index &mdash; a <i>prior</i> for data-poor teams</p>
+          <p class="viz-a">Population &times; football culture, an inverted-U in GDP/capita (peaking ≈ $60k), plus a confederation offset (Hoffmann-Ging-Ramasamy 2002). It only ever <b>shrinks low-data minnows</b> toward a sensible target instead of the global mean &mdash; for data-rich sides the match likelihood swamps it. Note it <b>underrates</b> South-American powers (Brazil, Argentina) on GDP: the known blind spot of socio-economic models, and exactly why it is a prior, not a signal.</p>
+        </div>
+        <!-- structural z bars: zero-line x=360, 26px per z unit -->
+        <svg class="viz-svg" viewBox="0 0 720 300" role="img"
+             aria-label="Structural strength index (z-score) by team">
+          <line x1="360" y1="30" x2="360" y2="288" stroke="#3a4048" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="360" y="22" fill="#6b7480" font-size="10" font-family="monospace" text-anchor="middle">0 (pool mean)</text>
+          <g font-family="monospace" font-size="11">
+            <!-- England +1.14 -->
+            <text x="8" y="48" fill="#9aa4ae">England</text>
+            <rect x="360" y="38" width="29.6" height="14" fill="#3fe08a" opacity="0.85"/>
+            <text x="394" y="48" fill="#3fe08a">+1.14</text>
+            <!-- Spain +1.02 -->
+            <text x="8" y="74" fill="#9aa4ae">Spain</text>
+            <rect x="360" y="64" width="26.5" height="14" fill="#3fe08a" opacity="0.85"/>
+            <text x="391" y="74" fill="#3fe08a">+1.02</text>
+            <!-- Netherlands +0.93 -->
+            <text x="8" y="100" fill="#9aa4ae">Netherlands</text>
+            <rect x="360" y="90" width="24.2" height="14" fill="#3fe08a" opacity="0.85"/>
+            <text x="389" y="100" fill="#3fe08a">+0.93</text>
+            <!-- Brazil +0.75 -->
+            <text x="8" y="126" fill="#9aa4ae">Brazil</text>
+            <rect x="360" y="116" width="19.5" height="14" fill="#3fe08a" opacity="0.6"/>
+            <text x="384" y="126" fill="#7fae8a">+0.75</text>
+            <!-- USA +0.72 -->
+            <text x="8" y="152" fill="#9aa4ae">United States</text>
+            <rect x="360" y="142" width="18.7" height="14" fill="#3fe08a" opacity="0.6"/>
+            <text x="383" y="152" fill="#7fae8a">+0.72</text>
+            <!-- Mexico +0.43 -->
+            <text x="8" y="178" fill="#9aa4ae">Mexico</text>
+            <rect x="360" y="168" width="11.2" height="14" fill="#3fe08a" opacity="0.5"/>
+            <text x="376" y="178" fill="#7fae8a">+0.43</text>
+            <!-- Curacao -0.20 -->
+            <text x="8" y="204" fill="#9aa4ae">Cura&ccedil;ao</text>
+            <rect x="354.8" y="194" width="5.2" height="14" fill="#e0a03f" opacity="0.7"/>
+            <text x="316" y="204" fill="#e0a03f" text-anchor="end">&minus;0.20</text>
+            <!-- Cape Verde -1.19 -->
+            <text x="8" y="230" fill="#9aa4ae">Cape Verde</text>
+            <rect x="329.1" y="220" width="30.9" height="14" fill="#e0a03f" opacity="0.8"/>
+            <text x="324" y="230" fill="#e0a03f" text-anchor="end">&minus;1.19</text>
+            <!-- Haiti -2.18 -->
+            <text x="8" y="256" fill="#9aa4ae">Haiti</text>
+            <rect x="303.3" y="246" width="56.7" height="14" fill="#e0603f" opacity="0.8"/>
+            <text x="298" y="256" fill="#e0603f" text-anchor="end">&minus;2.18</text>
+            <!-- DR Congo -3.51 -->
+            <text x="8" y="282" fill="#9aa4ae">DR Congo</text>
+            <rect x="268.7" y="272" width="91.3" height="14" fill="#e0603f" opacity="0.8"/>
+            <text x="263" y="282" fill="#e0603f" text-anchor="end">&minus;3.51</text>
+          </g>
+        </svg>
+        <p class="viz-note">structural strength z · src/wca/models/structural.py · prior only, never a market signal</p>
+
+        <div class="viz-qa">
+          <p class="viz-q">B. Host advantage, diluted &amp; altitude-aware</p>
+          <p class="viz-a">A single host&rsquo;s ~100 Elo-point edge is wrong for <b>three co-hosts</b> who are only at home in the group stage. The opt-in path <b>dilutes</b> the bonus and adds an <b>altitude tax</b> on sea-level visitors &mdash; biggest at Mexico&rsquo;s <b>Estadio Azteca (~2240 m)</b>. Knockouts roam, so they stay neutral.</p>
+        </div>
+        <svg class="viz-svg" viewBox="0 0 720 220" role="img"
+             aria-label="Host advantage in Elo points: legacy vs venue-aware">
+          <line x1="60" y1="180" x2="700" y2="180" stroke="#2a2f37" stroke-width="1"/>
+          <g fill="#4a525c" font-size="10" font-family="monospace" text-anchor="end">
+            <line x1="60" y1="40"  x2="700" y2="40"  stroke="#191d23"/><text x="54" y="43">100</text>
+            <line x1="60" y1="110" x2="700" y2="110" stroke="#191d23"/><text x="54" y="113">50</text>
+            <text x="54" y="183">0</text>
+            <text x="40" y="115" transform="rotate(-90 40 115)" text-anchor="middle">Elo points</text>
+          </g>
+          <g font-family="monospace" font-size="11" text-anchor="middle">
+            <!-- legacy 100 -> height 140 from y180 -->
+            <rect x="150" y="40" width="120" height="140" fill="#3a4048"/>
+            <text x="210" y="34" fill="#9aa4ae">100</text>
+            <text x="210" y="198" fill="#6b7480">legacy (any host)</text>
+            <!-- Mexico Azteca 74.6 -> height 104.4 -->
+            <rect x="330" y="75.6" width="120" height="104.4" fill="#3fe08a" opacity="0.8"/>
+            <text x="390" y="69" fill="#3fe08a">~75</text>
+            <text x="390" y="198" fill="#6b7480">co-host + Azteca alt.</text>
+            <!-- USA/CAN sea-level 50 -> height 70 -->
+            <rect x="510" y="110" width="120" height="70" fill="#3fe08a" opacity="0.55"/>
+            <text x="570" y="104" fill="#7fae8a">50</text>
+            <text x="570" y="198" fill="#6b7480">co-host, sea level</text>
+          </g>
+        </svg>
+        <p class="viz-note">src/wca/models/venues.py · factor 0.5 + 0.02 pts/m altitude tax over 1000 m gap · opt-in</p>
+      </div>
+    </section>
   </main>
 
   <footer class="foot">

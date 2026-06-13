@@ -157,6 +157,7 @@
           params: [
             ["initial", "1500.0"],
             ["home adv", "100.0 (+host on neutral)"],
+            ["host venue-aware", "opt-in, OFF — co-host dilution + altitude (Azteca)"],
             ["K by importance", "friendly 20 / NL 30 / qual 40 / continental 50 / WC 60"],
             ["goal-margin G", "|gd| 2→1.5, 3→1.75, ≥4 ramps"],
             ["logit", "x=diff/400, beta + c_lo ≤ c_hi, MLE NM→BFGS"]
@@ -173,7 +174,8 @@
             ["ridge reg_lambda", "0.01 (×5 low-data)"],
             ["min_matches", "5"],
             ["max_goals", "10"],
-            ["rho", "fitted, applied to (0,0)(0,1)(1,0)(1,1)"]
+            ["rho", "fitted, applied to (0,0)(0,1)(1,0)(1,1)"],
+            ["structural prior", "opt-in, OFF — shrink minnows to socio-economic target"]
           ],
           inputs: ["results history", "days_ago decay"],
           outputs: ["score matrix", "dc_prob (h,d,a)", "O/U, BTTS, scores"]
@@ -423,7 +425,8 @@
       stage: "Modeling",
       items: [
         "Player-level ratings → lineup-aware DC inputs (biggest accuracy lever).",
-        "Weather / altitude covariates for a tri-country 2026 tournament.",
+        "SHIPPED (opt-in, off): venue/altitude-aware host advantage — co-host dilution + Azteca altitude tax. Next: altitude/heat into the DC log-mean too.",
+        "SHIPPED (opt-in, off): structural socio-economic shrinkage prior for low-data minnows (Klement / Hoffmann-Ging-Ramasamy) — holdout inconclusive, awaits live 2026 minnow data.",
         "Fit the blend weights on a calibration backtest (replace the 0.25/0.25/0.50 prior).",
         "Backtest harness to pick DC xi (now hand-set 8y) and ridge by out-of-sample log-loss."
       ]

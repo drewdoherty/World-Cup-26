@@ -178,6 +178,10 @@ def aggregate(blocks: List[BlockResult]) -> Dict[str, Dict[str, Dict[str, float]
     return agg
 
 
+def _fmt(v: float) -> str:
+    return "—" if v != v else "%.4f" % v  # NaN-safe (NaN != NaN)
+
+
 def build_markdown(blocks: List[BlockResult], agg: Dict, scale: float) -> str:
     L: List[str] = []
     L.append("# Dixon-Coles structural (socio-economic) shrinkage-prior backtest")
@@ -207,12 +211,31 @@ def build_markdown(blocks: List[BlockResult], agg: Dict, scale: float) -> str:
         s = agg["structural"][subset]
         dll = b["log_loss"] - s["log_loss"]
         L.append(
-            "| %s | %d | %.4f | %.4f | %+.4f | %.4f | %.4f |"
-            % (label, b["n"], b["log_loss"], s["log_loss"], dll, b["brier"], s["brier"])
+            "| %s | %d | %s | %s | %s | %s | %s |"
+            % (
+                label,
+                b["n"],
+                _fmt(b["log_loss"]),
+                _fmt(s["log_loss"]),
+                ("—" if dll != dll else "%+.4f" % dll),
+                _fmt(b["brier"]),
+                _fmt(s["brier"]),
+            )
         )
     L.append("")
     L.append("(dLL > 0 means the structural prior has the lower — better — log-loss.)")
     L.append("")
+    n_low_total = agg["baseline"]["low"]["n"]
+    if n_low_total == 0:
+        L.append(
+            "> **The low-data subset is empty.** Every team appearing in these "
+            "tournament-finals holdouts has more than %d matches over the full "
+            "international history, so the extra low-data shrinkage the prior "
+            "targets never engages here. This holdout therefore **cannot** test "
+            "the prior's core hypothesis; the all-matches row only confirms the "
+            "prior is inert for data-rich teams (as designed)." % MIN_MATCHES
+        )
+        L.append("")
     L.append("## Per-holdout (low-data subset log-loss)")
     L.append("")
     L.append("| block | n | low-n | baseline LL | structural LL | dLL |")
@@ -220,9 +243,17 @@ def build_markdown(blocks: List[BlockResult], agg: Dict, scale: float) -> str:
     for b in blocks:
         bm = b.metrics["baseline"]["low"]["log_loss"]
         sm = b.metrics["structural"]["low"]["log_loss"]
+        dm = bm - sm
         L.append(
-            "| %s | %d | %d | %.4f | %.4f | %+.4f |"
-            % (b.name, b.n_all, b.n_low, bm, sm, bm - sm)
+            "| %s | %d | %d | %s | %s | %s |"
+            % (
+                b.name,
+                b.n_all,
+                b.n_low,
+                _fmt(bm),
+                _fmt(sm),
+                ("—" if dm != dm else "%+.4f" % dm),
+            )
         )
     L.append("")
     # Verdict.
@@ -234,37 +265,50 @@ def build_markdown(blocks: List[BlockResult], agg: Dict, scale: float) -> str:
     margin_all = b_all - s_all
     L.append("## Verdict")
     L.append("")
-    helps_low = margin_low > 0
-    hurts_all = margin_all < -0.005
-    if helps_low and not hurts_all:
+    if n_low_total == 0:
         verdict = (
-            "The structural prior improves the low-data subset (%+.4f log-loss) "
-            "without materially hurting the full set (%+.4f). It is a defensible "
-            "default for the thin outright/advancement markets where low-data "
-            "teams dominate; enable `structural_prior=True` there and keep "
-            "monitoring calibration on live 2026 data." % (margin_low, margin_all)
-        )
-    elif not helps_low:
-        verdict = (
-            "The structural prior does **not** improve the low-data subset "
-            "(%+.4f log-loss) on this holdout. Keep it **off** until a larger or "
-            "more minnow-heavy holdout (e.g. live 2026 group-stage minnows) says "
-            "otherwise — consistent with the project's keep-the-simple-default "
-            "discipline." % margin_low
+            "**Inconclusive — and unfixable on this holdout.** The low-data "
+            "subset is empty, so the prior's core hypothesis cannot be tested "
+            "here, and on the full set the prior is inert (%+.4f log-loss). "
+            "There is no evidence to enable it, and these historical tournament "
+            "finals cannot produce that evidence (they contain no data-poor "
+            "teams). Keep `structural_prior=False` (the default); the real test "
+            "is the 48-team 2026 field's minnows on thin Polymarket "
+            "outright/advancement markets, evaluated on live data." % margin_all
         )
     else:
-        verdict = (
-            "The prior helps low-data teams (%+.4f) but hurts the full set "
-            "(%+.4f) — likely the scale is too aggressive. Re-run with a smaller "
-            "`--scale` before considering deployment." % (margin_low, margin_all)
-        )
+        helps_low = margin_low > 0
+        hurts_all = margin_all < -0.005
+        if helps_low and not hurts_all:
+            verdict = (
+                "The structural prior improves the low-data subset (%+.4f "
+                "log-loss) without materially hurting the full set (%+.4f). It is "
+                "a defensible default for the thin outright/advancement markets "
+                "where low-data teams dominate; enable `structural_prior=True` "
+                "there and keep monitoring calibration on live 2026 data."
+                % (margin_low, margin_all)
+            )
+        elif not helps_low:
+            verdict = (
+                "The structural prior does **not** improve the low-data subset "
+                "(%+.4f log-loss) on this holdout. Keep it **off** until a larger "
+                "or more minnow-heavy holdout says otherwise — consistent with "
+                "the project's keep-the-simple-default discipline." % margin_low
+            )
+        else:
+            verdict = (
+                "The prior helps low-data teams (%+.4f) but hurts the full set "
+                "(%+.4f) — likely the scale is too aggressive. Re-run with a "
+                "smaller `--scale` before considering deployment."
+                % (margin_low, margin_all)
+            )
     L.append("**" + verdict + "**")
     L.append("")
     L.append(
         "_Caveat: recent men's tournament holdouts are dominated by data-rich "
-        "teams, so the low-data subset is small and noisy. The prior's real test "
-        "is the 48-team 2026 field's minnows on thin Polymarket markets, which "
-        "this historical holdout can only approximate._"
+        "teams, so the low-data subset is small or empty and noisy. The prior's "
+        "real test is the 48-team 2026 field's minnows on thin Polymarket "
+        "markets, which this historical holdout can only approximate._"
     )
     L.append("")
     return "\n".join(L)
