@@ -149,6 +149,7 @@ def get_odds(
                 "bookmaker_title",
                 "market",
                 "outcome_name",
+                "outcome_description",
                 "outcome_point",
                 "decimal_odds",
                 "retrieved_at",
@@ -221,6 +222,8 @@ def _parse_events(events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                             **bookie_meta,
                             "market": market_key,
                             "outcome_name": outcome.get("name"),
+                            # Player props put the player here (name is "Yes").
+                            "outcome_description": outcome.get("description"),
                             "outcome_point": outcome.get("point"),
                             "decimal_odds": outcome.get("price"),
                         }

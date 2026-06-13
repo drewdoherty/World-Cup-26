@@ -102,7 +102,10 @@ def _scorer_df():
                 market=ANYTIME_SCORER_MARKET,
                 bookmaker_key=book.lower().replace(" ", "_"),
                 bookmaker_title=book,
-                outcome_name=player,
+                # Real Odds API shape: player props carry the player in
+                # ``description`` with outcome name "Yes".
+                outcome_name="Yes",
+                outcome_description=player,
                 decimal_odds=odds,
             )
         )
@@ -171,6 +174,12 @@ class TestTopScorers:
 
     def test_top_n_cap(self):
         assert len(top_scorers_from_odds(_scorer_df(), top_n=2)) == 2
+
+    def test_fallback_to_outcome_name_without_description(self):
+        df = _scorer_df().drop(columns=["outcome_description"])
+        df["outcome_name"] = ["P1", "P1", "P2", "P3"]
+        out = top_scorers_from_odds(df)
+        assert [s.player for s in out] == ["P1", "P2", "P3"]
 
 
 # ---------------------------------------------------------------------------

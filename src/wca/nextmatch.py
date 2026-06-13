@@ -89,11 +89,18 @@ def top_scorers_from_odds(
     """
     if scorer_df is None or scorer_df.empty or "market" not in scorer_df.columns:
         return []
-    rows = scorer_df[scorer_df["market"] == market]
+    rows = scorer_df[scorer_df["market"] == market].copy()
     if rows.empty:
         return []
+    # Player-prop outcomes carry the player in ``description`` with
+    # outcome_name = "Yes"; fall back to outcome_name for feeds without it.
+    if "outcome_description" in rows.columns:
+        desc = rows["outcome_description"].fillna("").astype(str)
+        rows["_player"] = desc.where(desc != "", rows["outcome_name"].astype(str))
+    else:
+        rows["_player"] = rows["outcome_name"].astype(str)
     out: List[ScorerPrice] = []
-    for player, grp in rows.groupby("outcome_name"):
+    for player, grp in rows.groupby("_player"):
         # Best price for the punter is the MAX odds across books.
         idx = grp["decimal_odds"].astype(float).idxmax()
         odds = float(grp.loc[idx, "decimal_odds"])
