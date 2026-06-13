@@ -1,17 +1,17 @@
 {
   "meta": {
-    "generated": "2026-06-13T20:33:33"
+    "generated": "2026-06-13 20:35:32 UTC"
   },
   "totals": {
-    "wagered": 424.996,
-    "open_stake": 285.997,
+    "wagered": 425.756,
+    "open_stake": 286.757,
     "settled_pl": 39.822,
     "n_bets": 59
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 304.38,
-      "open_stake": 216.23000000000002,
+      "wagered": 305.14,
+      "open_stake": 216.99,
       "settled_pl": 36.57,
       "n_bets": 43
     },
@@ -24,8 +24,8 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 304.38,
-      "open_stake": 216.23000000000002,
+      "wagered": 305.14,
+      "open_stake": 216.99,
       "settled_pl": 36.57,
       "n_bets": 43,
       "currency": "GBP"
@@ -45,8 +45,8 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 187.38,
-      "open_stake": 131.23000000000002,
+      "wagered": 188.14000000000001,
+      "open_stake": 131.99,
       "settled_pl": 25.57,
       "n_bets": 30,
       "currency": "GBP",
@@ -64,8 +64,8 @@
   "source_summary": {
     "model": {
       "GBP": {
-        "wagered": 107.32,
-        "open_stake": 73.17,
+        "wagered": 108.08000000000001,
+        "open_stake": 73.92999999999999,
         "settled_pl": -15.180000000000001,
         "n_bets": 22
       },
@@ -100,35 +100,19 @@
     }
   },
   "platforms": {
-    "williamhill": {
+    "smarkets": {
       "venue": "sportsbook",
       "currency": "GBP",
-      "wagered": 0.73,
-      "open_stake": 0.73,
-      "settled_pl": 0.0,
-      "n_bets": 1
+      "wagered": 51.690000000000005,
+      "open_stake": 49.790000000000006,
+      "settled_pl": -1.9,
+      "n_bets": 12
     },
     "betfair_ex_uk": {
       "venue": "sportsbook",
       "currency": "GBP",
-      "wagered": 38.870000000000005,
-      "open_stake": 38.870000000000005,
-      "settled_pl": 0.0,
-      "n_bets": 5
-    },
-    "betvictor": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 1.95,
-      "open_stake": 1.95,
-      "settled_pl": 0.0,
-      "n_bets": 1
-    },
-    "skybet": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 5.37,
-      "open_stake": 5.37,
+      "wagered": 10.0,
+      "open_stake": 10.0,
       "settled_pl": 0.0,
       "n_bets": 1
     },
@@ -163,14 +147,6 @@
       "open_stake": 5.0,
       "settled_pl": 0.0,
       "n_bets": 1
-    },
-    "smarkets": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 14.01,
-      "open_stake": 12.110000000000001,
-      "settled_pl": -1.9,
-      "n_bets": 5
     },
     "polymarket": {
       "venue": "polymarket",
@@ -737,15 +713,15 @@
       "match": "Brazil vs Morocco",
       "market": "Match Odds",
       "selection": "The Draw",
-      "platform": "williamhill",
+      "platform": "Smarkets",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
       "currency": "GBP",
-      "decimal_odds": 4.0,
+      "decimal_odds": 3.95,
       "stake": 0.73,
       "model_prob": 0.263,
-      "ev": 1.051
+      "ev": 1.039
     },
     {
       "id": 78,
@@ -753,15 +729,15 @@
       "match": "Haiti vs Scotland",
       "market": "Match Odds",
       "selection": "The Draw",
-      "platform": "betfair_ex_uk",
+      "platform": "Smarkets",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
       "currency": "GBP",
-      "decimal_odds": 4.8,
-      "stake": 1.04,
+      "decimal_odds": 4.7,
+      "stake": 1.8,
       "model_prob": 0.228,
-      "ev": 1.094
+      "ev": 1.072
     },
     {
       "id": 77,
@@ -769,15 +745,15 @@
       "match": "Germany vs Curaçao",
       "market": "Match Odds",
       "selection": "Curaçao",
-      "platform": "betvictor",
+      "platform": "Smarkets",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
       "currency": "GBP",
-      "decimal_odds": 56.0,
+      "decimal_odds": 44.0,
       "stake": 1.95,
       "model_prob": 0.026,
-      "ev": 1.462
+      "ev": 1.144
     },
     {
       "id": 76,
@@ -785,7 +761,7 @@
       "match": "Sweden vs Tunisia",
       "market": "Match Odds",
       "selection": "The Draw",
-      "platform": "betfair_ex_uk",
+      "platform": "Smarkets",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -801,15 +777,15 @@
       "match": "Germany vs Curaçao",
       "market": "Match Odds",
       "selection": "The Draw",
-      "platform": "skybet",
+      "platform": "Smarkets",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
       "currency": "GBP",
-      "decimal_odds": 26.0,
+      "decimal_odds": 24.0,
       "stake": 5.37,
       "model_prob": 0.061,
-      "ev": 1.577
+      "ev": 1.464
     },
     {
       "id": 74,
@@ -817,7 +793,7 @@
       "match": "Sweden vs Tunisia",
       "market": "Match Odds",
       "selection": "Tunisia",
-      "platform": "betfair_ex_uk",
+      "platform": "Smarkets",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -833,15 +809,15 @@
       "match": "Ivory Coast vs Ecuador",
       "market": "Match Odds",
       "selection": "Ecuador",
-      "platform": "betfair_ex_uk",
+      "platform": "Smarkets",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
       "currency": "GBP",
-      "decimal_odds": 2.5,
+      "decimal_odds": 2.54,
       "stake": 18.48,
       "model_prob": 0.448,
-      "ev": 1.119
+      "ev": 1.138
     },
     {
       "id": 72,
