@@ -1,58 +1,18 @@
 {
   "meta": {
-    "generated": "2026-06-13 16:12:22 UTC"
+    "generated": "2026-06-13 18:56:12 UTC"
   },
   "portfolio": {
-    "ev": 29.61,
-    "best": 170.09,
-    "worst": -31.39,
-    "p_profit": 0.5872,
-    "p_loss": 0.4128,
-    "p_big_win": 0.412,
+    "ev": 38.69,
+    "best": 206.84,
+    "worst": -14.17,
+    "p_profit": 0.6855,
+    "p_loss": 0.3145,
+    "p_big_win": 0.4362,
     "n_scenarios": 81
   },
   "correlation": {
     "worst_states": [
-      {
-        "pnl": -31.39,
-        "prob": 0.0165,
-        "results": [
-          "Switzerland",
-          "Draw",
-          "Haiti",
-          "Turkey"
-        ]
-      },
-      {
-        "pnl": -24.69,
-        "prob": 0.0346,
-        "results": [
-          "Switzerland",
-          "Brazil",
-          "Haiti",
-          "Turkey"
-        ]
-      },
-      {
-        "pnl": -21.69,
-        "prob": 0.0197,
-        "results": [
-          "Switzerland",
-          "Brazil",
-          "Haiti",
-          "Draw"
-        ]
-      },
-      {
-        "pnl": -21.63,
-        "prob": 0.0111,
-        "results": [
-          "Switzerland",
-          "Morocco",
-          "Haiti",
-          "Turkey"
-        ]
-      },
       {
         "pnl": -14.17,
         "prob": 0.059,
@@ -62,31 +22,51 @@
           "Scotland",
           "Turkey"
         ]
+      },
+      {
+        "pnl": -14.14,
+        "prob": 0.0225,
+        "results": [
+          "Switzerland",
+          "Draw",
+          "Draw",
+          "Turkey"
+        ]
+      },
+      {
+        "pnl": -8.77,
+        "prob": 0.0335,
+        "results": [
+          "Switzerland",
+          "Draw",
+          "Scotland",
+          "Draw"
+        ]
+      },
+      {
+        "pnl": -7.44,
+        "prob": 0.0473,
+        "results": [
+          "Switzerland",
+          "Brazil",
+          "Draw",
+          "Turkey"
+        ]
+      },
+      {
+        "pnl": -5.21,
+        "prob": 0.0704,
+        "results": [
+          "Switzerland",
+          "Brazil",
+          "Scotland",
+          "Draw"
+        ]
       }
     ],
     "best_states": [
       {
-        "pnl": 170.09,
-        "prob": 0.0008,
-        "results": [
-          "Qatar",
-          "Morocco",
-          "Draw",
-          "Australia"
-        ]
-      },
-      {
-        "pnl": 160.33,
-        "prob": 0.0011,
-        "results": [
-          "Qatar",
-          "Draw",
-          "Draw",
-          "Australia"
-        ]
-      },
-      {
-        "pnl": 152.84,
+        "pnl": 206.84,
         "prob": 0.0006,
         "results": [
           "Qatar",
@@ -94,9 +74,29 @@
           "Haiti",
           "Australia"
         ]
+      },
+      {
+        "pnl": 197.08,
+        "prob": 0.0008,
+        "results": [
+          "Qatar",
+          "Draw",
+          "Haiti",
+          "Australia"
+        ]
+      },
+      {
+        "pnl": 184.16,
+        "prob": 0.0017,
+        "results": [
+          "Qatar",
+          "Brazil",
+          "Haiti",
+          "Australia"
+        ]
       }
     ],
-    "narrative": "Upside is concentrated: the biggest payouts (\u00a3170 best case) need the favourites to land together, while 41% of result-states leave the book down. Downside is driven by the real-money singles, not the free accas."
+    "narrative": "Upside is concentrated: the biggest payouts (\u00a3207 best case) need the favourites to land together, while 31% of result-states leave the book down. Downside is driven by the real-money singles, not the free accas."
   },
   "fixtures": [
     {
@@ -202,17 +202,10 @@
           "outcome": "Brazil",
           "prob": 0.5566,
           "direct_pnl": -7.0,
-          "acca_ev": 53.78,
-          "net_pnl": 46.78,
+          "acca_ev": 30.04,
+          "net_pnl": 23.04,
           "blindspot": false,
           "live": [
-            {
-              "label": "Treble: Netherlands + Brazil + Paraguay",
-              "kind": "acca",
-              "profit_if_all": 23.74,
-              "p_other_legs": 1.0,
-              "ev": 23.74
-            },
             {
               "label": "Acca 4-fold: Switzerland+Brazil+Scotland+Turkey",
               "kind": "acca",
@@ -296,7 +289,7 @@
         }
       ],
       "summary": {
-        "max_win": 46.78,
+        "max_win": 23.04,
         "stake_at_risk": 7.0,
         "best_outcome": "Brazil",
         "worst_outcome": "Draw",
@@ -310,11 +303,19 @@
         {
           "outcome": "Haiti",
           "prob": 0.1681,
-          "direct_pnl": -3.92,
+          "direct_pnl": 50.08,
           "acca_ev": 0.0,
-          "net_pnl": -3.92,
+          "net_pnl": 50.08,
           "blindspot": false,
-          "live": []
+          "live": [
+            {
+              "label": "Haiti",
+              "kind": "single",
+              "stake": 10.0,
+              "profit": 54.0,
+              "free": true
+            }
+          ]
         },
         {
           "outcome": "Draw",
@@ -412,13 +413,21 @@
           "potential_profit": 40.5,
           "free": true,
           "odds": 5.05
+        },
+        {
+          "type": "FIRST_GOALSCORER",
+          "selection": "Lawrence Shankland FGS",
+          "stake": 10.0,
+          "potential_profit": 35.0,
+          "free": false,
+          "odds": 4.5
         }
       ],
       "summary": {
-        "max_win": 23.51,
+        "max_win": 50.08,
         "stake_at_risk": 3.92,
-        "best_outcome": "Scotland",
-        "worst_outcome": "Haiti",
+        "best_outcome": "Haiti",
+        "worst_outcome": "Draw",
         "n_blindspots": 0
       }
     },
@@ -552,23 +561,9 @@
       }
     }
   ],
-  "unmapped": [
-    "USA vs Paraguay / Paraguay",
-    "USA vs Paraguay / Paraguay"
-  ],
-  "off_slate_accas": [
-    "Treble: Netherlands + Brazil + Paraguay"
-  ],
+  "unmapped": [],
+  "off_slate_accas": [],
   "off_slate_events": [
-    {
-      "type": "pm_moneyline",
-      "selection": "Paraguay Yes",
-      "stake": 2.53,
-      "profit": 8.470439999999998,
-      "free": false,
-      "odds": 4.348,
-      "match": "USA vs Paraguay"
-    },
     {
       "type": "outright_golden_boot",
       "selection": "Harry Kane (England)",
@@ -588,33 +583,6 @@
       "match": "2026 FIFA World Cup - Japan Round of 16"
     },
     {
-      "type": "MATCH",
-      "selection": "USA",
-      "stake": 10.0,
-      "profit": 12.000000000000002,
-      "free": true,
-      "odds": 2.2,
-      "match": "USA (qualifier)"
-    },
-    {
-      "type": "Exact Score",
-      "selection": "United States 0-1 Paraguay",
-      "stake": 0.9989999999999999,
-      "profit": 10.100999999999999,
-      "free": false,
-      "odds": 11.11111111111111,
-      "match": "United States vs Paraguay"
-    },
-    {
-      "type": "Exact Score",
-      "selection": "United States 1-1 Paraguay",
-      "stake": 1.5,
-      "profit": 8.5,
-      "free": false,
-      "odds": 6.666666666666667,
-      "match": "United States vs Paraguay"
-    },
-    {
       "type": "polymarket",
       "selection": "Ghana eliminated R32 - No",
       "stake": 1.0,
@@ -624,15 +592,6 @@
       "match": "Ghana eliminated R32 of the World Cup"
     },
     {
-      "type": "MATCH",
-      "selection": "USA",
-      "stake": 10.0,
-      "profit": 11.0,
-      "free": true,
-      "odds": 2.1,
-      "match": "USA (qualifier, mum/Betfred)"
-    },
-    {
       "type": "Shots on Target - Player",
       "selection": "Scott Mctominay to have 1 or more shots on target (including woodwork)",
       "stake": 5.0,
@@ -640,6 +599,15 @@
       "free": true,
       "odds": 2.0,
       "match": "Haiti v Scotland"
+    },
+    {
+      "type": "Full Time Result",
+      "selection": "Australia",
+      "stake": 10.0,
+      "profit": 40.0,
+      "free": true,
+      "odds": 5.0,
+      "match": "Australia vs T\u00fcrkiye"
     }
   ]
 }
