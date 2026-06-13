@@ -1,0 +1,110 @@
+{
+  "generated": "2026-06-13T15:35Z",
+  "priors": {
+    "corners": {
+      "base": 8.97,
+      "elasticity": 0.3,
+      "dispersion": 157.5
+    },
+    "cards": {
+      "base": 3.41,
+      "dispersion": 6.9,
+      "aggression": "1.0 (group-stage default, refit w/ foul-rate priors)"
+    },
+    "scorer": {
+      "pen_xg": 0.18,
+      "note": "needs player xG-share + penalty-taker injection"
+    }
+  },
+  "method": "goal lambdas calibrated to model 1X2 via independent-Poisson/Skellam; props priced off lambdas",
+  "fixtures": [
+    {
+      "fixture": "Qatar vs Switzerland",
+      "lambda_home": 0.61,
+      "lambda_away": 2.37,
+      "totals": {
+        "over2.5_fair": 1.75,
+        "under3.5_fair": 1.53,
+        "btts_no_fair": 1.71
+      },
+      "corners": {
+        "mean": 8.9,
+        "o8.5_fair_over": 1.9,
+        "o9.5_fair_over": 2.51,
+        "o10.5_fair_over": 3.51
+      },
+      "cards": {
+        "mean": 3.4,
+        "o2.5_fair_over": 1.65,
+        "o3.5_fair_over": 2.35,
+        "o4.5_fair_over": 3.64
+      }
+    },
+    {
+      "fixture": "Brazil vs Morocco",
+      "lambda_home": 1.45,
+      "lambda_away": 0.69,
+      "totals": {
+        "over2.5_fair": 2.77,
+        "under3.5_fair": 1.2,
+        "btts_no_fair": 1.62
+      },
+      "corners": {
+        "mean": 8.2,
+        "o8.5_fair_over": 2.33,
+        "o9.5_fair_over": 3.27,
+        "o10.5_fair_over": 4.89
+      },
+      "cards": {
+        "mean": 3.4,
+        "o2.5_fair_over": 1.65,
+        "o3.5_fair_over": 2.35,
+        "o4.5_fair_over": 3.64
+      }
+    },
+    {
+      "fixture": "Haiti vs Scotland",
+      "lambda_home": 0.81,
+      "lambda_away": 1.77,
+      "totals": {
+        "over2.5_fair": 2.1,
+        "under3.5_fair": 1.35,
+        "btts_no_fair": 1.85
+      },
+      "corners": {
+        "mean": 8.5,
+        "o8.5_fair_over": 2.08,
+        "o9.5_fair_over": 2.83,
+        "o10.5_fair_over": 4.08
+      },
+      "cards": {
+        "mean": 3.4,
+        "o2.5_fair_over": 1.65,
+        "o3.5_fair_over": 2.35,
+        "o4.5_fair_over": 3.64
+      }
+    },
+    {
+      "fixture": "Australia vs Turkey",
+      "lambda_home": 0.89,
+      "lambda_away": 1.37,
+      "totals": {
+        "over2.5_fair": 2.54,
+        "under3.5_fair": 1.24,
+        "btts_no_fair": 1.78
+      },
+      "corners": {
+        "mean": 8.3,
+        "o8.5_fair_over": 2.26,
+        "o9.5_fair_over": 3.14,
+        "o10.5_fair_over": 4.64
+      },
+      "cards": {
+        "mean": 3.4,
+        "o2.5_fair_over": 1.65,
+        "o3.5_fair_over": 2.35,
+        "o4.5_fair_over": 3.64
+      }
+    }
+  ]
+}

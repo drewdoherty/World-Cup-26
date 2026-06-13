@@ -1,0 +1,637 @@
+{
+  "meta": {
+    "generated": "2026-06-13 16:07:22 UTC"
+  },
+  "portfolio": {
+    "ev": 29.61,
+    "best": 170.09,
+    "worst": -31.39,
+    "p_profit": 0.5872,
+    "p_loss": 0.4128,
+    "p_big_win": 0.412,
+    "n_scenarios": 81
+  },
+  "correlation": {
+    "worst_states": [
+      {
+        "pnl": -31.39,
+        "prob": 0.0165,
+        "results": [
+          "Switzerland",
+          "Draw",
+          "Haiti",
+          "Turkey"
+        ]
+      },
+      {
+        "pnl": -24.69,
+        "prob": 0.0346,
+        "results": [
+          "Switzerland",
+          "Brazil",
+          "Haiti",
+          "Turkey"
+        ]
+      },
+      {
+        "pnl": -21.69,
+        "prob": 0.0197,
+        "results": [
+          "Switzerland",
+          "Brazil",
+          "Haiti",
+          "Draw"
+        ]
+      },
+      {
+        "pnl": -21.63,
+        "prob": 0.0111,
+        "results": [
+          "Switzerland",
+          "Morocco",
+          "Haiti",
+          "Turkey"
+        ]
+      },
+      {
+        "pnl": -14.17,
+        "prob": 0.059,
+        "results": [
+          "Switzerland",
+          "Draw",
+          "Scotland",
+          "Turkey"
+        ]
+      }
+    ],
+    "best_states": [
+      {
+        "pnl": 170.09,
+        "prob": 0.0008,
+        "results": [
+          "Qatar",
+          "Morocco",
+          "Draw",
+          "Australia"
+        ]
+      },
+      {
+        "pnl": 160.33,
+        "prob": 0.0011,
+        "results": [
+          "Qatar",
+          "Draw",
+          "Draw",
+          "Australia"
+        ]
+      },
+      {
+        "pnl": 152.84,
+        "prob": 0.0006,
+        "results": [
+          "Qatar",
+          "Morocco",
+          "Haiti",
+          "Australia"
+        ]
+      }
+    ],
+    "narrative": "Upside is concentrated: the biggest payouts (\u00a3170 best case) need the favourites to land together, while 41% of result-states leave the book down. Downside is driven by the real-money singles, not the free accas."
+  },
+  "fixtures": [
+    {
+      "fixture": "Qatar vs Switzerland",
+      "kickoff": "2026-06-13 19:00:00+00:00",
+      "results": [
+        {
+          "outcome": "Qatar",
+          "prob": 0.0765,
+          "direct_pnl": 65.61,
+          "acca_ev": 0.0,
+          "net_pnl": 65.61,
+          "blindspot": false,
+          "live": [
+            {
+              "label": "Qatar",
+              "kind": "single",
+              "stake": 4.42,
+              "profit": 70.72,
+              "free": false
+            }
+          ]
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.1561,
+          "direct_pnl": 27.26,
+          "acca_ev": 0.0,
+          "net_pnl": 27.26,
+          "blindspot": false,
+          "live": [
+            {
+              "label": "The Draw",
+              "kind": "single",
+              "stake": 5.11,
+              "profit": 31.68,
+              "free": false
+            }
+          ]
+        },
+        {
+          "outcome": "Switzerland",
+          "prob": 0.7674,
+          "direct_pnl": -9.53,
+          "acca_ev": 21.17,
+          "net_pnl": 11.64,
+          "blindspot": false,
+          "live": [
+            {
+              "label": "Acca 4-fold: Switzerland+Brazil+Scotland+Turkey",
+              "kind": "acca",
+              "profit_if_all": 33.33,
+              "p_other_legs": 0.1616,
+              "ev": 5.39
+            },
+            {
+              "label": "Acca treble (drop BRA): Switzerland+Scotland+Turkey",
+              "kind": "acca",
+              "profit_if_all": 17.22,
+              "p_other_legs": 0.2903,
+              "ev": 5.0
+            },
+            {
+              "label": "Acca treble (drop HAI): Switzerland+Brazil+Turkey",
+              "kind": "acca",
+              "profit_if_all": 19.62,
+              "p_other_legs": 0.2684,
+              "ev": 5.27
+            },
+            {
+              "label": "Acca treble (drop AUS): Switzerland+Brazil+Scotland",
+              "kind": "acca",
+              "profit_if_all": 16.48,
+              "p_other_legs": 0.3351,
+              "ev": 5.52
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "type": "Exact Score",
+          "selection": "Qatar 0-2 Switzerland",
+          "stake": 1.9,
+          "potential_profit": 8.1,
+          "free": false,
+          "odds": 5.26
+        }
+      ],
+      "summary": {
+        "max_win": 65.61,
+        "stake_at_risk": 9.53,
+        "best_outcome": "Qatar",
+        "worst_outcome": "Switzerland",
+        "n_blindspots": 0
+      }
+    },
+    {
+      "fixture": "Brazil vs Morocco",
+      "kickoff": "2026-06-13 22:00:00+00:00",
+      "results": [
+        {
+          "outcome": "Brazil",
+          "prob": 0.5566,
+          "direct_pnl": -7.0,
+          "acca_ev": 53.78,
+          "net_pnl": 46.78,
+          "blindspot": false,
+          "live": [
+            {
+              "label": "Treble: Netherlands + Brazil + Paraguay",
+              "kind": "acca",
+              "profit_if_all": 23.74,
+              "p_other_legs": 1.0,
+              "ev": 23.74
+            },
+            {
+              "label": "Acca 4-fold: Switzerland+Brazil+Scotland+Turkey",
+              "kind": "acca",
+              "profit_if_all": 33.33,
+              "p_other_legs": 0.2228,
+              "ev": 7.43
+            },
+            {
+              "label": "Acca treble (drop QAT): Brazil+Scotland+Turkey",
+              "kind": "acca",
+              "profit_if_all": 26.67,
+              "p_other_legs": 0.2903,
+              "ev": 7.74
+            },
+            {
+              "label": "Acca treble (drop HAI): Switzerland+Brazil+Turkey",
+              "kind": "acca",
+              "profit_if_all": 19.62,
+              "p_other_legs": 0.37,
+              "ev": 7.26
+            },
+            {
+              "label": "Acca treble (drop AUS): Switzerland+Brazil+Scotland",
+              "kind": "acca",
+              "profit_if_all": 16.48,
+              "p_other_legs": 0.4621,
+              "ev": 7.61
+            }
+          ]
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.2647,
+          "direct_pnl": 5.92,
+          "acca_ev": 0.0,
+          "net_pnl": 5.92,
+          "blindspot": false,
+          "live": [
+            {
+              "label": "The Draw",
+              "kind": "single",
+              "stake": 3.23,
+              "profit": 9.69,
+              "free": false
+            }
+          ]
+        },
+        {
+          "outcome": "Morocco",
+          "prob": 0.1787,
+          "direct_pnl": 15.68,
+          "acca_ev": 0.0,
+          "net_pnl": 15.68,
+          "blindspot": false,
+          "live": [
+            {
+              "label": "Morocco",
+              "kind": "single",
+              "stake": 0.3,
+              "profit": 1.56,
+              "free": false
+            },
+            {
+              "label": "Morocco",
+              "kind": "single",
+              "stake": 3.47,
+              "profit": 17.35,
+              "free": false
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "type": "Exact Score",
+          "selection": "Brazil 1-0 Morocco",
+          "stake": 1.7,
+          "potential_profit": 8.3,
+          "free": false,
+          "odds": 5.88
+        }
+      ],
+      "summary": {
+        "max_win": 46.78,
+        "stake_at_risk": 7.0,
+        "best_outcome": "Brazil",
+        "worst_outcome": "Draw",
+        "n_blindspots": 0
+      }
+    },
+    {
+      "fixture": "Haiti vs Scotland",
+      "kickoff": "2026-06-14 01:00:00+00:00",
+      "results": [
+        {
+          "outcome": "Haiti",
+          "prob": 0.1681,
+          "direct_pnl": -3.92,
+          "acca_ev": 0.0,
+          "net_pnl": -3.92,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.2298,
+          "direct_pnl": 13.33,
+          "acca_ev": 0.0,
+          "net_pnl": 13.33,
+          "blindspot": false,
+          "live": [
+            {
+              "label": "Draw",
+              "kind": "single",
+              "stake": 3.92,
+              "profit": 13.33,
+              "free": false
+            }
+          ]
+        },
+        {
+          "outcome": "Scotland",
+          "prob": 0.6021,
+          "direct_pnl": -3.92,
+          "acca_ev": 27.43,
+          "net_pnl": 23.51,
+          "blindspot": false,
+          "live": [
+            {
+              "label": "Acca 4-fold: Switzerland+Brazil+Scotland+Turkey",
+              "kind": "acca",
+              "profit_if_all": 33.33,
+              "p_other_legs": 0.2059,
+              "ev": 6.86
+            },
+            {
+              "label": "Acca treble (drop QAT): Brazil+Scotland+Turkey",
+              "kind": "acca",
+              "profit_if_all": 26.67,
+              "p_other_legs": 0.2684,
+              "ev": 7.16
+            },
+            {
+              "label": "Acca treble (drop BRA): Switzerland+Scotland+Turkey",
+              "kind": "acca",
+              "profit_if_all": 17.22,
+              "p_other_legs": 0.37,
+              "ev": 6.37
+            },
+            {
+              "label": "Acca treble (drop AUS): Switzerland+Brazil+Scotland",
+              "kind": "acca",
+              "profit_if_all": 16.48,
+              "p_other_legs": 0.4271,
+              "ev": 7.04
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "type": "Exact Score",
+          "selection": "Haiti 1-1 Scotland",
+          "stake": 0.77,
+          "potential_profit": 5.13,
+          "free": false,
+          "odds": 7.69
+        },
+        {
+          "type": "Exact Score",
+          "selection": "Haiti 0-2 Scotland",
+          "stake": 1.4,
+          "potential_profit": 8.6,
+          "free": false,
+          "odds": 7.14
+        },
+        {
+          "type": "Exact Score",
+          "selection": "Haiti 0-1 Scotland",
+          "stake": 1.5,
+          "potential_profit": 8.5,
+          "free": false,
+          "odds": 6.67
+        },
+        {
+          "type": "BETBUILDER",
+          "selection": "Scotland win & BTTS No & Over 1.5",
+          "stake": 10.0,
+          "potential_profit": 29.4,
+          "free": true,
+          "odds": 3.94
+        },
+        {
+          "type": "BETBUILDER",
+          "selection": "Shankland FGS & Under 5.5 & Double Chance Scot/Draw",
+          "stake": 10.0,
+          "potential_profit": 40.5,
+          "free": true,
+          "odds": 5.05
+        }
+      ],
+      "summary": {
+        "max_win": 23.51,
+        "stake_at_risk": 3.92,
+        "best_outcome": "Scotland",
+        "worst_outcome": "Haiti",
+        "n_blindspots": 0
+      }
+    },
+    {
+      "fixture": "Australia vs Turkey",
+      "kickoff": "2026-06-14 04:00:00+00:00",
+      "results": [
+        {
+          "outcome": "Australia",
+          "prob": 0.2441,
+          "direct_pnl": 75.47,
+          "acca_ev": 0.0,
+          "net_pnl": 75.47,
+          "blindspot": false,
+          "live": [
+            {
+              "label": "Australia",
+              "kind": "single",
+              "stake": 18.06,
+              "profit": 81.27,
+              "free": false
+            }
+          ]
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.2737,
+          "direct_pnl": -1.24,
+          "acca_ev": 0.0,
+          "net_pnl": -1.24,
+          "blindspot": true,
+          "live": [
+            {
+              "label": "The Draw",
+              "kind": "single",
+              "stake": 5.8,
+              "profit": 16.82,
+              "free": false
+            }
+          ],
+          "plug": {
+            "available": true,
+            "outcome": "Draw",
+            "best_venue": "smarkets",
+            "best_odds": 3.95,
+            "model_prob": 0.2737,
+            "ev_pct": 8.1,
+            "recommendation": "PLUG: +EV to back (8.1% edge) \u2014 fills the gap and adds value"
+          }
+        },
+        {
+          "outcome": "Turkey",
+          "prob": 0.4822,
+          "direct_pnl": -23.86,
+          "acca_ev": 33.85,
+          "net_pnl": 9.99,
+          "blindspot": false,
+          "live": [
+            {
+              "label": "Acca 4-fold: Switzerland+Brazil+Scotland+Turkey",
+              "kind": "acca",
+              "profit_if_all": 33.33,
+              "p_other_legs": 0.2572,
+              "ev": 8.57
+            },
+            {
+              "label": "Acca treble (drop QAT): Brazil+Scotland+Turkey",
+              "kind": "acca",
+              "profit_if_all": 26.67,
+              "p_other_legs": 0.3351,
+              "ev": 8.94
+            },
+            {
+              "label": "Acca treble (drop BRA): Switzerland+Scotland+Turkey",
+              "kind": "acca",
+              "profit_if_all": 17.22,
+              "p_other_legs": 0.4621,
+              "ev": 7.96
+            },
+            {
+              "label": "Acca treble (drop HAI): Switzerland+Brazil+Turkey",
+              "kind": "acca",
+              "profit_if_all": 19.62,
+              "p_other_legs": 0.4271,
+              "ev": 8.38
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "type": "Exact Score",
+          "selection": "Australia 0-1 Turkey",
+          "stake": 1.5,
+          "potential_profit": 8.5,
+          "free": false,
+          "odds": 6.67
+        }
+      ],
+      "summary": {
+        "max_win": 75.47,
+        "stake_at_risk": 23.86,
+        "best_outcome": "Australia",
+        "worst_outcome": "Draw",
+        "n_blindspots": 1
+      }
+    }
+  ],
+  "blindspots": [
+    {
+      "fixture": "Australia vs Turkey",
+      "outcome": "Draw",
+      "prob": 0.2737,
+      "net_pnl": -1.24,
+      "plug": {
+        "available": true,
+        "outcome": "Draw",
+        "best_venue": "smarkets",
+        "best_odds": 3.95,
+        "model_prob": 0.2737,
+        "ev_pct": 8.1,
+        "recommendation": "PLUG: +EV to back (8.1% edge) \u2014 fills the gap and adds value"
+      }
+    }
+  ],
+  "unmapped": [
+    "USA vs Paraguay / Paraguay",
+    "USA vs Paraguay / Paraguay"
+  ],
+  "off_slate_accas": [
+    "Treble: Netherlands + Brazil + Paraguay"
+  ],
+  "off_slate_events": [
+    {
+      "type": "pm_moneyline",
+      "selection": "Paraguay Yes",
+      "stake": 2.53,
+      "profit": 8.470439999999998,
+      "free": false,
+      "odds": 4.348,
+      "match": "USA vs Paraguay"
+    },
+    {
+      "type": "outright_golden_boot",
+      "selection": "Harry Kane (England)",
+      "stake": 10.0,
+      "profit": 65.0,
+      "free": true,
+      "odds": 7.5,
+      "match": "FIFA World Cup 2026 Golden Boot"
+    },
+    {
+      "type": "Will Japan reach the Round of 16 at the 2026 FIFA World Cup?",
+      "selection": "Japan reach R16 - No",
+      "stake": 60.0,
+      "profit": 40.002,
+      "free": false,
+      "odds": 1.6667,
+      "match": "2026 FIFA World Cup - Japan Round of 16"
+    },
+    {
+      "type": "MATCH",
+      "selection": "USA",
+      "stake": 10.0,
+      "profit": 12.000000000000002,
+      "free": true,
+      "odds": 2.2,
+      "match": "USA (qualifier)"
+    },
+    {
+      "type": "Exact Score",
+      "selection": "United States 0-1 Paraguay",
+      "stake": 0.9989999999999999,
+      "profit": 10.100999999999999,
+      "free": false,
+      "odds": 11.11111111111111,
+      "match": "United States vs Paraguay"
+    },
+    {
+      "type": "Exact Score",
+      "selection": "United States 1-1 Paraguay",
+      "stake": 1.5,
+      "profit": 8.5,
+      "free": false,
+      "odds": 6.666666666666667,
+      "match": "United States vs Paraguay"
+    },
+    {
+      "type": "polymarket",
+      "selection": "Ghana eliminated R32 - No",
+      "stake": 1.0,
+      "profit": 0.4708000000000001,
+      "free": false,
+      "odds": 1.4708,
+      "match": "Ghana eliminated R32 of the World Cup"
+    },
+    {
+      "type": "MATCH",
+      "selection": "USA",
+      "stake": 10.0,
+      "profit": 11.0,
+      "free": true,
+      "odds": 2.1,
+      "match": "USA (qualifier, mum/Betfred)"
+    },
+    {
+      "type": "Shots on Target - Player",
+      "selection": "Scott Mctominay to have 1 or more shots on target (including woodwork)",
+      "stake": 5.0,
+      "profit": 5.0,
+      "free": true,
+      "odds": 2.0,
+      "match": "Haiti v Scotland"
+    }
+  ]
+}

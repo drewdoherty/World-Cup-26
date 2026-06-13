@@ -1,0 +1,129 @@
+#!/usr/bin/env python
+"""Generate the portfolio-exposure feed (``site/exposure_data.json``).
+
+Reads the open bet ledger (``data/wca.db``), the model's 1X2 predictions
+(``data/model_predictions.json``), and the latest h2h odds snapshot (for
+gap-plug suggestions), then writes the structured JSON the Scores & Markets
+tab renders as the exposure column + Risk & Blind Spots panel.
+
+Usage
+-----
+    python scripts/wca_exposure_data.py [--db data/wca.db] \
+        [--preds data/model_predictions.json] [--out site/exposure_data.json]
+"""
+from __future__ import annotations
+
+import argparse
+import datetime
+import glob
+import json
+import os
+import sqlite3
+import sys
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_SRC = os.path.join(os.path.dirname(_HERE), "src")
+if _SRC not in sys.path:
+    sys.path.insert(0, _SRC)
+
+from wca import exposure  # noqa: E402
+
+
+def _now_utc_str() -> str:
+    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+
+
+def _open_bets(db_path: str):
+    con = sqlite3.connect(db_path)
+    con.row_factory = sqlite3.Row
+    try:
+        rows = con.execute("SELECT * FROM bets WHERE status='open'").fetchall()
+    finally:
+        con.close()
+    return [dict(r) for r in rows]
+
+
+def _odds_index(preds_fixtures):
+    """Build {fixture: {outcome: {venue: best_odds}}} from the newest h2h snapshot.
+
+    Outcome keys are the model fixture's home team / "Draw" / away team so the
+    exposure engine can look up a plug price for any blind-spot outcome.
+    """
+    files = sorted(glob.glob("data/raw/snapshots/oddsapi_h2h_uk_*.json"),
+                   key=os.path.getmtime)
+    if not files:
+        return {}
+    rows = json.load(open(files[-1]))
+    # fixture name -> (home, away)
+    pairs = {}
+    for f in preds_fixtures:
+        if " vs " in f["fixture"]:
+            h, a = f["fixture"].split(" vs ", 1)
+            pairs[f["fixture"]] = (h, a)
+
+    def canon(s):
+        return (s or "").strip().lower()
+
+    idx = {}
+    for fixture, (home, away) in pairs.items():
+        per_outcome = {}
+        for r in rows:
+            if r.get("market") != "h2h":
+                continue
+            if canon(home) not in canon(r.get("home_team")) and \
+               canon(r.get("home_team")) not in canon(home):
+                continue
+            if canon(away) not in canon(r.get("away_team")) and \
+               canon(r.get("away_team")) not in canon(away):
+                continue
+            name = r.get("outcome_name")
+            outcome = "Draw" if canon(name) == "draw" else (
+                home if canon(name) in canon(home) or canon(home) in canon(name)
+                else away if canon(name) in canon(away) or canon(away) in canon(name)
+                else None)
+            if outcome is None:
+                continue
+            venue = r.get("bookmaker_key") or "?"
+            price = r.get("decimal_odds")
+            if price is None:
+                continue
+            cur = per_outcome.setdefault(outcome, {})
+            if venue not in cur or price > cur[venue]:
+                cur[venue] = float(price)
+        if per_outcome:
+            idx[fixture] = per_outcome
+    return idx
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description="Generate the exposure feed.")
+    ap.add_argument("--db", default="data/wca.db")
+    ap.add_argument("--preds", default="data/model_predictions.json")
+    ap.add_argument("--out", default="site/exposure_data.json")
+    args = ap.parse_args(argv)
+
+    preds = json.load(open(args.preds))
+    fixtures = preds.get("fixtures", [])
+    bets = _open_bets(args.db)
+    odds_index = _odds_index(fixtures)
+
+    data = exposure.build_exposure_data(
+        bets=bets, model_fixtures=fixtures,
+        odds_index=odds_index, now_utc=_now_utc_str(),
+    )
+
+    os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
+    with open(args.out, "w", encoding="utf-8") as fh:
+        json.dump(data, fh, indent=2)
+
+    p = data["portfolio"]
+    print(args.out)
+    print("fixtures=%d  blindspots=%d  EV=£%.2f  best=£%.2f  worst=£%.2f  "
+          "P(profit)=%.0f%%  unmapped=%d"
+          % (len(data["fixtures"]), len(data["blindspots"]), p["ev"],
+             p["best"], p["worst"], p["p_profit"] * 100, len(data["unmapped"])))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

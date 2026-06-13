@@ -1,10 +1,11 @@
-/* World Cup Alpha — model-vs-market scores page.
+/* World Cup Alpha — scores, exposure & blind-spots page.
  *
- * Loads ./scores_data.json (cache-busted) and renders, per fixture:
- *   1. a scoreline ladder (score, probability bar, fair odds), and
- *   2. a compact venue table comparing the model-implied fair 1X2 against
- *      each bookmaker's (and Polymarket's) priced odds, tinting each cell
- *      green/red when the venue price beats / misses the model fair value.
+ * Loads ./scores_data.json (model-vs-market) and ./exposure_data.json
+ * (portfolio exposure) — both cache-busted — and renders:
+ *   1. a Risk & Blind Spots panel: portfolio P&L distribution, upside/downside
+ *      correlation, the outcomes you're NOT covered on, and gap-plug ideas;
+ *   2. per fixture: a scoreline ladder, your exposure to each result (with the
+ *      events/accas driving it), and the single best market price per leg.
  *
  * Everything degrades to a clean "no data" state. No external assets, no CDN.
  */
@@ -14,14 +15,10 @@
   var $ = function (id) { return document.getElementById(id); };
 
   // ---- formatting helpers -------------------------------------------------
-
-  // Format an already-percentage number (0..100, as emitted by the card
-  // scoreline parser) to one decimal place; null/undefined/NaN -> em-dash.
   function pct1(v) {
     if (v === null || v === undefined || isNaN(v)) return "—";
     return Number(v).toFixed(1) + "%";
   }
-  // Format a 0..1 probability to a percentage.
   function prob01(v, dp) {
     if (v === null || v === undefined || isNaN(v)) return "—";
     return (Number(v) * 100).toFixed(dp === undefined ? 1 : dp) + "%";
@@ -30,14 +27,16 @@
     if (v === null || v === undefined || isNaN(v)) return "—";
     return Number(v).toFixed(dp === undefined ? 2 : dp);
   }
-  // Signed edge as a percentage, e.g. +3.4% / -1.1%.
+  function gbp(v) {
+    if (v === null || v === undefined || isNaN(v)) return "—";
+    var n = Number(v);
+    return (n < 0 ? "-£" : "£") + Math.abs(n).toFixed(2);
+  }
   function edgePct(v) {
     if (v === null || v === undefined || isNaN(v)) return "—";
     var n = Number(v) * 100;
     return (n >= 0 ? "+" : "") + n.toFixed(1) + "%";
   }
-  // Tint class for a venue price cell given the edge vs model fair.
-  // edge >= +2% -> beats (green), edge <= -2% -> misses (red dim), else flat.
   function edgeClass(v) {
     if (v === null || v === undefined || isNaN(v)) return "edge-flat";
     var n = Number(v);
@@ -45,16 +44,21 @@
     if (n <= -0.02) return "edge-down";
     return "edge-flat";
   }
+  function pnlClass(v) {
+    var n = Number(v);
+    if (n > 0.5) return "pos";
+    if (n < -0.5) return "neg";
+    return "dim";
+  }
   function timeOnly(ts) {
     if (!ts) return "";
     var t = String(ts);
     var idx = t.indexOf("T");
-    if (idx >= 0) return t.slice(idx + 1, idx + 6); // HH:MM
+    if (idx >= 0) return t.slice(idx + 1, idx + 6);
+    idx = t.indexOf(" ");
+    if (idx >= 0) return t.slice(idx + 1, idx + 6);
     return t;
   }
-
-  // Minimal text escaping for any value sourced from scores_data.json before
-  // it goes into innerHTML.
   function esc(v) {
     if (v === null || v === undefined) return "";
     return String(v)
@@ -62,17 +66,13 @@
       .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
-  // ---- renderers ----------------------------------------------------------
-
+  // ---- scoreline ladder (unchanged) ---------------------------------------
   function renderScoreLadder(fx) {
     var scores = (fx.scores || []).slice(0, 6);
-    if (!scores.length) {
-      return '<div class="empty">no scorelines</div>';
-    }
+    if (!scores.length) return '<div class="empty">no scorelines</div>';
     var maxProb = scores.reduce(function (m, s) {
       return Math.max(m, Number(s.prob || 0));
     }, 0);
-
     return scores.map(function (s) {
       var p = Number(s.prob || 0);
       var frac = maxProb > 0 ? (p / maxProb) : 0;
@@ -100,90 +100,187 @@
     return '<div class="pred-foot">' + foot.join("") + '</div>';
   }
 
-  // The model-fair row + one row per venue. Each venue cell is tinted by its
-  // edge vs the model fair price for that leg.
-  function renderVenueTable(fx) {
+  // ---- best-price summary (replaces the full venue table) -----------------
+  // For each leg, the single best venue price + its edge vs the model fair.
+  function renderBestPrice(fx) {
     var model = fx.model_1x2 || null;
     var venues = fx.venues || [];
-
-    if (!venues.length) {
+    if (!venues.length || !model) {
       return '<div class="venue-empty">No priced markets matched</div>';
     }
-
-    // Model fair row: the implied fair decimal price (1 / model_prob) per leg.
-    function fairCell(p) {
-      if (p === null || p === undefined || isNaN(p) || Number(p) <= 0) {
-        return '<td class="vt-cell vt-fair">—</td>';
+    var legs = [
+      { key: "home", label: "home" },
+      { key: "draw", label: "draw" },
+      { key: "away", label: "away" },
+    ];
+    var cells = legs.map(function (leg) {
+      var best = null;
+      venues.forEach(function (v) {
+        var price = (v.selection_prices || {})[leg.key];
+        var edge = (v.edge_vs_model || {})[leg.key];
+        if (price === null || price === undefined || isNaN(price)) return;
+        if (best === null || price > best.price) {
+          best = { price: price, edge: edge, venue: v.venue };
+        }
+      });
+      var fair = model[leg.key];
+      var fairDec = (fair && fair > 0) ? (1 / Number(fair)) : null;
+      if (!best) {
+        return '<div class="bp-leg"><span class="bp-k">' + leg.label + '</span>' +
+          '<span class="bp-fair">fair ' + num(fairDec) + '</span>' +
+          '<span class="bp-px dim">—</span></div>';
       }
-      var dec = 1 / Number(p);
-      return '<td class="vt-cell vt-fair num">' + num(dec) +
-        '<span class="vt-imp">' + prob01(p, 0) + '</span></td>';
-    }
-
-    var modelRow = '<tr class="vt-model-row">' +
-      '<td class="vt-venue">model fair</td>' +
-      fairCell(model ? model.home : null) +
-      fairCell(model ? model.draw : null) +
-      fairCell(model ? model.away : null) +
-    '</tr>';
-
-    function priceCell(price, edge) {
-      var cls = edgeClass(edge);
-      if (price === null || price === undefined || isNaN(price)) {
-        return '<td class="vt-cell ' + cls + '">—</td>';
-      }
-      return '<td class="vt-cell ' + cls + ' num">' + num(price) +
-        '<span class="vt-edge">' + esc(edgePct(edge)) + '</span></td>';
-    }
-
-    var venueRows = venues.map(function (v) {
-      var prices = v.selection_prices || {};
-      var edge = v.edge_vs_model || {};
-      return '<tr>' +
-        '<td class="vt-venue" title="' + esc(v.venue) + '">' + esc(v.venue) + '</td>' +
-        priceCell(prices.home, edge.home) +
-        priceCell(prices.draw, edge.draw) +
-        priceCell(prices.away, edge.away) +
-      '</tr>';
+      return '<div class="bp-leg"><span class="bp-k">' + leg.label + '</span>' +
+        '<span class="bp-fair">fair ' + num(fairDec) + '</span>' +
+        '<span class="bp-px ' + edgeClass(best.edge) + ' num">' + num(best.price) +
+          ' <span class="bp-edge">' + esc(edgePct(best.edge)) + '</span></span>' +
+        '<span class="bp-venue dim" title="' + esc(best.venue) + '">' + esc(best.venue) + '</span>' +
+      '</div>';
     }).join("");
-
-    var approxNote = fx.approx_1x2
-      ? '<div class="vt-note">model 1X2 is approximate (top-k scores only)</div>'
-      : '';
-
-    return '<table class="venue-table">' +
-        '<thead><tr>' +
-          '<th class="vt-venue">venue</th>' +
-          '<th>home</th><th>draw</th><th>away</th>' +
-        '</tr></thead>' +
-        '<tbody>' + modelRow + venueRows + '</tbody>' +
-      '</table>' + approxNote;
+    return '<div class="bestprice">' + cells + '</div>';
   }
 
-  function renderFixtureCard(fx) {
-    var kickoff = timeOnly(fx.kickoff);
-    var kickHtml = kickoff
-      ? '<span class="sc-kick num">' + esc(kickoff) + '</span>'
-      : '';
+  // ---- per-fixture exposure -----------------------------------------------
+  function renderExposure(exp) {
+    if (!exp || !exp.results || !exp.results.length) {
+      return '<div class="venue-empty">No exposure on this match</div>';
+    }
+    var maxAbs = exp.results.reduce(function (m, r) {
+      return Math.max(m, Math.abs(Number(r.net_pnl || 0)));
+    }, 1);
+    var rows = exp.results.map(function (r) {
+      var net = Number(r.net_pnl || 0);
+      var frac = Math.min(Math.abs(net) / maxAbs, 1);
+      var side = net >= 0 ? "exp-pos" : "exp-neg";
+      var blind = r.blindspot
+        ? '<span class="exp-blind" title="meaningful probability, no positive exposure">BLIND</span>' : '';
+      var plug = "";
+      if (r.blindspot && r.plug) {
+        plug = '<div class="exp-plug">' +
+          (r.plug.available
+            ? esc(r.plug.recommendation) + ' <span class="dim">(' +
+              esc(r.plug.outcome) + ' @ ' + num(r.plug.best_odds) + ' ' +
+              esc(r.plug.best_venue) + ')</span>'
+            : esc(r.plug.note)) +
+          '</div>';
+      }
+      return '<div class="exp-row">' +
+          '<span class="exp-out">' + esc(r.outcome) + blind + '</span>' +
+          '<span class="exp-p dim">' + esc(prob01(r.prob, 0)) + '</span>' +
+          '<span class="exp-track"><span class="exp-fill ' + side +
+            '" style="width:' + (frac * 100).toFixed(1) + '%"></span></span>' +
+          '<span class="exp-net ' + pnlClass(net) + ' num">' + gbp(net) + '</span>' +
+        '</div>' + plug;
+    }).join("");
+    // events touching this match (scorelines / props / accas)
+    var ev = (exp.events || []).map(function (e) {
+      return '<span class="exp-chip" title="' + esc(e.type) + '">' +
+        esc(e.selection) + '</span>';
+    }).join("");
+    var evHtml = ev ? '<div class="exp-events"><span class="exp-evlabel">also on:</span>' + ev + '</div>' : '';
+    var s = exp.summary || {};
+    var summ = '<div class="exp-summ dim">max win ' + gbp(s.max_win) +
+      ' · stake at risk ' + gbp(s.stake_at_risk) + '</div>';
+    return rows + evHtml + summ;
+  }
+
+  // ---- fixture card -------------------------------------------------------
+  function renderFixtureCard(fx, exp) {
+    var kickoff = timeOnly(fx.kickoff || (exp && exp.kickoff));
+    var kickHtml = kickoff ? '<span class="sc-kick num">' + esc(kickoff) + '</span>' : '';
     return '<div class="sc-card">' +
         '<div class="sc-head">' +
-          '<span class="sc-title">' + esc(fx.fixture) + '</span>' +
-          kickHtml +
+          '<span class="sc-title">' + esc(fx.fixture) + '</span>' + kickHtml +
         '</div>' +
-        '<div class="sc-body">' +
-          '<div class="sc-ladder">' +
-            renderScoreLadder(fx) +
-            renderModelFooter(fx) +
-          '</div>' +
-          '<div class="sc-venues">' +
-            renderVenueTable(fx) +
-          '</div>' +
+        '<div class="sc-body sc-body3">' +
+          '<div class="sc-col"><div class="sc-coltag">scorelines</div>' +
+            renderScoreLadder(fx) + renderModelFooter(fx) + '</div>' +
+          '<div class="sc-col"><div class="sc-coltag">your exposure</div>' +
+            renderExposure(exp) + '</div>' +
+          '<div class="sc-col"><div class="sc-coltag">best price</div>' +
+            renderBestPrice(fx) + '</div>' +
         '</div>' +
       '</div>';
   }
 
-  function renderScores(d) {
-    var fixtures = d.fixtures || [];
+  // ---- risk & blind-spots panel -------------------------------------------
+  function statChip(label, value, cls) {
+    return '<div class="rk-stat"><span class="rk-stat-v ' + (cls || "") + '">' +
+      esc(value) + '</span><span class="rk-stat-l">' + esc(label) + '</span></div>';
+  }
+
+  function renderRisk(exp) {
+    if (!exp || !exp.portfolio) {
+      $("risk").innerHTML = '<div class="empty">No exposure feed</div>';
+      $("risk-meta").textContent = "";
+      return;
+    }
+    var p = exp.portfolio, c = exp.correlation || {};
+    var strip = '<div class="rk-strip">' +
+      statChip("EV (slate)", gbp(p.ev), pnlClass(p.ev)) +
+      statChip("best case", gbp(p.best), "pos") +
+      statChip("worst case", gbp(p.worst), "neg") +
+      statChip("P(profit)", prob01(p.p_profit, 0), "pos") +
+      statChip("P(loss)", prob01(p.p_loss, 0), "neg") +
+      statChip("P(win ≥ £50)", prob01(p.p_big_win, 0), "") +
+    '</div>';
+
+    var narr = c.narrative
+      ? '<div class="rk-narr">' + esc(c.narrative) + '</div>' : '';
+
+    var bs = (exp.blindspots || []);
+    var bsHtml;
+    if (!bs.length) {
+      bsHtml = '<div class="rk-ok">No meaningful blind spots — every probable outcome carries positive exposure.</div>';
+    } else {
+      bsHtml = bs.map(function (b) {
+        var plug = b.plug && b.plug.available
+          ? '<div class="rk-plug">' + esc(b.plug.recommendation) +
+            ' <span class="dim">(' + esc(b.plug.outcome) + ' @ ' +
+            num(b.plug.best_odds) + ' ' + esc(b.plug.best_venue) + ', EV ' +
+            (b.plug.ev_pct >= 0 ? "+" : "") + num(b.plug.ev_pct, 1) + '%)</span></div>'
+          : (b.plug ? '<div class="rk-plug dim">' + esc(b.plug.note) + '</div>' : '');
+        return '<div class="rk-bs">' +
+          '<div class="rk-bs-head">' +
+            '<span class="exp-blind">BLIND</span> ' +
+            '<b>' + esc(b.fixture) + '</b> — <b>' + esc(b.outcome) + '</b>' +
+            '<span class="dim"> · ' + prob01(b.prob, 0) + ' likely · net ' +
+            gbp(b.net_pnl) + '</span>' +
+          '</div>' + plug +
+        '</div>';
+      }).join("");
+    }
+
+    var worst = (c.worst_states || []).slice(0, 3).map(function (s) {
+      return '<div class="rk-state"><span class="neg num">' + gbp(s.pnl) +
+        '</span><span class="dim"> · ' + prob01(s.prob, 1) + ' · ' +
+        esc((s.results || []).join(" / ")) + '</span></div>';
+    }).join("");
+    var best = (c.best_states || []).slice(0, 2).map(function (s) {
+      return '<div class="rk-state"><span class="pos num">' + gbp(s.pnl) +
+        '</span><span class="dim"> · ' + prob01(s.prob, 1) + ' · ' +
+        esc((s.results || []).join(" / ")) + '</span></div>';
+    }).join("");
+
+    $("risk").innerHTML = strip + narr +
+      '<div class="rk-cols">' +
+        '<div class="rk-block"><div class="rk-h">Blind spots — outcomes you\'re not covered on</div>' + bsHtml + '</div>' +
+        '<div class="rk-block"><div class="rk-h">Worst result-states</div>' + (worst || '<div class="dim">—</div>') +
+          '<div class="rk-h" style="margin-top:8px">Best result-states</div>' + (best || '<div class="dim">—</div>') +
+        '</div>' +
+      '</div>';
+    var off = [];
+    if ((exp.off_slate_accas || []).length) off.push((exp.off_slate_accas).length + " off-slate acca");
+    if ((exp.unmapped || []).length) off.push((exp.unmapped).length + " unmapped");
+    $("risk-meta").textContent = (bs.length + " blind spot" + (bs.length === 1 ? "" : "s")) +
+      (off.length ? "  ·  " + off.join(", ") : "");
+  }
+
+  // ---- scores grid --------------------------------------------------------
+  function renderScores(scoresData, expData) {
+    var fixtures = scoresData.fixtures || [];
+    var expByName = {};
+    (expData && expData.fixtures || []).forEach(function (f) { expByName[f.fixture] = f; });
     if (!fixtures.length) {
       $("scores").innerHTML = '<div class="empty">No fixture predictions</div>';
       $("scores-meta").textContent = "0";
@@ -191,11 +288,14 @@
     }
     $("scores-meta").textContent =
       fixtures.length + " fixture" + (fixtures.length === 1 ? "" : "s");
-    $("scores").innerHTML = fixtures.map(renderFixtureCard).join("");
+    $("scores").innerHTML = fixtures.map(function (fx) {
+      return renderFixtureCard(fx, expByName[fx.fixture]);
+    }).join("");
   }
 
-  function renderFooter(d) {
-    var gen = (d.meta && d.meta.generated) ? d.meta.generated : "";
+  function renderFooter(scoresData, expData) {
+    var gen = (scoresData.meta && scoresData.meta.generated) ||
+      (expData && expData.meta && expData.meta.generated) || "";
     $("foot-gen").textContent = gen ? ("Generated " + gen) : "Generated —";
   }
 
@@ -205,28 +305,24 @@
     el.hidden = false;
   }
 
-  function render(d) {
-    renderScores(d);
-    renderFooter(d);
+  // ---- boot ---------------------------------------------------------------
+  function fetchJson(url) {
+    return fetch(url + "?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); });
   }
 
-  // ---- boot ---------------------------------------------------------------
-
   function load() {
-    var url = "./scores_data.json?t=" + Date.now();
-    fetch(url, { cache: "no-store" })
-      .then(function (r) {
-        if (!r.ok) throw new Error("HTTP " + r.status);
-        return r.json();
-      })
-      .then(function (d) {
-        if (!d || typeof d !== "object") throw new Error("bad payload");
-        render(d);
-      })
-      .catch(function (err) {
-        showNoData("SCORES FEED UNAVAILABLE");
-        render({ fixtures: [], meta: {} });
-      });
+    Promise.all([
+      fetchJson("./scores_data.json").catch(function () { return null; }),
+      fetchJson("./exposure_data.json").catch(function () { return null; }),
+    ]).then(function (res) {
+      var scoresData = res[0], expData = res[1];
+      if (!scoresData) { showNoData("SCORES FEED UNAVAILABLE"); scoresData = { fixtures: [], meta: {} }; }
+      if (!expData) { showNoData("EXPOSURE FEED UNAVAILABLE"); }
+      renderRisk(expData);
+      renderScores(scoresData, expData);
+      renderFooter(scoresData, expData);
+    });
   }
 
   if (document.readyState === "loading") {

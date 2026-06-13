@@ -542,8 +542,82 @@ body {
   padding: 10px 2px;
 }
 
-@media (max-width: 760px) {
-  .sc-body { grid-template-columns: 1fr; }
+/* --- three-column fixture card: scorelines · exposure · best price --- */
+.sc-body3 { grid-template-columns: minmax(190px, 1fr) minmax(230px, 1.1fr) minmax(150px, 0.8fr); }
+.sc-col { min-width: 0; }
+.sc-coltag {
+  font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 7px; padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* exposure rows */
+.exp-row {
+  display: grid;
+  grid-template-columns: 1fr 36px 60px 56px;
+  align-items: center; gap: 6px; padding: 3px 0; font-size: 11px;
+}
+.exp-out { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.exp-p { font-size: 10px; text-align: right; }
+.exp-track {
+  position: relative; height: 6px; border-radius: 3px;
+  background: var(--track); overflow: hidden;
+}
+.exp-fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 3px; }
+.exp-pos { background: var(--pos); opacity: 0.8; }
+.exp-neg { background: var(--neg); opacity: 0.75; }
+.exp-net { text-align: right; font-size: 11px; }
+.exp-blind {
+  display: inline-block; margin-left: 5px; padding: 0 4px;
+  font-size: 8px; letter-spacing: 1px; font-weight: 700;
+  color: var(--bg); background: var(--warn); border-radius: 2px; vertical-align: middle;
+}
+.exp-plug {
+  font-size: 10px; color: var(--warn); margin: 1px 0 5px 2px;
+  padding-left: 8px; border-left: 2px solid var(--warn); line-height: 1.4;
+}
+.exp-events { margin-top: 8px; font-size: 10px; line-height: 1.9; }
+.exp-evlabel { color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-right: 5px; font-size: 9px; }
+.exp-chip {
+  display: inline-block; margin: 0 4px 2px 0; padding: 1px 6px;
+  font-size: 10px; color: var(--text-dim);
+  background: var(--panel-2); border: 1px solid var(--border); border-radius: 2px;
+}
+.exp-summ { margin-top: 7px; font-size: 10px; }
+
+/* best-price column */
+.bp-leg {
+  display: grid; grid-template-columns: 38px 1fr auto; align-items: baseline;
+  gap: 6px; padding: 4px 0; font-size: 11px; border-bottom: 1px solid var(--border);
+}
+.bp-leg:last-child { border-bottom: none; }
+.bp-k { color: var(--text-dim); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+.bp-fair { color: var(--muted); font-size: 10px; }
+.bp-px { text-align: right; font-weight: 600; }
+.bp-edge { font-size: 9px; font-weight: 400; }
+.bp-venue { display: block; font-size: 9px; text-align: right; }
+
+/* risk & blind-spots panel */
+.rk-strip { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.rk-stat {
+  flex: 1 1 90px; display: flex; flex-direction: column; gap: 2px;
+  padding: 8px 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 3px;
+}
+.rk-stat-v { font-size: 16px; font-weight: 600; font-family: var(--mono); }
+.rk-stat-l { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.rk-narr { font-size: 12px; color: var(--text-dim); line-height: 1.5; margin-bottom: 12px; border-left: 2px solid var(--accent); padding-left: 10px; }
+.rk-cols { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
+.rk-h { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.rk-bs { padding: 6px 0; border-bottom: 1px solid var(--border); }
+.rk-bs:last-child { border-bottom: none; }
+.rk-bs-head { font-size: 12px; color: var(--text); }
+.rk-plug { font-size: 10px; color: var(--warn); margin-top: 3px; padding-left: 8px; border-left: 2px solid var(--warn); line-height: 1.4; }
+.rk-state { font-size: 11px; padding: 2px 0; }
+.rk-ok { font-size: 12px; color: var(--pos); padding: 4px 0; }
+
+@media (max-width: 860px) {
+  .sc-body, .sc-body3 { grid-template-columns: 1fr; }
+  .rk-cols { grid-template-columns: 1fr; }
   .scores-nav { width: 100%; border-top: 1px solid var(--border); }
 }
 
