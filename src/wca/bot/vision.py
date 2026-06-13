@@ -74,6 +74,37 @@ PROMPT = (
     "Use null for anything not legible. Output the JSON object and nothing else."
 )
 
+# The instruction for reading a PRICE-BOOST / enhanced-odds promo screenshot
+# (a different surface from a placed betslip): we want the single boosted
+# selection, its enhanced decimal price and — when shown — the "was" price.
+BOOST_PROMPT = (
+    "You are reading a sportsbook PRICE BOOST / enhanced-odds promo from an "
+    "image (a boosted single selection, e.g. a 'Price Boost', 'Enhanced "
+    "Odds', 'Boost' or flame-icon offer). Read the ONE boosted selection.\n\n"
+    "Return ONLY a single JSON object, no prose, no markdown fences, with "
+    "exactly these keys:\n"
+    '  "bookmaker": the sportsbook name. Infer it from any visible logo, '
+    "branding, wordmark, or distinctive brand colour (green=bet365, "
+    "blue=Sky Bet/William Hill, etc.). null if you truly cannot tell.\n"
+    '  "match": the fixture, e.g. "Brazil vs Morocco". null if absent.\n'
+    '  "market": the market the boost is on, e.g. "Match Result", '
+    '"Over 2.5 Goals", "Both Teams To Score", "Correct Score", '
+    '"Anytime Goalscorer".\n'
+    '  "selection": the picked outcome, e.g. "Brazil", "Draw", "Over", '
+    '"Yes", "2-1", "Harry Kane".\n'
+    '  "boosted_odds": the ENHANCED/boosted price as a DECIMAL number. This is '
+    "the bigger, highlighted price the boost upgraded TO. Convert fractional "
+    'odds ("31/20" -> 2.55, "2/9" -> 1.2222) and "EVS"/"Evens" -> 2.0. '
+    "null if not visible.\n"
+    '  "was_odds": the ORIGINAL pre-boost price (often shown struck-through or '
+    'labelled "was"), as a DECIMAL number with the same conversions. null if '
+    "no original price is shown.\n"
+    '  "is_inplay": true ONLY if the screenshot clearly shows a live / in-play '
+    "game (a live clock, current score, or an explicit In-Play / Live label); "
+    "false otherwise.\n\n"
+    "Use null for anything not legible. Output the JSON object and nothing else."
+)
+
 
 class VisionError(RuntimeError):
     """Raised when the vision extraction cannot complete (config/HTTP/parse)."""
@@ -476,3 +507,171 @@ def extract_bets_from_image(
         raise VisionError("Anthropic response was not a JSON object")
 
     return _parse_message_body(body)
+
+
+# ---------------------------------------------------------------------------
+# Price-boost extraction.
+#
+# A boost screenshot is a different surface from a placed betslip: one boosted
+# selection at an enhanced price, which we want to *price against the model*
+# (see :mod:`wca.boosts`) rather than log to the ledger. The transport,
+# auth, base64 image block and defensive JSON parsing below mirror
+# :func:`extract_bets_from_image` exactly — same shared session, same error
+# handling, same "JSON object only" discipline — just with the boost prompt
+# and a single-object reply.
+# ---------------------------------------------------------------------------
+
+
+def _post_image_for_text(
+    image_bytes: bytes,
+    prompt: str,
+    *,
+    api_key: Optional[str],
+    model: Optional[str],
+    media_type: str,
+    timeout: float,
+    session: Optional[Any],
+) -> Dict[str, Any]:
+    """POST an image + prompt to Anthropic and return the first JSON object.
+
+    Shared transport for the vision extractors: resolves the key/model, sniffs
+    the media type from the bytes, base64-encodes the image, posts it with the
+    ``prompt`` text block, and runs the same defensive parsing the betslip path
+    uses. Raises :class:`VisionError` on any config / HTTP / parse failure.
+    """
+    key = api_key or os.environ.get("ANTHROPIC_API_KEY")
+    if not key:
+        raise VisionError(
+            "no Anthropic API key: pass api_key= or set ANTHROPIC_API_KEY"
+        )
+
+    mdl = model or os.environ.get("ANTHROPIC_VISION_MODEL") or DEFAULT_MODEL
+    sess = session or _SESSION
+
+    # Trust the bytes over the caller's declared type (Telegram mislabels PNGs).
+    media_type = sniff_media_type(image_bytes) or media_type
+
+    b64 = base64.b64encode(image_bytes).decode("ascii")
+
+    headers = {
+        "x-api-key": key,
+        "anthropic-version": ANTHROPIC_VERSION,
+        "content-type": "application/json",
+    }
+    payload: Dict[str, Any] = {
+        "model": mdl,
+        "max_tokens": MAX_TOKENS,
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": media_type,
+                            "data": b64,
+                        },
+                    },
+                    {"type": "text", "text": prompt},
+                ],
+            }
+        ],
+    }
+
+    try:
+        resp = sess.post(API_URL, headers=headers, json=payload, timeout=timeout)
+    except requests.RequestException as exc:
+        raise VisionError("Anthropic request failed: %s" % exc) from exc
+
+    status = getattr(resp, "status_code", 200)
+    try:
+        body = resp.json()
+    except ValueError as exc:
+        snippet = getattr(resp, "text", "")[:200]
+        raise VisionError("Anthropic returned non-JSON: %s" % snippet) from exc
+
+    if status >= 400:
+        err = body.get("error") if isinstance(body, dict) else None
+        msg = err.get("message") if isinstance(err, dict) else body
+        raise VisionError("Anthropic API error (HTTP %s): %s" % (status, msg))
+
+    if not isinstance(body, dict):
+        raise VisionError("Anthropic response was not a JSON object")
+
+    content = body.get("content")
+    if not content or not isinstance(content, list):
+        raise VisionError(
+            "Anthropic response had no content (API error?): %s"
+            % json.dumps(body)[:300]
+        )
+    text = ""
+    for block in content:
+        if isinstance(block, dict) and block.get("type") == "text":
+            text = block.get("text", "")
+            break
+    else:
+        first = content[0]
+        text = first.get("text", "") if isinstance(first, dict) else ""
+    if not text:
+        raise VisionError("Anthropic response text block was empty")
+
+    return _extract_json_object(text)
+
+
+def boost_from_obj(obj: Dict[str, Any]) -> "Any":
+    """Build a :class:`wca.boosts.Boost` from a parsed boost JSON object.
+
+    Coerces odds (decimal/fractional/EVS) via :func:`_coerce_odds`, the in-play
+    flag via :func:`_coerce_bool`, and leaves text fields as best-effort
+    strings. ``boosted_odds`` defaults to ``0.0`` when illegible so a downstream
+    pricing call still runs (and simply yields a non-positive edge) rather than
+    crashing on ``None``. Imported lazily so :mod:`wca.bot.vision` has no hard
+    dependency on :mod:`wca.boosts` at import time.
+    """
+    from wca.boosts import Boost
+
+    boosted = _coerce_odds(obj.get("boosted_odds"))
+    return Boost(
+        site=_str_or_empty(obj.get("bookmaker")),
+        fixture=_str_or_empty(obj.get("match")),
+        market=_str_or_empty(obj.get("market")),
+        selection=_str_or_empty(obj.get("selection")),
+        boosted_odds=float(boosted) if boosted is not None else 0.0,
+        was_odds=_coerce_odds(obj.get("was_odds")),
+        is_inplay=_coerce_bool(obj.get("is_inplay")),
+    )
+
+
+def extract_boost(
+    image_bytes: bytes,
+    *,
+    api_key: Optional[str] = None,
+    model: Optional[str] = None,
+    media_type: str = "image/jpeg",
+    timeout: float = 60.0,
+    session: Optional[Any] = None,
+) -> "Any":
+    """Extract one price-boost selection from a promo screenshot.
+
+    Sends the image to Anthropic vision with :data:`BOOST_PROMPT` and returns a
+    :class:`wca.boosts.Boost` describing the single boosted selection (its
+    enhanced decimal price, optional ``was`` price, and an in-play flag). The
+    caller prices it via :func:`wca.boosts.evaluate_boost` — this function never
+    touches the ledger.
+
+    Parameters mirror :func:`extract_bets_from_image` (``api_key``, ``model``,
+    ``media_type``, ``timeout``, ``session``); the same shared session and
+    error handling apply. Raises :class:`VisionError` on config / HTTP / parse
+    failure.
+    """
+    obj = _post_image_for_text(
+        image_bytes,
+        BOOST_PROMPT,
+        api_key=api_key,
+        model=model,
+        media_type=media_type,
+        timeout=timeout,
+        session=session,
+    )
+    return boost_from_obj(obj)
