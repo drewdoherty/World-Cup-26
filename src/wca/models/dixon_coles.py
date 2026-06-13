@@ -346,6 +346,16 @@ class DixonColesModel:
         Extra ridge multiplier applied to low-data teams (see ``min_matches``).
     max_goals:
         Default truncation of the score matrix used by :meth:`predict`.
+    attack_prior, defence_prior:
+        Optional ``{team: value}`` shrinkage *targets* (in log-goal units) for the
+        ridge penalty. When given, the penalty pulls each team's attack/defence
+        toward its prior instead of toward zero — the structural-prior path (see
+        :mod:`wca.models.structural`). The priors are re-centred mean-zero over
+        the fitted team set to preserve identifiability. When ``None`` (default)
+        the targets are zero and the model is identical to the classic
+        shrink-to-global-mean Dixon-Coles. Most valuable for low-data teams,
+        whose weak likelihood lets the (stronger) ridge dominate; swamped by the
+        likelihood for data-rich teams.
     """
 
     def __init__(
@@ -356,6 +366,8 @@ class DixonColesModel:
         min_matches: int = 5,
         low_data_reg_multiplier: float = 5.0,
         max_goals: int = 10,
+        attack_prior: Optional[Dict[str, float]] = None,
+        defence_prior: Optional[Dict[str, float]] = None,
     ) -> None:
         if xi is not None and half_life_years is not None:
             raise ValueError("pass at most one of xi / half_life_years")
@@ -371,6 +383,12 @@ class DixonColesModel:
         self.min_matches = int(min_matches)
         self.low_data_reg_multiplier = float(low_data_reg_multiplier)
         self.max_goals = int(max_goals)
+        # Structural shrinkage targets (raw, as supplied). The per-fit, mean-zero
+        # re-centred versions are stored as ``_attack_prior_c`` / ``_defence_prior_c``.
+        self.attack_prior: Dict[str, float] = dict(attack_prior) if attack_prior else {}
+        self.defence_prior: Dict[str, float] = dict(defence_prior) if defence_prior else {}
+        self._attack_prior_c: Dict[str, float] = {}
+        self._defence_prior_c: Dict[str, float] = {}
 
         # Fitted state.
         self.teams: List[str] = []
@@ -403,26 +421,30 @@ class DixonColesModel:
     def _attack_of(self, team: str, warn: bool = True) -> float:
         if team in self.attack:
             return self.attack[team]
+        # Unseen team: prefer its (mean-zero re-centred) structural prior if one
+        # was supplied, else the zero baseline.
+        fallback = self._attack_prior_c.get(team, self.prior_attack)
         if warn:
             warnings.warn(
                 "Unseen team %r; falling back to baseline prior (attack=%.3f)."
-                % (team, self.prior_attack),
+                % (team, fallback),
                 RuntimeWarning,
                 stacklevel=2,
             )
-        return self.prior_attack
+        return fallback
 
     def _defence_of(self, team: str, warn: bool = True) -> float:
         if team in self.defence:
             return self.defence[team]
+        fallback = self._defence_prior_c.get(team, self.prior_defence)
         if warn:
             warnings.warn(
                 "Unseen team %r; falling back to baseline prior (defence=%.3f)."
-                % (team, self.prior_defence),
+                % (team, fallback),
                 RuntimeWarning,
                 stacklevel=2,
             )
-        return self.prior_defence
+        return fallback
 
     # -- fitting ------------------------------------------------------------
 
@@ -496,6 +518,20 @@ class DixonColesModel:
         low_data = counts < self.min_matches
         ridge[low_data] = self.reg_lambda * self.low_data_reg_multiplier
 
+        # Structural shrinkage targets, aligned to the team index and re-centred
+        # mean-zero (to match the mean-zero attack/defence parameterisation).
+        # Empty/absent priors => zero vectors => classic shrink-to-mean behaviour.
+        atk_prior_vec = np.array(
+            [self.attack_prior.get(t, 0.0) for t in teams], dtype=float
+        )
+        dfc_prior_vec = np.array(
+            [self.defence_prior.get(t, 0.0) for t in teams], dtype=float
+        )
+        atk_prior_vec = atk_prior_vec - atk_prior_vec.mean()
+        dfc_prior_vec = dfc_prior_vec - dfc_prior_vec.mean()
+        self._attack_prior_c = {t: float(atk_prior_vec[i]) for i, t in enumerate(teams)}
+        self._defence_prior_c = {t: float(dfc_prior_vec[i]) for i, t in enumerate(teams)}
+
         # Precompute index masks for the four corrected scorelines so the
         # log-likelihood is fully vectorised.
         x = hg.astype(int)
@@ -555,7 +591,11 @@ class DixonColesModel:
 
             wll = float(np.sum(weights * ll))
 
-            penalty = float(np.sum(ridge * atk * atk) + np.sum(ridge * dfc * dfc))
+            atk_dev = atk - atk_prior_vec
+            dfc_dev = dfc - dfc_prior_vec
+            penalty = float(
+                np.sum(ridge * atk_dev * atk_dev) + np.sum(ridge * dfc_dev * dfc_dev)
+            )
             return -wll + penalty
 
         # Initialisation: log mean goals for mu, small home advantage, rho 0.
@@ -717,6 +757,10 @@ class DixonColesModel:
             "home_advantage": self.home_advantage,
             "rho": self.rho,
             "match_counts": dict(self.match_counts),
+            "attack_prior": dict(self.attack_prior),
+            "defence_prior": dict(self.defence_prior),
+            "attack_prior_centered": dict(self._attack_prior_c),
+            "defence_prior_centered": dict(self._defence_prior_c),
             "fitted": self.fitted,
         }
 
@@ -729,11 +773,19 @@ class DixonColesModel:
             min_matches=data.get("min_matches", 5),
             low_data_reg_multiplier=data.get("low_data_reg_multiplier", 5.0),
             max_goals=data.get("max_goals", 10),
+            attack_prior=data.get("attack_prior") or None,
+            defence_prior=data.get("defence_prior") or None,
         )
         obj.teams = list(data.get("teams", []))
         obj._team_index = {t: i for i, t in enumerate(obj.teams)}
         obj.attack = {str(k): float(v) for k, v in data.get("attack", {}).items()}
         obj.defence = {str(k): float(v) for k, v in data.get("defence", {}).items()}
+        obj._attack_prior_c = {
+            str(k): float(v) for k, v in data.get("attack_prior_centered", {}).items()
+        }
+        obj._defence_prior_c = {
+            str(k): float(v) for k, v in data.get("defence_prior_centered", {}).items()
+        }
         obj.mu = float(data.get("mu", 0.0))
         obj.home_advantage = float(data.get("home_advantage", 0.0))
         obj.rho = float(data.get("rho", 0.0))

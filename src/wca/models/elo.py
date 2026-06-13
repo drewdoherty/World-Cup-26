@@ -232,13 +232,17 @@ class EloRater:
         away_team: str,
         neutral: bool = False,
         host: Optional[str] = None,
+        host_points: Optional[float] = None,
     ) -> float:
         """Expected score of the home side given the current ratings.
 
         ``host`` may name a team that receives the home/host advantage even on
-        a neutral venue (used for tournament hosts).
+        a neutral venue (used for tournament hosts). ``host_points`` optionally
+        overrides the magnitude of that host bonus (see :meth:`_rating_diff`).
         """
-        diff = self._rating_diff(home_team, away_team, neutral=neutral, host=host)
+        diff = self._rating_diff(
+            home_team, away_team, neutral=neutral, host=host, host_points=host_points
+        )
         return expected_score(diff)
 
     def _rating_diff(
@@ -247,8 +251,16 @@ class EloRater:
         away_team: str,
         neutral: bool,
         host: Optional[str],
+        host_points: Optional[float] = None,
     ) -> float:
-        """Home-minus-away effective rating difference, including advantages."""
+        """Home-minus-away effective rating difference, including advantages.
+
+        ``host_points`` optionally overrides the host-bonus magnitude on a
+        neutral venue. When ``None`` (default) the bonus is the full
+        ``home_advantage``, reproducing the legacy behaviour; the venue-aware
+        path (see :mod:`wca.models.venues`) passes a diluted, altitude-adjusted
+        value instead.
+        """
         rh = self.get_rating(home_team)
         ra = self.get_rating(away_team)
         adv = 0.0
@@ -257,10 +269,11 @@ class EloRater:
         elif self.host_advantage and host is not None:
             # Neutral venue but a tournament host is playing: grant the host
             # the advantage in whichever direction it applies.
+            mag = self.home_advantage if host_points is None else float(host_points)
             if host == home_team:
-                adv = self.home_advantage
+                adv = mag
             elif host == away_team:
-                adv = -self.home_advantage
+                adv = -mag
         return (rh + adv) - ra
 
     def rate_match(

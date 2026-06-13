@@ -78,6 +78,8 @@ flowchart TD
 ### Models — with the evidence behind every default
 - **International Elo** (World Football Elo conventions: importance-weighted K, goal-margin multiplier, host advantage) + ordered-logit draw model.
 - **Time-decayed Dixon-Coles** with L2 shrinkage for 200+ sparse national teams. Deployed half-life **8y** — backtested across WC2018/WC2022/Euro+Copa2024 holdouts (211 matches); hl=4 wins by a non-decision-grade +0.0016 log-loss and the deployed Elo+DC blend is best *at* 8y ([backtest](docs/research/backtests/halflife.md)).
+- **Optional structural (socio-economic) shrinkage prior** (`fit_models(structural_prior=True)`, default **off**): for the 48-team field's low-data minnows, shrink Dixon-Coles toward a Klement / Hoffmann-Ging-Ramasamy estimate (population × football culture, inverted-U in GDP/capita, confederation) instead of the global mean — a better-informed prior exactly where the likelihood is weak, swamped by data for the rich teams. Intended for the thin Polymarket outright/advancement markets, gated on its own holdout ([backtest](docs/research/backtests/structural_prior.md)).
+- **Venue/geography-aware host advantage** (`make_prob_fn(venue_aware=True)`, default **off**): dilutes the legacy single-host bonus across the three co-hosts (each only at home in the group stage) and adds an altitude tax on sea-level visitors — chiefly Mexico's group games at Estadio Azteca (~2240 m).
 - **Market baseline**: Shin de-vig per book → consensus median.
 - **Blend**: 25/25/50 Elo/DC/market. Fitted weights on real WC2022 closing odds (pulled via historical API) do **not** beat market-only with confidence (n=64, CI straddles zero) — so the prior stands, documented, until WC2026 group-stage data re-fits it ([backtest](docs/research/backtests/blend_weights.md)).
 - **Scoreline engine**: DC score matrix reconciled exactly to the blended 1X2 → correct scores, O/U, BTTS that never contradict the headline card.
@@ -159,6 +161,7 @@ This repository is a measurement instrument first. The backtests in `docs/resear
 - Dixon & Coles (1997), *Modelling association football scores…*, JRSS-C 46(2).
 - Shin (1993); Štrumbelj (2014), *On determining probability forecasts from betting odds*, IJF 30(4).
 - Hvattum & Arntzen (2010), *Using ELO ratings for match result prediction*, IJF 26(3).
+- Hoffmann, Ging & Ramasamy (2002), *The Socio-Economic Determinants of International Soccer Performance*, JAE 5(2) — basis of the optional structural prior (popularised by J. Klement).
 - MacLean, Thorp & Ziemba (2011), *The Kelly Capital Growth Investment Criterion*.
 - Buchdahl, *Squares & Sharps* — closing-line value as the edge proxy.
 - Full annotated bibliography: [docs/research/annotated_bibliography.md](docs/research/annotated_bibliography.md)

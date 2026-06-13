@@ -56,6 +56,8 @@ import pandas as pd
 from wca.card import FittedModels, dc_probs, elo_probs
 from wca.data.teamnames import canonical
 from wca.markets import kelly as kelly_mod
+from wca.models import venues as venues_mod
+from wca.models.structural import load_country_factors
 from wca.sim.tournament2026 import GROUP_LETTERS, TournamentSimulator
 
 # ---------------------------------------------------------------------------
@@ -122,6 +124,19 @@ PM_POOL_BANKROLL: float = 1310.0
 PM_KELLY_FRACTION: float = 0.25
 PM_PER_BET_CAP: float = 0.05
 
+# Default dilution of each co-host's home bonus on the venue-aware path. The
+# legacy path (venue_aware=False) ignores this and uses the full bonus.
+DEFAULT_HOST_FACTOR: float = 0.5
+
+# Representative group-stage home-venue altitude per host nation (metres). The
+# Mexican hosts play their group games at altitude (Estadio Azteca, Mexico City);
+# the US/Canadian host venues are effectively sea level.
+HOST_VENUE_ALTITUDE_M: Dict[str, float] = {
+    "Mexico": 2240.0,
+    "United States": 30.0,
+    "Canada": 50.0,
+}
+
 
 # ---------------------------------------------------------------------------
 # prob_fn: 50/50 Elo + Dixon-Coles blend (NO market input).
@@ -142,7 +157,13 @@ def _host_for(home: str, away: str) -> Optional[str]:
     return None
 
 
-def make_prob_fn(models: FittedModels):
+def make_prob_fn(
+    models: FittedModels,
+    *,
+    venue_aware: bool = False,
+    host_factor: float = DEFAULT_HOST_FACTOR,
+    altitude_coef: float = venues_mod.DEFAULT_ALTITUDE_COEF,
+):
     """Build ``prob_fn(team_a, team_b, knockout) -> (p_a, p_draw, p_b)``.
 
     A straight **50/50 average of the Elo ordered-logit and the Dixon-Coles**
@@ -161,17 +182,48 @@ def make_prob_fn(models: FittedModels):
       host handling is not modelled there — a small, documented approximation).
     * Every other group match and **all** knockout matches are neutral.
 
+    Venue/geography awareness (opt-in)
+    ----------------------------------
+    With ``venue_aware=True`` the host bonus is **diluted** by ``host_factor``
+    (the legacy single-host full bonus is mis-specified for three co-hosts who
+    are only at home in the group stage) and an **altitude** term is added that
+    taxes a sea-level visitor at a high-altitude venue — chiefly Mexico's group
+    games at Estadio Azteca. With ``venue_aware=False`` (default) the full,
+    undiluted host bonus is used exactly as before.
+
     The returned probabilities are ``(p_a, p_draw, p_b)`` for the *ordered* pair
     ``(team_a, team_b)``, i.e. ``team_a`` is treated as the nominal home side.
     The simulator normalises the triple, so only the ratio matters.
     """
+    base_adv = models.rater.home_advantage
+    factors = load_country_factors() if venue_aware else {}
+
+    def _host_points(host: Optional[str], opponent: Optional[str]) -> Optional[float]:
+        """Diluted, altitude-adjusted host bonus, or ``None`` for legacy behaviour."""
+        if not venue_aware or host is None:
+            return None
+        venue_alt = HOST_VENUE_ALTITUDE_M.get(host)
+        opp = factors.get(opponent) if opponent is not None else None
+        opp_alt = opp.home_altitude_m if opp is not None else None
+        return venues_mod.host_advantage_points(
+            base_adv,
+            factor=host_factor,
+            venue_altitude_m=venue_alt,
+            visitor_home_altitude_m=opp_alt,
+            altitude_coef=altitude_coef,
+        )
 
     def prob_fn(team_a: str, team_b: str, knockout: bool) -> Tuple[float, float, float]:
         a = canonical(team_a)
         b = canonical(team_b)
         host = None if knockout else _host_for(a, b)
+        # The visiting (non-host) side bears any altitude tax.
+        opponent = b if host == a else (a if host == b else None)
+        host_points = _host_points(host, opponent)
         # Elo: pass host on a neutral venue so the host bonus is applied.
-        e_h, e_d, e_a = elo_probs(models, a, b, neutral=True, host=host)
+        e_h, e_d, e_a = elo_probs(
+            models, a, b, neutral=True, host=host, host_points=host_points
+        )
         # Dixon-Coles: neutral (no per-host venue term available).
         d_h, d_d, d_a = dc_probs(models, a, b, neutral=True)
         p_a = 0.5 * e_h + 0.5 * d_h
@@ -195,6 +247,7 @@ def run_advancement(
     n_sims: int = 20000,
     seed: int = 42,
     groups: Optional[Dict[str, List[str]]] = None,
+    venue_aware: bool = False,
 ) -> pd.DataFrame:
     """Simulate the tournament and return per-team stage probabilities.
 
@@ -219,7 +272,7 @@ def run_advancement(
     if set(grp) != set(GROUP_LETTERS):
         raise ValueError("groups must contain exactly the 12 letters A-L")
 
-    prob_fn = make_prob_fn(models)
+    prob_fn = make_prob_fn(models, venue_aware=venue_aware)
     sim = TournamentSimulator(grp, prob_fn)
     res = sim.simulate(n_sims=n_sims, rng_seed=seed)
 

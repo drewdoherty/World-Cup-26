@@ -287,6 +287,8 @@ def fit_models(
     results: pd.DataFrame,
     half_life_years: float = 8.0,
     reference_date: Optional[str] = None,
+    structural_prior: bool = False,
+    structural_prior_scale: Optional[float] = None,
 ) -> FittedModels:
     """Fit Elo (rating + outcome) and Dixon-Coles on the results history.
 
@@ -332,7 +334,22 @@ def fit_models(
     # -- Dixon-Coles --------------------------------------------------------
     from wca.models.dixon_coles import xi_from_half_life
 
-    dc = DixonColesModel(xi=xi_from_half_life(half_life_years))
+    # Structural shrinkage prior (opt-in, default off). When enabled, low-data
+    # teams shrink toward a socio-economic estimate instead of the global mean.
+    atk_prior = dfc_prior = None
+    if structural_prior:
+        from wca.models.structural import DEFAULT_PRIOR_SCALE, dc_priors_from_factors
+
+        scale = (
+            DEFAULT_PRIOR_SCALE if structural_prior_scale is None else structural_prior_scale
+        )
+        atk_prior, dfc_prior = dc_priors_from_factors(scale=scale)
+
+    dc = DixonColesModel(
+        xi=xi_from_half_life(half_life_years),
+        attack_prior=atk_prior,
+        defence_prior=dfc_prior,
+    )
     dc.fit_dataframe(played, reference_date=reference_date)
 
     return FittedModels(rater=rater, elo_outcome=elo_outcome, dc=dc, n_matches=len(played))
@@ -344,10 +361,21 @@ def fit_models(
 
 
 def elo_probs(
-    models: FittedModels, home: str, away: str, neutral: bool, host: Optional[str] = None
+    models: FittedModels,
+    home: str,
+    away: str,
+    neutral: bool,
+    host: Optional[str] = None,
+    host_points: Optional[float] = None,
 ) -> Tuple[float, float, float]:
-    """Elo (home, draw, away) via the ordered-logit outcome model."""
-    diff = models.rater._rating_diff(home, away, neutral=neutral, host=host)
+    """Elo (home, draw, away) via the ordered-logit outcome model.
+
+    ``host_points`` optionally overrides the host-bonus magnitude (venue-aware
+    path); ``None`` keeps the legacy full ``home_advantage``.
+    """
+    diff = models.rater._rating_diff(
+        home, away, neutral=neutral, host=host, host_points=host_points
+    )
     return models.elo_outcome.predict_proba(diff)
 
 
