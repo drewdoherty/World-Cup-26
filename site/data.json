@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-13T19:54:25"
+    "generated": "2026-06-13 20:04:55 UTC"
   },
   "totals": {
-    "wagered": 388.0759999999999,
-    "open_stake": 249.077,
+    "wagered": 424.996,
+    "open_stake": 285.997,
     "settled_pl": 39.822,
-    "n_bets": 52
+    "n_bets": 59
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 267.46000000000004,
-      "open_stake": 179.31,
+      "wagered": 304.38,
+      "open_stake": 216.23000000000002,
       "settled_pl": 36.57,
-      "n_bets": 36
+      "n_bets": 43
     },
     "USD": {
       "wagered": 120.616,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 267.46000000000004,
-      "open_stake": 179.31,
+      "wagered": 304.38,
+      "open_stake": 216.23000000000002,
       "settled_pl": 36.57,
-      "n_bets": 36,
+      "n_bets": 43,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 150.45999999999998,
-      "open_stake": 94.30999999999999,
+      "wagered": 187.38,
+      "open_stake": 131.23000000000002,
       "settled_pl": 25.57,
-      "n_bets": 23,
+      "n_bets": 30,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,26 +62,26 @@
     }
   },
   "source_summary": {
-    "offer": {
-      "GBP": {
-        "wagered": 174.0,
-        "open_stake": 125.0,
-        "settled_pl": 26.75,
-        "n_bets": 19
-      }
-    },
     "model": {
       "GBP": {
-        "wagered": 70.4,
-        "open_stake": 36.25,
+        "wagered": 107.32,
+        "open_stake": 73.17,
         "settled_pl": -15.180000000000001,
-        "n_bets": 15
+        "n_bets": 22
       },
       "USD": {
         "wagered": 107.25,
         "open_stake": 60.0,
         "settled_pl": 6.852000000000004,
         "n_bets": 6
+      }
+    },
+    "offer": {
+      "GBP": {
+        "wagered": 174.0,
+        "open_stake": 125.0,
+        "settled_pl": 26.75,
+        "n_bets": 19
       }
     },
     "punt": {
@@ -100,11 +100,35 @@
     }
   },
   "platforms": {
+    "williamhill": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 0.73,
+      "open_stake": 0.73,
+      "settled_pl": 0.0,
+      "n_bets": 1
+    },
     "betfair_ex_uk": {
       "venue": "sportsbook",
       "currency": "GBP",
-      "wagered": 10.0,
-      "open_stake": 10.0,
+      "wagered": 38.870000000000005,
+      "open_stake": 38.870000000000005,
+      "settled_pl": 0.0,
+      "n_bets": 5
+    },
+    "betvictor": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 1.95,
+      "open_stake": 1.95,
+      "settled_pl": 0.0,
+      "n_bets": 1
+    },
+    "skybet": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 5.37,
+      "open_stake": 5.37,
       "settled_pl": 0.0,
       "n_bets": 1
     },
@@ -707,6 +731,118 @@
     "n_with_close": 12
   },
   "positions": [
+    {
+      "id": 79,
+      "ts_utc": "2026-06-13T20:55:00",
+      "match": "Brazil vs Morocco",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "williamhill",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 4.0,
+      "stake": 0.73,
+      "model_prob": 0.263,
+      "ev": 1.051
+    },
+    {
+      "id": 78,
+      "ts_utc": "2026-06-13T20:55:00",
+      "match": "Haiti vs Scotland",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "betfair_ex_uk",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 4.8,
+      "stake": 1.04,
+      "model_prob": 0.228,
+      "ev": 1.094
+    },
+    {
+      "id": 77,
+      "ts_utc": "2026-06-13T20:55:00",
+      "match": "Germany vs Curaçao",
+      "market": "Match Odds",
+      "selection": "Curaçao",
+      "platform": "betvictor",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 56.0,
+      "stake": 1.95,
+      "model_prob": 0.026,
+      "ev": 1.462
+    },
+    {
+      "id": 76,
+      "ts_utc": "2026-06-13T20:55:00",
+      "match": "Sweden vs Tunisia",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "betfair_ex_uk",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 3.6,
+      "stake": 2.68,
+      "model_prob": 0.286,
+      "ev": 1.03
+    },
+    {
+      "id": 75,
+      "ts_utc": "2026-06-13T20:55:00",
+      "match": "Germany vs Curaçao",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "skybet",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 26.0,
+      "stake": 5.37,
+      "model_prob": 0.061,
+      "ev": 1.577
+    },
+    {
+      "id": 74,
+      "ts_utc": "2026-06-13T20:55:00",
+      "match": "Sweden vs Tunisia",
+      "market": "Match Odds",
+      "selection": "Tunisia",
+      "platform": "betfair_ex_uk",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 4.6,
+      "stake": 6.67,
+      "model_prob": 0.24,
+      "ev": 1.103
+    },
+    {
+      "id": 73,
+      "ts_utc": "2026-06-13T20:55:00",
+      "match": "Ivory Coast vs Ecuador",
+      "market": "Match Odds",
+      "selection": "Ecuador",
+      "platform": "betfair_ex_uk",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 2.5,
+      "stake": 18.48,
+      "model_prob": 0.448,
+      "ev": 1.119
+    },
     {
       "id": 72,
       "ts_utc": "2026-06-13T20:15:00",
