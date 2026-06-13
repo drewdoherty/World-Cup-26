@@ -10,6 +10,12 @@ Usage::
 
     python scripts/wca_advancement.py [--n-sims N] [--seed S]
         [--results PATH] [--out PATH] [--cache PATH] [--refit] [--top N]
+        [--venue-aware] [--structural-prior]
+
+``--venue-aware`` and ``--structural-prior`` enable the opt-in Klement-borrowed
+features (both default off) for A/B comparison on the Polymarket markets; see
+docs/research/backtests/structural_prior.md for the evidence behind keeping them
+off by default.
 
 No API key is required (the Polymarket Gamma API is public).
 """
@@ -29,11 +35,16 @@ def _fmt_pct(x: float) -> str:
     return "%.1f%%" % (100.0 * x)
 
 
-def _load_or_fit_models(results_path: str, cache_path: str, refit: bool):
+def _load_or_fit_models(
+    results_path: str, cache_path: str, refit: bool, structural_prior: bool = False
+):
     """Fit Elo+DC, caching the fitted object to ``cache_path`` (pickle).
 
     The fit takes ~2 minutes; the cache is keyed only by existence (the caller
-    passes ``--refit`` to force a fresh fit when the results file changes).
+    passes ``--refit`` to force a fresh fit when the results file changes). When
+    ``structural_prior`` is set the Dixon-Coles ridge shrinks low-data teams
+    toward the socio-economic prior; that is a *different* fit, so the caller
+    routes it to a distinct cache file (see ``main``) to keep A/B runs separate.
     """
     from wca.card import fit_models
     from wca.data.results import load_results
@@ -48,9 +59,12 @@ def _load_or_fit_models(results_path: str, cache_path: str, refit: bool):
         except Exception as exc:  # noqa: BLE001 - cache is best-effort
             print("Cache load failed (%s); refitting." % exc, file=sys.stderr)
 
-    print("Fitting Elo + Dixon-Coles (this takes ~2 minutes)…")
+    print(
+        "Fitting Elo + Dixon-Coles%s (this takes ~2 minutes)…"
+        % (" [structural prior]" if structural_prior else "")
+    )
     results = load_results(results_path)
-    models = fit_models(results)
+    models = fit_models(results, structural_prior=structural_prior)
     try:
         cache.parent.mkdir(parents=True, exist_ok=True)
         with cache.open("wb") as fh:
@@ -295,6 +309,20 @@ def main() -> None:
     parser.add_argument(
         "--refit", action="store_true", help="Force a fresh model fit."
     )
+    parser.add_argument(
+        "--venue-aware",
+        action="store_true",
+        help="Opt-in venue/geography-aware host advantage: dilute the host bonus "
+        "across the three co-hosts and add an altitude tax (Estadio Azteca). "
+        "Default off (legacy full single-host bonus).",
+    )
+    parser.add_argument(
+        "--structural-prior",
+        action="store_true",
+        help="Opt-in socio-economic shrinkage prior for low-data teams in "
+        "Dixon-Coles (Klement / Hoffmann-Ging-Ramasamy). Refits to a separate "
+        "model cache. Default off. See docs/research/backtests/structural_prior.md.",
+    )
     parser.add_argument("--top", type=int, default=10)
     args = parser.parse_args()
 
@@ -305,12 +333,29 @@ def main() -> None:
         print("ERROR: could not import wca modules: %s" % exc, file=sys.stderr)
         sys.exit(1)
 
-    # 1. Models.
-    models = _load_or_fit_models(args.results, args.cache, args.refit)
+    # 1. Models. Structural-prior fits are a different model, so route them to a
+    #    distinct cache file to avoid clobbering the baseline A/B cache.
+    cache_path = args.cache
+    if args.structural_prior:
+        p = Path(args.cache)
+        cache_path = str(p.with_name(p.stem + "_structural" + p.suffix))
+    models = _load_or_fit_models(
+        args.results, cache_path, args.refit, structural_prior=args.structural_prior
+    )
 
     # 2. Simulate.
-    print("Running %d-sim tournament (seed %d)…" % (args.n_sims, args.seed))
-    sim_df = run_advancement(models, n_sims=args.n_sims, seed=args.seed)
+    flags = []
+    if args.venue_aware:
+        flags.append("venue-aware host")
+    if args.structural_prior:
+        flags.append("structural prior")
+    print(
+        "Running %d-sim tournament (seed %d)%s…"
+        % (args.n_sims, args.seed, (" [%s]" % ", ".join(flags)) if flags else "")
+    )
+    sim_df = run_advancement(
+        models, n_sims=args.n_sims, seed=args.seed, venue_aware=args.venue_aware
+    )
 
     # 3. Pull Polymarket.
     print("Pulling live Polymarket World-Cup markets…")
