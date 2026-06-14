@@ -1,39 +1,39 @@
 {
   "meta": {
-    "generated": "2026-06-14T00:13:23"
+    "generated": "2026-06-14T00:14:57"
   },
   "totals": {
     "wagered": 470.756,
-    "open_stake": 280.327,
-    "settled_pl": 65.184,
+    "open_stake": 225.897,
+    "settled_pl": 95.0575,
     "n_bets": 61
   },
   "totals_by_currency": {
     "GBP": {
       "wagered": 350.14000000000004,
-      "open_stake": 212.46,
-      "settled_pl": 63.832,
+      "open_stake": 159.73,
+      "settled_pl": 95.40550000000002,
       "n_bets": 45
     },
     "USD": {
       "wagered": 120.616,
-      "open_stake": 67.867,
-      "settled_pl": 1.3520000000000039,
+      "open_stake": 66.167,
+      "settled_pl": -0.3479999999999972,
       "n_bets": 16
     }
   },
   "venues": {
     "sportsbook": {
       "wagered": 350.14000000000004,
-      "open_stake": 212.46,
-      "settled_pl": 63.832,
+      "open_stake": 159.73,
+      "settled_pl": 95.40550000000002,
       "n_bets": 45,
       "currency": "GBP"
     },
     "polymarket": {
       "wagered": 120.616,
-      "open_stake": 67.867,
-      "settled_pl": 1.3520000000000039,
+      "open_stake": 66.167,
+      "settled_pl": -0.3479999999999972,
       "n_bets": 16,
       "currency": "USD"
     },
@@ -46,8 +46,8 @@
     },
     "sportsbook_1": {
       "wagered": 233.14000000000001,
-      "open_stake": 167.46,
-      "settled_pl": 52.831999999999994,
+      "open_stake": 114.73,
+      "settled_pl": 84.40550000000002,
       "n_bets": 32,
       "currency": "GBP",
       "label": "Sportsbook 1"
@@ -65,8 +65,8 @@
     "model": {
       "GBP": {
         "wagered": 153.07999999999998,
-        "open_stake": 109.39999999999999,
-        "settled_pl": 12.082,
+        "open_stake": 56.67,
+        "settled_pl": 43.65550000000001,
         "n_bets": 24
       },
       "USD": {
@@ -87,8 +87,8 @@
     "punt": {
       "USD": {
         "wagered": 13.366,
-        "open_stake": 7.867000000000001,
-        "settled_pl": -5.5,
+        "open_stake": 6.167000000000001,
+        "settled_pl": -7.199999999999999,
         "n_bets": 10
       },
       "GBP": {
@@ -104,24 +104,24 @@
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 25.0,
-      "open_stake": 25.0,
-      "settled_pl": 0.0,
+      "open_stake": 0.0,
+      "settled_pl": 43.50000000000001,
       "n_bets": 1
     },
     "betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 52.2,
-      "open_stake": 47.09,
-      "settled_pl": 31.682000000000002,
+      "open_stake": 23.86,
+      "settled_pl": 21.372,
       "n_bets": 5
     },
     "smarkets": {
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 51.690000000000005,
-      "open_stake": 45.370000000000005,
-      "settled_pl": -6.32,
+      "open_stake": 40.870000000000005,
+      "settled_pl": -7.9365,
       "n_bets": 12
     },
     "betfair_ex_uk": {
@@ -168,8 +168,8 @@
       "venue": "polymarket",
       "currency": "USD",
       "wagered": 120.616,
-      "open_stake": 67.867,
-      "settled_pl": 1.3520000000000039,
+      "open_stake": 66.167,
+      "settled_pl": -0.3479999999999972,
       "n_bets": 16
     },
     "virginbet": {
@@ -190,6 +190,60 @@
     }
   },
   "closed_positions": [
+    {
+      "id": 81,
+      "ts_utc": "2026-06-14T00:12:15",
+      "settled_ts": "2026-06-14T00:14:45",
+      "match": "Brazil vs Morocco",
+      "market": "Full-time result",
+      "selection": "Draw",
+      "platform": "unknown",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 2.74,
+      "stake": 25.0,
+      "status": "won",
+      "pl": 43.50000000000001,
+      "clv": -0.2974277712812414
+    },
+    {
+      "id": 80,
+      "ts_utc": "2026-06-13T22:17:42",
+      "settled_ts": "2026-06-14T00:14:45",
+      "match": "Brazil v Morocco",
+      "market": "Correct Score",
+      "selection": "2-0",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 9.4,
+      "stake": 20.0,
+      "status": "lost",
+      "pl": -20.0,
+      "clv": null
+    },
+    {
+      "id": 79,
+      "ts_utc": "2026-06-13T20:55:00",
+      "settled_ts": "2026-06-14T00:14:45",
+      "match": "Brazil vs Morocco",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 3.95,
+      "stake": 0.73,
+      "status": "won",
+      "pl": 2.1535,
+      "clv": 0.012832227532516782
+    },
     {
       "id": 65,
       "ts_utc": "2026-06-13T12:55:00",
@@ -317,6 +371,42 @@
       "clv": null
     },
     {
+      "id": 54,
+      "ts_utc": "2026-06-12T19:49:30",
+      "settled_ts": "2026-06-14T00:14:45",
+      "match": "Brazil vs Morocco",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 4.0,
+      "stake": 3.23,
+      "status": "won",
+      "pl": 9.69,
+      "clv": 0.025652888640523397
+    },
+    {
+      "id": 52,
+      "ts_utc": "2026-06-12T19:24:30",
+      "settled_ts": "2026-06-14T00:14:45",
+      "match": "Brazil vs Morocco",
+      "market": "Full-time result",
+      "selection": "Morocco",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 6.0,
+      "stake": 3.47,
+      "status": "lost",
+      "pl": -3.47,
+      "clv": 0.04526287662792683
+    },
+    {
       "id": 50,
       "ts_utc": "2026-06-12T19:03:13",
       "settled_ts": "2026-06-13T21:00:00",
@@ -368,6 +458,24 @@
       "stake": 1.9,
       "status": "lost",
       "pl": -1.9,
+      "clv": null
+    },
+    {
+      "id": 47,
+      "ts_utc": "2026-06-12T13:30:00",
+      "settled_ts": "2026-06-14T00:14:45",
+      "match": "Brazil vs Morocco",
+      "market": "Exact Score",
+      "selection": "Brazil 1-0 Morocco",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "punt",
+      "currency": "USD",
+      "decimal_odds": 5.88235294117647,
+      "stake": 1.7000000000000002,
+      "status": "lost",
+      "pl": -1.7000000000000002,
       "clv": null
     },
     {
@@ -513,6 +621,24 @@
       "status": "lost",
       "pl": -4.42,
       "clv": 0.05989947816046626
+    },
+    {
+      "id": 15,
+      "ts_utc": "2026-06-12T13:05:52",
+      "settled_ts": "2026-06-14T00:14:45",
+      "match": "Brazil vs Morocco",
+      "market": "Full-time result",
+      "selection": "Morocco",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 6.2,
+      "stake": 0.3,
+      "status": "lost",
+      "pl": -0.3,
+      "clv": 0.08010497251552429
     },
     {
       "id": 13,
@@ -818,6 +944,30 @@
         [
           "2026-06-13T21:00:00",
           63.83
+        ],
+        [
+          "2026-06-14T00:14:45",
+          107.33
+        ],
+        [
+          "2026-06-14T00:14:45",
+          87.33
+        ],
+        [
+          "2026-06-14T00:14:45",
+          89.49
+        ],
+        [
+          "2026-06-14T00:14:45",
+          99.18
+        ],
+        [
+          "2026-06-14T00:14:45",
+          95.71
+        ],
+        [
+          "2026-06-14T00:14:45",
+          95.41
         ]
       ]
     },
@@ -859,6 +1009,10 @@
         [
           "2026-06-13T21:00:00",
           1.35
+        ],
+        [
+          "2026-06-14T00:14:45",
+          -0.35
         ]
       ]
     }
@@ -869,54 +1023,6 @@
     "n_with_close": 17
   },
   "positions": [
-    {
-      "id": 81,
-      "ts_utc": "2026-06-14T00:12:15",
-      "match": "Brazil vs Morocco",
-      "market": "Full-time result",
-      "selection": "Draw",
-      "platform": "unknown",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 2.74,
-      "stake": 25.0,
-      "model_prob": null,
-      "ev": null
-    },
-    {
-      "id": 80,
-      "ts_utc": "2026-06-13T22:17:42",
-      "match": "Brazil v Morocco",
-      "market": "Correct Score",
-      "selection": "2-0",
-      "platform": "Betfair",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 9.4,
-      "stake": 20.0,
-      "model_prob": null,
-      "ev": null
-    },
-    {
-      "id": 79,
-      "ts_utc": "2026-06-13T20:55:00",
-      "match": "Brazil vs Morocco",
-      "market": "Match Odds",
-      "selection": "The Draw",
-      "platform": "Smarkets",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 3.95,
-      "stake": 0.73,
-      "model_prob": 0.263,
-      "ev": 1.039
-    },
     {
       "id": 78,
       "ts_utc": "2026-06-13T20:55:00",
@@ -1158,22 +1264,6 @@
       "ev": null
     },
     {
-      "id": 54,
-      "ts_utc": "2026-06-12T19:49:30",
-      "match": "Brazil vs Morocco",
-      "market": "Match Odds",
-      "selection": "The Draw",
-      "platform": "Betfair",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 4.0,
-      "stake": 3.23,
-      "model_prob": 0.26,
-      "ev": 0.04
-    },
-    {
       "id": 53,
       "ts_utc": "2026-06-12T19:49:30",
       "match": "Australia vs Turkey",
@@ -1190,22 +1280,6 @@
       "ev": 0.0725
     },
     {
-      "id": 52,
-      "ts_utc": "2026-06-12T19:24:30",
-      "match": "Brazil vs Morocco",
-      "market": "Full-time result",
-      "selection": "Morocco",
-      "platform": "Smarkets",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 6.0,
-      "stake": 3.47,
-      "model_prob": 0.175,
-      "ev": 0.05
-    },
-    {
       "id": 51,
       "ts_utc": "2026-06-12T19:24:30",
       "match": "Haiti vs Scotland",
@@ -1220,22 +1294,6 @@
       "stake": 3.92,
       "model_prob": 0.235,
       "ev": 0.034
-    },
-    {
-      "id": 47,
-      "ts_utc": "2026-06-12T13:30:00",
-      "match": "Brazil vs Morocco",
-      "market": "Exact Score",
-      "selection": "Brazil 1-0 Morocco",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "punt",
-      "currency": "USD",
-      "decimal_odds": 5.88235294117647,
-      "stake": 1.7000000000000002,
-      "model_prob": 0.145,
-      "ev": -0.1470588235294119
     },
     {
       "id": 46,
@@ -1316,22 +1374,6 @@
       "stake": 18.06,
       "model_prob": 0.245,
       "ev": 0.35
-    },
-    {
-      "id": 15,
-      "ts_utc": "2026-06-12T13:05:52",
-      "match": "Brazil vs Morocco",
-      "market": "Full-time result",
-      "selection": "Morocco",
-      "platform": "Smarkets",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 6.2,
-      "stake": 0.3,
-      "model_prob": 0.175,
-      "ev": 0.084
     },
     {
       "id": 14,
