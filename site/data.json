@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-14T01:16:19"
+    "generated": "2026-06-14T01:22:17"
   },
   "totals": {
-    "wagered": 470.756,
-    "open_stake": 215.897,
+    "wagered": 476.75600000000003,
+    "open_stake": 221.897,
     "settled_pl": 95.0575,
-    "n_bets": 61
+    "n_bets": 62
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 350.14000000000004,
-      "open_stake": 149.73,
+      "wagered": 356.14000000000004,
+      "open_stake": 155.73,
       "settled_pl": 95.40550000000002,
-      "n_bets": 45
+      "n_bets": 46
     },
     "USD": {
       "wagered": 120.616,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 350.14000000000004,
-      "open_stake": 149.73,
+      "wagered": 356.14000000000004,
+      "open_stake": 155.73,
       "settled_pl": 95.40550000000002,
-      "n_bets": 45,
+      "n_bets": 46,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 233.14000000000001,
-      "open_stake": 114.73,
+      "wagered": 239.14000000000001,
+      "open_stake": 120.73,
       "settled_pl": 84.40550000000002,
-      "n_bets": 32,
+      "n_bets": 33,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,14 @@
     }
   },
   "source_summary": {
+    "hedge": {
+      "GBP": {
+        "wagered": 6.0,
+        "open_stake": 6.0,
+        "settled_pl": 0.0,
+        "n_bets": 1
+      }
+    },
     "model": {
       "GBP": {
         "wagered": 153.07999999999998,
@@ -103,10 +111,10 @@
     "smarkets": {
       "venue": "sportsbook",
       "currency": "GBP",
-      "wagered": 76.69000000000001,
-      "open_stake": 40.870000000000005,
+      "wagered": 82.69000000000001,
+      "open_stake": 46.870000000000005,
       "settled_pl": 35.56350000000001,
-      "n_bets": 13
+      "n_bets": 14
     },
     "betfair": {
       "venue": "sportsbook",
@@ -1037,6 +1045,22 @@
     "n_with_close": 21
   },
   "positions": [
+    {
+      "id": 82,
+      "ts_utc": "2026-06-14T01:22:15",
+      "match": "Haiti vs Scotland",
+      "market": "Correct score",
+      "selection": "Haiti 1-2 Scotland",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "hedge",
+      "currency": "GBP",
+      "decimal_odds": 9.8,
+      "stake": 6.0,
+      "model_prob": null,
+      "ev": null
+    },
     {
       "id": 78,
       "ts_utc": "2026-06-13T20:55:00",
