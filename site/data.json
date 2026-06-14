@@ -1,17 +1,17 @@
 {
   "meta": {
-    "generated": "2026-06-14T00:14:57"
+    "generated": "2026-06-14 00:33:11 UTC"
   },
   "totals": {
     "wagered": 470.756,
-    "open_stake": 225.897,
+    "open_stake": 215.897,
     "settled_pl": 95.0575,
     "n_bets": 61
   },
   "totals_by_currency": {
     "GBP": {
       "wagered": 350.14000000000004,
-      "open_stake": 159.73,
+      "open_stake": 149.73,
       "settled_pl": 95.40550000000002,
       "n_bets": 45
     },
@@ -25,7 +25,7 @@
   "venues": {
     "sportsbook": {
       "wagered": 350.14000000000004,
-      "open_stake": 159.73,
+      "open_stake": 149.73,
       "settled_pl": 95.40550000000002,
       "n_bets": 45,
       "currency": "GBP"
@@ -54,7 +54,7 @@
     },
     "sportsbook_2": {
       "wagered": 107.0,
-      "open_stake": 45.0,
+      "open_stake": 35.0,
       "settled_pl": 0.0,
       "n_bets": 12,
       "currency": "GBP",
@@ -79,7 +79,7 @@
     "offer": {
       "GBP": {
         "wagered": 174.0,
-        "open_stake": 85.0,
+        "open_stake": 75.0,
         "settled_pl": 26.75,
         "n_bets": 19
       }
@@ -152,7 +152,7 @@
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 104.0,
-      "open_stake": 40.0,
+      "open_stake": 30.0,
       "settled_pl": -2.0,
       "n_bets": 11
     },
@@ -293,6 +293,24 @@
       "source": "offer",
       "currency": "GBP",
       "decimal_odds": 2.722,
+      "stake": 10.0,
+      "status": "lost",
+      "pl": 0.0,
+      "clv": null
+    },
+    {
+      "id": 62,
+      "ts_utc": "2026-06-13T12:55:00",
+      "settled_ts": "2026-06-13T23:50:00",
+      "match": "Acca treble (drop QAT): Brazil+Scotland+Turkey",
+      "market": "ACCA",
+      "selection": "BRA 1.57 x SCO 1.44 x TUR 1.61",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 3.667,
       "stake": 10.0,
       "status": "lost",
       "pl": 0.0,
@@ -946,6 +964,10 @@
           63.83
         ],
         [
+          "2026-06-13T23:50:00",
+          63.83
+        ],
+        [
           "2026-06-14T00:14:45",
           107.33
         ],
@@ -1230,22 +1252,6 @@
       "stake": 5.0,
       "model_prob": null,
       "ev": null
-    },
-    {
-      "id": 62,
-      "ts_utc": "2026-06-13T12:55:00",
-      "match": "Acca treble (drop QAT): Brazil+Scotland+Turkey",
-      "market": "ACCA",
-      "selection": "BRA 1.57 x SCO 1.44 x TUR 1.61",
-      "platform": "betfair_sportsbook",
-      "venue": "sportsbook",
-      "account": "2",
-      "source": "offer",
-      "currency": "GBP",
-      "decimal_odds": 3.667,
-      "stake": 10.0,
-      "model_prob": 0.161576,
-      "ev": -0.407501
     },
     {
       "id": 57,
