@@ -73,7 +73,8 @@ Only **Telegram** needs unblocking.
 | `com.wca.bot` | always-on | Telegram bot | **needs Telegram VPN**; sends PM proposals, takes `Y PM-n` confirmations |
 | `com.wca.snapshotd` | always-on | dense odds snapshots near kickoffs | produces the **closing lines** CLV needs |
 | `com.wca.closecapture` | every 10 min | stamp `closing_odds`+CLV after each KO | **this was scheduled nowhere — why your CLV froze** |
-| `com.wca.pmpropose` | every 30 min | park PM proposals + notify | needs PM **and** Telegram reachable |
+| `com.wca.build_card` | hourly | rebuild card (fit models + fetch odds) | ensures bot's `/card` is always fresh to within 1 hour |
+| `com.wca.pmpropose` | every 12 h | park PM proposals + notify | needs PM **and** Telegram reachable |
 | `com.wca.publish` | hourly | refresh scores → regen site → **auto-commit & push** | keeps the public site live with no manual push; rebases to absorb cloud-Action commits |
 | `com.wca.sync` | every 5 min | `git pull --rebase origin/main` → restart daemons on code change | the auto-deploy puller; see §0. Logs to `data/com.wca.sync.run.log` |
 
