@@ -5,6 +5,30 @@ is gitignored — it lives only on this host) and the home for everything that
 must run continuously or touch the wallet/Telegram. Your MacBook Pro stays on
 the **UK VPN for placing sportsbook bets manually** — that work never moves here.
 
+## 0. Dev → ops workflow
+
+Code is edited and tested on the **dev machine** (MacBook Pro), pushed to
+`origin/main`, and pulled here automatically:
+
+```
+Dev machine (MacBook Pro)          Mac Mini (this host, always-on)
+  ├─ edit code                       ├─ com.wca.sync pulls origin/main (every 5 min)
+  ├─ test locally           ──push──▶│  └─ restarts the bot/snapshot daemons on a code change
+  └─ git push main          origin   ├─ runs the Telegram bot + Polymarket proposals
+                                      ├─ captures closing lines + publishes the site
+                                      └─ launchd KeepAlive auto-restarts crashed daemons
+```
+
+This host **keeps its publisher role**: `data/wca.db` lives only here, so the
+site feed is generated and pushed from here. `com.wca.sync` therefore updates
+code with **`git pull --rebase`** (`deploy/sync.sh`), **never
+`git reset --hard`** — a hard reset would discard this machine's own
+site/ledger commits and freeze the public site. Deploy by hand any time:
+
+```bash
+bash deploy/sync.sh        # pull --rebase origin/main; restart daemons only if code changed
+```
+
 ## 1. The network split (the crux)
 
 | Service | Network it needs | Why |
@@ -51,6 +75,7 @@ Only **Telegram** needs unblocking.
 | `com.wca.closecapture` | every 10 min | stamp `closing_odds`+CLV after each KO | **this was scheduled nowhere — why your CLV froze** |
 | `com.wca.pmpropose` | every 30 min | park PM proposals + notify | needs PM **and** Telegram reachable |
 | `com.wca.publish` | hourly | refresh scores → regen site → **auto-commit & push** | keeps the public site live with no manual push; rebases to absorb cloud-Action commits |
+| `com.wca.sync` | every 5 min | `git pull --rebase origin/main` → restart daemons on code change | the auto-deploy puller; see §0. Logs to `data/com.wca.sync.run.log` |
 
 Free-bet accas and Double-Delight bets still need **manual settlement** (the
 auto-settler uses the wrong convention for SNR free bets / boosts) — keep doing
@@ -72,12 +97,12 @@ wouldn't see this host's `wca.db`.
 
 ## 6. Bootstrap (run once on the Mac Mini)
 ```bash
-git clone git@github.com:drewdoherty/World-Cup-26.git ~/World-Cup-26
-cd ~/World-Cup-26
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt   # or pandas scipy scikit-learn requests
+git clone https://github.com/drewdoherty/World-Cup-26.git   # clone anywhere — paths auto-detect
+cd World-Cup-26
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && .venv/bin/pip install -e . --no-deps
 cp .env.example .env   # then fill in keys
-bash deploy/check_connectivity.sh           # confirm Telegram VPN + PM both green
-bash deploy/install_services.sh             # load the launchd jobs
+bash deploy/check_connectivity.sh           # confirm Telegram + PM reachable
+bash deploy/install_services.sh             # generate + load all launchd jobs (incl. com.wca.sync)
 launchctl list | grep com.wca               # verify they're running
-tail -f data/com.wca.bot.err.log            # watch the bot connect to Telegram
+tail -f data/com.wca.sync.run.log           # watch auto-deploys (com.wca.bot.err.log for the bot)
 ```

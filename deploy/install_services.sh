@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 # Install the WCA always-on services on macOS via launchd (the Mac's cron+daemon
 # manager). Run ONCE on the Mac Mini after cloning the repo and creating .env.
+# Re-run any time to refresh the plists (it unloads + reloads each service).
 #
 #   bash deploy/install_services.sh
 #
-# Override paths if your layout differs:
+# The repo path is auto-detected from this script's location, so it works
+# wherever the repo lives. Override either path if your layout differs:
 #   WCA_REPO=/path/to/repo  WCA_PY=/path/to/.venv/bin/python  bash deploy/install_services.sh
 set -euo pipefail
 
-WCA_REPO="${WCA_REPO:-$HOME/World-Cup-26}"
+WCA_REPO="${WCA_REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 WCA_PY="${WCA_PY:-$WCA_REPO/.venv/bin/python}"
 LA="$HOME/Library/LaunchAgents"
 LOG="$WCA_REPO/data"
@@ -23,6 +25,7 @@ SERVICES=(
   "com.wca.closecapture|600|$WCA_PY|scripts/wca_close_capture.py"     # stamp closing_odds+CLV every 10 min (fixes stale CLV)
   "com.wca.pmpropose|1800|$WCA_PY|scripts/wca_pm_propose.py"          # park PM proposals + notify (needs PM + Telegram reachable)
   "com.wca.publish|3600|/bin/bash|deploy/publish_site.sh"            # hourly: refresh scores + regen site + AUTO-COMMIT & push
+  "com.wca.sync|300|/bin/bash|deploy/sync.sh"                        # every 5 min: git pull --rebase origin/main + restart daemons on code change
 )
 
 for entry in "${SERVICES[@]}"; do
@@ -41,6 +44,8 @@ for entry in "${SERVICES[@]}"; do
   <key>WorkingDirectory</key><string>$WCA_REPO</string>
   <key>EnvironmentVariables</key><dict>
     <key>PYTHONPATH</key><string>$WCA_REPO/src</string>
+    <key>WCA_REPO</key><string>$WCA_REPO</string>
+    <key>WCA_PY</key><string>$WCA_PY</string>
   </dict>
   <key>ProgramArguments</key><array>
     <string>$prog</string>

@@ -5,7 +5,7 @@
 #   * commits ONLY the four site feeds, and only when they actually changed
 #   * rebases before pushing to absorb the cloud Actions' commits (no conflicts)
 set -uo pipefail
-cd "${WCA_REPO:-$HOME/World-Cup-26}"
+cd "${WCA_REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 PY="${WCA_PY:-.venv/bin/python}"
 export PYTHONPATH="$PWD/src"
 stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
