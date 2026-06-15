@@ -1,18 +1,18 @@
 {
   "meta": {
-    "generated": "2026-06-14 06:03:35 UTC"
+    "generated": "2026-06-15T12:37:46"
   },
   "totals": {
     "wagered": 476.75600000000003,
-    "open_stake": 151.15,
-    "settled_pl": 183.6405,
+    "open_stake": 91.0,
+    "settled_pl": 123.4905,
     "n_bets": 62
   },
   "totals_by_currency": {
     "GBP": {
       "wagered": 356.14000000000004,
-      "open_stake": 90.15,
-      "settled_pl": 179.15550000000002,
+      "open_stake": 30.0,
+      "settled_pl": 119.00550000000001,
       "n_bets": 46
     },
     "USD": {
@@ -25,8 +25,8 @@
   "venues": {
     "sportsbook": {
       "wagered": 356.14000000000004,
-      "open_stake": 90.15,
-      "settled_pl": 179.15550000000002,
+      "open_stake": 30.0,
+      "settled_pl": 119.00550000000001,
       "n_bets": 46,
       "currency": "GBP"
     },
@@ -46,16 +46,16 @@
     },
     "sportsbook_1": {
       "wagered": 239.14000000000001,
-      "open_stake": 65.15,
-      "settled_pl": 178.15550000000002,
+      "open_stake": 30.0,
+      "settled_pl": 143.0055,
       "n_bets": 33,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
     "sportsbook_2": {
       "wagered": 107.0,
-      "open_stake": 25.0,
-      "settled_pl": -10.0,
+      "open_stake": 0.0,
+      "settled_pl": -35.0,
       "n_bets": 12,
       "currency": "GBP",
       "label": "Sportsbook 2"
@@ -73,8 +73,8 @@
     "model": {
       "GBP": {
         "wagered": 153.07999999999998,
-        "open_stake": 45.150000000000006,
-        "settled_pl": 32.135500000000015,
+        "open_stake": 0.0,
+        "settled_pl": -13.014499999999993,
         "n_bets": 24
       },
       "USD": {
@@ -87,8 +87,8 @@
     "offer": {
       "GBP": {
         "wagered": 174.0,
-        "open_stake": 45.0,
-        "settled_pl": 46.75,
+        "open_stake": 30.0,
+        "settled_pl": 31.75,
         "n_bets": 19
       }
     },
@@ -112,8 +112,8 @@
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 82.69000000000001,
-      "open_stake": 35.150000000000006,
-      "settled_pl": 23.84350000000001,
+      "open_stake": 0.0,
+      "settled_pl": -11.306499999999993,
       "n_bets": 14
     },
     "betfair": {
@@ -144,8 +144,8 @@
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 40.0,
-      "open_stake": 20.0,
-      "settled_pl": 1.0,
+      "open_stake": 0.0,
+      "settled_pl": -19.0,
       "n_bets": 4
     },
     "betfair_sportsbook": {
@@ -160,8 +160,8 @@
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 5.0,
-      "open_stake": 5.0,
-      "settled_pl": 0.0,
+      "open_stake": 0.0,
+      "settled_pl": -5.0,
       "n_bets": 1
     },
     "polymarket": {
@@ -281,6 +281,96 @@
       "clv": 0.030287388221973854
     },
     {
+      "id": 77,
+      "ts_utc": "2026-06-13T20:55:00",
+      "settled_ts": "2026-06-15T12:37:33",
+      "match": "Germany vs Curaçao",
+      "market": "Match Odds",
+      "selection": "Curaçao",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 44.0,
+      "stake": 1.95,
+      "status": "lost",
+      "pl": -1.95,
+      "clv": null
+    },
+    {
+      "id": 76,
+      "ts_utc": "2026-06-13T20:55:00",
+      "settled_ts": "2026-06-15T12:37:33",
+      "match": "Sweden vs Tunisia",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 3.6,
+      "stake": 2.68,
+      "status": "lost",
+      "pl": -2.68,
+      "clv": null
+    },
+    {
+      "id": 75,
+      "ts_utc": "2026-06-13T20:55:00",
+      "settled_ts": "2026-06-15T12:37:33",
+      "match": "Germany vs Curaçao",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 24.0,
+      "stake": 5.37,
+      "status": "lost",
+      "pl": -5.37,
+      "clv": null
+    },
+    {
+      "id": 74,
+      "ts_utc": "2026-06-13T20:55:00",
+      "settled_ts": "2026-06-15T12:37:33",
+      "match": "Sweden vs Tunisia",
+      "market": "Match Odds",
+      "selection": "Tunisia",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 4.6,
+      "stake": 6.67,
+      "status": "lost",
+      "pl": -6.67,
+      "clv": null
+    },
+    {
+      "id": 73,
+      "ts_utc": "2026-06-13T20:55:00",
+      "settled_ts": "2026-06-15T12:37:33",
+      "match": "Ivory Coast vs Ecuador",
+      "market": "Match Odds",
+      "selection": "Ecuador",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 2.54,
+      "stake": 18.48,
+      "status": "lost",
+      "pl": -18.48,
+      "clv": null
+    },
+    {
       "id": 72,
       "ts_utc": "2026-06-13T20:15:00",
       "settled_ts": "2026-06-14T02:50:00",
@@ -317,6 +407,42 @@
       "clv": -0.09998131275211108
     },
     {
+      "id": 70,
+      "ts_utc": "2026-06-13T19:55:00",
+      "settled_ts": "2026-06-15T12:37:33",
+      "match": "Haiti vs Scotland — Shankland First Goalscorer (Double Delight)",
+      "market": "FIRST_GOALSCORER",
+      "selection": "Lawrence Shankland FGS",
+      "platform": "betfred",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 4.5,
+      "stake": 10.0,
+      "status": "lost",
+      "pl": -10.0,
+      "clv": null
+    },
+    {
+      "id": 68,
+      "ts_utc": "2026-06-13T18:40:00",
+      "settled_ts": "2026-06-15T12:37:33",
+      "match": "Haiti vs Scotland (Betfred BB qualifier #2)",
+      "market": "BETBUILDER",
+      "selection": "Shankland FGS & Under 5.5 & Double Chance Scot/Draw",
+      "platform": "betfred",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 5.05,
+      "stake": 10.0,
+      "status": "lost",
+      "pl": -10.0,
+      "clv": null
+    },
+    {
       "id": 67,
       "ts_utc": "2026-06-13T18:10:00",
       "settled_ts": "2026-06-14T02:50:00",
@@ -332,6 +458,24 @@
       "stake": 10.0,
       "status": "lost",
       "pl": -10.0,
+      "clv": null
+    },
+    {
+      "id": 66,
+      "ts_utc": "2026-06-13T13:48:29",
+      "settled_ts": "2026-06-15T12:37:33",
+      "match": "Haiti v Scotland",
+      "market": "Shots on Target - Player",
+      "selection": "Scott Mctominay to have 1 or more shots on target (including woodwork)",
+      "platform": "Paddy Power",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 2.0,
+      "stake": 5.0,
+      "status": "lost",
+      "pl": -5.0,
       "clv": null
     },
     {
@@ -1238,6 +1382,38 @@
         [
           "2026-06-14T05:50:00",
           179.16
+        ],
+        [
+          "2026-06-15T12:37:33",
+          177.21
+        ],
+        [
+          "2026-06-15T12:37:33",
+          174.53
+        ],
+        [
+          "2026-06-15T12:37:33",
+          169.16
+        ],
+        [
+          "2026-06-15T12:37:33",
+          162.49
+        ],
+        [
+          "2026-06-15T12:37:33",
+          144.01
+        ],
+        [
+          "2026-06-15T12:37:33",
+          134.01
+        ],
+        [
+          "2026-06-15T12:37:33",
+          124.01
+        ],
+        [
+          "2026-06-15T12:37:33",
+          119.01
         ]
       ]
     },
@@ -1310,102 +1486,6 @@
   },
   "positions": [
     {
-      "id": 77,
-      "ts_utc": "2026-06-13T20:55:00",
-      "match": "Germany vs Curaçao",
-      "market": "Match Odds",
-      "selection": "Curaçao",
-      "platform": "Smarkets",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 44.0,
-      "stake": 1.95,
-      "model_prob": 0.026,
-      "ev": 1.144
-    },
-    {
-      "id": 76,
-      "ts_utc": "2026-06-13T20:55:00",
-      "match": "Sweden vs Tunisia",
-      "market": "Match Odds",
-      "selection": "The Draw",
-      "platform": "Smarkets",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 3.6,
-      "stake": 2.68,
-      "model_prob": 0.286,
-      "ev": 1.03
-    },
-    {
-      "id": 75,
-      "ts_utc": "2026-06-13T20:55:00",
-      "match": "Germany vs Curaçao",
-      "market": "Match Odds",
-      "selection": "The Draw",
-      "platform": "Smarkets",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 24.0,
-      "stake": 5.37,
-      "model_prob": 0.061,
-      "ev": 1.464
-    },
-    {
-      "id": 74,
-      "ts_utc": "2026-06-13T20:55:00",
-      "match": "Sweden vs Tunisia",
-      "market": "Match Odds",
-      "selection": "Tunisia",
-      "platform": "Smarkets",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 4.6,
-      "stake": 6.67,
-      "model_prob": 0.24,
-      "ev": 1.103
-    },
-    {
-      "id": 73,
-      "ts_utc": "2026-06-13T20:55:00",
-      "match": "Ivory Coast vs Ecuador",
-      "market": "Match Odds",
-      "selection": "Ecuador",
-      "platform": "Smarkets",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 2.54,
-      "stake": 18.48,
-      "model_prob": 0.448,
-      "ev": 1.138
-    },
-    {
-      "id": 70,
-      "ts_utc": "2026-06-13T19:55:00",
-      "match": "Haiti vs Scotland — Shankland First Goalscorer (Double Delight)",
-      "market": "FIRST_GOALSCORER",
-      "selection": "Lawrence Shankland FGS",
-      "platform": "betfred",
-      "venue": "sportsbook",
-      "account": "2",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 4.5,
-      "stake": 10.0,
-      "model_prob": 0.197,
-      "ev": 1.49
-    },
-    {
       "id": 69,
       "ts_utc": "2026-06-13T15:55:00",
       "match": "Australia vs Turkey",
@@ -1420,38 +1500,6 @@
       "stake": 20.0,
       "model_prob": 0.4176,
       "ev": 6.75
-    },
-    {
-      "id": 68,
-      "ts_utc": "2026-06-13T18:40:00",
-      "match": "Haiti vs Scotland (Betfred BB qualifier #2)",
-      "market": "BETBUILDER",
-      "selection": "Shankland FGS & Under 5.5 & Double Chance Scot/Draw",
-      "platform": "betfred",
-      "venue": "sportsbook",
-      "account": "2",
-      "source": "offer",
-      "currency": "GBP",
-      "decimal_odds": 5.05,
-      "stake": 10.0,
-      "model_prob": null,
-      "ev": null
-    },
-    {
-      "id": 66,
-      "ts_utc": "2026-06-13T13:48:29",
-      "match": "Haiti v Scotland",
-      "market": "Shots on Target - Player",
-      "selection": "Scott Mctominay to have 1 or more shots on target (including woodwork)",
-      "platform": "Paddy Power",
-      "venue": "sportsbook",
-      "account": "2",
-      "source": "offer",
-      "currency": "GBP",
-      "decimal_odds": 2.0,
-      "stake": 5.0,
-      "model_prob": null,
-      "ev": null
     },
     {
       "id": 57,
