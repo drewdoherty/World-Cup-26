@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-15T12:37:46"
+    "generated": "2026-06-15T12:42:14"
   },
   "totals": {
     "wagered": 476.75600000000003,
@@ -72,10 +72,10 @@
     },
     "model": {
       "GBP": {
-        "wagered": 153.07999999999998,
+        "wagered": 133.08,
         "open_stake": 0.0,
-        "settled_pl": -13.014499999999993,
-        "n_bets": 24
+        "settled_pl": 6.985500000000005,
+        "n_bets": 23
       },
       "USD": {
         "wagered": 107.25,
@@ -84,26 +84,26 @@
         "n_bets": 6
       }
     },
+    "punt": {
+      "GBP": {
+        "wagered": 43.06,
+        "open_stake": 0.0,
+        "settled_pl": 86.27,
+        "n_bets": 3
+      },
+      "USD": {
+        "wagered": 13.366,
+        "open_stake": 1.0,
+        "settled_pl": -2.367,
+        "n_bets": 10
+      }
+    },
     "offer": {
       "GBP": {
         "wagered": 174.0,
         "open_stake": 30.0,
         "settled_pl": 31.75,
         "n_bets": 19
-      }
-    },
-    "punt": {
-      "USD": {
-        "wagered": 13.366,
-        "open_stake": 1.0,
-        "settled_pl": -2.367,
-        "n_bets": 10
-      },
-      "GBP": {
-        "wagered": 23.06,
-        "open_stake": 0.0,
-        "settled_pl": 106.27,
-        "n_bets": 2
       }
     }
   },
@@ -236,7 +236,7 @@
       "platform": "Betfair",
       "venue": "sportsbook",
       "account": "1",
-      "source": "model",
+      "source": "punt",
       "currency": "GBP",
       "decimal_odds": 9.4,
       "stake": 20.0,
