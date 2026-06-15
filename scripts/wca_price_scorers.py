@@ -30,10 +30,11 @@ if _SRC not in sys.path:
 def _derive_lambdas(home: str, away: str, neutral: bool):
     """Fit DC on the results history and return (lambda_home, lambda_away)."""
     from wca.data.results import load_results
+    from wca.data.cleaning import resolve_results_path
     from wca.data.teamnames import canonical
     from wca.card import fit_models
 
-    results = load_results("data/raw/results.csv")
+    results = load_results(resolve_results_path())
     models = fit_models(results)
     pred = models.dc.predict(canonical(home), canonical(away), neutral=neutral, warn=False)
     return float(pred.lambda_home), float(pred.lambda_away)

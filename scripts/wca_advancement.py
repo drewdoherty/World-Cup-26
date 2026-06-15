@@ -299,7 +299,8 @@ def main() -> None:
     )
     parser.add_argument("--n-sims", type=int, default=20000)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--results", default="data/raw/results.csv")
+    parser.add_argument("--results", default=None,
+                        help="results CSV (default: cleaned dataset if present, else raw)")
     parser.add_argument("--out", default="docs/research/advancement_edges.md")
     parser.add_argument(
         "--cache",
@@ -329,9 +330,13 @@ def main() -> None:
     try:
         from wca.advancement import compare_to_polymarket, run_advancement
         from wca.data.polymarket import find_world_cup_markets
+        from wca.data.cleaning import resolve_results_path
     except ImportError as exc:
         print("ERROR: could not import wca modules: %s" % exc, file=sys.stderr)
         sys.exit(1)
+
+    if args.results is None:
+        args.results = resolve_results_path()
 
     # 1. Models. Structural-prior fits are a different model, so route them to a
     #    distinct cache file to avoid clobbering the baseline A/B cache.

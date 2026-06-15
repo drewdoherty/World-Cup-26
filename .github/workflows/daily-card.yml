@@ -31,6 +31,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Refresh cleaned results dataset
+        run: |
+          mkdir -p logs
+          # Rebuild martj42_cleaned.csv from the latest raw mirror + verified
+          # corrections so the card fits on accurate, current fixtures.
+          python scripts/wca_clean_results.py --days 14 --force-download \
+            >> logs/clean_results.log 2>&1 || \
+            echo "WARN: clean step degraded; card will use last good cleaned data"
+
       - name: Generate matchday card
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
@@ -58,6 +67,8 @@ jobs:
           git config user.email "bot@world-cup-alpha.local"
           git config user.name "World Cup Alpha Bot"
           git add data/card_latest.md data/model_predictions.json data/model_predictions_log.jsonl \
+                  data/raw/martj42_cleaned.csv \
+                  data/corrections.json data/corrections_review.json data/audit.json \
                   site/data.json site/linemove.json site/scores_data.json
           git commit -m "Auto-sync: daily card + site data" || true
           # Retry around concurrent pushes (local daemons also push to main).

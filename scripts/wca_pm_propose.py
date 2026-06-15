@@ -155,6 +155,7 @@ def main() -> int:
     # Heavy imports after arg parsing so --help stays fast.
     try:
         from wca.data.results import load_results  # type: ignore[attr-defined]
+        from wca.data.cleaning import resolve_results_path
         from wca.card import fit_models
         from wca.data import theoddsapi
         from wca.pm.propose import build_pm_proposals
@@ -164,7 +165,7 @@ def main() -> int:
 
     # -- models -----------------------------------------------------------
     try:
-        results = load_results("data/raw/results.csv")
+        results = load_results(resolve_results_path())
         models = fit_models(results)
     except Exception as exc:
         print("ERROR: model fitting failed: %s" % exc, file=sys.stderr)

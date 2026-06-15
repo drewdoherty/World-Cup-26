@@ -9,6 +9,9 @@ data/processed/*
 data/*.db
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+# The cleaned, verified results dataset IS a tracked deliverable (raw mirror is
+# not — it is re-downloaded). Rebuilt by scripts/wca_clean_results.py.
+!data/raw/martj42_cleaned.csv
 .DS_Store
 .claude/
 !data/raw/snapshots/

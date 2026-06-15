@@ -1,0 +1,57 @@
+name: Clean Results Dataset
+
+# Keeps data/raw/martj42_cleaned.csv accurate and up to date so /card and the
+# model never run on stale or wrong fixtures. Refreshes the raw martj42 mirror,
+# cross-verifies the recent window against two independent feeds (ESPN +
+# TheSportsDB), auto-applies only 2-source-agreed corrections, and rebuilds the
+# cleaned overlay. Disagreements land in data/corrections_review.json for a human.
+
+on:
+  schedule:
+    # Three times daily, each a few minutes before the card/odds jobs so the
+    # cleaned dataset is fresh when models fit. Offset minute avoids clashing.
+    - cron: '5 7,13,19 * * *'
+  workflow_dispatch:
+
+# Serialize with the other jobs that push to main.
+concurrency:
+  group: site-data-push
+  cancel-in-progress: false
+
+jobs:
+  clean-results:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Refresh + clean martj42 dataset
+        run: |
+          mkdir -p logs
+          python scripts/wca_clean_results.py --days 21 --force-download \
+            >> logs/clean_results.log 2>&1
+          tail -n 20 logs/clean_results.log || true
+
+      - name: Commit cleaned dataset
+        run: |
+          git config user.email "bot@world-cup-alpha.local"
+          git config user.name "World Cup Alpha Bot"
+          git add data/raw/martj42_cleaned.csv \
+                  data/corrections.json data/corrections_review.json data/audit.json
+          git commit -m "Auto-clean: refresh martj42_cleaned dataset" || true
+          for i in 1 2 3; do
+            git pull --rebase -X theirs origin main && git push origin main && break
+            sleep $((i * 10))
+          done

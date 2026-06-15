@@ -63,12 +63,13 @@ def main() -> int:
     from wca.data import polymarket as pm
     from wca.data import theoddsapi
     from wca.data.results import load_results
+    from wca.data.cleaning import resolve_results_path
 
     now = dt.datetime.utcnow()
     cutoff = (now + dt.timedelta(hours=args.hours_ahead)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     print("fitting models...", flush=True)
-    results = load_results("data/raw/results.csv")
+    results = load_results(resolve_results_path())
     models = fit_models(results)
 
     odds, quota = theoddsapi.get_odds("soccer_fifa_world_cup", regions="uk", markets="h2h")

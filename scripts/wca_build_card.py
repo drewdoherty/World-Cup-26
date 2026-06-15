@@ -120,6 +120,7 @@ def main() -> None:
     # ------------------------------------------------------------------
     try:
         from wca.data.results import load_results  # type: ignore[attr-defined]
+        from wca.data.cleaning import resolve_results_path
         from wca.card import (
             fit_models,
             build_card,
@@ -138,7 +139,7 @@ def main() -> None:
     # ------------------------------------------------------------------
     # Load and fit models.
     # ------------------------------------------------------------------
-    results_path = "data/raw/results.csv"
+    results_path = resolve_results_path()
     try:
         results = load_results(results_path)
         models = fit_models(results)
