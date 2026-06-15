@@ -1,0 +1,30 @@
+WC2026 OPEN-BET FAIR-VALUE RECOMPUTE (corrected Elo + Dixon-Coles)
+Evaluation date: 2026-06-15
+Models refit on data/raw/martj42_cleaned.csv (verified corrections overlay).
+Old prob/EV = value stored in DB at placement (pre-correction).
+Advancement bets use a COLD-START corrected sim: it isolates the
+data-correction effect on team strength, NOT a live in-tournament prob.
+
+ ID  SELECTION                                   ODDS    OLD_P    NEW_P       dP   OLD_EV   NEW_EV      dEV   KELLY  REC
+------------------------------------------------------------------------------------------------------------------------
+ 11  Harry Kane (England)                       7.500                                                                N/A (no match model)
+ 14  Japan reach R16 - No                       1.667   68.50%   66.70%   -1.80%   14.17%   11.18%   -2.99%  0.1676  GREEN (hold) | RED (material >2pp EV swing: review cash-out)
+ 57  Ghana eliminated R32 - No                  1.471            75.37%                     10.86%           0.2307  GREEN (hold)
+ 69  Under 3.5 Goals & DC Australia/Türkiye &   3.204   41.76%   56.63%  +14.87%  675.00%   81.41%  -593.59%  0.3695  RED — match already played; settle now (see flag)
+
+PER-BET NOTES
+  [11] Harry Kane (England)
+        basis: outright golden boot: no Elo+DC model
+  [14] Japan reach R16 - No
+        basis: corrected tournament sim (cold-start)
+  [57] Ghana eliminated R32 - No
+        basis: corrected sim; market-definition caveat (see report)
+  [69] Under 3.5 Goals & DC Australia/Türkiye & Under 4.5 Cards (100% boost)
+        basis: DC pre-match (Under3.5 x DC-not-draw); cards leg unmodelled
+        FLAG:  RESOLVED 13 Jun: AUS 2-0 TUR (Under3.5 WON, DC WON; cards leg pending) -> SETTLE, do not re-price
+
+CORRECTED SIM — key teams (cold-start P(reach stage)):
+  Japan       R32=0.803  R16=0.333  QF=0.177
+  Ghana       R32=0.303  R16=0.057  QF=0.011
+  Australia   R32=0.631  R16=0.306  QF=0.107
+  Turkey      R32=0.739  R16=0.405  QF=0.168

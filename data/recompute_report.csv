@@ -1,0 +1,5 @@
+id,match_id,market,selection,old_prob,new_prob,prob_delta,old_ev,new_ev,ev_delta,new_kelly,recommendation,basis,flag
+11,WC2026_GOLDEN_BOOT,outright_golden_boot,Harry Kane (England),,,,,,,,N/A (no match model),outright golden boot: no Elo+DC model,
+14,WC2026_JPN_R16,Will Japan reach the Round of 16 at the 2026 FIFA World Cup?,Japan reach R16 - No,0.685,0.6670499999999999,-0.017950000000000133,0.14168950000000025,0.11177223499999989,-0.02991726500000036,0.16764997000149973,GREEN (hold) | RED (material >2pp EV swing: review cash-out),corrected tournament sim (cold-start),
+57,PM_ghana_r32,polymarket,Ghana eliminated R32 - No,,0.7537499999999999,,,0.10861549999999998,,0.23070412064570933,GREEN (hold),corrected sim; market-definition caveat (see report),
+69,AUSTUR_BB_BOOST,BETBUILDER,Under 3.5 Goals & DC Australia/Türkiye & Under 4.5 Cards (100% boost),0.4176,0.5662906969464211,0.14869069694642106,6.75,0.81411224766786,-5.93588775233214,0.3694632392411436,RED — match already played; settle now (see flag),DC pre-match (Under3.5 x DC-not-draw); cards leg unmodelled,"RESOLVED 13 Jun: AUS 2-0 TUR (Under3.5 WON, DC WON; cards leg pending) -> SETTLE, do not re-price"
