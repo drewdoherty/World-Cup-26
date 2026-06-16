@@ -16,3 +16,7 @@ data/*.db
 .claude/
 !data/raw/snapshots/
 !data/processed/wc2026_results.json
+
+# SQLite WAL sidecars (live DB state — never track)
+data/*.db-shm
+data/*.db-wal
