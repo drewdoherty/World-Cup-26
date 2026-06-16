@@ -55,7 +55,9 @@ _REGIONS = "uk"
 # CLV point. Bulk /odds supports h2h/totals; btts is per-event only (422 on
 # bulk), pulled in a second pass. Upgraded key (~19k credits) covers both.
 _MARKETS = "h2h,totals"
-_EVENT_MARKETS = "btts"
+# Per-event markets (bulk /odds 422s on these). Override via WCA_EVENT_MARKETS
+# to widen the +EV monitoring surface (e.g. "btts,draw_no_bet").
+_EVENT_MARKETS = os.environ.get("WCA_EVENT_MARKETS", "btts")
 _SOURCE = "theoddsapi"
 
 # Flag flipped by the signal handler so the loop can break cleanly.
@@ -190,6 +192,18 @@ def _pull_event_markets(bulk_df: pd.DataFrame, window_h: float = 36.0) -> pd.Dat
     upcoming = bulk_df[
         (bulk_df["commence_time"] >= now) & (bulk_df["commence_time"] <= horizon)
     ]
+    # Optionally restrict the per-event pull to the next-N fixtures by kickoff
+    # (WCA_NEXT_N) to bound credit spend when monitoring many markets frequently.
+    try:
+        next_n = int(os.environ.get("WCA_NEXT_N", "0") or 0)
+    except ValueError:
+        next_n = 0
+    if next_n > 0 and not upcoming.empty:
+        upcoming = (
+            upcoming.sort_values("commence_time")
+            .drop_duplicates("event_id")
+            .head(next_n)
+        )
     frames = []
     for event_id in upcoming["event_id"].dropna().unique():
         try:
@@ -373,7 +387,19 @@ def main() -> None:
         stream=sys.stdout,
     )
     _load_dotenv(args.env)
-    run(db_path=args.db, once=args.once, repo_root=_REPO_ROOT, policy=PollPolicy())
+    # Fixed-cadence monitoring override: WCA_FIXED_POLL_SECONDS=900 gives a 15-min
+    # idle sweep for +EV monitoring; pre-close stays tight (120s) so closing
+    # lines / CLV are never sacrificed. In-game keeps its default dense cadence.
+    try:
+        _fixed = int(os.environ.get("WCA_FIXED_POLL_SECONDS", "0") or 0)
+    except ValueError:
+        _fixed = 0
+    _policy = (
+        PollPolicy(idle_seconds=_fixed, pre_close_seconds=120)
+        if _fixed > 0
+        else PollPolicy()
+    )
+    run(db_path=args.db, once=args.once, repo_root=_REPO_ROOT, policy=_policy)
 
 
 if __name__ == "__main__":

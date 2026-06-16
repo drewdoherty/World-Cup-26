@@ -47,6 +47,10 @@ for entry in "${SERVICES[@]}"; do
     <key>PYTHONPATH</key><string>$WCA_REPO/src</string>
     <key>WCA_REPO</key><string>$WCA_REPO</string>
     <key>WCA_PY</key><string>$WCA_PY</string>
+    <!-- snapshotd-only: lean 15-min next-5 all-markets monitoring sweep -->
+    <key>WCA_FIXED_POLL_SECONDS</key><string>900</string>
+    <key>WCA_NEXT_N</key><string>5</string>
+    <key>WCA_EVENT_MARKETS</key><string>btts,draw_no_bet</string>
   </dict>
   <key>ProgramArguments</key><array>
     <string>$prog</string>
