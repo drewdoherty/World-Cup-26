@@ -23,7 +23,7 @@ SERVICES=(
   "com.wca.bot|keepalive|$WCA_PY|scripts/wca_bot.py"                  # Telegram bot (NEEDS Telegram VPN)
   "com.wca.snapshotd|keepalive|$WCA_PY|scripts/wca_snapshotd.py"      # dense odds snapshots near kickoffs (closing lines)
   "com.wca.closecapture|600|$WCA_PY|scripts/wca_close_capture.py"     # stamp closing_odds+CLV every 10 min (fixes stale CLV)
-  "com.wca.pmpropose|43200|$WCA_PY|scripts/wca_pm_propose.py"         # park PM proposals + notify (needs PM + Telegram reachable) — every 12h
+  "com.wca.pmpropose|1800|$WCA_PY|scripts/wca_pm_propose.py"          # park PM proposals + notify (needs PM + Telegram reachable) — every 30 min
   "com.wca.build_card|3600|$WCA_PY|scripts/wca_build_card.py"         # refresh card hourly (models + odds) so bot /card is always fresh
   "com.wca.publish|3600|/bin/bash|deploy/publish_site.sh"            # hourly: refresh scores + regen site + AUTO-COMMIT & push
   "com.wca.sync|300|/bin/bash|deploy/sync.sh"                        # every 5 min: git pull --rebase origin/main + restart daemons on code change

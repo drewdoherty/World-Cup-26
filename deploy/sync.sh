@@ -26,10 +26,19 @@ if ! git fetch origin main --quiet 2>>"$LOG"; then
   exit 0
 fi
 
-# Rebase local commits onto origin/main; autostash any stray working changes.
+# build_card regenerates these tracked artifacts locally each cycle; discard any
+# uncommitted local copies before pulling so the rebase can never hit an autostash
+# conflict (the failure that corrupted data files on 2026-06-16). They are
+# regenerated next cycle and republished by com.wca.publish.
+git checkout -- data/card_latest.md data/next_latest.md data/model_predictions.json data/model_predictions_log.jsonl 2>/dev/null || true
+# Rebase local commits onto origin/main. On ANY conflict, abort the rebase, discard
+# stray working changes, and drop a half-applied stash so the tree is left clean
+# (never with conflict markers).
 if ! git pull --rebase --autostash origin main >>"$LOG" 2>&1; then
-  echo "$(ts) sync: rebase failed — aborting to leave the repo clean" >>"$LOG"
+  echo "$(ts) sync: rebase failed — aborting + clearing stash to leave the repo clean" >>"$LOG"
   git rebase --abort 2>/dev/null || true
+  git checkout -- . 2>/dev/null || true
+  git stash list 2>/dev/null | grep -q . && git stash drop 2>/dev/null || true
   exit 0
 fi
 

@@ -20,3 +20,7 @@ data/*.db
 # SQLite WAL sidecars (live DB state — never track)
 data/*.db-shm
 data/*.db-wal
+
+# runtime logs + DB backups (never track)
+data/com.wca.*.log
+data/*.db.*
