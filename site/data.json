@@ -1,12 +1,12 @@
 {
   "meta": {
-    "generated": "2026-06-16 15:42:06 UTC"
+    "generated": "2026-06-16 15:51:54 UTC"
   },
   "totals": {
-    "wagered": 476.75600000000003,
+    "wagered": 507.43600000000004,
     "open_stake": 71.0,
-    "settled_pl": 167.56050000000002,
-    "n_bets": 62
+    "settled_pl": 136.8805,
+    "n_bets": 63
   },
   "totals_by_currency": {
     "GBP": {
@@ -16,10 +16,10 @@
       "n_bets": 46
     },
     "USD": {
-      "wagered": 120.616,
+      "wagered": 151.29600000000002,
       "open_stake": 61.0,
-      "settled_pl": 4.485000000000003,
-      "n_bets": 16
+      "settled_pl": -26.195,
+      "n_bets": 17
     }
   },
   "venues": {
@@ -31,10 +31,10 @@
       "currency": "GBP"
     },
     "polymarket": {
-      "wagered": 120.616,
+      "wagered": 151.29600000000002,
       "open_stake": 61.0,
-      "settled_pl": 4.485000000000003,
-      "n_bets": 16,
+      "settled_pl": -26.195,
+      "n_bets": 17,
       "currency": "USD"
     },
     "kalshi": {
@@ -62,26 +62,26 @@
     }
   },
   "source_summary": {
+    "model": {
+      "USD": {
+        "wagered": 137.93,
+        "open_stake": 60.0,
+        "settled_pl": -23.827999999999996,
+        "n_bets": 7
+      },
+      "GBP": {
+        "wagered": 133.08,
+        "open_stake": 0.0,
+        "settled_pl": 6.985500000000005,
+        "n_bets": 23
+      }
+    },
     "hedge": {
       "GBP": {
         "wagered": 6.0,
         "open_stake": 0.0,
         "settled_pl": -6.0,
         "n_bets": 1
-      }
-    },
-    "model": {
-      "GBP": {
-        "wagered": 133.08,
-        "open_stake": 0.0,
-        "settled_pl": 6.985500000000005,
-        "n_bets": 23
-      },
-      "USD": {
-        "wagered": 107.25,
-        "open_stake": 60.0,
-        "settled_pl": 6.852000000000004,
-        "n_bets": 6
       }
     },
     "punt": {
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "polymarket": {
+      "venue": "polymarket",
+      "currency": "USD",
+      "wagered": 151.29600000000002,
+      "open_stake": 61.0,
+      "settled_pl": -26.195,
+      "n_bets": 17
+    },
     "smarkets": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -164,14 +172,6 @@
       "settled_pl": -5.0,
       "n_bets": 1
     },
-    "polymarket": {
-      "venue": "polymarket",
-      "currency": "USD",
-      "wagered": 120.616,
-      "open_stake": 61.0,
-      "settled_pl": 4.485000000000003,
-      "n_bets": 16
-    },
     "virginbet": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -190,6 +190,24 @@
     }
   },
   "closed_positions": [
+    {
+      "id": 83,
+      "ts_utc": "2026-06-15T19:19:18",
+      "settled_ts": "2026-06-16T03:00:00",
+      "match": "Will IR Iran win on 2026-06-15?",
+      "market": "polymarket",
+      "selection": "Iran win - Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "model",
+      "currency": "USD",
+      "decimal_odds": 1.8182,
+      "stake": 30.68,
+      "status": "lost",
+      "pl": -30.68,
+      "clv": null
+    },
     {
       "id": 82,
       "ts_utc": "2026-06-14T01:22:15",
@@ -1497,6 +1515,10 @@
         [
           "2026-06-14T05:50:00",
           4.49
+        ],
+        [
+          "2026-06-16T03:00:00",
+          -26.2
         ]
       ]
     }
