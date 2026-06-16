@@ -1,11 +1,13 @@
 name: Daily Card Generation
 
 on:
-  schedule:
-    # ~8 AM UTC (10 AM CEST, 11 AM GST). Minute offset so it never shares a
-    # trigger minute with the hourly odds job (both pushing to main).
-    - cron: '17 8 * * *'
-  workflow_dispatch:  # Allow manual trigger
+  # Automated daily card generation is now handled by the Mac Mini's
+  # com.wca.build_card service (hourly), which is more reliable and keeps
+  # the card fresher. The schedule trigger below is disabled; use workflow_dispatch
+  # manually if needed, or run: bash deploy/install_services.sh on the Mac Mini.
+  # schedule:
+  #   - cron: '17 8 * * *'
+  workflow_dispatch:  # Allow manual trigger if needed
 
 # Serialize with the hourly job — both commit site data to main.
 concurrency:
