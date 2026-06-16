@@ -30,7 +30,9 @@ fi
 # uncommitted local copies before pulling so the rebase can never hit an autostash
 # conflict (the failure that corrupted data files on 2026-06-16). They are
 # regenerated next cycle and republished by com.wca.publish.
-git checkout -- data/card_latest.md data/next_latest.md data/model_predictions.json data/model_predictions_log.jsonl 2>/dev/null || true
+# NOTE: model_predictions_log.jsonl is append-only history that feeds tracking —
+# it is deliberately NOT discarded here (autostash preserves its appends).
+git checkout -- data/card_latest.md data/next_latest.md data/model_predictions.json 2>/dev/null || true
 # Rebase local commits onto origin/main. On ANY conflict, abort the rebase, discard
 # stray working changes, and drop a half-applied stash so the tree is left clean
 # (never with conflict markers).
