@@ -1227,10 +1227,26 @@ def format_parked_order(token: str, proposal: Dict[str, Any]) -> str:
     label = proposal.get("label") or proposal.get("market") or "market"
     outcome = proposal.get("outcome") or proposal.get("selection") or ""
     sel = ("%s %s" % (label, outcome)).strip()
+
+    # Enhanced fields: model fair share price, EV, and stake %
+    model_prob = float(proposal.get("model_prob", 0.0))
+    ev_pct = float(proposal.get("ev", 0.0))  # Already in % from the proposal
+    size_usd = float(proposal.get("size_usd", notional))
+
+    # Model fair share price (probability as decimal) and EV if placed
+    fair_price = model_prob  # In prediction markets, price ≈ probability
+    ev_usd = (fair_price - price) * size if fair_price > 0 and size > 0 else 0.0
+
+    # Polymarket pool default is $2500; sportsbook bankroll is $1500
+    pm_pool_usd = 2500.0
+    sb_bankroll_usd = 1500.0
+    pct_pm = (size_usd / pm_pool_usd * 100.0) if pm_pool_usd > 0 else 0.0
+    pct_sb = (size_usd / sb_bankroll_usd * 100.0) if sb_bankroll_usd > 0 else 0.0
+
     return (
-        "place $%.2f %s %s @ %.2f? "
+        "place $%.2f %s %s @ %.2f | model fair %.2f ev %+.1f%% (+$%.2f) | %.1f%% PM / %.1f%% SB? "
         "Reply `Y %s` to execute, `N %s` to discard."
-        % (notional, sel, side, price, token, token)
+        % (notional, sel, side, price, fair_price, ev_pct, ev_usd, pct_pm, pct_sb, token, token)
     )
 
 
