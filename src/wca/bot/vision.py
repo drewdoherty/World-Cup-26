@@ -354,6 +354,86 @@ def _coerce_currency(value: Any, bookmaker: Any) -> Optional[str]:
     return s[:3] if s else None
 
 
+def _detect_accas(bets: List[ExtractedBet]) -> List[ExtractedBet]:
+    """Group individual legs into accas when detected.
+
+    Detects accas by finding groups of bets with:
+    - Same bookmaker
+    - Same stake
+    - Combined returns ≈ stake × product of odds
+    - 2+ legs
+    """
+    if len(bets) < 2:
+        return bets
+
+    # Group by (bookmaker, stake, currency)
+    from collections import defaultdict
+    groups = defaultdict(list)
+    used = set()
+
+    for i, b in enumerate(bets):
+        if i in used:
+            continue
+        # Try to form an acca starting from this bet
+        candidates = [i]
+        for j in range(i + 1, len(bets)):
+            if j in used:
+                continue
+            if (bets[j].bookmaker == b.bookmaker and
+                abs((bets[j].stake or 0) - (b.stake or 0)) < 0.01 and
+                bets[j].currency == b.currency):
+                candidates.append(j)
+
+        # Check if this is an acca (2+ legs with matching returns to combined odds)
+        if len(candidates) >= 2:
+            legs = [bets[idx] for idx in candidates]
+            # Calculate combined odds
+            combined_odds = 1.0
+            for leg in legs:
+                if leg.decimal_odds and leg.decimal_odds > 0:
+                    combined_odds *= leg.decimal_odds
+
+            expected_returns = (b.stake or 0) * combined_odds if b.stake else None
+            # Find actual returns from any leg that has it
+            actual_returns = next(
+                (leg.potential_returns for leg in legs if leg.potential_returns),
+                None
+            ) or 0
+
+            # If returns match (within 5% tolerance), it's an acca
+            if (expected_returns and actual_returns > 0 and
+                abs(expected_returns - actual_returns) / actual_returns < 0.05):
+                # Merge into one acca bet
+                selection = " + ".join(
+                    f"{leg.selection} ({leg.market})"
+                    for leg in legs
+                )
+                acca_bet = ExtractedBet(
+                    match_desc=" | ".join(set(leg.match_desc for leg in legs if leg.match_desc)),
+                    market="Accumulator",
+                    selection=selection,
+                    bookmaker=b.bookmaker,
+                    decimal_odds=combined_odds,
+                    stake=b.stake,
+                    potential_returns=actual_returns,
+                    status=b.status,
+                    is_boost=False,
+                    confidence=min(leg.confidence for leg in legs),
+                    raw_text=b.raw_text,
+                    currency=b.currency,
+                )
+                groups["acca"].append(acca_bet)
+                for idx in candidates:
+                    used.add(idx)
+                continue
+
+        # Not an acca, keep as single
+        groups["single"].append(b)
+        used.add(i)
+
+    return groups["acca"] + groups["single"]
+
+
 def _parse_message_body(body: Dict[str, Any]) -> List[ExtractedBet]:
     content = body.get("content")
     if not content or not isinstance(content, list):
@@ -379,11 +459,13 @@ def _parse_message_body(body: Dict[str, Any]) -> List[ExtractedBet]:
     bets_raw = obj.get("bets", [])
     if not isinstance(bets_raw, list):
         return []
-    return [
+    bets = [
         _bet_from_obj(b, raw_text=text)
         for b in bets_raw
         if isinstance(b, dict)
     ]
+    # Post-process to detect and merge accas
+    return _detect_accas(bets)
 
 
 # ---------------------------------------------------------------------------
