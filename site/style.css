@@ -1225,6 +1225,53 @@ main > .track-grid + .panel { margin-top: 12px; }
   color: var(--text-dim);
 }
 
+/* Chart 1, bar A — FT scoreline as a home-vs-away goal split. */
+.tr-ft-track {
+  display: flex;
+  height: 12px;
+}
+.tr-ft-seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-width: 0;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--bg);
+  overflow: hidden;
+}
+.tr-ft-home { background: var(--polymarket); opacity: 0.55; }
+.tr-ft-away { background: var(--warn); opacity: 0.55; }
+.tr-ft-home-win { background: var(--polymarket); }
+.tr-ft-away-win { background: var(--warn); }
+.tr-ft-draw { background: var(--text-dim); }
+
+/* Chart 1, bar B — diverging model-vs-market result-correctness bar. */
+.tr-div-track {
+  position: relative;
+  height: 12px;
+}
+.tr-div-fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 2px;
+}
+.tr-div-pos { background: var(--pos); }
+.tr-div-neg { background: var(--neg); }
+.tr-div-mid {
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  bottom: -2px;
+  width: 1px;
+  background: var(--border-2);
+  transform: translateX(-0.5px);
+}
+.tr-bar-val.pos { color: var(--pos); }
+.tr-bar-val.neg { color: var(--neg); }
+
 /* Charts 3 + 4 sit side by side on desktop. */
 .track-grid {
   display: grid;

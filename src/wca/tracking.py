@@ -659,6 +659,20 @@ def build_tracking_data(
         market_pick = modal_pick(market_triple)
 
         parsed_score = parse_score(score)
+        home_goals = parsed_score[0] if parsed_score is not None else None
+        away_goals = parsed_score[1] if parsed_score is not None else None
+
+        # Model-vs-market on the realised outcome: how much more probability
+        # the model assigned to what actually happened than the de-vigged
+        # market did.  Positive = the model beat the market on the result;
+        # negative = it didn't.  Drives the diverging "result correctness" bar.
+        model_prob_outcome = (model_triple or {}).get(outcome)
+        market_prob_outcome = (market_triple or {}).get(outcome)
+        result_edge = (
+            float(model_prob_outcome) - float(market_prob_outcome)
+            if model_prob_outcome is not None and market_prob_outcome is not None
+            else None
+        )
         top_scoreline = None
         top6_hit = None
         if scores:
@@ -715,6 +729,8 @@ def build_tracking_data(
                 "kickoff": kickoff,
                 "score": score,
                 "outcome": outcome,
+                "home_goals": home_goals,
+                "away_goals": away_goals,
                 "card_generated": (snap_used or {}).get("generated"),
                 "model_1x2": _round_triple(model_triple),
                 "model_source": model_source,
@@ -729,12 +745,9 @@ def build_tracking_data(
                 "market_correct": (
                     None if market_pick is None else market_pick == outcome
                 ),
-                "model_prob_outcome": _opt_round(
-                    (model_triple or {}).get(outcome)
-                ),
-                "market_prob_outcome": _opt_round(
-                    (market_triple or {}).get(outcome)
-                ),
+                "model_prob_outcome": _opt_round(model_prob_outcome),
+                "market_prob_outcome": _opt_round(market_prob_outcome),
+                "result_edge": _opt_round(result_edge),
                 "brier_model": _opt_round(brier_1x2(model_triple, outcome)),
                 "brier_market": _opt_round(brier_1x2(market_triple, outcome)),
                 "logloss_model": _opt_round(log_loss_1x2(model_triple, outcome)),

@@ -2,8 +2,10 @@
  *
  * Loads ./tracking_data.json (cache-busted) and renders:
  *   0. headline stat tiles (picks correct, Brier model vs market, P/L, CLV);
- *   1. paired bars: model vs de-vigged market probability assigned to the
- *      outcome that actually happened, per completed fixture;
+ *   1. two bars per completed fixture: the FINAL (FT) scoreline outcome
+ *      (home/away goal split) and a diverging "result correctness" bar that
+ *      runs right (green) when the model beat the de-vigged market on the
+ *      realised outcome and left (red) when it didn't;
  *   2. a per-fixture prediction scoreboard (picks, Brier, scorelines, O/U,
  *      BTTS — tick/cross per leg);
  *   3. a calibration scatter (predicted prob vs 0/1 outcome, jittered);
@@ -52,6 +54,13 @@
   }
   function legLabel(leg) {
     return leg === "home" ? "HOME" : leg === "away" ? "AWAY" : leg === "draw" ? "DRAW" : "—";
+  }
+  // "Home vs Away" -> ["Home", "Away"], else null.
+  function split(fixture) {
+    var parts = String(fixture || "").split(/\s+vs\s+/i);
+    return parts.length === 2
+      ? [parts[0].trim(), parts[1].trim()]
+      : null;
   }
   // "Home vs Away" + leg -> the team (or DRAW) the leg refers to.
   function legTeam(fixture, leg) {
@@ -110,7 +119,77 @@
       : "awaiting first results";
   }
 
-  // ---- 1. model vs market on the actual outcome ---------------------------
+  // ---- 1. FT scoreline + result-correctness (model vs market) -------------
+
+  // Bar A: the FINAL (FT) scoreline as a home-vs-away goal split. The track is
+  // divided proportionally to goals scored; the winning side (or both, on a
+  // draw) is tinted by the realised outcome so the picture reads at a glance.
+  function scorelineBar(f) {
+    var hg = f.home_goals, ag = f.away_goals;
+    var parts = split(f.fixture);
+    var homeName = parts ? parts[0] : "Home";
+    var awayName = parts ? parts[1] : "Away";
+    if (hg === null || hg === undefined || ag === null || ag === undefined) {
+      return '<div class="tr-bar-row">' +
+        '<span class="tr-bar-lbl">FT</span>' +
+        '<span class="tr-bar-track"></span>' +
+        '<span class="tr-bar-val num">' + esc(f.score || "—") + '</span>' +
+      '</div>';
+    }
+    hg = Number(hg); ag = Number(ag);
+    var total = hg + ag;
+    // 0-0 has no goals to split — show a neutral, full-width draw band.
+    var homePct = total > 0 ? (hg / total) * 100 : 50;
+    var awayPct = total > 0 ? (ag / total) * 100 : 50;
+    var homeCls = f.outcome === "home" ? "tr-ft-home-win" : "tr-ft-home";
+    var awayCls = f.outcome === "away" ? "tr-ft-away-win" : "tr-ft-away";
+    if (f.outcome === "draw") { homeCls = "tr-ft-draw"; awayCls = "tr-ft-draw"; }
+    var seg =
+      '<span class="tr-ft-seg ' + homeCls + '" style="width:' + homePct.toFixed(1) +
+        '%">' + (hg > 0 ? esc(String(hg)) : "") + '</span>' +
+      '<span class="tr-ft-seg ' + awayCls + '" style="width:' + awayPct.toFixed(1) +
+        '%">' + (ag > 0 ? esc(String(ag)) : "") + '</span>';
+    return '<div class="tr-bar-row">' +
+      '<span class="tr-bar-lbl">FT</span>' +
+      '<span class="tr-bar-track tr-ft-track">' + seg + '</span>' +
+      '<span class="tr-bar-val num" title="' + esc(homeName) + ' ' + hg + ' – ' +
+        ag + ' ' + esc(awayName) + '">' + esc(f.score || (hg + "-" + ag)) +
+      '</span>' +
+    '</div>';
+  }
+
+  // Bar B: diverging result-correctness bar. result_edge = model − market
+  // probability assigned to the outcome that actually happened. Positive runs
+  // right (green, model beat the market); negative runs left (red).
+  function resultBar(f) {
+    var edge = f.result_edge;
+    if (edge === null || edge === undefined || isNaN(edge)) {
+      return '<div class="tr-bar-row">' +
+        '<span class="tr-bar-lbl">M vs Mkt</span>' +
+        '<span class="tr-bar-track tr-div-track"><span class="tr-div-mid"></span></span>' +
+        '<span class="tr-bar-val num dim">—</span>' +
+      '</div>';
+    }
+    edge = Number(edge);
+    // Edge lives in [-1, 1]; clamp to a ±0.5 visual span so typical gaps fill
+    // the half-track without tiny edges vanishing.
+    var SPAN = 0.5;
+    var half = Math.min(Math.abs(edge) / SPAN, 1) * 50;
+    if (half < 1 && edge !== 0) half = 1;
+    var pos = edge >= 0;
+    var fill = pos
+      ? '<span class="tr-div-fill tr-div-pos" style="left:50%;width:' +
+          half.toFixed(1) + '%"></span>'
+      : '<span class="tr-div-fill tr-div-neg" style="right:50%;width:' +
+          half.toFixed(1) + '%"></span>';
+    return '<div class="tr-bar-row">' +
+      '<span class="tr-bar-lbl">M vs Mkt</span>' +
+      '<span class="tr-bar-track tr-div-track">' + fill +
+        '<span class="tr-div-mid"></span></span>' +
+      '<span class="tr-bar-val num ' + (pos ? "pos" : "neg") + '">' +
+        esc(signedPct(edge, 1)) + '</span>' +
+    '</div>';
+  }
 
   function renderOutcomeBars(d) {
     var fixtures = (d.fixtures || []).filter(function (f) { return !f.pending; });
@@ -120,33 +199,21 @@
       return;
     }
     var html = fixtures.map(function (f) {
-      var m = f.model_prob_outcome;
-      var k = f.market_prob_outcome;
-      var modelCls = (m !== null && k !== null)
-        ? (m > k ? "tr-fill-model-up" : "tr-fill-model-down")
-        : "tr-fill-model-up";
-      function bar(cls, p, label) {
-        var width = p === null || p === undefined ? 0 : Math.max(Number(p) * 100, 1);
-        return '<div class="tr-bar-row">' +
-          '<span class="tr-bar-lbl">' + label + '</span>' +
-          '<span class="tr-bar-track"><span class="tr-bar-fill ' + cls +
-            '" style="width:' + width.toFixed(1) + '%"></span></span>' +
-          '<span class="tr-bar-val num">' + esc(prob01(p)) + '</span>' +
-        '</div>';
-      }
       return '<div class="tr-pair">' +
         '<div class="tr-pair-head">' +
           '<span class="tr-pair-title">' + esc(f.fixture) + '</span>' +
           '<span class="tr-pair-actual">' + esc(f.score || "") + ' &middot; ' +
             esc(legTeam(f.fixture, f.outcome)) + '</span>' +
         '</div>' +
-        bar(modelCls, m, "model") +
-        bar("tr-fill-market", k, "market") +
+        scorelineBar(f) +
+        resultBar(f) +
       '</div>';
     }).join("");
 
-    html += '<div class="vt-note">model bar is green when it beat the de-vigged ' +
-      'closing consensus on the realised outcome, red when it didn’t</div>';
+    html += '<div class="vt-note">top bar is the final (FT) scoreline as a ' +
+      'home–away goal split; bottom bar runs right/green when the model beat ' +
+      'the de-vigged closing market on the realised result, left/red when it ' +
+      'didn’t (model − market probability on what happened)</div>';
     $("outcome-bars").innerHTML = html;
   }
 
