@@ -1,14 +1,14 @@
 {
   "meta": {
-    "generated": "2026-06-13 16:04:49 UTC"
+    "generated": "2026-06-17 12:40:03 UTC"
   },
   "sites": [
     {
       "name": "Paddy Power",
       "kind": "book",
       "scrape": {
-        "status": "ok",
-        "last_seen": "2026-06-13T16:02:02"
+        "status": "blocked",
+        "last_seen": "2026-06-17T12:39:57"
       },
       "ongoing": [
         {
@@ -45,7 +45,7 @@
       "kind": "book",
       "scrape": {
         "status": "blocked",
-        "last_seen": "2026-06-13T16:02:02"
+        "last_seen": "2026-06-17T12:39:57"
       },
       "ongoing": [
         {
@@ -87,7 +87,7 @@
       "kind": "book",
       "scrape": {
         "status": "blocked",
-        "last_seen": "2026-06-13T16:02:02"
+        "last_seen": "2026-06-17T12:39:57"
       },
       "ongoing": [
         {
@@ -124,7 +124,7 @@
       "kind": "book",
       "scrape": {
         "status": "ok",
-        "last_seen": "2026-06-13T16:02:02"
+        "last_seen": "2026-06-17T12:39:57"
       },
       "ongoing": [],
       "boosts": []
@@ -133,8 +133,8 @@
       "name": "William Hill",
       "kind": "book",
       "scrape": {
-        "status": "error",
-        "last_seen": "2026-06-13T16:02:02"
+        "status": "blocked",
+        "last_seen": "2026-06-17T12:39:57"
       },
       "ongoing": [
         {
@@ -176,7 +176,7 @@
       "kind": "book",
       "scrape": {
         "status": "ok",
-        "last_seen": "2026-06-13T16:02:02"
+        "last_seen": "2026-06-17T12:39:57"
       },
       "ongoing": [],
       "boosts": []
@@ -186,7 +186,7 @@
       "kind": "book",
       "scrape": {
         "status": "blocked",
-        "last_seen": "2026-06-13T16:02:02"
+        "last_seen": "2026-06-17T12:39:57"
       },
       "ongoing": [],
       "boosts": []
@@ -196,7 +196,7 @@
       "kind": "book",
       "scrape": {
         "status": "blocked",
-        "last_seen": "2026-06-13T16:02:02"
+        "last_seen": "2026-06-17T12:39:57"
       },
       "ongoing": [],
       "boosts": []
@@ -206,7 +206,7 @@
       "kind": "exchange",
       "scrape": {
         "status": "ok",
-        "last_seen": "2026-06-13T16:02:02"
+        "last_seen": "2026-06-17T12:39:57"
       },
       "ongoing": [],
       "boosts": []
@@ -216,7 +216,7 @@
       "kind": "exchange",
       "scrape": {
         "status": "ok",
-        "last_seen": "2026-06-13T16:02:02"
+        "last_seen": "2026-06-17T12:39:57"
       },
       "ongoing": [],
       "boosts": []
@@ -225,8 +225,8 @@
       "name": "Betfair Exchange",
       "kind": "exchange",
       "scrape": {
-        "status": "ok",
-        "last_seen": "2026-06-13T16:02:02"
+        "status": "blocked",
+        "last_seen": "2026-06-17T12:39:57"
       },
       "ongoing": [
         {
@@ -257,7 +257,7 @@
       "kind": "prediction_market",
       "scrape": {
         "status": "ok",
-        "last_seen": "2026-06-13T16:02:02"
+        "last_seen": "2026-06-17T12:39:57"
       },
       "ongoing": [],
       "boosts": []
@@ -373,14 +373,14 @@
   "scrape_health": [
     {
       "site": "Paddy Power",
-      "status": "ok",
-      "http_status": 200,
-      "last_ok_utc": "2026-06-13T16:02:02"
+      "status": "blocked",
+      "http_status": 403,
+      "last_ok_utc": ""
     },
     {
       "site": "Sky Bet",
       "status": "blocked",
-      "http_status": 200,
+      "http_status": 403,
       "last_ok_utc": ""
     },
     {
@@ -393,19 +393,19 @@
       "site": "Virgin Bet",
       "status": "ok",
       "http_status": 200,
-      "last_ok_utc": "2026-06-13T16:02:02"
+      "last_ok_utc": "2026-06-17T12:39:57"
     },
     {
       "site": "William Hill",
-      "status": "error",
-      "http_status": 404,
+      "status": "blocked",
+      "http_status": 403,
       "last_ok_utc": ""
     },
     {
       "site": "Ladbrokes",
       "status": "ok",
       "http_status": 200,
-      "last_ok_utc": "2026-06-13T16:02:02"
+      "last_ok_utc": "2026-06-17T12:39:57"
     },
     {
       "site": "Unibet",
@@ -423,25 +423,25 @@
       "site": "Smarkets",
       "status": "ok",
       "http_status": 200,
-      "last_ok_utc": "2026-06-13T16:02:02"
+      "last_ok_utc": "2026-06-17T12:39:57"
     },
     {
       "site": "Matchbook",
       "status": "ok",
       "http_status": 200,
-      "last_ok_utc": "2026-06-13T16:02:02"
+      "last_ok_utc": "2026-06-17T12:39:57"
     },
     {
       "site": "Betfair Exchange",
-      "status": "ok",
-      "http_status": 200,
-      "last_ok_utc": "2026-06-13T16:02:02"
+      "status": "blocked",
+      "http_status": 403,
+      "last_ok_utc": ""
     },
     {
       "site": "Polymarket",
       "status": "ok",
       "http_status": 200,
-      "last_ok_utc": "2026-06-13T16:02:02"
+      "last_ok_utc": "2026-06-17T12:39:57"
     }
   ]
 }
