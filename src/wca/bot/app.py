@@ -37,6 +37,8 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
+import pandas as pd
+
 from wca import cardcache
 from wca.bot.telegram import (
     TelegramClient,
@@ -60,6 +62,7 @@ HELP_TEXT = (
     "/card — today's recommended bet card\n"
     "/next — next match preview: winner, corners, scorers, scorelines\n"
     "/scores — predicted FT scorelines per fixture\n"
+    "/accas — 4+ leg accumulators (next 5 matches, min 2.0 odds per leg)\n"
     "/structure — project structure metrics\n"
     "/pm — Polymarket parked orders + trader status\n"
     "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
@@ -748,6 +751,43 @@ def handle_boost(text: str, *, scores_path: str = "site/scores_data.json") -> st
         )
     ev = boosts.evaluate_boost(boost, boosts.load_scores_feed(scores_path))
     return format_boost_verdict(boost, ev)
+
+
+def handle_accas(scores_path: str = "site/scores_data.json") -> str:
+    """`/accas` — multi-leg accumulators for the next 5 matches (4+ legs, min 2.0 odds)."""
+    from wca import accas
+    from wca.boosts import load_scores_feed
+
+    try:
+        scores_feed = load_scores_feed(scores_path)
+        if scores_feed.empty:
+            return (
+                "*Accumulators*\n"
+                "No odds data available yet. Try again after odds are loaded."
+            )
+
+        # Load fixtures meta for context
+        try:
+            from wca.data.results import load_results
+            from wca.data.cleaning import resolve_results_path
+
+            fixtures_meta = load_results(resolve_results_path())
+        except Exception:
+            fixtures_meta = pd.DataFrame()
+
+        # Build accas from the scores feed
+        acca_list = accas.build_accas_from_odds(
+            scores_feed, fixtures_meta, max_fixtures=5, min_legs=4, min_leg_odds=2.0
+        )
+        if not acca_list:
+            return (
+                "*Accumulators*\n"
+                "No valid 4+ leg accas found with 2.0+ odds per leg in next 5 matches."
+            )
+
+        return accas.format_accas(acca_list)
+    except Exception as exc:
+        return f"*Accumulators*\nError building accas: {exc}"
 
 
 def handle_boost_photo(
@@ -1664,6 +1704,8 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_next(next_path=NEXT_PATH)
     if cmd == "/scores":
         return handle_scores(card_path=CARD_PATH)
+    if cmd == "/accas":
+        return handle_accas()
     if cmd == "/structure":
         return handle_structure()
     if cmd == "/pm":

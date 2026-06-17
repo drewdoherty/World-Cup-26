@@ -26,13 +26,21 @@ if ! git fetch origin main --quiet 2>>"$LOG"; then
   exit 0
 fi
 
-# build_card regenerates these tracked artifacts locally each cycle; discard any
-# uncommitted local copies before pulling so the rebase can never hit an autostash
-# conflict (the failure that corrupted data files on 2026-06-16). They are
+# build_card regenerates data/model_predictions.json locally each cycle; discard any
+# uncommitted local copy before pulling so the rebase can never hit an autostash
+# conflict (the failure that corrupted data files on 2026-06-16). It is
 # regenerated next cycle and republished by com.wca.publish.
 # NOTE: model_predictions_log.jsonl is append-only history that feeds tracking —
 # it is deliberately NOT discarded here (autostash preserves its appends).
-git checkout -- data/card_latest.md data/next_latest.md data/model_predictions.json 2>/dev/null || true
+#
+# card_latest.md / next_latest.md are DELIBERATELY NOT discarded here: the bot
+# serves them via /card and /next, build_card refreshes them hourly, and
+# com.wca.publish commits the fresh copy each hour. Discarding them reverted the
+# working tree to the last committed (stale) blob within 5 min of every build,
+# which is exactly why /card and /next went stale (fixed 2026-06-17). --autostash
+# below preserves the fresh uncommitted copy across the rebase; the GitHub Actions
+# card commit that once caused divergence here is now disabled (workflow_dispatch).
+git checkout -- data/model_predictions.json 2>/dev/null || true
 # Rebase local commits onto origin/main. On ANY conflict, abort the rebase, discard
 # stray working changes, and drop a half-applied stash so the tree is left clean
 # (never with conflict markers).
