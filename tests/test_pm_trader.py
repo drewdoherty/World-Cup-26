@@ -28,6 +28,7 @@ from wca.pm.trader import (
     ApiCreds,
     ClobAuthError,
     ClobTrader,
+    LiveOrderUnconfirmed,
     TradeConfig,
     TradeError,
     compute_order_amounts,
@@ -787,6 +788,130 @@ def test_place_order_without_question_skips_allowlist(throwaway_key):
     t = _trader(throwaway_key, session=session, dry_run=True, db_path=db)
     out = t.place_order("1", 0.5, 10.0, "BUY")  # no market_question
     assert out["dry_run"] is True
+
+
+# ---------------------------------------------------------------------------
+# Live-order "unconfirmed" safety (2026-06-15 silently-unlogged on-chain fill).
+#
+# A live order that POSTs but cannot be confirmed/logged may already be
+# on-chain.  Such cases must raise LiveOrderUnconfirmed (so the bot alerts an
+# operator) and must NOT leave the order looking like a clean "not placed"
+# rejection — a definitive 4xx rejection still raises plain ClobAuthError.
+# ---------------------------------------------------------------------------
+
+
+def _live_db_live_rows(db: str) -> int:
+    import sqlite3
+
+    con = sqlite3.connect(db)
+    try:
+        return con.execute(
+            "SELECT COUNT(*) FROM pm_order_log WHERE dry_run = 0"
+        ).fetchone()[0]
+    finally:
+        con.close()
+
+
+def _live_trader(key: str, handler) -> "tuple[ClobTrader, str]":
+    db = _tmp_db()
+    t = _trader(
+        key,
+        session=RecordingSession(handler),
+        dry_run=False,
+        db_path=db,
+        signature_type=pmt.SIG_TYPE_EOA,  # prove account class for live order
+    )
+    return t, db
+
+
+def _live_creds_handler(post_response):
+    secret = base64.urlsafe_b64encode(b"unconfirmed-secret-001").decode()
+
+    def handler(method, url, kwargs):
+        if url.endswith("/auth/derive-api-key"):
+            return _resp({"apiKey": "k", "secret": secret, "passphrase": "p"})
+        if method == "POST" and url.endswith("/order"):
+            return post_response(method, url, kwargs)
+        return _resp({}, status=404)
+
+    return handler
+
+
+def test_live_order_success_writes_pm_order_log_row(throwaway_key):
+    """A fully successful live fill records exactly one dry_run=0 row, with the
+    server order id — the row the bot's daily-spend/safeguard reads back."""
+    def post(method, url, kwargs):
+        return _resp({"orderID": "srv-9", "success": True})
+
+    t, db = _live_trader(throwaway_key, _live_creds_handler(post))
+    out = t.place_order("42", 0.4, 25.0, "BUY", market_question="World Cup final")
+    assert out["submitted"] is True
+    import sqlite3
+
+    con = sqlite3.connect(db)
+    try:
+        rows = con.execute(
+            "SELECT token_id, side, notional, order_id, dry_run FROM pm_order_log "
+            "WHERE dry_run = 0"
+        ).fetchall()
+    finally:
+        con.close()
+    assert rows == [("42", "BUY", pytest.approx(10.0), "srv-9", 0)]
+
+
+def test_live_order_network_error_raises_unconfirmed(throwaway_key):
+    """A transport failure on the POST -> order may be on-chain -> Unconfirmed."""
+    def post(method, url, kwargs):
+        raise ConnectionError("connection reset by peer")
+
+    t, db = _live_trader(throwaway_key, _live_creds_handler(post))
+    with pytest.raises(LiveOrderUnconfirmed) as ei:
+        t.place_order("42", 0.4, 25.0, "BUY", market_question="World Cup final")
+    assert ei.value.token_id == "42"
+    assert ei.value.notional == pytest.approx(10.0)
+    assert ei.value.order_id is None
+    # Nothing was recorded as a live order.
+    assert _live_db_live_rows(db) == 0
+
+
+def test_live_order_5xx_raises_unconfirmed(throwaway_key):
+    """A 5xx is an uncertain outcome -> possibly on-chain -> Unconfirmed."""
+    def post(method, url, kwargs):
+        return _resp({"error": "upstream"}, status=502)
+
+    t, db = _live_trader(throwaway_key, _live_creds_handler(post))
+    with pytest.raises(LiveOrderUnconfirmed):
+        t.place_order("42", 0.4, 25.0, "BUY", market_question="World Cup final")
+    assert _live_db_live_rows(db) == 0
+
+
+def test_live_order_4xx_rejection_still_raises_clob_auth(throwaway_key):
+    """A definitive client-side rejection is NOT unconfirmed (safe to retry)."""
+    def post(method, url, kwargs):
+        return _resp({"success": False, "error": "invalid order payload"}, status=400)
+
+    t, db = _live_trader(throwaway_key, _live_creds_handler(post))
+    with pytest.raises(ClobAuthError):
+        t.place_order("42", 0.4, 25.0, "BUY", market_question="World Cup final")
+    # ClobAuthError subclasses TradeError but is NOT LiveOrderUnconfirmed.
+    assert _live_db_live_rows(db) == 0
+
+
+def test_live_order_accepted_but_log_failure_is_unconfirmed(throwaway_key, monkeypatch):
+    """Server accepted the order but pm_order_log write failed -> definitely
+    live + unlogged -> Unconfirmed carrying the server order id."""
+    def post(method, url, kwargs):
+        return _resp({"orderID": "abc", "success": True})
+
+    t, db = _live_trader(throwaway_key, _live_creds_handler(post))
+
+    def boom(*a, **k):
+        raise RuntimeError("database is locked")
+
+    monkeypatch.setattr(t, "_log_order", boom)
+    with pytest.raises(LiveOrderUnconfirmed) as ei:
+        t.place_order("42", 0.4, 25.0, "BUY", market_question="World Cup final")
+    assert ei.value.order_id == "abc"
 
 
 # ---------------------------------------------------------------------------

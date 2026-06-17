@@ -165,6 +165,42 @@ class ClobAuthError(TradeError):
     """
 
 
+class LiveOrderUnconfirmed(TradeError):
+    """A live order was submitted but its outcome could not be confirmed/logged.
+
+    Raised only *after* the order POST is attempted, so the order MAY have
+    reached the matching engine (network error / 5xx / unparseable response)
+    or — when the server accepted it but the ``pm_order_log`` write failed —
+    definitely DID.  Either way the caller must alert an operator to reconcile
+    against the wallet on-chain rather than silently treat the order as "not
+    placed" and invite a double-spend retry.
+
+    This is the guard for the 2026-06-15 incident, where an Iran-win order
+    filled on-chain but left no ``pm_order_log`` and no ledger row: ``place_order``
+    raised *after* the POST, skipping both the live ``_log_order`` and the bot's
+    ``record_bet``.  Carries the order parameters so the alert can name the
+    position.
+    """
+
+    def __init__(
+        self,
+        token_id: str,
+        side: str,
+        price: float,
+        size: float,
+        notional: float,
+        order_id: Optional[str],
+        message: str,
+    ) -> None:
+        super().__init__(message)
+        self.token_id = token_id
+        self.side = side
+        self.price = price
+        self.size = size
+        self.notional = notional
+        self.order_id = order_id
+
+
 # ---------------------------------------------------------------------------
 # Config + creds containers.
 # ---------------------------------------------------------------------------
@@ -1013,24 +1049,63 @@ class ClobTrader:
         body = json.dumps(envelope, separators=(",", ":"))
         headers = self.l2_headers("POST", "/order", body=body)
         headers["Content-Type"] = "application/json"
-        resp = self._request("POST", "/order", headers=headers, body=body)
+
+        # --- LIVE submission boundary ---------------------------------------
+        # Past this point the order may reach the matching engine even if we
+        # fail to read the response or record it.  Three outcomes:
+        #   * definitive client-side rejection (4xx / success:false) -> the
+        #     order was NOT placed; raise ClobAuthError as before (safe retry).
+        #   * uncertain outcome (network error / 5xx / unparseable) -> the
+        #     order MAY be on-chain; raise LiveOrderUnconfirmed so the bot
+        #     alerts an operator instead of inviting a blind double-spend retry.
+        #   * server accepted it but the pm_order_log write fails -> the order
+        #     is definitely LIVE and unlogged; also LiveOrderUnconfirmed.
+        # This is the fix for the 2026-06-15 silently-unlogged on-chain fill.
+        try:
+            resp = self._request("POST", "/order", headers=headers, body=body)
+        except TradeError as exc:
+            raise LiveOrderUnconfirmed(
+                token_id, side.upper(), price, size, notional, None,
+                "network error submitting live order (may be on-chain): %s" % exc,
+            ) from exc
+
         try:
             out = resp.json()
         except ValueError:
             out = {"raw": _short(getattr(resp, "text", ""))}
-        if getattr(resp, "status_code", 200) >= 400 or (
+
+        status_code = getattr(resp, "status_code", 200)
+        if status_code >= 500:
+            # Server-side error: the order may have been accepted before the
+            # failure — treat as possibly-live, not a clean rejection.
+            raise LiveOrderUnconfirmed(
+                token_id, side.upper(), price, size, notional, None,
+                "server error on live order (may be on-chain): %s %s"
+                % (status_code, _short(str(out))),
+            )
+        if status_code >= 400 or (
             isinstance(out, dict) and out.get("success") is False
         ):
             raise ClobAuthError(
-                "order POST failed: %s %s" % (resp.status_code, _short(str(out)))
+                "order POST failed: %s %s" % (status_code, _short(str(out)))
             )
 
         order_id = (
             out.get("orderID") or out.get("orderId") if isinstance(out, dict) else None
         )
-        self._log_order(
-            token_id, side.upper(), price, size, notional, order_id, dry_run=False
-        )
+        try:
+            self._log_order(
+                token_id, side.upper(), price, size, notional, order_id, dry_run=False
+            )
+        except Exception as exc:
+            # The server accepted the order (it is LIVE) but the pm_order_log
+            # write failed — surface loudly so the ledger gets reconciled
+            # rather than the fill going silently unrecorded.
+            raise LiveOrderUnconfirmed(
+                token_id, side.upper(), price, size, notional, order_id,
+                "live order accepted (id %s) but pm_order_log write failed: %s"
+                % (order_id, exc),
+            ) from exc
         result: Dict[str, Any] = dict(out) if isinstance(out, dict) else {"response": out}
         result.update(
             {

@@ -1261,6 +1261,63 @@ def _pm_dry_run() -> bool:
     return os.environ.get("PM_DRY_RUN", "1").strip().lower() not in {"0", "false", "no", ""}
 
 
+def _alert_admin(text: str) -> bool:
+    """Best-effort Telegram DM to the admin for safety-critical order alerts.
+
+    Used when a live Polymarket order may have reached the chain without being
+    fully logged (see :func:`_execute_parked_order`).  Never raises and never
+    makes a network call under pytest; returns True only if a message was sent.
+    """
+    admin = os.environ.get("TELEGRAM_ADMIN_USER_ID")
+    if not admin:
+        logger.error("ADMIN ALERT (TELEGRAM_ADMIN_USER_ID unset): %s", text)
+        return False
+    if "PYTEST_CURRENT_TEST" in os.environ:
+        logger.warning("ADMIN ALERT (suppressed under pytest): %s", text)
+        return False
+    try:
+        TelegramClient().send_message(admin, text)
+        return True
+    except Exception as exc:  # an alert failure must never break order handling
+        logger.error("failed to send admin alert (%s): %s", exc, text)
+        return False
+
+
+def _verify_live_order_logged(
+    db_path: str, bid: Optional[int], token_id: str
+) -> List[str]:
+    """Names of the log artifacts MISSING for a just-placed live order.
+
+    A live (on-chain) order must leave BOTH a ledger row (``bets``) and a
+    ``pm_order_log`` row.  Returns whichever are absent so the caller can alert;
+    an empty list means fully logged.  Querying problems are reported rather
+    than swallowed so a verification failure never reads as success.
+    """
+    import sqlite3
+
+    missing: List[str] = []
+    try:
+        conn = sqlite3.connect(db_path)
+        try:
+            if bid is None or conn.execute(
+                "SELECT 1 FROM bets WHERE id = ?", (bid,)
+            ).fetchone() is None:
+                missing.append("ledger row")
+            row = conn.execute(
+                "SELECT 1 FROM pm_order_log "
+                "WHERE token_id = ? AND dry_run = 0 LIMIT 1",
+                (str(token_id),),
+            ).fetchone()
+            if row is None:
+                missing.append("pm_order_log row")
+        finally:
+            conn.close()
+    except Exception as exc:
+        logger.error("could not verify live-order logging: %s", exc)
+        missing.append("verification failed (%s)" % exc)
+    return missing
+
+
 def _execute_parked_order(
     n: int,
     proposal: Dict[str, Any],
@@ -1313,6 +1370,10 @@ def _execute_parked_order(
     size = float(proposal.get("size", 0.0))
     side = str(proposal.get("side", "BUY")).upper()
     try:
+        from wca.pm.trader import LiveOrderUnconfirmed
+    except Exception:  # pragma: no cover - trader import validated above
+        LiveOrderUnconfirmed = None  # type: ignore[assignment]
+    try:
         result = trader.place_order(
             proposal["token_id"],
             price,
@@ -1333,6 +1394,35 @@ def _execute_parked_order(
             ).strip(),
         )
     except Exception as exc:
+        # A live POST that may have reached the chain (network error / 5xx /
+        # accepted-but-unlogged) raises LiveOrderUnconfirmed. Treat it as a
+        # safety event: alert the admin and do NOT report a clean "order
+        # failed" (which would invite a double-spend retry of a possibly-live
+        # order). All other exceptions are genuine pre-POST rejections.
+        if LiveOrderUnconfirmed is not None and isinstance(exc, LiveOrderUnconfirmed):
+            _alert_admin(
+                "⚠️ PM-%d LIVE order may be ON-CHAIN but is UNLOGGED.\n"
+                "%s\n"
+                "token=%s side=%s price=%.4f size=%.4f notional=$%.2f order_id=%s\n"
+                "Reconcile data/wca.db against the wallet at "
+                "data-api.polymarket.com/activity?user=<funder> BEFORE any retry "
+                "— do NOT blindly resend (double-spend risk)."
+                % (
+                    n,
+                    exc,
+                    getattr(exc, "token_id", proposal.get("token_id")),
+                    getattr(exc, "side", side),
+                    float(getattr(exc, "price", price)),
+                    float(getattr(exc, "size", size)),
+                    float(getattr(exc, "notional", price * size)),
+                    getattr(exc, "order_id", None),
+                )
+            )
+            return (
+                "PM-%d: ⚠️ order UNCONFIRMED — it may have been placed "
+                "on-chain but could not be confirmed/logged (%s). Admin alerted; "
+                "verify the wallet on-chain before retrying." % (n, exc)
+            )
         return "PM-%d: order failed — %s" % (n, exc)
 
     order_id = (result or {}).get("orderID") or (result or {}).get("orderId") or "dry-run"
@@ -1363,7 +1453,27 @@ def _execute_parked_order(
             db_path=db_path,
         )
     except Exception as exc:
+        # The order is LIVE (place_order returned) but the ledger write failed.
+        # Alert so the on-chain fill gets reconciled rather than discovered late.
+        if not dry_run:
+            _alert_admin(
+                "⚠️ PM-%d LIVE order placed (order id %s) but the ledger write "
+                "FAILED: %s. token=%s — backfill data/wca.db against the wallet "
+                "on-chain." % (n, order_id, exc, proposal.get("token_id"))
+            )
         return "PM-%d: order ok but ledger write failed — %s" % (n, exc)
+
+    # Safeguard: a live (on-chain) order must leave BOTH a ledger row and a
+    # pm_order_log row. Verify and alert on any gap so an on-chain order can
+    # never silently go unlogged again (2026-06-15 regression guard).
+    if not dry_run:
+        missing = _verify_live_order_logged(db_path, bid, proposal["token_id"])
+        if missing:
+            _alert_admin(
+                "⚠️ PM-%d LIVE order placed (order id %s, ledger #%s) but logging "
+                "is INCOMPLETE — missing %s. Reconcile data/wca.db against the "
+                "wallet on-chain." % (n, order_id, bid, " and ".join(missing))
+            )
 
     _autosync(db_path, "polymarket order")
     mode = "DRY-RUN (signed, not submitted)" if dry_run else "LIVE — submitted"
@@ -1423,6 +1533,14 @@ def handle_confirmation(
         result = _execute_parked_order(
             n, proposal, db_path, ts_utc=ts_utc, trader=trader
         )
+        # An UNCONFIRMED live order may already be on-chain: do NOT re-park it
+        # (a blind Y PM-n retry would risk a double-fill). Record a distinct
+        # status and force manual on-chain reconciliation (2026-06-15 guard).
+        unconfirmed = isinstance(result, str) and "UNCONFIRMED" in result
+        if unconfirmed:
+            if pending_orders is _PENDING_ORDERS or from_db:
+                _parked_set_status(n, "unconfirmed", db_path)
+            return result
         # A failed POST must NOT consume the proposal: keep it retryable
         # (live bug 2026-06-12: CLOB 400 marked the order "executed" and the
         # user's retry got "not a parked order").

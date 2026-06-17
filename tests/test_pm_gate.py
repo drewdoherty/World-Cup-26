@@ -196,6 +196,53 @@ def test_confirm_unknown_pm_token_reports_expired(tmp_path):
     assert "not a parked order" in out
 
 
+# ---------------------------------------------------------------------------
+# Live-order UNCONFIRMED handling (2026-06-15 silently-unlogged on-chain fill).
+# A live order that may be on-chain but could not be confirmed/logged must NOT
+# be reported as a clean failure (which would invite a double-spend retry) and
+# must NOT be left re-parked for `Y PM-n`.
+# ---------------------------------------------------------------------------
+
+
+class _UnconfirmedTrader:
+    """Trader whose live place_order raises LiveOrderUnconfirmed."""
+
+    def place_order(self, token_id, price, size, side, **kw):
+        from wca.pm.trader import LiveOrderUnconfirmed
+
+        raise LiveOrderUnconfirmed(
+            token_id, side.upper(), price, size, price * size, None,
+            "network error submitting live order (may be on-chain): boom",
+        )
+
+
+def test_confirm_live_unconfirmed_does_not_invite_retry(tmp_path, monkeypatch):
+    monkeypatch.setenv("PM_DRY_RUN", "0")
+    db = str(tmp_path / "t.db")
+    app.park_order(_proposal())
+    out = app.handle_confirmation("Y PM-1", db, trader=_UnconfirmedTrader())
+
+    # Surfaced as UNCONFIRMED, NOT a clean "order failed" + retry invitation.
+    assert "UNCONFIRMED" in out
+    assert "order failed" not in out
+    assert "retry with Y PM-1" not in out
+
+    # The proposal is NOT left parked for a blind retry: a re-confirm is refused.
+    assert 1 not in app._PENDING_ORDERS
+    retry = app.handle_confirmation("Y PM-1", db, trader=_UnconfirmedTrader())
+    assert "not a parked order" in retry
+
+    # No ledger row written for an unconfirmed order.
+    con = sqlite3.connect(db)
+    n = (
+        con.execute("SELECT COUNT(*) FROM bets").fetchone()[0]
+        if _table_exists(con, "bets")
+        else 0
+    )
+    con.close()
+    assert n == 0
+
+
 def test_confirm_pm_bad_number_returns_none():
     assert app.handle_confirmation("Y PM-abc", "x.db", trader=_FakeTrader()) is None
 
