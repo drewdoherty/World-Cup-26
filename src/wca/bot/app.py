@@ -1219,14 +1219,22 @@ def park_order(proposal: Dict[str, Any]) -> str:
 
 
 def format_parked_order(token: str, proposal: Dict[str, Any]) -> str:
-    """Human confirmation prompt for one parked Polymarket order."""
+    """Human confirmation prompt for one parked Polymarket order.
+
+    Format shows: match (both teams), outcome, price, stake, model prob, EV, and exposure.
+    """
     side = str(proposal.get("side", "BUY")).upper()
     price = float(proposal.get("price", 0.0))
     size = float(proposal.get("size", 0.0))
     notional = price * size
-    label = proposal.get("label") or proposal.get("market") or "market"
+
+    # Extract both teams from match_desc and show them
+    match_desc = proposal.get("match_desc", "")
     outcome = proposal.get("outcome") or proposal.get("selection") or ""
-    sel = ("%s %s" % (label, outcome)).strip()
+
+    # Build selection line: "Home vs Away — Outcome"
+    sel_line = "%s — %s" % (match_desc, outcome) if match_desc and outcome else \
+               (proposal.get("label") or proposal.get("market") or "market")
 
     # Enhanced fields: model fair share price, EV, and stake %
     model_prob = float(proposal.get("model_prob", 0.0))
@@ -1244,9 +1252,9 @@ def format_parked_order(token: str, proposal: Dict[str, Any]) -> str:
     pct_sb = (size_usd / sb_bankroll_usd * 100.0) if sb_bankroll_usd > 0 else 0.0
 
     return (
-        "place $%.2f %s %s @ %.2f | model fair %.2f ev %+.1f%% (+$%.2f) | %.1f%% PM / %.1f%% SB? "
-        "Reply `Y %s` to execute, `N %s` to discard."
-        % (notional, sel, side, price, fair_price, ev_pct, ev_usd, pct_pm, pct_sb, token, token)
+        "*%s* %s @ %.2f | $%.2f | model %.1f%% | ev %+.1f%% | %.1f%% PM\n"
+        "→ `Y %s` execute | `N %s` discard"
+        % (sel_line, side, price, notional, model_prob * 100.0, ev_pct, pct_pm, token, token)
     )
 
 

@@ -105,13 +105,15 @@ def _format_proposal_line(i: int, p: dict) -> str:
 
 
 def _build_exposure_section(proposals: list, odds_df) -> str:
-    """Build exposure analysis for the next 5 matches."""
-    if not proposals or odds_df.empty:
+    """Build exposure analysis for the next 5 matches.
+
+    Shows which outcomes (team wins) are covered in the next 5 matches, with
+    stakes and coverage indicators. Uncovered outcomes are highlighted.
+    """
+    if odds_df.empty:
         return ""
 
     import pandas as pd
-
-    now_dt = pd.Timestamp.utcnow()
 
     # Get next 5 matches from odds_df, sorted by commence_time
     upcoming = odds_df.copy()
@@ -120,51 +122,65 @@ def _build_exposure_section(proposals: list, odds_df) -> str:
             upcoming["commence_time"], errors="coerce", utc=True
         )
         upcoming = upcoming.sort_values("commence_time").drop_duplicates(
-            subset=["sport_key", "commence_time"]
+            subset=["home_team", "away_team", "commence_time"], keep="first"
         )
 
-    # Track which outcomes are covered
-    covered_outcomes = {}  # {match_desc: {outcome: stake}}
+    # Track which outcomes are covered: {match_key: {team: stake, ...}}
+    # where match_key is "Home vs Away" and teams include home_team, away_team, Draw
+    covered_outcomes = {}  # {match_key: {outcome: stake}}
     for p in proposals:
         match = p.get("match_desc", "")
-        outcome = p.get("outcome", "Yes")
+        outcome = p.get("outcome", "")
         stake = p.get("size_usd", 0)
 
-        if match not in covered_outcomes:
-            covered_outcomes[match] = {}
-        covered_outcomes[match][outcome] = stake
+        if match and outcome:
+            if match not in covered_outcomes:
+                covered_outcomes[match] = {}
+            covered_outcomes[match][outcome] = stake
 
     # Build exposure section
-    exposure_lines = ["*Polymarket Exposure (next 5 matches):*"]
+    exposure_lines = ["🎯 *Exposure (next 5 matches):*", ""]
 
     match_count = 0
     for _, row in upcoming.iterrows():
         if match_count >= 5:
             break
 
-        if not row.get("home_team") or not row.get("away_team"):
+        home = (row.get("home_team") or "").strip()
+        away = (row.get("away_team") or "").strip()
+        if not home or not away:
             continue
 
-        match_desc = "%s vs %s" % (row.get("home_team", ""), row.get("away_team", ""))
-        outcomes = covered_outcomes.get(match_desc, {})
+        match_desc = "%s vs %s" % (home, away)
+        covered = covered_outcomes.get(match_desc, {})
 
-        if not outcomes:
-            # Uncovered match
-            exposure_lines.append(
-                "  %s — 🔴 UNCOVERED" % match_desc
-            )
+        # Determine what's covered
+        home_covered = home in covered
+        away_covered = away in covered
+
+        # Calculate total exposure
+        total_stake = sum(covered.values()) if covered else 0.0
+
+        # Format coverage indicators
+        coverage_str = ""
+        if home_covered:
+            coverage_str += f"✅ {home} ${covered[home]:.0f}"
         else:
-            # Show coverage per outcome
-            covered = ", ".join(
-                "%s $%.0f" % (o, s) for o, s in sorted(outcomes.items())
-            )
-            exposure_lines.append(
-                "  %s — 🟢 %s" % (match_desc, covered)
-            )
+            coverage_str += f"⭕ {home}"
+
+        coverage_str += " | "
+
+        if away_covered:
+            coverage_str += f"✅ {away} ${covered[away]:.0f}"
+        else:
+            coverage_str += f"⭕ {away}"
+
+        exposure_lines.append(f"  {match_desc}")
+        exposure_lines.append(f"    {coverage_str}")
 
         match_count += 1
 
-    if len(exposure_lines) > 1:
+    if len(exposure_lines) > 2:
         return "\n".join(exposure_lines) + "\n"
     return ""
 
