@@ -1,22 +1,22 @@
-<!-- generated: 2026-06-16T14:38:27 -->
-⚽ *Next match* — France vs Senegal
-Kickoff 2026-06-16 19:00:00+00:00
+<!-- generated: 2026-06-17T18:26:22 -->
+⚽ *Next match* — England vs Croatia
+Kickoff 2026-06-17 20:00:00+00:00
 
 *Winner* (model blend)
-  France          63.2%  fair 1.58  best 1.50 (betfair_ex_uk) -5.2%
-  Draw            22.8%  fair 4.38  best 4.80 (betfair_ex_uk) +9.6% ✅
-  Senegal         14.0%  fair 7.15  best 8.00 (smarkets) +11.8% ✅
+  England         53.9%  fair 1.85  best 1.74 (matchbook) -6.2%
+  Draw            26.7%  fair 3.75  best 3.95 (betfair_ex_uk) +5.4% ✅
+  Croatia         19.4%  fair 5.16  best 5.70 (betfair_ex_uk) +10.5% ✅
 
-*Corners* (model, exp 8.2)
-  O/U 8.5: over 43.0% / under 57.0%  fair 2.33 / 1.75
+*Corners* (model, exp 8.1)
+  O/U 8.5: over 42.4% / under 57.6%  fair 2.36 / 1.74
 
 *Anytime scorer* (best market price, vig in)
-  Kylian Mbappe       2.18 (Betfair)  imp 46%
-  Jean-Philippe Mate  2.46 (Betfair)  imp 41%
-  Marcus Thuram       2.60 (William Hill)  imp 38%
-  Michael Olise       3.25 (Betfair)  imp 31%
-  Bradley Barcola     3.30 (Betfair)  imp 30%
+  Harry Kane          2.34 (Betfair)  imp 43%
+  Ivan Toney          3.00 (Betfair)  imp 33%
+  Ollie Watkins       3.00 (Betfair)  imp 33%
+  Bukayo Saka         4.20 (Betfair)  imp 24%
+  Marcus Rashford     4.20 (Betfair)  imp 24%
 
 *Scorelines* (top 6)
-1-0 18.7% | 2-0 14.4% | 0-0 10.2% | 1-1 10.0% | 2-1 9.5% | 3-0 7.2%
-  O/U 2.5: over 38.2% / under 61.8%   BTTS 36.7%
+1-0 17.3% | 1-1 11.9% | 2-0 11.7% | 0-0 11.4% | 2-1 9.4% | 0-1 8.0%
+  O/U 2.5: over 36.3% / under 63.7%   BTTS 39.9%
