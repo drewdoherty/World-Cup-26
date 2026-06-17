@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-17 15:49:17 UTC"
+    "generated": "2026-06-17T16:32:03"
   },
   "totals": {
-    "wagered": 507.43600000000004,
-    "open_stake": 71.0,
+    "wagered": 517.436,
+    "open_stake": 81.0,
     "settled_pl": 136.8805,
-    "n_bets": 63
+    "n_bets": 64
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 356.14000000000004,
-      "open_stake": 10.0,
+      "wagered": 366.14000000000004,
+      "open_stake": 20.0,
       "settled_pl": 163.0755,
-      "n_bets": 46
+      "n_bets": 47
     },
     "USD": {
       "wagered": 151.29600000000002,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 356.14000000000004,
-      "open_stake": 10.0,
+      "wagered": 366.14000000000004,
+      "open_stake": 20.0,
       "settled_pl": 163.0755,
-      "n_bets": 46,
+      "n_bets": 47,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 239.14000000000001,
-      "open_stake": 10.0,
+      "wagered": 249.14000000000001,
+      "open_stake": 20.0,
       "settled_pl": 187.07550000000003,
-      "n_bets": 33,
+      "n_bets": 34,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,20 @@
     }
   },
   "source_summary": {
+    "punt": {
+      "GBP": {
+        "wagered": 53.06,
+        "open_stake": 10.0,
+        "settled_pl": 86.27,
+        "n_bets": 4
+      },
+      "USD": {
+        "wagered": 13.366,
+        "open_stake": 1.0,
+        "settled_pl": -2.367,
+        "n_bets": 10
+      }
+    },
     "model": {
       "USD": {
         "wagered": 137.93,
@@ -84,20 +98,6 @@
         "n_bets": 1
       }
     },
-    "punt": {
-      "GBP": {
-        "wagered": 43.06,
-        "open_stake": 0.0,
-        "settled_pl": 86.27,
-        "n_bets": 3
-      },
-      "USD": {
-        "wagered": 13.366,
-        "open_stake": 1.0,
-        "settled_pl": -2.367,
-        "n_bets": 10
-      }
-    },
     "offer": {
       "GBP": {
         "wagered": 174.0,
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "betfair": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 62.19999999999999,
+      "open_stake": 10.0,
+      "settled_pl": 96.842,
+      "n_bets": 6
+    },
     "polymarket": {
       "venue": "polymarket",
       "currency": "USD",
@@ -123,14 +131,6 @@
       "open_stake": 0.0,
       "settled_pl": -11.306499999999993,
       "n_bets": 14
-    },
-    "betfair": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 52.2,
-      "open_stake": 0.0,
-      "settled_pl": 96.842,
-      "n_bets": 5
     },
     "betfair_ex_uk": {
       "venue": "sportsbook",
@@ -1529,6 +1529,22 @@
     "n_with_close": 24
   },
   "positions": [
+    {
+      "id": 84,
+      "ts_utc": "2026-06-17T16:32:03",
+      "match": "Czechia vs South Africa | Ghana vs Panama | England vs Croatia",
+      "market": "Accumulator",
+      "selection": "England (Match Odds 90) + Ghana (Match Odds 90) + Czechia (Match Odds 90)",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 6.348375,
+      "stake": 10.0,
+      "model_prob": null,
+      "ev": null
+    },
     {
       "id": 57,
       "ts_utc": "2026-06-12T20:03:20",
