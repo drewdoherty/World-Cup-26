@@ -85,22 +85,88 @@ def _augment_for_gate(proposal: dict) -> dict:
 
 
 def _format_proposal_line(i: int, p: dict) -> str:
+    match_desc = p.get("match_desc", "")
+    market_q = p.get("market_question", "")
     return (
-        "%d. %s | %s @ %.3f | $%.2f (%.1f shares) | model %.1f%% ev %+.1f%% | "
-        "token %s%s"
+        "*%d. %s*\n"
+        "    %s @ %.2f | $%.2f | model %.1f%% | ev %+.1f%%"
+        "%s"
         % (
             i,
-            p.get("market_question") or p.get("match_desc"),
-            p.get("outcome", "Yes"),
+            match_desc,
+            market_q.replace(" to win", "").strip() if market_q else "Yes",
             p["price"],
             p["size_usd"],
-            p["shares"],
             p["model_prob"] * 100.0,
             p["ev"] * 100.0,
-            p["token_id"],
             " [neg_risk]" if p.get("neg_risk") else "",
         )
     )
+
+
+def _build_exposure_section(proposals: list, odds_df) -> str:
+    """Build exposure analysis for the next 5 matches."""
+    if not proposals or odds_df.empty:
+        return ""
+
+    import pandas as pd
+
+    now_dt = pd.Timestamp.utcnow()
+
+    # Get next 5 matches from odds_df, sorted by commence_time
+    upcoming = odds_df.copy()
+    if "commence_time" in upcoming.columns:
+        upcoming["commence_time"] = pd.to_datetime(
+            upcoming["commence_time"], errors="coerce", utc=True
+        )
+        upcoming = upcoming.sort_values("commence_time").drop_duplicates(
+            subset=["sport_key", "commence_time"]
+        )
+
+    # Track which outcomes are covered
+    covered_outcomes = {}  # {match_desc: {outcome: stake}}
+    for p in proposals:
+        match = p.get("match_desc", "")
+        outcome = p.get("outcome", "Yes")
+        stake = p.get("size_usd", 0)
+
+        if match not in covered_outcomes:
+            covered_outcomes[match] = {}
+        covered_outcomes[match][outcome] = stake
+
+    # Build exposure section
+    exposure_lines = ["*Polymarket Exposure (next 5 matches):*"]
+
+    match_count = 0
+    for _, row in upcoming.iterrows():
+        if match_count >= 5:
+            break
+
+        if not row.get("home_team") or not row.get("away_team"):
+            continue
+
+        match_desc = "%s vs %s" % (row.get("home_team", ""), row.get("away_team", ""))
+        outcomes = covered_outcomes.get(match_desc, {})
+
+        if not outcomes:
+            # Uncovered match
+            exposure_lines.append(
+                "  %s — 🔴 UNCOVERED" % match_desc
+            )
+        else:
+            # Show coverage per outcome
+            covered = ", ".join(
+                "%s $%.0f" % (o, s) for o, s in sorted(outcomes.items())
+            )
+            exposure_lines.append(
+                "  %s — 🟢 %s" % (match_desc, covered)
+            )
+
+        match_count += 1
+
+    if len(exposure_lines) > 1:
+        return "\n".join(exposure_lines) + "\n"
+    return ""
 
 
 def main() -> int:
@@ -224,7 +290,7 @@ def main() -> int:
             print(_format_proposal_line(i, p))
         return 0
 
-    # -- park + notify ----------------------------------------------------
+    # -- park + notify (single message) -----------------------------------
     from wca.bot.app import push_parked_order
     from wca.bot.telegram import TelegramClient, TelegramError
 
@@ -243,20 +309,37 @@ def main() -> int:
         print("ERROR: Telegram client init failed: %s" % exc, file=sys.stderr)
         return 1
 
-    pushed = 0
+    # Park all proposals first
+    parked_texts = []
     for p in proposals:
-        text = push_parked_order(_augment_for_gate(p))
-        try:
-            client.send_message(admin, text)
-            pushed += 1
-        except TelegramError as exc:
-            print("send error: %s" % exc, file=sys.stderr)
+        parked_texts.append(push_parked_order(_augment_for_gate(p)))
 
-    print(
-        "Parked + notified %d/%d proposal(s) to admin %s. "
-        "Confirm each with `Y PM-<n>` in Telegram (PM_DRY_RUN gates execution)."
-        % (pushed, len(proposals), admin)
+    # Build single message with exposure + all proposals
+    exposure_section = _build_exposure_section(proposals, odds_df)
+
+    message_body = "🎯 *Polymarket Trade Ideas* — %d picks\n\n" % len(proposals)
+    if exposure_section:
+        message_body += exposure_section + "\n"
+
+    message_body += "*Proposals:*\n"
+    for i, text in enumerate(parked_texts, 1):
+        message_body += "\n" + text
+
+    message_body += (
+        "\n\n_PM_DRY_RUN gates execution. Confirm each with `Y PM-<n>` in Telegram._"
     )
+
+    # Send single message
+    try:
+        client.send_message(admin, message_body)
+        print(
+            "Parked + notified %d proposal(s) in a single message to admin %s."
+            % (len(proposals), admin)
+        )
+    except TelegramError as exc:
+        print("send error: %s" % exc, file=sys.stderr)
+        return 1
+
     return 0
 
 
