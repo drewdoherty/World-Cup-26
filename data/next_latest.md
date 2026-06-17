@@ -1,22 +1,22 @@
-<!-- generated: 2026-06-17T22:15:07 -->
-⚽ *Next match* — Ghana vs Panama
-Kickoff 2026-06-17 23:00:00+00:00
+<!-- generated: 2026-06-17T23:18:23 -->
+⚽ *Next match* — Uzbekistan vs Colombia
+Kickoff 2026-06-18 02:00:00+00:00
 
 *Winner* (model blend)
-  Ghana           35.3%  fair 2.83  best 2.50 (betfair_ex_uk) -11.8%
-  Draw            28.5%  fair 3.51  best 3.25 (betfair_ex_uk) -7.5%
-  Panama          36.3%  fair 2.76  best 3.40 (betfair_ex_uk) +23.3% ✅
+  Uzbekistan      11.3%  fair 8.83  best 10.50 (smarkets) +18.9% ✅
+  Draw            21.6%  fair 4.63  best 5.00 (skybet) +8.0% ✅
+  Colombia        67.1%  fair 1.49  best 1.43 (matchbook) -4.1%
 
-*Corners* (model, exp 8.1)
-  O/U 8.5: over 42.4% / under 57.6%  fair 2.36 / 1.74
+*Corners* (model, exp 8.3)
+  O/U 8.5: over 44.6% / under 55.4%  fair 2.24 / 1.80
 
 *Anytime scorer* (best market price, vig in)
-  Ismael Diaz         3.20 (William Hill)  imp 31%
-  Brandon Thomas-Asa  3.30 (William Hill)  imp 30%
-  Jose Fajardo Nelso  3.30 (William Hill)  imp 30%
-  Prince Kwabena Adu  3.60 (William Hill)  imp 28%
-  Antoine Semenyo     3.70 (Betfair)  imp 27%
+  Luis Fernando Diaz  2.32 (Betfair)  imp 43%
+  Luis Javier Suarez  2.38 (Betfair)  imp 42%
+  Jhon Cordoba        2.92 (Betfair)  imp 34%
+  Carlos Andres Gome  3.20 (William Hill)  imp 31%
+  James Rodriguez     3.65 (Betfair)  imp 27%
 
 *Scorelines* (top 6)
-0-1 14.0% | 1-1 12.8% | 0-0 11.9% | 1-0 11.7% | 1-2 8.0% | 2-0 7.4%
-  O/U 2.5: over 35.5% / under 64.5%   BTTS 41.7%
+0-1 17.5% | 0-2 15.6% | 0-0 9.8% | 1-1 9.4% | 0-3 9.0% | 1-2 8.6%
+  O/U 2.5: over 40.6% / under 59.4%   BTTS 34.9%
