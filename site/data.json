@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-17T16:32:03"
+    "generated": "2026-06-17T16:37:05"
   },
   "totals": {
-    "wagered": 517.436,
-    "open_stake": 81.0,
+    "wagered": 527.436,
+    "open_stake": 91.0,
     "settled_pl": 136.8805,
-    "n_bets": 64
+    "n_bets": 65
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 366.14000000000004,
-      "open_stake": 20.0,
+      "wagered": 376.1400000000001,
+      "open_stake": 30.0,
       "settled_pl": 163.0755,
-      "n_bets": 47
+      "n_bets": 48
     },
     "USD": {
       "wagered": 151.29600000000002,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 366.14000000000004,
-      "open_stake": 20.0,
+      "wagered": 376.1400000000001,
+      "open_stake": 30.0,
       "settled_pl": 163.0755,
-      "n_bets": 47,
+      "n_bets": 48,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 249.14000000000001,
-      "open_stake": 20.0,
+      "wagered": 259.14,
+      "open_stake": 30.0,
       "settled_pl": 187.07550000000003,
-      "n_bets": 34,
+      "n_bets": 35,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -64,10 +64,10 @@
   "source_summary": {
     "punt": {
       "GBP": {
-        "wagered": 53.06,
-        "open_stake": 10.0,
+        "wagered": 63.06,
+        "open_stake": 20.0,
         "settled_pl": 86.27,
-        "n_bets": 4
+        "n_bets": 5
       },
       "USD": {
         "wagered": 13.366,
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "unknown": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 10.0,
+      "open_stake": 10.0,
+      "settled_pl": 0.0,
+      "n_bets": 1
+    },
     "betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -1529,6 +1537,22 @@
     "n_with_close": 24
   },
   "positions": [
+    {
+      "id": 85,
+      "ts_utc": "2026-06-17T16:37:05",
+      "match": "Czechia vs South Africa | Ghana vs Panama | England vs Croatia | Portugal vs DR Congo",
+      "market": "Accumulator",
+      "selection": "Portugal (Match Odds 90) + England (Match Odds 90) + Ghana (Match Odds 90) + Czechia (Match Odds 90)",
+      "platform": "unknown",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 7.1732584,
+      "stake": 10.0,
+      "model_prob": null,
+      "ev": null
+    },
     {
       "id": 84,
       "ts_utc": "2026-06-17T16:32:03",
