@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-17T20:07:04"
+    "generated": "2026-06-17T20:25:33"
   },
   "totals": {
-    "wagered": 587.436,
-    "open_stake": 151.0,
+    "wagered": 597.436,
+    "open_stake": 161.0,
     "settled_pl": 136.8805,
-    "n_bets": 67
+    "n_bets": 68
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 436.14000000000004,
-      "open_stake": 90.0,
+      "wagered": 446.14000000000004,
+      "open_stake": 100.0,
       "settled_pl": 163.0755,
-      "n_bets": 50
+      "n_bets": 51
     },
     "USD": {
       "wagered": 151.29600000000002,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 436.14000000000004,
-      "open_stake": 90.0,
+      "wagered": 446.14000000000004,
+      "open_stake": 100.0,
       "settled_pl": 163.0755,
-      "n_bets": 50,
+      "n_bets": 51,
       "currency": "GBP"
     },
     "polymarket": {
@@ -53,10 +53,10 @@
       "label": "Sportsbook 1"
     },
     "sportsbook_2": {
-      "wagered": 107.0,
-      "open_stake": 0.0,
+      "wagered": 117.0,
+      "open_stake": 10.0,
       "settled_pl": -35.0,
-      "n_bets": 12,
+      "n_bets": 13,
       "currency": "GBP",
       "label": "Sportsbook 2"
     }
@@ -64,10 +64,10 @@
   "source_summary": {
     "punt": {
       "GBP": {
-        "wagered": 123.06,
-        "open_stake": 80.0,
+        "wagered": 133.06,
+        "open_stake": 90.0,
         "settled_pl": 86.27,
-        "n_bets": 7
+        "n_bets": 8
       },
       "USD": {
         "wagered": 13.366,
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "sky bet": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 10.0,
+      "open_stake": 10.0,
+      "settled_pl": 0.0,
+      "n_bets": 1
+    },
     "betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -1538,6 +1546,22 @@
   },
   "positions": [
     {
+      "id": 88,
+      "ts_utc": "2026-06-17T20:25:33",
+      "match": "Ghana vs Panama",
+      "market": "Both Teams to Score, Both Teams 3+ Corners & Both Teams 2+ Cards",
+      "selection": "Both Teams to Score, Both Teams 3+ Corners & Both Teams 2+ Cards",
+      "platform": "Sky Bet",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 8.0,
+      "stake": 10.0,
+      "model_prob": null,
+      "ev": null
+    },
+    {
       "id": 87,
       "ts_utc": "2026-06-17T17:50:48",
       "match": "Ghana vs Panama",
@@ -1652,90 +1676,43 @@
   ],
   "predictions": [
     {
-      "fixture": "England vs Croatia",
-      "scores": [
-        {
-          "score": "1-0",
-          "prob": 17.2,
-          "fair": 5.8,
-          "back": 5.91
-        },
-        {
-          "score": "1-1",
-          "prob": 11.9,
-          "fair": 8.43,
-          "back": 8.6
-        },
-        {
-          "score": "2-0",
-          "prob": 11.7,
-          "fair": 8.57,
-          "back": 8.74
-        },
-        {
-          "score": "0-0",
-          "prob": 11.4,
-          "fair": 8.77,
-          "back": 8.95
-        },
-        {
-          "score": "2-1",
-          "prob": 9.3,
-          "fair": 10.71,
-          "back": 10.92
-        },
-        {
-          "score": "0-1",
-          "prob": 8.0,
-          "fair": 12.44,
-          "back": 12.69
-        }
-      ],
-      "over_under": {
-        "line": 2.5,
-        "over": 36.4,
-        "under": 63.6
-      },
-      "btts": 39.8
-    },
-    {
       "fixture": "Ghana vs Panama",
       "scores": [
         {
           "score": "0-1",
           "prob": 14.0,
-          "fair": 7.16,
-          "back": 7.31
+          "fair": 7.15,
+          "back": 7.29
         },
         {
           "score": "1-1",
-          "prob": 12.9,
-          "fair": 7.77,
-          "back": 7.93
+          "prob": 12.8,
+          "fair": 7.78,
+          "back": 7.94
         },
         {
           "score": "0-0",
-          "prob": 12.0,
-          "fair": 8.36,
-          "back": 8.53
+          "prob": 11.9,
+          "fair": 8.37,
+          "back": 8.54
         },
         {
           "score": "1-0",
           "prob": 11.8,
-          "fair": 8.5,
-          "back": 8.67
+          "fair": 8.51,
+          "back": 8.68
         },
         {
           "score": "1-2",
           "prob": 8.0,
-          "fair": 12.55,
-          "back": 12.8
+          "fair": 12.53,
+          "back": 12.78
         },
         {
           "score": "2-0",
           "prob": 7.4,
-          "fair": 13.57,
-          "back": 13.84
+          "fair": 13.58,
+          "back": 13.85
         }
       ],
       "over_under": {
@@ -1752,37 +1729,37 @@
           "score": "0-1",
           "prob": 17.6,
           "fair": 5.68,
-          "back": 5.79
+          "back": 5.8
         },
         {
           "score": "0-2",
-          "prob": 15.7,
+          "prob": 15.6,
           "fair": 6.39,
           "back": 6.52
         },
         {
           "score": "0-0",
           "prob": 9.7,
-          "fair": 10.32,
-          "back": 10.53
+          "fair": 10.31,
+          "back": 10.52
         },
         {
           "score": "1-1",
           "prob": 9.3,
-          "fair": 10.77,
-          "back": 10.99
+          "fair": 10.76,
+          "back": 10.98
         },
         {
           "score": "0-3",
           "prob": 9.0,
-          "fair": 11.06,
-          "back": 11.28
+          "fair": 11.07,
+          "back": 11.29
         },
         {
           "score": "1-2",
           "prob": 8.6,
-          "fair": 11.57,
-          "back": 11.8
+          "fair": 11.58,
+          "back": 11.81
         }
       ],
       "over_under": {
@@ -1797,39 +1774,39 @@
       "scores": [
         {
           "score": "1-0",
-          "prob": 17.8,
-          "fair": 5.62,
-          "back": 5.73
+          "prob": 17.7,
+          "fair": 5.65,
+          "back": 5.77
         },
         {
           "score": "0-0",
-          "prob": 12.3,
-          "fair": 8.14,
-          "back": 8.3
+          "prob": 12.4,
+          "fair": 8.08,
+          "back": 8.25
         },
         {
           "score": "2-0",
-          "prob": 12.0,
-          "fair": 8.33,
-          "back": 8.5
+          "prob": 11.9,
+          "fair": 8.39,
+          "back": 8.56
         },
         {
           "score": "1-1",
-          "prob": 11.5,
-          "fair": 8.71,
-          "back": 8.89
+          "prob": 11.6,
+          "fair": 8.65,
+          "back": 8.83
         },
         {
           "score": "0-1",
-          "prob": 9.0,
-          "fair": 11.05,
-          "back": 11.27
+          "prob": 9.1,
+          "fair": 10.96,
+          "back": 11.17
         },
         {
           "score": "2-1",
-          "prob": 8.6,
-          "fair": 11.66,
-          "back": 11.9
+          "prob": 8.5,
+          "fair": 11.74,
+          "back": 11.98
         }
       ],
       "over_under": {
@@ -1844,39 +1821,39 @@
       "scores": [
         {
           "score": "1-0",
-          "prob": 15.7,
-          "fair": 6.35,
-          "back": 6.48
+          "prob": 15.8,
+          "fair": 6.34,
+          "back": 6.47
         },
         {
           "score": "2-0",
           "prob": 13.0,
-          "fair": 7.69,
-          "back": 7.84
+          "fair": 7.68,
+          "back": 7.83
         },
         {
           "score": "2-1",
           "prob": 10.6,
-          "fair": 9.42,
-          "back": 9.61
+          "fair": 9.41,
+          "back": 9.6
         },
         {
           "score": "1-1",
           "prob": 10.5,
-          "fair": 9.55,
-          "back": 9.74
+          "fair": 9.53,
+          "back": 9.72
         },
         {
           "score": "0-0",
           "prob": 8.2,
-          "fair": 12.24,
-          "back": 12.48
+          "fair": 12.22,
+          "back": 12.46
         },
         {
           "score": "3-0",
           "prob": 6.9,
-          "fair": 14.49,
-          "back": 14.78
+          "fair": 14.48,
+          "back": 14.77
         }
       ],
       "over_under": {
@@ -1892,38 +1869,38 @@
         {
           "score": "1-0",
           "prob": 14.6,
-          "fair": 6.86,
-          "back": 7.0
+          "fair": 6.87,
+          "back": 7.01
         },
         {
           "score": "2-0",
           "prob": 13.9,
-          "fair": 7.19,
-          "back": 7.33
+          "fair": 7.2,
+          "back": 7.35
         },
         {
           "score": "2-1",
           "prob": 11.9,
-          "fair": 8.42,
-          "back": 8.59
+          "fair": 8.43,
+          "back": 8.6
         },
         {
           "score": "3-0",
           "prob": 8.5,
-          "fair": 11.77,
-          "back": 12.0
+          "fair": 11.79,
+          "back": 12.02
         },
         {
           "score": "1-1",
           "prob": 8.3,
-          "fair": 12.09,
-          "back": 12.34
+          "fair": 12.05,
+          "back": 12.29
         },
         {
           "score": "3-1",
-          "prob": 7.3,
-          "fair": 13.77,
-          "back": 14.05
+          "prob": 7.2,
+          "fair": 13.8,
+          "back": 14.07
         }
       ],
       "over_under": {
@@ -1931,7 +1908,7 @@
         "over": 53.3,
         "under": 46.7
       },
-      "btts": 46.6
+      "btts": 46.7
     },
     {
       "fixture": "Mexico vs South Korea",
@@ -1939,38 +1916,38 @@
         {
           "score": "1-1",
           "prob": 12.7,
-          "fair": 7.9,
-          "back": 8.06
+          "fair": 7.89,
+          "back": 8.04
         },
         {
           "score": "1-0",
-          "prob": 12.2,
-          "fair": 8.22,
-          "back": 8.39
+          "prob": 12.1,
+          "fair": 8.24,
+          "back": 8.4
         },
         {
           "score": "2-0",
           "prob": 10.2,
-          "fair": 9.8,
-          "back": 10.0
+          "fair": 9.82,
+          "back": 10.01
         },
         {
           "score": "2-1",
           "prob": 9.3,
-          "fair": 10.77,
-          "back": 10.98
+          "fair": 10.78,
+          "back": 11.0
         },
         {
           "score": "0-0",
           "prob": 8.8,
-          "fair": 11.34,
-          "back": 11.57
+          "fair": 11.32,
+          "back": 11.54
         },
         {
           "score": "0-1",
           "prob": 6.9,
-          "fair": 14.42,
-          "back": 14.71
+          "fair": 14.4,
+          "back": 14.68
         }
       ],
       "over_under": {
