@@ -1,24 +1,24 @@
 {
   "meta": {
-    "generated": "2026-06-18 12:51:04 UTC"
+    "generated": "2026-06-18 12:58:36 UTC"
   },
   "totals": {
     "wagered": 598.436,
-    "open_stake": 0.0,
-    "settled_pl": -42.7195,
+    "open_stake": 61.0,
+    "settled_pl": 28.280500000000004,
     "n_bets": 68
   },
   "totals_by_currency": {
     "GBP": {
       "wagered": 447.14000000000004,
       "open_stake": 0.0,
-      "settled_pl": 44.47549999999998,
+      "settled_pl": 54.47549999999998,
       "n_bets": 51
     },
     "USD": {
       "wagered": 151.29600000000002,
-      "open_stake": 0.0,
-      "settled_pl": -87.195,
+      "open_stake": 61.0,
+      "settled_pl": -26.195,
       "n_bets": 17
     }
   },
@@ -26,14 +26,14 @@
     "sportsbook": {
       "wagered": 447.14000000000004,
       "open_stake": 0.0,
-      "settled_pl": 44.47549999999998,
+      "settled_pl": 54.47549999999998,
       "n_bets": 51,
       "currency": "GBP"
     },
     "polymarket": {
       "wagered": 151.29600000000002,
-      "open_stake": 0.0,
-      "settled_pl": -87.195,
+      "open_stake": 61.0,
+      "settled_pl": -26.195,
       "n_bets": 17,
       "currency": "USD"
     },
@@ -46,8 +46,8 @@
     },
     "sportsbook_1": {
       "wagered": 320.14,
-      "open_stake": 0.0,
-      "settled_pl": 78.47549999999998,
+      "open_stake": 10.0,
+      "settled_pl": 88.47549999999998,
       "n_bets": 37,
       "currency": "GBP",
       "label": "Sportsbook 1"
@@ -65,8 +65,8 @@
     "offer": {
       "GBP": {
         "wagered": 175.0,
-        "open_stake": 0.0,
-        "settled_pl": 74.82,
+        "open_stake": 10.0,
+        "settled_pl": 84.82,
         "n_bets": 20
       }
     },
@@ -79,16 +79,16 @@
       },
       "USD": {
         "wagered": 13.366,
-        "open_stake": 0.0,
-        "settled_pl": -3.367000000000001,
+        "open_stake": 1.0,
+        "settled_pl": -2.367,
         "n_bets": 10
       }
     },
     "model": {
       "USD": {
         "wagered": 137.93,
-        "open_stake": 0.0,
-        "settled_pl": -83.828,
+        "open_stake": 60.0,
+        "settled_pl": -23.827999999999996,
         "n_bets": 7
       },
       "GBP": {
@@ -136,16 +136,16 @@
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 114.0,
-      "open_stake": 0.0,
-      "settled_pl": 22.07,
+      "open_stake": 10.0,
+      "settled_pl": 32.07,
       "n_bets": 12
     },
     "polymarket": {
       "venue": "polymarket",
       "currency": "USD",
       "wagered": 151.29600000000002,
-      "open_stake": 0.0,
-      "settled_pl": -87.195,
+      "open_stake": 61.0,
+      "settled_pl": -26.195,
       "n_bets": 17
     },
     "smarkets": {
@@ -757,24 +757,6 @@
       "clv": null
     },
     {
-      "id": 57,
-      "ts_utc": "2026-06-12T20:03:20",
-      "settled_ts": "2026-06-18T12:50:56",
-      "match": "Ghana eliminated R32 of the World Cup",
-      "market": "polymarket",
-      "selection": "Ghana eliminated R32 - No",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "2",
-      "source": "punt",
-      "currency": "USD",
-      "decimal_odds": 1.4708,
-      "stake": 1.0,
-      "status": "lost",
-      "pl": -1.0,
-      "clv": null
-    },
-    {
       "id": 54,
       "ts_utc": "2026-06-12T19:49:30",
       "settled_ts": "2026-06-14T00:14:45",
@@ -1171,24 +1153,6 @@
       "clv": 0.08010497251552429
     },
     {
-      "id": 14,
-      "ts_utc": "2026-06-11T21:00:40",
-      "settled_ts": "2026-06-18T12:50:56",
-      "match": "2026 FIFA World Cup - Japan Round of 16",
-      "market": "Will Japan reach the Round of 16 at the 2026 FIFA World Cup?",
-      "selection": "Japan reach R16 - No",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.6667,
-      "stake": 60.0,
-      "status": "lost",
-      "pl": -60.0,
-      "clv": null
-    },
-    {
       "id": 13,
       "ts_utc": "2026-06-11T20:01:53",
       "settled_ts": "2026-06-11T20:37:54",
@@ -1222,24 +1186,6 @@
       "stake": 8.0,
       "status": "lost",
       "pl": -8.0,
-      "clv": null
-    },
-    {
-      "id": 11,
-      "ts_utc": "2026-06-11T15:52:42",
-      "settled_ts": "2026-06-18T12:50:56",
-      "match": "FIFA World Cup 2026 Golden Boot",
-      "market": "outright_golden_boot",
-      "selection": "Harry Kane (England)",
-      "platform": "betfair_sportsbook",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "offer",
-      "currency": "GBP",
-      "decimal_odds": 7.5,
-      "stake": 10.0,
-      "status": "lost",
-      "pl": -10.0,
       "clv": null
     },
     {
@@ -1626,10 +1572,6 @@
         [
           "2026-06-18T12:20:02",
           54.48
-        ],
-        [
-          "2026-06-18T12:50:56",
-          44.48
         ]
       ]
     },
@@ -1695,14 +1637,6 @@
         [
           "2026-06-16T03:00:00",
           -26.2
-        ],
-        [
-          "2026-06-18T12:50:56",
-          -27.2
-        ],
-        [
-          "2026-06-18T12:50:56",
-          -87.19
         ]
       ]
     }
@@ -1712,7 +1646,56 @@
     "pct_beat_close": 0.5416666666666666,
     "n_with_close": 24
   },
-  "positions": [],
+  "positions": [
+    {
+      "id": 57,
+      "ts_utc": "2026-06-12T20:03:20",
+      "match": "Ghana eliminated R32 of the World Cup",
+      "market": "polymarket",
+      "selection": "Ghana eliminated R32 - No",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "2",
+      "source": "punt",
+      "currency": "USD",
+      "decimal_odds": 1.4708,
+      "stake": 1.0,
+      "model_prob": null,
+      "ev": null
+    },
+    {
+      "id": 14,
+      "ts_utc": "2026-06-11T21:00:40",
+      "match": "2026 FIFA World Cup - Japan Round of 16",
+      "market": "Will Japan reach the Round of 16 at the 2026 FIFA World Cup?",
+      "selection": "Japan reach R16 - No",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "model",
+      "currency": "USD",
+      "decimal_odds": 1.6667,
+      "stake": 60.0,
+      "model_prob": 0.685,
+      "ev": 0.14168950000000025
+    },
+    {
+      "id": 11,
+      "ts_utc": "2026-06-11T15:52:42",
+      "match": "FIFA World Cup 2026 Golden Boot",
+      "market": "outright_golden_boot",
+      "selection": "Harry Kane (England)",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 7.5,
+      "stake": 10.0,
+      "model_prob": null,
+      "ev": null
+    }
+  ],
   "predictions": [
     {
       "fixture": "Czech Republic vs South Africa",
