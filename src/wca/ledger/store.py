@@ -286,8 +286,12 @@ def settle_bet(
 
     init_db(db_path)
     with _connect(db_path) as conn:
+        # source/account are added lazily for pre-existing DBs; ensure present
+        # so the free-bet/lay-aware settlement below can read source.
+        _ensure_account_source_columns(conn)
         row = conn.execute(
-            "SELECT status, stake, decimal_odds FROM bets WHERE id = ?", (bet_id,)
+            "SELECT status, stake, decimal_odds, source, market, selection "
+            "FROM bets WHERE id = ?", (bet_id,)
         ).fetchone()
         if row is None:
             raise KeyError("no bet with id=%d" % bet_id)
@@ -298,13 +302,22 @@ def settle_bet(
 
         stake_val = float(row["stake"])
         odds_val = float(row["decimal_odds"])
-        # P&L convention: profit = net return (winnings minus stake already
-        # counted; total return = odds * stake, net profit = (odds - 1) * stake,
-        # net loss = -stake).
-        if result_lower == "won":
+        source = str(row["source"] or "model")
+        is_free = source == "offer"
+        is_lay = "lay" in (str(row["market"] or "") + " " + str(row["selection"] or "")).lower()
+        # P&L conventions:
+        #  - Back bet:  won -> (odds-1)*stake ;  lost -> -stake.
+        #  - Free bet (source='offer', stake NOT returned): won -> (odds-1)*stake
+        #    (profit only) ; lost -> £0 (no stake at risk).
+        #  - Lay bet (Bet Against): won -> +backer stake ; lost -> -LIABILITY
+        #    (stake*(odds-1)), because a lay risks the liability, not the stake.
+        if is_lay:
+            liability = (odds_val - 1.0) * stake_val
+            pl = stake_val if result_lower == "won" else -liability
+        elif result_lower == "won":
             pl = (odds_val - 1.0) * stake_val
-        else:
-            pl = -stake_val
+        else:  # lost
+            pl = 0.0 if is_free else -stake_val
 
         _ensure_settled_ts_column(conn)
         if settled_ts_utc is None:

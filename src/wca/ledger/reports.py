@@ -150,6 +150,87 @@ def open_exposure(db_path: str) -> pd.DataFrame:
     return pd.concat([open_df, summary], ignore_index=True)
 
 
+# Sources whose open stake counts as "our" sportsbook exposure to hedge. A
+# 'punt' is a manual non-model bet; 'model' / 'offer' (free bet / promo) are the
+# positions the Polymarket loop should consider hedging.
+HEDGEABLE_SOURCES = ("model", "offer")
+
+
+def _match_team_key(match_desc: str):
+    """Frozenset of canonical team names for a single-match ``"A vs B"`` desc.
+
+    Returns ``None`` for accumulators (multi-match, contain ``" | "``) or any
+    string that is not a single ``"<home> vs <away>"`` fixture, so callers can
+    skip exposure they cannot attribute to one fixture/outcome.
+    """
+    from wca.data.teamnames import canonical
+
+    if not match_desc or "|" in match_desc:
+        return None
+    parts = [p.strip() for p in match_desc.split(" vs ")]
+    if len(parts) != 2 or not all(parts):
+        return None
+    return frozenset(canonical(p) for p in parts)
+
+
+def sportsbook_open_exposure_by_match(
+    db_path: str, sources=HEDGEABLE_SOURCES
+) -> Dict[frozenset, Dict[str, Any]]:
+    """Open single-match sportsbook exposure, keyed by canonical team pair.
+
+    Only open bets whose ``source`` is in *sources* (default model + offer/free
+    bets) and which name a single ``"<home> vs <away>"`` fixture are counted;
+    accumulators and multi-leg rows are skipped (they cannot be attributed to a
+    single outcome). Free bets (``source == 'offer'``) are stake-not-returned,
+    so their **profit at risk** ``stake*(odds-1)`` is what's exposed, not stake.
+
+    Returns
+    -------
+    dict mapping ``frozenset({home, away})`` (canonical names) to::
+
+        {
+          "match_desc": <original ledger match_desc>,
+          "outcomes": { <selection>: {"stake": float, "risk": float,
+                                       "n": int, "sources": set, "platforms": set} },
+          "total_stake": float,
+        }
+    """
+    df = _bets_df(db_path)
+    if df.empty:
+        return {}
+    open_df = df[df["status"] == "open"].copy()
+    if "source" in open_df.columns:
+        open_df = open_df[open_df["source"].isin(set(sources))]
+    if open_df.empty:
+        return {}
+
+    out: Dict[frozenset, Dict[str, Any]] = {}
+    for _, b in open_df.iterrows():
+        key = _match_team_key(str(b.get("match_desc") or ""))
+        if key is None:
+            continue
+        sel = str(b.get("selection") or "").strip()
+        stake = float(b.get("stake") or 0.0)
+        odds = float(b.get("decimal_odds") or 0.0)
+        is_free = str(b.get("source") or "") == "offer"
+        risk = stake * (odds - 1.0) if is_free else stake
+
+        entry = out.setdefault(
+            key,
+            {"match_desc": str(b.get("match_desc") or ""), "outcomes": {}, "total_stake": 0.0},
+        )
+        oc = entry["outcomes"].setdefault(
+            sel, {"stake": 0.0, "risk": 0.0, "n": 0, "sources": set(), "platforms": set()}
+        )
+        oc["stake"] += stake
+        oc["risk"] += risk
+        oc["n"] += 1
+        oc["sources"].add(str(b.get("source") or ""))
+        oc["platforms"].add(str(b.get("platform") or ""))
+        entry["total_stake"] += stake
+    return out
+
+
 def clv_report(db_path: str) -> Dict[str, Any]:
     """Per-bet CLV table and aggregate CLV statistics.
 

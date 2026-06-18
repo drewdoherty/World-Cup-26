@@ -58,7 +58,7 @@ from wca.data.teamnames import canonical
 from wca.markets import kelly as kelly_mod
 from wca.models import venues as venues_mod
 from wca.models.structural import load_country_factors
-from wca.sim.tournament2026 import GROUP_LETTERS, TournamentSimulator
+from wca.sim.tournament2026 import GROUP_LETTERS, Result, TournamentSimulator
 
 # ---------------------------------------------------------------------------
 # Official 2026 FIFA World Cup groups.
@@ -242,12 +242,66 @@ def make_prob_fn(
 # ---------------------------------------------------------------------------
 
 
+def load_played_group_results(
+    groups: Optional[Dict[str, List[str]]] = None,
+    results_path: Optional[str] = None,
+) -> List[Result]:
+    """Return the already-played 2026 World Cup *group-stage* results.
+
+    Reads the cleaned results dataset (the same source the models are fit on),
+    keeps only ``FIFA World Cup`` fixtures dated 2026 with a non-NA scoreline
+    where **both** teams sit in the same group (which guarantees the row is a
+    group match, never a knockout tie), and returns them as
+    :class:`~wca.sim.tournament2026.Result` objects.
+
+    These are passed to :class:`TournamentSimulator` so that completed group
+    matches are *fixed* (not re-simulated) — the advancement probabilities then
+    reflect the actual results so far, not a from-scratch pre-tournament sim.
+
+    Team names are mapped through :func:`wca.data.teamnames.canonical` so they
+    line up with the group definitions (and therefore the model ratings).
+    """
+    grp = groups if groups is not None else WC2026_GROUPS
+    team_to_group = {t: g for g, ts in grp.items() for t in ts}
+
+    if results_path is None:
+        from wca.data.cleaning import resolve_results_path
+
+        results_path = resolve_results_path()
+
+    df = pd.read_csv(results_path)
+    df = df[df["tournament"] == "FIFA World Cup"].copy()
+    dates = pd.to_datetime(df["date"], errors="coerce")
+    df = df[dates.dt.year == 2026]
+    df = df.dropna(subset=["home_score", "away_score"])
+
+    out: List[Result] = []
+    for _, r in df.iterrows():
+        home = canonical(str(r["home_team"]))
+        away = canonical(str(r["away_team"]))
+        gh, ga = team_to_group.get(home), team_to_group.get(away)
+        # Same-group => a group-stage fixture; skip anything else (knockouts,
+        # or a name that does not resolve to a 2026 group team).
+        if gh is None or gh != ga:
+            continue
+        out.append(
+            Result(
+                home=home,
+                away=away,
+                home_goals=int(r["home_score"]),
+                away_goals=int(r["away_score"]),
+            )
+        )
+    return out
+
+
 def run_advancement(
     models: FittedModels,
     n_sims: int = 20000,
     seed: int = 42,
     groups: Optional[Dict[str, List[str]]] = None,
     venue_aware: bool = False,
+    results: Optional[Sequence[Result]] = None,
 ) -> pd.DataFrame:
     """Simulate the tournament and return per-team stage probabilities.
 
@@ -261,6 +315,10 @@ def run_advancement(
         RNG seed for reproducibility.
     groups:
         Group assignment; defaults to :data:`WC2026_GROUPS`.
+    results:
+        Already-played group matches to fix (not re-simulate). Defaults to
+        auto-loading them via :func:`load_played_group_results`; pass an empty
+        list to force a from-scratch pre-tournament simulation.
 
     Returns
     -------
@@ -272,8 +330,14 @@ def run_advancement(
     if set(grp) != set(GROUP_LETTERS):
         raise ValueError("groups must contain exactly the 12 letters A-L")
 
+    # Fix already-played group matches so the simulation is conditioned on the
+    # actual results so far rather than replaying the whole tournament. Pass an
+    # explicit empty list to force a pre-tournament (from-scratch) sim.
+    if results is None:
+        results = load_played_group_results(grp)
+
     prob_fn = make_prob_fn(models, venue_aware=venue_aware)
-    sim = TournamentSimulator(grp, prob_fn)
+    sim = TournamentSimulator(grp, prob_fn, results=results)
     res = sim.simulate(n_sims=n_sims, rng_seed=seed)
 
     team_to_group = {t: g for g, ts in grp.items() for t in ts}

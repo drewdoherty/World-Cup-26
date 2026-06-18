@@ -104,85 +104,131 @@ def _format_proposal_line(i: int, p: dict) -> str:
     )
 
 
-def _build_exposure_section(proposals: list, odds_df) -> str:
-    """Build exposure analysis for the next 5 matches.
+def _next_5_matches(odds_df, now_dt) -> list:
+    """Return up to the 5 soonest distinct fixtures at/after ``now_dt``.
 
-    Shows which outcomes (team wins) are covered in the next 5 matches, with
-    stakes and coverage indicators. Uncovered outcomes are highlighted.
+    Each item is ``(home_team, away_team, commence_time)``. ``now_dt`` is a
+    naive-UTC datetime (as used elsewhere in this script).
     """
-    if odds_df.empty:
-        return ""
-
     import pandas as pd
 
-    # Get next 5 matches from odds_df, sorted by commence_time
-    upcoming = odds_df.copy()
-    if "commence_time" in upcoming.columns:
-        upcoming["commence_time"] = pd.to_datetime(
-            upcoming["commence_time"], errors="coerce", utc=True
-        )
-        upcoming = upcoming.sort_values("commence_time").drop_duplicates(
-            subset=["home_team", "away_team", "commence_time"], keep="first"
-        )
+    if odds_df is None or odds_df.empty or "commence_time" not in odds_df.columns:
+        return []
+    df = odds_df.copy()
+    ct = pd.to_datetime(df["commence_time"], errors="coerce", utc=True)
+    df["_ct"] = ct
+    now = pd.Timestamp(now_dt, tz="UTC")
+    df = df[df["_ct"] >= now]
+    df = df.sort_values("_ct").drop_duplicates(subset=["home_team", "away_team"], keep="first")
+    out = []
+    for _, r in df.head(5).iterrows():
+        home = str(r.get("home_team") or "").strip()
+        away = str(r.get("away_team") or "").strip()
+        if home and away:
+            out.append((home, away, r["_ct"]))
+    return out
 
-    # Track which outcomes are covered: {match_key: {team: stake, ...}}
-    # where match_key is "Home vs Away" and teams include home_team, away_team, Draw
-    covered_outcomes = {}  # {match_key: {outcome: stake}}
+
+def _outcome_token(sel: str, home: str, away: str) -> str:
+    """Normalise a selection/outcome to 'HOME' | 'AWAY' | 'DRAW' | canonical name."""
+    from wca.data.teamnames import canonical
+
+    s = (sel or "").strip()
+    if s.lower() in ("draw", "tie", "x"):
+        return "DRAW"
+    cs = canonical(s)
+    if cs == canonical(home):
+        return "HOME"
+    if cs == canonical(away):
+        return "AWAY"
+    return cs
+
+
+def _build_exposure_section(proposals: list, odds_df, db_path: str, now_dt) -> str:
+    """Exposure + hedge header for the **next 5 matches**.
+
+    For each of the five soonest fixtures:
+
+    * If there is existing *sportsbook* exposure from a model/offer (free-bet)
+      source on that match, show it and label each Polymarket proposal as a
+      🛡 HEDGE (covers a different outcome → offsets the existing risk) or a
+      ➕ ADD (same side as the existing bet).
+    * Otherwise there is nothing to hedge, so the proposal is just the best
+      model-fair-vs-market EV pick (ranked by EV).
+
+    Reads existing exposure from the ledger (never fabricated) via
+    :func:`wca.ledger.reports.sportsbook_open_exposure_by_match`.
+    """
+    from wca.data.teamnames import canonical
+    from wca.ledger.reports import sportsbook_open_exposure_by_match
+
+    matches = _next_5_matches(odds_df, now_dt)
+    if not matches:
+        return ""
+
+    try:
+        exposure = sportsbook_open_exposure_by_match(db_path)
+    except Exception:
+        exposure = {}
+
+    # Index proposals by canonical {home, away} pair.
+    props_by_key: dict = {}
     for p in proposals:
-        match = p.get("match_desc", "")
-        outcome = p.get("outcome", "")
-        stake = p.get("size_usd", 0)
-
-        if match and outcome:
-            if match not in covered_outcomes:
-                covered_outcomes[match] = {}
-            covered_outcomes[match][outcome] = stake
-
-    # Build exposure section
-    exposure_lines = ["🎯 *Exposure (next 5 matches):*", ""]
-
-    match_count = 0
-    for _, row in upcoming.iterrows():
-        if match_count >= 5:
-            break
-
-        home = (row.get("home_team") or "").strip()
-        away = (row.get("away_team") or "").strip()
-        if not home or not away:
+        md = str(p.get("match_desc") or "")
+        parts = [x.strip() for x in md.split(" vs ")]
+        if len(parts) != 2:
             continue
+        key = frozenset(canonical(x) for x in parts)
+        props_by_key.setdefault(key, []).append(p)
 
-        match_desc = "%s vs %s" % (home, away)
-        covered = covered_outcomes.get(match_desc, {})
+    lines = ["🎯 *Exposure & hedges — next 5 matches:*", ""]
+    for home, away, _ct in matches:
+        key = frozenset({canonical(home), canonical(away)})
+        exp = exposure.get(key)
+        mprops = props_by_key.get(key, [])
+        title = "%s vs %s" % (home, away)
 
-        # Determine what's covered
-        home_covered = home in covered
-        away_covered = away in covered
-
-        # Calculate total exposure
-        total_stake = sum(covered.values()) if covered else 0.0
-
-        # Format coverage indicators
-        coverage_str = ""
-        if home_covered:
-            coverage_str += f"✅ {home} ${covered[home]:.0f}"
+        if exp:
+            exposed_tokens = {
+                _outcome_token(sel, home, away) for sel in exp["outcomes"]
+            }
+            exp_str = ", ".join(
+                "%s £%.0f@risk" % (sel, oc["risk"])
+                for sel, oc in exp["outcomes"].items()
+            )
+            lines.append("⚠️ %s — existing exposure: %s" % (title, exp_str))
+            if mprops:
+                for p in mprops:
+                    tok = _outcome_token(p.get("outcome", ""), home, away)
+                    if tok not in exposed_tokens:
+                        lines.append(
+                            "    🛡 HEDGE %s @ %.2f ($%.0f) — offsets the above"
+                            % (p.get("outcome", "?"), p["price"], p["size_usd"])
+                        )
+                    else:
+                        lines.append(
+                            "    ➕ ADD %s @ %.2f ($%.0f) — same side, raises exposure"
+                            % (p.get("outcome", "?"), p["price"], p["size_usd"])
+                        )
+            else:
+                lines.append("    (no Polymarket market resolved to hedge this)")
         else:
-            coverage_str += f"⭕ {home}"
+            if mprops:
+                for p in sorted(mprops, key=lambda x: -float(x.get("ev", 0.0))):
+                    lines.append(
+                        "✅ %s — EV pick: %s @ %.2f (ev %+.1f%%, $%.0f)"
+                        % (
+                            title,
+                            p.get("outcome", "?"),
+                            p["price"],
+                            float(p.get("ev", 0.0)) * 100.0,
+                            p["size_usd"],
+                        )
+                    )
+            else:
+                lines.append("⚪ %s — no exposure, no Polymarket edge" % title)
 
-        coverage_str += " | "
-
-        if away_covered:
-            coverage_str += f"✅ {away} ${covered[away]:.0f}"
-        else:
-            coverage_str += f"⭕ {away}"
-
-        exposure_lines.append(f"  {match_desc}")
-        exposure_lines.append(f"    {coverage_str}")
-
-        match_count += 1
-
-    if len(exposure_lines) > 2:
-        return "\n".join(exposure_lines) + "\n"
-    return ""
+    return "\n".join(lines) + "\n"
 
 
 def main() -> int:
@@ -301,7 +347,12 @@ def main() -> int:
         return 0
 
     if args.dry_print:
-        print("\n-- proposals (dry-print; nothing parked or sent) --")
+        exposure_section = _build_exposure_section(
+            proposals, odds_df, args.db, now_dt
+        )
+        if exposure_section:
+            print("\n" + exposure_section)
+        print("-- proposals (dry-print; nothing parked or sent) --")
         for i, p in enumerate(proposals, 1):
             print(_format_proposal_line(i, p))
         return 0
@@ -331,7 +382,7 @@ def main() -> int:
         parked_texts.append(push_parked_order(_augment_for_gate(p)))
 
     # Build single message with exposure + all proposals
-    exposure_section = _build_exposure_section(proposals, odds_df)
+    exposure_section = _build_exposure_section(proposals, odds_df, args.db, now_dt)
 
     message_body = "🎯 *Polymarket Trade Ideas* — %d picks\n\n" % len(proposals)
     if exposure_section:

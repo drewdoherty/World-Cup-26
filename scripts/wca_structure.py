@@ -30,7 +30,6 @@ END_MARKER = "<!-- WCA:STRUCTURE:END -->"
 
 HISTORY_FIELDS = [
     "date", "modules", "loc", "tests", "data_sources", "bot_commands",
-    "complexity_index",
 ]
 
 # Packages whose LOC we report individually (label -> path relative to ROOT).
@@ -183,16 +182,7 @@ def compute_metrics(root=ROOT):
         "model_classes": model_classes,
         "bot_commands": bot_commands,
     }
-    metrics["complexity_index"] = complexity_index(metrics)
     return metrics
-
-
-def complexity_index(metrics):
-    """Weighted structural complexity: modules + tests/10 + data_sources*2."""
-    return round(
-        metrics["modules"] + metrics["tests"] / 10.0 + metrics["data_sources"] * 2,
-        1,
-    )
 
 
 # ---------------------------------------------------------------------------
@@ -238,42 +228,19 @@ def render_metrics_table(metrics):
     return "\n".join(out)
 
 
-def render_complexity_line(metrics):
-    return (
-        "**Complexity index: %.1f** "
-        "(modules + tests/10 + data sources × 2)" % metrics["complexity_index"]
-    )
-
-
 def render_history_section(rows):
-    """Markdown table + xychart-beta for the run history (>= 2 rows)."""
-    out = ["### Complexity over time", ""]
-    out.append("| Date | Modules | LOC | Tests | Data sources | Bot commands | Complexity |")
-    out.append("| --- | --- | --- | --- | --- | --- | --- |")
+    """Markdown table for the run history (>= 2 rows)."""
+    out = ["### Metrics over time", ""]
+    out.append("| Date | Modules | LOC | Tests | Data sources | Bot commands |")
+    out.append("| --- | --- | --- | --- | --- | --- |")
     for r in rows:
         out.append(
-            "| %s | %s | %s | %s | %s | %s | %s |"
+            "| %s | %s | %s | %s | %s | %s |"
             % (
                 r["date"], r["modules"], r["loc"], r["tests"],
-                r["data_sources"], r["bot_commands"], r["complexity_index"],
+                r["data_sources"], r["bot_commands"],
             )
         )
-    out.append("")
-    out.append("```mermaid")
-    out.append("xychart-beta")
-    out.append('    title "Complexity index over time"')
-    out.append(
-        "    x-axis [%s]" % ", ".join('"%s"' % r["date"] for r in rows)
-    )
-    values = [float(r["complexity_index"]) for r in rows]
-    lo = min(values)
-    hi = max(values)
-    pad = max((hi - lo) * 0.2, 1.0)
-    out.append(
-        '    y-axis "Complexity index" %.1f --> %.1f' % (lo - pad, hi + pad)
-    )
-    out.append("    line [%s]" % ", ".join("%.1f" % v for v in values))
-    out.append("```")
     return "\n".join(out)
 
 
@@ -285,9 +252,7 @@ def render_snapshot(metrics, mermaid, date_str):
         "## Pipeline\n\n"
         "```mermaid\n%s\n```\n\n"
         "## Metrics\n\n"
-        "%s\n\n"
-        "%s\n" % (date_str, mermaid, render_metrics_table(metrics),
-                  render_complexity_line(metrics))
+        "%s\n" % (date_str, mermaid, render_metrics_table(metrics))
     )
 
 
@@ -304,8 +269,6 @@ def render_readme_block(metrics, mermaid, date_str, history_rows):
         "```",
         "",
         render_metrics_table(metrics),
-        "",
-        render_complexity_line(metrics),
     ]
     if len(history_rows) >= 2:
         parts += ["", render_history_section(history_rows)]
@@ -330,10 +293,12 @@ def update_history(csv_path, metrics, date_str):
             "tests": str(metrics["tests"]),
             "data_sources": str(metrics["data_sources"]),
             "bot_commands": str(metrics["bot_commands"]),
-            "complexity_index": "%.1f" % metrics["complexity_index"],
         }
     )
     rows.sort(key=lambda r: r["date"])
+    # Drop any columns from older CSVs that are no longer tracked (e.g. the
+    # retired complexity_index) so DictWriter doesn't reject migrated rows.
+    rows = [{k: r.get(k, "") for k in HISTORY_FIELDS} for r in rows]
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
     with open(csv_path, "w", encoding="utf-8", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=HISTORY_FIELDS)
@@ -414,11 +379,11 @@ def main():
     print("Structure snapshot written.")
     print(
         "modules=%d loc=%d tests=%d data_sources=%d model_classes=%d "
-        "bot_commands=%d complexity_index=%.1f"
+        "bot_commands=%d"
         % (
             metrics["modules"], metrics["loc"], metrics["tests"],
             metrics["data_sources"], metrics["model_classes"],
-            metrics["bot_commands"], metrics["complexity_index"],
+            metrics["bot_commands"],
         )
     )
 
