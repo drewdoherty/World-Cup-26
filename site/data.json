@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-18T15:18:41"
+    "generated": "2026-06-18T15:32:35"
   },
   "totals": {
-    "wagered": 618.436,
-    "open_stake": 71.0,
+    "wagered": 641.436,
+    "open_stake": 94.0,
     "settled_pl": 28.280500000000004,
-    "n_bets": 70
+    "n_bets": 71
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 467.14000000000004,
-      "open_stake": 10.0,
+      "wagered": 490.14000000000004,
+      "open_stake": 33.0,
       "settled_pl": 54.47549999999998,
-      "n_bets": 53
+      "n_bets": 54
     },
     "USD": {
       "wagered": 151.29600000000002,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 467.14000000000004,
-      "open_stake": 10.0,
+      "wagered": 490.14000000000004,
+      "open_stake": 33.0,
       "settled_pl": 54.47549999999998,
-      "n_bets": 53,
+      "n_bets": 54,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 340.14,
-      "open_stake": 30.0,
+      "wagered": 363.1400000000001,
+      "open_stake": 53.0,
       "settled_pl": 88.47549999999998,
-      "n_bets": 39,
+      "n_bets": 40,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,20 @@
     }
   },
   "source_summary": {
+    "model": {
+      "GBP": {
+        "wagered": 156.07999999999998,
+        "open_stake": 23.0,
+        "settled_pl": 6.985500000000005,
+        "n_bets": 24
+      },
+      "USD": {
+        "wagered": 137.93,
+        "open_stake": 60.0,
+        "settled_pl": -23.827999999999996,
+        "n_bets": 7
+      }
+    },
     "punt": {
       "GBP": {
         "wagered": 143.06,
@@ -84,20 +98,6 @@
         "n_bets": 21
       }
     },
-    "model": {
-      "USD": {
-        "wagered": 137.93,
-        "open_stake": 60.0,
-        "settled_pl": -23.827999999999996,
-        "n_bets": 7
-      },
-      "GBP": {
-        "wagered": 133.08,
-        "open_stake": 0.0,
-        "settled_pl": 6.985500000000005,
-        "n_bets": 23
-      }
-    },
     "hedge": {
       "GBP": {
         "wagered": 6.0,
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "Betfair": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 155.20000000000002,
+      "open_stake": 23.0,
+      "settled_pl": -10.757999999999996,
+      "n_bets": 9
+    },
     "Bet Builder (bet365)": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -139,14 +147,6 @@
       "open_stake": 0.0,
       "settled_pl": -10.0,
       "n_bets": 1
-    },
-    "Betfair": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 132.2,
-      "open_stake": 0.0,
-      "settled_pl": -10.757999999999996,
-      "n_bets": 8
     },
     "Betfair Sportsbook": {
       "venue": "sportsbook",
@@ -2102,6 +2102,26 @@
     "n_with_close": 24
   },
   "positions": [
+    {
+      "id": 92,
+      "ts_utc": "2026-06-18T15:32:35",
+      "match": "",
+      "match_id": "MANUAL_UNKNOWN",
+      "market": "Match Result",
+      "selection": "Mexico",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 2.14,
+      "stake": 23.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.92"
+    },
     {
       "id": 91,
       "ts_utc": "2026-06-18T15:18:41",
