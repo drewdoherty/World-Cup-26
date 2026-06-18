@@ -278,6 +278,20 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* The expanded-metadata tables carry more columns; keep the prose columns
+   narrower so Odds/Stake/Model/Mkt/EV/Kelly all fit, and let the panel scroll
+   horizontally on narrow viewports rather than crushing the numeric cells. */
+.pos-table-wide { min-width: 760px; }
+.pos-table-wide .pos-match { max-width: 200px; }
+.pos-table-wide .pos-sel { max-width: 190px; }
+.pos-mkt {
+  color: var(--text-dim);
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+}
 .pill {
   display: inline-block;
   padding: 1px 6px;
@@ -1067,6 +1081,17 @@ body {
   fill: var(--muted);
   font-family: var(--mono);
   font-size: 9px;
+  letter-spacing: 0.5px;
+}
+/* Match-No. edge bars (tracking chart 01). */
+.tr-barsvg { width: 100%; height: auto; }
+.tr-bar-pos { fill: var(--pos, #4ade80); opacity: 0.85; }
+.tr-bar-neg { fill: var(--neg, #f87171); opacity: 0.85; }
+.tr-bar-pos:hover, .tr-bar-neg:hover { opacity: 1; }
+.tr-axis-title {
+  fill: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 10px;
   letter-spacing: 0.5px;
 }
 .cx-kick { stroke: var(--warn); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.8; }

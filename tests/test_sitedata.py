@@ -222,9 +222,10 @@ class TestBuildSiteData:
         assert len(positions) == 3
         for p in positions:
             assert set(p.keys()) == {
-                "id", "ts_utc", "match", "market", "selection", "platform",
-                "venue", "account", "source", "currency", "decimal_odds",
-                "stake", "model_prob", "ev",
+                "id", "ts_utc", "match", "match_id", "market", "selection",
+                "platform", "venue", "account", "source", "currency",
+                "decimal_odds", "stake", "model_prob", "market_prob_devig",
+                "ev", "kelly_fraction", "notes",
             }
         # Every position has a known venue.
         venues = {p["venue"] for p in positions}

@@ -62,6 +62,39 @@
     if (v === null || v === undefined || isNaN(v)) return "—";
     return Number(v).toFixed(dp === undefined ? 2 : dp);
   }
+  // Signed percentage with an explicit + on positives (for edge columns).
+  function pctSigned(n, dp) {
+    if (n === null || n === undefined || isNaN(n)) return "—";
+    var s = (n * 100).toFixed(dp === undefined ? 1 : dp);
+    return (n >= 0 ? "+" : "") + s + "%";
+  }
+  // Compact a verbose market string for the dense table column. Long
+  // descriptive markets (bet-builders, prop questions) collapse to a short tag;
+  // the full text stays available via the cell's title attribute.
+  function marketShort(m) {
+    if (!m) return "—";
+    var s = String(m);
+    var map = {
+      h2h: "1X2", outright_golden_boot: "Golden Boot",
+      BETBUILDER: "BetBuilder", polymarket: "PM",
+      over_under: "O/U", scoreline: "Score"
+    };
+    if (map[s]) return map[s];
+    if (s.length > 16) return s.slice(0, 15) + "…";
+    return s;
+  }
+  // Full bet metadata as a row hover-title: every field, including the free-text
+  // notes that don't get their own column.
+  function metaTitle(p) {
+    var parts = [];
+    if (p.match) parts.push(p.match);
+    if (p.market) parts.push("market: " + p.market);
+    if (p.selection) parts.push("selection: " + p.selection);
+    if (p.id != null) parts.push("bet #" + p.id);
+    if (p.account) parts.push("account " + p.account);
+    if (p.notes) parts.push("notes: " + p.notes);
+    return parts.join("  |  ");
+  }
   // Color class for an EV cell: positive -> pos, negative -> neg, and a
   // missing/non-numeric EV (e.g. an acca with no modelled edge) stays neutral
   // rather than being painted green by a Number(null) === 0 coercion.
@@ -332,16 +365,25 @@
       // venue, then to the neutral grey. Used for both the left rail and the
       // pill so the row is identifiable at a glance.
       var col = bookColor(book || venue);
-      return '<tr>' +
+      // Edge = model − market(devig): the model's claimed mispricing. Only
+      // meaningful when both are present.
+      var edge = (p.model_prob != null && p.market_prob_devig != null)
+        ? (p.model_prob - p.market_prob_devig) : null;
+      return '<tr title="' + esc(metaTitle(p)) + '">' +
         '<td class="num dim pos-time" style="border-left-color:' + col + '">' +
           esc(timeOnly(p.ts_utc)) + '</td>' +
         '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
+        '<td class="pos-mkt dim" title="' + esc(p.market) + '">' + esc(marketShort(p.market)) + '</td>' +
         '<td class="pos-sel" title="' + esc(p.selection) + '">' + esc(dash(p.selection)) + '</td>' +
         '<td class="r num">' + esc(num(p.decimal_odds)) + '</td>' +
         '<td class="r num">' + esc(money(p.stake, p.currency)) + '</td>' +
         '<td class="r num">' + esc(pct(p.model_prob, 0)) + '</td>' +
+        '<td class="r num dim">' + esc(pct(p.market_prob_devig, 0)) + '</td>' +
+        '<td class="r num ' + evClass(edge) + '">' +
+          esc(edge == null ? '—' : pctSigned(edge, 1)) + '</td>' +
         '<td class="r num ' + evClass(p.ev) + '">' +
           esc(p.ev === null || p.ev === undefined ? '—' : pct(p.ev, 1)) + '</td>' +
+        '<td class="r num dim">' + esc(p.kelly_fraction == null ? '—' : num(p.kelly_fraction, 3)) + '</td>' +
         '<td class="pos-src">' + sourceChip(p.source) + '</td>' +
         '<td><span class="pill book ' + venue + '" style="color:' + col +
           ';border-color:' + col + '">' + esc(p.platform || venue) +
@@ -350,11 +392,12 @@
     }).join("");
 
     $("positions").innerHTML =
-      '<table class="pos-table">' +
+      '<table class="pos-table pos-table-wide">' +
         '<thead><tr>' +
-          '<th>Time</th><th>Match</th><th>Selection</th>' +
+          '<th>Time</th><th>Match</th><th>Market</th><th>Selection</th>' +
           '<th class="r">Odds</th><th class="r">Stake</th>' +
-          '<th class="r">Model</th><th class="r">EV</th>' +
+          '<th class="r">Model</th><th class="r">Mkt</th>' +
+          '<th class="r">Edge</th><th class="r">EV</th><th class="r">Kelly</th>' +
           '<th>Source</th><th>Venue</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
@@ -991,12 +1034,18 @@
       var pl = Number(p.pl);
       var plCls = p.status === "void" ? "dim" : (pl >= 0 ? "pos" : "neg");
       var plTxt = p.status === "void" ? "void" : signedMoney(pl, p.currency);
-      return '<tr style="border-left:2px solid ' + bookColor(p.platform) + '">' +
+      return '<tr title="' + esc(metaTitle(p)) +
+          '" style="border-left:2px solid ' + bookColor(p.platform) + '">' +
         '<td class="num dim">' + esc(timeOnly(p.settled_ts || p.ts_utc)) + '</td>' +
         '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
+        '<td class="pos-mkt dim" title="' + esc(p.market) + '">' + esc(marketShort(p.market)) + '</td>' +
         '<td class="pos-sel" title="' + esc(p.selection) + '">' + esc(dash(p.selection)) + '</td>' +
         '<td class="r num">' + esc(num(p.decimal_odds)) + '</td>' +
         '<td class="r num">' + esc(money(p.stake, p.currency)) + '</td>' +
+        '<td class="r num">' + esc(pct(p.model_prob, 0)) + '</td>' +
+        '<td class="r num ' + evClass(p.ev) + '">' +
+          esc(p.ev === null || p.ev === undefined ? "—" : pct(p.ev, 1)) + '</td>' +
+        '<td class="r num">' + esc(num(p.closing_odds)) + '</td>' +
         '<td class="r num ' + plCls + '">' + esc(plTxt) + '</td>' +
         '<td class="r num ' + evClass(p.clv) + '">' +
           esc(p.clv === null || p.clv === undefined ? "—" : pct(p.clv, 1)) + '</td>' +
@@ -1006,11 +1055,12 @@
         '</tr>';
     }).join("");
     el.innerHTML =
-      '<table class="pos-table">' +
+      '<table class="pos-table pos-table-wide">' +
         '<thead><tr>' +
-          '<th>Settled</th><th>Match</th><th>Selection</th>' +
+          '<th>Settled</th><th>Match</th><th>Market</th><th>Selection</th>' +
           '<th class="r">Odds</th><th class="r">Stake</th>' +
-          '<th class="r">P&L</th><th class="r">CLV</th>' +
+          '<th class="r">Model</th><th class="r">EV</th>' +
+          '<th class="r">Close</th><th class="r">P&L</th><th class="r">CLV</th>' +
           '<th>Source</th><th>Venue</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +

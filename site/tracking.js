@@ -191,30 +191,119 @@
     '</div>';
   }
 
+  // One-line standing summary for a team, e.g. "Grp A · 2nd · P2 4pts GD+1".
+  function standingLine(st) {
+    if (!st) return "knockout / not in group table";
+    var gd = st.gd >= 0 ? "+" + st.gd : String(st.gd);
+    var ord = { 1: "1st", 2: "2nd", 3: "3rd", 4: "4th" }[st.position] ||
+      (st.position ? st.position + "th" : "—");
+    return "Grp " + st.group + " · " + ord + " · P" + st.played + " " +
+      st.points + "pts (W" + st.won + " D" + st.drawn + " L" + st.lost +
+      ", GD" + gd + ")";
+  }
+
+  // Multi-line hover text for one match bar: model-vs-market edge, both teams'
+  // current standing, and the model's top scoreline ladder.
+  function barTooltip(no, f) {
+    var parts = split(f.fixture);
+    var home = parts ? parts[0] : "Home";
+    var away = parts ? parts[1] : "Away";
+    var lines = ["Match " + no + ":  " + f.fixture];
+    lines.push("FT " + (f.score || "—") + "  ·  " + legTeam(f.fixture, f.outcome) +
+      (f.outcome === "draw" ? " (draw)" : " won"));
+    var mp = f.model_prob_outcome, kp = f.market_prob_outcome;
+    lines.push("Model " + prob01(mp, 1) + " vs Market " + prob01(kp, 1) +
+      " on the result  →  edge " + signedPct(f.result_edge, 1));
+    lines.push("");
+    lines.push("Standing for their stage:");
+    lines.push("  " + home + ": " + standingLine(f.home_standing));
+    lines.push("  " + away + ": " + standingLine(f.away_standing));
+    var sl = f.scorelines || [];
+    if (sl.length) {
+      lines.push("");
+      lines.push("Model scoreline probabilities:");
+      sl.forEach(function (s) {
+        lines.push("  " + (s.score || "—") + "   " +
+          (s.prob != null ? Number(s.prob).toFixed(1) + "%" : "—"));
+      });
+    }
+    return lines.join("\n");
+  }
+
+  // Inverted axes vs the old horizontal layout: x-axis is the integer Match No.,
+  // y-axis is the model−market edge (probability the model assigned to the
+  // realised outcome minus the market's). Bars rise green when the model beat
+  // the market, fall red when it didn't. Hover a bar for the full breakdown.
   function renderOutcomeBars(d) {
-    var fixtures = (d.fixtures || []).filter(function (f) { return !f.pending; });
+    var fixtures = (d.fixtures || []).filter(function (f) {
+      return !f.pending && f.result_edge !== null && f.result_edge !== undefined &&
+        !isNaN(f.result_edge);
+    });
     if (!fixtures.length) {
       $("outcome-bars").innerHTML =
         '<div class="empty">No completed fixtures yet</div>';
       return;
     }
-    var html = fixtures.map(function (f) {
-      return '<div class="tr-pair">' +
-        '<div class="tr-pair-head">' +
-          '<span class="tr-pair-title">' + esc(f.fixture) + '</span>' +
-          '<span class="tr-pair-actual">' + esc(f.score || "") + ' &middot; ' +
-            esc(legTeam(f.fixture, f.outcome)) + '</span>' +
-        '</div>' +
-        scorelineBar(f) +
-        resultBar(f) +
-      '</div>';
-    }).join("");
 
-    html += '<div class="vt-note">top bar is the final (FT) scoreline as a ' +
-      'home–away goal split; bottom bar runs right/green when the model beat ' +
-      'the de-vigged closing market on the realised result, left/red when it ' +
-      'didn’t (model − market probability on what happened)</div>';
-    $("outcome-bars").innerHTML = html;
+    // Symmetric y-range around zero, min span ±0.20 so small edges stay visible.
+    var maxAbs = fixtures.reduce(function (m, f) {
+      return Math.max(m, Math.abs(Number(f.result_edge)));
+    }, 0);
+    var span = Math.max(0.20, Math.ceil(maxAbs * 10) / 10);
+
+    var n = fixtures.length;
+    var W = Math.max(460, 40 + n * 34);
+    var H = 300;
+    var P = { l: 46, r: 14, t: 16, b: 40 };
+    var plotW = W - P.l - P.r, plotH = H - P.t - P.b;
+    // y: edge in [-span, +span] -> pixels; zero line in the vertical middle.
+    function py(edge) { return P.t + (1 - (edge + span) / (2 * span)) * plotH; }
+    var y0 = py(0);
+    var step = plotW / n;
+    var bw = Math.min(24, step * 0.62);
+
+    var parts = ['<svg viewBox="0 0 ' + W + ' ' + H +
+      '" xmlns="http://www.w3.org/2000/svg" role="img" class="tr-barsvg">'];
+
+    // y grid + ticks at -span, -span/2, 0, +span/2, +span.
+    [-span, -span / 2, 0, span / 2, span].forEach(function (g) {
+      parts.push('<line class="cx-grid" x1="' + P.l + '" y1="' + py(g).toFixed(1) +
+        '" x2="' + (W - P.r) + '" y2="' + py(g).toFixed(1) + '"/>');
+      parts.push('<text class="cx-tick" x="' + (P.l - 8) + '" y="' +
+        (py(g) + 3).toFixed(1) + '" text-anchor="end">' +
+        (g > 0 ? "+" : "") + Math.round(g * 100) + '%</text>');
+    });
+    // Zero baseline emphasised.
+    parts.push('<line class="cx-axis" x1="' + P.l + '" y1="' + y0.toFixed(1) +
+      '" x2="' + (W - P.r) + '" y2="' + y0.toFixed(1) + '"/>');
+
+    fixtures.forEach(function (f, i) {
+      var no = i + 1;
+      var edge = Number(f.result_edge);
+      var cx = P.l + step * i + step / 2;
+      var top = Math.min(py(edge), y0);
+      var h = Math.abs(py(edge) - y0);
+      if (h < 1) h = 1;
+      var cls = edge >= 0 ? "tr-bar-pos" : "tr-bar-neg";
+      parts.push('<rect class="' + cls + '" x="' + (cx - bw / 2).toFixed(1) +
+        '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' +
+        h.toFixed(1) + '" rx="2"><title>' + esc(barTooltip(no, f)) +
+        '</title></rect>');
+      // x-axis integer Match No.
+      parts.push('<text class="cx-tick" x="' + cx.toFixed(1) + '" y="' +
+        (H - P.b + 16) + '" text-anchor="middle">' + no + '</text>');
+    });
+
+    // Axis titles.
+    parts.push('<text class="tr-axis-title" x="' + (P.l + plotW / 2) +
+      '" y="' + (H - 6) + '" text-anchor="middle">Match No.</text>');
+    parts.push('</svg>');
+
+    $("outcome-bars").innerHTML = parts.join("") +
+      '<div class="vt-note">Each bar is one settled match (x = Match No.). ' +
+      'Height = model − market probability on the realised outcome: green/up = ' +
+      'model beat the closing market, red/down = it didn’t. Hover a bar for both ' +
+      'teams’ group standing and the model’s scoreline probabilities.</div>';
   }
 
   // ---- 2. prediction scoreboard -------------------------------------------

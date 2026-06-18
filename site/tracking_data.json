@@ -1,23 +1,23 @@
 {
   "meta": {
-    "generated": "2026-06-18 12:58:42 UTC"
+    "generated": "2026-06-18 13:51:00 UTC"
   },
   "summary": {
     "fixtures_complete": 24,
     "model_1x2_correct": 12,
     "market_1x2_correct": 13,
     "model_brier": 0.519,
-    "market_brier": 0.6189,
+    "market_brier": 0.6151,
     "model_logloss": 0.8561,
-    "market_logloss": 1.0036,
+    "market_logloss": 0.9984,
     "top6_hits": 10,
     "bets": {
-      "settled": 65,
+      "settled": 60,
       "won": 17,
-      "lost": 48,
-      "pl": 28.28,
-      "avg_clv": -0.0006,
-      "clv_count": 24
+      "lost": 43,
+      "pl": 188.32,
+      "avg_clv": -0.0005,
+      "clv_count": 25
     }
   },
   "fixtures": [
@@ -60,6 +60,58 @@
         "hit": false
       },
       "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "1-0",
+          "prob": 16.9
+        },
+        {
+          "score": "2-0",
+          "prob": 15.5
+        },
+        {
+          "score": "2-1",
+          "prob": 10.1
+        },
+        {
+          "score": "3-0",
+          "prob": 9.1
+        },
+        {
+          "score": "1-1",
+          "prob": 8.7
+        },
+        {
+          "score": "0-0",
+          "prob": 7.6
+        }
+      ],
+      "home_standing": {
+        "team": "Mexico",
+        "group": "A",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 2,
+        "ga": 0,
+        "gd": 2,
+        "points": 3,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "South Africa",
+        "group": "A",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 0,
+        "ga": 2,
+        "gd": -2,
+        "points": 0,
+        "position": 4
+      },
       "ou25": {
         "model_over": 0.458,
         "actual_over": false,
@@ -121,6 +173,58 @@
         "hit": false
       },
       "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "1-1",
+          "prob": 13.8
+        },
+        {
+          "score": "1-0",
+          "prob": 13.2
+        },
+        {
+          "score": "0-0",
+          "prob": 11.5
+        },
+        {
+          "score": "0-1",
+          "prob": 10.0
+        },
+        {
+          "score": "2-1",
+          "prob": 8.6
+        },
+        {
+          "score": "2-0",
+          "prob": 7.1
+        }
+      ],
+      "home_standing": {
+        "team": "South Korea",
+        "group": "A",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 2,
+        "ga": 1,
+        "gd": 1,
+        "points": 3,
+        "position": 2
+      },
+      "away_standing": {
+        "team": "Czech Republic",
+        "group": "A",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 1,
+        "ga": 2,
+        "gd": -1,
+        "points": 0,
+        "position": 3
+      },
       "ou25": {
         "model_over": 0.38,
         "actual_over": true,
@@ -182,6 +286,58 @@
         "hit": false
       },
       "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "1-0",
+          "prob": 14.5
+        },
+        {
+          "score": "1-1",
+          "prob": 11.5
+        },
+        {
+          "score": "2-1",
+          "prob": 11.3
+        },
+        {
+          "score": "2-0",
+          "prob": 11.0
+        },
+        {
+          "score": "0-0",
+          "prob": 8.0
+        },
+        {
+          "score": "0-1",
+          "prob": 5.6
+        }
+      ],
+      "home_standing": {
+        "team": "Canada",
+        "group": "B",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 1,
+        "ga": 1,
+        "gd": 0,
+        "points": 1,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Bosnia and Herzegovina",
+        "group": "B",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 1,
+        "ga": 1,
+        "gd": 0,
+        "points": 1,
+        "position": 2
+      },
       "ou25": {
         "model_over": 0.463,
         "actual_over": false,
@@ -243,6 +399,58 @@
         "hit": false
       },
       "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "1-1",
+          "prob": 13.8
+        },
+        {
+          "score": "1-0",
+          "prob": 12.5
+        },
+        {
+          "score": "0-0",
+          "prob": 10.7
+        },
+        {
+          "score": "0-1",
+          "prob": 8.8
+        },
+        {
+          "score": "2-1",
+          "prob": 8.7
+        },
+        {
+          "score": "2-0",
+          "prob": 8.7
+        }
+      ],
+      "home_standing": {
+        "team": "United States",
+        "group": "D",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 4,
+        "ga": 1,
+        "gd": 3,
+        "points": 3,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Paraguay",
+        "group": "D",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 1,
+        "ga": 4,
+        "gd": -3,
+        "points": 0,
+        "position": 4
+      },
       "ou25": {
         "model_over": 0.407,
         "actual_over": true,
@@ -295,6 +503,58 @@
         "hit": false
       },
       "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "0-2",
+          "prob": 15.1
+        },
+        {
+          "score": "0-1",
+          "prob": 13.9
+        },
+        {
+          "score": "0-3",
+          "prob": 10.6
+        },
+        {
+          "score": "1-2",
+          "prob": 10.2
+        },
+        {
+          "score": "1-1",
+          "prob": 7.4
+        },
+        {
+          "score": "1-3",
+          "prob": 7.1
+        }
+      ],
+      "home_standing": {
+        "team": "Qatar",
+        "group": "B",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 1,
+        "ga": 1,
+        "gd": 0,
+        "points": 1,
+        "position": 3
+      },
+      "away_standing": {
+        "team": "Switzerland",
+        "group": "B",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 1,
+        "ga": 1,
+        "gd": 0,
+        "points": 1,
+        "position": 4
+      },
       "ou25": {
         "model_over": 0.545,
         "actual_over": false,
@@ -347,6 +607,58 @@
         "hit": false
       },
       "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "1-0",
+          "prob": 17.7
+        },
+        {
+          "score": "2-0",
+          "prob": 13.4
+        },
+        {
+          "score": "0-0",
+          "prob": 12.8
+        },
+        {
+          "score": "1-1",
+          "prob": 11.0
+        },
+        {
+          "score": "0-1",
+          "prob": 8.6
+        },
+        {
+          "score": "2-1",
+          "prob": 7.8
+        }
+      ],
+      "home_standing": {
+        "team": "Brazil",
+        "group": "C",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 1,
+        "ga": 1,
+        "gd": 0,
+        "points": 1,
+        "position": 2
+      },
+      "away_standing": {
+        "team": "Morocco",
+        "group": "C",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 1,
+        "ga": 1,
+        "gd": 0,
+        "points": 1,
+        "position": 3
+      },
       "ou25": {
         "model_over": 0.337,
         "actual_over": false,
@@ -416,6 +728,58 @@
         "hit": true
       },
       "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "0-1",
+          "prob": 12.6
+        },
+        {
+          "score": "0-2",
+          "prob": 12.4
+        },
+        {
+          "score": "1-1",
+          "prob": 10.7
+        },
+        {
+          "score": "1-2",
+          "prob": 8.6
+        },
+        {
+          "score": "0-0",
+          "prob": 8.2
+        },
+        {
+          "score": "0-3",
+          "prob": 7.9
+        }
+      ],
+      "home_standing": {
+        "team": "Haiti",
+        "group": "C",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 0,
+        "ga": 1,
+        "gd": -1,
+        "points": 0,
+        "position": 4
+      },
+      "away_standing": {
+        "team": "Scotland",
+        "group": "C",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 1,
+        "ga": 0,
+        "gd": 1,
+        "points": 3,
+        "position": 1
+      },
       "ou25": {
         "model_over": 0.473,
         "actual_over": false,
@@ -485,6 +849,58 @@
         "hit": false
       },
       "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "0-1",
+          "prob": 14.8
+        },
+        {
+          "score": "1-1",
+          "prob": 12.7
+        },
+        {
+          "score": "0-0",
+          "prob": 10.2
+        },
+        {
+          "score": "1-2",
+          "prob": 10.0
+        },
+        {
+          "score": "0-2",
+          "prob": 9.5
+        },
+        {
+          "score": "1-0",
+          "prob": 8.0
+        }
+      ],
+      "home_standing": {
+        "team": "Australia",
+        "group": "D",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 2,
+        "ga": 0,
+        "gd": 2,
+        "points": 3,
+        "position": 2
+      },
+      "away_standing": {
+        "team": "Turkey",
+        "group": "D",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 0,
+        "ga": 2,
+        "gd": -2,
+        "points": 0,
+        "position": 3
+      },
       "ou25": {
         "model_over": 0.403,
         "actual_over": false,
@@ -554,6 +970,58 @@
         "hit": false
       },
       "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "1-1",
+          "prob": 12.9
+        },
+        {
+          "score": "1-0",
+          "prob": 11.2
+        },
+        {
+          "score": "2-0",
+          "prob": 9.4
+        },
+        {
+          "score": "0-0",
+          "prob": 9.2
+        },
+        {
+          "score": "2-1",
+          "prob": 8.5
+        },
+        {
+          "score": "0-1",
+          "prob": 8.3
+        }
+      ],
+      "home_standing": {
+        "team": "Netherlands",
+        "group": "F",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 2,
+        "ga": 2,
+        "gd": 0,
+        "points": 1,
+        "position": 2
+      },
+      "away_standing": {
+        "team": "Japan",
+        "group": "F",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 2,
+        "ga": 2,
+        "gd": 0,
+        "points": 1,
+        "position": 3
+      },
       "ou25": {
         "model_over": 0.449,
         "actual_over": true,
@@ -606,6 +1074,58 @@
         "hit": false
       },
       "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "1-0",
+          "prob": 15.5
+        },
+        {
+          "score": "1-1",
+          "prob": 12.7
+        },
+        {
+          "score": "0-0",
+          "prob": 12.4
+        },
+        {
+          "score": "2-0",
+          "prob": 10.2
+        },
+        {
+          "score": "0-1",
+          "prob": 9.7
+        },
+        {
+          "score": "2-1",
+          "prob": 8.4
+        }
+      ],
+      "home_standing": {
+        "team": "Sweden",
+        "group": "F",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 5,
+        "ga": 1,
+        "gd": 4,
+        "points": 3,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Tunisia",
+        "group": "F",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 1,
+        "ga": 5,
+        "gd": -4,
+        "points": 0,
+        "position": 4
+      },
       "ou25": {
         "model_over": 0.351,
         "actual_over": true,
@@ -675,6 +1195,58 @@
         "hit": false
       },
       "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "4-0",
+          "prob": 12.2
+        },
+        {
+          "score": "3-0",
+          "prob": 11.5
+        },
+        {
+          "score": "5-0",
+          "prob": 10.3
+        },
+        {
+          "score": "2-0",
+          "prob": 8.1
+        },
+        {
+          "score": "6-0",
+          "prob": 7.3
+        },
+        {
+          "score": "4-1",
+          "prob": 5.2
+        }
+      ],
+      "home_standing": {
+        "team": "Germany",
+        "group": "E",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 7,
+        "ga": 1,
+        "gd": 6,
+        "points": 3,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Cura\u00e7ao",
+        "group": "E",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 1,
+        "ga": 7,
+        "gd": -6,
+        "points": 0,
+        "position": 4
+      },
       "ou25": {
         "model_over": 0.825,
         "actual_over": true,
@@ -744,6 +1316,58 @@
         "hit": false
       },
       "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "0-1",
+          "prob": 15.6
+        },
+        {
+          "score": "1-1",
+          "prob": 13.7
+        },
+        {
+          "score": "0-0",
+          "prob": 13.5
+        },
+        {
+          "score": "1-0",
+          "prob": 9.7
+        },
+        {
+          "score": "0-2",
+          "prob": 9.4
+        },
+        {
+          "score": "1-2",
+          "prob": 8.3
+        }
+      ],
+      "home_standing": {
+        "team": "Ivory Coast",
+        "group": "E",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 1,
+        "ga": 0,
+        "gd": 1,
+        "points": 3,
+        "position": 2
+      },
+      "away_standing": {
+        "team": "Ecuador",
+        "group": "E",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 0,
+        "ga": 1,
+        "gd": -1,
+        "points": 0,
+        "position": 3
+      },
       "ou25": {
         "model_over": 0.335,
         "actual_over": false,
@@ -797,6 +1421,33 @@
       "logloss_market": 1.4097,
       "top_scoreline": null,
       "top6_hit": null,
+      "scorelines": [],
+      "home_standing": {
+        "team": "Belgium",
+        "group": "G",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 1,
+        "ga": 1,
+        "gd": 0,
+        "points": 1,
+        "position": 3
+      },
+      "away_standing": {
+        "team": "Egypt",
+        "group": "G",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 1,
+        "ga": 1,
+        "gd": 0,
+        "points": 1,
+        "position": 4
+      },
       "ou25": null,
       "btts": null,
       "picks": [],
@@ -833,6 +1484,33 @@
       "logloss_market": 1.2802,
       "top_scoreline": null,
       "top6_hit": null,
+      "scorelines": [],
+      "home_standing": {
+        "team": "Iran",
+        "group": "G",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 2,
+        "ga": 2,
+        "gd": 0,
+        "points": 1,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "New Zealand",
+        "group": "G",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 2,
+        "ga": 2,
+        "gd": 0,
+        "points": 1,
+        "position": 2
+      },
       "ou25": null,
       "btts": null,
       "picks": [],
@@ -869,6 +1547,33 @@
       "logloss_market": 2.4344,
       "top_scoreline": null,
       "top6_hit": null,
+      "scorelines": [],
+      "home_standing": {
+        "team": "Spain",
+        "group": "H",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 0,
+        "ga": 0,
+        "gd": 0,
+        "points": 1,
+        "position": 3
+      },
+      "away_standing": {
+        "team": "Cape Verde",
+        "group": "H",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 0,
+        "ga": 0,
+        "gd": 0,
+        "points": 1,
+        "position": 4
+      },
       "ou25": null,
       "btts": null,
       "picks": [],
@@ -905,6 +1610,33 @@
       "logloss_market": 1.5153,
       "top_scoreline": null,
       "top6_hit": null,
+      "scorelines": [],
+      "home_standing": {
+        "team": "Saudi Arabia",
+        "group": "H",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 1,
+        "ga": 1,
+        "gd": 0,
+        "points": 1,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Uruguay",
+        "group": "H",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 1,
+        "ga": 1,
+        "gd": 0,
+        "points": 1,
+        "position": 2
+      },
       "ou25": null,
       "btts": null,
       "picks": [],
@@ -926,9 +1658,9 @@
       },
       "model_source": "card_build",
       "market_1x2": {
-        "home": 0.6389,
-        "draw": 0.2165,
-        "away": 0.1445
+        "home": 0.6482,
+        "draw": 0.2203,
+        "away": 0.1315
       },
       "market_source": "closing_devig",
       "market_books": 20,
@@ -937,18 +1669,70 @@
       "model_correct": true,
       "market_correct": true,
       "model_prob_outcome": 0.629,
-      "market_prob_outcome": 0.6389,
-      "result_edge": -0.0099,
+      "market_prob_outcome": 0.6482,
+      "result_edge": -0.0192,
       "brier_model": 0.2103,
-      "brier_market": 0.1981,
+      "brier_market": 0.1895,
       "logloss_model": 0.4636,
-      "logloss_market": 0.4479,
+      "logloss_market": 0.4335,
       "top_scoreline": {
         "score": "1-0",
         "prob": 18.7,
         "hit": false
       },
       "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "1-0",
+          "prob": 18.7
+        },
+        {
+          "score": "2-0",
+          "prob": 14.4
+        },
+        {
+          "score": "0-0",
+          "prob": 10.2
+        },
+        {
+          "score": "1-1",
+          "prob": 10.0
+        },
+        {
+          "score": "2-1",
+          "prob": 9.5
+        },
+        {
+          "score": "3-0",
+          "prob": 7.2
+        }
+      ],
+      "home_standing": {
+        "team": "France",
+        "group": "I",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 3,
+        "ga": 1,
+        "gd": 2,
+        "points": 3,
+        "position": 2
+      },
+      "away_standing": {
+        "team": "Senegal",
+        "group": "I",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 1,
+        "ga": 3,
+        "gd": -2,
+        "points": 0,
+        "position": 3
+      },
       "ou25": {
         "model_over": 0.382,
         "actual_over": true,
@@ -978,29 +1762,81 @@
       },
       "model_source": "card_build",
       "market_1x2": {
-        "home": 0.071,
-        "draw": 0.1468,
-        "away": 0.7822
+        "home": 0.0657,
+        "draw": 0.1365,
+        "away": 0.7978
       },
       "market_source": "closing_devig",
-      "market_books": 20,
+      "market_books": 19,
       "model_pick": "away",
       "market_pick": "away",
       "model_correct": true,
       "market_correct": true,
       "model_prob_outcome": 0.6946,
-      "market_prob_outcome": 0.7822,
-      "result_edge": -0.0875,
+      "market_prob_outcome": 0.7978,
+      "result_edge": -0.1032,
       "brier_model": 0.1433,
-      "brier_market": 0.074,
+      "brier_market": 0.0638,
       "logloss_model": 0.3644,
-      "logloss_market": 0.2457,
+      "logloss_market": 0.2259,
       "top_scoreline": {
         "score": "0-1",
         "prob": 19.1,
         "hit": false
       },
       "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "0-1",
+          "prob": 19.1
+        },
+        {
+          "score": "0-2",
+          "prob": 15.7
+        },
+        {
+          "score": "1-2",
+          "prob": 10.2
+        },
+        {
+          "score": "1-1",
+          "prob": 8.6
+        },
+        {
+          "score": "0-0",
+          "prob": 8.4
+        },
+        {
+          "score": "0-3",
+          "prob": 8.3
+        }
+      ],
+      "home_standing": {
+        "team": "Iraq",
+        "group": "I",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 1,
+        "ga": 4,
+        "gd": -3,
+        "points": 0,
+        "position": 4
+      },
+      "away_standing": {
+        "team": "Norway",
+        "group": "I",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 4,
+        "ga": 1,
+        "gd": 3,
+        "points": 3,
+        "position": 1
+      },
       "ou25": {
         "model_over": 0.415,
         "actual_over": true,
@@ -1030,29 +1866,81 @@
       },
       "model_source": "card_build",
       "market_1x2": {
-        "home": 0.6228,
-        "draw": 0.2352,
-        "away": 0.142
+        "home": 0.6854,
+        "draw": 0.2086,
+        "away": 0.106
       },
       "market_source": "closing_devig",
-      "market_books": 20,
+      "market_books": 19,
       "model_pick": "home",
       "market_pick": "home",
       "model_correct": true,
       "market_correct": true,
       "model_prob_outcome": 0.6743,
-      "market_prob_outcome": 0.6228,
-      "result_edge": 0.0514,
+      "market_prob_outcome": 0.6854,
+      "result_edge": -0.0111,
       "brier_model": 0.1634,
-      "brier_market": 0.2178,
+      "brier_market": 0.1537,
       "logloss_model": 0.3941,
-      "logloss_market": 0.4735,
+      "logloss_market": 0.3777,
       "top_scoreline": {
         "score": "1-0",
         "prob": 15.1,
         "hit": false
       },
       "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "1-0",
+          "prob": 15.1
+        },
+        {
+          "score": "2-0",
+          "prob": 14.6
+        },
+        {
+          "score": "2-1",
+          "prob": 9.7
+        },
+        {
+          "score": "1-1",
+          "prob": 9.4
+        },
+        {
+          "score": "3-0",
+          "prob": 9.0
+        },
+        {
+          "score": "0-0",
+          "prob": 7.7
+        }
+      ],
+      "home_standing": {
+        "team": "Argentina",
+        "group": "J",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 3,
+        "ga": 0,
+        "gd": 3,
+        "points": 3,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Algeria",
+        "group": "J",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 0,
+        "ga": 3,
+        "gd": -3,
+        "points": 0,
+        "position": 4
+      },
       "ou25": {
         "model_over": 0.472,
         "actual_over": true,
@@ -1082,29 +1970,81 @@
       },
       "model_source": "card_build",
       "market_1x2": {
-        "home": 0.6852,
-        "draw": 0.2026,
-        "away": 0.1122
+        "home": 0.7178,
+        "draw": 0.1773,
+        "away": 0.1048
       },
       "market_source": "closing_devig",
-      "market_books": 20,
+      "market_books": 19,
       "model_pick": "home",
       "market_pick": "home",
       "model_correct": true,
       "market_correct": true,
       "model_prob_outcome": 0.6493,
-      "market_prob_outcome": 0.6852,
-      "result_edge": -0.0359,
+      "market_prob_outcome": 0.7178,
+      "result_edge": -0.0685,
       "brier_model": 0.188,
-      "brier_market": 0.1527,
+      "brier_market": 0.1221,
       "logloss_model": 0.4318,
-      "logloss_market": 0.378,
+      "logloss_market": 0.3315,
       "top_scoreline": {
         "score": "1-0",
         "prob": 15.3,
         "hit": false
       },
       "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "1-0",
+          "prob": 15.3
+        },
+        {
+          "score": "2-0",
+          "prob": 13.9
+        },
+        {
+          "score": "1-1",
+          "prob": 10.0
+        },
+        {
+          "score": "2-1",
+          "prob": 9.7
+        },
+        {
+          "score": "0-0",
+          "prob": 8.2
+        },
+        {
+          "score": "3-0",
+          "prob": 8.1
+        }
+      ],
+      "home_standing": {
+        "team": "Austria",
+        "group": "J",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 3,
+        "ga": 1,
+        "gd": 2,
+        "points": 3,
+        "position": 2
+      },
+      "away_standing": {
+        "team": "Jordan",
+        "group": "J",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 1,
+        "ga": 3,
+        "gd": -2,
+        "points": 0,
+        "position": 3
+      },
       "ou25": {
         "model_over": 0.453,
         "actual_over": true,
@@ -1134,9 +2074,9 @@
       },
       "model_source": "card_build",
       "market_1x2": {
-        "home": 0.5717,
-        "draw": 0.2509,
-        "away": 0.1774
+        "home": 0.5589,
+        "draw": 0.2586,
+        "away": 0.1825
       },
       "market_source": "closing_devig",
       "market_books": 19,
@@ -1145,18 +2085,70 @@
       "model_correct": true,
       "market_correct": true,
       "model_prob_outcome": 0.5378,
-      "market_prob_outcome": 0.5717,
-      "result_edge": -0.0339,
+      "market_prob_outcome": 0.5589,
+      "result_edge": -0.0211,
       "brier_model": 0.323,
-      "brier_market": 0.2779,
+      "brier_market": 0.2948,
       "logloss_model": 0.6204,
-      "logloss_market": 0.5592,
+      "logloss_market": 0.5819,
       "top_scoreline": {
         "score": "1-0",
         "prob": 17.2,
         "hit": false
       },
       "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "1-0",
+          "prob": 17.2
+        },
+        {
+          "score": "1-1",
+          "prob": 11.9
+        },
+        {
+          "score": "2-0",
+          "prob": 11.7
+        },
+        {
+          "score": "0-0",
+          "prob": 11.4
+        },
+        {
+          "score": "2-1",
+          "prob": 9.3
+        },
+        {
+          "score": "0-1",
+          "prob": 8.0
+        }
+      ],
+      "home_standing": {
+        "team": "England",
+        "group": "L",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 4,
+        "ga": 2,
+        "gd": 2,
+        "points": 3,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Croatia",
+        "group": "L",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 2,
+        "ga": 4,
+        "gd": -2,
+        "points": 0,
+        "position": 4
+      },
       "ou25": {
         "model_over": 0.364,
         "actual_over": true,
@@ -1186,29 +2178,81 @@
       },
       "model_source": "card_build",
       "market_1x2": {
-        "home": 0.7472,
-        "draw": 0.1729,
-        "away": 0.0799
+        "home": 0.7396,
+        "draw": 0.1722,
+        "away": 0.0883
       },
       "market_source": "closing_devig",
-      "market_books": 20,
+      "market_books": 19,
       "model_pick": "home",
       "market_pick": "home",
       "model_correct": false,
       "market_correct": false,
       "model_prob_outcome": 0.1745,
-      "market_prob_outcome": 0.1729,
-      "result_edge": 0.0016,
+      "market_prob_outcome": 0.1722,
+      "result_edge": 0.0023,
       "brier_model": 1.2417,
-      "brier_market": 1.2489,
+      "brier_market": 1.2401,
       "logloss_model": 1.7458,
-      "logloss_market": 1.7552,
+      "logloss_market": 1.7594,
       "top_scoreline": {
         "score": "2-0",
         "prob": 16.0,
         "hit": false
       },
       "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "2-0",
+          "prob": 16.0
+        },
+        {
+          "score": "1-0",
+          "prob": 14.8
+        },
+        {
+          "score": "3-0",
+          "prob": 11.2
+        },
+        {
+          "score": "2-1",
+          "prob": 8.4
+        },
+        {
+          "score": "1-1",
+          "prob": 7.9
+        },
+        {
+          "score": "0-0",
+          "prob": 7.2
+        }
+      ],
+      "home_standing": {
+        "team": "Portugal",
+        "group": "K",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 1,
+        "ga": 1,
+        "gd": 0,
+        "points": 1,
+        "position": 2
+      },
+      "away_standing": {
+        "team": "DR Congo",
+        "group": "K",
+        "played": 1,
+        "won": 0,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 1,
+        "ga": 1,
+        "gd": 0,
+        "points": 1,
+        "position": 3
+      },
       "ou25": {
         "model_over": 0.492,
         "actual_over": false,
@@ -1238,29 +2282,81 @@
       },
       "model_source": "card_build",
       "market_1x2": {
-        "home": 0.0923,
-        "draw": 0.1866,
-        "away": 0.7211
+        "home": 0.1034,
+        "draw": 0.2017,
+        "away": 0.6949
       },
       "market_source": "closing_devig",
-      "market_books": 20,
+      "market_books": 19,
       "model_pick": "away",
       "market_pick": "away",
       "model_correct": true,
       "market_correct": true,
       "model_prob_outcome": 0.6772,
-      "market_prob_outcome": 0.7211,
-      "result_edge": -0.0439,
+      "market_prob_outcome": 0.6949,
+      "result_edge": -0.0177,
       "brier_model": 0.161,
-      "brier_market": 0.1211,
+      "brier_market": 0.1444,
       "logloss_model": 0.3897,
-      "logloss_market": 0.327,
+      "logloss_market": 0.364,
       "top_scoreline": {
         "score": "0-1",
         "prob": 17.7,
         "hit": false
       },
       "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "0-1",
+          "prob": 17.7
+        },
+        {
+          "score": "0-2",
+          "prob": 15.7
+        },
+        {
+          "score": "0-0",
+          "prob": 9.5
+        },
+        {
+          "score": "1-1",
+          "prob": 9.1
+        },
+        {
+          "score": "0-3",
+          "prob": 9.1
+        },
+        {
+          "score": "1-2",
+          "prob": 8.7
+        }
+      ],
+      "home_standing": {
+        "team": "Uzbekistan",
+        "group": "K",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 1,
+        "ga": 3,
+        "gd": -2,
+        "points": 0,
+        "position": 4
+      },
+      "away_standing": {
+        "team": "Colombia",
+        "group": "K",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 3,
+        "ga": 1,
+        "gd": 2,
+        "points": 3,
+        "position": 1
+      },
       "ou25": {
         "model_over": 0.409,
         "actual_over": true,
@@ -1290,29 +2386,81 @@
       },
       "model_source": "card_build",
       "market_1x2": {
-        "home": 0.4051,
-        "draw": 0.3024,
-        "away": 0.2925
+        "home": 0.4101,
+        "draw": 0.298,
+        "away": 0.2919
       },
       "market_source": "closing_devig",
-      "market_books": 20,
+      "market_books": 19,
       "model_pick": "away",
       "market_pick": "home",
       "model_correct": false,
       "market_correct": true,
       "model_prob_outcome": 0.3529,
-      "market_prob_outcome": 0.4051,
-      "result_edge": -0.0522,
+      "market_prob_outcome": 0.4101,
+      "result_edge": -0.0572,
       "brier_model": 0.6312,
-      "brier_market": 0.5309,
+      "brier_market": 0.522,
       "logloss_model": 1.0416,
-      "logloss_market": 0.9036,
+      "logloss_market": 0.8913,
       "top_scoreline": {
         "score": "0-1",
         "prob": 14.0,
         "hit": false
       },
       "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "0-1",
+          "prob": 14.0
+        },
+        {
+          "score": "1-1",
+          "prob": 12.8
+        },
+        {
+          "score": "0-0",
+          "prob": 11.9
+        },
+        {
+          "score": "1-0",
+          "prob": 11.7
+        },
+        {
+          "score": "1-2",
+          "prob": 8.0
+        },
+        {
+          "score": "2-0",
+          "prob": 7.4
+        }
+      ],
+      "home_standing": {
+        "team": "Ghana",
+        "group": "L",
+        "played": 1,
+        "won": 1,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 1,
+        "ga": 0,
+        "gd": 1,
+        "points": 3,
+        "position": 2
+      },
+      "away_standing": {
+        "team": "Panama",
+        "group": "L",
+        "played": 1,
+        "won": 0,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 0,
+        "ga": 1,
+        "gd": -1,
+        "points": 0,
+        "position": 3
+      },
       "ou25": {
         "model_over": 0.355,
         "actual_over": false,
@@ -1994,63 +3142,13 @@
     },
     {
       "id": 83,
-      "match": "Will IR Iran win on 2026-06-15?",
-      "selection": "Iran win - Yes",
-      "odds": 1.8182,
-      "stake": 30.68,
-      "status": "lost",
-      "pl": -30.68,
-      "clv": null
-    },
-    {
-      "id": 84,
-      "match": "Czechia vs South Africa | Ghana vs Panama | England vs Croatia",
-      "selection": "England (Match Odds 90) + Ghana (Match Odds 90) + Czechia (Match Odds 90)",
-      "odds": 6.348375,
+      "match": "France vs Senegal",
+      "selection": "Mbappe AG + Mbappe 2+ Shots + France ML + O2.5",
+      "odds": 3.076,
       "stake": 10.0,
-      "status": "lost",
-      "pl": -10.0,
-      "clv": null
-    },
-    {
-      "id": 85,
-      "match": "Czechia vs South Africa | Ghana vs Panama | England vs Croatia | Portugal vs DR Congo",
-      "selection": "Portugal (Match Odds 90) + England (Match Odds 90) + Ghana (Match Odds 90) + Czechia (Match Odds 90)",
-      "odds": 7.1732584,
-      "stake": 10.0,
-      "status": "lost",
-      "pl": -10.0,
-      "clv": null
-    },
-    {
-      "id": 86,
-      "match": "Ghana vs Panama",
-      "selection": "Ghana",
-      "odds": 2.46,
-      "stake": 60.0,
-      "status": "lost",
-      "pl": -87.6,
-      "clv": null
-    },
-    {
-      "id": 88,
-      "match": "Ghana vs Panama",
-      "selection": "Both Teams to Score, Both Teams 3+ Corners & Both Teams 2+ Cards",
-      "odds": 8.0,
-      "stake": 10.0,
-      "status": "lost",
-      "pl": -10.0,
-      "clv": null
-    },
-    {
-      "id": 89,
-      "match": "England vs Croatia",
-      "selection": "England Full Time 2UP + Harry Kane Over 1.5 SOT (Sub Payout) + Jude Bellingham Over 1.5 SOT (Djed Spence sub, Sub Payout)",
-      "odds": 10.0,
-      "stake": 1.0,
       "status": "won",
-      "pl": 9.0,
-      "clv": null
+      "pl": 20.76,
+      "clv": 0.0
     }
   ]
 }

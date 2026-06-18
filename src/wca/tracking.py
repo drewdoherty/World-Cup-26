@@ -211,6 +211,90 @@ def outcome_from_score(score: Any) -> Optional[str]:
 
 
 # ---------------------------------------------------------------------------
+# Group-stage standings (for the tracking tooltip).
+# ---------------------------------------------------------------------------
+
+
+def compute_group_standings(
+    results: List[Dict[str, Any]],
+) -> Dict[str, Dict[str, Any]]:
+    """Build WC2026 group-stage standings from completed result rows.
+
+    Returns ``{canonical_team: {group, position, played, won, drawn, lost,
+    gf, ga, gd, points}}``. Only counts fixtures whose two teams share a
+    WC2026 group (i.e. genuine group-stage games), so knockout fixtures and
+    friendlies never pollute the table. Teams with no completed games yet
+    still appear (played 0), so the tooltip can show "0 pts, P0".
+    """
+    try:  # lazy import keeps module load light and avoids a hard sim dep
+        from wca.advancement import WC2026_GROUPS
+    except Exception:  # pragma: no cover - advancement always importable
+        return {}
+
+    team_to_group = {t: g for g, ts in WC2026_GROUPS.items() for t in ts}
+    tbl: Dict[str, Dict[str, Any]] = {
+        teamnames.canonical(t): {
+            "group": g, "played": 0, "won": 0, "drawn": 0, "lost": 0,
+            "gf": 0, "ga": 0, "gd": 0, "points": 0,
+        }
+        for g, ts in WC2026_GROUPS.items() for t in ts
+    }
+
+    for row in results or []:
+        parsed = parse_score(row.get("score"))
+        if parsed is None:
+            continue
+        pair = split_fixture(row.get("fixture") or "")
+        if not pair:
+            continue
+        home, away = teamnames.canonical(pair[0]), teamnames.canonical(pair[1])
+        if home not in tbl or away not in tbl:
+            continue
+        if team_to_group.get(home) != team_to_group.get(away):
+            continue  # cross-group => knockout, not a group-table game
+        hg, ag = parsed
+        for team, gf, ga in ((home, hg, ag), (away, ag, hg)):
+            t = tbl[team]
+            t["played"] += 1
+            t["gf"] += gf
+            t["ga"] += ga
+            t["gd"] = t["gf"] - t["ga"]
+            if gf > ga:
+                t["won"] += 1
+                t["points"] += 3
+            elif gf == ga:
+                t["drawn"] += 1
+                t["points"] += 1
+            else:
+                t["lost"] += 1
+
+    # Rank within each group: points, then goal difference, then goals for.
+    by_group: Dict[str, List[str]] = {}
+    for team, t in tbl.items():
+        by_group.setdefault(t["group"], []).append(team)
+    for g, teams in by_group.items():
+        teams.sort(key=lambda tm: (tbl[tm]["points"], tbl[tm]["gd"],
+                                   tbl[tm]["gf"]), reverse=True)
+        for i, tm in enumerate(teams):
+            tbl[tm]["position"] = i + 1
+    return tbl
+
+
+def _standing_for(
+    standings: Dict[str, Dict[str, Any]], fixture: str, leg: str
+) -> Optional[Dict[str, Any]]:
+    """Return the standing dict for one side of *fixture* (``home``/``away``)."""
+    pair = split_fixture(fixture or "")
+    if not pair:
+        return None
+    team = teamnames.canonical(pair[0] if leg == "home" else pair[1])
+    st = standings.get(team)
+    if st is None:
+        return None
+    return {"team": team, **st}
+
+
+# ---------------------------------------------------------------------------
 # 1X2 triples: reconstruction, de-vig, scoring rules.
 # ---------------------------------------------------------------------------
 
@@ -560,6 +644,10 @@ def build_tracking_data(
     market_closes = market_closes or {}
     bets = bets or []
 
+    # Group-stage standings snapshot (each team's current table position), used
+    # to annotate the tracking tooltip with both sides' competition context.
+    standings = compute_group_standings(results)
+
     fixtures_out: List[Dict[str, Any]] = []
     pending_out: List[Dict[str, Any]] = []
 
@@ -754,6 +842,12 @@ def build_tracking_data(
                 "logloss_market": _opt_round(log_loss_1x2(market_triple, outcome)),
                 "top_scoreline": top_scoreline,
                 "top6_hit": top6_hit,
+                "scorelines": [
+                    {"score": s.get("score"), "prob": s.get("prob")}
+                    for s in scores[:6]
+                ],
+                "home_standing": _standing_for(standings, fixture, "home"),
+                "away_standing": _standing_for(standings, fixture, "away"),
                 "ou25": ou25,
                 "btts": btts,
                 "picks": picks,

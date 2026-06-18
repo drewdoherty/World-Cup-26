@@ -224,6 +224,7 @@ def _positions_from_bets(bets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             "id": b.get("id"),
             "ts_utc": b.get("ts_utc"),
             "match": b.get("match_desc"),
+            "match_id": b.get("match_id"),
             "market": b.get("market"),
             "selection": b.get("selection"),
             "platform": b.get("platform"),
@@ -234,7 +235,10 @@ def _positions_from_bets(bets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             "decimal_odds": _opt_num(b.get("decimal_odds")),
             "stake": _opt_num(b.get("stake")),
             "model_prob": _opt_num(b.get("model_prob")),
+            "market_prob_devig": _opt_num(b.get("market_prob_devig")),
             "ev": _opt_num(b.get("ev")),
+            "kelly_fraction": _opt_num(b.get("kelly_fraction")),
+            "notes": b.get("notes"),
         })
     return positions
 
@@ -393,6 +397,7 @@ def build_site_data(
             "ts_utc": b.get("ts_utc"),
             "settled_ts": b.get("settled_ts"),
             "match": b.get("match_desc"),
+            "match_id": b.get("match_id"),
             "market": b.get("market"),
             "selection": b.get("selection"),
             "platform": b.get("platform"),
@@ -402,9 +407,15 @@ def build_site_data(
             "currency": VENUE_CURRENCY.get(venue, "GBP"),
             "decimal_odds": _opt_num(b.get("decimal_odds")),
             "stake": _opt_num(b.get("stake")),
+            "model_prob": _opt_num(b.get("model_prob")),
+            "market_prob_devig": _opt_num(b.get("market_prob_devig")),
+            "ev": _opt_num(b.get("ev")),
+            "kelly_fraction": _opt_num(b.get("kelly_fraction")),
             "status": status,
             "pl": _opt_num(b.get("settled_pl")),
+            "closing_odds": _opt_num(b.get("closing_odds")),
             "clv": _opt_num(b.get("clv")),
+            "notes": b.get("notes"),
         })
 
     # Realized P&L curves: cumulative settled P&L over settlement time, one
