@@ -1401,7 +1401,7 @@ def format_parked_order(token: str, proposal: Dict[str, Any]) -> str:
 
     # Enhanced fields: model fair share price, EV, and stake %
     model_prob = float(proposal.get("model_prob", 0.0))
-    ev_pct = float(proposal.get("ev", 0.0))  # Already in % from the proposal
+    ev_pct = float(proposal.get("ev", 0.0)) * 100.0  # ev stored as decimal (0.28 = 28%)
     size_usd = float(proposal.get("size_usd", notional))
 
     # Model fair share price (probability as decimal) and EV if placed
