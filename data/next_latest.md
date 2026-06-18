@@ -1,22 +1,22 @@
-<!-- generated: 2026-06-18T18:18:10 -->
-⚽ *Next match* — Switzerland vs Bosnia and Herzegovina
-Kickoff 2026-06-18 19:00:00+00:00
+<!-- generated: 2026-06-18T19:21:22 -->
+⚽ *Next match* — Canada vs Qatar
+Kickoff 2026-06-18 22:00:00+00:00
 
 *Winner* (model blend)
-  Switzerland     61.0%  fair 1.64  best 1.61 (matchbook) -1.7%
-  Draw            23.5%  fair 4.26  best 4.30 (betfair_ex_uk) +0.9%
-  Bosnia and Her  15.5%  fair 6.45  best 6.80 (betfair_ex_uk) +5.4% ✅
+  Canada          71.0%  fair 1.41  best 1.34 (betfair_ex_uk) -4.9%
+  Draw            18.3%  fair 5.45  best 6.00 (skybet) +10.0% ✅
+  Qatar           10.7%  fair 9.34  best 11.50 (betfair_ex_uk) +23.2% ✅
 
-*Corners* (model, exp 8.4)
-  O/U 8.5: over 45.9% / under 54.1%  fair 2.18 / 1.85
+*Corners* (model, exp 8.6)
+  O/U 8.5: over 49.3% / under 50.7%  fair 2.03 / 1.97
 
 *Anytime scorer* (best market price, vig in)
-  Breel Embolo        2.38 (Betfair)  imp 42%
-  Cedric Itten        2.38 (William Hill)  imp 42%
-  Mohamed Zeki Amdou  2.50 (William Hill)  imp 40%
-  Noah Okafor         2.90 (William Hill)  imp 34%
-  Ruben Vargas        3.00 (William Hill)  imp 33%
+  Jonathan David      2.26 (Betfair)  imp 44%
+  Cyle Larin          2.44 (Betfair)  imp 41%
+  Promise Oluwatobi   2.58 (Betfair)  imp 39%
+  Tani Oluwaseyi      2.70 (Betfair)  imp 37%
+  Jayden Nelson       3.65 (Betfair)  imp 27%
 
 *Scorelines* (top 6)
-1-0 15.3% | 2-0 12.6% | 1-1 11.0% | 2-1 10.3% | 0-0 8.6% | 3-0 6.7%
-  O/U 2.5: over 44.3% / under 55.7%   BTTS 43.9%
+1-0 14.1% | 2-0 13.6% | 2-1 11.5% | 1-1 8.7% | 3-0 8.3% | 3-1 7.0%
+  O/U 2.5: over 52.7% / under 47.3%   BTTS 46.7%
