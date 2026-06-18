@@ -20,12 +20,8 @@ def test_metrics_sane_on_this_repo():
     assert metrics["data_sources"] == 3
     assert metrics["model_classes"] >= 2
     assert metrics["bot_commands"] >= 5
-    assert metrics["complexity_index"] > 0
-    # Complexity index matches its documented formula.
-    expected = round(
-        metrics["modules"] + metrics["tests"] / 10.0 + metrics["data_sources"] * 2, 1
-    )
-    assert metrics["complexity_index"] == expected
+    # The complexity_index metric has been removed.
+    assert "complexity_index" not in metrics
 
 
 def test_mermaid_contains_existing_pipeline_nodes_only():
@@ -85,12 +81,13 @@ def test_history_replaces_same_day_row(tmp_path):
     rows = wca_structure.update_history(csv_path, metrics, "2026-06-11")
     assert len(rows) == 2
     assert [r["date"] for r in rows] == ["2026-06-10", "2026-06-11"]
-    # With >= 2 rows the README block grows a history table + xychart.
+    # With >= 2 rows the README block grows a metrics-over-time history table.
     block = wca_structure.render_readme_block(
         metrics, wca_structure.build_mermaid(), "2026-06-11", rows
     )
-    assert "Complexity over time" in block
-    assert "xychart-beta" in block
+    assert "Metrics over time" in block
+    assert "Complexity" not in block
+    assert "xychart-beta" not in block
 
 
 def test_bot_structure_dispatch_returns_text(tmp_path):
@@ -107,14 +104,13 @@ def test_bot_structure_dispatch_returns_text(tmp_path):
     (docs / "structure_2026-06-11.md").write_text(
         "# Project Structure — 2026-06-11\n\n"
         "## Pipeline\n\n```mermaid\nflowchart TD\n    A --> B\n```\n\n"
-        "## Metrics\n\n| Metric | Value |\n| --- | --- |\n| Modules | 15 |\n\n"
-        "**Complexity index: 37.5** (modules + tests/10 + data sources × 2)\n",
+        "## Metrics\n\n| Metric | Value |\n| --- | --- |\n| Modules | 15 |\n",
         encoding="utf-8",
     )
     reply = handle_structure(docs_dir=str(docs))
     assert "2026-06-11" in reply
     assert "| Modules | 15 |" in reply
-    assert "Complexity index: 37.5" in reply
+    assert "Complexity" not in reply
     assert "mermaid" not in reply
     assert "flowchart" not in reply
 

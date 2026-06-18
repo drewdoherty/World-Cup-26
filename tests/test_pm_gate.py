@@ -88,7 +88,7 @@ def test_format_parked_order_summary():
     text = app.format_parked_order(tok, app._PENDING_ORDERS[1])
     # $0.69 * 31.88 = 22.0 (ish) notional, both action tokens present.
     assert "$22.00" in text
-    assert "Mexico Yes" in text and "BUY" in text
+    assert "Mexico vs Canada — Yes" in text and "BUY" in text
     assert "Y PM-1" in text and "N PM-1" in text
 
 
@@ -279,7 +279,7 @@ def test_handle_pm_renders_status_and_parked(tmp_path, monkeypatch):
     out = app.handle_pm(str(tmp_path / "t.db"))
     assert "Polymarket" in out
     assert "configured" in out and "DRY-RUN" in out
-    assert "PM-1" in out and "Mexico Yes" in out
+    assert "PM-1" in out and "Mexico vs Canada — Yes" in out
 
 
 def test_handle_pm_no_orders_and_not_configured(tmp_path, monkeypatch):

@@ -50,7 +50,13 @@ def test_all_48_teams_appear_in_scheduled_fixtures():
     6 fixtures (a single round robin).
     """
     df = load_results("data/raw/results.csv")
-    wc = df[(df["tournament"] == "FIFA World Cup") & (df["home_score"].isna())]
+    # Use the FULL 2026 group-stage schedule (played + unplayed). Once the
+    # tournament is under way, completed fixtures have scores, so the old
+    # NA-score filter would undercount each group's round-robin (no longer 6
+    # *unplayed*). Filter by the 2026 season so historical World Cups are
+    # excluded but already-played 2026 group games are still counted.
+    _yr = pd.to_datetime(df["date"], errors="coerce").dt.year
+    wc = df[(df["tournament"] == "FIFA World Cup") & (_yr == 2026)]
     fixture_teams = set(wc["home_team"]).union(set(wc["away_team"]))
 
     group_teams = {t for ts in WC2026_GROUPS.values() for t in ts}

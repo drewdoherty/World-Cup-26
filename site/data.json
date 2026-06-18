@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-18 10:57:47 UTC"
+    "generated": "2026-06-18 12:30:03 UTC"
   },
   "totals": {
-    "wagered": 597.436,
-    "open_stake": 161.0,
-    "settled_pl": 136.8805,
-    "n_bets": 67
+    "wagered": 598.436,
+    "open_stake": 61.0,
+    "settled_pl": 28.280500000000004,
+    "n_bets": 68
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 446.14000000000004,
-      "open_stake": 100.0,
-      "settled_pl": 163.0755,
-      "n_bets": 50
+      "wagered": 447.14000000000004,
+      "open_stake": 0.0,
+      "settled_pl": 54.47549999999998,
+      "n_bets": 51
     },
     "USD": {
       "wagered": 151.29600000000002,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 446.14000000000004,
-      "open_stake": 100.0,
-      "settled_pl": 163.0755,
-      "n_bets": 50,
+      "wagered": 447.14000000000004,
+      "open_stake": 0.0,
+      "settled_pl": 54.47549999999998,
+      "n_bets": 51,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,28 +45,36 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 319.14,
-      "open_stake": 90.0,
-      "settled_pl": 187.07550000000003,
-      "n_bets": 36,
+      "wagered": 320.14,
+      "open_stake": 10.0,
+      "settled_pl": 88.47549999999998,
+      "n_bets": 37,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
     "sportsbook_2": {
       "wagered": 117.0,
-      "open_stake": 10.0,
-      "settled_pl": -35.0,
+      "open_stake": 0.0,
+      "settled_pl": -45.0,
       "n_bets": 13,
       "currency": "GBP",
       "label": "Sportsbook 2"
     }
   },
   "source_summary": {
+    "offer": {
+      "GBP": {
+        "wagered": 175.0,
+        "open_stake": 10.0,
+        "settled_pl": 84.82,
+        "n_bets": 20
+      }
+    },
     "punt": {
       "GBP": {
         "wagered": 133.06,
-        "open_stake": 90.0,
-        "settled_pl": 86.27,
+        "open_stake": 0.0,
+        "settled_pl": -31.33,
         "n_bets": 7
       },
       "USD": {
@@ -97,40 +105,40 @@
         "settled_pl": -6.0,
         "n_bets": 1
       }
-    },
-    "offer": {
-      "GBP": {
-        "wagered": 174.0,
-        "open_stake": 10.0,
-        "settled_pl": 75.82,
-        "n_bets": 19
-      }
     }
   },
   "platforms": {
+    "virginbet": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 31.25,
+      "open_stake": 0.0,
+      "settled_pl": -8.5,
+      "n_bets": 7
+    },
     "sky bet": {
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 10.0,
-      "open_stake": 10.0,
-      "settled_pl": 0.0,
+      "open_stake": 0.0,
+      "settled_pl": -10.0,
       "n_bets": 1
     },
     "betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 122.2,
-      "open_stake": 70.0,
-      "settled_pl": 96.842,
+      "open_stake": 0.0,
+      "settled_pl": -0.7579999999999956,
       "n_bets": 7
     },
-    "unknown": {
+    "betfair_sportsbook": {
       "venue": "sportsbook",
       "currency": "GBP",
-      "wagered": 10.0,
+      "wagered": 114.0,
       "open_stake": 10.0,
-      "settled_pl": 0.0,
-      "n_bets": 1
+      "settled_pl": 32.07,
+      "n_bets": 12
     },
     "polymarket": {
       "venue": "polymarket",
@@ -172,14 +180,6 @@
       "settled_pl": -19.0,
       "n_bets": 4
     },
-    "betfair_sportsbook": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 104.0,
-      "open_stake": 10.0,
-      "settled_pl": 42.07,
-      "n_bets": 11
-    },
     "paddy power": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -187,14 +187,6 @@
       "open_stake": 0.0,
       "settled_pl": -5.0,
       "n_bets": 1
-    },
-    "virginbet": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 30.25,
-      "open_stake": 0.0,
-      "settled_pl": -17.5,
-      "n_bets": 6
     },
     "paddypower": {
       "venue": "sportsbook",
@@ -206,6 +198,96 @@
     }
   },
   "closed_positions": [
+    {
+      "id": 89,
+      "ts_utc": "2026-06-17T14:42:00",
+      "settled_ts": "2026-06-18T12:20:02",
+      "match": "England vs Croatia",
+      "market": "Bet Builder (free bet)",
+      "selection": "England Full Time 2UP + Harry Kane Over 1.5 SOT (Sub Payout) + Jude Bellingham Over 1.5 SOT (Djed Spence sub, Sub Payout)",
+      "platform": "virginbet",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 10.0,
+      "stake": 1.0,
+      "status": "won",
+      "pl": 9.0,
+      "clv": null
+    },
+    {
+      "id": 88,
+      "ts_utc": "2026-06-17T20:25:33",
+      "settled_ts": "2026-06-18T12:20:02",
+      "match": "Ghana vs Panama",
+      "market": "Both Teams to Score, Both Teams 3+ Corners & Both Teams 2+ Cards",
+      "selection": "Both Teams to Score, Both Teams 3+ Corners & Both Teams 2+ Cards",
+      "platform": "Sky Bet",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 8.0,
+      "stake": 10.0,
+      "status": "lost",
+      "pl": -10.0,
+      "clv": null
+    },
+    {
+      "id": 86,
+      "ts_utc": "2026-06-17T17:50:48",
+      "settled_ts": "2026-06-18T12:20:02",
+      "match": "Ghana vs Panama",
+      "market": "Lay (Bet Against)",
+      "selection": "Ghana",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 2.46,
+      "stake": 60.0,
+      "status": "lost",
+      "pl": -87.6,
+      "clv": null
+    },
+    {
+      "id": 85,
+      "ts_utc": "2026-06-17T16:37:05",
+      "settled_ts": "2026-06-18T12:20:02",
+      "match": "Czechia vs South Africa | Ghana vs Panama | England vs Croatia | Portugal vs DR Congo",
+      "market": "Accumulator",
+      "selection": "Portugal (Match Odds 90) + England (Match Odds 90) + Ghana (Match Odds 90) + Czechia (Match Odds 90)",
+      "platform": "betfair_sportsbook",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 7.1732584,
+      "stake": 10.0,
+      "status": "lost",
+      "pl": -10.0,
+      "clv": null
+    },
+    {
+      "id": 84,
+      "ts_utc": "2026-06-17T16:32:03",
+      "settled_ts": "2026-06-18T12:20:02",
+      "match": "Czechia vs South Africa | Ghana vs Panama | England vs Croatia",
+      "market": "Accumulator",
+      "selection": "England (Match Odds 90) + Ghana (Match Odds 90) + Czechia (Match Odds 90)",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 6.348375,
+      "stake": 10.0,
+      "status": "lost",
+      "pl": -10.0,
+      "clv": null
+    },
     {
       "id": 83,
       "ts_utc": "2026-06-15T19:19:18",
@@ -1470,6 +1552,26 @@
         [
           "2026-06-15T18:15:00Z",
           163.08
+        ],
+        [
+          "2026-06-18T12:20:02",
+          172.08
+        ],
+        [
+          "2026-06-18T12:20:02",
+          162.08
+        ],
+        [
+          "2026-06-18T12:20:02",
+          74.48
+        ],
+        [
+          "2026-06-18T12:20:02",
+          64.48
+        ],
+        [
+          "2026-06-18T12:20:02",
+          54.48
         ]
       ]
     },
@@ -1546,70 +1648,6 @@
   },
   "positions": [
     {
-      "id": 88,
-      "ts_utc": "2026-06-17T20:25:33",
-      "match": "Ghana vs Panama",
-      "market": "Both Teams to Score, Both Teams 3+ Corners & Both Teams 2+ Cards",
-      "selection": "Both Teams to Score, Both Teams 3+ Corners & Both Teams 2+ Cards",
-      "platform": "Sky Bet",
-      "venue": "sportsbook",
-      "account": "2",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 8.0,
-      "stake": 10.0,
-      "model_prob": null,
-      "ev": null
-    },
-    {
-      "id": 86,
-      "ts_utc": "2026-06-17T17:50:48",
-      "match": "Ghana vs Panama",
-      "market": "Lay (Bet Against)",
-      "selection": "Ghana",
-      "platform": "Betfair",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 2.46,
-      "stake": 60.0,
-      "model_prob": null,
-      "ev": null
-    },
-    {
-      "id": 85,
-      "ts_utc": "2026-06-17T16:37:05",
-      "match": "Czechia vs South Africa | Ghana vs Panama | England vs Croatia | Portugal vs DR Congo",
-      "market": "Accumulator",
-      "selection": "Portugal (Match Odds 90) + England (Match Odds 90) + Ghana (Match Odds 90) + Czechia (Match Odds 90)",
-      "platform": "unknown",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 7.1732584,
-      "stake": 10.0,
-      "model_prob": null,
-      "ev": null
-    },
-    {
-      "id": 84,
-      "ts_utc": "2026-06-17T16:32:03",
-      "match": "Czechia vs South Africa | Ghana vs Panama | England vs Croatia",
-      "market": "Accumulator",
-      "selection": "England (Match Odds 90) + Ghana (Match Odds 90) + Czechia (Match Odds 90)",
-      "platform": "Betfair",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 6.348375,
-      "stake": 10.0,
-      "model_prob": null,
-      "ev": null
-    },
-    {
       "id": 57,
       "ts_utc": "2026-06-12T20:03:20",
       "match": "Ghana eliminated R32 of the World Cup",
@@ -1664,14 +1702,14 @@
       "scores": [
         {
           "score": "1-0",
-          "prob": 17.2,
-          "fair": 5.82,
-          "back": 5.93
+          "prob": 17.3,
+          "fair": 5.79,
+          "back": 5.91
         },
         {
           "score": "0-0",
           "prob": 12.7,
-          "fair": 7.89,
+          "fair": 7.9,
           "back": 8.05
         },
         {
@@ -1682,21 +1720,21 @@
         },
         {
           "score": "2-0",
-          "prob": 11.7,
-          "fair": 8.54,
-          "back": 8.71
+          "prob": 11.8,
+          "fair": 8.51,
+          "back": 8.68
         },
         {
           "score": "0-1",
-          "prob": 9.2,
-          "fair": 10.92,
-          "back": 11.14
+          "prob": 9.1,
+          "fair": 11.03,
+          "back": 11.25
         },
         {
           "score": "2-1",
           "prob": 8.4,
-          "fair": 11.96,
-          "back": 12.2
+          "fair": 11.91,
+          "back": 12.15
         }
       ],
       "over_under": {
@@ -1712,38 +1750,38 @@
         {
           "score": "1-0",
           "prob": 15.7,
-          "fair": 6.36,
-          "back": 6.49
+          "fair": 6.37,
+          "back": 6.5
         },
         {
           "score": "2-0",
-          "prob": 13.0,
-          "fair": 7.71,
-          "back": 7.87
+          "prob": 12.9,
+          "fair": 7.73,
+          "back": 7.88
         },
         {
           "score": "1-1",
           "prob": 10.6,
-          "fair": 9.45,
-          "back": 9.64
+          "fair": 9.41,
+          "back": 9.6
         },
         {
           "score": "2-1",
           "prob": 10.5,
-          "fair": 9.48,
-          "back": 9.67
+          "fair": 9.5,
+          "back": 9.69
         },
         {
           "score": "0-0",
-          "prob": 8.3,
-          "fair": 12.02,
-          "back": 12.26
+          "prob": 8.4,
+          "fair": 11.96,
+          "back": 12.2
         },
         {
           "score": "3-0",
           "prob": 6.8,
-          "fair": 14.61,
-          "back": 14.9
+          "fair": 14.63,
+          "back": 14.93
         }
       ],
       "over_under": {
@@ -1759,38 +1797,38 @@
         {
           "score": "1-0",
           "prob": 14.5,
-          "fair": 6.9,
-          "back": 7.04
+          "fair": 6.91,
+          "back": 7.05
         },
         {
           "score": "2-0",
           "prob": 13.9,
-          "fair": 7.19,
-          "back": 7.34
+          "fair": 7.2,
+          "back": 7.35
         },
         {
           "score": "2-1",
           "prob": 11.7,
-          "fair": 8.51,
-          "back": 8.69
+          "fair": 8.53,
+          "back": 8.7
         },
         {
           "score": "3-0",
           "prob": 8.5,
-          "fair": 11.73,
-          "back": 11.96
+          "fair": 11.74,
+          "back": 11.98
         },
         {
           "score": "1-1",
-          "prob": 8.3,
-          "fair": 11.98,
-          "back": 12.22
+          "prob": 8.4,
+          "fair": 11.91,
+          "back": 12.15
         },
         {
           "score": "3-1",
           "prob": 7.2,
-          "fair": 13.88,
-          "back": 14.16
+          "fair": 13.9,
+          "back": 14.18
         }
       ],
       "over_under": {
@@ -1806,38 +1844,38 @@
         {
           "score": "1-1",
           "prob": 12.8,
-          "fair": 7.8,
-          "back": 7.95
+          "fair": 7.83,
+          "back": 7.99
         },
         {
           "score": "1-0",
           "prob": 12.0,
-          "fair": 8.32,
-          "back": 8.49
+          "fair": 8.31,
+          "back": 8.48
         },
         {
           "score": "2-0",
-          "prob": 10.1,
-          "fair": 9.86,
-          "back": 10.06
+          "prob": 10.2,
+          "fair": 9.85,
+          "back": 10.05
         },
         {
           "score": "2-1",
           "prob": 9.2,
-          "fair": 10.89,
-          "back": 11.11
+          "fair": 10.88,
+          "back": 11.09
         },
         {
           "score": "0-0",
-          "prob": 9.0,
-          "fair": 11.15,
-          "back": 11.37
+          "prob": 8.9,
+          "fair": 11.2,
+          "back": 11.42
         },
         {
           "score": "0-1",
           "prob": 7.0,
-          "fair": 14.35,
-          "back": 14.64
+          "fair": 14.33,
+          "back": 14.61
         }
       ],
       "over_under": {
@@ -1845,7 +1883,7 @@
         "over": 45.7,
         "under": 54.3
       },
-      "btts": 48.6
+      "btts": 48.5
     }
   ]
 }

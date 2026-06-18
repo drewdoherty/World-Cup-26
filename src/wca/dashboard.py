@@ -178,6 +178,11 @@ def gather_stats(db_path: str) -> Dict[str, Any]:
 
         stake = _to_float(bet.get("stake"))
         status = (bet.get("status") or "").strip().lower()
+        source = str(bet.get("source") or "model")
+        # Free bets (source='offer') are stake-not-returned: the stake is never
+        # at risk, so it contributes £0 to open exposure (only the potential
+        # profit is at stake, and that is upside, not downside).
+        exposed = 0.0 if source == "offer" else stake
 
         block["wagered"] += stake
         block["n_bets"] += 1
@@ -185,8 +190,8 @@ def gather_stats(db_path: str) -> Dict[str, Any]:
         totals["n_bets"] += 1
 
         if status == "open":
-            block["open_stake"] += stake
-            totals["open_stake"] += stake
+            block["open_stake"] += exposed
+            totals["open_stake"] += exposed
 
         if status in ("won", "lost"):
             pl = _to_float(bet.get("settled_pl"))
@@ -210,9 +215,23 @@ def gather_stats(db_path: str) -> Dict[str, Any]:
     else:
         clv = {"avg_clv": None, "pct_beat_close": None, "n_with_close": 0}
 
+    # Per-currency rollup — GBP (sportsbook) and USD (polymarket/kalshi) must
+    # NEVER be summed. Consumers should prefer this over the legacy ``totals``
+    # (which sums across currencies and is kept only for backward-compat).
+    _VENUE_CCY = {"sportsbook": "GBP", "polymarket": "USD", "kalshi": "USD"}
+    totals_by_currency: Dict[str, Dict[str, float]] = {}
+    for v in VENUES:
+        ccy = _VENUE_CCY.get(v, "GBP")
+        agg = totals_by_currency.setdefault(
+            ccy, {"wagered": 0.0, "open_stake": 0.0, "settled_pl": 0.0, "n_bets": 0}
+        )
+        for k in ("wagered", "open_stake", "settled_pl", "n_bets"):
+            agg[k] += by_venue[v][k]
+
     return {
         "by_venue": by_venue,
         "totals": totals,
+        "totals_by_currency": totals_by_currency,
         "bets": bets,
         "clv": clv,
         "generated_inputs_ok": inputs_ok,

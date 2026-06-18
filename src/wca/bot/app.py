@@ -52,7 +52,63 @@ logger = logging.getLogger(__name__)
 
 CARD_PATH = "data/card_latest.md"
 NEXT_PATH = "data/next_latest.md"
+SCORES_FEED_PATH = "site/scores_data.json"
 CARD_MAX_AGE_HOURS = 6.0
+# The odds feed behind /accas and /boost should refresh frequently; warn beyond
+# this. Structure snapshots change rarely, so its window is generous.
+SCORES_FEED_MAX_AGE_HOURS = 6.0
+STRUCTURE_MAX_AGE_HOURS = 24.0 * 30.0
+
+
+def _normalize_ts(ts: Optional[str]) -> Optional[str]:
+    """Normalise 'YYYY-MM-DD HH:MM:SS UTC' (feed style) or ISO to ISO-T form."""
+    if not ts:
+        return ts
+    t = ts.strip()
+    if t.endswith(" UTC"):
+        t = t[:-4].strip()
+    if " " in t and "T" not in t:
+        t = t.replace(" ", "T", 1)
+    return t
+
+
+def _staleness_age_hours(generated: Optional[str], now_utc: Optional[str]):
+    """Hours between *generated* and *now_utc* (ISO/feed strings); None if N/A."""
+    t_gen = cardcache._parse_iso(_normalize_ts(generated) or "")
+    t_now = cardcache._parse_iso(_normalize_ts(now_utc) or "")
+    if t_gen is None or t_now is None:
+        return None
+    return (t_now - t_gen) / 3600.0
+
+
+def _stale_banner(generated: Optional[str], now_utc: Optional[str],
+                  max_age_hours: float, label: str = "data") -> str:
+    """A prominent staleness banner, or '' when fresh / age is unknown.
+
+    Used so that *every* cache-backed command makes staleness impossible to
+    miss — the bot never silently serves data that is older than its window.
+    """
+    age = _staleness_age_hours(generated, now_utc)
+    if age is not None and age > max_age_hours:
+        return (
+            "⚠️ *STALE %s* — generated %s (%.1fh ago; the scheduled build may be "
+            "lagging, treat with caution)\n\n" % (label, generated, age)
+        )
+    return ""
+
+
+def _feed_generated(path: str) -> Optional[str]:
+    """Read ``meta.generated`` from a JSON feed; None if absent/unreadable."""
+    try:
+        import json
+
+        with open(path, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+        if isinstance(data, dict):
+            return (data.get("meta") or {}).get("generated")
+    except Exception:
+        return None
+    return None
 
 HELP_TEXT = (
     "*World Cup Alpha* — manager console\n\n"
@@ -429,7 +485,8 @@ def handle_scores(
 
     header = "⚽ *Predicted scores* — %s" % generated if generated else "⚽ *Predicted scores*"
 
-    lines = [header, ""]
+    banner = _stale_banner(generated, now_utc, CARD_MAX_AGE_HOURS, label="card")
+    lines = [banner + header if banner else header, ""]
     for fx in fixtures:
         scores = fx.get("scores") or []
         if not scores:
@@ -506,8 +563,7 @@ def _fmt_prob(prob: Optional[float]) -> str:
 def handle_structure(docs_dir: Optional[str] = None) -> str:
     """Latest project-structure metrics from docs/architecture/structure_*.md.
 
-    Sends only the metrics table + complexity index (the Mermaid chart is
-    useless in Telegram).
+    Sends only the metrics table (the Mermaid chart is useless in Telegram).
     """
     if docs_dir is None:
         # src/wca/bot/app.py -> repo root is four levels up.
@@ -528,12 +584,18 @@ def handle_structure(docs_dir: Optional[str] = None) -> str:
     with open(latest, "r", encoding="utf-8") as fh:
         content = fh.read()
 
-    # Keep only the metrics section (table + complexity index line).
+    # Keep only the metrics section (the table).
     marker = "## Metrics"
     idx = content.find(marker)
     metrics_part = content[idx + len(marker):].strip() if idx >= 0 else content.strip()
 
-    return "*Project structure* (%s)\n\n%s" % (date, metrics_part)
+    # The snapshot date is just a day (YYYY-MM-DD); treat it as midnight UTC for
+    # the staleness check so an ancient snapshot is flagged.
+    now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    banner = _stale_banner(
+        "%sT00:00:00" % date, now_utc, STRUCTURE_MAX_AGE_HOURS, label="snapshot",
+    )
+    return "%s*Project structure* (%s)\n\n%s" % (banner, date, metrics_part)
 
 
 def handle_settle(text: str, db_path: str) -> str:
@@ -567,8 +629,8 @@ def handle_settle(text: str, db_path: str) -> str:
     try:
         # Fetch the open bet
         row = con.execute(
-            "SELECT id, stake, decimal_odds, model_prob, closing_odds "
-            "FROM bets WHERE id = ? AND status = 'open'",
+            "SELECT id, stake, decimal_odds, model_prob, closing_odds, source, "
+            "market, selection FROM bets WHERE id = ? AND status = 'open'",
             (bet_id,),
         ).fetchone()
 
@@ -577,6 +639,8 @@ def handle_settle(text: str, db_path: str) -> str:
 
         stake = float(row["stake"] or 0.0)
         odds_backed = float(row["decimal_odds"] or 0.0)
+        is_free = str(row["source"] or "model") == "offer"
+        is_lay = "lay" in (str(row["market"] or "") + " " + str(row["selection"] or "")).lower()
 
         # Explicit closing odds win; otherwise fall back to the close the
         # snapshot daemon auto-captured at kickoff (mirrors wca_settle.py, so
@@ -590,13 +654,17 @@ def handle_settle(text: str, db_path: str) -> str:
             )
 
         # Realized P&L pays at the price the bet was BACKED at (the close only
-        # feeds CLV, never the payout).
-        if outcome == "won":
-            settled_pl = stake * (odds_backed - 1)
-        elif outcome == "lost":
-            settled_pl = -stake
-        else:  # void
+        # feeds CLV, never the payout). Free bets are stake-not-returned (a loss
+        # costs £0); lays risk the LIABILITY (stake*(odds-1)), not the stake.
+        if outcome == "void":
             settled_pl = 0.0
+        elif is_lay:
+            liability = stake * (odds_backed - 1)
+            settled_pl = stake if outcome == "won" else -liability
+        elif outcome == "won":
+            settled_pl = stake * (odds_backed - 1)
+        else:  # lost
+            settled_pl = 0.0 if is_free else -stake
 
         # CLV: backed price vs closing line — the ledger-wide convention
         # (ratio - 1), shared with wca.ledger.store.set_closing_odds and
@@ -625,12 +693,17 @@ def handle_settle(text: str, db_path: str) -> str:
         lines.append(f"Realized P&L: {settled_pl:+.2f}")
         if clv is not None:
             lines.append(f"CLV: {clv:+.4f} ({clv*100:+.2f}%)")
-        return "\n".join(lines)
-
+        reply = "\n".join(lines)
     except Exception as exc:
         return f"Error: {exc}"
     finally:
         con.close()
+
+    # Settling moves a bet from open -> closed, so the site's closed-positions
+    # feed is now stale. Regenerate + push it immediately rather than waiting up
+    # to an hour for the publish cron. Best-effort (never blocks the reply).
+    _autosync(db_path, reason="bet %d settled %s" % (bet_id, outcome))
+    return reply
 
 
 # ---------------------------------------------------------------------------
@@ -750,7 +823,12 @@ def handle_boost(text: str, *, scores_path: str = "site/scores_data.json") -> st
             "`/boost SkyBet | Qatar vs Switzerland | Over 2.5 Goals | Over | 2.2`"
         )
     ev = boosts.evaluate_boost(boost, boosts.load_scores_feed(scores_path))
-    return format_boost_verdict(boost, ev)
+    now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    banner = _stale_banner(
+        _feed_generated(scores_path), now_utc, SCORES_FEED_MAX_AGE_HOURS,
+        label="odds feed",
+    )
+    return banner + format_boost_verdict(boost, ev)
 
 
 def handle_accas(scores_path: str = "site/scores_data.json") -> str:
@@ -785,7 +863,12 @@ def handle_accas(scores_path: str = "site/scores_data.json") -> str:
                 "No valid 4+ leg accas found with 2.0+ odds per leg in next 5 matches."
             )
 
-        return accas.format_accas(acca_list)
+        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+        banner = _stale_banner(
+            _feed_generated(scores_path), now_utc, SCORES_FEED_MAX_AGE_HOURS,
+            label="odds feed",
+        )
+        return banner + accas.format_accas(acca_list)
     except Exception as exc:
         return f"*Accumulators*\nError building accas: {exc}"
 
@@ -915,13 +998,15 @@ def resolve_tags(
     text: Optional[str],
     *,
     default_account: str = "1",
-    default_source: str = "model",
+    default_source: str = "punt",
     allow_bare_account: bool = False,
 ) -> Dict[str, str]:
     """Parse account/source tags out of a screenshot caption or yes-reply.
 
-    Screenshot ingests default to source=model (recommended from the card),
-    account=1; a caption can override either dimension. Recognised tokens
+    Screenshot ingests default to source=punt (a discretionary bet unless the
+    caption says otherwise — free bets are auto-detected as 'offer' from the
+    slip, and 'model' must be tagged explicitly), account=1; a caption can
+    override either dimension. Recognised tokens
     (case-insensitive, word-boundary matched anywhere in the text):
 
       account: ``account 2`` / ``acc2`` / ``a2`` -> account="2"
@@ -984,7 +1069,7 @@ def _format_extracted(bets: List[Any], tags: Optional[Dict[str, str]] = None) ->
         )
     if tags:
         acct = tags.get("account", "1")
-        src = _SOURCE_WORD.get(tags.get("source", "model"), tags.get("source", "model"))
+        src = _SOURCE_WORD.get(tags.get("source", "punt"), tags.get("source", "punt"))
         lines.append(
             "\nTags: account *%s* | source *%s*  "
             "(override in your reply, e.g. `yes a2 offer`)" % (acct, src)
@@ -992,7 +1077,7 @@ def _format_extracted(bets: List[Any], tags: Optional[Dict[str, str]] = None) ->
     lines.append(
         "\nReply *yes* to log all to the ledger, *no* to discard. "
         "Tag the reply to set provenance, e.g. `yes 2 offer` / `yes punt` "
-        "(account `1`/`2`, source `model`/`offer`/`punt`; default 1 / model)."
+        "(account `1`/`2`, source `model`/`offer`/`punt`; default 1 / punt)."
     )
     return "\n".join(lines)
 
@@ -1075,7 +1160,7 @@ def handle_photo_confirmation(
     tags = resolve_tags(
         text,
         default_account=parked_tags.get("account", "1"),
-        default_source=parked_tags.get("source", "model"),
+        default_source=parked_tags.get("source", "punt"),
         allow_bare_account=True,
     )
     account = tags["account"]
