@@ -1,22 +1,22 @@
-<!-- generated: 2026-06-18T20:24:47 -->
+<!-- generated: 2026-06-18T21:28:14 -->
 ⚽ *Next match* — Canada vs Qatar
 Kickoff 2026-06-18 22:00:00+00:00
 
 *Winner* (model blend)
-  Canada          71.1%  fair 1.41  best 1.33 (matchbook) -5.4%
-  Draw            18.3%  fair 5.46  best 6.00 (betfair_ex_uk) +9.9% ✅
-  Qatar           10.6%  fair 9.47  best 12.00 (betfair_ex_uk) +26.7% ✅
+  Canada          71.8%  fair 1.39  best 1.30 (betfair_ex_uk) -6.6%
+  Draw            17.9%  fair 5.57  best 6.50 (skybet) +16.6% ✅
+  Qatar           10.2%  fair 9.77  best 13.50 (betfair_ex_uk) +38.2% ✅
 
 *Corners* (model, exp 8.6)
   O/U 8.5: over 49.3% / under 50.7%  fair 2.03 / 1.97
 
 *Anytime scorer* (best market price, vig in)
-  Jonathan David      2.26 (Betfair)  imp 44%
-  Cyle Larin          2.44 (Betfair)  imp 41%
-  Promise Oluwatobi   2.58 (Betfair)  imp 39%
-  Tani Oluwaseyi      2.70 (Betfair)  imp 37%
-  Jayden Nelson       3.65 (Betfair)  imp 27%
+  Promise Oluwatobi   2.10 (William Hill)  imp 48%
+  Jonathan David      2.22 (Betfair)  imp 45%
+  Tani Oluwaseyi      2.50 (William Hill)  imp 40%
+  Cyle Larin          2.58 (Betfair)  imp 39%
+  Alphonso Davies     2.90 (William Hill)  imp 34%
 
 *Scorelines* (top 6)
-1-0 14.2% | 2-0 13.6% | 2-1 11.5% | 1-1 8.7% | 3-0 8.3% | 3-1 7.0%
-  O/U 2.5: over 52.7% / under 47.3%   BTTS 46.7%
+1-0 14.3% | 2-0 13.7% | 2-1 11.6% | 1-1 8.5% | 3-0 8.4% | 3-1 7.1%
+  O/U 2.5: over 52.9% / under 47.1%   BTTS 46.6%
