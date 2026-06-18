@@ -88,8 +88,32 @@ def test_format_parked_order_summary():
     text = app.format_parked_order(tok, app._PENDING_ORDERS[1])
     # $0.69 * 31.88 = 22.0 (ish) notional, both action tokens present.
     assert "$22.00" in text
-    assert "Mexico vs Canada — Yes" in text and "BUY" in text
+    # New format: match + plain-English "backing ..." + the Yes/No outcome.
+    assert "Mexico vs Canada" in text and "backing" in text and "Yes" in text
     assert "Y PM-1" in text and "N PM-1" in text
+
+
+def test_describe_pm_selection_draw_and_moneyline():
+    # Draw market: Yes -> the DRAW; No -> not a draw (the ambiguous case).
+    draw = dict(market_question="Will Canada vs. Qatar end in a draw?")
+    assert app.describe_pm_selection({**draw, "outcome": "Yes"}) == "the DRAW"
+    assert "NO draw" in app.describe_pm_selection({**draw, "outcome": "No"})
+    # Moneyline: names the team and direction.
+    ml = dict(market_question="Will Mexico win on 2026-06-18?")
+    assert app.describe_pm_selection({**ml, "outcome": "Yes"}) == "Mexico to WIN"
+    assert app.describe_pm_selection({**ml, "outcome": "No"}) == "Mexico NOT to win"
+
+
+def test_format_parked_order_includes_market_question():
+    # A bare "No @ 0.08" must carry the question + plain-English meaning.
+    p = _proposal(
+        market_question="Will Canada vs. Qatar end in a draw?",
+        outcome="No", price=0.92, size=10.0, match_desc="Canada vs Qatar",
+    )
+    tok = app.park_order(p)
+    text = app.format_parked_order(tok, app._PENDING_ORDERS[1])
+    assert "Will Canada vs. Qatar end in a draw?" in text
+    assert "NO draw" in text and "No" in text
 
 
 def test_push_parked_order_parks_and_renders():
@@ -279,7 +303,7 @@ def test_handle_pm_renders_status_and_parked(tmp_path, monkeypatch):
     out = app.handle_pm(str(tmp_path / "t.db"))
     assert "Polymarket" in out
     assert "configured" in out and "DRY-RUN" in out
-    assert "PM-1" in out and "Mexico vs Canada — Yes" in out
+    assert "PM-1" in out and "Mexico vs Canada" in out and "Yes" in out
 
 
 def test_handle_pm_no_orders_and_not_configured(tmp_path, monkeypatch):

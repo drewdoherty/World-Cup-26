@@ -179,10 +179,11 @@ def sportsbook_open_exposure_by_match(
     """Open single-match sportsbook exposure, keyed by canonical team pair.
 
     Only open bets whose ``source`` is in *sources* (default model + offer/free
-    bets) and which name a single ``"<home> vs <away>"`` fixture are counted;
-    accumulators and multi-leg rows are skipped (they cannot be attributed to a
-    single outcome). Free bets (``source == 'offer'``) are stake-not-returned,
-    so their **profit at risk** ``stake*(odds-1)`` is what's exposed, not stake.
+    bets; pass ``sources=None`` to include **every** source / book / venue) and
+    which name a single ``"<home> vs <away>"`` fixture are counted; accumulators
+    and multi-leg rows are skipped (they cannot be attributed to a single
+    outcome). Free bets (``source == 'offer'``) are stake-not-returned, so their
+    **profit at risk** ``stake*(odds-1)`` is what's exposed, not stake.
 
     Returns
     -------
@@ -199,7 +200,7 @@ def sportsbook_open_exposure_by_match(
     if df.empty:
         return {}
     open_df = df[df["status"] == "open"].copy()
-    if "source" in open_df.columns:
+    if sources is not None and "source" in open_df.columns:
         open_df = open_df[open_df["source"].isin(set(sources))]
     if open_df.empty:
         return {}

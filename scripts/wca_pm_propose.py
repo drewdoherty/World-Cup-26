@@ -85,16 +85,21 @@ def _augment_for_gate(proposal: dict) -> dict:
 
 
 def _format_proposal_line(i: int, p: dict) -> str:
+    from wca.bot.app import describe_pm_selection
+
     match_desc = p.get("match_desc", "")
-    market_q = p.get("market_question", "")
+    market_q = (p.get("market_question") or "").strip()
+    outcome = p.get("outcome") or "?"
+    backing = describe_pm_selection(p)
+    qline = ("\n    %s → %s" % (market_q, outcome)) if market_q else ""
     return (
-        "*%d. %s*\n"
-        "    %s @ %.2f | $%.2f | model %.1f%% | ev %+.1f%%"
-        "%s"
+        "*%d. %s* — backing %s%s\n"
+        "    @ %.2f | $%.2f | model %.1f%% | ev %+.1f%%%s"
         % (
             i,
             match_desc,
-            market_q.replace(" to win", "").strip() if market_q else "Yes",
+            backing,
+            qline,
             p["price"],
             p["size_usd"],
             p["model_prob"] * 100.0,
@@ -144,20 +149,79 @@ def _outcome_token(sel: str, home: str, away: str) -> str:
     return cs
 
 
+def _reset_parked_for_new_batch(db_path: str):
+    """Clear the parked queue so a fresh batch numbers from ``PM-1`` again.
+
+    The ``pm_parked`` table is only a handshake queue — every executed order is
+    audited in ``bets`` + ``pm_order_log``, not here — so it is safe to wipe and
+    reset its autoincrement before parking a new batch. We DELETE the rows and
+    reset ``sqlite_sequence`` so the next INSERT gets ``n=1``.
+
+    Safety: if any ``unconfirmed`` row exists (a live order that may be on-chain
+    but is not yet reconciled), we must NOT reuse its ``PM-<n>``. In that case we
+    fall back to merely *expiring* the parked rows (numbering continues upward),
+    so a possibly-live order's token can never collide with a new proposal.
+
+    Returns ``(n_cleared, did_reset)``. ``did_reset`` is ``True`` only when the
+    wipe actually committed (verified by re-reading the row count), so a transient
+    lock can never make us *claim* a reset that did not happen.
+    """
+    import sqlite3
+
+    con = sqlite3.connect(db_path)
+    try:
+        # Wait up to 10s for any concurrent writer (e.g. an odds-snapshot insert)
+        # rather than failing the wipe outright — a swallowed lock would silently
+        # leave the old autoincrement and break count-from-1.
+        con.execute("PRAGMA busy_timeout=10000")
+        has = con.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='pm_parked'"
+        ).fetchone()
+        if not has:
+            return (0, True)  # fresh table: first insert is n=1 anyway
+        n_parked = con.execute(
+            "SELECT COUNT(*) FROM pm_parked WHERE status='parked'"
+        ).fetchone()[0]
+        unconf = con.execute(
+            "SELECT COUNT(*) FROM pm_parked WHERE status='unconfirmed'"
+        ).fetchone()[0]
+        if unconf:
+            con.execute("UPDATE pm_parked SET status='expired' WHERE status='parked'")
+            con.commit()
+            return (n_parked, False)
+        con.execute("DELETE FROM pm_parked")
+        seq_tbl = con.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='sqlite_sequence'"
+        ).fetchone()
+        if seq_tbl:
+            con.execute("DELETE FROM sqlite_sequence WHERE name='pm_parked'")
+        con.commit()
+        # Verify the wipe really took (no rows left) before claiming a reset.
+        remaining = con.execute("SELECT COUNT(*) FROM pm_parked").fetchone()[0]
+        return (n_parked, remaining == 0)
+    except sqlite3.OperationalError:
+        # Persistent lock (e.g. a concurrent propose run): degrade gracefully —
+        # don't crash the send and don't claim a reset that didn't happen.
+        return (0, False)
+    finally:
+        con.close()
+
+
 def _build_exposure_section(proposals: list, odds_df, db_path: str, now_dt) -> str:
     """Exposure + hedge header for the **next 5 matches**.
 
     For each of the five soonest fixtures:
 
-    * If there is existing *sportsbook* exposure from a model/offer (free-bet)
-      source on that match, show it and label each Polymarket proposal as a
-      🛡 HEDGE (covers a different outcome → offsets the existing risk) or a
-      ➕ ADD (same side as the existing bet).
+    * If there is existing open exposure on that match — from *any* book or
+      venue and *any* source (model, free-bet/offer, punt, hedge) — show it and
+      label each Polymarket proposal as a 🛡 HEDGE (covers a different outcome →
+      offsets the existing risk) or a ➕ ADD (same side as the existing bet).
     * Otherwise there is nothing to hedge, so the proposal is just the best
       model-fair-vs-market EV pick (ranked by EV).
 
     Reads existing exposure from the ledger (never fabricated) via
-    :func:`wca.ledger.reports.sportsbook_open_exposure_by_match`.
+    :func:`wca.ledger.reports.sportsbook_open_exposure_by_match` with
+    ``sources=None`` so no open position on any book/venue is missed.
     """
     from wca.data.teamnames import canonical
     from wca.ledger.reports import sportsbook_open_exposure_by_match
@@ -167,7 +231,8 @@ def _build_exposure_section(proposals: list, odds_df, db_path: str, now_dt) -> s
         return ""
 
     try:
-        exposure = sportsbook_open_exposure_by_match(db_path)
+        # sources=None -> every book/venue/source, so nothing is hidden.
+        exposure = sportsbook_open_exposure_by_match(db_path, sources=None)
     except Exception:
         exposure = {}
 
@@ -193,7 +258,12 @@ def _build_exposure_section(proposals: list, odds_df, db_path: str, now_dt) -> s
                 _outcome_token(sel, home, away) for sel in exp["outcomes"]
             }
             exp_str = ", ".join(
-                "%s £%.0f@risk" % (sel, oc["risk"])
+                "%s £%.0f@risk [%s]"
+                % (
+                    sel,
+                    oc["risk"],
+                    "/".join(sorted(p for p in oc.get("platforms", set()) if p)) or "?",
+                )
                 for sel, oc in exp["outcomes"].items()
             )
             lines.append("⚠️ %s — existing exposure: %s" % (title, exp_str))
@@ -375,6 +445,17 @@ def main() -> int:
     except TelegramError as exc:
         print("ERROR: Telegram client init failed: %s" % exc, file=sys.stderr)
         return 1
+
+    # Clear the previous batch BEFORE parking the new one, so (a) a stale
+    # proposal for an already-played match can never be executed via a leftover
+    # `Y PM-<n>`, and (b) this batch numbers from PM-1 again. Skips the reset
+    # (expire-only) if an unconfirmed/possibly-on-chain order is in flight.
+    n_cleared, did_reset = _reset_parked_for_new_batch(args.db)
+    if n_cleared or did_reset:
+        print(
+            "Cleared %d stale parked proposal(s); PM numbering %s."
+            % (n_cleared, "reset to 1" if did_reset else "continues (in-flight order)")
+        )
 
     # Park all proposals first
     parked_texts = []

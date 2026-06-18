@@ -1381,43 +1381,65 @@ def park_order(proposal: Dict[str, Any]) -> str:
     return "PM-%d" % n
 
 
+def describe_pm_selection(proposal: Dict[str, Any]) -> str:
+    """Plain-English statement of what a Polymarket BUY actually backs.
+
+    A Polymarket outcome is a bare ``Yes``/``No`` against a market *question*,
+    which is meaningless without it ("No @ 0.08" — no on what?).  We derive the
+    human meaning purely from the proposal's own ``market_question`` +
+    ``outcome`` (never fabricated):
+
+    * draw market  -> "the DRAW" (Yes) / "NO draw — either team wins" (No)
+    * moneyline    -> "<Team> to WIN" (Yes) / "<Team> NOT to win" (No)
+    * anything else falls back to the verbatim question + outcome.
+    """
+    import re as _re
+
+    q = (proposal.get("market_question") or proposal.get("label") or "").strip()
+    outcome = (proposal.get("outcome") or proposal.get("selection") or "").strip()
+    yes = outcome.lower() in ("yes", "y", "true")
+    ql = q.lower()
+    if "draw" in ql or "tie" in ql:
+        return "the DRAW" if yes else "NO draw — either team wins"
+    m = _re.search(r"will\s+(.+?)\s+win\b", q, _re.IGNORECASE)
+    if m:
+        team = m.group(1).strip().rstrip("?").strip()
+        return ("%s to WIN" % team) if yes else ("%s NOT to win" % team)
+    if q:
+        return "%s = %s" % (q, outcome or "?")
+    return outcome or "?"
+
+
 def format_parked_order(token: str, proposal: Dict[str, Any]) -> str:
     """Human confirmation prompt for one parked Polymarket order.
 
-    Format shows: match (both teams), outcome, price, stake, model prob, EV, and exposure.
+    Shows the match, a plain-English reading of what the Yes/No actually backs,
+    the verbatim market question + outcome, price, stake, model prob and EV — so
+    a bare "No @ 0.08" can never be confirmed without knowing what it means.
     """
     side = str(proposal.get("side", "BUY")).upper()
     price = float(proposal.get("price", 0.0))
     size = float(proposal.get("size", 0.0))
     notional = price * size
 
-    # Extract both teams from match_desc and show them
     match_desc = proposal.get("match_desc", "")
     outcome = proposal.get("outcome") or proposal.get("selection") or ""
+    question = (proposal.get("market_question") or proposal.get("label") or "").strip()
+    backing = describe_pm_selection(proposal)
 
-    # Build selection line: "Home vs Away — Outcome"
-    sel_line = "%s — %s" % (match_desc, outcome) if match_desc and outcome else \
-               (proposal.get("label") or proposal.get("market") or "market")
-
-    # Enhanced fields: model fair share price, EV, and stake %
     model_prob = float(proposal.get("model_prob", 0.0))
     ev_pct = float(proposal.get("ev", 0.0)) * 100.0  # ev stored as decimal (0.28 = 28%)
     size_usd = float(proposal.get("size_usd", notional))
 
-    # Model fair share price (probability as decimal) and EV if placed
-    fair_price = model_prob  # In prediction markets, price ≈ probability
-    ev_usd = (fair_price - price) * size if fair_price > 0 and size > 0 else 0.0
-
-    # Polymarket pool default is $2500; sportsbook bankroll is $1500
     pm_pool_usd = 2500.0
-    sb_bankroll_usd = 1500.0
     pct_pm = (size_usd / pm_pool_usd * 100.0) if pm_pool_usd > 0 else 0.0
-    pct_sb = (size_usd / sb_bankroll_usd * 100.0) if sb_bankroll_usd > 0 else 0.0
 
+    header = ("*%s* — backing %s" % (match_desc, backing)) if match_desc else ("*%s*" % backing)
+    qline = ("\n    %s → *%s*" % (question, outcome)) if question else ""
     return (
-        "*%s* %s @ %.2f | $%.2f | model %.1f%% | ev %+.1f%% | %.1f%% PM\n"
+        "%s%s @ %.2f | $%.2f | model %.1f%% | ev %+.1f%% | %.1f%% PM pool\n"
         "→ `Y %s` execute | `N %s` discard"
-        % (sel_line, side, price, notional, model_prob * 100.0, ev_pct, pct_pm, token, token)
+        % (header, qline, price, size_usd, model_prob * 100.0, ev_pct, pct_pm, token, token)
     )
 
 
