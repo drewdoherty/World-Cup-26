@@ -1,22 +1,22 @@
-<!-- generated: 2026-06-18T01:24:53 -->
-⚽ *Next match* — Uzbekistan vs Colombia
-Kickoff 2026-06-18 02:00:00+00:00
+<!-- generated: 2026-06-18T02:28:07 -->
+⚽ *Next match* — Czech Republic vs South Africa
+Kickoff 2026-06-18 16:00:00+00:00
 
 *Winner* (model blend)
-  Uzbekistan      11.3%  fair 8.88  best 12.00 (smarkets) +35.2% ✅
-  Draw            21.0%  fair 4.76  best 5.50 (skybet) +15.6% ✅
-  Colombia        67.7%  fair 1.48  best 1.40 (coral) -5.2%
+  Czech Republic  52.1%  fair 1.92  best 1.88 (betfair_ex_uk) -2.1%
+  Draw            27.1%  fair 3.70  best 3.85 (betfair_ex_uk) +4.2% ✅
+  South Africa    20.9%  fair 4.79  best 4.70 (betfair_ex_uk) -1.9%
 
-*Corners* (model, exp 8.3)
-  O/U 8.5: over 44.6% / under 55.4%  fair 2.24 / 1.80
+*Corners* (model, exp 8.0)
+  O/U 8.5: over 41.4% / under 58.6%  fair 2.42 / 1.71
 
 *Anytime scorer* (best market price, vig in)
-  Luis Fernando Diaz  2.56 (Betfair)  imp 39%
-  Jhon Cordoba        2.60 (William Hill)  imp 38%
-  Luis Javier Suarez  2.60 (Betfair)  imp 38%
-  Carlos Andres Gome  3.00 (William Hill)  imp 33%
-  Jaminton Campaz     3.20 (William Hill)  imp 31%
+  Patrik Schick       2.45 (William Hill)  imp 41%
+  Tomas Chory         3.00 (Sky Bet)  imp 33%
+  Mojmir Chytil       3.25 (Betfair)  imp 31%
+  Jan Kuchta          3.30 (Betfair)  imp 30%
+  Pavel Sulc          4.10 (Betfair)  imp 24%
 
 *Scorelines* (top 6)
-0-1 17.7% | 0-2 15.7% | 0-0 9.5% | 1-1 9.1% | 0-3 9.1% | 1-2 8.7%
-  O/U 2.5: over 40.9% / under 59.1%   BTTS 34.8%
+1-0 17.4% | 0-0 12.5% | 2-0 11.7% | 1-1 11.7% | 0-1 9.4% | 2-1 8.4%
+  O/U 2.5: over 33.7% / under 66.3%   BTTS 37.1%
