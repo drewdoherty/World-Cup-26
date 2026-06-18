@@ -1,11 +1,11 @@
-<!-- generated: 2026-06-18T02:28:07 -->
+<!-- generated: 2026-06-18T03:31:22 -->
 ⚽ *Next match* — Czech Republic vs South Africa
 Kickoff 2026-06-18 16:00:00+00:00
 
 *Winner* (model blend)
   Czech Republic  52.1%  fair 1.92  best 1.88 (betfair_ex_uk) -2.1%
-  Draw            27.1%  fair 3.70  best 3.85 (betfair_ex_uk) +4.2% ✅
-  South Africa    20.9%  fair 4.79  best 4.70 (betfair_ex_uk) -1.9%
+  Draw            27.1%  fair 3.70  best 3.80 (betfair_ex_uk) +2.8% ✅
+  South Africa    20.8%  fair 4.80  best 4.80 (betfair_ex_uk) +0.1%
 
 *Corners* (model, exp 8.0)
   O/U 8.5: over 41.4% / under 58.6%  fair 2.42 / 1.71
