@@ -1,11 +1,11 @@
-<!-- generated: 2026-06-18T19:21:22 -->
+<!-- generated: 2026-06-18T20:24:47 -->
 ⚽ *Next match* — Canada vs Qatar
 Kickoff 2026-06-18 22:00:00+00:00
 
 *Winner* (model blend)
-  Canada          71.0%  fair 1.41  best 1.34 (betfair_ex_uk) -4.9%
-  Draw            18.3%  fair 5.45  best 6.00 (skybet) +10.0% ✅
-  Qatar           10.7%  fair 9.34  best 11.50 (betfair_ex_uk) +23.2% ✅
+  Canada          71.1%  fair 1.41  best 1.33 (matchbook) -5.4%
+  Draw            18.3%  fair 5.46  best 6.00 (betfair_ex_uk) +9.9% ✅
+  Qatar           10.6%  fair 9.47  best 12.00 (betfair_ex_uk) +26.7% ✅
 
 *Corners* (model, exp 8.6)
   O/U 8.5: over 49.3% / under 50.7%  fair 2.03 / 1.97
@@ -18,5 +18,5 @@ Kickoff 2026-06-18 22:00:00+00:00
   Jayden Nelson       3.65 (Betfair)  imp 27%
 
 *Scorelines* (top 6)
-1-0 14.1% | 2-0 13.6% | 2-1 11.5% | 1-1 8.7% | 3-0 8.3% | 3-1 7.0%
+1-0 14.2% | 2-0 13.6% | 2-1 11.5% | 1-1 8.7% | 3-0 8.3% | 3-1 7.0%
   O/U 2.5: over 52.7% / under 47.3%   BTTS 46.7%
