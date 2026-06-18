@@ -438,7 +438,7 @@ def build_site_data(
     # so the site can show which books the money actually sits at.
     platforms: Dict[str, Any] = {}
     for b in stats.get("bets") or []:
-        plat = (b.get("platform") or "unknown").lower()
+        plat = (b.get("platform") or "unknown").strip()
         venue = dashboard.venue_for_platform(plat)
         blk = platforms.setdefault(plat, {
             "venue": venue,

@@ -194,13 +194,40 @@ def _is_admin(user_id: str, admin: Optional[str]) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def _venue_of(platform: str) -> str:
-    p = (platform or "").lower()
-    if "polymarket" in p:
-        return "polymarket"
-    if "kalshi" in p:
-        return "kalshi"
-    return "sportsbook"
+def _canon_platform(raw: str) -> str:
+    """Normalise a bookmaker name from a screenshot to the canonical DB string.
+
+    Betfair Exchange (betfair_ex_uk, "Betfair Exchange", bare "Betfair") -> "Betfair"
+    Betfair Sportsbook ("Betfair Sportsbook", betfair_sportsbook)        -> "Betfair Sportsbook"
+    Everything else: title-case the raw value.
+    """
+    p = (raw or "").strip()
+    pl = p.lower()
+    # Exchange variants — bare "Betfair" or anything mentioning "exchange"
+    if pl in ("betfair", "betfair_ex_uk", "betfair_ex_eu", "betfair exchange", "betfair ex"):
+        return "Betfair"
+    if "betfair" in pl and "exchange" in pl:
+        return "Betfair"
+    # Sportsbook variants
+    if pl in ("betfair_sportsbook", "betfair sportsbook", "betfair sports"):
+        return "Betfair Sportsbook"
+    if "betfair" in pl and ("sports" in pl or "sb" in pl):
+        return "Betfair Sportsbook"
+    # Other known normalizations
+    _MAP = {
+        "paddy power": "Paddy Power",
+        "paddypower": "Paddy Power",
+        "skybet": "Sky Bet",
+        "sky bet": "Sky Bet",
+        "virgin bet": "Virgin Bet",
+        "virginbet": "Virgin Bet",
+        "bet 365": "bet365",
+        "betfair": "Betfair",  # fallback bare match (already caught above but safety)
+    }
+    if pl in _MAP:
+        return _MAP[pl]
+    # Return as-is (title-case if all-lower or all-slug)
+    return p if any(c.isupper() for c in p) else p.title().replace("_", " ")
 
 
 _VENUE_SYMBOL = {"sportsbook": "£", "polymarket": "$", "polymarket-auto": "$", "kalshi": "$"}
@@ -1117,9 +1144,20 @@ def handle_photo(
     # Enrich with model data from the card (optional — silently skipped if not found)
     bets = _enrich_bets_from_card(bets, card_path=CARD_PATH)
     tags = resolve_tags(caption)
+    # A free bet (purple gift icon / 'Free Bet' label, detected by vision) is a
+    # promo — stake-not-returned — so it must be source='offer' for the ledger's
+    # free-bet P&L/exposure math. Auto-apply UNLESS the caption explicitly set a
+    # source token, which the user's intent should always win over.
+    free_detected = any(getattr(b, "is_free_bet", False) for b in bets)
+    explicit_source = bool(re.search(r"\b(model|offer|punt)\b", (caption or "").lower()))
+    if free_detected and not explicit_source:
+        tags = {**tags, "source": "offer"}
     pending[chat_id] = bets
     pending_tags[chat_id] = tags
-    return _format_extracted(bets, tags)
+    reply = _format_extracted(bets, tags)
+    if free_detected:
+        reply = "🎁 *Free bet detected* (stake not returned → tagged `offer`).\n\n" + reply
+    return reply
 
 
 _YESNO_RE = re.compile(r"^\s*(yes|y|no|n)\b", re.IGNORECASE)
@@ -1183,7 +1221,7 @@ def handle_photo_confirmation(
                 b.match_desc,
                 b.market or "unknown",
                 b.selection,
-                b.bookmaker or "unknown",
+                _canon_platform(b.bookmaker or "unknown"),
                 float(b.decimal_odds or 0.0),
                 float(b.stake or 0.0),
                 notes=note,
