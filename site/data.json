@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-19 12:35:56 UTC"
+    "generated": "2026-06-19 13:12:02 UTC"
   },
   "totals": {
-    "wagered": 720.376,
+    "wagered": 690.376,
     "open_stake": 87.44,
     "settled_pl": 22.000500000000002,
-    "n_bets": 79
+    "n_bets": 76
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 569.0800000000002,
+      "wagered": 539.0800000000002,
       "open_stake": 26.439999999999998,
       "settled_pl": 48.19549999999998,
-      "n_bets": 62
+      "n_bets": 59
     },
     "USD": {
       "wagered": 151.29600000000002,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 569.0800000000002,
+      "wagered": 539.0800000000002,
       "open_stake": 26.439999999999998,
       "settled_pl": 48.19549999999998,
-      "n_bets": 62,
+      "n_bets": 59,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 442.0800000000001,
-      "open_stake": 76.44,
+      "wagered": 412.0800000000001,
+      "open_stake": 46.44,
       "settled_pl": 82.19549999999995,
-      "n_bets": 48,
+      "n_bets": 45,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -64,10 +64,10 @@
   "source_summary": {
     "offer": {
       "GBP": {
-        "wagered": 225.0,
-        "open_stake": 50.0,
+        "wagered": 195.0,
+        "open_stake": 20.0,
         "settled_pl": 74.82,
-        "n_bets": 25
+        "n_bets": 22
       }
     },
     "model": {
@@ -108,14 +108,6 @@
     }
   },
   "platforms": {
-    "Unknown": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 30.0,
-      "open_stake": 30.0,
-      "settled_pl": 0.0,
-      "n_bets": 3
-    },
     "Betfair Sportsbook": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -2219,66 +2211,6 @@
   },
   "positions": [
     {
-      "id": 100,
-      "ts_utc": "2026-06-19T12:32:02",
-      "match": "USA v Australia",
-      "match_id": "MANUAL_USA_V_AUSTRALIA",
-      "market": "Anytime Goalscorer - Safe Sub",
-      "selection": "Folarin Balogun",
-      "platform": "Unknown",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "offer",
-      "currency": "GBP",
-      "decimal_odds": 5.12,
-      "stake": 10.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.85"
-    },
-    {
-      "id": 99,
-      "ts_utc": "2026-06-19T12:32:02",
-      "match": "USA v Australia",
-      "match_id": "MANUAL_USA_V_AUSTRALIA",
-      "market": "Home Team Over/Under 2.5 Goals",
-      "selection": "Over",
-      "platform": "Unknown",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "offer",
-      "currency": "GBP",
-      "decimal_odds": 0.0,
-      "stake": 10.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.82"
-    },
-    {
-      "id": 98,
-      "ts_utc": "2026-06-19T12:32:02",
-      "match": "USA v Australia",
-      "match_id": "MANUAL_USA_V_AUSTRALIA",
-      "market": "Over/Under Total Goals 3.5",
-      "selection": "Over 3.5 Goals",
-      "platform": "Unknown",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "offer",
-      "currency": "GBP",
-      "decimal_odds": 0.0,
-      "stake": 10.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.82"
-    },
-    {
       "id": 97,
       "ts_utc": "2026-06-19T12:00:00",
       "match": "United States vs Australia",
@@ -2427,7 +2359,7 @@
           "score": "1-0",
           "prob": 14.2,
           "fair": 7.03,
-          "back": 7.18
+          "back": 7.17
         },
         {
           "score": "1-1",
@@ -2439,7 +2371,7 @@
           "score": "2-1",
           "prob": 10.7,
           "fair": 9.37,
-          "back": 9.56
+          "back": 9.55
         },
         {
           "score": "2-0",
@@ -2456,8 +2388,8 @@
         {
           "score": "0-1",
           "prob": 6.9,
-          "fair": 14.5,
-          "back": 14.79
+          "fair": 14.49,
+          "back": 14.78
         }
       ],
       "over_under": {
@@ -2472,39 +2404,39 @@
       "scores": [
         {
           "score": "0-1",
-          "prob": 21.2,
-          "fair": 4.71,
-          "back": 4.8
+          "prob": 21.3,
+          "fair": 4.7,
+          "back": 4.79
         },
         {
           "score": "0-0",
           "prob": 14.9,
           "fair": 6.7,
-          "back": 6.83
+          "back": 6.84
         },
         {
           "score": "0-2",
-          "prob": 11.6,
-          "fair": 8.59,
-          "back": 8.76
+          "prob": 11.7,
+          "fair": 8.57,
+          "back": 8.74
         },
         {
           "score": "1-1",
           "prob": 11.4,
           "fair": 8.76,
-          "back": 8.93
+          "back": 8.94
         },
         {
           "score": "1-0",
-          "prob": 9.4,
-          "fair": 10.67,
-          "back": 10.89
+          "prob": 9.3,
+          "fair": 10.73,
+          "back": 10.94
         },
         {
           "score": "1-2",
-          "prob": 8.3,
-          "fair": 12.0,
-          "back": 12.24
+          "prob": 8.4,
+          "fair": 11.97,
+          "back": 12.21
         }
       ],
       "over_under": {
@@ -2532,7 +2464,7 @@
         {
           "score": "2-0",
           "prob": 10.7,
-          "fair": 9.34,
+          "fair": 9.35,
           "back": 9.53
         },
         {

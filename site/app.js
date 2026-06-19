@@ -179,6 +179,24 @@
     }
     return String(ts);
   }
+  // "19 Jun" — calendar date in the viewer's local tz (pairs with timeOnly()).
+  function dateShort(ts) {
+    if (!ts) return "—";
+    var raw = String(ts);
+    var ms = Date.parse(raw.indexOf("T") >= 0 &&
+      !/[zZ]|[+\-]\d\d:?\d\d$/.test(raw) ? raw + "Z" : raw);
+    if (isNaN(ms)) return "";
+    var dt = new Date(ms);
+    var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return dt.getDate() + " " + MON[dt.getMonth()];
+  }
+  // Stacked date-over-time cell for the positions tables (the space between the
+  // spans renders only when they go inline on the mobile card layout).
+  function whenCell(ts) {
+    return '<span class="wd">' + esc(dateShort(ts)) + '</span> ' +
+           '<span class="wt">' + esc(timeOnly(ts)) + '</span>';
+  }
 
   // Minimal text escaping for any value sourced from data.json before it goes
   // into innerHTML. Defends against a hostile match/selection string.
@@ -232,33 +250,36 @@
 
   var VENUE_COLOR = { sportsbook: "#4ade80", polymarket: "#60a5fa", kalshi: "#a855f7" };
 
-  // Per-book accent colours. Keyed by the lower-cased platform string; any
-  // book not in the map (and any null/blank) degrades to BOOK_FALLBACK so the
-  // pill/rail still renders. Several Betfair surfaces share one orange.
+  // Per-book accent colours — the SINGLE source of truth for every venue
+  // surface (venues-panel dots, open + closed row rails, open + closed venue
+  // pills). Keys are normalised (lower-cased, separators stripped) so the
+  // human-readable ledger strings — "Paddy Power", "Betfair Sportsbook",
+  // "Virgin Bet", "Sky Bet" — all resolve instead of falling through to grey.
+  // Each in-use venue gets a visually distinct hue; the two Betfair surfaces
+  // intentionally share the gold/orange family but stay distinguishable.
   var BOOK_FALLBACK = "#9ca3af";
-  // Single source of truth for book/venue colours (mirrors the CSS vars):
-  // paddy light green, bet365 dark green, betfair yellow, polymarket light
-  // blue, kalshi purple.
   var BOOK_COLOR = {
-    paddypower: "#4ade80",
-    bet365: "#15803d",
-    virginbet: "#ef4444",
-    skybet: "#3b82f6",
-    betfair: "#fde047",
-    betfair_ex_uk: "#fde047",
-    betfair_sportsbook: "#f59e0b",
-    betfred: "#f43f5e",
-    williamhill: "#1d4ed8",
-    smarkets: "#2dd4bf",
-    matchbook: "#f472b6",
-    coral: "#fb923c",
-    ladbrokes: "#dc2626",
-    polymarket: "#60a5fa",
-    kalshi: "#a855f7"
+    paddypower: "#22c55e",         // green
+    bet365: "#4d7c0f",             // olive / dark green
+    virginbet: "#ef4444",          // red
+    skybet: "#818cf8",             // indigo
+    betway: "#84cc16",             // lime
+    betfair: "#facc15",            // gold (exchange)
+    betfairexuk: "#facc15",
+    betfairexchange: "#facc15",
+    betfairsportsbook: "#f97316",  // orange (sportsbook)
+    betfred: "#ec4899",            // pink
+    williamhill: "#1d4ed8",        // deep blue
+    smarkets: "#2dd4bf",           // teal
+    matchbook: "#f472b6",          // rose
+    coral: "#fb923c",              // amber
+    ladbrokes: "#dc2626",          // dark red
+    polymarket: "#60a5fa",         // light blue
+    kalshi: "#a855f7"              // purple
   };
   function bookColor(name) {
     var k = String(name === null || name === undefined ? "" : name)
-      .toLowerCase().trim();
+      .toLowerCase().replace(/[^a-z0-9]/g, "");
     return BOOK_COLOR[k] || BOOK_FALLBACK;
   }
 
@@ -436,9 +457,9 @@
       // meaningful when both are present.
       var edge = (p.model_prob != null && p.market_prob_devig != null)
         ? (p.model_prob - p.market_prob_devig) : null;
-      return '<tr title="' + esc(metaTitle(p)) + '">' +
-        '<td class="num dim pos-time" data-label="Time" style="border-left-color:' + col + '">' +
-          esc(timeOnly(p.ts_utc)) + '</td>' +
+      return '<tr title="' + esc(metaTitle(p)) + '" style="border-left:2px solid ' + col + '">' +
+        '<td class="num pos-when" data-label="Date">' +
+          whenCell(p.ts_utc) + '</td>' +
         '<td class="pos-match" data-label="Match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
         '<td class="pos-mkt dim" data-label="Market" title="' + esc(p.market) + '">' + esc(marketShort(p.market)) + '</td>' +
         '<td class="pos-sel" data-label="Selection" title="' + esc(p.selection) + '">' + selDisplay(p) + '</td>' +
@@ -460,7 +481,7 @@
     $("positions").innerHTML =
       '<table class="pos-table pos-table-wide">' +
         '<thead><tr>' +
-          '<th>Time</th><th>Match</th><th>Market</th><th>Selection</th>' +
+          '<th>Date</th><th>Match</th><th>Market</th><th>Selection</th>' +
           '<th class="r">Odds</th><th class="r">Stake</th>' +
           '<th class="r">Model</th><th class="r">Mkt</th>' +
           '<th class="r">Edge</th><th class="r">EV</th>' +
@@ -1105,7 +1126,7 @@
       var plTxt = p.status === "void" ? "void" : signedMoney(pl, p.currency);
       return '<tr title="' + esc(metaTitle(p)) +
           '" style="border-left:2px solid ' + bookColor(p.platform) + '">' +
-        '<td class="num dim" data-label="Time">' + esc(timeOnly(p.settled_ts || p.ts_utc)) + '</td>' +
+        '<td class="num pos-when" data-label="Settled">' + whenCell(p.settled_ts || p.ts_utc) + '</td>' +
         '<td class="pos-match" data-label="Match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
         '<td class="pos-mkt dim" data-label="Market" title="' + esc(p.market) + '">' + esc(marketShort(p.market)) + '</td>' +
         '<td class="pos-sel" data-label="Selection" title="' + esc(p.selection) + '">' + selDisplay(p) + '</td>' +
