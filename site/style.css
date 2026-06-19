@@ -1085,6 +1085,12 @@ body {
 }
 /* Match-No. edge bars (tracking chart 01). */
 .tr-barsvg { width: 100%; height: auto; }
+/* The calibration + CLV scatter SVGs (svgOpen) carry only a viewBox, so without
+   an explicit width they render at their intrinsic 460px and sit left-aligned
+   inside their (wider) panels — making the side-by-side pair look misaligned.
+   Match the chart-canvas/tr-barsvg treatment so both fill their panel equally. */
+#calibration svg,
+#clv-pl svg { width: 100%; height: auto; display: block; }
 .tr-bar-pos { fill: var(--pos, #4ade80); opacity: 0.85; }
 .tr-bar-neg { fill: var(--neg, #f87171); opacity: 0.85; }
 .tr-bar-pos:hover, .tr-bar-neg:hover { opacity: 1; }
