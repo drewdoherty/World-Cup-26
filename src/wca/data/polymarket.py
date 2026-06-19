@@ -271,6 +271,104 @@ def resolve_outcome_token(
     return None
 
 
+def _player_props_event(
+    fixture_home: str,
+    fixture_away: str,
+    events: List[Dict[str, Any]],
+) -> Optional[Dict[str, Any]]:
+    """Find the single-match "<Home> vs. <Away> - Player Props" event.
+
+    Matched on the canonical fixture pair appearing in the event title (the
+    Player-Props event has no per-team win markets to key off, so the title is
+    the only fixture signal). Returns the event dict or ``None``.
+    """
+    from wca.data.teamnames import canonical
+
+    home_c = canonical(fixture_home)
+    away_c = canonical(fixture_away)
+    for event in events:
+        title = (event.get("title") or "")
+        if "player prop" not in title.lower():
+            continue
+        # Title shape: "United States vs. Australia - Player Props".
+        head = title.split(" - ")[0]
+        parts = [p.strip() for p in head.replace(" vs. ", " vs ").split(" vs ")]
+        if len(parts) != 2:
+            continue
+        teams_c = {canonical(parts[0]), canonical(parts[1])}
+        if teams_c == {home_c, away_c}:
+            return event
+    return None
+
+
+def resolve_player_anytime_token(
+    fixture_home: str,
+    fixture_away: str,
+    player: str,
+    *,
+    events: Optional[List[Dict[str, Any]]] = None,
+) -> Optional[Dict[str, Any]]:
+    """Resolve a player's Polymarket *anytime-goalscorer* YES token + price.
+
+    Polymarket prices single-match scorer props as graded "<Player>: N+ goals"
+    questions inside a "<Home> vs. <Away> - Player Props" event; the **1+ goals**
+    market is the anytime-scorer equivalent (there is no per-player
+    first-goalscorer market on Polymarket — that gap is reported by the caller).
+
+    Player names are matched case-insensitively on a normalised spelling so the
+    Odds API spelling ("Brendan Aaronson", "Sergino Dest") lines up with
+    Polymarket's ("Brenden Aaronson", "Sergiño Dest"). Returns the usual
+    ``{token_id, price, neg_risk, market_question, outcome, ...}`` dict, or
+    ``None`` when no event / 1+ goals market / token resolves.
+    """
+    if events is None:
+        events = find_world_cup_markets(include_closed=False)
+    event = _player_props_event(fixture_home, fixture_away, events)
+    if event is None:
+        return None
+
+    want = _norm_player(player)
+    want_key = _player_key(player)
+    fuzzy: Optional[Dict[str, Any]] = None
+    for m in event.get("markets") or []:
+        git = (m.get("groupItemTitle") or m.get("question") or "")
+        name, _, suffix = git.partition(":")
+        # Anytime == exactly "1+ goals" — NOT "1+ goals + assists" / "1+ shots".
+        if suffix.strip().lower() != "1+ goals":
+            continue
+        if _norm_player(name) == want:
+            return _yes_token_and_price(m, event)
+        # Fall back to a last-name + first-initial key so the Odds API spelling
+        # ("Brendan Aaronson", "Mohamed Toure", "Sergino Dest") matches
+        # Polymarket's ("Brenden Aaronson", "Mo Touré", "Sergiño Dest").
+        if want_key and _player_key(name) == want_key and fuzzy is None:
+            fuzzy = _yes_token_and_price(m, event)
+    return fuzzy
+
+
+def _norm_player(name: str) -> str:
+    """Normalise a player name for cross-source matching (accents, case, ws)."""
+    import unicodedata
+
+    n = unicodedata.normalize("NFKD", str(name))
+    n = "".join(c for c in n if not unicodedata.combining(c))
+    return " ".join(n.lower().split())
+
+
+def _player_key(name: str) -> str:
+    """Loose match key: first-initial + last-name (accent/case-insensitive).
+
+    Bridges short-form / variant first names across feeds ("Brendan"/"Brenden",
+    "Mohamed"/"Mo", "Sergino"/"Sergiño") while keeping the (always-spelled-out)
+    surname intact, so two different players are not collapsed. Empty when the
+    name has no usable surname token.
+    """
+    parts = _norm_player(name).split()
+    if len(parts) < 2:
+        return ""
+    return parts[0][:1] + "|" + parts[-1]
+
+
 def find_world_cup_markets(include_closed: bool = False) -> List[Dict[str, Any]]:
     """Return all active Polymarket 2026 FIFA World Cup markets.
 

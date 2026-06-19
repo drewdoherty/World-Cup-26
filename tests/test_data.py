@@ -187,6 +187,75 @@ class TestFindWorldCupMarkets:
         assert len(ids) == len(set(ids)), "Duplicates found"
 
 
+class TestResolvePlayerAnytimeToken:
+    """Resolve a player's Polymarket 1+ goals (anytime) token from an event."""
+
+    def _events(self):
+        # A "<Home> vs. <Away> - Player Props" event with graded N+ goals
+        # questions; only "1+ goals" is the anytime equivalent.
+        mk = lambda git, price: {
+            "groupItemTitle": git,
+            "question": git,
+            "clobTokenIds": '["tok_%s"]' % git.split(":")[0].strip().replace(" ", "_"),
+            "outcomes": '["Yes","No"]',
+            "outcomePrices": '["%s","%s"]' % (price, round(1 - price, 4)),
+        }
+        return [
+            {
+                "id": "e1",
+                "slug": "fifwc-usa-aus-2026-06-19-player-props",
+                "title": "United States vs. Australia - Player Props",
+                "markets": [
+                    mk("Folarin Balogun: 1+ goals", 0.40),
+                    mk("Folarin Balogun: 2+ goals", 0.12),
+                    mk("Brenden Aaronson: 1+ goals", 0.09),
+                    mk("Nestory Irankunda: 1+ goals + assists", 0.50),
+                    mk("Nestory Irankunda: 1+ goals", 0.16),
+                ],
+            }
+        ]
+
+    def test_exact_name_match_returns_anytime_price(self) -> None:
+        from wca.data import polymarket
+
+        r = polymarket.resolve_player_anytime_token(
+            "United States", "Australia", "Folarin Balogun", events=self._events()
+        )
+        assert r is not None
+        assert abs(r["price"] - 0.40) < 1e-9
+        assert r["market_question"] == "Folarin Balogun: 1+ goals"
+
+    def test_does_not_match_goals_plus_assists(self) -> None:
+        from wca.data import polymarket
+
+        # "1+ goals" must NOT resolve to the "1+ goals + assists" market.
+        r = polymarket.resolve_player_anytime_token(
+            "United States", "Australia", "Nestory Irankunda", events=self._events()
+        )
+        assert r is not None and abs(r["price"] - 0.16) < 1e-9
+
+    def test_loose_name_key_bridges_spelling(self) -> None:
+        from wca.data import polymarket
+
+        # Odds API "Brendan Aaronson" -> Polymarket "Brenden Aaronson".
+        r = polymarket.resolve_player_anytime_token(
+            "United States", "Australia", "Brendan Aaronson", events=self._events()
+        )
+        assert r is not None and abs(r["price"] - 0.09) < 1e-9
+
+    def test_unknown_player_or_fixture_returns_none(self) -> None:
+        from wca.data import polymarket
+
+        ev = self._events()
+        assert polymarket.resolve_player_anytime_token(
+            "United States", "Australia", "Nobody At All", events=ev
+        ) is None
+        # Wrong fixture pair -> no matching player-props event.
+        assert polymarket.resolve_player_anytime_token(
+            "Brazil", "Haiti", "Folarin Balogun", events=ev
+        ) is None
+
+
 # ---------------------------------------------------------------------------
 # wca.data.theoddsapi
 # ---------------------------------------------------------------------------

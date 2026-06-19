@@ -245,7 +245,7 @@ def main() -> None:
     if args.next_out:
         try:
             from wca.nextmatch import (
-                ANYTIME_SCORER_MARKET,
+                SCORER_MARKETS,
                 build_next_match,
                 format_next_match,
                 select_next_blend,
@@ -262,17 +262,20 @@ def main() -> None:
                 nxt = select_next_blend(blends)
                 if nxt is not None:
                     try:
+                        # Both anytime + first-goalscorer player-prop markets
+                        # (each costs extra Odds API credits per region/market).
                         scorer_df, quota = theoddsapi.get_event_odds(
                             "soccer_fifa_world_cup",
                             str(nxt.fx["event_id"]),
                             regions=args.regions,
-                            markets=ANYTIME_SCORER_MARKET,
+                            markets=SCORER_MARKETS,
                         )
                     except Exception as exc:
                         print("WARN: scorer odds pull failed: %s" % exc, file=sys.stderr)
 
             next_card = build_next_match(
-                models, odds_df, fixtures_meta, scorer_df=scorer_df
+                models, odds_df, fixtures_meta, scorer_df=scorer_df,
+                pm_lookup=not args.skip_scorers,
             )
             write_card(format_next_match(next_card), path=args.next_out, ts_utc=now_str)
             print("Next-match card written: out=%s" % args.next_out)

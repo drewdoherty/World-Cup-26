@@ -4,8 +4,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import json
+
 from wca.nextmatch import (
     ANYTIME_SCORER_MARKET,
+    FIRST_SCORER_MARKET,
+    build_goalscorers,
     build_next_match,
     format_next_match,
     top_scorers_from_odds,
@@ -112,6 +116,111 @@ def _scorer_df():
     return pd.DataFrame(rows)
 
 
+def _gs_scorer_df():
+    """Anytime + first-goalscorer rows for Alpha/Bravo players (Odds API shape)."""
+    rows = []
+    anytime = [
+        ("Alpha Striker", "Book A", 2.5),
+        ("Alpha Mid", "Book A", 4.0),
+        ("Bravo Striker", "Book A", 3.0),
+        ("Bravo Winger", "Book B", 6.0),
+        ("Bench Unknown", "Book A", 12.0),  # not in any squad list
+    ]
+    first = [
+        ("Alpha Striker", "Book A", 6.0),
+        ("Bravo Striker", "Book B", 8.0),
+    ]
+    for player, book, odds in anytime:
+        rows.append(dict(
+            event_id="evt_next", market=ANYTIME_SCORER_MARKET,
+            bookmaker_key=book.lower().replace(" ", "_"), bookmaker_title=book,
+            outcome_name="Yes", outcome_description=player, decimal_odds=odds,
+        ))
+    for player, book, odds in first:
+        rows.append(dict(
+            event_id="evt_next", market=FIRST_SCORER_MARKET,
+            bookmaker_key=book.lower().replace(" ", "_"), bookmaker_title=book,
+            outcome_name="Yes", outcome_description=player, decimal_odds=odds,
+        ))
+    return pd.DataFrame(rows)
+
+
+def _write_squads(tmp_path):
+    path = tmp_path / "squads.json"
+    path.write_text(json.dumps({
+        "_note": "test",
+        "Alpha": ["Alpha Striker", "Alpha Mid"],
+        "Bravo": ["Bravo Striker", "Bravo Winger"],
+    }))
+    return str(path)
+
+
+# ---------------------------------------------------------------------------
+# Goalscorers (top 2 per team, anytime + first, book + Polymarket).
+# ---------------------------------------------------------------------------
+
+
+class TestBuildGoalscorers:
+    def test_splits_top_two_per_team_with_both_markets(self, tmp_path):
+        gs, note = build_goalscorers(
+            "Alpha", "Bravo", _gs_scorer_df(),
+            squads_path=_write_squads(tmp_path), pm_lookup=False,
+        )
+        assert [l.player for l in gs["home"]] == ["Alpha Striker", "Alpha Mid"]
+        assert [l.player for l in gs["away"]] == ["Bravo Striker", "Bravo Winger"]
+        striker = gs["home"][0]
+        # Best book anytime odds + first-goalscorer odds attached.
+        assert striker.anytime_book_odds == 2.5 and striker.anytime_book == "Book A"
+        assert striker.first_book_odds == 6.0
+        # Market-implied goals/game = -ln(1 - 1/2.5) = -ln(0.6).
+        assert striker.xg_per_game == pytest.approx(-__import__("math").log(0.6), abs=1e-9)
+        # Polymarket skipped -> PM fields None; note flags the FGS gap.
+        assert striker.anytime_pm_odds is None
+        assert "first-goalscorer" in note and "market-implied" in note
+
+    def test_unplaced_player_flagged_not_attributed(self, tmp_path):
+        gs, note = build_goalscorers(
+            "Alpha", "Bravo", _gs_scorer_df(),
+            squads_path=_write_squads(tmp_path), pm_lookup=False,
+        )
+        names = [l.player for l in gs["home"] + gs["away"]]
+        assert "Bench Unknown" not in names
+        assert "1 market player(s) not in squad lists" in note
+
+    def test_missing_squads_degrades_gracefully(self, tmp_path):
+        gs, note = build_goalscorers(
+            "Alpha", "Bravo", _gs_scorer_df(),
+            squads_path=str(tmp_path / "absent.json"), pm_lookup=False,
+        )
+        assert gs == {"home": [], "away": []}
+        assert "squads.json missing" in note
+
+    def test_no_scorer_market(self):
+        gs, note = build_goalscorers("Alpha", "Bravo", None, pm_lookup=False)
+        assert gs == {"home": [], "away": []}
+        assert "no sportsbook scorer market" in note
+
+    def test_polymarket_anytime_price_attached(self, tmp_path, monkeypatch):
+        import wca.data.polymarket as pmmod
+
+        def fake_resolve(home, away, player, events=None):
+            if player == "Alpha Striker":
+                return {"price": 0.40, "token_id": "t", "neg_risk": False,
+                        "market_question": "Alpha Striker: 1+ goals", "outcome": "Yes"}
+            return None
+
+        monkeypatch.setattr(pmmod, "resolve_player_anytime_token", fake_resolve)
+        gs, note = build_goalscorers(
+            "Alpha", "Bravo", _gs_scorer_df(),
+            squads_path=_write_squads(tmp_path), pm_events=[], pm_lookup=True,
+        )
+        striker = gs["home"][0]
+        assert striker.anytime_pm_price == pytest.approx(0.40)
+        assert striker.anytime_pm_odds == pytest.approx(2.5)
+        # Players without a PM market are reported in the note.
+        assert "no PM 1+ goals market" in note
+
+
 # ---------------------------------------------------------------------------
 # Builder.
 # ---------------------------------------------------------------------------
@@ -205,6 +314,23 @@ class TestFormatAndBot:
         assert "O/U 8.5" in text
         assert "Striker One" in text
         assert "*Scorelines*" in text and "BTTS" in text
+
+    def test_format_includes_goalscorer_block(self, tmp_path):
+        from wca.card import fit_models
+
+        rng = np.random.default_rng(42)
+        models = fit_models(_synthetic_results(rng), half_life_years=8.0)
+        card = build_next_match(
+            models, _synthetic_odds(), _synthetic_fixtures_meta(),
+            scorer_df=_gs_scorer_df(), squads_path=_write_squads(tmp_path),
+            pm_lookup=False,
+        )
+        text = format_next_match(card)
+        assert "*Top goalscorers*" in text
+        assert "Alpha Striker" in text and "Bravo Striker" in text
+        assert "g/g" in text                 # market-implied goals/game basis
+        assert "Any  bk" in text and "1st  bk" in text   # both markets rendered
+        assert "/ PM --" in text             # PM column present (skipped here)
 
     def test_handle_next_serves_cache(self, tmp_path):
         from wca.bot.app import handle_next

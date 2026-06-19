@@ -7,9 +7,13 @@ odds slate:
   with fair odds, the best available book price and the edge per outcome;
 * corners — the calibrated :class:`wca.models.props.CornersModel` driven by
   the Dixon-Coles expected-goals lambdas, at a configurable line;
-* top goalscorers — market anytime-scorer prices (best price per player from
-  the per-event Odds API endpoint); shown as raw implied probabilities since
-  anytime markets are not a coherent simplex to de-vig;
+* top goalscorers — the top 2 players per team (4 total). For each: a
+  market-implied goals-per-game rate (``-ln(1 - anytime prob)`` from the best
+  book anytime price — there is no per-player 2026 goal-count feed) plus the
+  best **sportsbook** anytime + first-goalscorer odds (Odds API player-prop
+  markets) and the **Polymarket** "1+ goals" anytime price. Polymarket carries
+  no per-player first-goalscorer market, which is flagged in the block's note.
+  Players are split onto the right side via ``data/squads.json``;
 * scorelines — the reconciled Dixon-Coles score matrix (same reconciliation
   as the main card's scorelines section) plus O/U 2.5 and BTTS.
 
@@ -20,6 +24,10 @@ writes ``data/next_latest.md``) and the bot serves the cache via ``/next``.
 
 from __future__ import annotations
 
+import json
+import math
+import os
+import unicodedata
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple
 
@@ -39,6 +47,9 @@ from wca.models.scores import ScorelineCard, scoreline_card
 
 DEFAULT_CORNERS_LINE = 8.5
 ANYTIME_SCORER_MARKET = "player_goal_scorer_anytime"
+FIRST_SCORER_MARKET = "player_first_goal_scorer"
+SCORER_MARKETS = "%s,%s" % (ANYTIME_SCORER_MARKET, FIRST_SCORER_MARKET)
+DEFAULT_SQUADS_PATH = "data/squads.json"
 
 
 @dataclass
@@ -49,6 +60,37 @@ class ScorerPrice:
     best_odds: float
     best_book: str
     implied: float  # raw 1/odds — vig NOT removed (anytime is not a simplex)
+
+
+@dataclass
+class GoalscorerLine:
+    """One player's anytime + first-goalscorer prices across sources.
+
+    All probabilities/odds are pulled live at build time — none are stored.
+    Any field that could not be resolved is ``None`` and rendered as ``--``.
+    """
+
+    player: str
+    team: str  # canonical team, or "" when the squad split could not place them
+    # Anytime goalscorer.
+    anytime_book_odds: Optional[float] = None   # best (max) sportsbook decimal odds
+    anytime_book: Optional[str] = None
+    anytime_pm_odds: Optional[float] = None     # 1 / PM YES price (decimal)
+    anytime_pm_price: Optional[float] = None    # raw PM YES price (probability)
+    # First goalscorer (sportsbook only — Polymarket has no per-player FGS market).
+    first_book_odds: Optional[float] = None
+    first_book: Optional[str] = None
+    # Market-implied tournament scoring rate (goals per game). Derived from the
+    # de-vig-free best anytime price as lambda = -ln(1 - p_anytime); this is the
+    # market's expected goals/game for the player, NOT an observed 2026 count.
+    xg_per_game: Optional[float] = None
+
+    @property
+    def anytime_implied(self) -> Optional[float]:
+        """Raw implied probability from the best sportsbook anytime odds."""
+        if self.anytime_book_odds and self.anytime_book_odds > 1.0:
+            return 1.0 / self.anytime_book_odds
+        return None
 
 
 @dataclass
@@ -65,6 +107,9 @@ class NextMatchCard:
     corners_mu: float
     scores: ScorelineCard
     scorers: List[ScorerPrice] = field(default_factory=list)
+    # Top goalscorers split by team: home -> [GoalscorerLine], away -> [...].
+    goalscorers: Dict[str, List[GoalscorerLine]] = field(default_factory=dict)
+    goalscorer_note: str = ""  # basis / data-gap note shown under the block
     min_edge: float = 0.02
 
 
@@ -118,6 +163,200 @@ def top_scorers_from_odds(
     return out[:top_n]
 
 
+def _norm_name(name: str) -> str:
+    """Accent/case/whitespace-insensitive player-name key."""
+    n = unicodedata.normalize("NFKD", str(name))
+    n = "".join(c for c in n if not unicodedata.combining(c))
+    return " ".join(n.lower().split())
+
+
+def _name_key(name: str) -> str:
+    """First-initial + surname loose key (mirrors polymarket._player_key)."""
+    parts = _norm_name(name).split()
+    if len(parts) < 2:
+        return ""
+    return parts[0][:1] + "|" + parts[-1]
+
+
+def load_squads(path: str = DEFAULT_SQUADS_PATH) -> Dict[str, List[str]]:
+    """Load the per-team squad name lists (keys beginning with ``_`` ignored).
+
+    Returns ``{canonical_team: [player, ...]}``; ``{}`` when the file is absent
+    so callers degrade to "team unknown" rather than crashing.
+    """
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            raw = json.load(fh)
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return {k: list(v) for k, v in raw.items() if not k.startswith("_")}
+
+
+def _team_for_player(
+    player: str,
+    squads: Dict[str, List[str]],
+    home: str,
+    away: str,
+) -> str:
+    """Return the canonical team for *player*, restricted to {home, away}.
+
+    Matches exact-normalised first, then the loose first-initial+surname key.
+    Returns ``""`` when the player is in neither fixture squad list.
+    """
+    from wca.data.teamnames import canonical
+
+    targets = {canonical(home): home, canonical(away): away}
+    want, want_key = _norm_name(player), _name_key(player)
+    fuzzy = ""
+    for team_name, roster in squads.items():
+        if canonical(team_name) not in targets:
+            continue
+        for rp in roster:
+            if _norm_name(rp) == want:
+                return canonical(team_name)
+            if want_key and _name_key(rp) == want_key and not fuzzy:
+                fuzzy = canonical(team_name)
+    return fuzzy
+
+
+def _best_book_odds(rows: pd.DataFrame) -> Tuple[Optional[float], Optional[str]]:
+    """Best (max) decimal odds + book title for one player's market rows."""
+    if rows.empty:
+        return None, None
+    odds = pd.to_numeric(rows["decimal_odds"], errors="coerce")
+    if odds.dropna().empty:
+        return None, None
+    idx = odds.idxmax()
+    o = float(odds.loc[idx])
+    if o <= 1.0:
+        return None, None
+    book = rows.loc[idx].get("bookmaker_title")
+    return o, (str(book) if book is not None else None)
+
+
+def _player_rows(scorer_df: pd.DataFrame, market: str) -> Dict[str, pd.DataFrame]:
+    """Group a market's rows by player (description, falling back to name)."""
+    rows = scorer_df[scorer_df["market"] == market].copy()
+    if rows.empty:
+        return {}
+    if "outcome_description" in rows.columns:
+        desc = rows["outcome_description"].fillna("").astype(str)
+        rows["_player"] = desc.where(desc != "", rows["outcome_name"].astype(str))
+    else:
+        rows["_player"] = rows["outcome_name"].astype(str)
+    return {str(p): g for p, g in rows.groupby("_player")}
+
+
+def build_goalscorers(
+    home: str,
+    away: str,
+    scorer_df: Optional[pd.DataFrame],
+    *,
+    top_n_per_team: int = 2,
+    squads_path: str = DEFAULT_SQUADS_PATH,
+    pm_events: Optional[List[dict]] = None,
+    pm_lookup: bool = True,
+) -> Tuple[Dict[str, List[GoalscorerLine]], str]:
+    """Top-N goalscorers per team with anytime + first odds (book + Polymarket).
+
+    Ranks every player in the anytime market by best-price implied probability,
+    splits them onto the home/away side via ``data/squads.json``, keeps the top
+    ``top_n_per_team`` per side, then attaches:
+
+    * best **sportsbook** anytime + first-goalscorer decimal odds (Odds API
+      player-prop markets — max across books);
+    * the **Polymarket** "1+ goals" price (anytime equivalent; Polymarket has no
+      per-player first-goalscorer market);
+    * the market-implied **goals-per-game** rate ``-ln(1 - p_anytime)``.
+
+    Returns ``({"home": [...], "away": [...]}, note)`` where *note* records the
+    pricing basis and any data that could not be obtained.
+    """
+    from wca.data.teamnames import canonical
+
+    home_c, away_c = canonical(home), canonical(away)
+    empty: Dict[str, List[GoalscorerLine]] = {"home": [], "away": []}
+    if scorer_df is None or scorer_df.empty or "market" not in scorer_df.columns:
+        return empty, "no sportsbook scorer market available for this fixture"
+
+    anytime = _player_rows(scorer_df, ANYTIME_SCORER_MARKET)
+    first = _player_rows(scorer_df, FIRST_SCORER_MARKET)
+    if not anytime:
+        return empty, "no anytime-scorer market available for this fixture"
+
+    squads = load_squads(squads_path)
+
+    # Build one ranked line per player from the anytime market.
+    ranked: List[GoalscorerLine] = []
+    for player, grp in anytime.items():
+        a_odds, a_book = _best_book_odds(grp)
+        if a_odds is None:
+            continue
+        p_any = 1.0 / a_odds
+        line = GoalscorerLine(
+            player=player,
+            team=_team_for_player(player, squads, home, away),
+            anytime_book_odds=a_odds,
+            anytime_book=a_book,
+            xg_per_game=(-math.log(1.0 - p_any) if 0.0 < p_any < 1.0 else None),
+        )
+        f_odds, f_book = _best_book_odds(first.get(player, pd.DataFrame()))
+        line.first_book_odds, line.first_book = f_odds, f_book
+        ranked.append(line)
+
+    ranked.sort(key=lambda l: l.anytime_implied or 0.0, reverse=True)
+
+    # Players the squad split could not attribute to either fixture side. A
+    # large count usually means the fixture's teams are absent from squads.json.
+    unplaced = sum(1 for line in ranked if line.team == "")
+
+    by_team: Dict[str, List[GoalscorerLine]] = {"home": [], "away": []}
+    for line in ranked:
+        if line.team == home_c and len(by_team["home"]) < top_n_per_team:
+            by_team["home"].append(line)
+        elif line.team == away_c and len(by_team["away"]) < top_n_per_team:
+            by_team["away"].append(line)
+        if len(by_team["home"]) >= top_n_per_team and len(by_team["away"]) >= top_n_per_team:
+            break
+
+    # Attach Polymarket anytime ("1+ goals") prices for the selected players.
+    pm_missing: List[str] = []
+    if pm_lookup:
+        try:
+            from wca.data import polymarket as pm
+
+            if pm_events is None:
+                pm_events = pm.find_world_cup_markets(include_closed=False)
+            for side in ("home", "away"):
+                for line in by_team[side]:
+                    res = pm.resolve_player_anytime_token(
+                        home, away, line.player, events=pm_events
+                    )
+                    if res is not None and 0.0 < float(res["price"]) < 1.0:
+                        line.anytime_pm_price = float(res["price"])
+                        line.anytime_pm_odds = 1.0 / float(res["price"])
+                    else:
+                        pm_missing.append(line.player)
+        except Exception:  # network/parse failure must not break the card
+            pm_missing = ["(Polymarket lookup failed)"]
+
+    # Compose the basis / data-gap note.
+    notes = [
+        "basis: goals/game = market-implied xG/game (-ln(1-anytime prob)); "
+        "no per-player 2026 goal counts are tracked",
+    ]
+    if not squads:
+        notes.append("squads.json missing — players not split by team")
+    if unplaced:
+        notes.append("%d market player(s) not in squad lists" % unplaced)
+    if pm_missing:
+        notes.append("no PM 1+ goals market: " + ", ".join(pm_missing))
+    notes.append("Polymarket has no per-player first-goalscorer market")
+    return by_team, "; ".join(notes)
+
+
 def build_next_match(
     models: FittedModels,
     odds_df: pd.DataFrame,
@@ -129,13 +368,18 @@ def build_next_match(
     min_edge: float = 0.02,
     host_nations: Sequence[str] = ("United States", "Mexico", "Canada", "USA"),
     top_k_scores: int = 6,
+    top_scorers_per_team: int = 2,
+    squads_path: str = DEFAULT_SQUADS_PATH,
+    pm_events: Optional[List[dict]] = None,
+    pm_lookup: bool = True,
 ) -> Optional[NextMatchCard]:
     """Build the next-match preview, or None when the slate is empty.
 
     ``odds_df`` should already be filtered to the look-ahead window by the
     caller (same frame the main card build uses); the earliest kickoff among
-    fixtures with a usable market wins. ``scorer_df`` is the optional
-    per-event anytime-scorer pull for that fixture.
+    fixtures with a usable market wins. ``scorer_df`` is the optional per-event
+    anytime + first-goalscorer pull for that fixture; ``pm_lookup`` resolves the
+    Polymarket "1+ goals" price per selected player (set False to skip network).
     """
     blends = _iter_fixture_blends(models, odds_df, fixtures_meta, weights, host_nations)
     fb = select_next_blend(blends)
@@ -165,6 +409,16 @@ def build_next_match(
     p_over = cm.prob_over(corners_line, lam_h, lam_a)
     mu = cm.mean_total(lam_h, lam_a)
 
+    goalscorers, gs_note = build_goalscorers(
+        fb.home,
+        fb.away,
+        scorer_df,
+        top_n_per_team=top_scorers_per_team,
+        squads_path=squads_path,
+        pm_events=pm_events,
+        pm_lookup=pm_lookup,
+    )
+
     return NextMatchCard(
         home=fb.home,
         away=fb.away,
@@ -175,8 +429,62 @@ def build_next_match(
         corners_mu=mu,
         scores=scores,
         scorers=top_scorers_from_odds(scorer_df),
+        goalscorers=goalscorers,
+        goalscorer_note=gs_note,
         min_edge=min_edge,
     )
+
+
+def _fmt_odds(o: Optional[float]) -> str:
+    """Decimal odds or ``--`` when unavailable."""
+    return "%.2f" % o if o and o > 1.0 else "--"
+
+
+def _format_goalscorers(card: NextMatchCard) -> List[str]:
+    """Render the per-team top-goalscorers block (compact, phone-width)."""
+    gs = card.goalscorers or {}
+    home_lines = gs.get("home") or []
+    away_lines = gs.get("away") or []
+    if not home_lines and not away_lines:
+        # Fall back to the legacy flat anytime list if the split is empty.
+        if card.scorers:
+            out = ["*Anytime scorer* (best book price, vig in)"]
+            for s in card.scorers:
+                out.append(
+                    "  %-18s %5.2f (%s)  imp %.0f%%"
+                    % (s.player[:18], s.best_odds, s.best_book, s.implied * 100)
+                )
+            return out
+        return ["*Top goalscorers* — no scorer market available yet."]
+
+    out = ["*Top goalscorers* — best book / Polymarket"]
+    side_team = {"home": card.home, "away": card.away}
+    for side in ("home", "away"):
+        rows = gs.get(side) or []
+        if not rows:
+            continue
+        out.append("_%s_" % side_team[side])
+        for ln in rows:
+            gpg = ("%.2f g/g" % ln.xg_per_game) if ln.xg_per_game else "g/g --"
+            out.append("  %s  (%s)" % (ln.player[:20], gpg))
+            out.append(
+                "    Any  bk %s%s / PM %s"
+                % (
+                    _fmt_odds(ln.anytime_book_odds),
+                    (" (%s)" % ln.anytime_book) if ln.anytime_book else "",
+                    _fmt_odds(ln.anytime_pm_odds),
+                )
+            )
+            out.append(
+                "    1st  bk %s%s / PM --"
+                % (
+                    _fmt_odds(ln.first_book_odds),
+                    (" (%s)" % ln.first_book) if ln.first_book else "",
+                )
+            )
+    if card.goalscorer_note:
+        out.append("_%s_" % card.goalscorer_note)
+    return out
 
 
 def format_next_match(card: Optional[NextMatchCard]) -> str:
@@ -215,15 +523,7 @@ def format_next_match(card: Optional[NextMatchCard]) -> str:
     )
 
     lines.append("")
-    if card.scorers:
-        lines.append("*Anytime scorer* (best market price, vig in)")
-        for s in card.scorers:
-            lines.append(
-                "  %-18s %5.2f (%s)  imp %.0f%%"
-                % (s.player[:18], s.best_odds, s.best_book, s.implied * 100)
-            )
-    else:
-        lines.append("*Anytime scorer* — no market prices available yet.")
+    lines.extend(_format_goalscorers(card))
 
     c = card.scores
     lines.append("")
