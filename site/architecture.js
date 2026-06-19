@@ -25,23 +25,28 @@
   // ======================================================================
 
   var LEAD =
-    "We bet the 2026 World Cup as a disciplined quant. Three feeds come in — " +
-    "historical international results (martj42), live bookmaker odds (The Odds " +
-    "API, UK region) and Polymarket prices. Two models are fitted on the history " +
-    "— an Elo rating with an ordered-logit 1X2, and a time-decayed Dixon-Coles " +
-    "goals model. Each fixture's books are de-vigged with Shin, the per-column " +
-    "median is taken as market consensus, then Elo + Dixon-Coles + market are " +
-    "blended into one (home, draw, away) — market weighted 50% because the market " +
-    "is hard to beat. We line-shop the best price per outcome, keep only edges " +
-    "clearing 2%, size at quarter-Kelly capped 5% per bet and 5% same-day. The " +
+    "We bet the 2026 World Cup as a disciplined quant. The training history is the " +
+    "martj42 international-results dataset, but we never trust it raw: a cleaning " +
+    "overlay corrects and back-fills fixtures, and a verification pipeline " +
+    "cross-checks recent results against TWO independent feeds (ESPN + " +
+    "TheSportsDB) — a fix is only auto-applied when both agree, everything else " +
+    "is parked for human review. Live bookmaker odds (The Odds API, UK) and " +
+    "Polymarket prices come in alongside. Two models are fitted on the cleaned " +
+    "history — an Elo rating with an ordered-logit 1X2, and an 8-year half-life " +
+    "Dixon-Coles goals model — and guarded by walk-forward backtest, blend-fit " +
+    "and structural-bias test suites so the parameters aren't overfit. Each " +
+    "fixture's books are Shin-de-vigged to a market consensus, then Elo + " +
+    "Dixon-Coles + market are blended (market weighted 60% because it is hard to " +
+    "beat). We line-shop the best price, keep only edges clearing 2%, and size at " +
+    "fractional Kelly off a CLV-gated bankroll ladder (£1.5k→£2.5k→£5k). The " +
     "system never places a bet — it emits a card; a human places it, screenshots " +
-    "the slip, and the Telegram bot reads it via Claude vision into the SQLite " +
-    "ledger after a yes. A snapshot daemon records the closing line so the ledger " +
-    "can compute CLV — did we beat the close?";
+    "the slip, and a 15-command Telegram bot reads it via Claude vision into the " +
+    "SQLite ledger after a yes. A snapshot daemon records the closing line so the " +
+    "ledger can compute CLV — did we beat the close?";
 
   var MENTAL =
-    "history + market → blend → edge filter → quarter-Kelly card " +
-    "→ human places → ledger → CLV";
+    "martj42 → clean + 2-source verify → fit + overfit guards → blend → edge " +
+    "filter → CLV-laddered Kelly card → human places → ledger → CLV";
 
   // Five pipeline stages. Each id matches the section anchor.
   var STAGES = [
@@ -53,16 +58,32 @@
       blurb: "Every external feed, its exact fields and cadence.",
       cards: [
         {
-          name: "Historical results",
-          role: "martj42 results.csv — the model training history.",
+          name: "Historical results (raw)",
+          role: "martj42 results.csv — the pristine upstream mirror, re-downloaded daily.",
           file: "src/wca/data/results.py",
           params: [
             ["dest", "data/raw/results.csv"],
             ["refresh", "skip if mtime == today (UTC)"],
-            ["fields", "date, teams, scores Int64, tournament, city, country, neutral"]
+            ["fields", "date, teams, scores Int64, tournament, city, country, neutral"],
+            ["note", "never read directly — consumers load the CLEANED overlay"]
           ],
           inputs: ["GitHub raw CSV"],
-          outputs: ["played-match frame", "outcome H/D/A"]
+          outputs: ["raw martj42 mirror"]
+        },
+        {
+          name: "Cleaning overlay + 2-source verification",
+          role: "Corrects/back-fills fixtures; auto-applies only what TWO feeds agree on.",
+          file: "src/wca/data/cleaning.py · fixture_sources.py · reconcile.py",
+          params: [
+            ["overlay", "raw + data/corrections.json → data/raw/martj42_cleaned.csv (idempotent)"],
+            ["sources", "ESPN scoreboard + TheSportsDB (keyless, defensive)"],
+            ["auto-apply", "BOTH agree & differ from martj42 → stage; orientation-aware"],
+            ["else", "single-source / disagreement → data/corrections_review.json (human)"],
+            ["loader", "resolve_results_path() → cleaned if present, else raw"],
+            ["CI", "clean-results.yml 3×/day; audit → data/audit.json"]
+          ],
+          inputs: ["raw martj42", "ESPN", "TheSportsDB", "corrections.json"],
+          outputs: ["martj42_cleaned.csv", "review queue", "audit"]
         },
         {
           name: "Live odds",
@@ -147,8 +168,8 @@
       id: "models",
       n: "02",
       title: "Models",
-      tag: "fit on history",
-      blurb: "Two models fitted on history plus the de-vigged market baseline.",
+      tag: "fit on clean history",
+      blurb: "Two models fitted on the cleaned history, de-vigged market baseline, overfit-guarded.",
       cards: [
         {
           name: "International Elo",
@@ -191,6 +212,19 @@
           ],
           inputs: ["book 1X2 decimal odds"],
           outputs: ["fair probs", "market_prob (h,d,a)", "z diagnostic"]
+        },
+        {
+          name: "Overfit & bias guards",
+          role: "Test suites that keep the fitted params honest, out-of-sample.",
+          file: "tests/test_halflife_backtest.py · test_blend_fit.py · test_structural.py",
+          params: [
+            ["half-life backtest", "walk-forward log-loss/Brier picks DC xi (no in-sample peeking)"],
+            ["blend fit", "convex Elo/DC/market weights on a holdout — fitted vs the 0.10/0.30/0.60 prior"],
+            ["structural bias", "socio-economic prior: GDP inverted-U, mean-zero priors, probs sum to 1"],
+            ["result", "fitted blend ≈ prior (95% CI [-0.022,+0.016] nats) → keep the simple prior"]
+          ],
+          inputs: ["cleaned history (walk-forward splits)"],
+          outputs: ["out-of-sample log-loss/Brier", "overfit verdicts"]
         }
       ]
     },
@@ -204,12 +238,13 @@
         {
           name: "Blend 1X2",
           role: "Fixed convex combination of Elo + Dixon-Coles + market.",
-          file: "src/wca/card.py",
+          file: "src/wca/card.py (BlendWeights)",
           params: [
-            ["w_elo", "0.25"],
-            ["w_dc", "0.25"],
-            ["w_market", "0.50 (market-anchored prior)"],
-            ["status", "unfitted prior; backtest deferred"]
+            ["w_elo", "0.10"],
+            ["w_dc", "0.30"],
+            ["w_market", "0.60 (market-anchored prior)"],
+            ["deployed", "2026-06-18 — shifted DC>Elo on group-stage evidence"],
+            ["status", "prior, not fitted — backtest showed no decision-grade lift"]
           ],
           inputs: ["elo_prob", "dc_prob", "market_prob"],
           outputs: ["blended (p_home, p_draw, p_away)"]
@@ -240,18 +275,19 @@
           outputs: ["stake per pool", "ranked Recommendations"]
         },
         {
-          name: "Kelly ladder (gap)",
-          role: "CLV-gated promotion — defined & tested, NOT yet wired into build_card.",
-          file: "src/wca/markets/kelly.py",
+          name: "CLV-gated Kelly ladder",
+          role: "WIRED: ledger CLV picks the rung, setting both bankroll and Kelly fraction.",
+          file: "src/wca/card.py (resolve_pool_bankroll) · markets/kelly.py",
           params: [
-            ["rung0", "c=0.25 until 50 settled w/ closing odds"],
-            ["rung1", "c=0.35 (≥50 settled & CLV>0)"],
-            ["rung2", "c=0.50 (≥100 settled & CLV>0)"],
+            ["rung0", "£1,500 · c=0.25 (base, until 50 settled w/ close)"],
+            ["rung1", "£2,500 · c=0.35 (≥50 settled & to-date CLV>0)"],
+            ["rung2", "£5,000 · c=0.50 (≥100 settled & CLV>0; ceiling)"],
             ["demote", "rolling-50 CLV<0 → down one rung"],
-            ["max_odds_unvalidated", "10.0 (longshot filter on rung0)"]
+            ["live", "build_card sizes off the rung's bankroll + fraction"],
+            ["gap left", "longshot filter (odds>10) & arb exemption not yet applied in card"]
           ],
           inputs: ["staking_stats (n_settled, clv_to_date, rolling50_clv)"],
-          outputs: ["would set fraction + longshot filter"]
+          outputs: ["pool bankroll + Kelly fraction for sizing"]
         },
         {
           name: "Scoreline reconciliation",
@@ -280,20 +316,35 @@
           role: "Ranked recommendations emitted for a human to place.",
           file: "scripts/wca_build_card.py",
           params: [
-            ["pool", "name=main, bankroll=1000.0"],
+            ["pool", "main, bankroll = CLV-ladder rung (£1,500 at rung 0)"],
             ["sort", "edge descending"],
+            ["sidecars", "scorelines, accas, goalscorers, next-match previews"],
             ["never", "the system does not place bets"]
           ],
           inputs: ["surviving picks + stakes"],
           outputs: ["formatted card → cache → bot / site"]
         },
         {
+          name: "Recommendation surfaces",
+          role: "Extra +EV signals built alongside the 1X2 card.",
+          file: "accas.py · boosts.py · arb.py · exposure.py · offers.py · promos.py",
+          params: [
+            ["accas", "4+ legs, next 5 matches, ≥2.0 odds/leg"],
+            ["boosts", "/boost prices enhanced odds vs model (honest: unpriceable flagged)"],
+            ["arb", "cross-book arbs, commission-aware; refuses ET/pens markets"],
+            ["exposure", "whole-book P&L per result; blind-spot + gap-plug detection"],
+            ["promos / offers", "matched-betting extraction in ISOLATED tables (never the bets ledger)"]
+          ],
+          inputs: ["model feed", "book/exchange/PM prices", "promo catalog"],
+          outputs: ["accas, boost verdicts, arbs, exposure map, offers"]
+        },
+        {
           name: "Telegram bot",
           role: "Authorized-chat console; reads reports, drives the confirm flow.",
           file: "src/wca/bot/app.py",
           params: [
-            ["commands", "8: /summary /bets /clv /card /scores /structure /ping /help"],
-            ["auth", "only TELEGRAM_CHAT_ID; others get their id, no data"],
+            ["15 commands", "/summary /bets /clv /card /next /goalscorers /scores /accas /structure /pm /settle /boost /ping /start /help"],
+            ["auth", "only TELEGRAM_CHAT_ID; money actions gated to TELEGRAM_ADMIN_USER_ID"],
             ["transport", "long-poll getUpdates 25s, split >4096"]
           ],
           inputs: ["operator commands", "betslip photos"],
@@ -306,8 +357,9 @@
           params: [
             ["pending", "_PENDING_PHOTO_BETS[chat_id], in-memory"],
             ["yes/y", "record_bet per selection (match_id MANUAL_<slug>)"],
+            ["tag overrides", "a1/a2/account1/2, model/offer/punt in the reply"],
             ["no/n", "discard; expires on restart"],
-            ["pushed-bet", "Y BET-<id> ack only (wiring pending)"]
+            ["admin", "money writes gated to TELEGRAM_ADMIN_USER_ID when set"]
           ],
           inputs: ["ExtractedBet[]", "operator yes/no"],
           outputs: ["bets rows in SQLite"]
@@ -375,11 +427,11 @@
     {
       cls: "sportsbook",
       name: "Sportsbook",
-      amt: "£1,000",
-      sub: "notional",
+      amt: "£1,500",
+      sub: "rung 0 base",
       notes: [
-        "scales → £2.5k at ~20 settled bets (avg CLV ≥ 0)",
-        "scales → £5k at ~50 settled bets"
+        "→ £2.5k at 50 settled-with-close bets (to-date CLV > 0)",
+        "→ £5k at 100 settled bets (CLV > 0); demote if rolling-50 CLV < 0"
       ]
     },
     {
@@ -400,10 +452,10 @@
 
   var MONEY_STEPS = [
     ["Pools", "sportsbook £ / polymarket $ / kalshi planned"],
-    ["Quarter-Kelly + caps", "f × 0.25, 5% per-bet, 5% same-day"],
+    ["Laddered Kelly + caps", "rung fraction (0.25→0.50) × CLV bankroll, 5% per-bet, 5% same-day"],
     ["Bets", "human places, bot confirms to ledger"],
     ["Settle", "win (o−1)·stake / loss −stake"],
-    ["CLV feedback", "(odds_taken / closing_odds) − 1"]
+    ["CLV feedback", "(odds_taken / closing_odds) − 1 → sets the next rung"]
   ];
 
   var KILL_RULE =
@@ -416,6 +468,7 @@
     {
       stage: "Ingestion",
       items: [
+        "SHIPPED: cleaning overlay + 2-source (ESPN + TheSportsDB) verification → martj42_cleaned.csv, 3×/day CI.",
         "Kalshi client mirroring the Polymarket reader — lights up the third pool.",
         "Betfair exchange as a sharper CLV reference and eventual execution venue.",
         "Totals / correct-score market ingestion (get_odds already parses outcome_point)."
@@ -427,16 +480,17 @@
         "Player-level ratings → lineup-aware DC inputs (biggest accuracy lever).",
         "SHIPPED (opt-in, off): venue/altitude-aware host advantage — co-host dilution + Azteca altitude tax. Next: altitude/heat into the DC log-mean too.",
         "SHIPPED (opt-in, off): structural socio-economic shrinkage prior for low-data minnows (Klement / Hoffmann-Ging-Ramasamy) — holdout inconclusive, awaits live 2026 minnow data.",
-        "Fit the blend weights on a calibration backtest (replace the 0.25/0.25/0.50 prior).",
-        "Backtest harness to pick DC xi (now hand-set 8y) and ridge by out-of-sample log-loss."
+        "SHIPPED: walk-forward half-life backtest + blend-fit holdout (fitted ≈ 0.10/0.30/0.60 prior, no decision-grade lift) + structural-bias tests.",
+        "Next: re-fit blend/xi as 2026 results accumulate; arb the new cleaned-data signal into the prior."
       ]
     },
     {
       stage: "Decision",
       items: [
-        "Wire KellyPolicy into build_card (gap): rung promotion, longshot filter, arb exemption.",
+        "SHIPPED: CLV-gated ladder wired into build_card — rung sets bankroll AND Kelly fraction.",
+        "Gap left: apply the rung-0 longshot filter (odds>10) and arb-exemption inside build_card.",
         "Promo / boost EV models (2-Up, super-sub) — needs goal-timing distributions.",
-        "Arbitrage / middling detection across the line-shopped book set."
+        "Middling detection on top of the existing cross-book arbitrage scan."
       ]
     },
     {
