@@ -51,7 +51,8 @@ def test_confirmation_yes_logs_to_ledger(tmp_path):
     rows = con.execute("select match_desc, selection, decimal_odds, stake, platform "
                        "from bets").fetchall()
     con.close()
-    assert rows == [("USA vs Paraguay", "Paraguay", 4.2, 5.0, "virginbet")]
+    # Platform is normalised on ingest ("virginbet" -> "Virgin Bet").
+    assert rows == [("USA vs Paraguay", "Paraguay", 4.2, 5.0, "Virgin Bet")]
 
 
 def test_confirmation_no_discards(tmp_path):

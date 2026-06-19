@@ -24,6 +24,7 @@ different price.
 """
 from __future__ import annotations
 
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
@@ -124,6 +125,15 @@ def build_pm_proposals(
             continue
 
         price = float(resolved["price"])
+        if not (0.0 < price < 1.0):
+            continue
+        # Snap to the Polymarket 0.01 tick grid (ROUND_HALF_UP, matching the
+        # trader's order-amount rounding) so the parked price IS the executable
+        # price. Without this, a mid like 0.075 is parked but the order fills at
+        # 0.08, silently overspending; sizing/EV below then use the real price.
+        price = float(
+            Decimal(str(price)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        )
         if not (0.0 < price < 1.0):
             continue
 

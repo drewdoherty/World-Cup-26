@@ -70,6 +70,11 @@ PROMPT = (
     'marker on the slip; default "open" if unsettled.\n'
     '  "is_boost": true if the slip shows a price boost / enhanced odds / '
     "boost flame icon for this selection, else false.\n"
+    '  "is_free_bet": true if this is a FREE BET / bonus / token stake — look '
+    "for a purple/gift icon (Virgin, Paddy Power), a 'Free Bet'/'Bonus'/'Token' "
+    "label, or a returns figure that EXCLUDES the stake (e.g. £1 stake at 10.0 "
+    "returning £9, not £10). A free bet is stake-not-returned: the stake is not "
+    "the bettor's own money and is not part of the winnings. Else false.\n"
     '  "confidence": your confidence in this row from 0 to 1.\n\n'
     "Use null for anything not legible. Output the JSON object and nothing else."
 )
@@ -127,6 +132,7 @@ class ExtractedBet:
     potential_returns: Optional[float] = None
     status: str = "open"
     is_boost: bool = False
+    is_free_bet: bool = False
     confidence: float = 0.0
     raw_text: str = ""
     currency: Optional[str] = None
@@ -321,6 +327,7 @@ def _bet_from_obj(obj: Dict[str, Any], raw_text: str) -> ExtractedBet:
         potential_returns=_coerce_float(obj.get("returns")),
         status=_coerce_status(obj.get("status")),
         is_boost=_coerce_bool(obj.get("is_boost")),
+        is_free_bet=_coerce_bool(obj.get("is_free_bet")),
         confidence=_coerce_confidence(obj.get("confidence")),
         raw_text=raw_text,
         currency=_coerce_currency(obj.get("currency"), obj.get("bookmaker")),

@@ -73,7 +73,13 @@ class TelegramClient:
         parse_mode: Optional[str] = "Markdown",
         reply_markup: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
-        """Send a text message, transparently splitting if over the length cap."""
+        """Send a text message, transparently splitting if over the length cap.
+
+        If a chunk fails to parse under ``parse_mode`` (e.g. an odd ``_`` from a
+        venue name like ``betfair_ex_uk`` makes Telegram's Markdown reject the
+        whole message with "can't parse entities"), the chunk is retried as
+        plain text so the bot NEVER drops a reply over a formatting glitch.
+        """
         chunks = _split_message(text)
         last: Dict[str, Any] = {}
         for i, chunk in enumerate(chunks):
@@ -83,7 +89,18 @@ class TelegramClient:
             # Only attach the keyboard to the final chunk.
             if reply_markup and i == len(chunks) - 1:
                 payload["reply_markup"] = reply_markup
-            last = self._call("sendMessage", payload)
+            try:
+                last = self._call("sendMessage", payload)
+            except TelegramError as exc:
+                if parse_mode and "parse entities" in str(exc).lower():
+                    # Markdown parse failure -> resend as plain text, dropping the
+                    # bold ``*`` markers so the fallback reads cleanly (underscores
+                    # in venue names render fine literally without a parse mode).
+                    payload.pop("parse_mode", None)
+                    payload["text"] = chunk.replace("*", "")
+                    last = self._call("sendMessage", payload)
+                else:
+                    raise
         return last
 
     # -- file / photo download ---------------------------------------------

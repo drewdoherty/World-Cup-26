@@ -383,7 +383,6 @@
           esc(edge == null ? '—' : pctSigned(edge, 1)) + '</td>' +
         '<td class="r num ' + evClass(p.ev) + '">' +
           esc(p.ev === null || p.ev === undefined ? '—' : pct(p.ev, 1)) + '</td>' +
-        '<td class="r num dim">' + esc(p.kelly_fraction == null ? '—' : num(p.kelly_fraction, 3)) + '</td>' +
         '<td class="pos-src">' + sourceChip(p.source) + '</td>' +
         '<td><span class="pill book ' + venue + '" style="color:' + col +
           ';border-color:' + col + '">' + esc(p.platform || venue) +
@@ -397,7 +396,7 @@
           '<th>Time</th><th>Match</th><th>Market</th><th>Selection</th>' +
           '<th class="r">Odds</th><th class="r">Stake</th>' +
           '<th class="r">Model</th><th class="r">Mkt</th>' +
-          '<th class="r">Edge</th><th class="r">EV</th><th class="r">Kelly</th>' +
+          '<th class="r">Edge</th><th class="r">EV</th>' +
           '<th>Source</th><th>Venue</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +

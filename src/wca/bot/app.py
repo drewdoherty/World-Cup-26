@@ -233,6 +233,22 @@ def _canon_platform(raw: str) -> str:
 _VENUE_SYMBOL = {"sportsbook": "£", "polymarket": "$", "polymarket-auto": "$", "kalshi": "$"}
 
 
+def _venue_of(platform: Optional[str]) -> str:
+    """Map a raw platform string to its canonical venue (currency pool).
+
+    Restored 2026-06-18: the "normalise platform names" commit removed this
+    helper but left call sites in ``_pool_rows`` and ``handle_bets``, crashing
+    ``/bets`` and ``/summary`` with a NameError. Substring match is robust to
+    however platform names are normalised (case/spacing).
+    """
+    p = (platform or "").lower()
+    if "polymarket" in p:
+        return "polymarket"
+    if "kalshi" in p:
+        return "kalshi"
+    return "sportsbook"
+
+
 def _pool_rows(db_path: str) -> Dict[str, Dict[str, float]]:
     """Per-venue money picture from the ledger (deposits tagged in reason)."""
     import sqlite3

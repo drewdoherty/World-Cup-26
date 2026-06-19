@@ -55,19 +55,24 @@ class BlendWeights:
     blend and market-only (all within ~0.003 nats, heavily overlapping bootstrap
     CIs), so there is no decision-grade reason to change them.
 
-    There is a weak, directionally consistent signal that DC > Elo (Step 1 LOTO
-    and Step 3 both favour DC; fitted w_elo=0.00, pooled relative optimum
-    w_elo/(w_elo+w_dc)=0.15). If the desk wants to act on it, the single
-    conservative move is ``BlendWeights(elo=0.10, dc=0.30, market=0.60)`` —
-    shift weight from Elo to DC and nudge market up. Do NOT zero out Elo or
-    adopt the raw single-tournament fit (0.00/0.32/0.68); that over-fits one
-    World Cup. Re-fit after a second tournament with closing odds (WC2026 group
-    stage) before any larger change.
+    **2026-06-18 update — the pre-registered conservative DC>Elo move was taken.**
+    With the WC2026 group stage now providing live evidence (24 played matches),
+    the deployed weights shifted to **0.10 / 0.30 / 0.60**. Drivers: Step 1 LOTO
+    and Step 3 both favour DC (fitted w_elo=0.00); a non-leaky pre-tournament
+    diagnostic on the 24 matches showed Elo as the worst component, and
+    re-blending the 16 logged matches improved Brier from 0.534 (0.25/0.25/0.50)
+    to 0.527 here. This is the *conservative* move the prior analysis
+    pre-registered (shift Elo→DC, nudge market up). We deliberately did NOT zero
+    Elo or adopt the raw single-tournament fit (0.00/0.32/0.68) — that over-fits
+    one World Cup. NOTE: this does NOT fix the model's draw under-prediction
+    (~14pp on the 24 matches) — that is a Dixon-Coles draw-mass issue, not a
+    blend-weight one, and inflating draws on 24 group-stage games risks
+    over-fitting (knockouts draw far less). Revisit with more data; do not force.
     """
 
-    elo: float = 0.25
-    dc: float = 0.25
-    market: float = 0.50
+    elo: float = 0.10
+    dc: float = 0.30
+    market: float = 0.60
 
     def normalised(self) -> "BlendWeights":
         s = self.elo + self.dc + self.market
