@@ -83,6 +83,22 @@
     if (s.length > 16) return s.slice(0, 15) + "…";
     return s;
   }
+  // Bet Builder / accumulator selections list each leg; render them stacked on
+  // their own line so every leg is readable (not crammed/truncated into one).
+  function selDisplay(p) {
+    var s = String(p.selection == null ? "" : p.selection).trim();
+    if (!s) return "—";
+    var combo = /bet ?builder|accumulator|acca/i.test(String(p.market || ""));
+    var legs = null;
+    if (s.indexOf(" & ") !== -1) legs = s.split(" & ");
+    else if (combo && s.indexOf(" / ") !== -1) legs = s.split(" / ");
+    if (legs && legs.length > 1) {
+      return legs.map(function (leg) {
+        return '<span class="leg">' + esc(leg.trim()) + '</span>';
+      }).join("");
+    }
+    return esc(s);
+  }
   // Full bet metadata as a row hover-title: every field, including the free-text
   // notes that don't get their own column.
   function metaTitle(p) {
@@ -375,7 +391,7 @@
           esc(timeOnly(p.ts_utc)) + '</td>' +
         '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
         '<td class="pos-mkt dim" title="' + esc(p.market) + '">' + esc(p.market) + '</td>' +
-        '<td class="pos-sel" title="' + esc(p.selection) + '">' + esc(dash(p.selection)) + '</td>' +
+        '<td class="pos-sel" title="' + esc(p.selection) + '">' + selDisplay(p) + '</td>' +
         '<td class="r num">' + esc(num(p.decimal_odds)) + '</td>' +
         '<td class="r num">' + esc(money(p.stake, p.currency)) + '</td>' +
         '<td class="r num">' + esc(pct(p.model_prob, 0)) + '</td>' +
@@ -1042,7 +1058,7 @@
         '<td class="num dim">' + esc(timeOnly(p.settled_ts || p.ts_utc)) + '</td>' +
         '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
         '<td class="pos-mkt dim" title="' + esc(p.market) + '">' + esc(p.market) + '</td>' +
-        '<td class="pos-sel" title="' + esc(p.selection) + '">' + esc(dash(p.selection)) + '</td>' +
+        '<td class="pos-sel" title="' + esc(p.selection) + '">' + selDisplay(p) + '</td>' +
         '<td class="r num">' + esc(num(p.decimal_odds)) + '</td>' +
         '<td class="r num">' + esc(money(p.stake, p.currency)) + '</td>' +
         '<td class="r num">' + esc(pct(p.model_prob, 0)) + '</td>' +

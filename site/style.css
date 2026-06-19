@@ -273,17 +273,16 @@ body {
 }
 .pos-sel {
   color: var(--text-dim);
-  max-width: 300px;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
+.pos-sel .leg { display: block; }
+.pos-sel .leg + .leg { margin-top: 1px; }
 /* The expanded-metadata tables carry more columns; keep the prose columns
    narrower so Odds/Stake/Model/Mkt/EV/Kelly all fit, and let the panel scroll
    horizontally on narrow viewports rather than crushing the numeric cells. */
 .pos-table-wide { min-width: 760px; }
 .pos-table-wide .pos-match { max-width: 200px; }
-.pos-table-wide .pos-sel { max-width: 190px; }
+.pos-table-wide .pos-sel { max-width: none; }
 .pos-mkt {
   color: var(--text-dim);
   white-space: nowrap;
