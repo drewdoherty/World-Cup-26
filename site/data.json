@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-19 21:11:35 UTC"
+    "generated": "2026-06-19 21:26:22 UTC"
   },
   "totals": {
-    "wagered": 496.75600000000003,
+    "wagered": 502.75600000000003,
     "open_stake": 61.0,
-    "settled_pl": 188.3205,
-    "n_bets": 64
+    "settled_pl": 182.3205,
+    "n_bets": 65
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 376.1400000000001,
+      "wagered": 382.1400000000001,
       "open_stake": 0.0,
-      "settled_pl": 183.83550000000002,
-      "n_bets": 48
+      "settled_pl": 177.83550000000002,
+      "n_bets": 49
     },
     "USD": {
       "wagered": 120.616,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 376.1400000000001,
+      "wagered": 382.1400000000001,
       "open_stake": 0.0,
-      "settled_pl": 183.83550000000002,
-      "n_bets": 48,
+      "settled_pl": 177.83550000000002,
+      "n_bets": 49,
       "currency": "GBP"
     },
     "polymarket": {
@@ -53,15 +53,29 @@
       "label": "Sportsbook 1"
     },
     "sportsbook_2": {
-      "wagered": 107.0,
+      "wagered": 113.0,
       "open_stake": 0.0,
-      "settled_pl": -35.0,
-      "n_bets": 12,
+      "settled_pl": -41.0,
+      "n_bets": 13,
       "currency": "GBP",
       "label": "Sportsbook 2"
     }
   },
   "source_summary": {
+    "punt": {
+      "GBP": {
+        "wagered": 49.06,
+        "open_stake": 0.0,
+        "settled_pl": 80.27,
+        "n_bets": 4
+      },
+      "USD": {
+        "wagered": 13.366,
+        "open_stake": 1.0,
+        "settled_pl": -2.367,
+        "n_bets": 10
+      }
+    },
     "offer": {
       "GBP": {
         "wagered": 184.0,
@@ -99,23 +113,17 @@
         "settled_pl": 6.852000000000004,
         "n_bets": 6
       }
-    },
-    "punt": {
-      "GBP": {
-        "wagered": 43.06,
-        "open_stake": 0.0,
-        "settled_pl": 86.27,
-        "n_bets": 3
-      },
-      "USD": {
-        "wagered": 13.366,
-        "open_stake": 1.0,
-        "settled_pl": -2.367,
-        "n_bets": 10
-      }
     }
   },
   "platforms": {
+    "betfair_ex_uk": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 16.0,
+      "open_stake": 0.0,
+      "settled_pl": -16.0,
+      "n_bets": 2
+    },
     "betfair_sportsbook": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -147,14 +155,6 @@
       "open_stake": 0.0,
       "settled_pl": 15.572000000000003,
       "n_bets": 4
-    },
-    "betfair_ex_uk": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 10.0,
-      "open_stake": 0.0,
-      "settled_pl": -10.0,
-      "n_bets": 1
     },
     "bet365": {
       "venue": "sportsbook",
@@ -214,6 +214,31 @@
     }
   },
   "closed_positions": [
+    {
+      "id": 85,
+      "ts_utc": "2026-06-19T16:16:06",
+      "settled_ts": "2026-06-19T22:09:30",
+      "match": "USA vs Australia",
+      "match_id": "MANUAL_USA_VS_AUSTRALIA",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "betfair_ex_uk",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 4.7,
+      "stake": 6.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "lost",
+      "pl": -6.0,
+      "closing_odds": null,
+      "clv": null,
+      "notes": "Betfair Exchange a2 punt. Back The Draw @4.70, settled 19-Jun (no draw). Cash GBP6 lost (Bet ID 1:432758479762). PLUS GBP10 free bet @4.70 also lost, GBP0 cash impact, stake-not-returned (Bet ID 1:432758479761) - not rowed separately to avoid inflating wagered."
+    },
     {
       "id": 83,
       "ts_utc": "2026-06-17T15:21:50",
@@ -1902,6 +1927,10 @@
         [
           "2026-06-17T15:21:50",
           183.84
+        ],
+        [
+          "2026-06-19T22:09:30",
+          177.84
         ]
       ]
     },

@@ -170,17 +170,20 @@
   // book not in the map (and any null/blank) degrades to BOOK_FALLBACK so the
   // pill/rail still renders. Several Betfair surfaces share one orange.
   var BOOK_FALLBACK = "#9ca3af";
-  // Single source of truth for book/venue colours (mirrors the CSS vars):
-  // paddy light green, bet365 dark green, betfair yellow, polymarket light
-  // blue, kalshi purple.
+  // Single source of truth for book/venue colours — ONE colour per bookmaker,
+  // brand-matched. Both Betfair products are yellow-branded, so we split them by
+  // shade: the Sportsbook keeps the bright Betfair yellow, the Exchange takes a
+  // distinct amber so the two are never confused in the positions tables.
   var BOOK_COLOR = {
     paddypower: "#4ade80",
     bet365: "#15803d",
     virginbet: "#ef4444",
     skybet: "#3b82f6",
-    betfair: "#fde047",
-    betfair_ex_uk: "#fde047",
-    betfair_sportsbook: "#fde047",
+    betfred: "#1e3a8a",                // Betfred navy blue
+    betfair_sportsbook: "#fde047",     // Betfair Sportsbook — bright yellow
+    betfair_ex_uk: "#f59e0b",          // Betfair Exchange — amber (distinct)
+    betfair: "#f59e0b",                // bare "betfair" => Exchange (sportsbook
+                                       // bets are explicitly *_sportsbook)
     williamhill: "#1d4ed8",
     smarkets: "#2dd4bf",
     matchbook: "#f472b6",
@@ -1050,7 +1053,9 @@
         '<td class="r num ' + evClass(p.clv) + '">' +
           esc(p.clv === null || p.clv === undefined ? "—" : pct(p.clv, 1)) + '</td>' +
         '<td class="pos-src">' + sourceChip(p.source) + '</td>' +
-        '<td><span class="pill ' + esc(p.venue || "sportsbook") + '">' +
+        '<td><span class="pill book ' + esc(p.venue || "sportsbook") +
+          '" style="color:' + bookColor(p.platform || p.venue) +
+          ';border-color:' + bookColor(p.platform || p.venue) + '">' +
           esc(p.platform || "") + accountSuffix(p.account) + '</span></td>' +
         '</tr>';
     }).join("");
