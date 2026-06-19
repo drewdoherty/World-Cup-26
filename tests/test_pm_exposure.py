@@ -83,34 +83,65 @@ def _odds_df():
 
 def test_exposure_section_labels_hedge_vs_add(tmp_path):
     db = str(tmp_path / "wca.db")
-    _seed_bets(db)  # exposure on England (Home) and Draw in England vs Croatia
+    _seed_bets(db)  # result exposure on England (Home) + Draw in England vs Croatia
     now = pd.Timestamp("2026-06-17T12:00:00").to_pydatetime()
 
-    # A PM proposal on Croatia (the un-exposed outcome) should be a HEDGE;
-    # a PM proposal on England (already exposed) should be an ADD.
+    # Realistic shape: outcome is the bare PM 'Yes'; the real 1X2 selection
+    # lives in market_question. Croatia (un-exposed result) -> HEDGE;
+    # England (already exposed) -> ADD.
     proposals = [
-        {"match_desc": "England vs Croatia", "outcome": "Croatia",
+        {"match_desc": "England vs Croatia",
+         "market_question": "Will Croatia win on 2026-06-17?", "outcome": "Yes",
          "price": 0.18, "size_usd": 25.0, "ev": 0.10},
-        {"match_desc": "England vs Croatia", "outcome": "England",
+        {"match_desc": "England vs Croatia",
+         "market_question": "Will England win on 2026-06-17?", "outcome": "Yes",
          "price": 0.55, "size_usd": 15.0, "ev": 0.03},
     ]
     section = propose_cli._build_exposure_section(proposals, _odds_df(), db, now)
     assert "England vs Croatia" in section
-    assert "existing exposure" in section
-    assert "🛡 HEDGE Croatia" in section
-    assert "➕ ADD England" in section
+    assert "result exposure" in section
+    # PM-1 = Croatia (higher EV, listed first), PM-2 = England.
+    assert "🛡 HEDGE PM-1 Croatia to WIN" in section
+    assert "➕ ADD PM-2 England to WIN" in section
 
 
 def test_exposure_section_ev_pick_when_no_exposure(tmp_path):
     db = str(tmp_path / "wca.db")  # empty ledger -> no exposure
     now = pd.Timestamp("2026-06-17T12:00:00").to_pydatetime()
     proposals = [
-        {"match_desc": "Ghana vs Panama", "outcome": "Panama",
+        {"match_desc": "Ghana vs Panama",
+         "market_question": "Will Panama win on 2026-06-17?", "outcome": "Yes",
          "price": 0.29, "size_usd": 30.0, "ev": 0.27},
     ]
     section = propose_cli._build_exposure_section(proposals, _odds_df(), db, now)
-    assert "EV pick: Panama" in section
+    assert "✅ PM-1 Panama to WIN" in section
     assert "HEDGE" not in section
+
+
+def test_prop_exposure_is_not_hedged_by_a_result_bet(tmp_path):
+    # The McTominay-prop bug: a player-shots prop is exposure on the fixture but
+    # a 1X2 result bet does NOT offset it -> must be an EV pick, never a HEDGE.
+    db = str(tmp_path / "wca.db")
+    record_bet(
+        "2026-06-17T09:00:00", "PROP1", "Scotland vs Morocco",
+        "Player shots on target",
+        "Scott McTominay to have 1 or more shots on target", "paddypower",
+        1.8, 5.0, source="offer", db_path=db,
+    )
+    now = pd.Timestamp("2026-06-17T12:00:00").to_pydatetime()
+    odds = pd.DataFrame([
+        {"home_team": "Scotland", "away_team": "Morocco",
+         "commence_time": "2026-06-17T20:00:00Z"},
+    ])
+    proposals = [
+        {"match_desc": "Scotland vs Morocco",
+         "market_question": "Will Scotland win on 2026-06-17?", "outcome": "Yes",
+         "price": 0.17, "size_usd": 18.0, "ev": 0.139},
+    ]
+    section = propose_cli._build_exposure_section(proposals, odds, db, now)
+    assert "HEDGE" not in section
+    assert "does NOT offset" in section
+    assert "✅ PM-1 Scotland to WIN" in section
 
 
 def test_next_5_filters_and_orders(tmp_path):

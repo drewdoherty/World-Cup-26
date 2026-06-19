@@ -149,6 +149,37 @@ def _outcome_token(sel: str, home: str, away: str) -> str:
     return cs
 
 
+# 1X2 result tokens — the only exposure a result/1X2 Polymarket bet can offset.
+_RESULT_TOKENS = ("HOME", "DRAW", "AWAY")
+
+
+def _pm_result_token(p: dict, home: str, away: str):
+    """The 1X2 result token a Polymarket BUY backs ('HOME'/'DRAW'/'AWAY'), or
+    ``None`` if it is not a clean home/draw/away *result* bet.
+
+    A PM outcome is a bare Yes/No against a market *question*, so the real
+    selection lives in ``market_question`` — not ``outcome`` (which is just
+    'Yes'). Parsed exactly like :func:`wca.bot.app.describe_pm_selection`:
+    'Will X win? Yes' -> X's token, 'end in a draw? Yes' -> DRAW. A No-side or a
+    prop/non-result question returns None, so a result bet is never mislabelled
+    a 1X2 hedge/add of an unrelated market (the McTominay-prop bug).
+    """
+    import re
+
+    q = (p.get("market_question") or p.get("label") or "").strip()
+    outcome = (p.get("outcome") or p.get("selection") or "").strip().lower()
+    if outcome not in ("yes", "y", "true"):
+        return None
+    ql = q.lower()
+    if "draw" in ql or "tie" in ql:
+        return "DRAW"
+    m = re.search(r"will\s+(.+?)\s+win\b", q, re.IGNORECASE)
+    if m:
+        tok = _outcome_token(m.group(1).strip().rstrip("?").strip(), home, away)
+        return tok if tok in _RESULT_TOKENS else None
+    return None
+
+
 def _reset_parked_for_new_batch(db_path: str):
     """Clear the parked queue so a fresh batch numbers from ``PM-1`` again.
 
@@ -210,21 +241,23 @@ def _reset_parked_for_new_batch(db_path: str):
 def _build_exposure_section(proposals: list, odds_df, db_path: str, now_dt) -> str:
     """Exposure + hedge header for the **next 5 matches**.
 
-    For each of the five soonest fixtures:
+    For each of the five soonest fixtures, list its Polymarket proposals by
+    their PM-<n> and *real* selection (the market question, e.g. "Australia to
+    WIN" / "the DRAW" — never the bare Yes/No outcome), classified against the
+    existing ledger exposure:
 
-    * If there is existing open exposure on that match — from *any* book or
-      venue and *any* source (model, free-bet/offer, punt, hedge) — show it and
-      label each Polymarket proposal as a 🛡 HEDGE (covers a different outcome →
-      offsets the existing risk) or a ➕ ADD (same side as the existing bet).
-    * Otherwise there is nothing to hedge, so the proposal is just the best
-      model-fair-vs-market EV pick (ranked by EV).
+    * 🛡 HEDGE — only when there is open **1X2 result** exposure on a *different*
+      result outcome, so the proposal wins when that bet loses.
+    * ➕ ADD — the proposal backs a result outcome we are already on.
+    * ✅ EV pick — no result exposure to offset. Player props / scorers / cards
+      are shown as *non-result* exposure that a 1X2 bet does NOT hedge.
 
-    Reads existing exposure from the ledger (never fabricated) via
-    :func:`wca.ledger.reports.sportsbook_open_exposure_by_match` with
-    ``sources=None`` so no open position on any book/venue is missed.
+    Reads exposure from the ledger (never fabricated) via
+    :func:`wca.ledger.reports.sportsbook_open_exposure_by_match` (``sources=None``).
     """
     from wca.data.teamnames import canonical
     from wca.ledger.reports import sportsbook_open_exposure_by_match
+    from wca.bot.app import describe_pm_selection
 
     matches = _next_5_matches(odds_df, now_dt)
     if not matches:
@@ -236,15 +269,17 @@ def _build_exposure_section(proposals: list, odds_df, db_path: str, now_dt) -> s
     except Exception:
         exposure = {}
 
-    # Index proposals by canonical {home, away} pair.
+    # Index proposals by canonical {home, away} pair, carrying each proposal's
+    # 1-based PM-<n> (its position in the proposals list == its parked number)
+    # so the summary maps onto the numbered "Y PM-n" proposals below.
     props_by_key: dict = {}
-    for p in proposals:
+    for n, p in enumerate(proposals, 1):
         md = str(p.get("match_desc") or "")
         parts = [x.strip() for x in md.split(" vs ")]
         if len(parts) != 2:
             continue
         key = frozenset(canonical(x) for x in parts)
-        props_by_key.setdefault(key, []).append(p)
+        props_by_key.setdefault(key, []).append((n, p))
 
     lines = ["🎯 *Exposure & hedges — next 5 matches:*", ""]
     for home, away, _ct in matches:
@@ -253,50 +288,63 @@ def _build_exposure_section(proposals: list, odds_df, db_path: str, now_dt) -> s
         mprops = props_by_key.get(key, [])
         title = "%s vs %s" % (home, away)
 
+        # Split existing exposure into 1X2 *result* exposure (the only thing a
+        # result/1X2 Polymarket bet can offset) and *other* exposure (player
+        # props, scorers, cards, ...). A result bet does NOT hedge a prop.
+        result_tokens: set = set()
+        result_strs: list = []
+        other_strs: list = []
         if exp:
-            exposed_tokens = {
-                _outcome_token(sel, home, away) for sel in exp["outcomes"]
-            }
-            exp_str = ", ".join(
-                "%s £%.0f@risk [%s]"
-                % (
-                    sel,
-                    oc["risk"],
-                    "/".join(sorted(p for p in oc.get("platforms", set()) if p)) or "?",
-                )
-                for sel, oc in exp["outcomes"].items()
+            for sel, oc in exp["outcomes"].items():
+                tok = _outcome_token(sel, home, away)
+                plats = "/".join(sorted(p for p in oc.get("platforms", set()) if p)) or "?"
+                cell = "%s £%.0f@risk [%s]" % (sel, oc["risk"], plats)
+                if tok in _RESULT_TOKENS:
+                    result_tokens.add(tok)
+                    result_strs.append(cell)
+                else:
+                    other_strs.append(cell)
+
+        # Fixture header — describe only the exposure that is actually relevant.
+        if result_tokens:
+            hdr = "⚠️ %s — result exposure: %s" % (title, ", ".join(result_strs))
+            if other_strs:
+                hdr += " (also open, non-result: %s)" % "; ".join(other_strs)
+            lines.append(hdr)
+        elif other_strs:
+            lines.append(
+                "ℹ️ %s — open (non-result): %s — a 1X2 bet does NOT offset this"
+                % (title, "; ".join(other_strs))
             )
-            lines.append("⚠️ %s — existing exposure: %s" % (title, exp_str))
-            if mprops:
-                for p in mprops:
-                    tok = _outcome_token(p.get("outcome", ""), home, away)
-                    if tok not in exposed_tokens:
-                        lines.append(
-                            "    🛡 HEDGE %s @ %.2f ($%.0f) — offsets the above"
-                            % (p.get("outcome", "?"), p["price"], p["size_usd"])
-                        )
-                    else:
-                        lines.append(
-                            "    ➕ ADD %s @ %.2f ($%.0f) — same side, raises exposure"
-                            % (p.get("outcome", "?"), p["price"], p["size_usd"])
-                        )
-            else:
-                lines.append("    (no Polymarket market resolved to hedge this)")
+        elif mprops:
+            lines.append("✅ %s — EV picks (no existing exposure):" % title)
         else:
-            if mprops:
-                for p in sorted(mprops, key=lambda x: -float(x.get("ev", 0.0))):
+            lines.append("⚪ %s — no exposure, no Polymarket edge" % title)
+            continue
+
+        if not mprops:
+            if result_tokens:
+                lines.append("    (no Polymarket market resolved to hedge this)")
+            continue
+
+        # One line per proposal — mapped to its PM-<n>, with the REAL selection
+        # (from the market question), classified against result exposure only.
+        for n, p in sorted(mprops, key=lambda np: -float(np[1].get("ev", 0.0))):
+            sel = describe_pm_selection(p)
+            tok = _pm_result_token(p, home, away)
+            body = "PM-%d %s @ %.2f (ev %+.1f%%, $%.0f)" % (
+                n, sel, p["price"], float(p.get("ev", 0.0)) * 100.0, p["size_usd"],
+            )
+            if result_tokens and tok in _RESULT_TOKENS:
+                if tok in result_tokens:
+                    lines.append("    ➕ ADD %s — same result side, raises exposure" % body)
+                else:
                     lines.append(
-                        "✅ %s — EV pick: %s @ %.2f (ev %+.1f%%, $%.0f)"
-                        % (
-                            title,
-                            p.get("outcome", "?"),
-                            p["price"],
-                            float(p.get("ev", 0.0)) * 100.0,
-                            p["size_usd"],
-                        )
+                        "    🛡 HEDGE %s — offsets your %s exposure"
+                        % (body, "/".join(sorted(result_tokens)))
                     )
             else:
-                lines.append("⚪ %s — no exposure, no Polymarket edge" % title)
+                lines.append("    ✅ %s" % body)
 
     return "\n".join(lines) + "\n"
 
