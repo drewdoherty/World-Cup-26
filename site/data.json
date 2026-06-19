@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-19 10:44:36 UTC"
+    "generated": "2026-06-19T11:15:17"
   },
   "totals": {
-    "wagered": 641.436,
-    "open_stake": 94.0,
+    "wagered": 646.436,
+    "open_stake": 99.0,
     "settled_pl": 28.280500000000004,
-    "n_bets": 71
+    "n_bets": 72
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 490.14000000000004,
-      "open_stake": 33.0,
+      "wagered": 495.14000000000004,
+      "open_stake": 38.0,
       "settled_pl": 54.47549999999998,
-      "n_bets": 54
+      "n_bets": 55
     },
     "USD": {
       "wagered": 151.29600000000002,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 490.14000000000004,
-      "open_stake": 33.0,
+      "wagered": 495.14000000000004,
+      "open_stake": 38.0,
       "settled_pl": 54.47549999999998,
-      "n_bets": 54,
+      "n_bets": 55,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 363.1400000000001,
-      "open_stake": 53.0,
+      "wagered": 368.14000000000004,
+      "open_stake": 58.0,
       "settled_pl": 88.47549999999998,
-      "n_bets": 40,
+      "n_bets": 41,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,20 @@
     }
   },
   "source_summary": {
+    "punt": {
+      "GBP": {
+        "wagered": 148.06,
+        "open_stake": 15.0,
+        "settled_pl": -31.33,
+        "n_bets": 9
+      },
+      "USD": {
+        "wagered": 13.366,
+        "open_stake": 1.0,
+        "settled_pl": -2.367,
+        "n_bets": 10
+      }
+    },
     "model": {
       "GBP": {
         "wagered": 156.07999999999998,
@@ -74,20 +88,6 @@
         "open_stake": 60.0,
         "settled_pl": -23.827999999999996,
         "n_bets": 7
-      }
-    },
-    "punt": {
-      "GBP": {
-        "wagered": 143.06,
-        "open_stake": 10.0,
-        "settled_pl": -31.33,
-        "n_bets": 8
-      },
-      "USD": {
-        "wagered": 13.366,
-        "open_stake": 1.0,
-        "settled_pl": -2.367,
-        "n_bets": 10
       }
     },
     "offer": {
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "Paddy Power": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 25.0,
+      "open_stake": 5.0,
+      "settled_pl": 30.0,
+      "n_bets": 4
+    },
     "Betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -187,14 +195,6 @@
       "open_stake": 0.0,
       "settled_pl": -19.0,
       "n_bets": 4
-    },
-    "Paddy Power": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 20.0,
-      "open_stake": 0.0,
-      "settled_pl": 30.0,
-      "n_bets": 3
     }
   },
   "closed_positions": [
@@ -2102,6 +2102,26 @@
     "n_with_close": 24
   },
   "positions": [
+    {
+      "id": 93,
+      "ts_utc": "2026-06-19T11:15:17",
+      "match": "Scotland vs Morocco",
+      "match_id": "MANUAL_SCOTLAND_VS_MOROCCO",
+      "market": "Player Shots on Target",
+      "selection": "Scott McTominay to have 1 or more shots on target including woodwork",
+      "platform": "Paddy Power",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 2.5,
+      "stake": 5.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.92; boost"
+    },
     {
       "id": 92,
       "ts_utc": "2026-06-18T15:32:35",
