@@ -230,6 +230,23 @@ def _canon_platform(raw: str) -> str:
     return p if any(c.isupper() for c in p) else p.title().replace("_", " ")
 
 
+def _venue_of(platform: str) -> str:
+    """Map a ledger ``platform`` string to its venue class for pooling/symbols.
+
+    Restored 2026-06-18 (Phase-0 audit): the callers in :func:`_pool_rows`
+    (line ~245) and :func:`handle_bets` (line ~352) referenced this helper but
+    the definition had been dropped in a refactor, crashing ``/bets`` with a
+    ``NameError`` on any open bet and silently voiding the per-venue GBP/USD
+    split in ``/summary``. Keys line up with :data:`_VENUE_SYMBOL`.
+    """
+    p = (platform or "").lower()
+    if "polymarket" in p:
+        return "polymarket"
+    if "kalshi" in p:
+        return "kalshi"
+    return "sportsbook"
+
+
 _VENUE_SYMBOL = {"sportsbook": "£", "polymarket": "$", "polymarket-auto": "$", "kalshi": "$"}
 
 

@@ -1,6 +1,27 @@
 # World Cup Alpha: Shared TODO
 
-**Last updated:** 2026-06-18 | **Scope:** cross-session (main + feature/cross-venue-events) + cross-device (Drews-Mac-mini + dev MacBook)
+**Last updated:** 2026-06-18 | **Scope:** cross-session (main + feature/market-anchored-advancement) + cross-device (Drews-Mac-mini + dev MacBook)
+
+## 🔴 Phase 0 audit (2026-06-18) — P0 fixes (full report: `docs/research/phase0_audit_2026-06-18.md`)
+
+- [x] **`/bets` crash fixed** — `_venue_of` was undefined (committed regression on main) → `NameError` on any open bet; `/summary` silently dropped the per-venue GBP/USD split. Restored in `src/wca/bot/app.py`; 9/9 `test_bot_bets` pass. **Owner:** bot.
+- [ ] **Fix `scripts/wca_settle.py:95` free-bet/lay loss bug** — books loss `-stake` unconditionally; SELECT at :62 omits `source` → free bets mis-booked as real-cash loss (repro −10.0 vs 0.0). Mirror `store.py:305-320`; add CLI free/lay test. **Owner:** ledger.
+- [ ] **Gate ungated live scripts** — `wca_pm_try.py --post` raw-POSTs orders bypassing all guardrails; `wca_pm_fund.py:118` / `wca_pm_transfer.py:99` broadcast on-chain txs with no arming flag. Bring under `PM_*_LIVE=1 + --yes` (mirror `wca_pm_approve.py:128`); route orders through `place_order`. **Owner:** PM/exec.
+- [ ] **Funder guard** — `trader.py:716-722` marks `_account_class_proven=True` for any forced funder with no balance check; default fallback is the $0 `0x4023…E191` wallet. Require `POLYMARKET_SIG_TYPE=3` + non-zero balance. **Owner:** PM/exec.
+- [ ] **Stale-price/expiry on `Y PM-n`** — `_parked_load` re-serves week-old `parked`/`failed` rows; `place_order` re-fetches tick only, never re-quotes. Add TTL + re-quote/reject-on-move. **Owner:** PM/exec.
+- [ ] **Currency-blind `reports.summary`** — sums GBP+USD into one `total_pl`/`roi` (`reports.py:430-433`, printed at `app.py:298`). Never sum across `VENUE_CURRENCY`. **Owner:** ledger.
+- [ ] **arb liquidity guard** — `arb.py` enforces settlement-key but not fillable size → phantom-arb risk. **Owner:** EV.
+- [ ] **Promo/settlement schema** — add `settlement_clause`/`promo_kind`/per-leg `settlement_key`/`cashed` to `bets`; 2Up/Super-Sub/acca-insurance/cash-out currently unrepresentable (a promo winner that is a book loss is booked as a loss). **Owner:** ledger.
+
+### Market-anchored advancement (branch `feature/market-anchored-advancement`)
+- [x] PM price-history + winner de-vig helpers shipped (`src/wca/data/polymarket.py` `get_prices_history`, `winner_market_implied`; tested `tests/test_data.py`). Redo: `docs/research/argentina_market_anchored.md` (Argentina is a model artifact; France is the market favourite).
+- [ ] Re-wire `advancement.make_prob_fn` to anchor winner/stage outputs to the de-vigged market (w≈0.5); delete the false "no market odds for later rounds" docstring (`advancement.py:13-14,170-171`). Keep on the ET/pens settlement track. **Owner:** models.
+- [ ] Historize PM winner/stage prices into storage (helpers have zero callers; table is 100% theoddsapi). **Owner:** data.
+
+### Doc-staleness corrections (see audit report)
+- [ ] SYSTEM_MAP: Kelly ladder is WIRED (§418); base rung £1500 (§494); 12 commands not 9 (§550); host bonus undiluted in card. README: base £1500, tests 993, commands 12. Calibration (Brier/log-loss/bins) is LIVE — only the diagnostics doc was missing (now `docs/research/model_diagnostics.md`).
+- [ ] Branch refs: `feature/cross-venue-events` is gone; update HEAD refs.
+
 
 ## 🏗️ Infrastructure & Coordination
 
