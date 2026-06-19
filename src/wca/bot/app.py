@@ -52,6 +52,7 @@ logger = logging.getLogger(__name__)
 
 CARD_PATH = "data/card_latest.md"
 NEXT_PATH = "data/next_latest.md"
+GOALSCORERS_PATH = "data/goalscorers_latest.md"
 SCORES_FEED_PATH = "site/scores_data.json"
 CARD_MAX_AGE_HOURS = 6.0
 # The odds feed behind /accas and /boost should refresh frequently; warn beyond
@@ -117,6 +118,7 @@ HELP_TEXT = (
     "/clv — closing-line-value report\n"
     "/card — today's recommended bet card\n"
     "/next — next match preview: winner, corners, scorers, scorelines\n"
+    "/goalscorers — anytime + first-goalscorer recs, next 5 games\n"
     "/scores — predicted FT scorelines per fixture\n"
     "/accas — 4+ leg accumulators (next 5 matches, min 2.0 odds per leg)\n"
     "/structure — project structure metrics\n"
@@ -154,7 +156,7 @@ def _authorized(chat_id: int | str, allowed: Optional[str]) -> bool:
 
 READ_ONLY_MSG = (
     "🔒 Read-only: bets and order confirmations are admin-only in this chat. "
-    "You can use /next, /scores, /card, /summary, /bets, /clv, /ping."
+    "You can use /next, /goalscorers, /scores, /card, /summary, /bets, /clv, /ping."
 )
 
 # Lone yes/no (betslip confirm) or Y/N BET-<id> / PM-<n> (order confirm) —
@@ -591,6 +593,34 @@ def handle_next(
             "writes it alongside the main card — try again after the next build."
         )
     body = cached.get("text") or "(empty preview)"
+    if cached.get("stale"):
+        body = "⚠️ STALE (generated %s UTC)\n\n%s" % (cached.get("generated"), body)
+    return body
+
+
+def handle_goalscorers(
+    goalscorers_path: str = GOALSCORERS_PATH,
+    now_utc: Optional[str] = None,
+) -> str:
+    """Serve the cached /goalscorers card written by ``scripts/wca_build_card.py``.
+
+    Anytime + first-goalscorer recommendations for the next few fixtures (best
+    book / Polymarket prices, with player-level model edges + Kelly £ stakes
+    where a share exists). Built on cron alongside the main card; this handler
+    reads the cache and flags staleness.
+    """
+    if now_utc is None:
+        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    cached = cardcache.read_card(
+        goalscorers_path, now_utc=now_utc, max_age_hours=CARD_MAX_AGE_HOURS
+    )
+    if cached is None:
+        return (
+            "*Goalscorers*\n"
+            "No card cached yet. The cron build (`scripts/wca_build_card.py`) "
+            "writes it alongside the main card — try again after the next build."
+        )
+    body = cached.get("text") or "(empty card)"
     if cached.get("stale"):
         body = "⚠️ STALE (generated %s UTC)\n\n%s" % (cached.get("generated"), body)
     return body
@@ -1901,6 +1931,8 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_card(db_path)
     if cmd == "/next":
         return handle_next(next_path=NEXT_PATH)
+    if cmd == "/goalscorers":
+        return handle_goalscorers(goalscorers_path=GOALSCORERS_PATH)
     if cmd == "/scores":
         return handle_scores(card_path=CARD_PATH)
     if cmd == "/accas":

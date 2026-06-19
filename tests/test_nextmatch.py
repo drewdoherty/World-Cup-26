@@ -9,8 +9,12 @@ import json
 from wca.nextmatch import (
     ANYTIME_SCORER_MARKET,
     FIRST_SCORER_MARKET,
+    GoalscorerFixture,
+    GoalscorerLine,
+    build_goalscorer_card,
     build_goalscorers,
     build_next_match,
+    format_goalscorer_card,
     format_next_match,
     top_scorers_from_odds,
 )
@@ -353,3 +357,88 @@ class TestFormatAndBot:
         monkeypatch.setattr(bot_app, "NEXT_PATH", path)
         reply = bot_app.dispatch("/next", db_path=str(tmp_path / "wca.db"))
         assert "Next match" in reply
+
+
+# ---------------------------------------------------------------------------
+# /goalscorers — multi-fixture anytime + first-goalscorer card.
+# ---------------------------------------------------------------------------
+
+
+class TestGoalscorerCard:
+    def _models(self):
+        from wca.card import fit_models
+
+        rng = np.random.default_rng(42)
+        return fit_models(_synthetic_results(rng), half_life_years=8.0)
+
+    def test_build_orders_and_degrades_without_scorers(self):
+        # No per-event scorer odds -> each fixture degrades to market-less, but
+        # the multi-fixture iteration + kickoff ordering still hold.
+        cards = build_goalscorer_card(
+            self._models(), _synthetic_odds(), _synthetic_fixtures_meta(),
+            {}, top_k_fixtures=3, pm_lookup=False,
+        )
+        assert 1 <= len(cards) <= 3
+        assert (cards[0].home, cards[0].away) == ("Alpha", "Bravo")  # earliest KO
+        assert not (cards[0].goalscorers.get("home") or cards[0].goalscorers.get("away"))
+
+    def test_format_renders_headers_and_model_stake(self):
+        priced = GoalscorerLine(
+            player="Test Striker", team="Alpha",
+            anytime_book_odds=3.0, anytime_book="Book A",
+            first_book_odds=8.0, first_book="Book A", xg_per_game=0.5,
+            model_p_anytime=0.45, model_fair_anytime=1.0 / 0.45,
+            model_p_first=0.16, model_fair_first=1.0 / 0.16,
+        )
+        fx1 = GoalscorerFixture(
+            home="Alpha", away="Bravo", commence_time="2026-06-11T18:00:00Z",
+            goalscorers={"home": [priced], "away": []},
+            goalscorer_note="basis note", bankroll=1500.0,
+        )
+        fx2 = GoalscorerFixture(
+            home="Charlie", away="Delta", commence_time="2026-06-12T18:00:00Z",
+            goalscorers={"home": [], "away": []},
+        )
+        text = format_goalscorer_card([fx1, fx2])
+        assert "Goalscorers" in text and "next 2 games" in text
+        assert "Alpha vs Bravo" in text and "Charlie vs Delta" in text
+        assert "Any  bk 3.00" in text and "1st  bk 8.00" in text
+        assert "£" in text                       # +EV model edge -> Kelly stake
+        assert "no scorer market" in text        # fx2 degrades
+
+    def test_format_empty(self):
+        assert "No upcoming fixtures" in format_goalscorer_card([])
+
+    def test_format_flat_fallback_when_no_squad(self):
+        from wca.nextmatch import ScorerPrice
+
+        fx = GoalscorerFixture(
+            home="Alpha", away="Bravo", commence_time="2026-06-11T18:00:00Z",
+            goalscorers={"home": [], "away": []},
+            goalscorer_note="44 market player(s) not in squad lists",
+            scorers=[ScorerPrice(player="Star Man", best_odds=2.5,
+                                 best_book="Book A", implied=0.4)],
+        )
+        text = format_goalscorer_card([fx])
+        assert "top anytime (both teams" in text
+        assert "Star Man" in text and "2.50" in text
+
+    def test_handle_goalscorers_serves_cache(self, tmp_path):
+        from wca.bot.app import handle_goalscorers
+        from wca.cardcache import write_card
+
+        path = str(tmp_path / "goalscorers_latest.md")
+        assert "No card cached" in handle_goalscorers(goalscorers_path=path)
+        write_card("⚽ *Goalscorers* — next 5 games", path=path, ts_utc="2026-06-13T10:00:00")
+        out = handle_goalscorers(goalscorers_path=path, now_utc="2026-06-13T11:00:00")
+        assert "Goalscorers" in out and "STALE" not in out
+        out = handle_goalscorers(goalscorers_path=path, now_utc="2026-06-14T11:00:00")
+        assert "STALE" in out
+
+    def test_dispatch_routes_goalscorers(self, tmp_path, monkeypatch):
+        from wca.bot import app as bot_app
+
+        path = str(tmp_path / "goalscorers_latest.md")
+        monkeypatch.setattr(bot_app, "GOALSCORERS_PATH", path)
+        reply = bot_app.dispatch("/goalscorers", db_path=str(tmp_path / "wca.db"))
+        assert "Goalscorers" in reply

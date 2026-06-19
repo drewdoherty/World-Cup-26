@@ -66,6 +66,20 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--goalscorers-out",
+        default="data/goalscorers_latest.md",
+        help=(
+            "Output path for the cached /goalscorers card "
+            "(default: data/goalscorers_latest.md; pass '' to skip)"
+        ),
+    )
+    parser.add_argument(
+        "--goalscorers-n",
+        type=int,
+        default=5,
+        help="Number of upcoming fixtures in the /goalscorers card (default: 5)",
+    )
+    parser.add_argument(
         "--skip-scorers",
         action="store_true",
         help="Skip the per-event anytime-scorer odds pull (saves API quota)",
@@ -283,6 +297,59 @@ def main() -> None:
             print("Next-match card written: out=%s" % args.next_out)
         except Exception as exc:
             print("WARN: next-match card failed: %s" % exc, file=sys.stderr)
+
+    # ------------------------------------------------------------------
+    # Goalscorers card (/goalscorers): anytime + first-goalscorer recs for the
+    # next N fixtures. One per-event scorer pull per fixture (Odds API credits),
+    # priced player-level (StatsBomb npxg-share x DC lambda) with Kelly stakes.
+    # ------------------------------------------------------------------
+    if args.goalscorers_out and args.goalscorers_n and args.goalscorers_n > 0:
+        try:
+            from wca.card import _iter_fixture_blends, BlendWeights
+            from wca.nextmatch import (
+                SCORER_MARKETS,
+                build_goalscorer_card,
+                format_goalscorer_card,
+            )
+
+            scorer_by_event = {}
+            if not args.skip_scorers and not odds_df.empty:
+                _host = ("United States", "Mexico", "Canada", "USA")
+                _blends = sorted(
+                    _iter_fixture_blends(
+                        models, odds_df, fixtures_meta, BlendWeights(), _host
+                    ),
+                    key=lambda fb: str(fb.fx["commence_time"]),
+                )[: args.goalscorers_n]
+                for fb in _blends:
+                    eid = str(fb.fx.get("event_id"))
+                    if not eid or eid == "None" or eid in scorer_by_event:
+                        continue
+                    try:
+                        df, _q = theoddsapi.get_event_odds(
+                            "soccer_fifa_world_cup", eid,
+                            regions=args.regions, markets=SCORER_MARKETS,
+                        )
+                        scorer_by_event[eid] = df
+                    except Exception as exc:
+                        print("WARN: scorer pull failed for %s: %s" % (eid, exc),
+                              file=sys.stderr)
+
+            gcards = build_goalscorer_card(
+                models, odds_df, fixtures_meta, scorer_by_event,
+                top_k_fixtures=args.goalscorers_n,
+                bankroll=pool_bank.bankroll,
+                kelly_fraction=pool_bank.kelly_fraction,
+                pm_lookup=not args.skip_scorers,
+            )
+            write_card(
+                format_goalscorer_card(gcards),
+                path=args.goalscorers_out, ts_utc=now_str,
+            )
+            print("Goalscorers card written: out=%s (%d fixtures)"
+                  % (args.goalscorers_out, len(gcards)))
+        except Exception as exc:
+            print("WARN: goalscorers card failed: %s" % exc, file=sys.stderr)
 
     quota_str = (
         "quota remaining=%s" % quota.remaining

@@ -544,24 +544,15 @@ def _model_suffix(
     return s
 
 
-def _format_goalscorers(card: NextMatchCard) -> List[str]:
-    """Render the per-team top-goalscorers block (compact, phone-width)."""
-    gs = card.goalscorers or {}
-    home_lines = gs.get("home") or []
-    away_lines = gs.get("away") or []
-    if not home_lines and not away_lines:
-        # Fall back to the legacy flat anytime list if the split is empty.
-        if card.scorers:
-            out = ["*Anytime scorer* (best book price, vig in)"]
-            for s in card.scorers:
-                out.append(
-                    "  %-18s %5.2f (%s)  imp %.0f%%"
-                    % (s.player[:18], s.best_odds, s.best_book, s.implied * 100)
-                )
-            return out
-        return ["*Top goalscorers* — no scorer market available yet."]
+def _goalscorer_team_blocks(card) -> List[str]:
+    """Per-team player lines (no section header / note).
 
-    out = ["*Top goalscorers* — best book / Polymarket"]
+    Shared by the single-fixture /next block and the multi-fixture
+    /goalscorers card. ``card`` need only expose ``goalscorers`` / ``home`` /
+    ``away`` and the Kelly fields read by :func:`_model_suffix`.
+    """
+    gs = card.goalscorers or {}
+    out: List[str] = []
     side_team = {"home": card.home, "away": card.away}
     for side in ("home", "away"):
         rows = gs.get(side) or []
@@ -594,6 +585,26 @@ def _format_goalscorers(card: NextMatchCard) -> List[str]:
                     ),
                 )
             )
+    return out
+
+
+def _format_goalscorers(card: NextMatchCard) -> List[str]:
+    """Render the per-team top-goalscorers block (compact, phone-width)."""
+    gs = card.goalscorers or {}
+    if not (gs.get("home") or gs.get("away")):
+        # Fall back to the legacy flat anytime list if the split is empty.
+        if card.scorers:
+            out = ["*Anytime scorer* (best book price, vig in)"]
+            for s in card.scorers:
+                out.append(
+                    "  %-18s %5.2f (%s)  imp %.0f%%"
+                    % (s.player[:18], s.best_odds, s.best_book, s.implied * 100)
+                )
+            return out
+        return ["*Top goalscorers* — no scorer market available yet."]
+
+    out = ["*Top goalscorers* — best book / Polymarket"]
+    out.extend(_goalscorer_team_blocks(card))
     if card.goalscorer_note:
         out.append("_%s_" % card.goalscorer_note)
     return out
@@ -661,3 +672,156 @@ def format_next_match(card: Optional[NextMatchCard]) -> str:
             % (ou25[0] * 100, ou25[1] * 100, c.btts * 100)
         )
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# /goalscorers — anytime + first-goalscorer card for the next N fixtures.
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class GoalscorerFixture:
+    """One fixture's goalscorer block for the multi-game /goalscorers card.
+
+    Carries the same fields :func:`_goalscorer_team_blocks` / :func:`_model_suffix`
+    read off a :class:`NextMatchCard`, so the shared renderer works for both.
+    """
+
+    home: str
+    away: str
+    commence_time: str
+    goalscorers: Dict[str, List[GoalscorerLine]] = field(default_factory=dict)
+    goalscorer_note: str = ""
+    # Flat top-anytime fallback (both teams, unsplit) used when the squad split
+    # fails — so a fixture whose teams are absent from squads.json still shows
+    # its most-likely scorers + best anytime price instead of nothing.
+    scorers: List[ScorerPrice] = field(default_factory=list)
+    bankroll: float = 1500.0
+    kelly_fraction: float = 0.25
+    kelly_cap: float = 0.05
+
+
+def build_goalscorer_card(
+    models: FittedModels,
+    odds_df: pd.DataFrame,
+    fixtures_meta: pd.DataFrame,
+    scorer_by_event: Dict[str, pd.DataFrame],
+    *,
+    weights: BlendWeights = BlendWeights(),
+    host_nations: Sequence[str] = ("United States", "Mexico", "Canada", "USA"),
+    top_k_fixtures: int = 5,
+    top_n_per_team: int = 2,
+    squads_path: str = DEFAULT_SQUADS_PATH,
+    players_path: str = "data/players.json",
+    bankroll: float = 1500.0,
+    kelly_fraction: float = 0.25,
+    kelly_cap: float = 0.05,
+    pm_events: Optional[List[dict]] = None,
+    pm_lookup: bool = True,
+) -> List[GoalscorerFixture]:
+    """Goalscorer blocks for the next ``top_k_fixtures`` fixtures by kickoff.
+
+    ``scorer_by_event`` maps a fixture's ``event_id`` to its per-event
+    anytime+first-goalscorer odds frame (pulled by the caller); a missing entry
+    degrades that fixture to "no scorer market". Player-level model pricing and
+    Kelly stakes follow the same rules as :func:`build_goalscorers`.
+    """
+    blends = _iter_fixture_blends(models, odds_df, fixtures_meta, weights, host_nations)
+    blends = sorted(blends, key=lambda fb: str(fb.fx["commence_time"]))[:top_k_fixtures]
+    # Resolve the Polymarket events list once and reuse it across fixtures.
+    if pm_lookup and pm_events is None:
+        try:
+            from wca.data import polymarket as pm
+
+            pm_events = pm.find_world_cup_markets(include_closed=False)
+        except Exception:
+            pm_events = []
+
+    out: List[GoalscorerFixture] = []
+    for fb in blends:
+        try:
+            pred = models.dc.predict(fb.home, fb.away, neutral=fb.neutral, warn=False)
+            lam_h = float(getattr(pred, "lambda_home", 0.0) or 0.0)
+            lam_a = float(getattr(pred, "lambda_away", 0.0) or 0.0)
+        except Exception:
+            lam_h = lam_a = 0.0
+        scorer_df = scorer_by_event.get(str(fb.fx.get("event_id")))
+        goalscorers, note = build_goalscorers(
+            fb.home,
+            fb.away,
+            scorer_df,
+            top_n_per_team=top_n_per_team,
+            squads_path=squads_path,
+            pm_events=pm_events,
+            pm_lookup=pm_lookup,
+            lambda_home=lam_h,
+            lambda_away=lam_a,
+            players_path=players_path,
+        )
+        # If the squad split placed nobody but the market exists, fall back to a
+        # flat top-anytime list (both teams) so the fixture still shows recs.
+        flat: List[ScorerPrice] = []
+        if not (goalscorers.get("home") or goalscorers.get("away")) and scorer_df is not None:
+            flat = top_scorers_from_odds(scorer_df, top_n=6)
+        out.append(
+            GoalscorerFixture(
+                home=fb.home,
+                away=fb.away,
+                commence_time=str(fb.fx["commence_time"]),
+                goalscorers=goalscorers,
+                goalscorer_note=note,
+                scorers=flat,
+                bankroll=bankroll,
+                kelly_fraction=kelly_fraction,
+                kelly_cap=kelly_cap,
+            )
+        )
+    return out
+
+
+def _fmt_kickoff(ts: str) -> str:
+    """Compact UTC kickoff label, e.g. ``Jun 19 19:00Z``."""
+    from datetime import datetime
+
+    try:
+        dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+        return dt.strftime("%b %d %H:%MZ")
+    except Exception:
+        return str(ts)
+
+
+def format_goalscorer_card(fixtures: List[GoalscorerFixture]) -> str:
+    """Telegram Markdown for the multi-fixture /goalscorers card."""
+    if not fixtures:
+        return (
+            "⚽ *Goalscorers*\n"
+            "No upcoming fixtures with a usable market in the current window."
+        )
+    out = [
+        "⚽ *Goalscorers* — next %d games" % len(fixtures),
+        "_anytime + first · best book / Polymarket; ¼-Kelly £ stake on +EV_",
+        "",
+    ]
+    for fx in fixtures:
+        out.append(
+            "*%s vs %s*  _%s_" % (fx.home, fx.away, _fmt_kickoff(fx.commence_time))
+        )
+        gs = fx.goalscorers or {}
+        if gs.get("home") or gs.get("away"):
+            out.extend(_goalscorer_team_blocks(fx))
+            if fx.goalscorer_note:
+                out.append("_%s_" % fx.goalscorer_note)
+        elif fx.scorers:
+            # Squad split unavailable: show the flat top-anytime list (both teams).
+            out.append("_top anytime (both teams — add squad to split + FGS)_")
+            for s in fx.scorers:
+                out.append(
+                    "  %-20s %5.2f (%s)  imp %.0f%%"
+                    % (s.player[:20], s.best_odds, s.best_book, s.implied * 100)
+                )
+        else:
+            out.append(
+                "  _%s_" % (fx.goalscorer_note or "no scorer market for this fixture")
+            )
+        out.append("")
+    return "\n".join(out).rstrip()
