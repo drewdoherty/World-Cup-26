@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-19 11:45:49 UTC"
+    "generated": "2026-06-19T11:56:23"
   },
   "totals": {
-    "wagered": 658.936,
-    "open_stake": 76.0,
-    "settled_pl": 32.000499999999974,
-    "n_bets": 73
+    "wagered": 668.2860000000001,
+    "open_stake": 75.35,
+    "settled_pl": 22.000500000000002,
+    "n_bets": 74
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 507.64000000000004,
-      "open_stake": 15.0,
-      "settled_pl": 58.19549999999995,
-      "n_bets": 56
+      "wagered": 516.99,
+      "open_stake": 14.35,
+      "settled_pl": 48.19549999999998,
+      "n_bets": 57
     },
     "USD": {
       "wagered": 151.29600000000002,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 507.64000000000004,
-      "open_stake": 15.0,
-      "settled_pl": 58.19549999999995,
-      "n_bets": 56,
+      "wagered": 516.99,
+      "open_stake": 14.35,
+      "settled_pl": 48.19549999999998,
+      "n_bets": 57,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 380.64000000000004,
-      "open_stake": 25.0,
-      "settled_pl": 92.19549999999998,
-      "n_bets": 42,
+      "wagered": 389.99000000000007,
+      "open_stake": 24.35,
+      "settled_pl": 82.19549999999995,
+      "n_bets": 43,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -64,10 +64,10 @@
   "source_summary": {
     "model": {
       "GBP": {
-        "wagered": 168.58,
-        "open_stake": 0.0,
+        "wagered": 177.93000000000004,
+        "open_stake": 9.35,
         "settled_pl": 20.7055,
-        "n_bets": 25
+        "n_bets": 26
       },
       "USD": {
         "wagered": 137.93,
@@ -79,8 +79,8 @@
     "punt": {
       "GBP": {
         "wagered": 148.06,
-        "open_stake": 15.0,
-        "settled_pl": -31.33,
+        "open_stake": 5.0,
+        "settled_pl": -41.33,
         "n_bets": 9
       },
       "USD": {
@@ -111,10 +111,10 @@
     "Betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
-      "wagered": 167.70000000000002,
-      "open_stake": 0.0,
+      "wagered": 177.05,
+      "open_stake": 9.35,
       "settled_pl": 2.9620000000000033,
-      "n_bets": 10
+      "n_bets": 11
     },
     "Paddy Power": {
       "venue": "sportsbook",
@@ -128,8 +128,8 @@
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 50.0,
-      "open_stake": 10.0,
-      "settled_pl": -19.0,
+      "open_stake": 0.0,
+      "settled_pl": -29.0,
       "n_bets": 5
     },
     "Betway": {
@@ -239,6 +239,31 @@
       "closing_odds": null,
       "clv": null,
       "notes": "screenshot ingest; currency=GBP; conf 0.92 | settled WON vs Mexico 1-0 South Korea (verified feed); model/market backfilled from model_predictions_log 2026-06-18 pre-KO"
+    },
+    {
+      "id": 91,
+      "ts_utc": "2026-06-18T15:18:41",
+      "settled_ts": "2026-06-19T12:30:00",
+      "match": "Switzerland vs Bosnia-Herzegovina",
+      "match_id": "MANUAL_SWITZERLAND_VS_BOSNIA_HERZEGOVINA",
+      "market": "Bet Builder - Switzerland To Win Both Halves / Over 2.5 Home Team Total Goals / Breel Embolo Player To Score And Assist",
+      "selection": "Switzerland To Win Both Halves + Over 2.5 Home Team Total Goals + Breel Embolo Player To Score And Assist",
+      "platform": "betfred",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 19.28,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "lost",
+      "pl": -10.0,
+      "closing_odds": null,
+      "clv": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.92 | settled LOST per user (Betfred graded): a leg failed in the bet builder"
     },
     {
       "id": 90,
@@ -2106,6 +2131,10 @@
         [
           "2026-06-19T12:00:00",
           58.2
+        ],
+        [
+          "2026-06-19T12:30:00",
+          48.2
         ]
       ]
     },
@@ -2182,6 +2211,26 @@
   },
   "positions": [
     {
+      "id": 95,
+      "ts_utc": "2026-06-19T11:56:23",
+      "match": "Türkiye v Paraguay",
+      "match_id": "MANUAL_T_RKIYE_V_PARAGUAY",
+      "market": "Match Odds",
+      "selection": "Paraguay",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 4.0,
+      "stake": 9.35,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97"
+    },
+    {
       "id": 93,
       "ts_utc": "2026-06-19T11:15:17",
       "match": "Scotland vs Morocco",
@@ -2200,26 +2249,6 @@
       "ev": null,
       "kelly_fraction": null,
       "notes": "screenshot ingest; currency=GBP; conf 0.92; boost"
-    },
-    {
-      "id": 91,
-      "ts_utc": "2026-06-18T15:18:41",
-      "match": "Switzerland vs Bosnia-Herzegovina",
-      "match_id": "MANUAL_SWITZERLAND_VS_BOSNIA_HERZEGOVINA",
-      "market": "Bet Builder - Switzerland To Win Both Halves / Over 2.5 Home Team Total Goals / Breel Embolo Player To Score And Assist",
-      "selection": "Switzerland To Win Both Halves + Over 2.5 Home Team Total Goals + Breel Embolo Player To Score And Assist",
-      "platform": "betfred",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 19.28,
-      "stake": 10.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92"
     },
     {
       "id": 57,
