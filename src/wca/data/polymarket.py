@@ -12,6 +12,9 @@ from typing import Any, Dict, List, Optional
 import requests
 
 _BASE_URL = "https://gamma-api.polymarket.com"
+#: CLOB host serves the public order book + the price-history time series. It is
+#: a *different* host from the Gamma API above, so it has its own helper.
+_CLOB_BASE_URL = "https://clob.polymarket.com"
 _TIMEOUT = 15
 _HEADERS = {
     "User-Agent": "WorldCupAlpha/0.1 (research; contact via GitHub)",
@@ -332,3 +335,111 @@ def find_world_cup_markets(include_closed: bool = False) -> List[Dict[str, Any]]
             break  # last page reached
 
     return results
+
+
+def get_prices_history(
+    token_id: str,
+    *,
+    fidelity: int = 360,
+    interval: str = "max",
+    start_ts: Optional[int] = None,
+    end_ts: Optional[int] = None,
+) -> List[Dict[str, float]]:
+    """Fetch the historical share-price series for a single CLOB token.
+
+    Hits the public CLOB ``prices-history`` endpoint
+    (``https://clob.polymarket.com/prices-history``). Returns a chronological
+    list of ``{"ts": <epoch seconds>, "price": <0..1>}`` dicts (one share = one
+    outcome token, priced in [0, 1] = implied probability). Returns ``[]`` when
+    the token has no recorded history.
+
+    Parameters
+    ----------
+    token_id:
+        The CLOB token id (an entry of a market's decoded ``clobTokenIds``).
+    fidelity:
+        Resolution in minutes between points. Polymarket caps the number of
+        points returned, so a coarser fidelity covers a longer window.
+    interval:
+        Time window keyword (``"max"``, ``"1m"``, ``"1w"``, ``"1d"``, ``"6h"``).
+        Ignored by the API when ``start_ts`` / ``end_ts`` are supplied.
+    start_ts, end_ts:
+        Optional explicit epoch-second bounds. When either is given the
+        ``interval`` keyword is dropped in favour of the explicit window.
+
+    Raises
+    ------
+    requests.HTTPError
+        On a 4xx/5xx response.
+    """
+    params: Dict[str, Any] = {"market": str(token_id), "fidelity": int(fidelity)}
+    if start_ts is not None or end_ts is not None:
+        if start_ts is not None:
+            params["startTs"] = int(start_ts)
+        if end_ts is not None:
+            params["endTs"] = int(end_ts)
+    else:
+        params["interval"] = interval
+
+    url = _CLOB_BASE_URL.rstrip("/") + "/prices-history"
+    resp = requests.get(url, params=params, headers=_HEADERS, timeout=_TIMEOUT)
+    resp.raise_for_status()
+    body = resp.json()
+    # The endpoint returns {"history": [{"t": epoch, "p": price}, ...]}; tolerate
+    # a bare list too.
+    history = body.get("history", []) if isinstance(body, dict) else (body or [])
+    out: List[Dict[str, float]] = []
+    for pt in history:
+        try:
+            out.append({"ts": int(pt["t"]), "price": float(pt["p"])})
+        except (KeyError, TypeError, ValueError):
+            logger.warning("Skipping malformed price-history point: %r", pt)
+            continue
+    return out
+
+
+def winner_market_implied(
+    events: Optional[List[Dict[str, Any]]] = None,
+    *,
+    event_title: str = "World Cup Winner",
+) -> Dict[str, float]:
+    """De-vigged market-implied World Cup *winner* probability per team.
+
+    Reads the multi-outcome winner event (one Yes/No market per team), takes
+    each team's YES price (mid of ``bestBid``/``bestAsk``, else the YES
+    ``outcomePrices`` entry, via :func:`_yes_token_and_price`), and normalises
+    across all teams so the probabilities sum to one — a multiplicative de-vig
+    of the book's overround. This is the market anchor for the tournament
+    simulation's winner output (see :mod:`wca.advancement`).
+
+    Returns ``{team_label: prob}`` keyed by the raw Polymarket ``groupItemTitle``
+    team label. Callers should canonicalise the keys with
+    :func:`wca.data.teamnames.canonical` before matching to model team names.
+    Returns ``{}`` when the event/markets are unavailable.
+
+    ``events`` may be supplied (tests / batch runs) to avoid a network call;
+    otherwise the live World Cup events are fetched.
+    """
+    if events is None:
+        events = find_world_cup_markets(include_closed=False)
+
+    ev = next(
+        (e for e in events if (e.get("title") or "").strip().lower() == event_title.lower()),
+        None,
+    )
+    if ev is None:
+        return {}
+
+    raw: Dict[str, float] = {}
+    for m in ev.get("markets") or []:
+        team = (m.get("groupItemTitle") or "").strip()
+        if not team:
+            continue
+        info = _yes_token_and_price(m, ev)
+        if info is not None:
+            raw[team] = float(info["price"])
+
+    total = sum(raw.values())
+    if total <= 0:
+        return {}
+    return {team: price / total for team, price in raw.items()}

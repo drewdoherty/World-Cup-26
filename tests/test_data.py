@@ -617,3 +617,90 @@ class TestSnapshotAppend:
         assert len(data) == 1
         assert data[0]["source"] == "pm"
         assert data[0]["decimal_odds"] == pytest.approx(3.0)
+
+
+# ---------------------------------------------------------------------------
+# wca.data.polymarket — price history + winner-market de-vig (market anchor)
+# ---------------------------------------------------------------------------
+
+class TestPolymarketPricesHistory:
+    """get_prices_history: CLOB share-price time series."""
+
+    def test_parses_history_points_chronologically(self, monkeypatch: Any) -> None:
+        from wca.data import polymarket
+
+        payload = {"history": [{"t": 1779192023, "p": 0.1665},
+                               {"t": 1781869084, "p": 0.1365}]}
+        captured: Dict[str, Any] = {}
+
+        def fake_get(url, params=None, headers=None, timeout=None):
+            captured["url"] = url
+            captured["params"] = params
+            return _make_response(payload)
+
+        monkeypatch.setattr(polymarket.requests, "get", fake_get)
+        out = polymarket.get_prices_history("TOKEN123", fidelity=720)
+
+        assert out == [{"ts": 1779192023, "price": 0.1665},
+                       {"ts": 1781869084, "price": 0.1365}]
+        # hits the CLOB host, not the gamma host, and forwards the token id
+        assert captured["url"].startswith(polymarket._CLOB_BASE_URL)
+        assert captured["params"]["market"] == "TOKEN123"
+        assert captured["params"]["fidelity"] == 720
+        assert captured["params"]["interval"] == "max"
+
+    def test_explicit_window_drops_interval(self, monkeypatch: Any) -> None:
+        from wca.data import polymarket
+        captured: Dict[str, Any] = {}
+
+        def fake_get(url, params=None, headers=None, timeout=None):
+            captured["params"] = params
+            return _make_response({"history": []})
+
+        monkeypatch.setattr(polymarket.requests, "get", fake_get)
+        polymarket.get_prices_history("T", start_ts=100, end_ts=200)
+        assert captured["params"]["startTs"] == 100
+        assert captured["params"]["endTs"] == 200
+        assert "interval" not in captured["params"]
+
+    def test_malformed_points_skipped(self, monkeypatch: Any) -> None:
+        from wca.data import polymarket
+
+        payload = {"history": [{"t": 1, "p": 0.5}, {"t": "bad"}, {"nope": 1}]}
+        monkeypatch.setattr(polymarket.requests, "get",
+                            lambda *a, **k: _make_response(payload))
+        out = polymarket.get_prices_history("T")
+        assert out == [{"ts": 1, "price": 0.5}]
+
+
+class TestPolymarketWinnerMarketImplied:
+    """winner_market_implied: de-vigged per-team WC-winner probabilities."""
+
+    def _winner_event(self) -> Dict[str, Any]:
+        def mk(team: str, yes: float) -> Dict[str, Any]:
+            return {
+                "groupItemTitle": team,
+                "clobTokenIds": '["%s_yes","%s_no"]' % (team, team),
+                "outcomes": '["Yes","No"]',
+                "outcomePrices": '["%s","%s"]' % (yes, round(1 - yes, 4)),
+            }
+        return {
+            "title": "World Cup Winner",
+            "slug": "world-cup-winner",
+            "markets": [mk("France", 0.18), mk("Spain", 0.13),
+                        mk("Argentina", 0.11), mk("Brazil", 0.08)],
+        }
+
+    def test_devig_sums_to_one_and_preserves_order(self) -> None:
+        from wca.data.polymarket import winner_market_implied
+
+        probs = winner_market_implied(events=[self._winner_event()])
+        assert abs(sum(probs.values()) - 1.0) < 1e-9
+        # France was the shortest price -> highest implied prob
+        assert max(probs, key=probs.get) == "France"
+        # de-vig only scales; France/Spain ratio is preserved
+        assert probs["France"] / probs["Spain"] == pytest.approx(0.18 / 0.13, rel=1e-6)
+
+    def test_missing_event_returns_empty(self) -> None:
+        from wca.data.polymarket import winner_market_implied
+        assert winner_market_implied(events=[{"title": "Group A Winner"}]) == {}
