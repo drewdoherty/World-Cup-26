@@ -180,7 +180,8 @@
     skybet: "#3b82f6",
     betfair: "#fde047",
     betfair_ex_uk: "#fde047",
-    betfair_sportsbook: "#fde047",
+    betfair_sportsbook: "#f59e0b",
+    betfred: "#f43f5e",
     williamhill: "#1d4ed8",
     smarkets: "#2dd4bf",
     matchbook: "#f472b6",
@@ -373,7 +374,7 @@
         '<td class="num dim pos-time" style="border-left-color:' + col + '">' +
           esc(timeOnly(p.ts_utc)) + '</td>' +
         '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
-        '<td class="pos-mkt dim" title="' + esc(p.market) + '">' + esc(marketShort(p.market)) + '</td>' +
+        '<td class="pos-mkt dim" title="' + esc(p.market) + '">' + esc(p.market) + '</td>' +
         '<td class="pos-sel" title="' + esc(p.selection) + '">' + esc(dash(p.selection)) + '</td>' +
         '<td class="r num">' + esc(num(p.decimal_odds)) + '</td>' +
         '<td class="r num">' + esc(money(p.stake, p.currency)) + '</td>' +
@@ -1026,8 +1027,11 @@
       tot[c] = (tot[c] || 0) + Number(p.pl || 0);
     });
     if (meta) {
-      meta.textContent = pos.length + " settled · " +
-        Object.keys(tot).map(function (c) { return signedMoney(tot[c], c); }).join(" + ");
+      meta.innerHTML = esc(pos.length + " settled · ") +
+        Object.keys(tot).map(function (c) {
+          return '<span class="' + (tot[c] >= 0 ? "pos" : "neg") + '">' +
+            esc(signedMoney(tot[c], c)) + '</span>';
+        }).join(" + ");
     }
     var rows = pos.map(function (p) {
       var pl = Number(p.pl);
@@ -1037,7 +1041,7 @@
           '" style="border-left:2px solid ' + bookColor(p.platform) + '">' +
         '<td class="num dim">' + esc(timeOnly(p.settled_ts || p.ts_utc)) + '</td>' +
         '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
-        '<td class="pos-mkt dim" title="' + esc(p.market) + '">' + esc(marketShort(p.market)) + '</td>' +
+        '<td class="pos-mkt dim" title="' + esc(p.market) + '">' + esc(p.market) + '</td>' +
         '<td class="pos-sel" title="' + esc(p.selection) + '">' + esc(dash(p.selection)) + '</td>' +
         '<td class="r num">' + esc(num(p.decimal_odds)) + '</td>' +
         '<td class="r num">' + esc(money(p.stake, p.currency)) + '</td>' +
@@ -1049,8 +1053,10 @@
         '<td class="r num ' + evClass(p.clv) + '">' +
           esc(p.clv === null || p.clv === undefined ? "—" : pct(p.clv, 1)) + '</td>' +
         '<td class="pos-src">' + sourceChip(p.source) + '</td>' +
-        '<td><span class="pill ' + esc(p.venue || "sportsbook") + '">' +
-          esc(p.platform || "") + accountSuffix(p.account) + '</span></td>' +
+        '<td><span class="pill book ' + esc(p.venue || "sportsbook") +
+          '" style="color:' + bookColor(p.platform) + ';border-color:' +
+          bookColor(p.platform) + '">' + esc(p.platform || "") +
+          accountSuffix(p.account) + '</span></td>' +
         '</tr>';
     }).join("");
     el.innerHTML =

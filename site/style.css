@@ -190,7 +190,7 @@ body {
   color: var(--muted);
 }
 .panel-body { padding: 12px; }
-.panel-scroll { max-height: 360px; overflow-y: auto; }
+.panel-scroll { max-height: 360px; overflow-y: auto; overflow-x: auto; }
 
 .empty {
   color: var(--muted);
@@ -286,9 +286,6 @@ body {
 .pos-table-wide .pos-sel { max-width: 190px; }
 .pos-mkt {
   color: var(--text-dim);
-  max-width: 110px;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 11px;
 }
