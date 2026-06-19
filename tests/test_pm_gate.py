@@ -536,3 +536,27 @@ def _table_exists(con, name):
     return con.execute(
         "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (name,)
     ).fetchone() is not None
+
+
+def test_order_confirm_defers_when_betslip_parked():
+    # Regression (2026-06-19): "Y PM-5" must NOT be swallowed by the betslip
+    # confirmer when a slip is parked — it has to reach the PM order gate.
+    class _Slip:
+        match_desc = "USA vs Australia"
+        is_combo = True
+        market = "Bet Builder"
+        notes = ""
+        currency = "GBP"
+        confidence = 0.9
+        is_free_bet = False
+        is_boost = False
+
+    app._PENDING_PHOTO_BETS[909] = [_Slip()]
+    try:
+        for tok in ("Y PM-5", "N PM-5", "y pm-2", "Y BET-3"):
+            assert app.handle_photo_confirmation(tok, 909, ":memory:") is None, tok
+            assert 909 in app._PENDING_PHOTO_BETS  # slip left intact for its own yes/no
+        # A genuine betslip yes/no is still handled.
+        assert app.handle_photo_confirmation("no", 909, ":memory:") is not None
+    finally:
+        app._PENDING_PHOTO_BETS.pop(909, None)

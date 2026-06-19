@@ -1098,7 +1098,7 @@ def _format_extracted(bets: List[Any], tags: Optional[Dict[str, str]] = None) ->
     """
     from wca.bot.vision import currency_symbol
 
-    lines = ["*Parsed %d selection(s) from your slip:*" % len(bets)]
+    lines = ["*Parsed %d bet(s) from your slip:*" % len(bets)]
     for i, b in enumerate(bets, 1):
         sym = currency_symbol(getattr(b, "currency", None))
         odds = ("%.2f" % b.decimal_odds) if b.decimal_odds else "?"
@@ -1106,10 +1106,23 @@ def _format_extracted(bets: List[Any], tags: Optional[Dict[str, str]] = None) ->
         book = b.bookmaker or "?"
         flag = "  ⚡boost" if getattr(b, "is_boost", False) else ""
         warn = "" if getattr(b, "confidence", 1.0) >= 0.6 else "  ⚠️low-conf"
-        lines.append(
-            "%d. %s — *%s* @ %s | stake %s | %s%s%s"
-            % (i, b.match_desc, b.selection, odds, stake, book, flag, warn)
-        )
+        # A combo prints the market label (Bet Builder / Accumulator) as a
+        # heading so the single combined price + stake reads as ONE bet, with
+        # the legs broken out underneath.
+        if getattr(b, "is_combo", False):
+            lines.append(
+                "%d. %s — *%s* @ %s | stake %s | %s%s%s"
+                % (i, b.match_desc, getattr(b, "market", "Combo"),
+                   odds, stake, book, flag, warn)
+            )
+            for leg in (b.selection or "").split(" + "):
+                if leg.strip():
+                    lines.append("    • %s" % leg.strip())
+        else:
+            lines.append(
+                "%d. %s — *%s* @ %s | stake %s | %s%s%s"
+                % (i, b.match_desc, b.selection, odds, stake, book, flag, warn)
+            )
     if tags:
         acct = tags.get("account", "1")
         src = _SOURCE_WORD.get(tags.get("source", "punt"), tags.get("source", "punt"))
@@ -1178,6 +1191,12 @@ def handle_photo(
 
 _YESNO_RE = re.compile(r"^\s*(yes|y|no|n)\b", re.IGNORECASE)
 
+# Y/N PM-<n> and Y/N BET-<id> are *order* confirmations (handled by
+# handle_confirmation), NOT betslip yes/no. handle_photo_confirmation must defer
+# them so e.g. "Y PM-5" executes the parked Polymarket order instead of logging
+# a parked betslip on the leading "Y" (the 2026-06-19 mis-route).
+_ORDER_CONFIRM_RE = re.compile(r"^\s*[yn]\s+(?:bet|pm)-\d+", re.IGNORECASE)
+
 
 def handle_photo_confirmation(
     text: str,
@@ -1195,6 +1214,11 @@ def handle_photo_confirmation(
     ``yes`` logs with the parse-time (caption) tags, defaulting to
     ``account="1"`` / ``source="model"`` for an untagged screenshot.
     """
+    # An order confirm (Y/N PM-<n> / Y/N BET-<id>) is never a betslip yes/no —
+    # defer it to handle_confirmation even when a betslip is parked, so the order
+    # executes instead of the slip being logged on the leading "Y".
+    if _ORDER_CONFIRM_RE.match(text or ""):
+        return None
     if pending is None:
         pending = _PENDING_PHOTO_BETS
     if pending_tags is None:
@@ -1225,10 +1249,24 @@ def handle_photo_confirmation(
     logged: List[str] = []
     for b in bets:
         match_id = "MANUAL_" + _slug(b.match_desc)
-        note = "screenshot ingest; currency=%s; conf %.2f%s" % (
+        # A combo (Bet Builder / accumulator) is ONE bet at ONE combined price
+        # with ONE total stake; its leg breakdown lives in notes, never as extra
+        # rows. Tag offer/free bets "SNR" (stake-not-returned) so the /bets and
+        # /summary P&L pools treat the stake as non-cash (the existing
+        # convention: notes containing "SNR").
+        extra = []
+        if getattr(b, "is_combo", False):
+            extra.append(getattr(b, "market", None) or "Combo")
+        combo_notes = getattr(b, "notes", "") or ""
+        if combo_notes:
+            extra.append(combo_notes)
+        if source == "offer" or getattr(b, "is_free_bet", False):
+            extra.append("SNR")
+        note = "screenshot ingest; currency=%s; conf %.2f%s%s" % (
             getattr(b, "currency", None) or "GBP",
             getattr(b, "confidence", 0.0),
             "; boost" if getattr(b, "is_boost", False) else "",
+            ("; " + "; ".join(extra)) if extra else "",
         )
         try:
             bid = record_bet(
