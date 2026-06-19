@@ -1,11 +1,11 @@
-<!-- generated: 2026-06-19T16:56:45 -->
+<!-- generated: 2026-06-19T18:00:11 -->
 ⚽ *Next match* — United States vs Australia
 Kickoff 2026-06-19 19:00:00+00:00
 
 *Winner* (model blend)
-  United States   53.7%  fair 1.86  best 1.65 (betfair_ex_uk) -11.5%
-  Draw            24.2%  fair 4.13  best 4.70 (betfair_ex_uk) +13.8% ✅  £13.94
-  Australia       22.1%  fair 4.52  best 5.40 (betfair_ex_uk) +19.6% ✅  £16.68
+  United States   53.3%  fair 1.88  best 1.67 (betfair_ex_uk) -11.0%
+  Draw            24.9%  fair 4.02  best 4.40 (betfair_ex_uk) +9.4% ✅  £10.37
+  Australia       21.9%  fair 4.57  best 5.60 (matchbook) +22.5% ✅  £18.30
   _stake = ¼-Kelly @ £1500 bankroll (+EV picks)_
 
 *Corners* (model, exp 8.4)
@@ -13,21 +13,21 @@ Kickoff 2026-06-19 19:00:00+00:00
 
 *Top goalscorers* — best book / Polymarket
 _United States_
-  Folarin Balogun  (0.49 g/g)
-    Any  bk 2.60 (Betfair) / PM 2.50
-    1st  bk 5.50 (Sky Bet) / PM --
-  Ricardo Pepi  (0.44 g/g)
-    Any  bk 2.80 (Betfair) / PM 10.00
-    1st  bk 5.50 (Betfair) / PM --
+  Folarin Balogun  (0.48 g/g)
+    Any  bk 2.62 (Betfair) / PM 2.56
+    1st  bk 5.60 (Betfair) / PM --
+  Haji Wright  (0.48 g/g)
+    Any  bk 2.62 (William Hill) / PM 11.11
+    1st  bk 4.75 (William Hill) / PM --
 _Australia_
-  Mohamed Toure  (0.25 g/g)
-    Any  bk 4.60 (Betfair) / PM 7.14
-    1st  bk 10.50 (Betfair) / PM --
-  Tete Yengi  (0.20 g/g)
-    Any  bk 5.60 (Betfair) / PM 20.00
-    1st  bk 12.00 (Betfair) / PM --
+  Tete Yengi  (0.27 g/g)
+    Any  bk 4.20 (William Hill) / PM 33.33
+    1st  bk 7.50 (William Hill) / PM --
+  Nestory Irankunda  (0.22 g/g)
+    Any  bk 5.00 (William Hill) / PM 8.70
+    1st  bk 8.50 (William Hill) / PM --
 _basis: goals/game = market-implied xG/game (-ln(1-anytime prob)); no per-player 2026 goal counts are tracked; Polymarket has no per-player first-goalscorer market; no player-level model share for these players (data/players.json) — goalscorers shown market-only, not Kelly-sized_
 
 *Scorelines* (top 6)
-1-0 14.2% | 1-1 11.4% | 2-1 10.7% | 2-0 10.4% | 0-0 8.2% | 0-1 6.9%
-  O/U 2.5: over 44.9% / under 55.1%   BTTS 47.6%
+1-0 14.1% | 1-1 11.8% | 2-1 10.6% | 2-0 10.3% | 0-0 8.4% | 0-1 6.9%
+  O/U 2.5: over 44.7% / under 55.3%   BTTS 47.8%
