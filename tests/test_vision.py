@@ -321,7 +321,7 @@ def test_to_dict_roundtrip() -> None:
     assert set(d.keys()) == {
         "match_desc", "market", "selection", "bookmaker", "decimal_odds",
         "stake", "potential_returns", "status", "is_boost", "is_free_bet",
-        "confidence", "raw_text", "currency",
+        "confidence", "raw_text", "currency", "is_combo", "notes",
     }
 
 
@@ -394,3 +394,213 @@ def test_network_failure_raises() -> None:
 
     with pytest.raises(VisionError):
         extract_bets_from_image(b"img", api_key="k", session=BoomSession())
+
+
+# ---------------------------------------------------------------------------
+# Bet Builder / combo parsing — a SINGLE combined bet (N legs, one combined
+# price, one total stake) must collapse to ONE row, never N rows each at the
+# full stake.
+# ---------------------------------------------------------------------------
+
+
+def test_bet_builder_single_fixture_is_one_row() -> None:
+    """The concrete failing case: USA v Australia Bet Builder (x3) @ 5.12, £10.
+
+    Three legs (Over 3.5 Goals, Home Over/Under 2.5 -> Over, Anytime Goalscorer
+    -> Folarin Balogun) at ONE combined price (5.12) with ONE £10 stake. Must
+    be a single Bet Builder row, NOT three £10 bets at "@ ?".
+    """
+    body_text = json.dumps(
+        {
+            "bets": [
+                {
+                    "bookmaker": "Betfair Sportsbook",
+                    "match": "USA v Australia",
+                    "market": "Bet Builder",
+                    "selection": None,
+                    "is_combo": True,
+                    "legs": [
+                        {"market": "Total Goals", "selection": "Over 3.5 Goals"},
+                        {"market": "Home Team Over/Under 2.5", "selection": "Over"},
+                        {"market": "Anytime Goalscorer Safe Sub",
+                         "selection": "Folarin Balogun"},
+                    ],
+                    "odds_decimal": 5.12,
+                    "stake": 10.0,
+                    "currency": "GBP",
+                    "returns": 41.20,
+                    "status": "open",
+                    "is_boost": False,
+                    "is_free_bet": True,
+                    "confidence": 0.9,
+                }
+            ]
+        }
+    )
+    sess = _session_returning(body_text)
+    bets = extract_bets_from_image(b"img", api_key="k", session=sess)
+
+    assert len(bets) == 1  # ONE bet, not three
+    bet = bets[0]
+    assert bet.is_combo is True
+    assert bet.market == "Bet Builder"
+    assert bet.match_desc == "USA v Australia"
+    assert bet.bookmaker == "Betfair Sportsbook"
+    assert bet.decimal_odds == pytest.approx(5.12)  # the COMBINED price
+    assert bet.stake == pytest.approx(10.0)  # the SINGLE total stake
+    assert bet.potential_returns == pytest.approx(41.20)
+    assert bet.currency == "GBP"
+    assert bet.is_free_bet is True
+    # All three legs present in the joined selection and the notes, not as rows.
+    for fragment in ("Over 3.5 Goals", "Over", "Folarin Balogun"):
+        assert fragment in bet.selection
+    assert "Folarin Balogun" in bet.notes
+    assert bet.notes.startswith("legs:")
+
+
+def test_multi_fixture_accumulator_is_one_row() -> None:
+    """A genuine multi-fixture acca stays ONE row, market 'Accumulator'."""
+    body_text = json.dumps(
+        {
+            "bets": [
+                {
+                    "bookmaker": "bet365",
+                    "match": "England vs France | Spain vs Italy",
+                    "market": "Accumulator",
+                    "selection": None,
+                    "is_combo": True,
+                    "legs": [
+                        {"market": "Match Result", "selection": "England"},
+                        {"market": "Match Result", "selection": "Spain"},
+                    ],
+                    "odds_decimal": 4.0,
+                    "stake": 20.0,
+                    "currency": "GBP",
+                    "returns": 80.0,
+                    "status": "open",
+                    "is_boost": False,
+                    "is_free_bet": False,
+                    "confidence": 0.85,
+                }
+            ]
+        }
+    )
+    sess = _session_returning(body_text)
+    bets = extract_bets_from_image(b"img", api_key="k", session=sess)
+
+    assert len(bets) == 1
+    assert bets[0].market == "Accumulator"
+    assert bets[0].is_combo is True
+    assert bets[0].decimal_odds == pytest.approx(4.0)
+    assert bets[0].stake == pytest.approx(20.0)
+    assert "England" in bets[0].selection and "Spain" in bets[0].selection
+
+
+def test_single_leg_slip_unchanged_by_combo_path() -> None:
+    """A single-selection slip still parses as one ordinary (non-combo) bet."""
+    body_text = json.dumps(
+        {
+            "bets": [
+                {
+                    "bookmaker": "bet365",
+                    "match": "Brazil vs Morocco",
+                    "market": "Match Result",
+                    "selection": "Brazil",
+                    "is_combo": False,
+                    "legs": [],
+                    "odds_decimal": 1.8,
+                    "stake": 25.0,
+                    "currency": "GBP",
+                    "returns": 45.0,
+                    "status": "open",
+                    "is_boost": False,
+                    "is_free_bet": False,
+                    "confidence": 0.95,
+                }
+            ]
+        }
+    )
+    sess = _session_returning(body_text)
+    bets = extract_bets_from_image(b"img", api_key="k", session=sess)
+
+    assert len(bets) == 1
+    assert bets[0].is_combo is False
+    assert bets[0].market == "Match Result"
+    assert bets[0].selection == "Brazil"
+    assert bets[0].notes == ""
+
+
+def test_combo_inferred_from_legs_without_flag() -> None:
+    """Defensive: a 2+ leg ``legs`` array collapses even if is_combo is absent."""
+    body_text = json.dumps(
+        {
+            "bets": [
+                {
+                    "bookmaker": "Betfair Sportsbook",
+                    "match": "USA v Australia",
+                    "market": None,
+                    "legs": [
+                        {"market": "Total Goals", "selection": "Over 3.5 Goals"},
+                        {"market": "Anytime Goalscorer", "selection": "Folarin Balogun"},
+                    ],
+                    "odds_decimal": 5.12,
+                    "stake": 10.0,
+                    "returns": 51.20,
+                    "confidence": 0.9,
+                }
+            ]
+        }
+    )
+    sess = _session_returning(body_text)
+    bets = extract_bets_from_image(b"img", api_key="k", session=sess)
+
+    assert len(bets) == 1
+    assert bets[0].is_combo is True
+    # No market label + single fixture -> Bet Builder.
+    assert bets[0].market == "Bet Builder"
+    assert bets[0].stake == pytest.approx(10.0)
+
+
+def test_leaked_legs_without_combo_flag_are_merged() -> None:
+    """Fallback: model leaks legs as separate same-stake rows -> one acca row.
+
+    Each leg carries its own price and the full stake; the product of the prices
+    reproduces the returns, so _detect_accas collapses them rather than logging
+    each leg at the full stake.
+    """
+    body_text = json.dumps(
+        {
+            "bets": [
+                {"bookmaker": "bet365", "match": "A vs B", "market": "Result",
+                 "selection": "A", "odds_decimal": 2.0, "stake": 10.0,
+                 "returns": 60.0, "status": "open", "is_boost": False,
+                 "confidence": 0.9},
+                {"bookmaker": "bet365", "match": "C vs D", "market": "Result",
+                 "selection": "C", "odds_decimal": 3.0, "stake": 10.0,
+                 "returns": None, "status": "open", "is_boost": False,
+                 "confidence": 0.9},
+            ]
+        }
+    )
+    sess = _session_returning(body_text)
+    bets = extract_bets_from_image(b"img", api_key="k", session=sess)
+
+    assert len(bets) == 1  # merged, not two £10 bets
+    assert bets[0].market == "Accumulator"  # two distinct fixtures
+    assert bets[0].decimal_odds == pytest.approx(6.0)  # 2.0 * 3.0
+    assert bets[0].stake == pytest.approx(10.0)  # single stake, not doubled
+    assert bets[0].is_combo is True
+
+
+def test_prompt_instructs_combo_collapse() -> None:
+    """The vision prompt must tell the model to collapse combos to one bet."""
+    p = vision.PROMPT
+    assert "Bet Builder" in p
+    assert "is_combo" in p
+    assert "legs" in p
+    # The key money-safety instruction: one combined price + one total stake.
+    assert "combined price" in p.lower()
+    assert "total stake" in p.lower()
+    # Betfair "O/<id>" hint and Bonus Used / money-back-as-free-bet.
+    assert "O/" in p
+    assert "Bonus Used" in p or "money-back" in p.lower()

@@ -40,28 +40,59 @@ _VALID_STATUSES = ("open", "won", "lost", "void")
 
 # The instruction we hand to the model. It must return ONLY the JSON object so
 # our parser has the smallest possible surface to clean up.
+#
+# CRITICAL distinction the prompt has to get right: a Bet Builder / Same-Game
+# Multi / accumulator is ONE bet placed at ONE combined price with ONE total
+# stake — NOT N separate bets each carrying the full stake. The model must
+# return such a slip as a SINGLE bet object with ``is_combo: true`` and the
+# individual selections listed under ``legs`` (the combined price and total
+# stake go on the parent object).
 PROMPT = (
-    "You are reading a sports betting betslip from an image. Transcribe EVERY "
-    "bet and EVERY selection visible on the slip — singles, and each leg of any "
-    "accumulator/parlay as its own entry.\n\n"
+    "You are reading a sports betting betslip from an image. Return ONE entry "
+    "per PLACED BET (per stake), not per selection.\n\n"
+    "CRITICAL — combined bets. A 'Bet Builder', 'Same Game Multi', "
+    "'Build a Bet', 'BetBuilder (xN)', accumulator, acca, parlay, multiple, "
+    "double, treble or fold is a SINGLE bet: it has ONE combined price and ONE "
+    "total stake covering ALL its legs together. DO NOT emit one entry per leg "
+    "and DO NOT repeat the stake on each leg — that would multiply the real "
+    "exposure. Emit ONE bet object for the whole combined bet, set "
+    '"is_combo": true, and list every leg under "legs".\n\n'
     "Return ONLY a single JSON object, no prose, no markdown fences, of the form:\n"
     '{"bets": [ {bet}, {bet}, ... ] }\n\n'
     "Each {bet} object MUST have exactly these keys:\n"
     '  "bookmaker": the sportsbook name. Infer it from any visible logo, '
     "branding, wordmark, or distinctive brand colour (e.g. green=bet365, "
-    "blue=Sky Bet/William Hill, etc.). null if you truly cannot tell.\n"
-    '  "match": the event/fixture description, e.g. "England vs France". For '
-    "OUTRIGHT/futures bets (Golden Boot, Tournament Winner, Top Scorer) use "
-    'the competition + market, e.g. "FIFA World Cup 2026 Golden Boot". null if absent.\n'
-    '  "market": the market, e.g. "Match Result", "Over/Under 2.5", "Anytime Goalscorer".\n'
-    '  "selection": the picked outcome, e.g. "England", "Over 2.5", "Harry Kane".\n'
-    '  "odds_decimal": the price as a DECIMAL number. Convert fractional odds '
+    "blue=Sky Bet/William Hill, etc.). A Bet ID printed as 'O/<digits>/...' "
+    "indicates Betfair Sportsbook. null if you truly cannot tell.\n"
+    '  "match": the event/fixture description, e.g. "England vs France". For a '
+    "combined bet whose legs are ALL on the same fixture (a Bet Builder / Same "
+    "Game Multi), use that one fixture. For a multi-fixture accumulator, join "
+    'the fixtures with " | ". For OUTRIGHT/futures bets (Golden Boot, '
+    "Tournament Winner, Top Scorer) use the competition + market, e.g. "
+    '"FIFA World Cup 2026 Golden Boot". null if absent.\n'
+    '  "market": the market, e.g. "Match Result", "Over/Under 2.5", '
+    '"Anytime Goalscorer". For a combined bet set this to "Bet Builder" when '
+    'all legs are the same fixture, or "Accumulator" when the legs span '
+    "different fixtures.\n"
+    '  "selection": the picked outcome, e.g. "England", "Over 2.5", '
+    '"Harry Kane". For a combined bet, leave this null (the legs carry the '
+    "detail) or set a short summary.\n"
+    '  "is_combo": true if this object represents a Bet Builder / Same Game '
+    "Multi / accumulator / parlay / multiple (a single stake across 2+ legs at "
+    "a combined price). false for an ordinary single-selection bet.\n"
+    '  "legs": for a combined bet, an array of objects, one per leg, each with '
+    '"market" and "selection" (e.g. {"market": "Total Goals", "selection": '
+    '"Over 3.5"}). Use [] or omit for a single bet.\n'
+    '  "odds_decimal": the price as a DECIMAL number. For a combined bet this '
+    "is the ONE COMBINED price for the whole bet (e.g. a 'Combined odds 5.12'), "
+    "NOT a per-leg price. Convert fractional odds "
     '(e.g. "31/20" -> 2.55, "2/9" -> 1.2222) and "EVS"/"Evens" -> 2.0. On '
     "prediction-market screenshots (Polymarket/Kalshi) prices are cents per "
     'share (e.g. "69c", "$0.69", "avg 69c"): convert to decimal odds as '
     "1/price, so 69c -> 1.449. null if not visible.\n"
-    '  "stake": the amount staked/traded as a number (no currency symbol). '
-    "null if not visible.\n"
+    '  "stake": the SINGLE total amount staked on this bet as a number (no '
+    "currency symbol) — for a combined bet this is the one 'Total Stake', NOT "
+    "the stake times the number of legs. null if not visible.\n"
     '  "currency": ISO code of the money on the slip, inferred from symbols '
     'and platform: "£" -> "GBP", "$" -> "USD", "€" -> "EUR". '
     'Polymarket and Kalshi are ALWAYS "USD". null if unclear.\n'
@@ -72,7 +103,8 @@ PROMPT = (
     "boost flame icon for this selection, else false.\n"
     '  "is_free_bet": true if this is a FREE BET / bonus / token stake — look '
     "for a purple/gift icon (Virgin, Paddy Power), a 'Free Bet'/'Bonus'/'Token' "
-    "label, or a returns figure that EXCLUDES the stake (e.g. £1 stake at 10.0 "
+    "label, a 'Bonus Used' line equal to the stake, a money-back-as-free-bet "
+    "offer, or a returns figure that EXCLUDES the stake (e.g. £1 stake at 10.0 "
     "returning £9, not £10). A free bet is stake-not-returned: the stake is not "
     "the bettor's own money and is not part of the winnings. Else false.\n"
     '  "confidence": your confidence in this row from 0 to 1.\n\n'
@@ -136,6 +168,8 @@ class ExtractedBet:
     confidence: float = 0.0
     raw_text: str = ""
     currency: Optional[str] = None
+    is_combo: bool = False
+    notes: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -316,7 +350,97 @@ def _extract_json_object(text: str) -> Dict[str, Any]:
     raise VisionError("no JSON object found in model reply: %r" % text[:200])
 
 
+def _leg_text(leg: Any) -> str:
+    """Render one combo leg ('market -> selection' / 'selection') for display."""
+    if isinstance(leg, dict):
+        market = str(leg.get("market") or "").strip()
+        selection = str(leg.get("selection") or "").strip()
+        if market and selection:
+            return "%s -> %s" % (market, selection)
+        return selection or market
+    return str(leg or "").strip()
+
+
+def _format_legs(legs: Any) -> List[str]:
+    """Normalise a model ``legs`` value to a list of non-empty leg strings."""
+    if not isinstance(legs, list):
+        return []
+    out = []
+    for leg in legs:
+        text = _leg_text(leg)
+        if text:
+            out.append(text)
+    return out
+
+
+def _combo_market(obj: Dict[str, Any]) -> str:
+    """Pick the combo market label.
+
+    Honours an explicit "Accumulator"/"Bet Builder" from the model; otherwise
+    infers from whether the legs span one fixture (Bet Builder) or several
+    (Accumulator) using the " | "-joined ``match`` heuristic.
+    """
+    raw = str(obj.get("market") or "").strip().lower()
+    if "acc" in raw or "parlay" in raw or "multiple" in raw or "fold" in raw:
+        return "Accumulator"
+    if "builder" in raw or "same game" in raw or "same-game" in raw:
+        return "Bet Builder"
+    # No usable market label: infer from the fixture field. A multi-fixture
+    # accumulator joins fixtures with " | "; a single-fixture combo does not.
+    match = str(obj.get("match") or "")
+    if "|" in match:
+        return "Accumulator"
+    return "Bet Builder"
+
+
+def _combo_from_obj(obj: Dict[str, Any], raw_text: str) -> ExtractedBet:
+    """Build ONE ledger row for a Bet Builder / accumulator combo.
+
+    The combined bet carries the ONE combined price and the ONE total stake;
+    the per-leg breakdown is preserved in ``selection`` (joined for display)
+    and in ``notes`` (for the ledger), never split into separate rows.
+    """
+    legs = _format_legs(obj.get("legs"))
+    market = _combo_market(obj)
+    # Display selection: the joined legs (falls back to the model's own
+    # selection summary, then a generic label).
+    if legs:
+        selection = " + ".join(legs)
+    else:
+        selection = _str_or_empty(obj.get("selection")) or market
+    notes = ("legs: " + " | ".join(legs)) if legs else ""
+    return ExtractedBet(
+        match_desc=_str_or_empty(obj.get("match")),
+        market=market,
+        selection=selection,
+        bookmaker=(None if obj.get("bookmaker") is None else str(obj["bookmaker"])),
+        decimal_odds=_coerce_odds(obj.get("odds_decimal")),
+        stake=_coerce_float(obj.get("stake")),
+        potential_returns=_coerce_float(obj.get("returns")),
+        status=_coerce_status(obj.get("status")),
+        is_boost=_coerce_bool(obj.get("is_boost")),
+        is_free_bet=_coerce_bool(obj.get("is_free_bet")),
+        confidence=_coerce_confidence(obj.get("confidence")),
+        raw_text=raw_text,
+        currency=_coerce_currency(obj.get("currency"), obj.get("bookmaker")),
+        is_combo=True,
+        notes=notes,
+    )
+
+
+def _is_combo_obj(obj: Dict[str, Any]) -> bool:
+    """Whether a model bet object describes a single-stake multi-leg combo."""
+    if _coerce_bool(obj.get("is_combo")):
+        return True
+    # Defensive: a populated ``legs`` array (2+ entries) is a combo even if the
+    # model forgot the flag.
+    legs = obj.get("legs")
+    return isinstance(legs, list) and len(legs) >= 2
+
+
 def _bet_from_obj(obj: Dict[str, Any], raw_text: str) -> ExtractedBet:
+    if _is_combo_obj(obj):
+        return _combo_from_obj(obj, raw_text)
     return ExtractedBet(
         match_desc=_str_or_empty(obj.get("match")),
         market=_str_or_empty(obj.get("market")),
@@ -362,13 +486,17 @@ def _coerce_currency(value: Any, bookmaker: Any) -> Optional[str]:
 
 
 def _detect_accas(bets: List[ExtractedBet]) -> List[ExtractedBet]:
-    """Group individual legs into accas when detected.
+    """Fallback: group leaked individual legs into one acca when detected.
 
-    Detects accas by finding groups of bets with:
-    - Same bookmaker
-    - Same stake
-    - Combined returns ≈ stake × product of odds
-    - 2+ legs
+    With the current prompt the model returns a Bet Builder / accumulator as a
+    SINGLE ``is_combo`` row, so this never has to fire. It remains a safety net
+    for the case where the model leaks the legs as separate ``bets[]`` entries
+    (each carrying the full stake) — exactly the mis-parse this module exists to
+    prevent. Detects an acca by finding 2+ same-bookmaker, same-stake rows whose
+    combined (product) odds reproduce the returns shown on any leg.
+
+    Rows already flagged ``is_combo`` are left untouched — the model has already
+    collapsed them into one bet, and re-grouping would corrupt the price/stake.
     """
     if len(bets) < 2:
         return bets
@@ -381,10 +509,15 @@ def _detect_accas(bets: List[ExtractedBet]) -> List[ExtractedBet]:
     for i, b in enumerate(bets):
         if i in used:
             continue
+        # Already a collapsed combo (or any pre-formed multi-leg row): keep as-is.
+        if getattr(b, "is_combo", False):
+            groups["single"].append(b)
+            used.add(i)
+            continue
         # Try to form an acca starting from this bet
         candidates = [i]
         for j in range(i + 1, len(bets)):
-            if j in used:
+            if j in used or getattr(bets[j], "is_combo", False):
                 continue
             if (bets[j].bookmaker == b.bookmaker and
                 abs((bets[j].stake or 0) - (b.stake or 0)) < 0.01 and
@@ -410,24 +543,32 @@ def _detect_accas(bets: List[ExtractedBet]) -> List[ExtractedBet]:
             # If returns match (within 5% tolerance), it's an acca
             if (expected_returns and actual_returns > 0 and
                 abs(expected_returns - actual_returns) / actual_returns < 0.05):
-                # Merge into one acca bet
-                selection = " + ".join(
-                    f"{leg.selection} ({leg.market})"
+                # Merge into one acca bet. A single fixture across all legs is a
+                # Bet Builder; multiple distinct fixtures is an accumulator.
+                fixtures = [leg.match_desc for leg in legs if leg.match_desc]
+                distinct = list(dict.fromkeys(fixtures))
+                leg_texts = [
+                    ("%s -> %s" % (leg.market, leg.selection)) if leg.market
+                    else leg.selection
                     for leg in legs
-                )
+                ]
                 acca_bet = ExtractedBet(
-                    match_desc=" | ".join(set(leg.match_desc for leg in legs if leg.match_desc)),
-                    market="Accumulator",
-                    selection=selection,
+                    match_desc=(distinct[0] if len(distinct) == 1
+                                else " | ".join(distinct)),
+                    market=("Bet Builder" if len(distinct) == 1 else "Accumulator"),
+                    selection=" + ".join(leg_texts),
                     bookmaker=b.bookmaker,
                     decimal_odds=combined_odds,
                     stake=b.stake,
                     potential_returns=actual_returns,
                     status=b.status,
                     is_boost=False,
+                    is_free_bet=any(leg.is_free_bet for leg in legs),
                     confidence=min(leg.confidence for leg in legs),
                     raw_text=b.raw_text,
                     currency=b.currency,
+                    is_combo=True,
+                    notes="legs: " + " | ".join(leg_texts),
                 )
                 groups["acca"].append(acca_bet)
                 for idx in candidates:
