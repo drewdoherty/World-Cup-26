@@ -1,56 +1,48 @@
-<!-- generated: 2026-06-19T16:07:05 -->
+<!-- generated: 2026-06-19T19:53:43 -->
 ⚽ *Goalscorers* — next 5 games
-_anytime + first · best book / Polymarket; ¼-Kelly £ stake on +EV_
-
-*United States vs Australia*  _Jun 19 19:00Z_
-_United States_
-  Folarin Balogun  (0.49 g/g)
-    Any  bk 2.60 (Betfair) / PM 2.53
-    1st  bk 5.50 (Sky Bet) / PM --
-  Ricardo Pepi  (0.44 g/g)
-    Any  bk 2.80 (Betfair) / PM 10.00
-    1st  bk 5.50 (Betfair) / PM --
-_Australia_
-  Mohamed Toure  (0.25 g/g)
-    Any  bk 4.60 (Betfair) / PM 6.90
-    1st  bk 9.00 (Sky Bet) / PM --
-  Tete Yengi  (0.20 g/g)
-    Any  bk 5.60 (Betfair) / PM 22.22
-    1st  bk 12.00 (Betfair) / PM --
-_basis: goals/game = market-implied xG/game (-ln(1-anytime prob)); no per-player 2026 goal counts are tracked; Polymarket has no per-player first-goalscorer market; no player-level model share for these players (data/players.json) — goalscorers shown market-only, not Kelly-sized_
+_anytime + first · best book / Polymarket; ¼-Kelly £ stake on most likely + best EV_
 
 *Scotland vs Morocco*  _Jun 19 22:00Z_
 _top anytime (both teams — add squad to split + FGS)_
-  Ayoub El Kaabi        2.70 (Betfair)  imp 37%
-  Ismael Saibari        2.90 (Betfair)  imp 34%
+  Ismael Saibari        3.05 (Betfair)  imp 33%
   Soufiane Rahimi       3.30 (Betfair)  imp 30%
-  Brahim Diaz           3.45 (Betfair)  imp 29%
-  Mohamed Amine Sbai    4.00 (Betfair)  imp 25%
-  Chemsdine Talbi       4.80 (Betfair)  imp 21%
+  Ayoub El Kaabi        3.45 (Betfair)  imp 29%
+  Brahim Diaz           3.50 (Betfair)  imp 29%
+  Mohamed Amine Sbai    4.70 (Betfair)  imp 21%
+  Chemsdine Talbi       5.00 (Betfair)  imp 20%
 
 *Brazil vs Haiti*  _Jun 20 00:30Z_
 _top anytime (both teams — add squad to split + FGS)_
   Neymar                1.75 (William Hill)  imp 57%
-  Igor Thiago Nascimen  1.85 (Betfair)  imp 54%
-  Vinicius Junior       1.97 (Betfair)  imp 51%
+  Vinicius Junior       1.80 (Betfair)  imp 56%
+  Igor Thiago Nascimen  1.91 (Betfair)  imp 52%
+  Matheus Cunha         2.00 (Sky Bet)  imp 50%
   Endrick Felipe Morei  2.20 (Betfair)  imp 45%
-  Matheus Cunha         2.28 (Betfair)  imp 44%
-  Rayan Vitor           2.40 (William Hill)  imp 42%
+  Rayan Vitor           2.45 (William Hill)  imp 41%
 
 *Turkey vs Paraguay*  _Jun 20 03:00Z_
 _top anytime (both teams — add squad to split + FGS)_
-  Deniz Gul             3.25 (Sky Bet)  imp 31%
+  Deniz Gul             3.50 (Sky Bet)  imp 29%
   Kenan Yildiz          3.80 (Betfair)  imp 26%
   Arda Guler            3.90 (Betfair)  imp 26%
   Can Yilmaz Uzun       4.00 (Betfair)  imp 25%
-  Yunus Akgun           4.10 (Betfair)  imp 24%
+  Gabriel Avalos        4.00 (Sky Bet)  imp 25%
   Alex Adrian Arce Bar  4.30 (Betfair)  imp 23%
 
 *Netherlands vs Sweden*  _Jun 20 17:00Z_
 _top anytime (both teams — add squad to split + FGS)_
-  Brian Brobbey         1.81 (Betfair)  imp 55%
-  Donyell Malen         2.72 (Betfair)  imp 37%
-  Memphis Depay         2.74 (Betfair)  imp 36%
+  Brian Brobbey         2.50 (William Hill)  imp 40%
+  Donyell Malen         2.50 (Sky Bet)  imp 40%
+  Memphis Depay         2.50 (Sky Bet)  imp 40%
+  Wout Weghorst         2.62 (William Hill)  imp 38%
   Cody Gakpo            2.80 (Betfair)  imp 36%
-  Wout Weghorst         2.98 (Betfair)  imp 34%
-  Crysencio Summervill  3.25 (Sky Bet)  imp 31%
+  Guus Til              2.90 (William Hill)  imp 34%
+
+*Germany vs Ivory Coast*  _Jun 20 20:00Z_
+_top anytime (both teams — add squad to split + FGS)_
+  Kai Havertz           2.38 (Sky Bet)  imp 42%
+  Deniz Undav           2.52 (Betfair)  imp 40%
+  Jamal Musiala         3.00 (Betfair)  imp 33%
+  Nick Woltemade        3.00 (Betfair)  imp 33%
+  Florian Wirtz         3.10 (Betfair)  imp 32%
+  Maximilian Beier      3.10 (Betfair)  imp 32%

@@ -559,9 +559,31 @@ def _goalscorer_team_blocks(card) -> List[str]:
         if not rows:
             continue
         out.append("_%s_" % side_team[side])
+        # Per team, flag the "most likely" scorer (shortest anytime price) and
+        # the "best EV" pick (highest model edge vs best book — only when the
+        # player-level model could price them). These are the picks the subtitle
+        # says the ¼-Kelly £ stake is sized on.
+        likely = None
+        best_ev = None
+        best_ev_val = 0.0
         for ln in rows:
+            if ln.anytime_book_odds and (
+                likely is None or ln.anytime_book_odds < likely.anytime_book_odds
+            ):
+                likely = ln
+            if ln.model_p_anytime and ln.anytime_book_odds:
+                ev = ln.model_p_anytime * ln.anytime_book_odds - 1.0
+                if ev > best_ev_val:
+                    best_ev_val, best_ev = ev, ln
+        for ln in rows:
+            tags = []
+            if ln is likely:
+                tags.append("⭐ most likely")
+            if ln is best_ev:
+                tags.append("💰 best EV")
+            tag = ("  " + " · ".join(tags)) if tags else ""
             gpg = ("%.2f g/g" % ln.xg_per_game) if ln.xg_per_game else "g/g --"
-            out.append("  %s  (%s)" % (ln.player[:20], gpg))
+            out.append("  %s  (%s)%s" % (ln.player[:20], gpg, tag))
             out.append(
                 "    Any  bk %s%s / PM %s%s"
                 % (
@@ -799,7 +821,8 @@ def format_goalscorer_card(fixtures: List[GoalscorerFixture]) -> str:
         )
     out = [
         "⚽ *Goalscorers* — next %d games" % len(fixtures),
-        "_anytime + first · best book / Polymarket; ¼-Kelly £ stake on +EV_",
+        "_anytime + first · best book / Polymarket; "
+        "¼-Kelly £ stake on most likely + best EV_",
         "",
     ]
     for fx in fixtures:
