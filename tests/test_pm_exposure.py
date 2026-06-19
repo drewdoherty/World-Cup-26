@@ -152,3 +152,35 @@ def test_next_5_filters_and_orders(tmp_path):
     now_late = pd.Timestamp("2026-06-17T21:00:00").to_pydatetime()
     matches2 = propose_cli._next_5_matches(_odds_df(), now_late)
     assert [m[0] for m in matches2] == ["Ghana"]
+
+
+def test_exposure_matches_v_and_dash_separators(tmp_path):
+    # Result bets are logged with varied separators (" v ", " - ", " vs ");
+    # all must be attributed to the fixture so hedge/add logic can fire.
+    db = str(tmp_path / "wca.db")
+    record_bet(
+        "2026-06-17T10:00:00", "MV", "Scotland v Morocco", "Match Odds",
+        "Scotland", "betfair", 1.8, 40.0, source="model", db_path=db,
+    )
+    exp = sportsbook_open_exposure_by_match(db)
+    assert frozenset({"Scotland", "Morocco"}) in exp
+
+    # End-to-end: a " v " Scotland-win bet -> the DRAW proposal HEDGEs it and the
+    # Scotland-win proposal ADDs to it (the bug that left both as bare EV picks).
+    now = pd.Timestamp("2026-06-17T12:00:00").to_pydatetime()
+    odds = pd.DataFrame([
+        {"home_team": "Scotland", "away_team": "Morocco",
+         "commence_time": "2026-06-17T20:00:00Z"},
+    ])
+    proposals = [
+        {"match_desc": "Scotland vs Morocco",
+         "market_question": "Will Scotland vs. Morocco end in a draw?", "outcome": "Yes",
+         "price": 0.27, "size_usd": 14.0, "ev": 0.06},
+        {"match_desc": "Scotland vs Morocco",
+         "market_question": "Will Scotland win on 2026-06-17?", "outcome": "Yes",
+         "price": 0.17, "size_usd": 18.0, "ev": 0.14},
+    ]
+    section = propose_cli._build_exposure_section(proposals, odds, db, now)
+    assert "result exposure" in section
+    assert "🛡 HEDGE PM-1 the DRAW" in section
+    assert "➕ ADD PM-2 Scotland to WIN" in section

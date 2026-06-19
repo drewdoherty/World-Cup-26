@@ -163,11 +163,20 @@ def _match_team_key(match_desc: str):
     string that is not a single ``"<home> vs <away>"`` fixture, so callers can
     skip exposure they cannot attribute to one fixture/outcome.
     """
+    import re
+
     from wca.data.teamnames import canonical
 
     if not match_desc or "|" in match_desc:
         return None
-    parts = [p.strip() for p in match_desc.split(" vs ")]
+    # Ledger match_desc separators vary across logging paths: "A vs B", "A v B",
+    # "A - B". Split on the first of these (spaces required, so hyphenated team
+    # names like "Bosnia-Herzegovina" are not split) so result bets logged with
+    # " v " (e.g. "Scotland v Morocco") are still attributed to their fixture.
+    parts = [
+        p.strip()
+        for p in re.split(r"\s+(?:vs?|-)\s+", match_desc, maxsplit=1, flags=re.IGNORECASE)
+    ]
     if len(parts) != 2 or not all(parts):
         return None
     return frozenset(canonical(p) for p in parts)
