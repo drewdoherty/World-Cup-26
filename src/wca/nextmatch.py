@@ -84,6 +84,15 @@ class GoalscorerLine:
     # de-vig-free best anytime price as lambda = -ln(1 - p_anytime); this is the
     # market's expected goals/game for the player, NOT an observed 2026 count.
     xg_per_game: Optional[float] = None
+    # Player-level MODEL prices (StatsBomb npxg-share + DC team lambda, via
+    # wca.models.scorers.ScorerPricer). Present only when the player has a share
+    # in data/players.json (or the empirical props_players.csv); otherwise None
+    # and the line stays market-only. These drive the Kelly edge/stake.
+    model_p_anytime: Optional[float] = None
+    model_fair_anytime: Optional[float] = None
+    model_p_first: Optional[float] = None
+    model_fair_first: Optional[float] = None
+    share_source: Optional[str] = None  # provenance of the npxg share, if priced
 
     @property
     def anytime_implied(self) -> Optional[float]:
@@ -111,6 +120,11 @@ class NextMatchCard:
     goalscorers: Dict[str, List[GoalscorerLine]] = field(default_factory=dict)
     goalscorer_note: str = ""  # basis / data-gap note shown under the block
     min_edge: float = 0.02
+    # Staking: quarter-Kelly on the resolved sportsbook-pool bankroll (threaded
+    # in by the build from the same CLV ladder the bet card uses).
+    bankroll: float = 1500.0
+    kelly_fraction: float = 0.25
+    kelly_cap: float = 0.05
 
 
 def select_next_blend(blends: Sequence[_FixtureBlend]) -> Optional[_FixtureBlend]:
@@ -258,6 +272,9 @@ def build_goalscorers(
     squads_path: str = DEFAULT_SQUADS_PATH,
     pm_events: Optional[List[dict]] = None,
     pm_lookup: bool = True,
+    lambda_home: float = 0.0,
+    lambda_away: float = 0.0,
+    players_path: str = "data/players.json",
 ) -> Tuple[Dict[str, List[GoalscorerLine]], str]:
     """Top-N goalscorers per team with anytime + first odds (book + Polymarket).
 
@@ -342,6 +359,47 @@ def build_goalscorers(
         except Exception:  # network/parse failure must not break the card
             pm_missing = ["(Polymarket lookup failed)"]
 
+    # Player-level MODEL pricing: StatsBomb npxg-share (data/players.json
+    # override store) + the DC team lambda, via ScorerPricer. Only players with
+    # a known share are priced — we never invent a share — so the rest stay
+    # market-only. The model price is what the Kelly edge/stake is taken against.
+    n_priced = 0
+    if lambda_home > 0.0 and lambda_away > 0.0:
+        try:
+            from wca.data.teamnames import canonical as _canon
+            from wca.models.scorers import ScorerPricer, load_player_overrides
+
+            overrides = load_player_overrides(players_path)
+            exact: Dict[Tuple[str, str], "object"] = {}
+            loose: Dict[Tuple[str, str], "object"] = {}
+            for tname, recs in overrides.items():
+                tc = _canon(tname)
+                for rec in recs:
+                    exact[(tc, _norm_name(rec.name))] = rec
+                    lk = _name_key(rec.name)
+                    if lk:
+                        loose.setdefault((tc, lk), rec)
+            pricer = ScorerPricer()
+            total_lambda = lambda_home + lambda_away
+            for side in ("home", "away"):
+                team_lambda = lambda_home if side == "home" else lambda_away
+                for line in by_team[side]:
+                    rec = exact.get((line.team, _norm_name(line.player)))
+                    if rec is None:
+                        lk = _name_key(line.player)
+                        rec = loose.get((line.team, lk)) if lk else None
+                    if rec is None:
+                        continue
+                    sl = pricer.price_player(rec, team_lambda, total_lambda)
+                    line.model_p_anytime = sl.p_anytime
+                    line.model_fair_anytime = sl.fair_anytime
+                    line.model_p_first = sl.p_first
+                    line.model_fair_first = sl.fair_first
+                    line.share_source = rec.source
+                    n_priced += 1
+        except Exception:  # a pricing failure must not break the card
+            n_priced = 0
+
     # Compose the basis / data-gap note.
     notes = [
         "basis: goals/game = market-implied xG/game (-ln(1-anytime prob)); "
@@ -354,6 +412,16 @@ def build_goalscorers(
     if pm_missing:
         notes.append("no PM 1+ goals market: " + ", ".join(pm_missing))
     notes.append("Polymarket has no per-player first-goalscorer market")
+    if n_priced:
+        notes.append(
+            "stake = ¼-Kelly vs best book where the player-level model "
+            "(StatsBomb npxg-share × DC λ) shows +EV"
+        )
+    else:
+        notes.append(
+            "no player-level model share for these players "
+            "(data/players.json) — goalscorers shown market-only, not Kelly-sized"
+        )
     return by_team, "; ".join(notes)
 
 
@@ -372,6 +440,10 @@ def build_next_match(
     squads_path: str = DEFAULT_SQUADS_PATH,
     pm_events: Optional[List[dict]] = None,
     pm_lookup: bool = True,
+    bankroll: float = 1500.0,
+    kelly_fraction: float = 0.25,
+    kelly_cap: float = 0.05,
+    players_path: str = "data/players.json",
 ) -> Optional[NextMatchCard]:
     """Build the next-match preview, or None when the slate is empty.
 
@@ -417,6 +489,9 @@ def build_next_match(
         squads_path=squads_path,
         pm_events=pm_events,
         pm_lookup=pm_lookup,
+        lambda_home=lam_h,
+        lambda_away=lam_a,
+        players_path=players_path,
     )
 
     return NextMatchCard(
@@ -432,12 +507,41 @@ def build_next_match(
         goalscorers=goalscorers,
         goalscorer_note=gs_note,
         min_edge=min_edge,
+        bankroll=bankroll,
+        kelly_fraction=kelly_fraction,
+        kelly_cap=kelly_cap,
     )
 
 
 def _fmt_odds(o: Optional[float]) -> str:
     """Decimal odds or ``--`` when unavailable."""
     return "%.2f" % o if o and o > 1.0 else "--"
+
+
+def _model_suffix(
+    model_p: Optional[float],
+    model_fair: Optional[float],
+    book_odds: Optional[float],
+    card: "NextMatchCard",
+) -> str:
+    """`` | model <fair> <edge%> £<stake>`` for a priced goalscorer leg.
+
+    Empty when the player has no model price (no share). The Kelly stake is
+    quarter-Kelly of the card bankroll vs the best book odds, shown only on a
+    positive model edge (``model_p * book_odds - 1 > 0``).
+    """
+    if not model_p or not model_fair or model_fair <= 1.0:
+        return ""
+    s = " | model %.2f" % model_fair
+    if book_odds and book_odds > 1.0:
+        edge = model_p * book_odds - 1.0
+        s += " %+.0f%%" % (edge * 100)
+        stk = kelly_mod.stake(
+            model_p, book_odds, card.bankroll, card.kelly_fraction, card.kelly_cap
+        )
+        if stk > 0:
+            s += " £%.2f" % stk
+    return s
 
 
 def _format_goalscorers(card: NextMatchCard) -> List[str]:
@@ -468,18 +572,26 @@ def _format_goalscorers(card: NextMatchCard) -> List[str]:
             gpg = ("%.2f g/g" % ln.xg_per_game) if ln.xg_per_game else "g/g --"
             out.append("  %s  (%s)" % (ln.player[:20], gpg))
             out.append(
-                "    Any  bk %s%s / PM %s"
+                "    Any  bk %s%s / PM %s%s"
                 % (
                     _fmt_odds(ln.anytime_book_odds),
                     (" (%s)" % ln.anytime_book) if ln.anytime_book else "",
                     _fmt_odds(ln.anytime_pm_odds),
+                    _model_suffix(
+                        ln.model_p_anytime, ln.model_fair_anytime,
+                        ln.anytime_book_odds, card,
+                    ),
                 )
             )
             out.append(
-                "    1st  bk %s%s / PM --"
+                "    1st  bk %s%s / PM --%s"
                 % (
                     _fmt_odds(ln.first_book_odds),
                     (" (%s)" % ln.first_book) if ln.first_book else "",
+                    _model_suffix(
+                        ln.model_p_first, ln.model_fair_first,
+                        ln.first_book_odds, card,
+                    ),
                 )
             )
     if card.goalscorer_note:
@@ -499,6 +611,7 @@ def format_next_match(card: Optional[NextMatchCard]) -> str:
         "*Winner* (model blend)",
     ]
     names = {"home": card.home, "draw": "Draw", "away": card.away}
+    staked = False
     for outcome in OUTCOMES:
         p, book, odds, edge = card.winner[outcome]
         fair = (1.0 / p) if p > 0 else float("inf")
@@ -506,7 +619,17 @@ def format_next_match(card: Optional[NextMatchCard]) -> str:
         if book is not None and odds > 1.0:
             flag = " ✅" if edge >= card.min_edge else ""
             line += "  best %.2f (%s) %+.1f%%%s" % (odds, book, edge * 100, flag)
+            stk = kelly_mod.stake(
+                p, odds, card.bankroll, card.kelly_fraction, card.kelly_cap
+            )
+            if stk > 0:
+                line += "  £%.2f" % stk
+                staked = True
         lines.append(line)
+    if staked:
+        lines.append(
+            "  _stake = ¼-Kelly @ £%.0f bankroll (+EV picks)_" % card.bankroll
+        )
 
     p_over = card.corners_p_over
     lines.append("")

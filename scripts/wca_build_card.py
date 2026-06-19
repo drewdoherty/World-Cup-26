@@ -276,6 +276,8 @@ def main() -> None:
             next_card = build_next_match(
                 models, odds_df, fixtures_meta, scorer_df=scorer_df,
                 pm_lookup=not args.skip_scorers,
+                bankroll=pool_bank.bankroll,
+                kelly_fraction=pool_bank.kelly_fraction,
             )
             write_card(format_next_match(next_card), path=args.next_out, ts_utc=now_str)
             print("Next-match card written: out=%s" % args.next_out)

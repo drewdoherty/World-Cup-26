@@ -739,7 +739,7 @@ def format_card(recs: Sequence[Recommendation], pools: Sequence[PoolConfig]) -> 
     lines = ["*World Cup Alpha — bet card* (%d picks)" % len(recs), ""]
     for i, r in enumerate(recs, 1):
         stake_str = "  ".join(
-            "%s %.2f" % (p.name, r.stakes.get(p.name, 0.0)) for p in pools
+            "%s £%.2f" % (p.name, r.stakes.get(p.name, 0.0)) for p in pools
         )
         lines.append(
             "*%d. %s* — %s @ *%.2f* (%s)\n"
