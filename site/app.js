@@ -45,6 +45,22 @@
     });
     return parts.length ? parts.join(" + ") : money(0);
   }
+  // HTML variant of moneyByCcy for SIGNED P&L: each currency component is
+  // coloured by ITS OWN sign. A losing $ leg must never be painted green just
+  // because the aggregate (or the £ leg) happens to be positive.
+  function moneyByCcyHTML(byCcy, field) {
+    var parts = [];
+    ["GBP", "USD", "EUR"].forEach(function (ccy) {
+      var blk = (byCcy || {})[ccy];
+      if (!blk) return;
+      var v = Number(blk[field] || 0);
+      if (v === 0 && field !== "settled_pl") return;
+      parts.push('<span class="' + (v < 0 ? "neg" : "pos") + '">' +
+        esc(signedMoney(v, ccy)) + "</span>");
+    });
+    return parts.length ? parts.join(" + ")
+      : '<span class="pos">' + esc(signedMoney(0)) + "</span>";
+  }
   function pct(n, dp) {
     if (n === null || n === undefined || isNaN(n)) return "—";
     return (n * 100).toFixed(dp === undefined ? 1 : dp) + "%";
@@ -73,14 +89,46 @@
   // the full text stays available via the cell's title attribute.
   function marketShort(m) {
     if (!m) return "—";
-    var s = String(m);
+    var s = String(m).trim();
     var map = {
-      h2h: "1X2", outright_golden_boot: "Golden Boot",
-      BETBUILDER: "BetBuilder", polymarket: "PM",
-      over_under: "O/U", scoreline: "Score"
+      h2h: "1X2", match_odds: "1X2", "match odds": "1X2",
+      outright_golden_boot: "Golden Boot", golden_boot: "Golden Boot",
+      outright_winner: "Winner", BETBUILDER: "Bet Builder",
+      polymarket: "PM", over_under: "O/U", totals: "O/U",
+      scoreline: "Score", correct_score: "Score", draw_no_bet: "DNB",
+      btts: "BTTS", double_chance: "Dbl Chance",
+      player_goal_scorer_anytime: "ATGS", player_first_goal_scorer: "FGS",
+      player_shots_on_target: "Shots OT"
     };
     if (map[s]) return map[s];
-    if (s.length > 16) return s.slice(0, 15) + "…";
+    var key = s.toLowerCase();
+    if (map[key]) return map[key];
+    // Advancement / outright prop questions -> "<Team> <stage>" (e.g.
+    // "Will Japan reach the Round of 16…" -> "Japan R16"). Full text on hover.
+    var adv = s.match(/^will\s+(.+?)\s+(reach|win|advance|qualif|be eliminat|progress|top|finish)\b(.*)$/i);
+    if (adv) {
+      var team = adv[1].replace(/\s+/g, " ").trim();
+      var r = (adv[2] + " " + adv[3]).toLowerCase();
+      var stage =
+        /round of 16|last 16|\br16\b/.test(r) ? "R16" :
+        /quarter/.test(r) ? "QF" :
+        /semi/.test(r) ? "SF" :
+        /win the (world cup|tournament)|lift|champion/.test(r) ? "Winner" :
+        /final/.test(r) ? "Final" :
+        /eliminat/.test(r) ? "Out" :
+        /group/.test(r) ? "Group" :
+        /qualif/.test(r) ? "Qualify" : "Advance";
+      return team + " " + stage;
+    }
+    if (/bet ?builder/i.test(s)) return "Bet Builder";
+    if (/accumulator|acca/i.test(s)) return "Accumulator";
+    // Title-case a bare snake_case key so it reads as words, not code.
+    if (/^[a-z0-9_]+$/.test(s)) {
+      s = s.replace(/_/g, " ").replace(/\b\w/g, function (c) {
+        return c.toUpperCase();
+      });
+    }
+    if (s.length > 18) return s.slice(0, 17) + "…";
     return s;
   }
   // Bet Builder / accumulator selections list each leg; render them stacked on
@@ -162,20 +210,22 @@
     // to the legacy single-currency totals for old data files.
     var wagered = byCcy ? moneyByCcy(byCcy, "wagered") : money(t.wagered || 0);
     var openExp = byCcy ? moneyByCcy(byCcy, "open_stake") : money(t.open_stake || 0);
-    var plStr = byCcy ? moneyByCcy(byCcy, "settled_pl", true) : signedMoney(pl);
+    // Per-currency, per-sign coloured P&L (HTML); each leg owns its own colour.
+    var plStr = byCcy ? moneyByCcyHTML(byCcy, "settled_pl")
+      : '<span class="' + plCls + '">' + esc(signedMoney(pl)) + "</span>";
 
     var ticks = [
-      ["Total Wagered", wagered, ""],
-      ["Open Exposure", openExp, ""],
-      ["Settled P&L", plStr, plCls],
-      ["Avg CLV", clvVal, hasClv ? (Number(clv.avg_clv) >= 0 ? "pos" : "neg") : "dim"],
-      ["Bet Count", String(t.n_bets || 0), ""]
+      ["Total Wagered", esc(wagered), ""],
+      ["Open Exposure", esc(openExp), ""],
+      ["Settled P&L", plStr, ""],
+      ["Avg CLV", esc(clvVal), hasClv ? (Number(clv.avg_clv) >= 0 ? "pos" : "neg") : "dim"],
+      ["Bet Count", esc(String(t.n_bets || 0)), ""]
     ];
 
     $("ticker-stats").innerHTML = ticks.map(function (row) {
       return '<div class="tick">' +
         '<div class="tick-label">' + esc(row[0]) + '</div>' +
-        '<div class="tick-value num ' + row[2] + '">' + esc(row[1]) + '</div>' +
+        '<div class="tick-value num ' + row[2] + '">' + row[1] + '</div>' +
         '</div>';
     }).join("");
   }
@@ -336,12 +386,12 @@
     SRC.forEach(function (s) {
       var byCcy = ss[s.key];
       if (!byCcy || typeof byCcy !== "object") return;
-      var amt = moneyByCcy(byCcy, "settled_pl", true);
+      var amt = moneyByCcyHTML(byCcy, "settled_pl");
       var any = ["GBP", "USD", "EUR"].some(function (c) { return byCcy[c]; });
       if (!any) return;
       parts.push('<span class="src-pl-item">' +
         '<span class="src-chip src-' + s.key + '">' + esc(s.label) + '</span> ' +
-        esc(amt) + '</span>');
+        amt + '</span>');
     });
     if (!parts.length) return "";
     return '<div class="venue-source-pl"><span class="dim">SOURCE // P&L</span> ' +
@@ -387,21 +437,21 @@
       var edge = (p.model_prob != null && p.market_prob_devig != null)
         ? (p.model_prob - p.market_prob_devig) : null;
       return '<tr title="' + esc(metaTitle(p)) + '">' +
-        '<td class="num dim pos-time" style="border-left-color:' + col + '">' +
+        '<td class="num dim pos-time" data-label="Time" style="border-left-color:' + col + '">' +
           esc(timeOnly(p.ts_utc)) + '</td>' +
-        '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
-        '<td class="pos-mkt dim" title="' + esc(p.market) + '">' + esc(p.market) + '</td>' +
-        '<td class="pos-sel" title="' + esc(p.selection) + '">' + selDisplay(p) + '</td>' +
-        '<td class="r num">' + esc(num(p.decimal_odds)) + '</td>' +
-        '<td class="r num">' + esc(money(p.stake, p.currency)) + '</td>' +
-        '<td class="r num">' + esc(pct(p.model_prob, 0)) + '</td>' +
-        '<td class="r num dim">' + esc(pct(p.market_prob_devig, 0)) + '</td>' +
-        '<td class="r num ' + evClass(edge) + '">' +
+        '<td class="pos-match" data-label="Match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
+        '<td class="pos-mkt dim" data-label="Market" title="' + esc(p.market) + '">' + esc(marketShort(p.market)) + '</td>' +
+        '<td class="pos-sel" data-label="Selection" title="' + esc(p.selection) + '">' + selDisplay(p) + '</td>' +
+        '<td class="r num" data-label="Odds">' + esc(num(p.decimal_odds)) + '</td>' +
+        '<td class="r num" data-label="Stake">' + esc(money(p.stake, p.currency)) + '</td>' +
+        '<td class="r num" data-label="Model">' + esc(pct(p.model_prob, 0)) + '</td>' +
+        '<td class="r num dim" data-label="Mkt">' + esc(pct(p.market_prob_devig, 0)) + '</td>' +
+        '<td class="r num ' + evClass(edge) + '" data-label="Edge">' +
           esc(edge == null ? '—' : pctSigned(edge, 1)) + '</td>' +
-        '<td class="r num ' + evClass(p.ev) + '">' +
+        '<td class="r num ' + evClass(p.ev) + '" data-label="EV">' +
           esc(p.ev === null || p.ev === undefined ? '—' : pct(p.ev, 1)) + '</td>' +
-        '<td class="pos-src">' + sourceChip(p.source) + '</td>' +
-        '<td><span class="pill book ' + venue + '" style="color:' + col +
+        '<td class="pos-src" data-label="Source">' + sourceChip(p.source) + '</td>' +
+        '<td data-label="Venue"><span class="pill book ' + venue + '" style="color:' + col +
           ';border-color:' + col + '">' + esc(p.platform || venue) +
           accountSuffix(p.account) + '</span></td>' +
         '</tr>';
@@ -1055,21 +1105,21 @@
       var plTxt = p.status === "void" ? "void" : signedMoney(pl, p.currency);
       return '<tr title="' + esc(metaTitle(p)) +
           '" style="border-left:2px solid ' + bookColor(p.platform) + '">' +
-        '<td class="num dim">' + esc(timeOnly(p.settled_ts || p.ts_utc)) + '</td>' +
-        '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
-        '<td class="pos-mkt dim" title="' + esc(p.market) + '">' + esc(p.market) + '</td>' +
-        '<td class="pos-sel" title="' + esc(p.selection) + '">' + selDisplay(p) + '</td>' +
-        '<td class="r num">' + esc(num(p.decimal_odds)) + '</td>' +
-        '<td class="r num">' + esc(money(p.stake, p.currency)) + '</td>' +
-        '<td class="r num">' + esc(pct(p.model_prob, 0)) + '</td>' +
-        '<td class="r num ' + evClass(p.ev) + '">' +
+        '<td class="num dim" data-label="Time">' + esc(timeOnly(p.settled_ts || p.ts_utc)) + '</td>' +
+        '<td class="pos-match" data-label="Match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
+        '<td class="pos-mkt dim" data-label="Market" title="' + esc(p.market) + '">' + esc(marketShort(p.market)) + '</td>' +
+        '<td class="pos-sel" data-label="Selection" title="' + esc(p.selection) + '">' + selDisplay(p) + '</td>' +
+        '<td class="r num" data-label="Odds">' + esc(num(p.decimal_odds)) + '</td>' +
+        '<td class="r num" data-label="Stake">' + esc(money(p.stake, p.currency)) + '</td>' +
+        '<td class="r num" data-label="Model">' + esc(pct(p.model_prob, 0)) + '</td>' +
+        '<td class="r num ' + evClass(p.ev) + '" data-label="EV">' +
           esc(p.ev === null || p.ev === undefined ? "—" : pct(p.ev, 1)) + '</td>' +
-        '<td class="r num">' + esc(num(p.closing_odds)) + '</td>' +
-        '<td class="r num ' + plCls + '">' + esc(plTxt) + '</td>' +
-        '<td class="r num ' + evClass(p.clv) + '">' +
+        '<td class="r num" data-label="Close">' + esc(num(p.closing_odds)) + '</td>' +
+        '<td class="r num ' + plCls + '" data-label="P&L">' + esc(plTxt) + '</td>' +
+        '<td class="r num ' + evClass(p.clv) + '" data-label="CLV">' +
           esc(p.clv === null || p.clv === undefined ? "—" : pct(p.clv, 1)) + '</td>' +
-        '<td class="pos-src">' + sourceChip(p.source) + '</td>' +
-        '<td><span class="pill book ' + esc(p.venue || "sportsbook") +
+        '<td class="pos-src" data-label="Source">' + sourceChip(p.source) + '</td>' +
+        '<td data-label="Venue"><span class="pill book ' + esc(p.venue || "sportsbook") +
           '" style="color:' + bookColor(p.platform) + ';border-color:' +
           bookColor(p.platform) + '">' + esc(p.platform || "") +
           accountSuffix(p.account) + '</span></td>' +

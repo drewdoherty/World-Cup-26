@@ -44,7 +44,7 @@ body {
 }
 
 #app {
-  max-width: 1180px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 14px 28px;
 }
@@ -242,7 +242,7 @@ body {
 .pos-table { width: 100%; border-collapse: collapse; table-layout: auto; }
 .pos-table th, .pos-table td {
   text-align: left;
-  padding: 6px 10px;
+  padding: 5px 7px;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
@@ -257,7 +257,7 @@ body {
   font-weight: 500;
   z-index: 1;
 }
-.pos-table td { font-size: 12px; }
+.pos-table td { font-size: 11px; }
 .pos-table td.r, .pos-table th.r { text-align: right; }
 .pos-table tr:last-child td { border-bottom: none; }
 /* A thin per-book accent rail sits on the first cell of each row; the colour
@@ -281,12 +281,20 @@ body {
    narrower so Odds/Stake/Model/Mkt/EV/Kelly all fit, and let the panel scroll
    horizontally on narrow viewports rather than crushing the numeric cells. */
 .pos-table-wide { min-width: 760px; }
-.pos-table-wide .pos-match { max-width: 200px; }
-.pos-table-wide .pos-sel { max-width: none; }
+.pos-table-wide .pos-match { max-width: 180px; }
+/* Wrap long Bet Builder legs rather than letting one wide leg push the table
+   past the panel and force a horizontal scroller. */
+.pos-table-wide .pos-sel { max-width: 200px; white-space: normal; }
+.pos-table-wide .pos-sel .leg { white-space: normal; }
+/* Market is a short tag (see marketShort()); cap + ellipsis so an un-mapped
+   long market never widens the table — the full text stays on hover (title). */
 .pos-mkt {
   color: var(--text-dim);
   white-space: nowrap;
   font-size: 11px;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .pill {
   display: inline-block;
@@ -401,13 +409,52 @@ body {
   #app { padding: 0 8px 24px; }
 }
 
-/* Only below ~520px does the dense positions table need a horizontal
-   scroller; above that the full-width row holds every column comfortably. */
-@media (max-width: 520px) {
-  .panel-positions .panel-scroll { overflow-x: auto; }
-  .pos-table { min-width: 520px; }
-  .pos-match { max-width: 160px; }
-  .pos-sel { max-width: 140px; }
+/* On a phone the dense multi-column positions tables would need a horizontal
+   scroller; instead collapse each row into a labelled card (field label left,
+   value right) so everything reads top-to-bottom with no sideways scroll. */
+@media (max-width: 560px) {
+  .panel-positions .panel-scroll,
+  .panel-closed .panel-scroll { overflow-x: visible; }
+  .pos-table, .pos-table tbody, .pos-table tr, .pos-table td { display: block; }
+  .pos-table { min-width: 0; width: 100%; }
+  .pos-table thead { display: none; }
+  .pos-table tr {
+    border: 1px solid var(--border);
+    border-left-width: 2px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background: var(--panel-2);
+  }
+  .pos-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 14px;
+    text-align: right;
+    white-space: normal;
+    max-width: none;
+    overflow: visible;
+    text-overflow: clip;
+    border-bottom: 1px solid var(--border);
+    padding: 6px 11px;
+  }
+  .pos-table td.pos-time { border-left: none; }
+  .pos-table tr td:last-child { border-bottom: none; }
+  .pos-table td::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    text-align: left;
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  /* Selection (Bet Builder legs) stacks under its label, full width. */
+  .pos-table td.pos-sel { display: block; text-align: left; }
+  .pos-table td.pos-sel::before { display: block; margin-bottom: 3px; }
+  .pos-table td.pos-sel .leg { display: block; white-space: normal; }
+  /* Two ticker stats per row instead of cramming all five. */
+  .tick { flex: 1 1 50%; }
 }
 
 /* ============================================================ Scores page */
