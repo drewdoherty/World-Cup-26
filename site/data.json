@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-19T11:56:23"
+    "generated": "2026-06-19T11:56:42"
   },
   "totals": {
-    "wagered": 668.2860000000001,
-    "open_stake": 75.35,
+    "wagered": 680.376,
+    "open_stake": 87.44,
     "settled_pl": 22.000500000000002,
-    "n_bets": 74
+    "n_bets": 75
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 516.99,
-      "open_stake": 14.35,
+      "wagered": 529.0800000000002,
+      "open_stake": 26.439999999999998,
       "settled_pl": 48.19549999999998,
-      "n_bets": 57
+      "n_bets": 58
     },
     "USD": {
       "wagered": 151.29600000000002,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 516.99,
-      "open_stake": 14.35,
+      "wagered": 529.0800000000002,
+      "open_stake": 26.439999999999998,
       "settled_pl": 48.19549999999998,
-      "n_bets": 57,
+      "n_bets": 58,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 389.99000000000007,
-      "open_stake": 24.35,
+      "wagered": 402.0800000000001,
+      "open_stake": 36.44,
       "settled_pl": 82.19549999999995,
-      "n_bets": 43,
+      "n_bets": 44,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -64,10 +64,10 @@
   "source_summary": {
     "model": {
       "GBP": {
-        "wagered": 177.93000000000004,
-        "open_stake": 9.35,
+        "wagered": 190.02,
+        "open_stake": 21.439999999999998,
         "settled_pl": 20.7055,
-        "n_bets": 26
+        "n_bets": 27
       },
       "USD": {
         "wagered": 137.93,
@@ -111,10 +111,10 @@
     "Betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
-      "wagered": 177.05,
-      "open_stake": 9.35,
+      "wagered": 189.14000000000001,
+      "open_stake": 21.439999999999998,
       "settled_pl": 2.9620000000000033,
-      "n_bets": 11
+      "n_bets": 12
     },
     "Paddy Power": {
       "venue": "sportsbook",
@@ -2210,6 +2210,26 @@
     "n_with_close": 25
   },
   "positions": [
+    {
+      "id": 96,
+      "ts_utc": "2026-06-19T11:56:42",
+      "match": "Scotland v Morocco",
+      "match_id": "MANUAL_SCOTLAND_V_MOROCCO",
+      "market": "Match Odds",
+      "selection": "Scotland",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 6.0,
+      "stake": 12.09,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.93"
+    },
     {
       "id": 95,
       "ts_utc": "2026-06-19T11:56:23",
