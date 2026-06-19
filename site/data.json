@@ -1,40 +1,40 @@
 {
   "meta": {
-    "generated": "2026-06-19T11:15:17"
+    "generated": "2026-06-19 21:11:35 UTC"
   },
   "totals": {
-    "wagered": 646.436,
-    "open_stake": 99.0,
-    "settled_pl": 28.280500000000004,
-    "n_bets": 72
+    "wagered": 496.75600000000003,
+    "open_stake": 61.0,
+    "settled_pl": 188.3205,
+    "n_bets": 64
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 495.14000000000004,
-      "open_stake": 38.0,
-      "settled_pl": 54.47549999999998,
-      "n_bets": 55
+      "wagered": 376.1400000000001,
+      "open_stake": 0.0,
+      "settled_pl": 183.83550000000002,
+      "n_bets": 48
     },
     "USD": {
-      "wagered": 151.29600000000002,
+      "wagered": 120.616,
       "open_stake": 61.0,
-      "settled_pl": -26.195,
-      "n_bets": 17
+      "settled_pl": 4.485000000000003,
+      "n_bets": 16
     }
   },
   "venues": {
     "sportsbook": {
-      "wagered": 495.14000000000004,
-      "open_stake": 38.0,
-      "settled_pl": 54.47549999999998,
-      "n_bets": 55,
+      "wagered": 376.1400000000001,
+      "open_stake": 0.0,
+      "settled_pl": 183.83550000000002,
+      "n_bets": 48,
       "currency": "GBP"
     },
     "polymarket": {
-      "wagered": 151.29600000000002,
+      "wagered": 120.616,
       "open_stake": 61.0,
-      "settled_pl": -26.195,
-      "n_bets": 17,
+      "settled_pl": 4.485000000000003,
+      "n_bets": 16,
       "currency": "USD"
     },
     "kalshi": {
@@ -45,57 +45,37 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 368.14000000000004,
-      "open_stake": 58.0,
-      "settled_pl": 88.47549999999998,
-      "n_bets": 41,
+      "wagered": 259.14,
+      "open_stake": 20.0,
+      "settled_pl": 207.8355,
+      "n_bets": 35,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
     "sportsbook_2": {
-      "wagered": 117.0,
+      "wagered": 107.0,
       "open_stake": 0.0,
-      "settled_pl": -45.0,
-      "n_bets": 13,
+      "settled_pl": -35.0,
+      "n_bets": 12,
       "currency": "GBP",
       "label": "Sportsbook 2"
     }
   },
   "source_summary": {
-    "punt": {
-      "GBP": {
-        "wagered": 148.06,
-        "open_stake": 15.0,
-        "settled_pl": -31.33,
-        "n_bets": 9
-      },
-      "USD": {
-        "wagered": 13.366,
-        "open_stake": 1.0,
-        "settled_pl": -2.367,
-        "n_bets": 10
-      }
-    },
-    "model": {
-      "GBP": {
-        "wagered": 156.07999999999998,
-        "open_stake": 23.0,
-        "settled_pl": 6.985500000000005,
-        "n_bets": 24
-      },
-      "USD": {
-        "wagered": 137.93,
-        "open_stake": 60.0,
-        "settled_pl": -23.827999999999996,
-        "n_bets": 7
-      }
-    },
     "offer": {
       "GBP": {
-        "wagered": 185.0,
+        "wagered": 184.0,
         "open_stake": 20.0,
-        "settled_pl": 84.82,
-        "n_bets": 21
+        "settled_pl": 75.82,
+        "n_bets": 20
+      }
+    },
+    "manual": {
+      "GBP": {
+        "wagered": 10.0,
+        "open_stake": 0.0,
+        "settled_pl": 20.76,
+        "n_bets": 1
       }
     },
     "hedge": {
@@ -105,72 +85,52 @@
         "settled_pl": -6.0,
         "n_bets": 1
       }
+    },
+    "model": {
+      "GBP": {
+        "wagered": 133.08,
+        "open_stake": 0.0,
+        "settled_pl": 6.985500000000005,
+        "n_bets": 23
+      },
+      "USD": {
+        "wagered": 107.25,
+        "open_stake": 60.0,
+        "settled_pl": 6.852000000000004,
+        "n_bets": 6
+      }
+    },
+    "punt": {
+      "GBP": {
+        "wagered": 43.06,
+        "open_stake": 0.0,
+        "settled_pl": 86.27,
+        "n_bets": 3
+      },
+      "USD": {
+        "wagered": 13.366,
+        "open_stake": 1.0,
+        "settled_pl": -2.367,
+        "n_bets": 10
+      }
     }
   },
   "platforms": {
-    "Paddy Power": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 25.0,
-      "open_stake": 5.0,
-      "settled_pl": 30.0,
-      "n_bets": 4
-    },
-    "Betfair": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 155.20000000000002,
-      "open_stake": 23.0,
-      "settled_pl": -10.757999999999996,
-      "n_bets": 9
-    },
-    "Bet Builder (bet365)": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 10.0,
-      "open_stake": 10.0,
-      "settled_pl": 0.0,
-      "n_bets": 1
-    },
-    "Betway": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 10.0,
-      "open_stake": 10.0,
-      "settled_pl": 0.0,
-      "n_bets": 1
-    },
-    "Virgin Bet": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 31.25,
-      "open_stake": 0.0,
-      "settled_pl": -8.5,
-      "n_bets": 7
-    },
-    "Sky Bet": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 10.0,
-      "open_stake": 0.0,
-      "settled_pl": -10.0,
-      "n_bets": 1
-    },
-    "Betfair Sportsbook": {
+    "betfair_sportsbook": {
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 114.0,
-      "open_stake": 10.0,
-      "settled_pl": 32.07,
+      "open_stake": 20.0,
+      "settled_pl": 42.07,
       "n_bets": 12
     },
-    "polymarket": {
-      "venue": "polymarket",
-      "currency": "USD",
-      "wagered": 151.29600000000002,
-      "open_stake": 61.0,
-      "settled_pl": -26.195,
-      "n_bets": 17
+    "Paddypower": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 10.0,
+      "open_stake": 0.0,
+      "settled_pl": 20.76,
+      "n_bets": 1
     },
     "Smarkets": {
       "venue": "sportsbook",
@@ -179,6 +139,22 @@
       "open_stake": 0.0,
       "settled_pl": -11.306499999999993,
       "n_bets": 14
+    },
+    "Betfair": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 34.14,
+      "open_stake": 0.0,
+      "settled_pl": 15.572000000000003,
+      "n_bets": 4
+    },
+    "betfair_ex_uk": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 10.0,
+      "open_stake": 0.0,
+      "settled_pl": -10.0,
+      "n_bets": 1
     },
     "bet365": {
       "venue": "sportsbook",
@@ -195,158 +171,73 @@
       "open_stake": 0.0,
       "settled_pl": -19.0,
       "n_bets": 4
+    },
+    "Paddy Power": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 5.0,
+      "open_stake": 0.0,
+      "settled_pl": -5.0,
+      "n_bets": 1
+    },
+    "polymarket": {
+      "venue": "polymarket",
+      "currency": "USD",
+      "wagered": 120.616,
+      "open_stake": 61.0,
+      "settled_pl": 4.485000000000003,
+      "n_bets": 16
+    },
+    "betfair": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 18.06,
+      "open_stake": 0.0,
+      "settled_pl": 81.27,
+      "n_bets": 1
+    },
+    "virginbet": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 30.25,
+      "open_stake": 0.0,
+      "settled_pl": -17.5,
+      "n_bets": 6
+    },
+    "paddypower": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 15.0,
+      "open_stake": 0.0,
+      "settled_pl": 35.0,
+      "n_bets": 2
     }
   },
   "closed_positions": [
     {
-      "id": 89,
-      "ts_utc": "2026-06-17T14:42:00",
-      "settled_ts": "2026-06-18T12:20:02",
-      "match": "England vs Croatia",
-      "match_id": "ENG_CRO_2026-06-17",
-      "market": "Bet Builder (free bet)",
-      "selection": "England Full Time 2UP + Harry Kane Over 1.5 SOT (Sub Payout) + Jude Bellingham Over 1.5 SOT (Djed Spence sub, Sub Payout)",
-      "platform": "Virgin Bet",
+      "id": 83,
+      "ts_utc": "2026-06-17T15:21:50",
+      "settled_ts": "2026-06-17T15:21:50",
+      "match": "France vs Senegal",
+      "match_id": "WC_FRANCE_SENEGAL_20260616",
+      "market": "Accumulator",
+      "selection": "Mbappe AG + Mbappe 2+ Shots + France ML + O2.5",
+      "platform": "Paddypower",
       "venue": "sportsbook",
       "account": "1",
-      "source": "offer",
+      "source": "manual",
       "currency": "GBP",
-      "decimal_odds": 10.0,
-      "stake": 1.0,
+      "decimal_odds": 3.076,
+      "stake": 10.0,
       "model_prob": null,
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
       "status": "won",
-      "pl": 9.0,
-      "closing_odds": null,
-      "clv": null,
-      "notes": "free bet (Virgin, stake not returned); won £9; one-off manual add"
-    },
-    {
-      "id": 88,
-      "ts_utc": "2026-06-17T20:25:33",
-      "settled_ts": "2026-06-18T12:20:02",
-      "match": "Ghana vs Panama",
-      "match_id": "MANUAL_GHANA_VS_PANAMA",
-      "market": "Both Teams to Score, Both Teams 3+ Corners & Both Teams 2+ Cards",
-      "selection": "Both Teams to Score, Both Teams 3+ Corners & Both Teams 2+ Cards",
-      "platform": "Sky Bet",
-      "venue": "sportsbook",
-      "account": "2",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 8.0,
-      "stake": 10.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "status": "lost",
-      "pl": -10.0,
-      "closing_odds": null,
-      "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.88; boost"
-    },
-    {
-      "id": 86,
-      "ts_utc": "2026-06-17T17:50:48",
-      "settled_ts": "2026-06-18T12:20:02",
-      "match": "Ghana vs Panama",
-      "match_id": "GHA_PAN_2026-06-17",
-      "market": "Lay (Bet Against)",
-      "selection": "Ghana",
-      "platform": "Betfair",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 2.46,
-      "stake": 60.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "status": "lost",
-      "pl": -87.6,
-      "closing_odds": null,
-      "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.95; merged fills 6.85+53.15=60.00 (was rows 86+87)"
-    },
-    {
-      "id": 85,
-      "ts_utc": "2026-06-17T16:37:05",
-      "settled_ts": "2026-06-18T12:20:02",
-      "match": "Czechia vs South Africa | Ghana vs Panama | England vs Croatia | Portugal vs DR Congo",
-      "match_id": "MANUAL_CZECHIA_VS_SOUTH_AFRICA_GHANA_VS_PANAMA_ENGLAND_",
-      "market": "Accumulator",
-      "selection": "Portugal (Match Odds 90) + England (Match Odds 90) + Ghana (Match Odds 90) + Czechia (Match Odds 90)",
-      "platform": "Betfair Sportsbook",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 7.1732584,
-      "stake": 10.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "status": "lost",
-      "pl": -10.0,
-      "closing_odds": null,
-      "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92"
-    },
-    {
-      "id": 84,
-      "ts_utc": "2026-06-17T16:32:03",
-      "settled_ts": "2026-06-18T12:20:02",
-      "match": "Czechia vs South Africa | Ghana vs Panama | England vs Croatia",
-      "match_id": "MANUAL_CZECHIA_VS_SOUTH_AFRICA_GHANA_VS_PANAMA_ENGLAND_",
-      "market": "Accumulator",
-      "selection": "England (Match Odds 90) + Ghana (Match Odds 90) + Czechia (Match Odds 90)",
-      "platform": "Betfair",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 6.348375,
-      "stake": 10.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "status": "lost",
-      "pl": -10.0,
-      "closing_odds": null,
-      "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.82"
-    },
-    {
-      "id": 83,
-      "ts_utc": "2026-06-15T19:19:18",
-      "settled_ts": "2026-06-16T03:00:00",
-      "match": "Will IR Iran win on 2026-06-15?",
-      "match_id": "PM_iran_win_20260615",
-      "market": "polymarket",
-      "selection": "Iran win - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.8182,
-      "stake": 30.68,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "status": "lost",
-      "pl": -30.68,
-      "closing_odds": null,
-      "clv": null,
-      "notes": "RECONCILED 2026-06-16: bot-executed (Y PM-5) on PM2 0xd42e..., 55.04 sh @ 0.55 = $30.68 (data-api TRADE 2026-06-15T19:19:18Z). Found on-chain but unlogged (execution-logging gap) — backfilled."
+      "pl": 20.76,
+      "closing_odds": 3.076,
+      "clv": 0.0,
+      "notes": "4-leg acca: Mbappe AG (Super Sub) + Mbappe 2+ shots (Super Sub, Win More) + France ML + O2.5; paddypower slip 0/8819553/0000009"
     },
     {
       "id": 82,
@@ -606,7 +497,7 @@
       "match_id": "HAISCO_HAITI_EX",
       "market": "Match Odds",
       "selection": "Haiti",
-      "platform": "Betfair",
+      "platform": "betfair_ex_uk",
       "venue": "sportsbook",
       "account": "1",
       "source": "offer",
@@ -681,7 +572,7 @@
       "match_id": "AUSTUR_BB_BOOST",
       "market": "BETBUILDER",
       "selection": "Under 3.5 Goals & DC Australia/Türkiye & Under 4.5 Cards (100% boost)",
-      "platform": "Betfair Sportsbook",
+      "platform": "betfair_sportsbook",
       "venue": "sportsbook",
       "account": "1",
       "source": "offer",
@@ -781,7 +672,7 @@
       "match_id": "ACCA_A2_0008",
       "market": "ACCA",
       "selection": "SUI 1.16 x BRA 1.57 x SCO 1.44",
-      "platform": "Betfair Sportsbook",
+      "platform": "betfair_sportsbook",
       "venue": "sportsbook",
       "account": "2",
       "source": "offer",
@@ -806,7 +697,7 @@
       "match_id": "ACCA_A2_0007",
       "market": "ACCA",
       "selection": "SUI 1.16 x BRA 1.57 x TUR 1.61",
-      "platform": "Betfair Sportsbook",
+      "platform": "betfair_sportsbook",
       "venue": "sportsbook",
       "account": "2",
       "source": "offer",
@@ -831,7 +722,7 @@
       "match_id": "ACCA_A2_0006",
       "market": "ACCA",
       "selection": "SUI 1.16 x SCO 1.44 x TUR 1.61",
-      "platform": "Betfair Sportsbook",
+      "platform": "betfair_sportsbook",
       "venue": "sportsbook",
       "account": "2",
       "source": "offer",
@@ -856,7 +747,7 @@
       "match_id": "ACCA_A2_0005",
       "market": "ACCA",
       "selection": "BRA 1.57 x SCO 1.44 x TUR 1.61",
-      "platform": "Betfair Sportsbook",
+      "platform": "betfair_sportsbook",
       "venue": "sportsbook",
       "account": "2",
       "source": "offer",
@@ -881,7 +772,7 @@
       "match_id": "ACCA_A2_0004",
       "market": "ACCA",
       "selection": "SUI 1.18 x BRA 1.57 x SCO 1.44 x TUR 1.61",
-      "platform": "Betfair Sportsbook",
+      "platform": "betfair_sportsbook",
       "venue": "sportsbook",
       "account": "2",
       "source": "offer",
@@ -1331,7 +1222,7 @@
       "match_id": "AUS_TUR_20260614",
       "market": "Match Winner",
       "selection": "Australia",
-      "platform": "Betfair",
+      "platform": "betfair",
       "venue": "sportsbook",
       "account": "1",
       "source": "punt",
@@ -1356,7 +1247,7 @@
       "match_id": "MANUAL_CANADA_VS_BOSNIA_HERZEGOVINA",
       "market": "Total Cards",
       "selection": "Under 3.5",
-      "platform": "Virgin Bet",
+      "platform": "virginbet",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -1381,7 +1272,7 @@
       "match_id": "MANUAL_CANADA_VS_BOSNIA_HERZEGOVINA",
       "market": "Total Corners",
       "selection": "Under 8.5",
-      "platform": "Virgin Bet",
+      "platform": "virginbet",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -1406,7 +1297,7 @@
       "match_id": "ACC2_TREBLE",
       "market": "ACCA",
       "selection": "Netherlands/Brazil/Paraguay all win",
-      "platform": "Betfair Sportsbook",
+      "platform": "betfair_sportsbook",
       "venue": "sportsbook",
       "account": "2",
       "source": "offer",
@@ -1431,7 +1322,7 @@
       "match_id": "ACC2_USA",
       "market": "MATCH",
       "selection": "USA",
-      "platform": "Betfair Sportsbook",
+      "platform": "betfair_sportsbook",
       "venue": "sportsbook",
       "account": "2",
       "source": "offer",
@@ -1456,7 +1347,7 @@
       "match_id": "ACC2_CAN",
       "market": "MATCH",
       "selection": "Canada",
-      "platform": "Betfair Sportsbook",
+      "platform": "betfair_sportsbook",
       "venue": "sportsbook",
       "account": "2",
       "source": "offer",
@@ -1531,7 +1422,7 @@
       "match_id": "WC2026_MEX_RSA",
       "market": "player_second_goalscorer",
       "selection": "Raul Jimenez",
-      "platform": "Paddy Power",
+      "platform": "paddypower",
       "venue": "sportsbook",
       "account": "1",
       "source": "punt",
@@ -1556,7 +1447,7 @@
       "match_id": "WC2026_KOR_CZE",
       "market": "Both Teams To Score",
       "selection": "BTTS - No",
-      "platform": "Virgin Bet",
+      "platform": "virginbet",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -1706,7 +1597,7 @@
       "match_id": "WC2026_FREEBET_ACCA_D1",
       "market": "acca_treble",
       "selection": "Korea/Paraguay/Canada all win",
-      "platform": "Betfair Sportsbook",
+      "platform": "betfair_sportsbook",
       "venue": "sportsbook",
       "account": "1",
       "source": "offer",
@@ -1731,7 +1622,7 @@
       "match_id": "WC2026_MEX_RSA",
       "market": "player_shots_on_target",
       "selection": "Raul Jimenez 1+ SOT Yes",
-      "platform": "Paddy Power",
+      "platform": "paddypower",
       "venue": "sportsbook",
       "account": "1",
       "source": "offer",
@@ -1756,7 +1647,7 @@
       "match_id": "WC2026_MEX_RSA",
       "market": "player_score_or_assist",
       "selection": "Raul Jimenez Yes",
-      "platform": "Virgin Bet",
+      "platform": "virginbet",
       "venue": "sportsbook",
       "account": "1",
       "source": "offer",
@@ -1781,7 +1672,7 @@
       "match_id": "WC2026_CAN_BIH",
       "market": "h2h",
       "selection": "Canada",
-      "platform": "Virgin Bet",
+      "platform": "virginbet",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -1806,7 +1697,7 @@
       "match_id": "WC2026_USA_PAR",
       "market": "h2h",
       "selection": "Paraguay",
-      "platform": "Virgin Bet",
+      "platform": "virginbet",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -2009,24 +1900,8 @@
           163.08
         ],
         [
-          "2026-06-18T12:20:02",
-          172.08
-        ],
-        [
-          "2026-06-18T12:20:02",
-          162.08
-        ],
-        [
-          "2026-06-18T12:20:02",
-          74.48
-        ],
-        [
-          "2026-06-18T12:20:02",
-          64.48
-        ],
-        [
-          "2026-06-18T12:20:02",
-          54.48
+          "2026-06-17T15:21:50",
+          183.84
         ]
       ]
     },
@@ -2088,99 +1963,35 @@
         [
           "2026-06-14T05:50:00",
           4.49
-        ],
-        [
-          "2026-06-16T03:00:00",
-          -26.2
         ]
       ]
     }
   },
   "clv": {
-    "avg_clv": -0.0005636302581156263,
-    "pct_beat_close": 0.5416666666666666,
-    "n_with_close": 24
+    "avg_clv": -0.0005410850477910012,
+    "pct_beat_close": 0.52,
+    "n_with_close": 25
   },
   "positions": [
     {
-      "id": 93,
-      "ts_utc": "2026-06-19T11:15:17",
-      "match": "Scotland vs Morocco",
-      "match_id": "MANUAL_SCOTLAND_VS_MOROCCO",
-      "market": "Player Shots on Target",
-      "selection": "Scott McTominay to have 1 or more shots on target including woodwork",
-      "platform": "Paddy Power",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 2.5,
-      "stake": 5.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92; boost"
-    },
-    {
-      "id": 92,
-      "ts_utc": "2026-06-18T15:32:35",
-      "match": "",
-      "match_id": "MANUAL_UNKNOWN",
-      "market": "Match Result",
-      "selection": "Mexico",
-      "platform": "Betfair",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 2.14,
-      "stake": 23.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92"
-    },
-    {
-      "id": 91,
-      "ts_utc": "2026-06-18T15:18:41",
-      "match": "Switzerland vs Bosnia-Herzegovina",
-      "match_id": "MANUAL_SWITZERLAND_VS_BOSNIA_HERZEGOVINA",
-      "market": "Bet Builder - Switzerland To Win Both Halves / Over 2.5 Home Team Total Goals / Breel Embolo Player To Score And Assist",
-      "selection": "Switzerland To Win Both Halves + Over 2.5 Home Team Total Goals + Breel Embolo Player To Score And Assist",
-      "platform": "Bet Builder (bet365)",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 19.28,
-      "stake": 10.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92"
-    },
-    {
-      "id": 90,
-      "ts_utc": "2026-06-18T14:29:16",
-      "match": "Czech Republic vs South Africa",
-      "match_id": "MANUAL_CZECH_REPUBLIC_VS_SOUTH_AFRICA",
-      "market": "Match Result & Both Teams to Score",
-      "selection": "Czech Republic & No",
-      "platform": "Betway",
+      "id": 84,
+      "ts_utc": "2026-06-18T15:44:46",
+      "match": "Czechia v South Africa / Switzerland v Bosnia (4-fold)",
+      "match_id": "ACCA_BFSB_4F_20260618",
+      "market": "bet_builder_acca",
+      "selection": "Czechia win + Switzerland win + Under 2.5 + BTTS No (4-fold)",
+      "platform": "betfair_sportsbook",
       "venue": "sportsbook",
       "account": "1",
       "source": "offer",
       "currency": "GBP",
-      "decimal_odds": 2.75,
+      "decimal_odds": 6.02,
       "stake": 10.0,
-      "model_prob": null,
+      "model_prob": 0.129,
       "market_prob_devig": null,
-      "ev": null,
+      "ev": -0.223,
       "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.82"
+      "notes": "currency=GBP; Betfair Bet Boost applied 5.56->6.02 (boosted return GBP60.19 on GBP10). Legs: Czechia ML win (Cze v RSA), Switzerland ML win + Under 2.5 + BTTS-No (Sui v Bih). Boost promo P1. Break-even prob @6.02 = 16.6%. Provisional model joint ~15.5% (Czech ~54.8% x Swiss-builder ~28.3%) => ~break-even/marginal; EV/model_prob left NULL pending fresh model re-fit on full completed-match results (results.csv stale @2026-06-14). [REFIT 24-match: joint model prob 12.9% (Czech win 51.6% x Swiss 1-0/2-0 25.0%); break-even @6.02=16.6%; EV=-GBP2.24 (-22%). Boost insufficient; -EV but already placed.]"
     },
     {
       "id": 57,
@@ -2229,7 +2040,7 @@
       "match_id": "WC2026_GOLDEN_BOOT",
       "market": "outright_golden_boot",
       "selection": "Harry Kane (England)",
-      "platform": "Betfair Sportsbook",
+      "platform": "betfair_sportsbook",
       "venue": "sportsbook",
       "account": "1",
       "source": "offer",

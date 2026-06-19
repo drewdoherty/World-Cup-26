@@ -118,7 +118,7 @@ HELP_TEXT = (
     "/card — today's recommended bet card\n"
     "/next — next match preview: winner, corners, scorers, scorelines\n"
     "/scores — predicted FT scorelines per fixture\n"
-    "/accas — 4+ leg accumulators (next 5 matches, min 2.0 odds per leg)\n"
+    "/accas — promo accas / bet builders for Paddy, Betfair, Betfred, Virgin\n"
     "/structure — project structure metrics\n"
     "/pm — Polymarket parked orders + trader status\n"
     "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
@@ -876,37 +876,18 @@ def handle_boost(text: str, *, scores_path: str = "site/scores_data.json") -> st
 
 
 def handle_accas(scores_path: str = "site/scores_data.json") -> str:
-    """`/accas` — multi-leg accumulators for the next 5 matches (4+ legs, min 2.0 odds)."""
+    """`/accas` — promo acca / bet-builder briefs from the scores feed."""
     from wca import accas
-    from wca.boosts import load_scores_feed
 
     try:
-        scores_feed = load_scores_feed(scores_path)
-        if scores_feed.empty:
+        scores_feed = accas.load_scores_feed(scores_path)
+        if not scores_feed or not scores_feed.get("fixtures"):
             return (
-                "*Accumulators*\n"
-                "No odds data available yet. Try again after odds are loaded."
+                "🎟 *Promo accas / bet builders*\n"
+                "No scores/market feed available yet. Try again after `scores_data.json` is rebuilt."
             )
 
-        # Load fixtures meta for context
-        try:
-            from wca.data.results import load_results
-            from wca.data.cleaning import resolve_results_path
-
-            fixtures_meta = load_results(resolve_results_path())
-        except Exception:
-            fixtures_meta = pd.DataFrame()
-
-        # Build accas from the scores feed
-        acca_list = accas.build_accas_from_odds(
-            scores_feed, fixtures_meta, max_fixtures=5, min_legs=4, min_leg_odds=2.0
-        )
-        if not acca_list:
-            return (
-                "*Accumulators*\n"
-                "No valid 4+ leg accas found with 2.0+ odds per leg in next 5 matches."
-            )
-
+        acca_list = accas.build_accas_from_odds(scores_feed)
         now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         banner = _stale_banner(
             _feed_generated(scores_path), now_utc, SCORES_FEED_MAX_AGE_HOURS,
@@ -914,7 +895,7 @@ def handle_accas(scores_path: str = "site/scores_data.json") -> str:
         )
         return banner + accas.format_accas(acca_list)
     except Exception as exc:
-        return f"*Accumulators*\nError building accas: {exc}"
+        return f"🎟 *Promo accas / bet builders*\nError building accas: {exc}"
 
 
 def handle_boost_photo(
