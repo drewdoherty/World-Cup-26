@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-19T11:56:42"
+    "generated": "2026-06-19 12:14:59 UTC"
   },
   "totals": {
-    "wagered": 680.376,
+    "wagered": 690.376,
     "open_stake": 87.44,
     "settled_pl": 22.000500000000002,
-    "n_bets": 75
+    "n_bets": 76
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 529.0800000000002,
+      "wagered": 539.0800000000002,
       "open_stake": 26.439999999999998,
       "settled_pl": 48.19549999999998,
-      "n_bets": 58
+      "n_bets": 59
     },
     "USD": {
       "wagered": 151.29600000000002,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 529.0800000000002,
+      "wagered": 539.0800000000002,
       "open_stake": 26.439999999999998,
       "settled_pl": 48.19549999999998,
-      "n_bets": 58,
+      "n_bets": 59,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 402.0800000000001,
-      "open_stake": 36.44,
+      "wagered": 412.0800000000001,
+      "open_stake": 46.44,
       "settled_pl": 82.19549999999995,
-      "n_bets": 44,
+      "n_bets": 45,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,14 @@
     }
   },
   "source_summary": {
+    "offer": {
+      "GBP": {
+        "wagered": 195.0,
+        "open_stake": 20.0,
+        "settled_pl": 74.82,
+        "n_bets": 22
+      }
+    },
     "model": {
       "GBP": {
         "wagered": 190.02,
@@ -90,14 +98,6 @@
         "n_bets": 10
       }
     },
-    "offer": {
-      "GBP": {
-        "wagered": 185.0,
-        "open_stake": 10.0,
-        "settled_pl": 74.82,
-        "n_bets": 21
-      }
-    },
     "hedge": {
       "GBP": {
         "wagered": 6.0,
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "Betfair Sportsbook": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 124.0,
+      "open_stake": 20.0,
+      "settled_pl": 32.07,
+      "n_bets": 13
+    },
     "Betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -155,14 +163,6 @@
       "open_stake": 0.0,
       "settled_pl": -10.0,
       "n_bets": 1
-    },
-    "Betfair Sportsbook": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 114.0,
-      "open_stake": 10.0,
-      "settled_pl": 32.07,
-      "n_bets": 12
     },
     "polymarket": {
       "venue": "polymarket",
@@ -2210,6 +2210,26 @@
     "n_with_close": 25
   },
   "positions": [
+    {
+      "id": 97,
+      "ts_utc": "2026-06-17T15:03:00",
+      "match": "United States vs Australia",
+      "match_id": "BFSB_BB_USAAUS_20260619",
+      "market": "Bet Builder",
+      "selection": "Over 3.5 Goals & Home Team Over 2.5 & Folarin Balogun ATGS (Safe Sub)",
+      "platform": "Betfair Sportsbook",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 5.12,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "Bet Builder x3, money-back-as-free-bet (Bonus Used GBP10, SNR; potential returns GBP41.20 = profit only). Legs: Over 3.5 Goals; Home Team Over 2.5; Folarin Balogun anytime scorer (Safe Sub). Bet ID O/28625888/0000007. Logged manually as ONE combined bet (bot vision wrongly split it into 3 legs)."
+    },
     {
       "id": 96,
       "ts_utc": "2026-06-19T11:56:42",
