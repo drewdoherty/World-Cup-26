@@ -29,12 +29,15 @@ replying ``Y BET-12`` / ``N BET-12`` confirms or declines.
 
 from __future__ import annotations
 
+import csv
 import glob
+import json
 import logging
+import math
 import os
 import re
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
@@ -53,6 +56,7 @@ logger = logging.getLogger(__name__)
 CARD_PATH = "data/card_latest.md"
 NEXT_PATH = "data/next_latest.md"
 SCORES_FEED_PATH = "site/scores_data.json"
+RESULTS_PATH = "data/processed/wc2026_results.json"
 CARD_MAX_AGE_HOURS = 6.0
 # The odds feed behind /accas and /boost should refresh frequently; warn beyond
 # this. Structure snapshots change rarely, so its window is generous.
@@ -111,31 +115,22 @@ def _feed_generated(path: str) -> Optional[str]:
     return None
 
 HELP_TEXT = (
-    "*World Cup Alpha* — manager console\n\n"
-    "/summary — portfolio P&L, ROI, CLV, bankroll by pool\n"
-    "/bets — open bets, stakes, max win / max loss by venue\n"
-    "/clv — closing-line-value report\n"
-    "/card — today's recommended bet card\n"
-    "/next — next match preview: winner, corners, scorers, scorelines\n"
-    "/scores — predicted FT scorelines per fixture\n"
-    "/accas — promo accas / bet builders for Paddy, Betfair, Betfred, Virgin\n"
-    "/structure — project structure metrics\n"
+    "*World Cup Alpha* — operator console\n\n"
+    "Core commands:\n"
+    "/today — live operator brief: next match, active exposure, accas\n"
+    "/open or /bets — active open exposure only; FT fixtures are hidden\n"
+    "/scores — active predicted FT scorelines; hides FT fixtures\n/goalscorers — next-match anytime scorer prices\n/accas — promo accas / bet builders from current odds feed\n"
+    "/boost — price a bookmaker boost vs the model\n"
     "/pm — Polymarket parked orders + trader status\n"
-    "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
-    "/boost — price a bookmaker price-boost vs the model (usage below)\n"
-    "/ping — liveness check\n"
-    "/help — this message\n\n"
+    "/summary — portfolio P&L, ROI, CLV, bankroll by pool\n"
+    "/settle — settle a bet: `/settle <id> <won|lost|void> [closing-odds]`\n"
+    "/ping — liveness check\n\n"
+    "Quiet/debug commands still work: /next, /card, /clv, /structure.\n\n"
     "\U0001F4F8 Send a betslip *screenshot* and I'll parse the selections, then "
-    "log them to the ledger once you reply `yes`.\n"
-    "Tag the photo caption (or yes-reply) to set provenance: `a2` (account 2), "
-    "`offer`, `punt`, `model` — default is account 1 / model.\n"
-    "⚡ Caption a screenshot with `boost` and I'll read the enhanced price "
-    "and tell you if it beats the model's fair odds (no ledger write).\n"
-    "⚡ Or type it: "
+    "log them once you reply `yes`. Use tags: `a2`, `offer`, `punt`, `model`.\n"
+    "⚡ Caption a screenshot with `boost`, or type: "
     "`/boost <site> | <match> | <market> | <selection> | <odds> [was <odds>] [inplay]`\n"
-    "e.g. `/boost bet365 | Brazil vs Morocco | Match Result | Brazil | 2.5 was 1.8`\n"
-    "Confirm a pushed bet with `Y BET-<id>`, decline with `N BET-<id>`.\n"
-    "Execute a parked Polymarket order with `Y PM-<n>`, discard with `N PM-<n>`."
+    "Confirm a pushed sportsbook bet with `Y BET-<id>`; execute a parked Polymarket order with `Y PM-<n>`."
 )
 
 
@@ -154,7 +149,7 @@ def _authorized(chat_id: int | str, allowed: Optional[str]) -> bool:
 
 READ_ONLY_MSG = (
     "🔒 Read-only: bets and order confirmations are admin-only in this chat. "
-    "You can use /next, /scores, /card, /summary, /bets, /clv, /ping."
+    "You can use /today, /next, /scores, /card, /summary, /bets, /accas, /pm, /ping."
 )
 
 # Lone yes/no (betslip confirm) or Y/N BET-<id> / PM-<n> (order confirm) —
@@ -187,6 +182,105 @@ def _is_admin(user_id: str, admin: Optional[str]) -> bool:
     if not admin:
         return True
     return str(user_id) == str(admin)
+
+
+
+def _repo_root() -> str:
+    return os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    )
+
+
+def _resolve_repo_path(path: str) -> str:
+    if not path:
+        return path
+    if os.path.isabs(path):
+        return path
+    return os.path.join(_repo_root(), path)
+
+
+def _fixture_tokens(name: Any) -> Optional[tuple]:
+    if not isinstance(name, str):
+        return None
+    text = name.strip()
+    lowered = text.lower()
+    for sep in (" vs ", " v "):
+        if sep in lowered:
+            idx = lowered.find(sep)
+            left_raw = text[:idx].strip()
+            right_raw = text[idx + len(sep):].strip()
+            try:
+                from wca.data import teamnames
+                left_raw = teamnames.canonical(left_raw)
+                right_raw = teamnames.canonical(right_raw)
+            except Exception:
+                pass
+            left = re.sub(r"[^a-z0-9]+", " ", str(left_raw).lower()).strip()
+            right = re.sub(r"[^a-z0-9]+", " ", str(right_raw).lower()).strip()
+            if left and right:
+                return left, right
+    return None
+
+
+def _finished_fixture_tokens(results_path: str = RESULTS_PATH) -> List[tuple[str, str]]:
+    try:
+        with open(_resolve_repo_path(results_path), "r", encoding="utf-8") as fh:
+            payload = json.load(fh)
+    except Exception:
+        return []
+    rows = payload.get("results") if isinstance(payload, dict) else payload
+    out: List[tuple[str, str]] = []
+    for row in rows or []:
+        if not isinstance(row, dict):
+            continue
+        if not row.get("score") or row.get("outcome") in (None, "pending"):
+            continue
+        toks = _fixture_tokens(str(row.get("fixture") or ""))
+        if toks is not None:
+            out.append(toks)
+    return out
+
+
+def _matches_finished_fixture(match_desc: Any, finished: List[tuple[str, str]]) -> bool:
+    text = re.sub(r"[^a-z0-9]+", " ", str(match_desc or "").lower()).strip()
+    if not text:
+        return False
+    for home, away in finished:
+        if home in text and away in text:
+            return True
+    return False
+
+
+def _is_match_specific_market(market: Any) -> bool:
+    text = re.sub(r"[^a-z0-9]+", " ", str(market or "").lower()).strip()
+    if not text:
+        return False
+    needles = (
+        "match result",
+        "correct score",
+        "asian handicap",
+        "handicap",
+        "bet builder",
+        "acca",
+        "both teams",
+        "btts",
+        "over under",
+        "total goals",
+        "goalscorer",
+        "shots on target",
+        "cards",
+        "corners",
+    )
+    return any(n in text for n in needles)
+
+
+def _is_malformed_match_position(row: Any) -> bool:
+    match = str(row["match_desc"] or "").strip()
+    if _fixture_tokens(match):
+        return False
+    if match and match not in {"-", "—", "unknown", "UNKNOWN"}:
+        return False
+    return _is_match_specific_market(row["market"])
 
 
 # ---------------------------------------------------------------------------
@@ -340,7 +434,7 @@ def handle_summary(db_path: str) -> str:
     return "\n".join(lines)
 
 
-def handle_bets(db_path: str) -> str:
+def handle_bets(db_path: str, results_path: str = RESULTS_PATH) -> str:
     """All open bets — odds, stake per bet grouped by venue, max win / max loss.
 
     Free bets (notes containing "FREE") risk no cash: they count toward max
@@ -364,11 +458,41 @@ def handle_bets(db_path: str) -> str:
     if not rows:
         return "*Open bets*\nNone — the book is flat."
 
+    finished = _finished_fixture_tokens(results_path)
+    stale_rows = [r for r in rows if _matches_finished_fixture(r["match_desc"], finished)]
+    malformed_rows = [r for r in rows if _is_malformed_match_position(r)]
+    rows = [
+        r for r in rows
+        if not _matches_finished_fixture(r["match_desc"], finished)
+        and not _is_malformed_match_position(r)
+    ]
+
+    if not rows:
+        lines = ["\U0001f3af *Active open bets*", "None — no pre-match/in-play exposure."]
+        if stale_rows:
+            lines.extend(["", "⚠️ *Needs settlement* (FT fixtures hidden from active exposure)"])
+            for r in stale_rows[:12]:
+                lines.append("#%d %s — %s @ %.2f" % (
+                    r["id"], r["match_desc"], r["selection"], float(r["decimal_odds"] or 0.0),
+                ))
+        if malformed_rows:
+            lines.extend(["", "⚠️ *Needs cleanup* (malformed match rows hidden from active exposure)"])
+            for r in malformed_rows[:12]:
+                lines.append("#%d %s — %s @ %.2f" % (
+                    r["id"], r["match_desc"], r["selection"], float(r["decimal_odds"] or 0.0),
+                ))
+        return "\n".join(lines)
+
     by_venue: Dict[str, List[Any]] = {}
     for r in rows:
         by_venue.setdefault(_venue_of(r["platform"]), []).append(r)
 
-    lines = ["\U0001f3af *Open bets* (%d)" % len(rows)]
+    title = "\U0001f3af *Active open bets* (%d)" % len(rows)
+    if stale_rows:
+        title += " — %d FT hidden" % len(stale_rows)
+    if malformed_rows:
+        title += " — %d malformed hidden" % len(malformed_rows)
+    lines = [title]
     grand_win = {}
     grand_loss = {}
     for venue in ("sportsbook", "polymarket", "polymarket-auto", "kalshi"):
@@ -425,6 +549,9 @@ def handle_bets(db_path: str) -> str:
     tot_loss = " + ".join("%s%.2f" % (s, a) for s, a in grand_loss.items())
     lines.append("")
     lines.append("*TOTAL*  max win %s / max loss %s" % (tot_win, tot_loss))
+    if stale_rows:
+        lines.append("")
+        lines.append("⚠️ %d open row(s) are for FT fixtures and are hidden here; settle them with /settle." % len(stale_rows))
     return "\n".join(lines)
 
 
@@ -492,63 +619,31 @@ def handle_card(
     return header + "\n\n" + body
 
 
-def handle_scores(
-    card_path: str = CARD_PATH,
+def _format_score_fixtures(
+    fixtures: List[Dict[str, Any]],
+    generated: str = "",
     now_utc: Optional[str] = None,
+    stale_label: str = "scores feed",
 ) -> str:
-    """Return predicted full-time scorelines per fixture from the cached card.
-
-    Reads the card written by ``scripts/wca_build_card.py``, parses the
-    scorelines section via :func:`wca.sitedata.parse_scorelines`, and formats
-    a compact Telegram message.  If no card is cached yet returns an honest
-    message telling the user the cron build has not run.
-    """
     if now_utc is None:
         now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
-
-    cached = cardcache.read_card(card_path, now_utc=now_utc, max_age_hours=CARD_MAX_AGE_HOURS)
-    if cached is None:
-        return (
-            "*Predicted scores*\n"
-            "No card cached yet. The cron build (`scripts/wca_build_card.py`) "
-            "has not run — try again after the next scheduled build."
-        )
-
-    from wca.sitedata import parse_scorelines
-
-    card_text = cached.get("text") or ""
-    generated = cached.get("generated") or ""
-    fixtures = parse_scorelines(card_text)
-
-    if not fixtures:
-        return (
-            "*Predicted scores*\n"
-            "No scorelines section found in the current card. "
-            "The build may not have included scoreline predictions."
-        )
-
     header = "⚽ *Predicted scores* — %s" % generated if generated else "⚽ *Predicted scores*"
-
-    banner = _stale_banner(generated, now_utc, CARD_MAX_AGE_HOURS, label="card")
+    banner = _stale_banner(generated, now_utc, SCORES_FEED_MAX_AGE_HOURS, label=stale_label)
     lines = [banner + header if banner else header, ""]
     for fx in fixtures:
         scores = fx.get("scores") or []
         if not scores:
             continue
-        # Top score (most likely).
         top = scores[0]
-        top_str = "*%s* (%s%%)" % (top["score"], _fmt_prob(top["prob"]))
-        # Up to 4 runner-ups (indices 1-4) — kept inline to satisfy existing assertions.
-        runners = scores[1:5]
+        top_str = "*%s* (%s%%)" % (top.get("score"), _fmt_prob(top.get("prob")))
         runner_strs = [
-            "%s %s%%" % (s["score"], _fmt_prob(s["prob"])) for s in runners
+            "%s %s%%" % (r.get("score"), _fmt_prob(r.get("prob")))
+            for r in scores[1:5]
         ]
-        fixture_line = "*%s*: %s" % (fx["fixture"], top_str)
+        fixture_line = "*%s*: %s" % (fx.get("fixture"), top_str)
         if runner_strs:
             fixture_line += "  | " + " | ".join(runner_strs)
         lines.append(fixture_line)
-
-        # O/U + BTTS dimmed line (indented).
         ou = fx.get("over_under")
         btts = fx.get("btts")
         if ou is not None:
@@ -560,14 +655,77 @@ def handle_scores(
             if btts is not None:
                 ou_str += "   BTTS %s%%" % _fmt_prob(btts)
             lines.append("    " + ou_str)
-        # Blank line between fixtures.
         lines.append("")
-
-    # Remove trailing blank line if present.
     while lines and lines[-1] == "":
         lines.pop()
-
     return "\n".join(lines)
+
+
+def _active_score_fixtures_from_feed(scores_path: str = SCORES_FEED_PATH) -> Optional[tuple[str, List[Dict[str, Any]]]]:
+    try:
+        with open(_resolve_repo_path(scores_path), "r", encoding="utf-8") as fh:
+            payload = json.load(fh)
+    except Exception:
+        return None
+    generated = (payload.get("meta") or {}).get("generated") or ""
+    finished = _finished_fixture_tokens()
+    fixtures = [
+        fx for fx in (payload.get("fixtures") or [])
+        if not _matches_finished_fixture(fx.get("fixture"), finished)
+    ]
+    return generated, fixtures
+
+
+def handle_scores(
+    card_path: str = CARD_PATH,
+    now_utc: Optional[str] = None,
+    scores_path: str = SCORES_FEED_PATH,
+) -> str:
+    """Return active predicted full-time scorelines.
+
+    Prefer the lightweight scores feed because it carries current market venues
+    and can be regenerated without serving the whole raw card. Completed FT
+    fixtures are hidden so the command never suggests dead markets. Falls back
+    to the card parser only when the feed is absent.
+    """
+    if now_utc is None:
+        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+
+    use_scores_feed = os.path.normpath(str(card_path)) == os.path.normpath("data/card_latest.md")
+    if use_scores_feed:
+        feed = _active_score_fixtures_from_feed(scores_path)
+        if feed is not None:
+            generated, fixtures = feed
+            if fixtures:
+                return _format_score_fixtures(fixtures, generated, now_utc, "scores feed")
+            return (
+                "⚽ *Predicted scores*\n"
+                "No active scoreline feed right now — the cached fixtures are all FT. "
+                "Run the local card/scores refresh before using this for new bets."
+            )
+
+    cached = cardcache.read_card(card_path, now_utc=now_utc, max_age_hours=CARD_MAX_AGE_HOURS)
+    if cached is None:
+        return (
+            "*Predicted scores*\n"
+            "No card cached and no scores feed found yet. Run the local refresh build workflow."
+        )
+
+    from wca.sitedata import parse_scorelines
+
+    generated = cached.get("generated") or ""
+    fixtures = parse_scorelines(cached.get("text") or "")
+    if os.path.normpath(str(card_path)) == os.path.normpath("data/card_latest.md"):
+        finished = _finished_fixture_tokens()
+        fixtures = [
+            fx for fx in fixtures
+            if not _matches_finished_fixture(fx.get("fixture"), finished)
+        ]
+        if not fixtures:
+            return "⚽ *Predicted scores*\nNo active scorelines in the current card — cached fixtures are FT."
+    elif not fixtures:
+        return "⚽ *Predicted scores*\nNo scorelines section found in the supplied card."
+    return _format_score_fixtures(fixtures, generated, now_utc, "card")
 
 
 def handle_next(
@@ -592,9 +750,448 @@ def handle_next(
             "writes it alongside the main card — try again after the next build."
         )
     body = cached.get("text") or "(empty preview)"
+    # A stale next-match cache is actively dangerous once that fixture is FT:
+    # refuse it instead of showing dead goalscorer/scoreline markets.
+    first_line = next((ln for ln in body.splitlines() if ln.startswith("⚽ *Next match*")), "")
+    fixture = first_line.split("—", 1)[1].strip() if "—" in first_line else ""
+    if fixture and _matches_finished_fixture(fixture, _finished_fixture_tokens()):
+        return (
+            "⚽ *Next match*\n"
+            "No active next-match cache — the cached fixture is FT. "
+            "Run the local card/next refresh before using scorer or scoreline markets."
+        )
     if cached.get("stale"):
         body = "⚠️ STALE (generated %s UTC)\n\n%s" % (cached.get("generated"), body)
     return body
+
+
+def _score_to_pair(score: Any) -> Optional[tuple[int, int]]:
+    text = str(score or "").strip()
+    if "-" not in text:
+        return None
+    left, _, right = text.partition("-")
+    try:
+        return int(left.strip()), int(right.strip())
+    except ValueError:
+        return None
+
+
+def _poisson_over_25_lambda(target_over: float) -> Optional[float]:
+    """Combined-goals lambda whose Poisson P(total >= 3) matches target."""
+    if not 0.0 < target_over < 1.0:
+        return None
+
+    def over25(lam: float) -> float:
+        return 1.0 - math.exp(-lam) * (1.0 + lam + (lam * lam / 2.0))
+
+    lo, hi = 0.01, 8.0
+    for _ in range(60):
+        mid = (lo + hi) / 2.0
+        if over25(mid) < target_over:
+            lo = mid
+        else:
+            hi = mid
+    return (lo + hi) / 2.0
+
+
+def _score_fixture_lambdas(fx: Dict[str, Any]) -> tuple[float, float]:
+    """Approximate team xG from listed scorelines plus O/U 2.5."""
+    w_sum = h_sum = a_sum = 0.0
+    for row in fx.get("scores") or []:
+        pair = _score_to_pair(row.get("score") if isinstance(row, dict) else None)
+        if pair is None:
+            continue
+        try:
+            w = float(row.get("prob")) / 100.0
+        except (TypeError, ValueError):
+            continue
+        if w <= 0:
+            continue
+        h, a = pair
+        w_sum += w
+        h_sum += h * w
+        a_sum += a * w
+    listed_h = h_sum / w_sum if w_sum > 0 else 0.0
+    listed_a = a_sum / w_sum if w_sum > 0 else 0.0
+    ratio = listed_h / (listed_h + listed_a) if (listed_h + listed_a) > 0 else 0.5
+    if (listed_h + listed_a) <= 0:
+        model = fx.get("model_1x2") or {}
+        try:
+            ph = float(model.get("home") or 0.0)
+            pa = float(model.get("away") or 0.0)
+            if ph > 0 or pa > 0:
+                ratio = min(max(0.5 + 0.35 * (ph - pa), 0.25), 0.75)
+        except (TypeError, ValueError):
+            pass
+
+    total = listed_h + listed_a
+    ou = fx.get("over_under") or {}
+    try:
+        line = float(ou.get("line", 2.5))
+        over = float(ou.get("over")) / 100.0
+    except (TypeError, ValueError):
+        line, over = 2.5, 0.0
+    if abs(line - 2.5) < 1e-9:
+        inferred = _poisson_over_25_lambda(over)
+        if inferred is not None:
+            total = inferred
+    if total <= 0:
+        total = 2.4
+    return max(total * ratio, 0.05), max(total * (1.0 - ratio), 0.05)
+
+
+def _median(xs: List[float]) -> Optional[float]:
+    vals = sorted(x for x in xs if x > 0)
+    if not vals:
+        return None
+    n = len(vals)
+    mid = n // 2
+    if n % 2:
+        return vals[mid]
+    return (vals[mid - 1] + vals[mid]) / 2.0
+
+
+def _parse_utc_datetime(raw: Any) -> Optional[datetime]:
+    text = str(raw or "").strip()
+    if not text:
+        return None
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        dt = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
+
+def _latest_snapshot_score_fixture(
+    now_utc: Optional[str] = None,
+    pattern: str = "data/raw/snapshots/oddsapi_multi_uk_*.json",
+) -> Optional[tuple[str, Dict[str, Any]]]:
+    """Build a score-feed-like fixture from the latest raw multi-market snapshot."""
+    paths = sorted(glob.glob(_resolve_repo_path(pattern)))
+    if not paths:
+        return None
+    path = paths[-1]
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            rows = json.load(fh)
+    except Exception:
+        return None
+    if not isinstance(rows, list):
+        return None
+    now = _parse_utc_datetime(now_utc) if now_utc else datetime.now(timezone.utc)
+    min_dt = now - timedelta(hours=2)
+    by_event: Dict[str, List[Dict[str, Any]]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        eid = str(row.get("event_id") or row.get("id") or "")
+        if not eid:
+            continue
+        by_event.setdefault(eid, []).append(row)
+
+    candidates: List[tuple[datetime, Dict[str, Any]]] = []
+    for event_rows in by_event.values():
+        first = event_rows[0]
+        kickoff = _parse_utc_datetime(first.get("commence_time"))
+        if kickoff is None or kickoff < min_dt:
+            continue
+        home = str(first.get("home_team") or "").strip()
+        away = str(first.get("away_team") or "").strip()
+        if not home or not away:
+            continue
+
+        implied = {"home": [], "draw": [], "away": []}  # type: Dict[str, List[float]]
+        over_imps: List[float] = []
+        under_imps: List[float] = []
+        for row in event_rows:
+            try:
+                odds = float(row.get("decimal_odds") or 0.0)
+            except (TypeError, ValueError):
+                continue
+            if odds <= 1.0:
+                continue
+            market = str(row.get("market") or "")
+            name = str(row.get("outcome_name") or "")
+            if market == "h2h":
+                key = None
+                if _canon_team_for_match(name) == _canon_team_for_match(home):
+                    key = "home"
+                elif _canon_team_for_match(name) == _canon_team_for_match(away):
+                    key = "away"
+                elif name.lower() == "draw":
+                    key = "draw"
+                if key:
+                    implied[key].append(1.0 / odds)
+            elif market == "totals":
+                try:
+                    point = float(row.get("outcome_point"))
+                except (TypeError, ValueError):
+                    continue
+                if abs(point - 2.5) > 1e-9:
+                    continue
+                if name.lower() == "over":
+                    over_imps.append(1.0 / odds)
+                elif name.lower() == "under":
+                    under_imps.append(1.0 / odds)
+
+        med = {k: _median(v) for k, v in implied.items()}
+        h = med.get("home") or 0.0
+        d = med.get("draw") or 0.0
+        a = med.get("away") or 0.0
+        s = h + d + a
+        if s > 0:
+            model_1x2 = {"home": h / s, "draw": d / s, "away": a / s}
+        else:
+            model_1x2 = {"home": 0.5, "draw": 0.25, "away": 0.25}
+
+        over_med = _median(over_imps)
+        under_med = _median(under_imps)
+        if over_med is not None and under_med is not None and (over_med + under_med) > 0:
+            over_pct = 100.0 * over_med / (over_med + under_med)
+        else:
+            over_pct = 50.0
+        fx = {
+            "fixture": "%s vs %s" % (home, away),
+            "kickoff": kickoff.isoformat(),
+            "scores": [],
+            "model_1x2": model_1x2,
+            "over_under": {"line": 2.5, "over": over_pct, "under": 100.0 - over_pct},
+            "btts": None,
+            "_source": os.path.basename(path),
+        }
+        candidates.append((kickoff, fx))
+
+    if not candidates:
+        return None
+    candidates.sort(key=lambda x: x[0])
+    return candidates[0][1].get("_source", ""), candidates[0][1]
+
+
+def _canon_team_for_match(team: str) -> str:
+    try:
+        from wca.data import teamnames
+
+        return teamnames.canonical(team)
+    except Exception:
+        return str(team or "")
+
+
+def _statsbomb_players_for_team(
+    team: str,
+    path: str = "data/processed/props_players.csv",
+    limit: int = 8,
+) -> List[Any]:
+    """Empirical WC2018/2022 npxG-share player params for a team."""
+    try:
+        from wca.models.scorers import PlayerParams
+    except Exception:
+        return []
+    target = _canon_team_for_match(team)
+    rows: List[Dict[str, Any]] = []
+    try:
+        with open(_resolve_repo_path(path), "r", encoding="utf-8") as fh:
+            for row in csv.DictReader(fh):
+                if _canon_team_for_match(str(row.get("team") or "")) == target:
+                    rows.append(row)
+    except Exception:
+        return []
+    totals = []
+    for row in rows:
+        try:
+            totals.append(max(float(row.get("npxg_sum") or 0.0), 0.0))
+        except (TypeError, ValueError):
+            totals.append(0.0)
+    team_total = sum(totals)
+    if team_total <= 0:
+        return []
+    enriched = []
+    for row, npxg in zip(rows, totals):
+        if npxg <= 0:
+            continue
+        try:
+            minutes = float(row.get("minutes") or 0.0)
+            matches = max(float(row.get("matches") or 1.0), 1.0)
+            xg = float(row.get("xg_sum") or 0.0)
+        except (TypeError, ValueError):
+            minutes, matches, xg = 0.0, 1.0, npxg
+        enriched.append(
+            (
+                npxg,
+                PlayerParams(
+                    name=str(row.get("player") or "").strip(),
+                    team=target,
+                    npxg_share=min(max(npxg / team_total, 0.0), 0.75),
+                    penalty_taker=(xg - npxg) >= 0.45,
+                    expected_minutes=min(max(minutes / matches, 20.0), 90.0),
+                    source="statsbomb_wc18_22",
+                ),
+            )
+        )
+    enriched.sort(key=lambda x: x[0], reverse=True)
+    return [p for _, p in enriched[:limit] if p.name]
+
+
+def _players_for_goalscorers(
+    team: str,
+    players_path: str = "data/players.json",
+    statsbomb_players_path: str = "data/processed/props_players.csv",
+    limit: int = 8,
+) -> List[Any]:
+    try:
+        from wca.models.scorers import players_for_team
+
+        players = list(players_for_team(_canon_team_for_match(team), _resolve_repo_path(players_path)))
+    except Exception:
+        players = []
+    seen = {str(getattr(p, "name", "")).lower() for p in players}
+    for p in _statsbomb_players_for_team(team, statsbomb_players_path, limit=limit):
+        if str(getattr(p, "name", "")).lower() in seen:
+            continue
+        players.append(p)
+        seen.add(str(getattr(p, "name", "")).lower())
+        if len(players) >= limit:
+            break
+    return players[:limit]
+
+
+def _format_goalscorer_fallback(
+    fx: Dict[str, Any],
+    generated: str = "",
+    now_utc: Optional[str] = None,
+    players_path: str = "data/players.json",
+    statsbomb_players_path: str = "data/processed/props_players.csv",
+) -> str:
+    from wca.models.scorers import ScorerPricer
+
+    if now_utc is None:
+        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    fixture = str(fx.get("fixture") or "?")
+    home, away = _fixture_sides(fixture) if "_fixture_sides" in globals() else (fixture, "")
+    # local helper avoids importing accas just for a tiny string split
+    if home == fixture and " vs " in fixture:
+        home, _, away = fixture.partition(" vs ")
+    elif home == fixture and " v " in fixture:
+        home, _, away = fixture.partition(" v ")
+    home, away = home.strip(), away.strip()
+    lam_h, lam_a = _score_fixture_lambdas(fx)
+    total_lam = lam_h + lam_a
+    pricer = ScorerPricer()
+
+    banner = _stale_banner(generated, now_utc, SCORES_FEED_MAX_AGE_HOURS, label="scores feed")
+    lines: List[str] = []
+    if banner:
+        lines.append(banner.rstrip())
+        lines.append("")
+    lines.extend(
+        [
+            "⚽ *Goalscorers — %s*" % fixture,
+            "Model scorer prices from scoreline xG + StatsBomb/player overrides.",
+            "No live scorer book prices in the current local feed; use fair odds as a filter, not a bet instruction.",
+            "Team xG approx: %s %.2f / %s %.2f" % (home, lam_h, away, lam_a),
+            "",
+        ]
+    )
+
+    for team, lam in ((home, lam_h), (away, lam_a)):
+        if not team:
+            continue
+        players = _players_for_goalscorers(team, players_path, statsbomb_players_path)
+        lines.append("*%s*" % team)
+        if not players:
+            lines.append("  No player-level data yet.")
+            lines.append("")
+            continue
+        priced = [pricer.price_player(p, lam, total_lam) for p in players]
+        priced.sort(key=lambda x: x.p_anytime, reverse=True)
+        for line in priced[:6]:
+            lines.append(
+                "  %-22s anytime %.1f%% fair %.2f | first %.1f%% fair %.2f"
+                % (
+                    line.player[:22],
+                    line.p_anytime * 100.0,
+                    line.fair_anytime,
+                    line.p_first * 100.0,
+                    line.fair_first,
+                )
+            )
+        lines.append("")
+    while lines and lines[-1] == "":
+        lines.pop()
+    return "\n".join(lines)
+
+
+def handle_goalscorers(
+    next_path: str = NEXT_PATH,
+    now_utc: Optional[str] = None,
+    scores_path: str = SCORES_FEED_PATH,
+    players_path: str = "data/players.json",
+    statsbomb_players_path: str = "data/processed/props_players.csv",
+) -> str:
+    """Return next-match scorer prices; fall back to scoreline+StatsBomb estimates."""
+    text = handle_next(next_path=next_path, now_utc=now_utc)
+    if "*Anytime scorer*" not in text:
+        feed = _active_score_fixtures_from_feed(scores_path)
+        if feed is not None and feed[1]:
+            generated, fixtures = feed
+            fixtures = sorted(fixtures, key=lambda f: str(f.get("kickoff") or f.get("commence_time") or ""))
+            return _format_goalscorer_fallback(
+                fixtures[0],
+                generated,
+                now_utc,
+                players_path=players_path,
+                statsbomb_players_path=statsbomb_players_path,
+            )
+        snap = _latest_snapshot_score_fixture(now_utc)
+        if snap is None:
+            return text
+        generated, fx = snap
+        return _format_goalscorer_fallback(
+            fx,
+            "latest raw snapshot %s" % generated,
+            now_utc,
+            players_path=players_path,
+            statsbomb_players_path=statsbomb_players_path,
+        )
+    if "*Anytime scorer* — no market prices available yet." in text:
+        feed = _active_score_fixtures_from_feed(scores_path)
+        if feed is not None and feed[1]:
+            generated, fixtures = feed
+            fixtures = sorted(fixtures, key=lambda f: str(f.get("kickoff") or f.get("commence_time") or ""))
+            return _format_goalscorer_fallback(
+                fixtures[0],
+                generated,
+                now_utc,
+                players_path=players_path,
+                statsbomb_players_path=statsbomb_players_path,
+            )
+        snap = _latest_snapshot_score_fixture(now_utc)
+        if snap is not None:
+            generated, fx = snap
+            return _format_goalscorer_fallback(
+                fx,
+                "latest raw snapshot %s" % generated,
+                now_utc,
+                players_path=players_path,
+                statsbomb_players_path=statsbomb_players_path,
+            )
+    lines = text.splitlines()
+    out: List[str] = []
+    capture = False
+    for line in lines:
+        if line.startswith("⚽ *Next match*") or line.startswith("Kickoff "):
+            out.append(line)
+            continue
+        if line.startswith("*Anytime scorer*"):
+            capture = True
+        elif capture and line.startswith("*") and line.strip():
+            break
+        if capture:
+            out.append(line)
+    return "\n".join(out).strip() or text
 
 
 def _fmt_prob(prob: Optional[float]) -> str:
@@ -602,6 +1199,28 @@ def _fmt_prob(prob: Optional[float]) -> str:
     if prob is None:
         return "?"
     return "%.1f" % prob
+
+
+def _clip_section(text: str, max_lines: int) -> str:
+    lines = (text or "").splitlines()
+    if len(lines) <= max_lines:
+        return text
+    return "\n".join(lines[:max_lines] + ["…"] )
+
+
+def handle_today(db_path: str) -> str:
+    """Compact operator brief: next match, active exposure, promo builders."""
+    sections = ["🧭 *WCA today*"]
+    sections.append("")
+    sections.append("*Next / in-play*")
+    sections.append(_clip_section(handle_next(next_path=NEXT_PATH), 12))
+    sections.append("")
+    sections.append("*Exposure*")
+    sections.append(_clip_section(handle_bets(db_path), 18))
+    sections.append("")
+    sections.append("*Promos / accas*")
+    sections.append(_clip_section(handle_accas(), 16))
+    return "\n".join(sections)
 
 
 def handle_structure(docs_dir: Optional[str] = None) -> str:
@@ -881,6 +1500,16 @@ def handle_accas(scores_path: str = "site/scores_data.json") -> str:
 
     try:
         scores_feed = accas.load_scores_feed(scores_path)
+        if os.path.normpath(str(scores_path)) == os.path.normpath("site/scores_data.json"):
+            scores_feed = accas.merge_snapshot_feed(
+                scores_feed,
+                accas.load_latest_snapshot_feed(),
+            )
+            finished = _finished_fixture_tokens()
+            scores_feed["fixtures"] = [
+                fx for fx in (scores_feed.get("fixtures") or [])
+                if isinstance(fx, dict) and not _matches_finished_fixture(fx.get("fixture"), finished)
+            ]
         if not scores_feed or not scores_feed.get("fixtures"):
             return (
                 "🎟 *Promo accas / bet builders*\n"
@@ -889,8 +1518,9 @@ def handle_accas(scores_path: str = "site/scores_data.json") -> str:
 
         acca_list = accas.build_accas_from_odds(scores_feed)
         now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+        generated = str((scores_feed.get("meta") or {}).get("generated") or _feed_generated(scores_path) or "")
         banner = _stale_banner(
-            _feed_generated(scores_path), now_utc, SCORES_FEED_MAX_AGE_HOURS,
+            generated, now_utc, SCORES_FEED_MAX_AGE_HOURS,
             label="odds feed",
         )
         return banner + accas.format_accas(acca_list)
@@ -1835,9 +2465,11 @@ def dispatch(text: str, db_path: str) -> str:
 
     if cmd in {"/start", "/help"}:
         return HELP_TEXT
+    if cmd == "/today":
+        return handle_today(db_path)
     if cmd == "/summary":
         return handle_summary(db_path)
-    if cmd == "/bets":
+    if cmd in {"/open", "/bets"}:
         return handle_bets(db_path)
     if cmd == "/clv":
         return handle_clv(db_path)
@@ -1847,6 +2479,8 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_next(next_path=NEXT_PATH)
     if cmd == "/scores":
         return handle_scores(card_path=CARD_PATH)
+    if cmd in {"/goalscorers", "/scorers"}:
+        return handle_goalscorers(next_path=NEXT_PATH)
     if cmd == "/accas":
         return handle_accas()
     if cmd == "/structure":

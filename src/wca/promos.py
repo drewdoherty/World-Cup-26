@@ -187,6 +187,8 @@ SITES: List[Dict[str, Any]] = [
     },
 ]
 
+EXCLUDED_SEED_SITES = {"Ladbrokes"}
+
 
 def site_by_name(name: str) -> Optional[Dict[str, Any]]:
     """Return the :data:`SITES` registry entry for *name* (or ``None``)."""
@@ -1126,6 +1128,15 @@ def seed_from_recon(
     ongoing_candidates: List[Dict[str, Any]] = []
     if start_2b is not None:
         ongoing_candidates = _parse_2b_sections(lines, start_2b)
+
+    signup_candidates = [
+        c for c in signup_candidates
+        if c.get("site") not in EXCLUDED_SEED_SITES
+    ]
+    ongoing_candidates = [
+        c for c in ongoing_candidates
+        if c.get("site") not in EXCLUDED_SEED_SITES
+    ]
 
     for cand in signup_candidates:
         if _upsert_seed_row(conn, cand, now):

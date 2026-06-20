@@ -10,8 +10,8 @@ def _seed(db):
                "virginbet", 4.2, 5.68, db_path=db)
     record_bet("2026-06-11T10:00:00", "M2", "Treble", "acca", "3 legs",
                "betfair_sportsbook", 20.41, 2.0, notes="FREE bet SNR", db_path=db)
-    record_bet("2026-06-11T10:00:00", "M3", "Mexico vs South Africa", "pm_moneyline",
-               "Mexico Yes", "polymarket", 1.449, 22.0, notes="currency=USD", db_path=db)
+    record_bet("2026-06-11T10:00:00", "M3", "Brazil Golden Boot", "pm_moneyline",
+               "Brazil Yes", "polymarket", 1.449, 22.0, notes="currency=USD", db_path=db)
     add_bankroll_event("2026-06-11T09:00:00", 1310.0, "deposit pool=polymarket currency=USD", db_path=db)
     add_bankroll_event("2026-06-11T09:00:00", 1000.0, "notional pool=sportsbook currency=GBP", db_path=db)
 

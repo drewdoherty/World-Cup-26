@@ -62,6 +62,10 @@
     if (v === null || v === undefined || isNaN(v)) return "—";
     return Number(v).toFixed(dp === undefined ? 2 : dp);
   }
+  function odds(v) {
+    if (v === null || v === undefined || isNaN(v) || Number(v) <= 1) return "—";
+    return Number(v).toFixed(2);
+  }
   // Signed percentage with an explicit + on positives (for edge columns).
   function pctSigned(n, dp) {
     if (n === null || n === undefined || isNaN(n)) return "—";
@@ -377,7 +381,7 @@
         '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
         '<td class="pos-mkt dim" title="' + esc(p.market) + '">' + esc(marketShort(p.market)) + '</td>' +
         '<td class="pos-sel" title="' + esc(p.selection) + '">' + esc(dash(p.selection)) + '</td>' +
-        '<td class="r num">' + esc(num(p.decimal_odds)) + '</td>' +
+        '<td class="r num">' + esc(odds(p.decimal_odds)) + '</td>' +
         '<td class="r num">' + esc(money(p.stake, p.currency)) + '</td>' +
         '<td class="r num">' + esc(pct(p.model_prob, 0)) + '</td>' +
         '<td class="r num dim">' + esc(pct(p.market_prob_devig, 0)) + '</td>' +
@@ -1042,7 +1046,7 @@
         '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
         '<td class="pos-mkt dim" title="' + esc(p.market) + '">' + esc(marketShort(p.market)) + '</td>' +
         '<td class="pos-sel" title="' + esc(p.selection) + '">' + esc(dash(p.selection)) + '</td>' +
-        '<td class="r num">' + esc(num(p.decimal_odds)) + '</td>' +
+        '<td class="r num">' + esc(odds(p.decimal_odds)) + '</td>' +
         '<td class="r num">' + esc(money(p.stake, p.currency)) + '</td>' +
         '<td class="r num">' + esc(pct(p.model_prob, 0)) + '</td>' +
         '<td class="r num ' + evClass(p.ev) + '">' +

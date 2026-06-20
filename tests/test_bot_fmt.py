@@ -31,8 +31,8 @@ def _seed(db: str) -> None:
         "betfair_sportsbook", 20.41, 2.0, notes="FREE bet SNR", db_path=db,
     )
     record_bet(
-        "2026-06-11T10:00:00", "M3", "Mexico vs South Africa", "pm_moneyline",
-        "Mexico Yes", "polymarket", 1.449, 22.0, notes="currency=USD", db_path=db,
+        "2026-06-11T10:00:00", "M3", "Brazil Golden Boot", "pm_moneyline",
+        "Brazil Yes", "polymarket", 1.449, 22.0, notes="currency=USD", db_path=db,
     )
     add_bankroll_event(
         "2026-06-11T09:00:00", 1310.0,
@@ -158,7 +158,7 @@ class TestBetsFormat:
         db = str(tmp_path / "t.db")
         _seed(db)
         out = app.handle_bets(db)
-        assert "Open bets" in out
+        assert "Active open bets" in out
         assert "(3)" in out
 
     def test_code_block_fences_present(self, tmp_path):

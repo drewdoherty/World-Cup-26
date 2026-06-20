@@ -198,6 +198,109 @@ def _read_card_body(card_path: str) -> str:
     return raw
 
 
+RESULTS_PATH = "data/processed/wc2026_results.json"
+
+
+def _repo_root() -> str:
+    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def _resolve_repo_path(path: str) -> str:
+    if os.path.isabs(path):
+        return path
+    return os.path.join(_repo_root(), path)
+
+
+def _fixture_tokens(name: Any) -> Optional[tuple]:
+    if not isinstance(name, str):
+        return None
+    text = name.strip()
+    lowered = text.lower()
+    for sep in (" vs ", " v "):
+        if sep in lowered:
+            idx = lowered.find(sep)
+            left_raw = text[:idx].strip()
+            right_raw = text[idx + len(sep):].strip()
+            try:
+                from wca.data import teamnames
+                left_raw = teamnames.canonical(left_raw)
+                right_raw = teamnames.canonical(right_raw)
+            except Exception:
+                pass
+            left = re.sub(r"[^a-z0-9]+", " ", str(left_raw).lower()).strip()
+            right = re.sub(r"[^a-z0-9]+", " ", str(right_raw).lower()).strip()
+            if left and right:
+                return left, right
+    return None
+
+
+def _finished_fixture_tokens(results_path: str = RESULTS_PATH) -> List[tuple]:
+    try:
+        with open(_resolve_repo_path(results_path), "r", encoding="utf-8") as fh:
+            payload = json.load(fh)
+    except Exception:
+        return []
+    rows = payload.get("results") if isinstance(payload, dict) else payload
+    out: List[tuple] = []
+    for row in rows or []:
+        if not isinstance(row, dict):
+            continue
+        if not row.get("score") or row.get("outcome") in (None, "pending"):
+            continue
+        toks = _fixture_tokens(str(row.get("fixture") or ""))
+        if toks is not None:
+            out.append(toks)
+    return out
+
+
+def _matches_finished_fixture(match_desc: Any, finished: List[tuple]) -> bool:
+    text = re.sub(r"[^a-z0-9]+", " ", str(match_desc or "").lower()).strip()
+    if not text:
+        return False
+    for home, away in finished:
+        if home in text and away in text:
+            return True
+    return False
+
+
+def _is_match_specific_market(market: Any) -> bool:
+    text = re.sub(r"[^a-z0-9]+", " ", str(market or "").lower()).strip()
+    if not text:
+        return False
+    needles = (
+        "match result",
+        "correct score",
+        "asian handicap",
+        "handicap",
+        "bet builder",
+        "acca",
+        "both teams",
+        "btts",
+        "over under",
+        "total goals",
+        "goalscorer",
+        "shots on target",
+        "cards",
+        "corners",
+    )
+    return any(n in text for n in needles)
+
+
+def _is_malformed_match_position(bet: Dict[str, Any]) -> bool:
+    """Rows like '-' / UNKNOWN / Match Result are not usable active exposure.
+
+    This keeps open outrights and advancement positions visible, while stopping
+    half-parsed slip rows from leaking into the site as if they were live match
+    exposure.
+    """
+    match = str(bet.get("match_desc") or "").strip()
+    if _fixture_tokens(match):
+        return False
+    if match and match not in {"-", "—", "unknown", "UNKNOWN"}:
+        return False
+    return _is_match_specific_market(bet.get("market"))
+
+
 # ---------------------------------------------------------------------------
 # Positions (open bets) extraction.
 # ---------------------------------------------------------------------------
@@ -209,15 +312,20 @@ VENUE_CURRENCY = {"sportsbook": "GBP", "polymarket": "USD", "kalshi": "USD"}
 CURRENCY_SYMBOL = {"GBP": "£", "USD": "$", "EUR": "€"}
 
 
-def _positions_from_bets(bets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _positions_from_bets(bets: List[Dict[str, Any]], finished: Optional[List[tuple]] = None) -> List[Dict[str, Any]]:
     """Project the open bets into the compact terminal "positions" shape.
 
     Ordering follows ``gather_stats`` (newest-first by id).
     """
     positions: List[Dict[str, Any]] = []
+    finished = finished or []
     for b in bets:
         status = (b.get("status") or "").strip().lower()
         if status != "open":
+            continue
+        if _matches_finished_fixture(b.get("match_desc"), finished):
+            continue
+        if _is_malformed_match_position(b):
             continue
         venue = dashboard.venue_for_platform(b.get("platform"))
         positions.append({
@@ -383,7 +491,8 @@ def build_site_data(
         "n_with_close": int(clv_in.get("n_with_close") or 0),
     }
 
-    positions = _positions_from_bets(stats.get("bets") or [])
+    finished_fixtures = _finished_fixture_tokens()
+    positions = _positions_from_bets(stats.get("bets") or [], finished_fixtures)
 
     # Closed (settled/void) positions with realized P&L per bet.
     closed_positions: List[Dict[str, Any]] = []
