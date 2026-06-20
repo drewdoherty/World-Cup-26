@@ -1,18 +1,18 @@
 {
   "meta": {
-    "generated": "2026-06-20T08:08:38"
+    "generated": "2026-06-20 08:26:13 UTC"
   },
   "totals": {
     "wagered": 738.836,
-    "open_stake": 135.89999999999998,
-    "settled_pl": 22.000500000000002,
+    "open_stake": 114.46000000000001,
+    "settled_pl": 37.96049999999998,
     "n_bets": 83
   },
   "totals_by_currency": {
     "GBP": {
       "wagered": 585.08,
-      "open_stake": 72.44,
-      "settled_pl": 48.19549999999998,
+      "open_stake": 51.0,
+      "settled_pl": 64.15549999999999,
       "n_bets": 65
     },
     "USD": {
@@ -25,8 +25,8 @@
   "venues": {
     "sportsbook": {
       "wagered": 585.08,
-      "open_stake": 72.44,
-      "settled_pl": 48.19549999999998,
+      "open_stake": 51.0,
+      "settled_pl": 64.15549999999999,
       "n_bets": 65,
       "currency": "GBP"
     },
@@ -46,8 +46,8 @@
     },
     "sportsbook_1": {
       "wagered": 437.0800000000001,
-      "open_stake": 71.44,
-      "settled_pl": 82.19549999999995,
+      "open_stake": 40.0,
+      "settled_pl": 98.15549999999999,
       "n_bets": 48,
       "currency": "GBP",
       "label": "Sportsbook 1"
@@ -71,8 +71,8 @@
       },
       "GBP": {
         "wagered": 211.02,
-        "open_stake": 42.440000000000005,
-        "settled_pl": 20.7055,
+        "open_stake": 21.0,
+        "settled_pl": 36.6655,
         "n_bets": 30
       }
     },
@@ -93,7 +93,7 @@
     "offer": {
       "GBP": {
         "wagered": 195.0,
-        "open_stake": 20.0,
+        "open_stake": 10.0,
         "settled_pl": 74.82,
         "n_bets": 22
       }
@@ -144,15 +144,15 @@
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 194.14000000000001,
-      "open_stake": 26.439999999999998,
-      "settled_pl": 2.9620000000000033,
+      "open_stake": 5.0,
+      "settled_pl": 18.92200000000001,
       "n_bets": 13
     },
     "Betfair Sportsbook": {
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 124.0,
-      "open_stake": 20.0,
+      "open_stake": 10.0,
       "settled_pl": 32.07,
       "n_bets": 13
     },
@@ -214,6 +214,81 @@
     }
   },
   "closed_positions": [
+    {
+      "id": 97,
+      "ts_utc": "2026-06-19T12:00:00",
+      "settled_ts": "2026-06-20T08:24:51",
+      "match": "United States vs Australia",
+      "match_id": "BFSB_BB_USAAUS_20260619",
+      "market": "Bet Builder",
+      "selection": "Over 3.5 Goals & Home Team Over 2.5 & Folarin Balogun ATGS (Safe Sub)",
+      "platform": "Betfair Sportsbook",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 5.12,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "lost",
+      "pl": 0.0,
+      "closing_odds": null,
+      "clv": null,
+      "notes": "Bet Builder x3, money-back-as-free-bet (Bonus Used GBP10, SNR; potential returns GBP41.20 = profit only). Legs: Over 3.5 Goals; Home Team Over 2.5; Folarin Balogun anytime scorer (Safe Sub). Bet ID O/28625888/0000007. Logged manually as ONE combined bet (bot vision wrongly split it into 3 legs). | ts set to ingest date (slip shows no placement time); Bet ID O/28625888/0000007 | settled 2026-06-19: US 2-0 Australia, Over 3.5 leg failed -> LOST; SNR free bet (no cash loss)"
+    },
+    {
+      "id": 96,
+      "ts_utc": "2026-06-19T11:56:42",
+      "settled_ts": "2026-06-20T08:24:51",
+      "match": "Scotland v Morocco",
+      "match_id": "MANUAL_SCOTLAND_V_MOROCCO",
+      "market": "Match Odds",
+      "selection": "Scotland",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 6.0,
+      "stake": 12.09,
+      "model_prob": 0.193525,
+      "market_prob_devig": 0.16356,
+      "ev": 0.16115,
+      "kelly_fraction": null,
+      "status": "lost",
+      "pl": -12.09,
+      "closing_odds": 5.863631612788238,
+      "clv": 0.0232566430186969,
+      "notes": "screenshot ingest; currency=GBP; conf 0.93 | model/market backfilled from model_predictions_log 2026-06-19 pre-KO | settled 2026-06-19: Scotland 0-1 Morocco (/scores) -> Scotland LOST"
+    },
+    {
+      "id": 95,
+      "ts_utc": "2026-06-19T11:56:23",
+      "settled_ts": "2026-06-20T08:24:51",
+      "match": "Türkiye v Paraguay",
+      "match_id": "MANUAL_T_RKIYE_V_PARAGUAY",
+      "market": "Match Odds",
+      "selection": "Paraguay",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 4.0,
+      "stake": 9.35,
+      "model_prob": 0.271779,
+      "market_prob_devig": 0.250002,
+      "ev": 0.087116,
+      "kelly_fraction": null,
+      "status": "won",
+      "pl": 28.05,
+      "closing_odds": 4.036219265317766,
+      "clv": -0.008973562370357069,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97 | model/market backfilled from model_predictions_log 2026-06-19 pre-KO | settled 2026-06-19: Turkey 0-1 Paraguay (/scores) -> Paraguay WON"
+    },
     {
       "id": 94,
       "ts_utc": "2026-06-19T11:23:47",
@@ -1710,8 +1785,8 @@
       "kelly_fraction": 0.25,
       "status": "won",
       "pl": 11.969999999999999,
-      "closing_odds": 2.7281262034124074,
-      "clv": -0.006644195341745873,
+      "closing_odds": 2.6,
+      "clv": 0.04230769230769216,
       "notes": "screenshot ingest; currency=GBP; conf 0.97; boost"
     },
     {
@@ -1760,8 +1835,8 @@
       "kelly_fraction": 0.25,
       "status": "won",
       "pl": 14.224,
-      "closing_odds": 2.7281262034124074,
-      "clv": 0.01828133776407026,
+      "closing_odds": 2.6,
+      "clv": 0.06846153846153835,
       "notes": "currency=USD; avg price 36c; taker; Polymarket portfolio screenshot 2026-06-11"
     },
     {
@@ -2159,6 +2234,18 @@
         [
           "2026-06-19T12:30:00",
           48.2
+        ],
+        [
+          "2026-06-20T08:24:51",
+          48.2
+        ],
+        [
+          "2026-06-20T08:24:51",
+          36.11
+        ],
+        [
+          "2026-06-20T08:24:51",
+          64.16
         ]
       ]
     },
@@ -2229,8 +2316,8 @@
     }
   },
   "clv": {
-    "avg_clv": -0.018790336422255978,
-    "pct_beat_close": 0.5185185185185185,
+    "avg_clv": -0.015118777594592788,
+    "pct_beat_close": 0.5555555555555556,
     "n_with_close": 27
   },
   "positions": [
@@ -2373,66 +2460,6 @@
       "ev": null,
       "kelly_fraction": null,
       "notes": "screenshot ingest; currency=GBP; conf 0.85"
-    },
-    {
-      "id": 97,
-      "ts_utc": "2026-06-19T12:00:00",
-      "match": "United States vs Australia",
-      "match_id": "BFSB_BB_USAAUS_20260619",
-      "market": "Bet Builder",
-      "selection": "Over 3.5 Goals & Home Team Over 2.5 & Folarin Balogun ATGS (Safe Sub)",
-      "platform": "Betfair Sportsbook",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "offer",
-      "currency": "GBP",
-      "decimal_odds": 5.12,
-      "stake": 10.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "Bet Builder x3, money-back-as-free-bet (Bonus Used GBP10, SNR; potential returns GBP41.20 = profit only). Legs: Over 3.5 Goals; Home Team Over 2.5; Folarin Balogun anytime scorer (Safe Sub). Bet ID O/28625888/0000007. Logged manually as ONE combined bet (bot vision wrongly split it into 3 legs). | ts set to ingest date (slip shows no placement time); Bet ID O/28625888/0000007"
-    },
-    {
-      "id": 96,
-      "ts_utc": "2026-06-19T11:56:42",
-      "match": "Scotland v Morocco",
-      "match_id": "MANUAL_SCOTLAND_V_MOROCCO",
-      "market": "Match Odds",
-      "selection": "Scotland",
-      "platform": "Betfair",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 6.0,
-      "stake": 12.09,
-      "model_prob": 0.193525,
-      "market_prob_devig": 0.16356,
-      "ev": 0.16115,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.93 | model/market backfilled from model_predictions_log 2026-06-19 pre-KO"
-    },
-    {
-      "id": 95,
-      "ts_utc": "2026-06-19T11:56:23",
-      "match": "Türkiye v Paraguay",
-      "match_id": "MANUAL_T_RKIYE_V_PARAGUAY",
-      "market": "Match Odds",
-      "selection": "Paraguay",
-      "platform": "Betfair",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 4.0,
-      "stake": 9.35,
-      "model_prob": 0.271779,
-      "market_prob_devig": 0.250002,
-      "ev": 0.087116,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97 | model/market backfilled from model_predictions_log 2026-06-19 pre-KO"
     },
     {
       "id": 93,
