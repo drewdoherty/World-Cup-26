@@ -240,6 +240,17 @@
       ["Bet Count", esc(String(t.n_bets || 0)), ""]
     ];
 
+    // P&L by source (model / offer / punt), moved here from the venues panel.
+    // Each currency leg is coloured by its own sign via moneyByCcyHTML.
+    var ss = d.source_summary || {};
+    [["model", "Model P&L"], ["offer", "Offer P&L"], ["punt", "Punt P&L"]]
+      .forEach(function (pair) {
+        var byCcy = ss[pair[0]];
+        if (byCcy && ["GBP", "USD", "EUR"].some(function (c) { return byCcy[c]; })) {
+          ticks.push([pair[1], moneyByCcyHTML(byCcy, "settled_pl"), ""]);
+        }
+      });
+
     $("ticker-stats").innerHTML = ticks.map(function (row) {
       return '<div class="tick">' +
         '<div class="tick-label">' + esc(row[0]) + '</div>' +
@@ -327,16 +338,20 @@
 
     $("venues-meta").textContent = moneyByCcy(d.totals_by_currency, "wagered");
 
-    // Per-bookmaker rows nested under each venue, coloured by book.
+    // Per-bookmaker rows nested under each venue, coloured by book. For the two
+    // sportsbook accounts we use the per-account breakdown so a1 AND a2 each show
+    // their OWN book split (they share books, so the venue-level map can't).
     var plats = d.platforms || {};
+    var pba = d.platforms_by_account || {};
 
-    function platformRows(venueKey, venueWagered, ccy) {
-      var rows = Object.keys(plats).filter(function (p) {
-        return (plats[p].venue || "sportsbook") === venueKey && Number(plats[p].wagered || 0) > 0;
-      }).sort(function (a, b) { return plats[b].wagered - plats[a].wagered; });
+    function platformRows(venueKey, venueWagered, ccy, account) {
+      var src = (account && pba[account]) ? pba[account] : plats;
+      var rows = Object.keys(src).filter(function (p) {
+        return (src[p].venue || "sportsbook") === venueKey && Number(src[p].wagered || 0) > 0;
+      }).sort(function (a, b) { return src[b].wagered - src[a].wagered; });
       if (!rows.length) return "";
       return '<div class="venue-books">' + rows.map(function (p) {
-        var blk = plats[p];
+        var blk = src[p];
         var frac = venueWagered > 0 ? (blk.wagered / venueWagered) : 0;
         var pl = Number(blk.settled_pl || 0);
         var plBit = pl !== 0
@@ -367,9 +382,11 @@
       // account 1 keeps the canonical green, account 2 uses a teal-green.
       var color = (k === "sportsbook_2") ? "#34d399"
         : (VENUE_COLOR[pvk] || "#9ca3af");
-      // Per-book rows only under sportsbook_1 (or the combined sportsbook /
-      // non-sportsbook venues) — never duplicated under sportsbook_2.
-      var books = (k === "sportsbook_2") ? "" : platformRows(pvk, amt, ccy);
+      // Per-book breakdown: each sportsbook account uses its own per-account
+      // split (so a2 shows its books just like a1); other venues use the
+      // combined platforms map.
+      var acct = (k === "sportsbook_1") ? "1" : (k === "sportsbook_2") ? "2" : null;
+      var books = platformRows(pvk, amt, ccy, acct);
       return '' +
         '<div class="venue-row">' +
           '<div class="venue-top">' +
@@ -386,37 +403,9 @@
         '</div>';
     }).join("");
 
-    html += sourceSummaryLine(d);
+    // (P&L by source moved to the top ticker row — see renderTicker.)
 
     $("venues").innerHTML = html;
-  }
-
-  // Optional "SOURCE // P&L" footer line built from d.source_summary, a map
-  // {model:{GBP:{settled_pl},USD:{...}}, offer:{...}, punt:{...}}. Per-currency
-  // settled P&L is shown separately (never summing £ with $). Absent feed (old
-  // data.json) -> empty string, so the panel is unchanged.
-  function sourceSummaryLine(d) {
-    var ss = d.source_summary;
-    if (!ss || typeof ss !== "object") return "";
-    var SRC = [
-      { key: "model", label: "model" },
-      { key: "offer", label: "offer" },
-      { key: "punt", label: "punt" }
-    ];
-    var parts = [];
-    SRC.forEach(function (s) {
-      var byCcy = ss[s.key];
-      if (!byCcy || typeof byCcy !== "object") return;
-      var amt = moneyByCcyHTML(byCcy, "settled_pl");
-      var any = ["GBP", "USD", "EUR"].some(function (c) { return byCcy[c]; });
-      if (!any) return;
-      parts.push('<span class="src-pl-item">' +
-        '<span class="src-chip src-' + s.key + '">' + esc(s.label) + '</span> ' +
-        amt + '</span>');
-    });
-    if (!parts.length) return "";
-    return '<div class="venue-source-pl"><span class="dim">SOURCE // P&L</span> ' +
-      parts.join('<span class="dim"> · </span>') + '</div>';
   }
 
   // Small terminal chip for a bet's source (model/offer/punt). Unknown/absent

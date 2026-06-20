@@ -448,22 +448,36 @@ def build_site_data(
     # Per-bookmaker breakdown within each venue (all bets, not just open),
     # so the site can show which books the money actually sits at.
     platforms: Dict[str, Any] = {}
-    for b in stats.get("bets") or []:
-        plat = (b.get("platform") or "unknown").strip()
-        venue = dashboard.venue_for_platform(plat)
-        blk = platforms.setdefault(plat, {
+    # Same per-book breakdown, but ALSO split by physical account so the venue
+    # panel can show each sportsbook account's own book split (a1 AND a2 — the
+    # two accounts share books like Betfair, so the venue-level split alone can't
+    # attribute the per-book money).
+    platforms_by_account: Dict[str, Dict[str, Any]] = {}
+
+    def _plat_block(venue: str) -> Dict[str, Any]:
+        return {
             "venue": venue,
             "currency": VENUE_CURRENCY.get(venue, "GBP"),
             "wagered": 0.0, "open_stake": 0.0, "settled_pl": 0.0, "n_bets": 0,
-        })
+        }
+
+    for b in stats.get("bets") or []:
+        plat = (b.get("platform") or "unknown").strip()
+        venue = dashboard.venue_for_platform(plat)
         stake = float(b.get("stake") or 0.0)
         status = (b.get("status") or "").lower()
-        blk["wagered"] += stake
-        blk["n_bets"] += 1
-        if status == "open":
-            blk["open_stake"] += stake
-        elif status in ("won", "lost"):
-            blk["settled_pl"] += float(b.get("settled_pl") or 0.0)
+        pl = float(b.get("settled_pl") or 0.0) if status in ("won", "lost") else 0.0
+        acct = str(b.get("account") or "1")
+
+        for blk in (
+            platforms.setdefault(plat, _plat_block(venue)),
+            platforms_by_account.setdefault(acct, {}).setdefault(plat, _plat_block(venue)),
+        ):
+            blk["wagered"] += stake
+            blk["n_bets"] += 1
+            if status == "open":
+                blk["open_stake"] += stake
+            blk["settled_pl"] += pl
 
     predictions = parse_scorelines(_read_card_body(card_path))
 
@@ -474,6 +488,7 @@ def build_site_data(
         "venues": venues,
         "source_summary": source_summary,
         "platforms": platforms,
+        "platforms_by_account": platforms_by_account,
         "closed_positions": closed_positions,
         "pnl_series": pnl_series,
         "clv": clv,
