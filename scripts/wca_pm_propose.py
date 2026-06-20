@@ -349,6 +349,58 @@ def _build_exposure_section(proposals: list, odds_df, db_path: str, now_dt) -> s
     return "\n".join(lines) + "\n"
 
 
+def _unfilled_orders_section(proposals: list, db_path: str) -> str:
+    """Best-effort "Unfilled PM orders" section for the proposal message.
+
+    Pulls the account's live open orders + books and renders each with its
+    %-off-market and age via :mod:`wca.pm.redeem`.  Any failure (no key, CLOB
+    unreachable, region block) returns ``""`` so the proposal message still
+    sends — the unfilled list is informational, never load-bearing.
+    """
+    try:
+        import datetime as _dt
+
+        from wca.pm import redeem as redeem_core
+        from wca.pm.trader import ClobTrader, resolve_funder_from_env
+
+        key = os.environ.get("POLYMARKET_PRIVATE_KEY")
+        if not key:
+            return ""
+        funder, sig_type, _ = resolve_funder_from_env()
+        trader = ClobTrader(key, funder=funder, signature_type=sig_type)
+        orders = trader.open_orders()
+        if not orders:
+            return ""
+
+        # token -> human label from the current proposals.
+        tok_label = {}
+        for p in proposals:
+            tok = str(p.get("token_id") or "")
+            if tok:
+                tok_label[tok] = "%s — %s" % (p.get("match_desc", ""), p.get("outcome", ""))
+
+        label_by_id, books = {}, {}
+        for o in orders:
+            tok = str(o.get("asset_id") or o.get("token_id") or "")
+            oid = redeem_core.order_id_of(o)
+            if oid and tok in tok_label:
+                label_by_id[oid] = tok_label[tok]
+            if tok and tok not in books:
+                try:
+                    books[tok] = trader.get_order_book(tok)
+                except Exception:  # noqa: BLE001 — a missing book just omits %-off
+                    books[tok] = None
+
+        now_epoch = _dt.datetime.now(_dt.timezone.utc).timestamp()
+        return redeem_core.format_unfilled_orders(
+            orders, books, now_epoch,
+            label_by_id=label_by_id,
+            log_epoch_by_id=redeem_core.log_epoch_by_id(db_path),
+        )
+    except Exception:  # noqa: BLE001 — never block the proposal message
+        return ""
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Produce Polymarket parked-order proposals from the card."
@@ -521,8 +573,15 @@ def main() -> int:
     for i, text in enumerate(parked_texts, 1):
         message_body += "\n" + text
 
+    # Resting orders from earlier batches that are still unfilled — shown with
+    # %-off-market + age so the user can let them ride or redeem instantly.
+    unfilled_section = _unfilled_orders_section(proposals, args.db)
+    if unfilled_section:
+        message_body += "\n\n" + unfilled_section
+
     message_body += (
-        "\n\n_PM_DRY_RUN gates execution. Confirm each with `Y PM-<n>` in Telegram._"
+        "\n\n_PM_DRY_RUN gates execution. Confirm each with `Y PM-<n>`. "
+        "Unfilled orders auto-redeem after 24h; `REDEEM ALL` / `REDEEM <id>` to cancel now._"
     )
 
     # Send single message

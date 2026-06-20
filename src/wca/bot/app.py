@@ -137,7 +137,9 @@ HELP_TEXT = (
     "`/boost <site> | <match> | <market> | <selection> | <odds> [was <odds>] [inplay]`\n"
     "e.g. `/boost bet365 | Brazil vs Morocco | Match Result | Brazil | 2.5 was 1.8`\n"
     "Confirm a pushed bet with `Y BET-<id>`, decline with `N BET-<id>`.\n"
-    "Execute a parked Polymarket order with `Y PM-<n>`, discard with `N PM-<n>`."
+    "Execute a parked Polymarket order with `Y PM-<n>`, discard with `N PM-<n>`.\n"
+    "Unfilled PM orders auto-redeem after 24h; `REDEEM ALL` or `REDEEM <order-id>` "
+    "cancels them now and frees the pUSD."
 )
 
 
@@ -170,6 +172,7 @@ _MONEY_RE = re.compile(
     r"^\s*(?:"
     r"[yn]\s+(?:bet|pm)-\d+"            # Y/N BET-<id> | Y/N PM-<n>
     r"|(?:yes|no|y|n)(?:\s+" + _TAG_TOKEN + r")*"  # yes/no [+ tag overrides]
+    r"|redeem\s+\S+"                   # REDEEM ALL | REDEEM <order_id>
     r")\s*$",
     re.IGNORECASE,
 )
@@ -1909,11 +1912,75 @@ def _pm_daily_spend(db_path: str, *, day_utc: Optional[str] = None) -> Optional[
         con.close()
 
 
+def handle_redeem(text: str, db_path: str = "data/wca.db") -> str:
+    """Instant-override redeem: cancel an open Polymarket order now (or all).
+
+    ``REDEEM ALL`` cancels every open order; ``REDEEM <order_id>`` cancels one.
+    Frees the reserved pUSD without waiting for the 24h auto-redeem cron
+    (:mod:`scripts.wca_pm_redeem`).  Cancelling only removes unfilled orders, so
+    it never risks money — but it writes to the exchange, hence admin-gated.
+    """
+    from wca.pm import redeem as redeem_core
+
+    parts = text.strip().split()
+    target = parts[1] if len(parts) > 1 else ""
+    if not target:
+        return "Usage: `REDEEM ALL` or `REDEEM <order_id>` (ids shown in the proposal message)."
+
+    key = os.environ.get("POLYMARKET_PRIVATE_KEY")
+    if not key:
+        return "REDEEM: POLYMARKET_PRIVATE_KEY not set — cannot reach the CLOB."
+    try:
+        from wca.pm.trader import ClobTrader, resolve_funder_from_env
+    except Exception as exc:  # noqa: BLE001
+        return "REDEEM: trader unavailable (%s)." % exc
+    funder, sig_type, _ = resolve_funder_from_env()
+    try:
+        trader = ClobTrader(key, funder=funder, signature_type=sig_type)
+    except Exception as exc:  # noqa: BLE001
+        return "REDEEM: could not init trader (%s)." % exc
+    try:
+        orders = trader.open_orders()
+    except Exception as exc:  # noqa: BLE001
+        return "REDEEM: could not fetch open orders (%s)." % exc
+
+    redeem_all = target.lower() == "all"
+    order_id = None if redeem_all else target
+    now_epoch = datetime.now(timezone.utc).timestamp()
+    selected = redeem_core.select_orders_to_redeem(
+        orders, now_epoch, redeem_all=redeem_all, order_id=order_id,
+    )
+    if not selected:
+        if not orders:
+            return "REDEEM: no open orders."
+        return "REDEEM: no open order matches `%s`." % target
+
+    done, freed, fails = [], 0.0, []
+    for order, _reason in selected:
+        oid = redeem_core.order_id_of(order) or "?"
+        rem = redeem_core.unfilled_size(order) or 0.0
+        price = order.get("price")
+        freed += (float(price) * rem) if price not in (None, "") else 0.0
+        try:
+            trader.cancel_order(oid)
+            done.append(oid)
+        except Exception as exc:  # noqa: BLE001 — keep going, report at end
+            fails.append("%s: %s" % (oid, exc))
+
+    msg = "🧹 Redeemed %d order(s), freed ~$%.2f pUSD." % (len(done), freed)
+    if fails:
+        msg += "\n⚠️ %d failed: %s" % (len(fails), "; ".join(fails[:5]))
+    return msg
+
+
 def dispatch(text: str, db_path: str) -> str:
     """Map an incoming text message to a reply."""
     confirm = handle_confirmation(text, db_path)
     if confirm is not None:
         return confirm
+
+    if text.strip().lower().split()[:1] == ["redeem"]:
+        return handle_redeem(text, db_path)
 
     cmd = text.strip().split()[0].lower() if text.strip() else ""
     # Strip @botname suffix Telegram appends in group chats.
