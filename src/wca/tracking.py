@@ -927,12 +927,17 @@ def build_tracking_data(
         {
             "id": b.get("id"),
             "match": b.get("match_desc"),
+            "market": b.get("market"),
             "selection": b.get("selection"),
             "odds": b.get("decimal_odds"),
             "stake": b.get("stake"),
             "status": (b.get("status") or "").lower(),
             "pl": b.get("settled_pl"),
             "clv": b.get("clv"),
+            "source": b.get("source"),
+            "ev": b.get("ev"),
+            # Currency for the per-bet P&L tooltip (Polymarket settles in USD).
+            "ccy": "$" if str(b.get("platform") or "").lower() == "polymarket" else "£",
         }
         for b in settled
     ]

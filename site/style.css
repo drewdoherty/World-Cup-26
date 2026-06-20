@@ -1142,6 +1142,18 @@ body {
 .tr-bar-pos { fill: var(--pos, #4ade80); opacity: 0.85; }
 .tr-bar-neg { fill: var(--neg, #f87171); opacity: 0.85; }
 .tr-bar-pos:hover, .tr-bar-neg:hover { opacity: 1; }
+/* Source dropdown on the P&L-by-bet panel. */
+.tr-select {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border-2);
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 6px;
+  margin: 0 4px;
+}
+.tr-select:focus { outline: none; border-color: var(--accent); }
 .tr-axis-title {
   fill: var(--text-dim);
   font-family: var(--mono);

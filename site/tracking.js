@@ -558,12 +558,163 @@
     $("nodata").hidden = false;
   }
 
+  // ---- 5. P&L by bet: model +EV/-EV facets + by-source dropdown -----------
+
+  // Hover text for one bet bar: market, selection, P/L (+ source/EV).
+  function betTooltip(b) {
+    var lines = ["Bet #" + b.id];
+    if (b.match) lines.push(b.match);
+    lines.push("market: " + (b.market || "—"));
+    lines.push("selection: " + (b.selection || "—"));
+    var ccy = b.ccy || "£";
+    var pl = Number(b.pl) || 0;
+    lines.push("P/L: " + (pl >= 0 ? "+" : "−") + ccy + Math.abs(pl).toFixed(2));
+    if (b.source) lines.push("source: " + b.source);
+    if (b.ev !== null && b.ev !== undefined && !isNaN(b.ev))
+      lines.push("EV: " + signedPct(b.ev, 1));
+    return lines.join("\n");
+  }
+
+  // Signed-P&L vertical bar chart, one bar per settled bet (x = bet #). Green
+  // up = profit, red down = loss; native <title> tooltip per bar.
+  function pnlBarSVG(bets, emptyMsg) {
+    if (!bets.length) {
+      return '<div class="empty">' + esc(emptyMsg || "no bets") + '</div>';
+    }
+    var maxAbs = bets.reduce(function (m, b) {
+      return Math.max(m, Math.abs(Number(b.pl) || 0));
+    }, 0);
+    var span = Math.max(5, Math.ceil(maxAbs));
+    var n = bets.length;
+    var W = Math.max(300, 44 + n * 30);
+    var H = 210;
+    var P = { l: 44, r: 12, t: 14, b: 38 };
+    var plotW = W - P.l - P.r, plotH = H - P.t - P.b;
+    function py(v) { return P.t + (1 - (v + span) / (2 * span)) * plotH; }
+    var y0 = py(0);
+    var step = plotW / n;
+    var bw = Math.min(22, step * 0.62);
+    var parts = ['<svg viewBox="0 0 ' + W + ' ' + H +
+      '" xmlns="http://www.w3.org/2000/svg" role="img" class="tr-barsvg">'];
+    [-span, -span / 2, 0, span / 2, span].forEach(function (g) {
+      parts.push('<line class="cx-grid" x1="' + P.l + '" y1="' + py(g).toFixed(1) +
+        '" x2="' + (W - P.r) + '" y2="' + py(g).toFixed(1) + '"/>');
+      parts.push('<text class="cx-tick" x="' + (P.l - 6) + '" y="' +
+        (py(g) + 3).toFixed(1) + '" text-anchor="end">' +
+        (g > 0 ? "+" : "") + Math.round(g) + '</text>');
+    });
+    parts.push('<line class="cx-axis" x1="' + P.l + '" y1="' + y0.toFixed(1) +
+      '" x2="' + (W - P.r) + '" y2="' + y0.toFixed(1) + '"/>');
+    bets.forEach(function (b, i) {
+      var pl = Number(b.pl) || 0;
+      var cx = P.l + step * i + step / 2;
+      var top = Math.min(py(pl), y0);
+      var h = Math.abs(py(pl) - y0); if (h < 1) h = 1;
+      var cls = pl >= 0 ? "tr-bar-pos" : "tr-bar-neg";
+      parts.push('<rect class="' + cls + '" x="' + (cx - bw / 2).toFixed(1) +
+        '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' +
+        h.toFixed(1) + '" rx="2"><title>' + esc(betTooltip(b)) + '</title></rect>');
+      if (n <= 16 || i % 2 === 0) {
+        parts.push('<text class="cx-tick" x="' + cx.toFixed(1) + '" y="' +
+          (H - P.b + 15) + '" text-anchor="middle">' + esc(String(b.id)) + '</text>');
+      }
+    });
+    parts.push('<text class="tr-axis-title" x="' + (P.l + plotW / 2) +
+      '" y="' + (H - 3) + '" text-anchor="middle">Bet #</text>');
+    parts.push('</svg>');
+    return parts.join("");
+  }
+
+  function _sumPl(arr) {
+    return arr.reduce(function (s, b) { return s + (Number(b.pl) || 0); }, 0);
+  }
+  function _plLabel(v) {
+    return (v >= 0 ? "+" : "−") + "£" + Math.abs(v).toFixed(2);
+  }
+
+  var _betData = [];
+
+  function renderBetPnl(d) {
+    var bets = (d.bets || []).filter(function (b) {
+      return b.pl !== null && b.pl !== undefined && !isNaN(b.pl);
+    });
+    _betData = bets;
+    if (!bets.length) {
+      $("betpnl").innerHTML = '<div class="empty">No settled bets yet</div>';
+      $("betpnl-meta").textContent = "";
+      return;
+    }
+    // Facet A: model picks split by EV sign (model-source bets with a recorded EV).
+    var model = bets.filter(function (b) {
+      return b.source === "model" && b.ev !== null && b.ev !== undefined && !isNaN(b.ev);
+    });
+    var posEV = model.filter(function (b) { return Number(b.ev) > 0; });
+    var negEV = model.filter(function (b) { return Number(b.ev) <= 0; });
+    var nullEV = bets.filter(function (b) {
+      return b.source === "model" && (b.ev === null || b.ev === undefined || isNaN(b.ev));
+    }).length;
+
+    var facets =
+      '<div class="rk-cols">' +
+        '<div class="rk-block">' +
+          '<div class="rk-h">+EV model picks <span class="dim">(' + posEV.length +
+            ' · ' + _plLabel(_sumPl(posEV)) + ')</span></div>' +
+          pnlBarSVG(posEV, "no +EV model bets") +
+        '</div>' +
+        '<div class="rk-block">' +
+          '<div class="rk-h">−EV model picks <span class="dim">(' + negEV.length +
+            ' · ' + _plLabel(_sumPl(negEV)) + ')</span></div>' +
+          pnlBarSVG(negEV, "no −EV model bets") +
+        '</div>' +
+      '</div>';
+
+    // Chart B: P&L by bet for one source, chosen from a dropdown.
+    var sources = [];
+    bets.forEach(function (b) {
+      if (b.source && sources.indexOf(b.source) < 0) sources.push(b.source);
+    });
+    sources.sort();
+    var sel = '<select id="betpnl-source" class="tr-select">' +
+      sources.map(function (s) {
+        return '<option value="' + esc(s) + '">' + esc(s) + '</option>';
+      }).join("") + '</select>';
+    var sourceBlock =
+      '<div class="rk-block" style="margin-top:14px">' +
+        '<div class="rk-h">P&amp;L by bet — source ' + sel +
+          ' <span class="dim" id="betpnl-source-sum"></span></div>' +
+        '<div id="betpnl-source-chart"></div>' +
+      '</div>';
+
+    $("betpnl").innerHTML = facets + sourceBlock +
+      '<div class="vt-note">Each bar is one settled bet (x = bet #), height = P/L ' +
+      '(green profit, red loss). Hover a bar for market · selection · P/L. ' +
+      'The +EV / −EV split uses the model’s EV at placement (model-source bets only' +
+      (nullEV ? '; ' + nullEV + ' model bet' + (nullEV === 1 ? "" : "s") +
+        ' had no recorded EV, omitted' : '') + ').</div>';
+    $("betpnl-meta").textContent = bets.length + " settled · " + _plLabel(_sumPl(bets));
+
+    var dd = $("betpnl-source");
+    function drawSource() {
+      var s = dd.value;
+      var arr = _betData.filter(function (b) { return b.source === s; });
+      $("betpnl-source-chart").innerHTML = pnlBarSVG(arr, "no " + s + " bets");
+      var sumEl = $("betpnl-source-sum");
+      if (sumEl) sumEl.textContent = "(" + arr.length + " · " + _plLabel(_sumPl(arr)) + ")";
+    }
+    if (dd) {
+      if (sources.indexOf("model") >= 0) dd.value = "model";  // useful default
+      dd.addEventListener("change", drawSource);
+      drawSource();
+    }
+  }
+
   function render(d) {
     renderStats(d);
     renderOutcomeBars(d);
     renderScoreboard(d);
     renderCalibration(d);
     renderClvPl(d);
+    renderBetPnl(d);
     renderPending(d);
     renderFooter(d);
   }

@@ -236,7 +236,8 @@ def load_bets(con: sqlite3.Connection) -> List[Dict[str, Any]]:
     con.row_factory = sqlite3.Row
     rows = con.execute(
         "SELECT id, match_desc, market, selection, decimal_odds, stake, "
-        "status, settled_pl, model_prob, market_prob_devig, closing_odds, clv "
+        "status, settled_pl, model_prob, market_prob_devig, closing_odds, clv, "
+        "source, ev, platform "
         "FROM bets ORDER BY id"
     ).fetchall()
     return [dict(r) for r in rows]
