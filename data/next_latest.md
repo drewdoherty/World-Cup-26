@@ -1,11 +1,11 @@
-<!-- generated: 2026-06-20T13:45:13 -->
+<!-- generated: 2026-06-20T13:50:50 -->
 ⚽ *Next match* — Netherlands vs Sweden
 Kickoff 2026-06-20 17:00:00+00:00
 
 *Winner* (model blend)
-  Netherlands     55.5%  fair 1.80  best 1.76 (betfair_ex_uk) -2.2%
-  Draw            24.4%  fair 4.10  best 4.20 (betfair_ex_uk) +2.3% ✅  £2.73
-  Sweden          20.1%  fair 4.98  best 5.00 (betfair_ex_uk) +0.5%  £0.43
+  Netherlands     55.5%  fair 1.80  best 1.77 (matchbook) -1.7%
+  Draw            24.4%  fair 4.10  best 4.20 (betfair_ex_uk) +2.4% ✅  £2.84
+  Sweden          20.1%  fair 4.97  best 5.00 (betfair_ex_uk) +0.5%  £0.48
   _stake = ¼-Kelly @ £1500 bankroll (+EV picks)_
 
 *Corners* (model, exp 8.5)

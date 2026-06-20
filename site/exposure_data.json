@@ -1,13 +1,13 @@
 {
   "meta": {
-    "generated": "2026-06-20 13:51:33 UTC"
+    "generated": "2026-06-20 14:52:10 UTC"
   },
   "portfolio": {
     "ev": 0.04,
     "best": 7.79,
     "worst": -2.46,
-    "p_profit": 0.2436,
-    "p_loss": 0.7564,
+    "p_profit": 0.2439,
+    "p_loss": 0.7561,
     "p_big_win": 0,
     "n_scenarios": 729
   },
@@ -121,7 +121,7 @@
       "results": [
         {
           "outcome": "Netherlands",
-          "prob": 0.5554,
+          "prob": 0.5551,
           "direct_pnl": -2.46,
           "acca_ev": 0.0,
           "net_pnl": -2.46,
@@ -131,15 +131,15 @@
             "available": true,
             "outcome": "Netherlands",
             "best_venue": "matchbook",
-            "best_odds": 1.77,
-            "model_prob": 0.5554,
-            "ev_pct": -1.7,
+            "best_odds": 1.78,
+            "model_prob": 0.5551,
+            "ev_pct": -1.2,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.2436,
+          "prob": 0.2439,
           "direct_pnl": 7.79,
           "acca_ev": 0.0,
           "net_pnl": 7.79,
@@ -156,7 +156,7 @@
         },
         {
           "outcome": "Sweden",
-          "prob": 0.2009,
+          "prob": 0.201,
           "direct_pnl": -2.46,
           "acca_ev": 0.0,
           "net_pnl": -2.46,
@@ -167,9 +167,9 @@
             "outcome": "Sweden",
             "best_venue": "betfred_uk",
             "best_odds": 5.0,
-            "model_prob": 0.2009,
-            "ev_pct": 0.4,
-            "recommendation": "PLUG: +EV to back (0.4% edge) \u2014 fills the gap and adds value"
+            "model_prob": 0.201,
+            "ev_pct": 0.5,
+            "recommendation": "PLUG: +EV to back (0.5% edge) \u2014 fills the gap and adds value"
           }
         }
       ],
@@ -205,7 +205,7 @@
       "results": [
         {
           "outcome": "Germany",
-          "prob": 0.6281,
+          "prob": 0.6284,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -216,8 +216,8 @@
             "outcome": "Germany",
             "best_venue": "unibet_uk",
             "best_odds": 1.54,
-            "model_prob": 0.6281,
-            "ev_pct": -3.3,
+            "model_prob": 0.6284,
+            "ev_pct": -3.2,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
@@ -232,7 +232,7 @@
           "plug": {
             "available": true,
             "outcome": "Draw",
-            "best_venue": "betfair_ex_uk",
+            "best_venue": "smarkets",
             "best_odds": 4.9,
             "model_prob": 0.2153,
             "ev_pct": 5.5,
@@ -241,7 +241,7 @@
         },
         {
           "outcome": "Ivory Coast",
-          "prob": 0.1565,
+          "prob": 0.1563,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -436,30 +436,30 @@
     {
       "fixture": "Germany vs Ivory Coast",
       "outcome": "Germany",
-      "prob": 0.6281,
+      "prob": 0.6284,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Germany",
         "best_venue": "unibet_uk",
         "best_odds": 1.54,
-        "model_prob": 0.6281,
-        "ev_pct": -3.3,
+        "model_prob": 0.6284,
+        "ev_pct": -3.2,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
     {
       "fixture": "Netherlands vs Sweden",
       "outcome": "Netherlands",
-      "prob": 0.5554,
+      "prob": 0.5551,
       "net_pnl": -2.46,
       "plug": {
         "available": true,
         "outcome": "Netherlands",
         "best_venue": "matchbook",
-        "best_odds": 1.77,
-        "model_prob": 0.5554,
-        "ev_pct": -1.7,
+        "best_odds": 1.78,
+        "model_prob": 0.5551,
+        "ev_pct": -1.2,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
@@ -471,7 +471,7 @@
       "plug": {
         "available": true,
         "outcome": "Draw",
-        "best_venue": "betfair_ex_uk",
+        "best_venue": "smarkets",
         "best_odds": 4.9,
         "model_prob": 0.2153,
         "ev_pct": 5.5,
@@ -481,16 +481,16 @@
     {
       "fixture": "Netherlands vs Sweden",
       "outcome": "Sweden",
-      "prob": 0.2009,
+      "prob": 0.201,
       "net_pnl": -2.46,
       "plug": {
         "available": true,
         "outcome": "Sweden",
         "best_venue": "betfred_uk",
         "best_odds": 5.0,
-        "model_prob": 0.2009,
-        "ev_pct": 0.4,
-        "recommendation": "PLUG: +EV to back (0.4% edge) \u2014 fills the gap and adds value"
+        "model_prob": 0.201,
+        "ev_pct": 0.5,
+        "recommendation": "PLUG: +EV to back (0.5% edge) \u2014 fills the gap and adds value"
       }
     }
   ],

@@ -1,39 +1,39 @@
-<!-- generated: 2026-06-20T13:45:13 -->
+<!-- generated: 2026-06-20T13:50:50 -->
 *World Cup Alpha — bet card* (11 picks)
 
 *1. Belgium vs Iran* — Iran @ *8.40* (betfair_ex_uk)
     model 15.8% / mkt 11.7%  edge *+33.0%*  [elo 26% dc 21%]
-    stake: main £16.74
+    stake: main £16.59
 *2. Spain vs Saudi Arabia* — Draw @ *12.00* (betfair_ex_uk)
     model 10.0% / mkt 7.9%  edge *+20.4%*  [elo 9% dc 15%]
-    stake: main £6.95
+    stake: main £6.88
 *3. Tunisia vs Japan* — Tunisia @ *7.20* (betfair_ex_uk)
     model 16.7% / mkt 13.6%  edge *+19.9%*  [elo 12% dc 24%]
-    stake: main £12.06
+    stake: main £11.96
 *4. Belgium vs Iran* — Draw @ *4.90* (betfair_ex_uk)
     model 23.4% / mkt 20.5%  edge *+14.5%*  [elo 28% dc 28%]
-    stake: main £13.98
+    stake: main £13.86
 *5. Spain vs Saudi Arabia* — Saudi Arabia @ *32.00* (betfair_ex_uk)
     model 3.5% / mkt 2.7%  edge *+13.2%*  [elo 4% dc 5%]
-    stake: main £1.60
-*6. Ecuador vs Curaçao* — Curaçao @ *29.00* (unibet_uk)
+    stake: main £1.59
+*6. Germany vs Ivory Coast* — Ivory Coast @ *7.00* (matchbook)
+    model 15.6% / mkt 14.6%  edge *+9.4%*  [elo 18% dc 17%]
+    stake: main £5.84
+*7. Ecuador vs Curaçao* — Curaçao @ *29.00* (unibet_uk)
     model 3.7% / mkt 3.3%  edge *+7.7%*  [elo 7% dc 4%]
-    stake: main £1.03
-*7. Germany vs Ivory Coast* — Ivory Coast @ *6.80* (betfair_ex_uk)
-    model 15.7% / mkt 14.6%  edge *+6.5%*  [elo 18% dc 17%]
-    stake: main £4.17
+    stake: main £1.02
 *8. Tunisia vs Japan* — Draw @ *4.20* (betfair_ex_uk)
     model 25.3% / mkt 23.6%  edge *+6.2%*  [elo 19% dc 31%]
-    stake: main £7.25
+    stake: main £7.18
 *9. Germany vs Ivory Coast* — Draw @ *4.90* (betfair_ex_uk)
     model 21.5% / mkt 20.2%  edge *+5.5%*  [elo 24% dc 23%]
-    stake: main £5.29
+    stake: main £5.24
 *10. Ecuador vs Curaçao* — Draw @ *10.00* (betfair_ex_uk)
     model 10.5% / mkt 9.6%  edge *+4.9%*  [elo 13% dc 12%]
-    stake: main £2.04
+    stake: main £2.02
 *11. Netherlands vs Sweden* — Draw @ *4.20* (betfair_ex_uk)
-    model 24.4% / mkt 23.7%  edge *+2.3%*  [elo 22% dc 26%]
-    stake: main £2.73
+    model 24.4% / mkt 23.8%  edge *+2.4%*  [elo 22% dc 26%]
+    stake: main £2.81
 
 _Pool: rung 0 £1500 — 27/50 settled-with-close bets, CLV -0.0151, Kelly fraction 0.25_
 
@@ -41,20 +41,20 @@ _Pool: rung 0 £1500 — 27/50 settled-with-close bets, CLV -0.0151, Kelly fract
 
 *Netherlands vs Sweden*
     1-0  12.6%  fair 7.91  back >= 8.07
-    1-1  11.6%  fair 8.63  back >= 8.80
+    1-1  11.6%  fair 8.62  back >= 8.79
     2-0  10.6%  fair 9.42  back >= 9.61
-    2-1  10.2%  fair 9.78  back >= 9.97
-    0-0  7.7%  fair 12.93  back >= 13.19
-    0-1  6.2%  fair 16.14  back >= 16.46
+    2-1  10.2%  fair 9.78  back >= 9.98
+    0-0  7.7%  fair 12.92  back >= 13.18
+    0-1  6.2%  fair 16.13  back >= 16.45
     O/U 2.5: over 48.0% / under 52.0%   BTTS 49.3%
 
 *Germany vs Ivory Coast*
-    1-0  11.9%  fair 8.38  back >= 8.55
+    1-0  11.9%  fair 8.37  back >= 8.54
     2-0  11.6%  fair 8.59  back >= 8.76
     2-1  10.4%  fair 9.66  back >= 9.85
     1-1  10.3%  fair 9.74  back >= 9.94
-    3-0  7.2%  fair 13.85  back >= 14.12
-    3-1  6.4%  fair 15.57  back >= 15.88
+    3-0  7.2%  fair 13.84  back >= 14.12
+    3-1  6.4%  fair 15.56  back >= 15.87
     O/U 2.5: over 52.7% / under 47.3%   BTTS 49.7%
 
 *Ecuador vs Curaçao*
