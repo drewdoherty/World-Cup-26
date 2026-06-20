@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import json
 import os
 import sys
 from pathlib import Path
@@ -214,6 +215,91 @@ def _collect_pm_quotes(odds_df: Any) -> Dict[str, Dict[str, float]]:
     return quotes
 
 
+_PM_SCORES_CACHE = "data/pm_exactscore_cache.json"
+
+
+def _kickoff_for(odds_df: Any, home: str, away: str) -> Optional[datetime.datetime]:
+    """Kickoff (UTC datetime) for a fixture from the odds frame, or ``None``."""
+    try:
+        import pandas as pd
+
+        if odds_df is None or getattr(odds_df, "empty", True):
+            return None
+        if "commence_time" not in odds_df.columns:
+            return None
+        m = odds_df[(odds_df["home_team"] == home) & (odds_df["away_team"] == away)]
+        if m.empty:
+            return None
+        dt = pd.to_datetime(m["commence_time"].iloc[0], utc=True, errors="coerce")
+        return None if pd.isna(dt) else dt.to_pydatetime()
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _collect_pm_scores(
+    odds_df: Any, cache_path: str = _PM_SCORES_CACHE
+) -> Dict[str, Dict[str, float]]:
+    """Per-fixture Polymarket exact-score probabilities, on a refresh cadence.
+
+    Each fixture's correct-score quotes are re-pulled **once per day** while its
+    kickoff is far off, stepping up to **once per hour once kickoff is < 4h away**
+    (publish runs hourly, so the <4h tier resolves to every run). A small JSON
+    cache (``data/pm_exactscore_cache.json``, host-local, not committed) records
+    the last pull per fixture so far-off fixtures aren't re-fetched every hour.
+    Polymarket's Gamma API is free, so this never costs Odds-API credits.
+    """
+    now = datetime.datetime.now(datetime.timezone.utc)
+    try:
+        cache = json.load(open(cache_path)) if os.path.exists(cache_path) else {}
+    except (OSError, json.JSONDecodeError):
+        cache = {}
+
+    fixtures = [
+        (home, away, "%s vs %s" % (home, away), _kickoff_for(odds_df, home, away))
+        for home, away in _fixture_pairs(odds_df)
+    ]
+
+    due = []
+    for home, away, fx, ko in fixtures:
+        ttl = 86400.0
+        if ko is not None and now < ko and (ko - now).total_seconds() <= 4 * 3600:
+            ttl = 3600.0
+        ts = (cache.get(fx) or {}).get("ts")
+        fresh = False
+        if ts:
+            try:
+                fresh = (now - datetime.datetime.fromisoformat(ts)).total_seconds() < ttl
+            except ValueError:
+                fresh = False
+        if not fresh:
+            due.append((home, away, fx))
+
+    if due:
+        try:
+            events = polymarket.find_world_cup_markets(include_closed=False)
+        except Exception:  # noqa: BLE001 — never let PM break the feed.
+            events = None
+        if events is not None:
+            for home, away, fx in due:
+                try:
+                    scores = polymarket.resolve_exact_scores(home, away, events=events)
+                except Exception:  # noqa: BLE001
+                    scores = {}
+                cache[fx] = {"ts": now.isoformat(), "scores": scores}
+            try:
+                with open(cache_path, "w", encoding="utf-8") as fh:
+                    json.dump(cache, fh, indent=2)
+            except OSError:
+                pass
+
+    out: Dict[str, Dict[str, float]] = {}
+    for _h, _a, fx, _k in fixtures:
+        sc = (cache.get(fx) or {}).get("scores") or {}
+        if sc:
+            out[fx] = sc
+    return out
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         description="Generate the World Cup Alpha model-vs-market scores feed.",
@@ -252,11 +338,16 @@ def main(argv=None) -> int:
 
     # --- Polymarket enrichment (best-effort) --------------------------------
     pm_quotes: Dict[str, Dict[str, float]] = {}
+    pm_scores: Dict[str, Dict[str, float]] = {}
     if not args.no_polymarket:
         try:
             pm_quotes = _collect_pm_quotes(odds_df)
         except Exception as exc:  # noqa: BLE001 — never let PM break the feed.
-            print("polymarket enrichment failed (%s); continuing" % exc)
+            print("polymarket 1X2 enrichment failed (%s); continuing" % exc)
+        try:
+            pm_scores = _collect_pm_scores(odds_df)
+        except Exception as exc:  # noqa: BLE001
+            print("polymarket exact-score enrichment failed (%s); continuing" % exc)
 
     now_utc = _now_utc_str()
     out_path = scorespage.write_scores_data(
@@ -264,22 +355,28 @@ def main(argv=None) -> int:
         out_path=args.out,
         odds_df=odds_df,
         pm_quotes=pm_quotes,
+        pm_scores=pm_scores,
         now_utc=now_utc,
     )
 
     data = scorespage.build_scores_data(
-        args.card, odds_df=odds_df, pm_quotes=pm_quotes, now_utc=now_utc
+        args.card, odds_df=odds_df, pm_quotes=pm_quotes, pm_scores=pm_scores,
+        now_utc=now_utc,
     )
     fixtures = data["fixtures"]
     n_with_venues = sum(1 for f in fixtures if f.get("venues"))
+    n_with_pmscores = sum(
+        1 for f in fixtures if any(s.get("pm_prob") is not None for s in f.get("scores") or [])
+    )
 
     print(out_path)
     print(
-        "fixtures=%d  with_venues=%d  pm_quotes=%d  quota_remaining=%s"
+        "fixtures=%d  with_venues=%d  pm_quotes=%d  pm_scores_fixtures=%d  quota_remaining=%s"
         % (
             len(fixtures),
             n_with_venues,
             len(pm_quotes),
+            n_with_pmscores,
             "?" if quota is None else quota.remaining,
         )
     )

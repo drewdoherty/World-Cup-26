@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import requests
 
@@ -344,6 +344,73 @@ def resolve_player_anytime_token(
         if want_key and _player_key(name) == want_key and fuzzy is None:
             fuzzy = _yes_token_and_price(m, event)
     return fuzzy
+
+
+def _exact_score_event(
+    fixture_home: str,
+    fixture_away: str,
+    events: List[Dict[str, Any]],
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    """Find the "<Home> vs. <Away> - Exact Score" event.
+
+    Returns ``(event, pm_home_team_name)`` — the second element is the team
+    Polymarket lists first in the title, so the caller can re-orient scorelines
+    to its own home/away convention. ``(None, None)`` when no event matches.
+    """
+    from wca.data.teamnames import canonical
+
+    home_c, away_c = canonical(fixture_home), canonical(fixture_away)
+    for event in events:
+        title = (event.get("title") or "")
+        if "exact score" not in title.lower():
+            continue
+        head = title.split(" - ")[0]
+        parts = [p.strip() for p in head.replace(" vs. ", " vs ").split(" vs ")]
+        if len(parts) != 2:
+            continue
+        if {canonical(parts[0]), canonical(parts[1])} == {home_c, away_c}:
+            return event, parts[0]
+    return None, None
+
+
+def resolve_exact_scores(
+    fixture_home: str,
+    fixture_away: str,
+    *,
+    events: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, float]:
+    """Polymarket exact-score (correct-score) YES probabilities for one fixture.
+
+    Polymarket prices each scoreline as its own binary "Exact Score: <Home> H - A
+    <Away>?" market inside a "<Home> vs. <Away> - Exact Score" event; the YES
+    price is the market's probability for that exact score. Returns a mapping of
+    ``"H-A"`` (the requested home-away convention) -> probability in 0..1, or
+    ``{}`` when no exact-score event resolves. Scorelines are re-oriented if
+    Polymarket lists the two teams the other way round. The catch-all "Any Other
+    Score" market (no digits) is skipped.
+    """
+    import re as _re
+    from wca.data.teamnames import canonical
+
+    if events is None:
+        events = find_world_cup_markets(include_closed=False)
+    event, pm_home = _exact_score_event(fixture_home, fixture_away, events)
+    if event is None:
+        return {}
+    flip = canonical(pm_home or "") != canonical(fixture_home)
+    out: Dict[str, float] = {}
+    for m in event.get("markets") or []:
+        label = (m.get("groupItemTitle") or m.get("question") or "")
+        mm = _re.search(r"(\d+)\s*[-–]\s*(\d+)", label)
+        if not mm:
+            continue
+        a, b = int(mm.group(1)), int(mm.group(2))
+        score = "%d-%d" % ((b, a) if flip else (a, b))
+        res = _yes_token_and_price(m, event)
+        price = (res or {}).get("price")
+        if price is not None and 0.0 < float(price) < 1.0:
+            out[score] = float(price)
+    return out
 
 
 def _norm_player(name: str) -> str:

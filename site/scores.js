@@ -66,20 +66,38 @@
       .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
-  // ---- scoreline ladder (unchanged) ---------------------------------------
+  // ---- scoreline ladder ---------------------------------------------------
+  // Green bar = model implied probability; blue bar = Polymarket exact-score
+  // market probability (when a PM correct-score market exists for the fixture).
+  // Both bars share one scale (maxProb) so their lengths are comparable; hover a
+  // row for model vs PM. pm_prob is a percentage (matching prob), or absent.
   function renderScoreLadder(fx) {
     var scores = (fx.scores || []).slice(0, 6);
     if (!scores.length) return '<div class="empty">no scorelines</div>';
+    var hasPM = scores.some(function (s) { return s.pm_prob != null; });
     var maxProb = scores.reduce(function (m, s) {
-      return Math.max(m, Number(s.prob || 0));
+      return Math.max(m, Number(s.prob || 0), Number(s.pm_prob || 0));
     }, 0);
     return scores.map(function (s) {
-      var p = Number(s.prob || 0);
-      var frac = maxProb > 0 ? (p / maxProb) : 0;
-      return '<div class="score-row">' +
+      var frac = maxProb > 0 ? (Number(s.prob || 0) / maxProb) : 0;
+      var modelBar = '<span class="sl-track"><span class="sl-fill sl-model" style="width:' +
+        (frac * 100).toFixed(1) + '%"></span></span>';
+      var bars, title;
+      if (hasPM) {
+        var hasThis = s.pm_prob != null;
+        var pmFrac = (hasThis && maxProb > 0) ? (Number(s.pm_prob) / maxProb) : 0;
+        bars = '<span class="sl-bars">' + modelBar +
+          '<span class="sl-track"><span class="sl-fill sl-pm" style="width:' +
+            (pmFrac * 100).toFixed(1) + '%"></span></span></span>';
+        title = s.score + " — model " + pct1(s.prob) +
+          " · PM " + (hasThis ? pct1(s.pm_prob) : "n/a");
+      } else {
+        bars = '<span class="sl-bars">' + modelBar + '</span>';
+        title = s.score + " — model " + pct1(s.prob);
+      }
+      return '<div class="score-row" title="' + esc(title) + '">' +
         '<span class="score-label">' + esc(s.score) + '</span>' +
-        '<span class="score-bar"><span class="score-fill" style="width:' +
-          (frac * 100).toFixed(1) + '%"></span></span>' +
+        bars +
         '<span class="score-prob">' + esc(pct1(s.prob)) + '</span>' +
         '<span class="score-fair num dim">' + esc(num(s.fair)) + '</span>' +
       '</div>';

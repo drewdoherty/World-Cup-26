@@ -542,6 +542,13 @@ body {
   grid-template-columns: 42px 1fr 52px 44px;
 }
 .score-fair { text-align: right; font-size: 11px; }
+/* Scoreline ladder bars: model (green) stacked over Polymarket exact-score
+   (blue). One thin track each so both lengths are visible per scoreline. */
+.sl-bars { display: flex; flex-direction: column; gap: 2px; justify-content: center; }
+.sl-track { height: 5px; background: var(--track); border-radius: 2px; overflow: hidden; }
+.sl-fill { display: block; height: 100%; border-radius: 2px; min-width: 1px; }
+.sl-fill.sl-model { background: var(--accent); }
+.sl-fill.sl-pm { background: var(--polymarket); }
 
 /* --- venue comparison table --- */
 .venue-table { width: 100%; border-collapse: collapse; }

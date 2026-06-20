@@ -367,6 +367,7 @@ def build_scores_data(
     card_path: str,
     odds_df: Any = None,
     pm_quotes: Optional[Dict[str, Dict[str, float]]] = None,
+    pm_scores: Optional[Dict[str, Dict[str, float]]] = None,
     now_utc: str = "",
     model_preds_path: Optional[str] = None,
 ) -> Dict[str, Any]:
@@ -440,6 +441,18 @@ def build_scores_data(
             continue
         pm_by_key[_fixture_key(pair[0], pair[1])] = quote
 
+    # Per-scoreline Polymarket exact-score probabilities (fixture -> {"H-A": p}),
+    # indexed by canonical fixture key like the 1X2 quotes above.
+    pm_scores = pm_scores or {}
+    pm_scores_by_key: Dict[Tuple[str, str], Dict[str, float]] = {}
+    for fx_str, smap in pm_scores.items():
+        if not isinstance(smap, dict):
+            continue
+        pair = _split_fixture(fx_str)
+        if pair is None:
+            continue
+        pm_scores_by_key[_fixture_key(pair[0], pair[1])] = smap
+
     # Exact blended 1X2 persisted at card-build time, indexed verbatim and by
     # canonical fixture key for tolerant matching.
     exact_preds = modelpreds.load_latest(
@@ -459,11 +472,21 @@ def build_scores_data(
         fixture_str = fx.get("fixture") or ""
         scores_in = fx.get("scores") or []
         # Drop the per-score "back" column from the public payload — the scores
-        # page only shows score / prob / fair.
-        scores = [
-            {"score": s.get("score"), "prob": s.get("prob"), "fair": s.get("fair")}
-            for s in scores_in
-        ]
+        # page shows score / prob / fair, plus the Polymarket exact-score
+        # probability (pm_prob, percent) when a PM correct-score market exists.
+        pm_sc = pm_scores.get(fixture_str)
+        if pm_sc is None:
+            pair_ps = _split_fixture(fixture_str)
+            if pair_ps is not None:
+                pm_sc = pm_scores_by_key.get(_fixture_key(pair_ps[0], pair_ps[1]))
+        pm_sc = pm_sc or {}
+        scores = []
+        for s in scores_in:
+            row = {"score": s.get("score"), "prob": s.get("prob"), "fair": s.get("fair")}
+            pmp = pm_sc.get(str(s.get("score")))
+            if pmp is not None:
+                row["pm_prob"] = round(float(pmp) * 100.0, 1)
+            scores.append(row)
 
         exact = exact_preds.get(fixture_str)
         if exact is None:
@@ -517,6 +540,7 @@ def write_scores_data(
     out_path: str = "site/scores_data.json",
     odds_df: Any = None,
     pm_quotes: Optional[Dict[str, Dict[str, float]]] = None,
+    pm_scores: Optional[Dict[str, Dict[str, float]]] = None,
     now_utc: str = "",
     model_preds_path: Optional[str] = None,
 ) -> str:
@@ -528,6 +552,7 @@ def write_scores_data(
         card_path,
         odds_df=odds_df,
         pm_quotes=pm_quotes,
+        pm_scores=pm_scores,
         now_utc=now_utc,
         model_preds_path=model_preds_path,
     )
