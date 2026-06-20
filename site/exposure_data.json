@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-20 19:54:58 UTC"
+    "generated": "2026-06-20 20:55:26 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -9,15 +9,14 @@
     "p_profit": 0,
     "p_loss": 0,
     "p_big_win": 0,
-    "n_scenarios": 2187
+    "n_scenarios": 729
   },
   "correlation": {
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0053,
+        "prob": 0.0079,
         "results": [
-          "Germany",
           "Ecuador",
           "Tunisia",
           "Spain",
@@ -28,9 +27,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0078,
+        "prob": 0.0116,
         "results": [
-          "Germany",
           "Ecuador",
           "Tunisia",
           "Spain",
@@ -41,9 +39,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0178,
+        "prob": 0.0265,
         "results": [
-          "Germany",
           "Ecuador",
           "Tunisia",
           "Spain",
@@ -54,9 +51,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0018,
+        "prob": 0.0027,
         "results": [
-          "Germany",
           "Ecuador",
           "Tunisia",
           "Spain",
@@ -67,9 +63,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0026,
+        "prob": 0.004,
         "results": [
-          "Germany",
           "Ecuador",
           "Tunisia",
           "Spain",
@@ -82,9 +77,8 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0053,
+        "prob": 0.0079,
         "results": [
-          "Germany",
           "Ecuador",
           "Tunisia",
           "Spain",
@@ -95,9 +89,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0078,
+        "prob": 0.0116,
         "results": [
-          "Germany",
           "Ecuador",
           "Tunisia",
           "Spain",
@@ -108,9 +101,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0178,
+        "prob": 0.0265,
         "results": [
-          "Germany",
           "Ecuador",
           "Tunisia",
           "Spain",
@@ -124,12 +116,12 @@
   },
   "fixtures": [
     {
-      "fixture": "Germany vs Ivory Coast",
-      "kickoff": "2026-06-20T20:00:00+00:00",
+      "fixture": "Ecuador vs Cura\u00e7ao",
+      "kickoff": "2026-06-21T00:00:00+00:00",
       "results": [
         {
-          "outcome": "Germany",
-          "prob": 0.6451,
+          "outcome": "Ecuador",
+          "prob": 0.8415,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -137,35 +129,26 @@
           "live": [],
           "plug": {
             "available": true,
-            "outcome": "Germany",
-            "best_venue": "betfair_ex_uk",
-            "best_odds": 1.49,
-            "model_prob": 0.6451,
-            "ev_pct": -3.9,
+            "outcome": "Ecuador",
+            "best_venue": "smarkets",
+            "best_odds": 1.18,
+            "model_prob": 0.8415,
+            "ev_pct": -0.7,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.2074,
+          "prob": 0.1152,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
-          "blindspot": true,
-          "live": [],
-          "plug": {
-            "available": true,
-            "outcome": "Draw",
-            "best_venue": "unibet_uk",
-            "best_odds": 5.0,
-            "model_prob": 0.2074,
-            "ev_pct": 3.7,
-            "recommendation": "PLUG: +EV to back (3.7% edge) \u2014 fills the gap and adds value"
-          }
+          "blindspot": false,
+          "live": []
         },
         {
-          "outcome": "Ivory Coast",
-          "prob": 0.1475,
+          "outcome": "Cura\u00e7ao",
+          "prob": 0.0433,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -189,63 +172,14 @@
           "potential_profit": 37.0,
           "free": false,
           "odds": 4.7
-        },
-        {
-          "type": "polymarket",
-          "selection": "Yes",
-          "stake": 1.0,
-          "potential_profit": 0.52,
-          "free": false,
-          "odds": 1.52
         }
       ],
-      "summary": {
-        "max_win": 0.0,
-        "stake_at_risk": 0,
-        "best_outcome": "Germany",
-        "worst_outcome": "Germany",
-        "n_blindspots": 2
-      }
-    },
-    {
-      "fixture": "Ecuador vs Cura\u00e7ao",
-      "kickoff": "2026-06-21T00:00:00+00:00",
-      "results": [
-        {
-          "outcome": "Ecuador",
-          "prob": 0.8561,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Draw",
-          "prob": 0.1063,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Cura\u00e7ao",
-          "prob": 0.0376,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        }
-      ],
-      "events": [],
       "summary": {
         "max_win": 0.0,
         "stake_at_risk": 0,
         "best_outcome": "Ecuador",
         "worst_outcome": "Ecuador",
-        "n_blindspots": 0
+        "n_blindspots": 1
       }
     },
     {
@@ -254,7 +188,7 @@
       "results": [
         {
           "outcome": "Tunisia",
-          "prob": 0.1591,
+          "prob": 0.1578,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -263,7 +197,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2476,
+          "prob": 0.2448,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -272,7 +206,7 @@
         },
         {
           "outcome": "Japan",
-          "prob": 0.5932,
+          "prob": 0.5974,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -295,7 +229,7 @@
       "results": [
         {
           "outcome": "Spain",
-          "prob": 0.8612,
+          "prob": 0.8613,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -313,7 +247,7 @@
         },
         {
           "outcome": "Saudi Arabia",
-          "prob": 0.0356,
+          "prob": 0.0355,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -336,7 +270,7 @@
       "results": [
         {
           "outcome": "Belgium",
-          "prob": 0.6094,
+          "prob": 0.6055,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -345,7 +279,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2326,
+          "prob": 0.235,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -354,7 +288,7 @@
         },
         {
           "outcome": "Iran",
-          "prob": 0.158,
+          "prob": 0.1595,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -377,7 +311,7 @@
       "results": [
         {
           "outcome": "Uruguay",
-          "prob": 0.6691,
+          "prob": 0.6654,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -386,7 +320,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2256,
+          "prob": 0.2277,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -395,7 +329,7 @@
         },
         {
           "outcome": "Cape Verde",
-          "prob": 0.1053,
+          "prob": 0.1068,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -456,33 +390,18 @@
   ],
   "blindspots": [
     {
-      "fixture": "Germany vs Ivory Coast",
-      "outcome": "Germany",
-      "prob": 0.6451,
+      "fixture": "Ecuador vs Cura\u00e7ao",
+      "outcome": "Ecuador",
+      "prob": 0.8415,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
-        "outcome": "Germany",
-        "best_venue": "betfair_ex_uk",
-        "best_odds": 1.49,
-        "model_prob": 0.6451,
-        "ev_pct": -3.9,
+        "outcome": "Ecuador",
+        "best_venue": "smarkets",
+        "best_odds": 1.18,
+        "model_prob": 0.8415,
+        "ev_pct": -0.7,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
-      }
-    },
-    {
-      "fixture": "Germany vs Ivory Coast",
-      "outcome": "Draw",
-      "prob": 0.2074,
-      "net_pnl": 0.0,
-      "plug": {
-        "available": true,
-        "outcome": "Draw",
-        "best_venue": "unibet_uk",
-        "best_odds": 5.0,
-        "model_prob": 0.2074,
-        "ev_pct": 3.7,
-        "recommendation": "PLUG: +EV to back (3.7% edge) \u2014 fills the gap and adds value"
       }
     }
   ],
@@ -571,6 +490,15 @@
       "free": true,
       "odds": 5.52,
       "match": "England vs Ghana"
+    },
+    {
+      "type": "polymarket",
+      "selection": "Yes",
+      "stake": 1.0,
+      "profit": 0.5151515151515151,
+      "free": false,
+      "odds": 1.5151515151515151,
+      "match": "Germany vs Ivory Coast"
     }
   ]
 }
