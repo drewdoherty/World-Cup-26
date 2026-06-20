@@ -1,22 +1,22 @@
 {
   "meta": {
-    "generated": "2026-06-19 21:10:41 UTC"
+    "generated": "2026-06-20 07:15:59 UTC"
   },
   "summary": {
-    "fixtures_complete": 24,
-    "model_1x2_correct": 12,
-    "market_1x2_correct": 13,
-    "model_brier": 0.519,
-    "market_brier": 0.6151,
-    "model_logloss": 0.8561,
-    "market_logloss": 0.9984,
-    "top6_hits": 10,
+    "fixtures_complete": 28,
+    "model_1x2_correct": 15,
+    "market_1x2_correct": 16,
+    "model_brier": 0.4951,
+    "market_brier": 0.5794,
+    "model_logloss": 0.8257,
+    "market_logloss": 0.9515,
+    "top6_hits": 14,
     "bets": {
-      "settled": 60,
+      "settled": 61,
       "won": 17,
-      "lost": 43,
-      "pl": 188.32,
-      "avg_clv": -0.0005,
+      "lost": 44,
+      "pl": 182.32,
+      "avg_clv": 0.0034,
       "clv_count": 25
     }
   },
@@ -428,28 +428,28 @@
       "home_standing": {
         "team": "United States",
         "group": "D",
-        "played": 1,
-        "won": 1,
+        "played": 2,
+        "won": 2,
         "drawn": 0,
         "lost": 0,
-        "gf": 4,
+        "gf": 6,
         "ga": 1,
-        "gd": 3,
-        "points": 3,
+        "gd": 5,
+        "points": 6,
         "position": 1
       },
       "away_standing": {
         "team": "Paraguay",
         "group": "D",
-        "played": 1,
-        "won": 0,
+        "played": 2,
+        "won": 1,
         "drawn": 0,
         "lost": 1,
-        "gf": 1,
+        "gf": 2,
         "ga": 4,
-        "gd": -3,
-        "points": 0,
-        "position": 4
+        "gd": -2,
+        "points": 3,
+        "position": 3
       },
       "ou25": {
         "model_over": 0.407,
@@ -636,28 +636,28 @@
       "home_standing": {
         "team": "Brazil",
         "group": "C",
-        "played": 1,
-        "won": 0,
+        "played": 2,
+        "won": 1,
         "drawn": 1,
         "lost": 0,
-        "gf": 1,
+        "gf": 4,
         "ga": 1,
-        "gd": 0,
-        "points": 1,
-        "position": 2
+        "gd": 3,
+        "points": 4,
+        "position": 1
       },
       "away_standing": {
         "team": "Morocco",
         "group": "C",
-        "played": 1,
-        "won": 0,
+        "played": 2,
+        "won": 1,
         "drawn": 1,
         "lost": 0,
-        "gf": 1,
+        "gf": 2,
         "ga": 1,
-        "gd": 0,
-        "points": 1,
-        "position": 3
+        "gd": 1,
+        "points": 4,
+        "position": 2
       },
       "ou25": {
         "model_over": 0.337,
@@ -757,28 +757,28 @@
       "home_standing": {
         "team": "Haiti",
         "group": "C",
-        "played": 1,
+        "played": 2,
         "won": 0,
         "drawn": 0,
-        "lost": 1,
+        "lost": 2,
         "gf": 0,
-        "ga": 1,
-        "gd": -1,
+        "ga": 4,
+        "gd": -4,
         "points": 0,
         "position": 4
       },
       "away_standing": {
         "team": "Scotland",
         "group": "C",
-        "played": 1,
+        "played": 2,
         "won": 1,
         "drawn": 0,
-        "lost": 0,
+        "lost": 1,
         "gf": 1,
-        "ga": 0,
-        "gd": 1,
+        "ga": 1,
+        "gd": 0,
         "points": 3,
-        "position": 1
+        "position": 3
       },
       "ou25": {
         "model_over": 0.473,
@@ -878,28 +878,28 @@
       "home_standing": {
         "team": "Australia",
         "group": "D",
-        "played": 1,
+        "played": 2,
         "won": 1,
         "drawn": 0,
-        "lost": 0,
+        "lost": 1,
         "gf": 2,
-        "ga": 0,
-        "gd": 2,
+        "ga": 2,
+        "gd": 0,
         "points": 3,
         "position": 2
       },
       "away_standing": {
         "team": "Turkey",
         "group": "D",
-        "played": 1,
+        "played": 2,
         "won": 0,
         "drawn": 0,
-        "lost": 1,
+        "lost": 2,
         "gf": 0,
-        "ga": 2,
-        "gd": -2,
+        "ga": 3,
+        "gd": -3,
         "points": 0,
-        "position": 3
+        "position": 4
       },
       "ou25": {
         "model_over": 0.403,
@@ -2473,103 +2473,107 @@
       },
       "picks": [],
       "pending": false
-    }
-  ],
-  "pending": [
-    {
-      "fixture": "Brazil vs Haiti",
-      "date": null,
-      "kickoff": null,
-      "model_1x2": {
-        "home": 0.8967,
-        "draw": 0.0744,
-        "away": 0.0289
-      },
-      "model_source": "card_build",
-      "model_pick": "home",
-      "top_scoreline": {
-        "score": "3-0",
-        "prob": 13.5
-      },
-      "picks": [],
-      "pending": true
     },
     {
-      "fixture": "Scotland vs Morocco",
-      "date": null,
-      "kickoff": null,
-      "model_1x2": {
-        "home": 0.194,
-        "draw": 0.2876,
-        "away": 0.5184
-      },
-      "model_source": "card_build",
-      "model_pick": "away",
-      "top_scoreline": {
-        "score": "0-1",
-        "prob": 21.2
-      },
-      "picks": [
-        {
-          "fixture": "Scotland vs Morocco",
-          "selection": "Scotland",
-          "odds": 6.0,
-          "venue": "betfair_ex_uk",
-          "model_prob": 0.19399999999999998,
-          "market_prob": 0.16399999999999998
-        },
-        {
-          "fixture": "Scotland vs Morocco",
-          "selection": "Draw",
-          "odds": 3.75,
-          "venue": "betfair_ex_uk",
-          "model_prob": 0.28800000000000003,
-          "market_prob": 0.265
-        }
-      ],
-      "pending": true
-    },
-    {
-      "fixture": "Turkey vs Paraguay",
-      "date": null,
-      "kickoff": null,
-      "model_1x2": {
-        "home": 0.4417,
-        "draw": 0.2881,
-        "away": 0.2702
-      },
-      "model_source": "card_build",
-      "model_pick": "home",
-      "top_scoreline": {
-        "score": "1-0",
-        "prob": 14.3
-      },
-      "picks": [
-        {
-          "fixture": "Turkey vs Paraguay",
-          "selection": "Paraguay",
-          "odds": 4.0,
-          "venue": "betfair_ex_uk",
-          "model_prob": 0.27,
-          "market_prob": 0.247
-        }
-      ],
-      "pending": true
-    },
-    {
-      "fixture": "United States vs Australia",
-      "date": null,
-      "kickoff": null,
+      "fixture": "USA vs Australia",
+      "date": "2026-06-19",
+      "kickoff": "2026-06-19T19:00:00.000Z",
+      "score": "2-0",
+      "outcome": "home",
+      "home_goals": 2,
+      "away_goals": 0,
+      "card_generated": "2026-06-19T10:40:46",
       "model_1x2": {
         "home": 0.5375,
         "draw": 0.2461,
         "away": 0.2164
       },
       "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.591,
+        "draw": 0.2301,
+        "away": 0.179
+      },
+      "market_source": "closing_devig",
+      "market_books": 19,
       "model_pick": "home",
+      "market_pick": "home",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.5375,
+      "market_prob_outcome": 0.591,
+      "result_edge": -0.0535,
+      "brier_model": 0.3214,
+      "brier_market": 0.2523,
+      "logloss_model": 0.6209,
+      "logloss_market": 0.526,
       "top_scoreline": {
         "score": "1-0",
-        "prob": 14.3
+        "prob": 14.3,
+        "hit": false
+      },
+      "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "1-0",
+          "prob": 14.3
+        },
+        {
+          "score": "1-1",
+          "prob": 11.6
+        },
+        {
+          "score": "2-1",
+          "prob": 10.7
+        },
+        {
+          "score": "2-0",
+          "prob": 10.4
+        },
+        {
+          "score": "0-0",
+          "prob": 8.3
+        },
+        {
+          "score": "0-1",
+          "prob": 6.8
+        }
+      ],
+      "home_standing": {
+        "team": "United States",
+        "group": "D",
+        "played": 2,
+        "won": 2,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 6,
+        "ga": 1,
+        "gd": 5,
+        "points": 6,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Australia",
+        "group": "D",
+        "played": 2,
+        "won": 1,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 2,
+        "ga": 2,
+        "gd": 0,
+        "points": 3,
+        "position": 2
+      },
+      "ou25": {
+        "model_over": 0.448,
+        "actual_over": false,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.477,
+        "actual": false,
+        "hit": true
       },
       "picks": [
         {
@@ -2589,9 +2593,322 @@
           "market_prob": 0.22
         }
       ],
-      "pending": true
+      "pending": false
+    },
+    {
+      "fixture": "Scotland vs Morocco",
+      "date": "2026-06-19",
+      "kickoff": "2026-06-19T22:00:00.000Z",
+      "score": "0-1",
+      "outcome": "away",
+      "home_goals": 0,
+      "away_goals": 1,
+      "card_generated": "2026-06-19 21:11:18 UTC",
+      "model_1x2": {
+        "home": 0.194,
+        "draw": 0.2876,
+        "away": 0.5184
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.1795,
+        "draw": 0.2656,
+        "away": 0.5548
+      },
+      "market_source": "closing_devig",
+      "market_books": 18,
+      "model_pick": "away",
+      "market_pick": "away",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.5184,
+      "market_prob_outcome": 0.5548,
+      "result_edge": -0.0364,
+      "brier_model": 0.3523,
+      "brier_market": 0.301,
+      "logloss_model": 0.657,
+      "logloss_market": 0.5891,
+      "top_scoreline": {
+        "score": "0-1",
+        "prob": 21.2,
+        "hit": true
+      },
+      "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "0-1",
+          "prob": 21.2
+        },
+        {
+          "score": "0-0",
+          "prob": 15.0
+        },
+        {
+          "score": "0-2",
+          "prob": 11.6
+        },
+        {
+          "score": "1-1",
+          "prob": 11.5
+        },
+        {
+          "score": "1-0",
+          "prob": 9.4
+        },
+        {
+          "score": "1-2",
+          "prob": 8.3
+        }
+      ],
+      "home_standing": {
+        "team": "Scotland",
+        "group": "C",
+        "played": 2,
+        "won": 1,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 1,
+        "ga": 1,
+        "gd": 0,
+        "points": 3,
+        "position": 3
+      },
+      "away_standing": {
+        "team": "Morocco",
+        "group": "C",
+        "played": 2,
+        "won": 1,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 2,
+        "ga": 1,
+        "gd": 1,
+        "points": 4,
+        "position": 2
+      },
+      "ou25": {
+        "model_over": 0.278,
+        "actual_over": false,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.328,
+        "actual": false,
+        "hit": true
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "Brazil vs Haiti",
+      "date": "2026-06-20",
+      "kickoff": "2026-06-20T00:30:00.000Z",
+      "score": "3-0",
+      "outcome": "home",
+      "home_goals": 3,
+      "away_goals": 0,
+      "card_generated": "2026-06-19 21:11:18 UTC",
+      "model_1x2": {
+        "home": 0.8967,
+        "draw": 0.0744,
+        "away": 0.0289
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.861,
+        "draw": 0.0946,
+        "away": 0.0443
+      },
+      "market_source": "closing_devig",
+      "market_books": 18,
+      "model_pick": "home",
+      "market_pick": "home",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.8967,
+      "market_prob_outcome": 0.861,
+      "result_edge": 0.0357,
+      "brier_model": 0.017,
+      "brier_market": 0.0302,
+      "logloss_model": 0.109,
+      "logloss_market": 0.1496,
+      "top_scoreline": {
+        "score": "3-0",
+        "prob": 13.5,
+        "hit": true
+      },
+      "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "3-0",
+          "prob": 13.5
+        },
+        {
+          "score": "4-0",
+          "prob": 12.7
+        },
+        {
+          "score": "2-0",
+          "prob": 10.7
+        },
+        {
+          "score": "5-0",
+          "prob": 9.6
+        },
+        {
+          "score": "6-0",
+          "prob": 6.0
+        },
+        {
+          "score": "1-0",
+          "prob": 5.6
+        }
+      ],
+      "home_standing": {
+        "team": "Brazil",
+        "group": "C",
+        "played": 2,
+        "won": 1,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 4,
+        "ga": 1,
+        "gd": 3,
+        "points": 4,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Haiti",
+        "group": "C",
+        "played": 2,
+        "won": 0,
+        "drawn": 0,
+        "lost": 2,
+        "gf": 0,
+        "ga": 4,
+        "gd": -4,
+        "points": 0,
+        "position": 4
+      },
+      "ou25": {
+        "model_over": 0.763,
+        "actual_over": true,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.323,
+        "actual": false,
+        "hit": true
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "Turkey vs Paraguay",
+      "date": "2026-06-20",
+      "kickoff": "2026-06-20T03:00:00.000Z",
+      "score": "0-1",
+      "outcome": "away",
+      "home_goals": 0,
+      "away_goals": 1,
+      "card_generated": "2026-06-19 21:11:18 UTC",
+      "model_1x2": {
+        "home": 0.4417,
+        "draw": 0.2881,
+        "away": 0.2702
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.4718,
+        "draw": 0.2854,
+        "away": 0.2428
+      },
+      "market_source": "closing_devig",
+      "market_books": 18,
+      "model_pick": "home",
+      "market_pick": "home",
+      "model_correct": false,
+      "market_correct": false,
+      "model_prob_outcome": 0.2702,
+      "market_prob_outcome": 0.2428,
+      "result_edge": 0.0274,
+      "brier_model": 0.8108,
+      "brier_market": 0.8775,
+      "logloss_model": 1.3087,
+      "logloss_market": 1.4157,
+      "top_scoreline": {
+        "score": "1-0",
+        "prob": 14.3,
+        "hit": false
+      },
+      "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "1-0",
+          "prob": 14.3
+        },
+        {
+          "score": "1-1",
+          "prob": 13.3
+        },
+        {
+          "score": "0-0",
+          "prob": 11.2
+        },
+        {
+          "score": "0-1",
+          "prob": 9.4
+        },
+        {
+          "score": "2-1",
+          "prob": 9.0
+        },
+        {
+          "score": "2-0",
+          "prob": 8.8
+        }
+      ],
+      "home_standing": {
+        "team": "Turkey",
+        "group": "D",
+        "played": 2,
+        "won": 0,
+        "drawn": 0,
+        "lost": 2,
+        "gf": 0,
+        "ga": 3,
+        "gd": -3,
+        "points": 0,
+        "position": 4
+      },
+      "away_standing": {
+        "team": "Paraguay",
+        "group": "D",
+        "played": 2,
+        "won": 1,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 2,
+        "ga": 4,
+        "gd": -2,
+        "points": 3,
+        "position": 3
+      },
+      "ou25": {
+        "model_over": 0.38,
+        "actual_over": false,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.443,
+        "actual": false,
+        "hit": true
+      },
+      "picks": [],
+      "pending": false
     }
   ],
+  "pending": [],
   "bets": [
     {
       "id": 1,
@@ -2671,7 +2988,7 @@
       "stake": 8.0,
       "status": "won",
       "pl": 14.224,
-      "clv": 0.01828133776407026
+      "clv": 0.06846153846153835
     },
     {
       "id": 9,
@@ -2691,7 +3008,7 @@
       "stake": 7.0,
       "status": "won",
       "pl": 11.969999999999999,
-      "clv": -0.006644195341745873
+      "clv": 0.04230769230769216
     },
     {
       "id": 12,
@@ -3192,6 +3509,16 @@
       "status": "won",
       "pl": 20.76,
       "clv": 0.0
+    },
+    {
+      "id": 85,
+      "match": "USA vs Australia",
+      "selection": "The Draw",
+      "odds": 4.7,
+      "stake": 6.0,
+      "status": "lost",
+      "pl": -6.0,
+      "clv": null
     }
   ]
 }

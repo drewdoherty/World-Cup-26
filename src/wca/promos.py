@@ -142,13 +142,6 @@ SITES: List[Dict[str, Any]] = [
         "expect_promos": True,
     },
     {
-        "name": "Ladbrokes",
-        "kind": "book",
-        "promos_url": "https://sports.ladbrokes.com/promotions",
-        "boosts_url": None,
-        "expect_promos": True,
-    },
-    {
         "name": "Unibet",
         "kind": "book",
         "promos_url": "https://www.unibet.co.uk/promotions",

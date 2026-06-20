@@ -188,7 +188,6 @@
     smarkets: "#2dd4bf",
     matchbook: "#f472b6",
     coral: "#fb923c",
-    ladbrokes: "#dc2626",
     polymarket: "#60a5fa",
     kalshi: "#a855f7"
   };

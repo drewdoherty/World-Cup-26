@@ -134,7 +134,7 @@ class TestBuildPromosData:
         assert len(pp["boosts"]) == 1
         b365 = next(s for s in data["sites"] if s["name"] == "Bet365")
         assert b365["scrape"]["status"] == "blocked"
-        unfetched = next(s for s in data["sites"] if s["name"] == "Ladbrokes")
+        unfetched = next(s for s in data["sites"] if s["name"] == "Unibet")
         assert unfetched["scrape"]["status"] == "never"
 
     def test_signup_and_watchlist_and_boost_evals(self) -> None:

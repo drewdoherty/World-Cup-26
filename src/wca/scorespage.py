@@ -44,6 +44,11 @@ from wca import modelpreds, sitedata
 from wca.data import teamnames
 
 
+#: Bookmakers deliberately hidden from user-facing venue comparisons.
+#: We keep raw snapshots intact, but do not surface books we are not using.
+EXCLUDED_BOOKMAKERS = {"ladbrokes", "ladbrokes_uk"}
+
+
 # ---------------------------------------------------------------------------
 # Fixture / team-name helpers.
 # ---------------------------------------------------------------------------
@@ -273,6 +278,8 @@ def _h2h_venues_for_fixture(
         if bookie is None:
             continue
         bookie = str(bookie)
+        if bookie.strip().lower() in EXCLUDED_BOOKMAKERS:
+            continue
         leg = _leg_for_outcome(row.get("outcome_name"), home_c, away_c)
         if leg is None:
             continue

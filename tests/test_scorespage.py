@@ -290,6 +290,37 @@ class TestVenues:
         assert "kickoff" not in mex or mex["kickoff"] != "NaT"
         assert mex.get("kickoff", "") == ""
 
+    def test_excluded_bookmakers_not_emitted(self) -> None:
+        rows = _synth_odds_df().to_dict("records")
+        rows.extend([
+            _odds_row(
+                event_id="E1", commence_time="2026-06-12T18:00:00+00:00",
+                home_team="Mexico", away_team="South Africa",
+                bookmaker_key="ladbrokes_uk", market="h2h",
+                outcome_name="Mexico", decimal_odds=1.48,
+            ),
+            _odds_row(
+                event_id="E1", commence_time="2026-06-12T18:00:00+00:00",
+                home_team="Mexico", away_team="South Africa",
+                bookmaker_key="ladbrokes_uk", market="h2h",
+                outcome_name="Draw", decimal_odds=4.00,
+            ),
+            _odds_row(
+                event_id="E1", commence_time="2026-06-12T18:00:00+00:00",
+                home_team="Mexico", away_team="South Africa",
+                bookmaker_key="ladbrokes_uk", market="h2h",
+                outcome_name="South Africa", decimal_odds=10.00,
+            ),
+        ])
+        df = pd.DataFrame(rows, columns=_ODDS_COLUMNS)
+        card = _write_card(_SYNTH_CARD)
+        try:
+            data = scorespage.build_scores_data(card, odds_df=df)
+        finally:
+            os.unlink(card)
+        mex = data["fixtures"][0]
+        assert {v["venue"] for v in mex["venues"]} == {"skybet"}
+
     def test_team_name_normalisation_bosnia(self) -> None:
         """Card 'Bosnia and Herzegovina' must match feed 'Bosnia &
         Herzegovina' so the williamhill venue attaches to that fixture."""

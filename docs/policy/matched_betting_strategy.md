@@ -4,7 +4,7 @@
 
 World Cup Alpha uses two distinct matched-betting playbooks depending on the venue:
 
-1. **New customer offers** (Betfair, Virgin Bet, Paddy Power, Bet365, Sky Bet, Coral, Ladbrokes): signup bonuses that convert to risk-free profit via hedging
+1. **New customer offers** (Betfair, Virgin Bet, Paddy Power, Bet365, Sky Bet, Coral): signup bonuses that convert to risk-free profit via hedging
 2. **Zero-commission venues** (Smarkets): no EV buffer; only +EV on genuine model edge
 
 ## New Customer Offers (Sign-up Bonus Route)
