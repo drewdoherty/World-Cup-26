@@ -1,11 +1,11 @@
-<!-- generated: 2026-06-20T03:31:25 -->
+<!-- generated: 2026-06-20T04:34:52 -->
 ⚽ *Next match* — Netherlands vs Sweden
 Kickoff 2026-06-20 17:00:00+00:00
 
 *Winner* (model blend)
-  Netherlands     55.4%  fair 1.81  best 1.77 (matchbook) -2.0%
-  Draw            24.4%  fair 4.10  best 4.20 (betfair_ex_uk) +2.6% ✅  £3.00
-  Sweden          20.2%  fair 4.95  best 5.00 (betfair_ex_uk) +1.0%  £0.96
+  Netherlands     55.5%  fair 1.80  best 1.76 (betfair_ex_uk) -2.3%
+  Draw            24.4%  fair 4.10  best 4.20 (betfair_ex_uk) +2.5% ✅  £2.87
+  Sweden          20.1%  fair 4.98  best 5.00 (betfair_ex_uk) +0.4%  £0.37
   _stake = ¼-Kelly @ £1500 bankroll (+EV picks)_
 
 *Corners* (model, exp 8.5)
@@ -14,7 +14,7 @@ Kickoff 2026-06-20 17:00:00+00:00
 *Anytime scorer* (best book price, vig in)
   Brian Brobbey       2.50 (William Hill)  imp 40%
   Memphis Depay       2.50 (Sky Bet)  imp 40%
-  Donyell Malen       2.64 (Betfair)  imp 38%
+  Donyell Malen       2.60 (Betfair)  imp 38%
   Wout Weghorst       2.88 (Betfair)  imp 35%
   Cody Gakpo          2.94 (Betfair)  imp 34%
 
