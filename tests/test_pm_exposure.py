@@ -140,7 +140,7 @@ def test_prop_exposure_is_not_hedged_by_a_result_bet(tmp_path):
     ]
     section = propose_cli._build_exposure_section(proposals, odds, db, now)
     assert "HEDGE" not in section
-    assert "does NOT offset" in section
+    assert "does NOT hedge" in section
     assert "✅ PM-1 Scotland to WIN" in section
 
 
@@ -184,3 +184,64 @@ def test_exposure_matches_v_and_dash_separators(tmp_path):
     assert "result exposure" in section
     assert "🛡 HEDGE PM-1 the DRAW" in section
     assert "➕ ADD PM-2 Scotland to WIN" in section
+
+
+# -- currency, multi-leg decomposition, message splitting (2026-06 additions) --
+
+def test_platform_currency_and_symbol():
+    from wca.ledger.reports import _platform_currency, currency_symbol
+    assert _platform_currency("polymarket") == "USD"
+    assert _platform_currency("kalshi") == "USD"
+    assert _platform_currency("Betfair") == "GBP"
+    assert currency_symbol("USD") == "$"
+    assert currency_symbol("GBP") == "£"
+
+
+def test_decompose_acca_result_legs_and_default_skips(tmp_path):
+    from wca.data.teamnames import canonical
+    db = str(tmp_path / "wca.db")
+    record_bet("2026-06-17T10:00:00", "ACC",
+               "Czechia vs South Africa | Ghana vs Panama", "Accumulator",
+               "Ghana (Match Odds 90) + Czechia (Match Odds 90)",
+               "Betfair", 6.3, 10.0, source="punt", db_path=db)
+    gp = frozenset({canonical("Ghana"), canonical("Panama")})
+    # decompose=True surfaces the Ghana result leg under its fixture
+    exp = sportsbook_open_exposure_by_match(db, sources=None, decompose_multileg=True)
+    assert gp in exp
+    assert any(l["is_result"] and canonical(l["team"]) == canonical("Ghana")
+               for l in exp[gp]["legs"])
+    # default (no decompose) still skips multi-match accas
+    assert gp not in sportsbook_open_exposure_by_match(db, sources=None)
+
+
+def test_builder_separates_result_from_props(tmp_path):
+    from wca.data.teamnames import canonical
+    db = str(tmp_path / "wca.db")
+    record_bet("2026-06-17T10:00:00", "BB", "Brazil vs Haiti", "Bet Builder",
+               "Match Result -> Brazil + Anytime Goal Scorer -> Neymar",
+               "Bet365", 4.0, 10.0, source="punt", db_path=db)
+    bh = frozenset({canonical("Brazil"), canonical("Haiti")})
+    legs = sportsbook_open_exposure_by_match(db, sources=None, decompose_multileg=True)[bh]["legs"]
+    assert any(l["is_result"] and canonical(l["team"]) == canonical("Brazil") for l in legs)
+    assert any((not l["is_result"]) and "Neymar" in l["selection"] for l in legs)
+
+
+def test_exposure_section_shows_dollar_for_polymarket(tmp_path):
+    import datetime as _dt
+    db = str(tmp_path / "wca.db")
+    record_bet("2026-06-17T10:00:00", "JPN", "2026 FIFA World Cup - Japan R16",
+               "pm_market", "Japan reach R16 - No", "polymarket", 1.67, 60.0,
+               source="model", db_path=db)
+    section = propose_cli._build_exposure_section([], None, db, _dt.datetime(2026, 6, 17))
+    assert "$60" in section
+    assert "£60" not in section
+
+
+def test_split_for_telegram():
+    assert propose_cli._split_for_telegram("short") == ["short"]
+    big = "block\n\n" * 2000
+    parts = propose_cli._split_for_telegram(big, limit=4000)
+    assert len(parts) > 1
+    assert all(len(p) <= 4000 for p in parts)
+    # nothing dropped (allowing for join whitespace differences)
+    assert "block" in parts[0] and "block" in parts[-1]

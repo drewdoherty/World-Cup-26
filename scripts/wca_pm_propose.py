@@ -239,40 +239,37 @@ def _reset_parked_for_new_batch(db_path: str):
 
 
 def _build_exposure_section(proposals: list, odds_df, db_path: str, now_dt) -> str:
-    """Exposure + hedge header for the **next 5 matches**.
+    """Exposure + hedge header across ALL fixtures with a Polymarket edge or open
+    sportsbook exposure (no longer limited to the next 5 games).
 
-    For each of the five soonest fixtures, list its Polymarket proposals by
-    their PM-<n> and *real* selection (the market question, e.g. "Australia to
-    WIN" / "the DRAW" — never the bare Yes/No outcome), classified against the
-    existing ledger exposure:
+    Uses the *decomposed* ledger exposure (``decompose_multileg=True``) so
+    accumulators / bet-builders are surfaced leg-by-leg and no open bet is
+    missed. Money is shown in its real currency ($ for Polymarket/Kalshi, £ for
+    sportsbooks). Polymarket proposals are classified against existing 1X2
+    result exposure:
 
-    * 🛡 HEDGE — only when there is open **1X2 result** exposure on a *different*
-      result outcome, so the proposal wins when that bet loses.
-    * ➕ ADD — the proposal backs a result outcome we are already on.
-    * ✅ EV pick — no result exposure to offset. Player props / scorers / cards
-      are shown as *non-result* exposure that a 1X2 bet does NOT hedge.
-
-    Reads exposure from the ledger (never fabricated) via
-    :func:`wca.ledger.reports.sportsbook_open_exposure_by_match` (``sources=None``).
+    * 🛡 HEDGE — a result market on a *different* outcome than one we already
+      back (wins when that bet loses). Acca/builder result legs count too, but a
+      single-leg hedge only *partially* offsets an all-or-nothing multi.
+    * ➕ ADD — same result side we already back (raises exposure).
+    * ✅ EV pick — no result exposure to offset.
+    Non-result exposure (props, handicaps, scorers, corners…) is listed for
+    awareness; a 1X2 bet does NOT hedge it.
     """
     from wca.data.teamnames import canonical
-    from wca.ledger.reports import sportsbook_open_exposure_by_match
+    from wca.ledger.reports import sportsbook_open_exposure_by_match, currency_symbol
     from wca.bot.app import describe_pm_selection
 
-    matches = _next_5_matches(odds_df, now_dt)
-    if not matches:
-        return ""
-
     try:
-        # sources=None -> every book/venue/source, so nothing is hidden.
-        exposure = sportsbook_open_exposure_by_match(db_path, sources=None)
+        exposure = sportsbook_open_exposure_by_match(
+            db_path, sources=None, decompose_multileg=True
+        )
     except Exception:
         exposure = {}
 
-    # Index proposals by canonical {home, away} pair, carrying each proposal's
-    # 1-based PM-<n> (its position in the proposals list == its parked number)
-    # so the summary maps onto the numbered "Y PM-n" proposals below.
     props_by_key: dict = {}
+    title_by_key: dict = {}
+    ha_by_key: dict = {}
     for n, p in enumerate(proposals, 1):
         md = str(p.get("match_desc") or "")
         parts = [x.strip() for x in md.split(" vs ")]
@@ -280,72 +277,100 @@ def _build_exposure_section(proposals: list, odds_df, db_path: str, now_dt) -> s
             continue
         key = frozenset(canonical(x) for x in parts)
         props_by_key.setdefault(key, []).append((n, p))
+        title_by_key.setdefault(key, "%s vs %s" % (parts[0], parts[1]))
+        ha_by_key.setdefault(key, (parts[0], parts[1]))
 
-    lines = ["🎯 *Exposure & hedges — next 5 matches:*", ""]
-    for home, away, _ct in matches:
-        key = frozenset({canonical(home), canonical(away)})
-        exp = exposure.get(key)
+    for key, e in exposure.items():
+        md = e.get("match_desc", "")
+        if key not in ha_by_key and md and "|" not in md and " vs " in md:
+            h, _, a = md.partition(" vs ")
+            ha_by_key[key] = (h.strip(), a.strip())
+            title_by_key.setdefault(key, "%s vs %s" % (h.strip(), a.strip()))
+        title_by_key.setdefault(key, "/".join(sorted(key)))
+
+    if not props_by_key and not exposure:
+        return ""
+
+    def _res_token(name):
+        s = (name or "").strip().lower()
+        return "DRAW" if s in ("draw", "the draw") else canonical(name)
+
+    def _key_rank(key):
+        ps = props_by_key.get(key, [])
+        best = max((float(p.get("ev", 0.0)) for _n, p in ps), default=None)
+        return (0, -best) if best is not None else (1, 0.0)
+
+    ordered = sorted(set(props_by_key) | set(exposure), key=_key_rank)
+
+    lines = ["🎯 *Exposure & hedges — all opportunities:*", ""]
+    saw_leg_hedge = False
+    for key in ordered:
+        title = title_by_key.get(key, "/".join(sorted(key)))
+        e = exposure.get(key)
         mprops = props_by_key.get(key, [])
-        title = "%s vs %s" % (home, away)
+        home, away = ha_by_key.get(key, (None, None))
 
-        # Split existing exposure into 1X2 *result* exposure (the only thing a
-        # result/1X2 Polymarket bet can offset) and *other* exposure (player
-        # props, scorers, cards, ...). A result bet does NOT hedge a prop.
-        result_tokens: set = set()
-        result_strs: list = []
-        other_strs: list = []
-        if exp:
-            for sel, oc in exp["outcomes"].items():
-                tok = _outcome_token(sel, home, away)
+        backed: set = set()
+        res_cells, nonres_cells = [], []
+
+        if e:
+            for sel, oc in e["outcomes"].items():
+                sym = currency_symbol(oc.get("currency"))
                 plats = "/".join(sorted(p for p in oc.get("platforms", set()) if p)) or "?"
-                cell = "%s £%.0f@risk [%s]" % (sel, oc["risk"], plats)
+                tok = _outcome_token(sel, home or "", away or "")
                 if tok in _RESULT_TOKENS:
-                    result_tokens.add(tok)
-                    result_strs.append(cell)
+                    label = {"HOME": home, "AWAY": away, "DRAW": "Draw"}.get(tok) or sel
+                    backed.add(_res_token(label))
+                    res_cells.append("%s %s%.0f@risk [%s]" % (label, sym, oc["risk"], plats))
                 else:
-                    other_strs.append(cell)
+                    nonres_cells.append("%s %s%.0f@risk [%s]" % (sel[:24], sym, oc["risk"], plats))
+            for leg in e.get("legs", []):
+                sym = currency_symbol(leg.get("currency"))
+                bt = leg.get("bet_type", "multi")
+                if leg.get("is_result"):
+                    backed.add(_res_token(leg["team"]))
+                    res_cells.append("%s %s%.0f@risk [%s leg]" % (leg["team"][:18], sym, leg["risk"], bt))
+                else:
+                    nonres_cells.append("%s %s%.0f@risk [%s leg]" % (leg["selection"][:22], sym, leg["risk"], bt))
 
-        # Fixture header — describe only the exposure that is actually relevant.
-        if result_tokens:
-            hdr = "⚠️ %s — result exposure: %s" % (title, ", ".join(result_strs))
-            if other_strs:
-                hdr += " (also open, non-result: %s)" % "; ".join(other_strs)
+        if res_cells:
+            hdr = "⚠️ %s — result exposure: %s" % (title, ", ".join(res_cells))
+            if nonres_cells:
+                hdr += "  | non-result (1X2 does NOT hedge): %s" % "; ".join(nonres_cells)
             lines.append(hdr)
-        elif other_strs:
-            lines.append(
-                "ℹ️ %s — open (non-result): %s — a 1X2 bet does NOT offset this"
-                % (title, "; ".join(other_strs))
-            )
+        elif nonres_cells:
+            lines.append("ℹ️ %s — open (non-result, 1X2 does NOT hedge): %s"
+                         % (title, "; ".join(nonres_cells)))
         elif mprops:
             lines.append("✅ %s — EV picks (no existing exposure):" % title)
         else:
-            lines.append("⚪ %s — no exposure, no Polymarket edge" % title)
             continue
 
-        if not mprops:
-            if result_tokens:
-                lines.append("    (no Polymarket market resolved to hedge this)")
-            continue
-
-        # One line per proposal — mapped to its PM-<n>, with the REAL selection
-        # (from the market question), classified against result exposure only.
         for n, p in sorted(mprops, key=lambda np: -float(np[1].get("ev", 0.0))):
             sel = describe_pm_selection(p)
-            tok = _pm_result_token(p, home, away)
+            tok = _pm_result_token(p, home or "", away or "")
             body = "PM-%d %s @ %.2f (ev %+.1f%%, $%.0f)" % (
                 n, sel, p["price"], float(p.get("ev", 0.0)) * 100.0, p["size_usd"],
             )
-            if result_tokens and tok in _RESULT_TOKENS:
-                if tok in result_tokens:
+            if tok in _RESULT_TOKENS and backed:
+                ptok = {"HOME": _res_token(home), "AWAY": _res_token(away), "DRAW": "DRAW"}.get(tok)
+                if ptok in backed:
                     lines.append("    ➕ ADD %s — same result side, raises exposure" % body)
                 else:
-                    lines.append(
-                        "    🛡 HEDGE %s — offsets your %s exposure"
-                        % (body, "/".join(sorted(result_tokens)))
-                    )
+                    has_leg = bool(e and any(l.get("is_result") for l in e.get("legs", [])))
+                    saw_leg_hedge = saw_leg_hedge or has_leg
+                    note = " (partial — multi is all-or-nothing)" if has_leg else ""
+                    lines.append("    🛡 HEDGE %s — offsets %s%s"
+                                 % (body, "/".join(sorted(backed)), note))
             else:
                 lines.append("    ✅ %s" % body)
+        if not mprops and res_cells:
+            lines.append("    (no Polymarket market resolved to hedge this)")
 
+    if saw_leg_hedge:
+        lines.append("")
+        lines.append("_⚠️ Acca/builder legs are all-or-nothing: a single-leg hedge "
+                     "only partially offsets the multi._")
     return "\n".join(lines) + "\n"
 
 
@@ -409,8 +434,10 @@ def main() -> int:
     parser.add_argument(
         "--hours-ahead",
         type=float,
-        default=30.0,
-        help="Include fixtures starting within this many hours (default 30)",
+        default=720.0,
+        help="Include fixtures starting within this many hours (default 720 = "
+             "30 days, i.e. ALL upcoming moneyline opportunities; lower it to "
+             "restrict to the near term)",
     )
     parser.add_argument(
         "--regions",
@@ -584,11 +611,13 @@ def main() -> int:
         "Unfilled orders auto-redeem after 24h; `REDEEM ALL` / `REDEEM <id>` to cancel now._"
     )
 
-    # Send single message
+    # Send — split on paragraph boundaries if over Telegram's 4096-char limit
+    # (proposing ALL moneyline opportunities can exceed a single message).
     try:
-        client.send_message(admin, message_body)
+        for part in _split_for_telegram(message_body):
+            client.send_message(admin, part)
         print(
-            "Parked + notified %d proposal(s) in a single message to admin %s."
+            "Parked + notified %d proposal(s) to admin %s."
             % (len(proposals), admin)
         )
     except TelegramError as exc:
@@ -596,6 +625,41 @@ def main() -> int:
         return 1
 
     return 0
+
+
+def _split_for_telegram(text: str, limit: int = 4000):
+    """Yield message chunks ≤ ``limit`` chars, splitting on blank lines (then
+    single newlines, then hard) so a long proposal/exposure block is delivered
+    intact across multiple Telegram messages."""
+    if len(text) <= limit:
+        return [text]
+    parts, buf = [], ""
+    for block in text.split("\n\n"):
+        piece = (buf + "\n\n" + block) if buf else block
+        if len(piece) <= limit:
+            buf = piece
+            continue
+        if buf:
+            parts.append(buf)
+            buf = ""
+        if len(block) <= limit:
+            buf = block
+            continue
+        # A single block still too long: split on newlines, then hard-cut.
+        for line in block.split("\n"):
+            cand = (buf + "\n" + line) if buf else line
+            if len(cand) <= limit:
+                buf = cand
+            else:
+                if buf:
+                    parts.append(buf)
+                while len(line) > limit:
+                    parts.append(line[:limit])
+                    line = line[limit:]
+                buf = line
+    if buf:
+        parts.append(buf)
+    return parts
 
 
 if __name__ == "__main__":
