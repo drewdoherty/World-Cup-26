@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-20 08:44:28 UTC"
+    "generated": "2026-06-20T09:26:45"
   },
   "totals": {
-    "wagered": 738.836,
+    "wagered": 743.836,
     "open_stake": 114.46000000000001,
     "settled_pl": 37.96049999999998,
-    "n_bets": 83
+    "n_bets": 84
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 585.08,
+      "wagered": 590.08,
       "open_stake": 51.0,
       "settled_pl": 64.15549999999999,
-      "n_bets": 65
+      "n_bets": 66
     },
     "USD": {
       "wagered": 153.756,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 585.08,
+      "wagered": 590.08,
       "open_stake": 51.0,
       "settled_pl": 64.15549999999999,
-      "n_bets": 65,
+      "n_bets": 66,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 437.0800000000001,
-      "open_stake": 40.0,
+      "wagered": 442.0800000000001,
+      "open_stake": 45.0,
       "settled_pl": 98.15549999999999,
-      "n_bets": 48,
+      "n_bets": 49,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,14 @@
     }
   },
   "source_summary": {
+    "offer": {
+      "GBP": {
+        "wagered": 200.0,
+        "open_stake": 15.0,
+        "settled_pl": 74.82,
+        "n_bets": 23
+      }
+    },
     "model": {
       "USD": {
         "wagered": 140.39,
@@ -90,14 +98,6 @@
         "n_bets": 10
       }
     },
-    "offer": {
-      "GBP": {
-        "wagered": 195.0,
-        "open_stake": 10.0,
-        "settled_pl": 74.82,
-        "n_bets": 22
-      }
-    },
     "hedge": {
       "GBP": {
         "wagered": 6.0,
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "Betfair": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 199.14000000000001,
+      "open_stake": 10.0,
+      "settled_pl": 18.92200000000001,
+      "n_bets": 14
+    },
     "polymarket": {
       "venue": "polymarket",
       "currency": "USD",
@@ -139,14 +147,6 @@
       "open_stake": 21.0,
       "settled_pl": 0.0,
       "n_bets": 3
-    },
-    "Betfair": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 194.14000000000001,
-      "open_stake": 5.0,
-      "settled_pl": 18.92200000000001,
-      "n_bets": 13
     },
     "Betfair Sportsbook": {
       "venue": "sportsbook",
@@ -2322,6 +2322,26 @@
   },
   "positions": [
     {
+      "id": 108,
+      "ts_utc": "2026-06-20T09:26:45",
+      "match": "England vs Ghana",
+      "match_id": "MANUAL_ENGLAND_VS_GHANA",
+      "market": "Bet Builder",
+      "selection": "Home Team Minus 2.5 Goals -> England -2.5 Goals + Handicap Betting -> England (-2.0) + Correct Score Combinations -> England to win 1-0, 2-0 or 3-0",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 5.52,
+      "stake": 5.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.92; Bet Builder; legs: Home Team Minus 2.5 Goals -> England -2.5 Goals | Handicap Betting -> England (-2.0) | Correct Score Combinations -> England to win 1-0, 2-0 or 3-0; SNR"
+    },
+    {
       "id": 107,
       "ts_utc": "2026-06-20T08:08:37",
       "match": "Netherlands vs Sweden",
@@ -2548,21 +2568,21 @@
       "scores": [
         {
           "score": "1-0",
-          "prob": 12.8,
-          "fair": 7.81,
-          "back": 7.97
+          "prob": 12.6,
+          "fair": 7.91,
+          "back": 8.07
         },
         {
           "score": "1-1",
           "prob": 11.5,
-          "fair": 8.66,
-          "back": 8.83
+          "fair": 8.67,
+          "back": 8.84
         },
         {
           "score": "2-0",
-          "prob": 10.7,
-          "fair": 9.38,
-          "back": 9.56
+          "prob": 10.6,
+          "fair": 9.42,
+          "back": 9.61
         },
         {
           "score": "2-1",
@@ -2572,79 +2592,79 @@
         },
         {
           "score": "0-0",
-          "prob": 7.8,
-          "fair": 12.81,
-          "back": 13.07
+          "prob": 7.7,
+          "fair": 12.98,
+          "back": 13.24
         },
         {
           "score": "0-1",
           "prob": 6.3,
-          "fair": 15.81,
-          "back": 16.13
+          "fair": 15.98,
+          "back": 16.3
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 47.6,
-        "under": 52.4
+        "over": 48.0,
+        "under": 52.0
       },
-      "btts": 48.9
+      "btts": 49.3
     },
     {
       "fixture": "Germany vs Ivory Coast",
       "scores": [
         {
           "score": "1-0",
-          "prob": 12.0,
-          "fair": 8.36,
-          "back": 8.53
+          "prob": 11.7,
+          "fair": 8.52,
+          "back": 8.69
         },
         {
           "score": "2-0",
-          "prob": 11.6,
-          "fair": 8.63,
-          "back": 8.8
+          "prob": 11.5,
+          "fair": 8.72,
+          "back": 8.89
         },
         {
           "score": "1-1",
           "prob": 10.4,
-          "fair": 9.63,
-          "back": 9.82
+          "fair": 9.64,
+          "back": 9.84
         },
         {
           "score": "2-1",
           "prob": 10.2,
-          "fair": 9.8,
-          "back": 10.0
+          "fair": 9.78,
+          "back": 9.97
         },
         {
           "score": "3-0",
-          "prob": 7.2,
-          "fair": 13.97,
-          "back": 14.25
+          "prob": 7.1,
+          "fair": 14.02,
+          "back": 14.3
         },
         {
           "score": "0-0",
-          "prob": 6.6,
-          "fair": 15.23,
-          "back": 15.53
+          "prob": 6.4,
+          "fair": 15.55,
+          "back": 15.87
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 52.1,
-        "under": 47.9
+        "over": 52.7,
+        "under": 47.3
       },
-      "btts": 49.4
+      "btts": 49.9
     },
     {
       "fixture": "Ecuador vs Curaçao",
       "scores": [
         {
           "score": "2-0",
-          "prob": 16.2,
-          "fair": 6.19,
-          "back": 6.31
+          "prob": 16.3,
+          "fair": 6.14,
+          "back": 6.27
         },
         {
           "score": "3-0",
@@ -2654,33 +2674,33 @@
         },
         {
           "score": "1-0",
-          "prob": 11.7,
-          "fair": 8.55,
-          "back": 8.72
+          "prob": 11.9,
+          "fair": 8.4,
+          "back": 8.57
         },
         {
           "score": "4-0",
-          "prob": 9.8,
-          "fair": 10.19,
-          "back": 10.39
+          "prob": 9.7,
+          "fair": 10.29,
+          "back": 10.49
         },
         {
           "score": "2-1",
-          "prob": 6.9,
-          "fair": 14.44,
-          "back": 14.73
+          "prob": 7.0,
+          "fair": 14.29,
+          "back": 14.57
         },
         {
           "score": "3-1",
           "prob": 6.2,
-          "fair": 16.04,
-          "back": 16.36
+          "fair": 16.01,
+          "back": 16.33
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 61.1,
-        "under": 38.9
+        "over": 60.7,
+        "under": 39.3
       },
       "btts": 32.4
     },
@@ -2689,47 +2709,47 @@
       "scores": [
         {
           "score": "0-1",
-          "prob": 18.9,
-          "fair": 5.28,
-          "back": 5.39
+          "prob": 19.3,
+          "fair": 5.18,
+          "back": 5.29
         },
         {
           "score": "0-2",
           "prob": 12.3,
-          "fair": 8.11,
-          "back": 8.27
+          "fair": 8.12,
+          "back": 8.28
         },
         {
           "score": "1-1",
           "prob": 11.3,
           "fair": 8.82,
-          "back": 9.0
+          "back": 8.99
         },
         {
           "score": "0-0",
-          "prob": 11.0,
-          "fair": 9.13,
-          "back": 9.31
+          "prob": 11.1,
+          "fair": 8.99,
+          "back": 9.17
         },
         {
           "score": "1-2",
           "prob": 10.3,
-          "fair": 9.75,
-          "back": 9.95
+          "fair": 9.73,
+          "back": 9.93
         },
         {
           "score": "1-0",
           "prob": 6.9,
-          "fair": 14.45,
-          "back": 14.74
+          "fair": 14.44,
+          "back": 14.73
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 36.5,
-        "under": 63.5
+        "over": 35.9,
+        "under": 64.1
       },
-      "btts": 39.5
+      "btts": 39.2
     }
   ]
 }
