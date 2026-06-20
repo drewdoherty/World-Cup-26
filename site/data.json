@@ -1,12 +1,12 @@
 {
   "meta": {
-    "generated": "2026-06-20 07:43:47 UTC"
+    "generated": "2026-06-20T08:08:38"
   },
   "totals": {
-    "wagered": 736.3760000000001,
-    "open_stake": 133.44,
+    "wagered": 738.836,
+    "open_stake": 135.89999999999998,
     "settled_pl": 22.000500000000002,
-    "n_bets": 82
+    "n_bets": 83
   },
   "totals_by_currency": {
     "GBP": {
@@ -16,10 +16,10 @@
       "n_bets": 65
     },
     "USD": {
-      "wagered": 151.29600000000002,
-      "open_stake": 61.0,
+      "wagered": 153.756,
+      "open_stake": 63.46,
       "settled_pl": -26.195,
-      "n_bets": 17
+      "n_bets": 18
     }
   },
   "venues": {
@@ -31,10 +31,10 @@
       "currency": "GBP"
     },
     "polymarket": {
-      "wagered": 151.29600000000002,
-      "open_stake": 61.0,
+      "wagered": 153.756,
+      "open_stake": 63.46,
       "settled_pl": -26.195,
-      "n_bets": 17,
+      "n_bets": 18,
       "currency": "USD"
     },
     "kalshi": {
@@ -62,6 +62,20 @@
     }
   },
   "source_summary": {
+    "model": {
+      "USD": {
+        "wagered": 140.39,
+        "open_stake": 62.46,
+        "settled_pl": -23.827999999999996,
+        "n_bets": 8
+      },
+      "GBP": {
+        "wagered": 211.02,
+        "open_stake": 42.440000000000005,
+        "settled_pl": 20.7055,
+        "n_bets": 30
+      }
+    },
     "punt": {
       "GBP": {
         "wagered": 173.06,
@@ -74,20 +88,6 @@
         "open_stake": 1.0,
         "settled_pl": -2.367,
         "n_bets": 10
-      }
-    },
-    "model": {
-      "GBP": {
-        "wagered": 211.02,
-        "open_stake": 42.440000000000005,
-        "settled_pl": 20.7055,
-        "n_bets": 30
-      },
-      "USD": {
-        "wagered": 137.93,
-        "open_stake": 60.0,
-        "settled_pl": -23.827999999999996,
-        "n_bets": 7
       }
     },
     "offer": {
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "polymarket": {
+      "venue": "polymarket",
+      "currency": "USD",
+      "wagered": 153.756,
+      "open_stake": 63.46,
+      "settled_pl": -26.195,
+      "n_bets": 18
+    },
     "Ladbrokes": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -187,14 +195,6 @@
       "open_stake": 0.0,
       "settled_pl": -10.0,
       "n_bets": 1
-    },
-    "polymarket": {
-      "venue": "polymarket",
-      "currency": "USD",
-      "wagered": 151.29600000000002,
-      "open_stake": 61.0,
-      "settled_pl": -26.195,
-      "n_bets": 17
     },
     "Smarkets": {
       "venue": "sportsbook",
@@ -2235,6 +2235,26 @@
   },
   "positions": [
     {
+      "id": 107,
+      "ts_utc": "2026-06-20T08:08:37",
+      "match": "Netherlands vs Sweden",
+      "match_id": "PM_NETHERLANDS_VS_SWEDEN",
+      "market": "polymarket",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "model",
+      "currency": "USD",
+      "decimal_odds": 4.166666666666667,
+      "stake": 2.46,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "polymarket order; token=76430088308493460494891335845203272510723451292248221729565378437032576762940; side=BUY; LIVE; order_id=0xeca58abf2efdc12a1415f72d6c9c50b24e3b15d0388b84d9358a0f964a00815d"
+    },
+    {
       "id": 106,
       "ts_utc": "2026-06-19T20:17:12",
       "match": "Scotland vs Morocco",
@@ -2507,7 +2527,7 @@
         },
         {
           "score": "1-1",
-          "prob": 11.6,
+          "prob": 11.5,
           "fair": 8.66,
           "back": 8.83
         },
@@ -2515,7 +2535,7 @@
           "score": "2-0",
           "prob": 10.7,
           "fair": 9.38,
-          "back": 9.57
+          "back": 9.56
         },
         {
           "score": "2-1",
@@ -2526,8 +2546,8 @@
         {
           "score": "0-0",
           "prob": 7.8,
-          "fair": 12.8,
-          "back": 13.06
+          "fair": 12.81,
+          "back": 13.07
         },
         {
           "score": "0-1",
@@ -2549,7 +2569,7 @@
         {
           "score": "1-0",
           "prob": 12.0,
-          "fair": 8.37,
+          "fair": 8.36,
           "back": 8.53
         },
         {
@@ -2567,20 +2587,20 @@
         {
           "score": "2-1",
           "prob": 10.2,
-          "fair": 9.81,
+          "fair": 9.8,
           "back": 10.0
         },
         {
           "score": "3-0",
           "prob": 7.2,
-          "fair": 13.98,
-          "back": 14.26
+          "fair": 13.97,
+          "back": 14.25
         },
         {
           "score": "0-0",
           "prob": 6.6,
-          "fair": 15.24,
-          "back": 15.54
+          "fair": 15.23,
+          "back": 15.53
         }
       ],
       "over_under": {
@@ -2596,44 +2616,44 @@
         {
           "score": "2-0",
           "prob": 16.2,
-          "fair": 6.18,
-          "back": 6.3
+          "fair": 6.19,
+          "back": 6.31
         },
         {
           "score": "3-0",
-          "prob": 14.6,
-          "fair": 6.86,
-          "back": 7.0
+          "prob": 14.5,
+          "fair": 6.88,
+          "back": 7.02
         },
         {
           "score": "1-0",
           "prob": 11.7,
-          "fair": 8.52,
-          "back": 8.69
+          "fair": 8.55,
+          "back": 8.72
         },
         {
           "score": "4-0",
           "prob": 9.8,
-          "fair": 10.16,
-          "back": 10.37
+          "fair": 10.19,
+          "back": 10.39
         },
         {
           "score": "2-1",
           "prob": 6.9,
-          "fair": 14.4,
-          "back": 14.69
+          "fair": 14.44,
+          "back": 14.73
         },
         {
           "score": "3-1",
           "prob": 6.2,
-          "fair": 16.0,
-          "back": 16.32
+          "fair": 16.04,
+          "back": 16.36
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 61.2,
-        "under": 38.8
+        "over": 61.1,
+        "under": 38.9
       },
       "btts": 32.4
     },
@@ -2643,44 +2663,44 @@
         {
           "score": "0-1",
           "prob": 18.9,
-          "fair": 5.29,
+          "fair": 5.28,
           "back": 5.39
         },
         {
           "score": "0-2",
           "prob": 12.3,
-          "fair": 8.12,
-          "back": 8.28
+          "fair": 8.11,
+          "back": 8.27
         },
         {
           "score": "1-1",
-          "prob": 11.4,
-          "fair": 8.8,
-          "back": 8.98
+          "prob": 11.3,
+          "fair": 8.82,
+          "back": 9.0
         },
         {
           "score": "0-0",
           "prob": 11.0,
-          "fair": 9.11,
-          "back": 9.29
+          "fair": 9.13,
+          "back": 9.31
         },
         {
           "score": "1-2",
-          "prob": 10.2,
-          "fair": 9.77,
-          "back": 9.96
+          "prob": 10.3,
+          "fair": 9.75,
+          "back": 9.95
         },
         {
           "score": "1-0",
           "prob": 6.9,
-          "fair": 14.43,
-          "back": 14.72
+          "fair": 14.45,
+          "back": 14.74
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 36.4,
-        "under": 63.6
+        "over": 36.5,
+        "under": 63.5
       },
       "btts": 39.5
     }
