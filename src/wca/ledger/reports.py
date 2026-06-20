@@ -182,28 +182,108 @@ def _match_team_key(match_desc: str):
     return frozenset(canonical(p) for p in parts)
 
 
+# Venues whose money is denominated in USD ($); everything else is GBP (£).
+_USD_VENUES = ("polymarket", "kalshi")
+
+# Selection keywords that mean a leg is NOT a clean 1X2 result (so a Polymarket
+# 1X2/result bet cannot hedge it): handicaps, totals, scorers, props, etc.
+_NONRESULT_KW = (
+    "goal", "score", "corner", "card", "shot", "assist", "handicap",
+    "btts", "both teams", "2up", "2 up", "minus", "over ", "under ",
+    "double chance", "half", "-1", "-2", "-3", "+1", "+2", "+3", "clean sheet",
+)
+# Keywords that positively mark a clean match-result pick.
+_RESULT_KW = ("match odds", "match result", "full time result", "ft result", "to win")
+
+
+def _platform_currency(platform: str) -> str:
+    """``"USD"`` for prediction-market venues, else ``"GBP"``."""
+    p = (platform or "").lower()
+    return "USD" if any(v in p for v in _USD_VENUES) else "GBP"
+
+
+def currency_symbol(currency: str) -> str:
+    return {"USD": "$", "GBP": "£", "EUR": "€"}.get(currency or "", "£")
+
+
+def _leg_team(leg: str) -> str:
+    """Extract the team a leg is about: handles ``"Team (Match Odds 90)"`` and
+    ``"Match Odds -> Team"`` (and falls back to the leftmost token)."""
+    t = leg
+    if "->" in t:
+        t = t.split("->")[-1]
+    t = t.split("(")[0]
+    # Trim a trailing market suffix like "Morocco - 2UP" → "Morocco".
+    t = t.split(" - ")[0]
+    return t.strip()
+
+
+def _leg_is_result(leg: str) -> bool:
+    """True only for an unambiguous 1X2 match-result pick (conservative: any
+    handicap/total/prop keyword disqualifies it, so we never claim a false
+    hedge)."""
+    l = leg.lower()
+    if any(k in l for k in _NONRESULT_KW):
+        return False
+    return any(k in l for k in _RESULT_KW)
+
+
+def _decompose_legs(match_desc: str, selection: str):
+    """Split a multi-leg bet into ``(fixture_key, leg_selection, team, is_result)``.
+
+    ``match_desc`` may list several fixtures (``"A vs B | C vs D"``); ``selection``
+    lists legs joined by ``" + "``.  Each leg is attributed to the fixture whose
+    teams contain the leg's team; a single-fixture bet-builder attributes every
+    leg to that one fixture.  Returns ``[]`` for a plain single-leg straight bet.
+    """
+    import re
+
+    from wca.data.teamnames import canonical
+
+    matches = [m.strip() for m in match_desc.split("|") if m.strip()]
+    legs = [x.strip() for x in re.split(r"\s+\+\s+", selection) if x.strip()]
+    if len(matches) <= 1 and len(legs) <= 1:
+        return []
+
+    fixtures = []  # (key, {canonical teams}, desc)
+    for m in matches:
+        parts = [p.strip() for p in re.split(r"\s+(?:vs?|-)\s+", m, maxsplit=1, flags=re.IGNORECASE)]
+        if len(parts) == 2 and all(parts):
+            fixtures.append((frozenset(canonical(p) for p in parts),
+                             {canonical(parts[0]), canonical(parts[1])}, m))
+    if not fixtures:
+        return []
+
+    out = []
+    for leg in legs:
+        team = _leg_team(leg)
+        team_c = canonical(team)
+        assigned = next((f for f in fixtures if team_c in f[1]), None)
+        if assigned is None and len(fixtures) == 1:
+            assigned = fixtures[0]  # single-match builder: all legs → that match
+        if assigned is not None:
+            out.append((assigned[0], leg, team, _leg_is_result(leg)))
+    return out
+
+
 def sportsbook_open_exposure_by_match(
-    db_path: str, sources=HEDGEABLE_SOURCES
+    db_path: str, sources=HEDGEABLE_SOURCES, *, decompose_multileg: bool = False
 ) -> Dict[frozenset, Dict[str, Any]]:
-    """Open single-match sportsbook exposure, keyed by canonical team pair.
+    """Open sportsbook exposure, keyed by canonical team pair.
 
     Only open bets whose ``source`` is in *sources* (default model + offer/free
-    bets; pass ``sources=None`` to include **every** source / book / venue) and
-    which name a single ``"<home> vs <away>"`` fixture are counted; accumulators
-    and multi-leg rows are skipped (they cannot be attributed to a single
-    outcome). Free bets (``source == 'offer'``) are stake-not-returned, so their
-    **profit at risk** ``stake*(odds-1)`` is what's exposed, not stake.
+    bets; pass ``sources=None`` to include **every** source / book / venue) are
+    counted.  Straight ``"<home> vs <away>"`` bets accrue under ``outcomes``.
+    Free bets (``source == 'offer'``) are stake-not-returned, so their **profit
+    at risk** ``stake*(odds-1)`` is what's exposed, not stake.
 
-    Returns
-    -------
-    dict mapping ``frozenset({home, away})`` (canonical names) to::
+    With ``decompose_multileg=True``, accumulators / bet-builders (previously
+    skipped) are split into per-fixture legs collected under ``legs`` — so no
+    open bet is "missed out". A leg is flagged ``is_result`` only when it is an
+    unambiguous 1X2 pick (the only thing a Polymarket result bet can hedge).
 
-        {
-          "match_desc": <original ledger match_desc>,
-          "outcomes": { <selection>: {"stake": float, "risk": float,
-                                       "n": int, "sources": set, "platforms": set} },
-          "total_stake": float,
-        }
+    Returns ``frozenset({home, away}) -> {match_desc, total_stake, outcomes, legs}``
+    where each outcome / leg carries its ``currency`` ("USD"/"GBP"/"MIXED").
     """
     df = _bets_df(db_path)
     if df.empty:
@@ -215,29 +295,73 @@ def sportsbook_open_exposure_by_match(
         return {}
 
     out: Dict[frozenset, Dict[str, Any]] = {}
+
+    def _entry(key, match_desc):
+        return out.setdefault(
+            key,
+            {"match_desc": match_desc, "outcomes": {}, "legs": [], "total_stake": 0.0},
+        )
+
+    def _accrue_currency(oc, cur):
+        seen = oc.setdefault("_cur", set())
+        seen.add(cur)
+        oc["currency"] = next(iter(seen)) if len(seen) == 1 else "MIXED"
+
     for _, b in open_df.iterrows():
-        key = _match_team_key(str(b.get("match_desc") or ""))
-        if key is None:
-            continue
+        match_desc = str(b.get("match_desc") or "")
         sel = str(b.get("selection") or "").strip()
         stake = float(b.get("stake") or 0.0)
         odds = float(b.get("decimal_odds") or 0.0)
-        is_free = str(b.get("source") or "") == "offer"
-        risk = stake * (odds - 1.0) if is_free else stake
+        platform = str(b.get("platform") or "")
+        source = str(b.get("source") or "")
+        cur = _platform_currency(platform)
+        risk = stake * (odds - 1.0) if source == "offer" else stake
 
-        entry = out.setdefault(
-            key,
-            {"match_desc": str(b.get("match_desc") or ""), "outcomes": {}, "total_stake": 0.0},
-        )
-        oc = entry["outcomes"].setdefault(
-            sel, {"stake": 0.0, "risk": 0.0, "n": 0, "sources": set(), "platforms": set()}
-        )
-        oc["stake"] += stake
-        oc["risk"] += risk
-        oc["n"] += 1
-        oc["sources"].add(str(b.get("source") or ""))
-        oc["platforms"].add(str(b.get("platform") or ""))
-        entry["total_stake"] += stake
+        key = _match_team_key(match_desc)
+        is_multileg = (" + " in sel) or ("|" in match_desc)
+
+        # Multi-leg (acca / single-match bet-builder): surface each leg under
+        # its fixture rather than treating the whole "A + B + C" string as one
+        # straight outcome. Only when the caller opts in.
+        if decompose_multileg and is_multileg:
+            legs = _decompose_legs(match_desc, sel)
+            if legs:
+                for leg_key, leg_sel, team, is_result in legs:
+                    entry = _entry(leg_key, match_desc)
+                    entry["legs"].append({
+                        "bet_type": "acca" if "|" in match_desc else "builder",
+                        "selection": leg_sel,
+                        "team": team,
+                        "is_result": is_result,
+                        "stake": stake,    # whole-bet stake at risk (all-or-nothing)
+                        "risk": risk,
+                        "source": source,
+                        "platform": platform,
+                        "currency": cur,
+                        "full_desc": match_desc,
+                    })
+                continue
+            # decomposition found no attributable leg → fall through to straight.
+
+        if key is not None:
+            # Straight single-match bet → clean, fully hedgeable outcome.
+            entry = _entry(key, match_desc)
+            oc = entry["outcomes"].setdefault(
+                sel, {"stake": 0.0, "risk": 0.0, "n": 0, "sources": set(),
+                      "platforms": set(), "currency": cur},
+            )
+            oc["stake"] += stake
+            oc["risk"] += risk
+            oc["n"] += 1
+            oc["sources"].add(source)
+            oc["platforms"].add(platform)
+            _accrue_currency(oc, cur)
+            entry["total_stake"] += stake
+
+    # Drop the private currency-tracking set before returning.
+    for entry in out.values():
+        for oc in entry["outcomes"].values():
+            oc.pop("_cur", None)
     return out
 
 
