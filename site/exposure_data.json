@@ -1,69 +1,74 @@
 {
   "meta": {
-    "generated": "2026-06-20 13:26:06 UTC"
+    "generated": "2026-06-20 13:51:33 UTC"
   },
   "portfolio": {
-    "ev": 0.87,
+    "ev": 0.04,
     "best": 7.79,
     "worst": -2.46,
-    "p_profit": 0.3249,
-    "p_loss": 0.6751,
+    "p_profit": 0.2436,
+    "p_loss": 0.7564,
     "p_big_win": 0,
-    "n_scenarios": 243
+    "n_scenarios": 729
   },
   "correlation": {
     "worst_states": [
       {
         "pnl": -2.46,
-        "prob": 0.0383,
+        "prob": 0.0262,
         "results": [
           "Netherlands",
           "Germany",
           "Ecuador",
           "Tunisia",
-          "Spain"
+          "Spain",
+          "Belgium"
         ]
       },
       {
         "pnl": -2.46,
-        "prob": 0.0,
+        "prob": 0.0101,
         "results": [
           "Netherlands",
           "Germany",
           "Ecuador",
           "Tunisia",
+          "Spain",
           "Draw"
         ]
       },
       {
         "pnl": -2.46,
-        "prob": 0.0,
+        "prob": 0.0068,
         "results": [
           "Netherlands",
           "Germany",
           "Ecuador",
           "Tunisia",
-          "Saudi Arabia"
+          "Spain",
+          "Iran"
         ]
       },
       {
         "pnl": -2.46,
-        "prob": 0.1269,
+        "prob": 0.003,
         "results": [
           "Netherlands",
           "Germany",
           "Ecuador",
+          "Tunisia",
           "Draw",
-          "Spain"
+          "Belgium"
         ]
       },
       {
         "pnl": -2.46,
-        "prob": 0.0,
+        "prob": 0.0012,
         "results": [
           "Netherlands",
           "Germany",
           "Ecuador",
+          "Tunisia",
           "Draw",
           "Draw"
         ]
@@ -72,39 +77,42 @@
     "best_states": [
       {
         "pnl": 7.79,
-        "prob": 0.0218,
+        "prob": 0.0115,
         "results": [
           "Draw",
           "Germany",
           "Ecuador",
           "Tunisia",
-          "Spain"
+          "Spain",
+          "Belgium"
         ]
       },
       {
         "pnl": 7.79,
-        "prob": 0.0,
+        "prob": 0.0044,
         "results": [
           "Draw",
           "Germany",
           "Ecuador",
           "Tunisia",
+          "Spain",
           "Draw"
         ]
       },
       {
         "pnl": 7.79,
-        "prob": 0.0,
+        "prob": 0.003,
         "results": [
           "Draw",
           "Germany",
           "Ecuador",
           "Tunisia",
-          "Saudi Arabia"
+          "Spain",
+          "Iran"
         ]
       }
     ],
-    "narrative": "Upside is concentrated: the biggest payouts (\u00a38 best case) need the favourites to land together, while 68% of result-states leave the book down. Downside is driven by the real-money singles, not the free accas."
+    "narrative": "Upside is concentrated: the biggest payouts (\u00a38 best case) need the favourites to land together, while 76% of result-states leave the book down. Downside is driven by the real-money singles, not the free accas."
   },
   "fixtures": [
     {
@@ -113,7 +121,7 @@
       "results": [
         {
           "outcome": "Netherlands",
-          "prob": 0.5702,
+          "prob": 0.5554,
           "direct_pnl": -2.46,
           "acca_ev": 0.0,
           "net_pnl": -2.46,
@@ -122,16 +130,16 @@
           "plug": {
             "available": true,
             "outcome": "Netherlands",
-            "best_venue": "smarkets",
-            "best_odds": 1.75,
-            "model_prob": 0.5702,
-            "ev_pct": -0.2,
+            "best_venue": "matchbook",
+            "best_odds": 1.77,
+            "model_prob": 0.5554,
+            "ev_pct": -1.7,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.3249,
+          "prob": 0.2436,
           "direct_pnl": 7.79,
           "acca_ev": 0.0,
           "net_pnl": 7.79,
@@ -148,12 +156,21 @@
         },
         {
           "outcome": "Sweden",
-          "prob": 0.1049,
+          "prob": 0.2009,
           "direct_pnl": -2.46,
           "acca_ev": 0.0,
           "net_pnl": -2.46,
-          "blindspot": false,
-          "live": []
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "Sweden",
+            "best_venue": "betfred_uk",
+            "best_odds": 5.0,
+            "model_prob": 0.2009,
+            "ev_pct": 0.4,
+            "recommendation": "PLUG: +EV to back (0.4% edge) \u2014 fills the gap and adds value"
+          }
         }
       ],
       "events": [
@@ -179,7 +196,7 @@
         "stake_at_risk": 2.46,
         "best_outcome": "Draw",
         "worst_outcome": "Netherlands",
-        "n_blindspots": 1
+        "n_blindspots": 2
       }
     },
     {
@@ -188,7 +205,7 @@
       "results": [
         {
           "outcome": "Germany",
-          "prob": 0.7106,
+          "prob": 0.6281,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -199,14 +216,14 @@
             "outcome": "Germany",
             "best_venue": "unibet_uk",
             "best_odds": 1.54,
-            "model_prob": 0.7106,
-            "ev_pct": 9.4,
-            "recommendation": "PLUG: +EV to back (9.4% edge) \u2014 fills the gap and adds value"
+            "model_prob": 0.6281,
+            "ev_pct": -3.3,
+            "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.2894,
+          "prob": 0.2153,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -217,14 +234,14 @@
             "outcome": "Draw",
             "best_venue": "betfair_ex_uk",
             "best_odds": 4.9,
-            "model_prob": 0.2894,
-            "ev_pct": 41.8,
-            "recommendation": "PLUG: +EV to back (41.8% edge) \u2014 fills the gap and adds value"
+            "model_prob": 0.2153,
+            "ev_pct": 5.5,
+            "recommendation": "PLUG: +EV to back (5.5% edge) \u2014 fills the gap and adds value"
           }
         },
         {
           "outcome": "Ivory Coast",
-          "prob": 0.0,
+          "prob": 0.1565,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -256,7 +273,7 @@
       "results": [
         {
           "outcome": "Ecuador",
-          "prob": 1.0,
+          "prob": 0.858,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -265,7 +282,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.0,
+          "prob": 0.1049,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -274,7 +291,7 @@
         },
         {
           "outcome": "Cura\u00e7ao",
-          "prob": 0.0,
+          "prob": 0.0371,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -297,7 +314,7 @@
       "results": [
         {
           "outcome": "Tunisia",
-          "prob": 0.0945,
+          "prob": 0.1666,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -306,7 +323,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.3131,
+          "prob": 0.2528,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -315,7 +332,7 @@
         },
         {
           "outcome": "Japan",
-          "prob": 0.5924,
+          "prob": 0.5806,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -338,7 +355,7 @@
       "results": [
         {
           "outcome": "Spain",
-          "prob": 1.0,
+          "prob": 0.8643,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -347,7 +364,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.0,
+          "prob": 0.1003,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -356,7 +373,7 @@
         },
         {
           "outcome": "Saudi Arabia",
-          "prob": 0.0,
+          "prob": 0.0354,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -372,52 +389,108 @@
         "worst_outcome": "Spain",
         "n_blindspots": 0
       }
+    },
+    {
+      "fixture": "Belgium vs Iran",
+      "kickoff": "2026-06-21T19:00:00+00:00",
+      "results": [
+        {
+          "outcome": "Belgium",
+          "prob": 0.6079,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.2338,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Iran",
+          "prob": 0.1584,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Belgium",
+        "worst_outcome": "Belgium",
+        "n_blindspots": 0
+      }
     }
   ],
   "blindspots": [
     {
       "fixture": "Germany vs Ivory Coast",
       "outcome": "Germany",
-      "prob": 0.7106,
+      "prob": 0.6281,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Germany",
         "best_venue": "unibet_uk",
         "best_odds": 1.54,
-        "model_prob": 0.7106,
-        "ev_pct": 9.4,
-        "recommendation": "PLUG: +EV to back (9.4% edge) \u2014 fills the gap and adds value"
+        "model_prob": 0.6281,
+        "ev_pct": -3.3,
+        "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
     {
       "fixture": "Netherlands vs Sweden",
       "outcome": "Netherlands",
-      "prob": 0.5702,
+      "prob": 0.5554,
       "net_pnl": -2.46,
       "plug": {
         "available": true,
         "outcome": "Netherlands",
-        "best_venue": "smarkets",
-        "best_odds": 1.75,
-        "model_prob": 0.5702,
-        "ev_pct": -0.2,
+        "best_venue": "matchbook",
+        "best_odds": 1.77,
+        "model_prob": 0.5554,
+        "ev_pct": -1.7,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
     {
       "fixture": "Germany vs Ivory Coast",
       "outcome": "Draw",
-      "prob": 0.2894,
+      "prob": 0.2153,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Draw",
         "best_venue": "betfair_ex_uk",
         "best_odds": 4.9,
-        "model_prob": 0.2894,
-        "ev_pct": 41.8,
-        "recommendation": "PLUG: +EV to back (41.8% edge) \u2014 fills the gap and adds value"
+        "model_prob": 0.2153,
+        "ev_pct": 5.5,
+        "recommendation": "PLUG: +EV to back (5.5% edge) \u2014 fills the gap and adds value"
+      }
+    },
+    {
+      "fixture": "Netherlands vs Sweden",
+      "outcome": "Sweden",
+      "prob": 0.2009,
+      "net_pnl": -2.46,
+      "plug": {
+        "available": true,
+        "outcome": "Sweden",
+        "best_venue": "betfred_uk",
+        "best_odds": 5.0,
+        "model_prob": 0.2009,
+        "ev_pct": 0.4,
+        "recommendation": "PLUG: +EV to back (0.4% edge) \u2014 fills the gap and adds value"
       }
     }
   ],
