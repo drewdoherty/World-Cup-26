@@ -25,9 +25,15 @@ costs £0, only the profit is at stake.  Real-money bets lose their stake.
 """
 from __future__ import annotations
 
+import datetime
 import itertools
 import re
 from typing import Any, Dict, List, Optional, Tuple
+
+# A fixture stays on the risk slate until ~this long after kickoff (a match plus
+# stoppage / a little buffer); after that it is treated as finished and dropped,
+# so the panel never shows blind spots / "no live market price" for past games.
+IN_PLAY_HOURS = 3.0
 
 # Probability a blind spot must exceed to be "meaningful" (else it's noise).
 BLINDSPOT_MIN_PROB = 0.18
@@ -66,12 +72,49 @@ def _acca_legs(match_desc: str) -> List[str]:
     return [_team_key(p) for p in re.split(r"[+]", md) if p.strip()]
 
 
-def build_slate(model_fixtures: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
-    """Index the model fixtures into ``{fixture: {home, away, kickoff, p{}}}``."""
+def _parse_dt(value: Any) -> Optional[datetime.datetime]:
+    """Parse an ISO-ish timestamp to an aware UTC datetime, or ``None``."""
+    if not value:
+        return None
+    txt = str(value).strip().replace("Z", "+00:00")
+    for candidate in (txt, txt[:19]):
+        try:
+            d = datetime.datetime.fromisoformat(candidate)
+        except ValueError:
+            continue
+        return d if d.tzinfo else d.replace(tzinfo=datetime.timezone.utc)
+    return None
+
+
+def _is_future_or_inplay(
+    kickoff: Any, now: Optional[datetime.datetime]
+) -> bool:
+    """Upcoming or still in play (not finished). Missing/unparseable kickoff or
+    a missing ``now`` -> kept (never silently drop a possibly-live fixture)."""
+    if now is None:
+        return True
+    ko = _parse_dt(kickoff)
+    if ko is None:
+        return True
+    return now < ko + datetime.timedelta(hours=IN_PLAY_HOURS)
+
+
+def build_slate(
+    model_fixtures: List[Dict[str, Any]],
+    now: Optional[datetime.datetime] = None,
+) -> Dict[str, Dict[str, Any]]:
+    """Index the model fixtures into ``{fixture: {home, away, kickoff, p{}}}``.
+
+    When ``now`` is given, fixtures that have already finished (kickoff more than
+    :data:`IN_PLAY_HOURS` in the past) are dropped, so the risk view only ever
+    covers future or in-play games.
+    """
     slate: Dict[str, Dict[str, Any]] = {}
     for f in model_fixtures:
         fixture = f["fixture"]
         if " vs " not in fixture:
+            continue
+        if not _is_future_or_inplay(f.get("kickoff"), now):
             continue
         home, away = fixture.split(" vs ", 1)
         m = f.get("model") or {}
@@ -138,7 +181,9 @@ def build_exposure_data(
     now_utc:
         Display timestamp for the feed header.
     """
-    slate = build_slate(model_fixtures)
+    # Restrict the risk slate to future / in-play games (drop finished ones), so
+    # blind spots and per-fixture exposure never cover games already played.
+    slate = build_slate(model_fixtures, now=_parse_dt(now_utc))
     team2fx = _team_to_fixture(slate)
     odds_index = odds_index or {}
 
@@ -191,9 +236,21 @@ def build_exposure_data(
                 rec["match"] = md
             event_bets.setdefault(fx or "(off-slate)", []).append(rec)
 
+    # Fixtures carrying live exposure (>=1 open bet — a result single, an acca
+    # leg, or a prop/event bet). A blind spot is only flagged where we actually
+    # hold a position, so "uncovered" never fires for games we simply aren't on.
+    fixtures_with_bets = set(rb["fx"] for rb in result_bets)
+    for ab in acca_bets:
+        for (f2, _s) in ab["legs"]:
+            fixtures_with_bets.add(f2)
+    for fx_key, evs in event_bets.items():
+        if fx_key != "(off-slate)" and evs:
+            fixtures_with_bets.add(fx_key)
+
     fixtures_out = [
         _fixture_exposure(fx, slate, result_bets, acca_bets,
-                          event_bets.get(fx, []), odds_index.get(fx, {}))
+                          event_bets.get(fx, []), odds_index.get(fx, {}),
+                          has_bets=fx in fixtures_with_bets)
         for fx in slate
     ]
     portfolio, correlation = _portfolio_scenarios(slate, result_bets, acca_bets)
@@ -211,7 +268,8 @@ def build_exposure_data(
     }
 
 
-def _fixture_exposure(fx, slate, result_bets, acca_bets, events, fx_odds):
+def _fixture_exposure(fx, slate, result_bets, acca_bets, events, fx_odds,
+                      has_bets=True):
     d = slate[fx]
     outcomes = [d["home"], "Draw", d["away"]]
     rows = []
@@ -250,7 +308,8 @@ def _fixture_exposure(fx, slate, result_bets, acca_bets, events, fx_odds):
             "outcome": X, "prob": round(prob, 4),
             "direct_pnl": round(direct, 2), "acca_ev": round(acca_ev, 2),
             "net_pnl": round(net, 2),
-            "blindspot": bool(net <= BLINDSPOT_NET_FLOOR and prob >= BLINDSPOT_MIN_PROB),
+            "blindspot": bool(has_bets and net <= BLINDSPOT_NET_FLOOR
+                              and prob >= BLINDSPOT_MIN_PROB),
             "live": live + acca_live,
         })
     # plug suggestions for blind-spot outcomes

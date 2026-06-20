@@ -95,17 +95,67 @@ def _odds_index(preds_fixtures):
     return idx
 
 
+def _scores_fixtures(scores_path):
+    """Raw fixtures list from the fresh scores feed, or ``[]`` on failure."""
+    try:
+        return json.load(open(scores_path)).get("fixtures", []) or []
+    except (OSError, json.JSONDecodeError):
+        return []
+
+
+def _odds_index_from_scores(sd_fixtures):
+    """``{fixture: {outcome: {venue: best_odds}}}`` from scores_data per-venue
+    1X2 prices — fresh and matched to the exact fixtures, for blind-spot plugs."""
+    idx = {}
+    for f in sd_fixtures:
+        fixture = f.get("fixture") or ""
+        if " vs " not in fixture:
+            continue
+        home, away = fixture.split(" vs ", 1)
+        label = {"home": home, "draw": "Draw", "away": away}
+        per_outcome = {}
+        for v in f.get("venues") or []:
+            venue = v.get("venue") or "?"
+            sp = v.get("selection_prices") or {}
+            for k in ("home", "draw", "away"):
+                try:
+                    price = float(sp.get(k))
+                except (TypeError, ValueError):
+                    continue
+                if price > 1.0:
+                    per_outcome.setdefault(label[k], {})[venue] = price
+        if per_outcome:
+            idx[fixture] = per_outcome
+    return idx
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Generate the exposure feed.")
     ap.add_argument("--db", default="data/wca.db")
+    ap.add_argument("--scores", default="site/scores_data.json")
     ap.add_argument("--preds", default="data/model_predictions.json")
     ap.add_argument("--out", default="site/exposure_data.json")
     args = ap.parse_args(argv)
 
-    preds = json.load(open(args.preds))
-    fixtures = preds.get("fixtures", [])
+    # Prefer the FRESH scores feed (live upcoming slate + per-venue prices) over
+    # data/model_predictions.json, which the deploy can leave days stale
+    # (deploy/sync.sh reverts it to its last commit each cycle).
+    sd_fixtures = _scores_fixtures(args.scores)
+    if sd_fixtures:
+        fixtures = [
+            {"fixture": f["fixture"], "kickoff": f.get("kickoff"),
+             "model": f.get("model_1x2") or {}}
+            for f in sd_fixtures if f.get("fixture") and f.get("model_1x2")
+        ]
+        odds_index = _odds_index_from_scores(sd_fixtures)
+    else:
+        try:
+            fixtures = json.load(open(args.preds)).get("fixtures", [])
+        except (OSError, json.JSONDecodeError):
+            fixtures = []
+        odds_index = _odds_index(fixtures)
+
     bets = _open_bets(args.db)
-    odds_index = _odds_index(fixtures)
 
     data = exposure.build_exposure_data(
         bets=bets, model_fixtures=fixtures,
