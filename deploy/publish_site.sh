@@ -18,12 +18,13 @@ stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 "$PY" scripts/wca_advancement_history.py >/dev/null 2>&1 || true
 
 # 2. stage the site feed + the cached cards; bail if nothing changed.
-#    card_latest.md / next_latest.md are committed here so the freshly built
-#    cards (1) persist to git instead of being reverted by com.wca.sync and
-#    (2) feed the prediction-tracking history that walks the card's git log.
+#    card_latest.md / next_latest.md / model_predictions.json are committed here so
+#    the freshly built outputs (1) persist to git instead of being reverted to a
+#    stale blob by com.wca.sync and (2) feed downstream (card git-log history, and
+#    the exact model 1X2 used by scores/exposure).
 git add site/data.json site/linemove.json site/scores_data.json site/tracking_data.json \
         site/exposure_data.json site/advancement_history.json \
-        data/card_latest.md data/next_latest.md
+        data/card_latest.md data/next_latest.md data/model_predictions.json
 if git diff --cached --quiet; then
   echo "$(stamp) publish: no site changes"; exit 0
 fi
