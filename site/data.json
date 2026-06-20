@@ -1,12 +1,12 @@
 {
   "meta": {
-    "generated": "2026-06-20 13:02:00 UTC"
+    "generated": "2026-06-20T13:09:59"
   },
   "totals": {
-    "wagered": 743.836,
-    "open_stake": 114.46000000000001,
+    "wagered": 744.836,
+    "open_stake": 115.46000000000001,
     "settled_pl": 37.96049999999998,
-    "n_bets": 84
+    "n_bets": 85
   },
   "totals_by_currency": {
     "GBP": {
@@ -16,10 +16,10 @@
       "n_bets": 66
     },
     "USD": {
-      "wagered": 153.756,
-      "open_stake": 63.46,
+      "wagered": 154.756,
+      "open_stake": 64.46,
       "settled_pl": -26.195,
-      "n_bets": 18
+      "n_bets": 19
     }
   },
   "venues": {
@@ -31,10 +31,10 @@
       "currency": "GBP"
     },
     "polymarket": {
-      "wagered": 153.756,
-      "open_stake": 63.46,
+      "wagered": 154.756,
+      "open_stake": 64.46,
       "settled_pl": -26.195,
-      "n_bets": 18,
+      "n_bets": 19,
       "currency": "USD"
     },
     "kalshi": {
@@ -62,26 +62,26 @@
     }
   },
   "source_summary": {
-    "offer": {
-      "GBP": {
-        "wagered": 200.0,
-        "open_stake": 15.0,
-        "settled_pl": 74.82,
-        "n_bets": 23
-      }
-    },
     "model": {
       "USD": {
-        "wagered": 140.39,
-        "open_stake": 62.46,
+        "wagered": 141.39,
+        "open_stake": 63.46,
         "settled_pl": -23.827999999999996,
-        "n_bets": 8
+        "n_bets": 9
       },
       "GBP": {
         "wagered": 211.02,
         "open_stake": 21.0,
         "settled_pl": 36.6655,
         "n_bets": 30
+      }
+    },
+    "offer": {
+      "GBP": {
+        "wagered": 200.0,
+        "open_stake": 15.0,
+        "settled_pl": 74.82,
+        "n_bets": 23
       }
     },
     "punt": {
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "polymarket": {
+      "venue": "polymarket",
+      "currency": "USD",
+      "wagered": 154.756,
+      "open_stake": 64.46,
+      "settled_pl": -26.195,
+      "n_bets": 19
+    },
     "Betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -115,14 +123,6 @@
       "open_stake": 10.0,
       "settled_pl": 18.92200000000001,
       "n_bets": 14
-    },
-    "polymarket": {
-      "venue": "polymarket",
-      "currency": "USD",
-      "wagered": 153.756,
-      "open_stake": 63.46,
-      "settled_pl": -26.195,
-      "n_bets": 18
     },
     "Ladbrokes": {
       "venue": "sportsbook",
@@ -215,6 +215,14 @@
   },
   "platforms_by_account": {
     "1": {
+      "polymarket": {
+        "venue": "polymarket",
+        "currency": "USD",
+        "wagered": 152.816,
+        "open_stake": 63.46,
+        "settled_pl": -25.254999999999995,
+        "n_bets": 17
+      },
       "Betfair": {
         "venue": "sportsbook",
         "currency": "GBP",
@@ -222,14 +230,6 @@
         "open_stake": 5.0,
         "settled_pl": 18.92200000000001,
         "n_bets": 13
-      },
-      "polymarket": {
-        "venue": "polymarket",
-        "currency": "USD",
-        "wagered": 151.816,
-        "open_stake": 62.46,
-        "settled_pl": -25.254999999999995,
-        "n_bets": 16
       },
       "Ladbrokes": {
         "venue": "sportsbook",
@@ -2489,6 +2489,26 @@
     "n_with_close": 27
   },
   "positions": [
+    {
+      "id": 109,
+      "ts_utc": "2026-06-20T13:09:58",
+      "match": "Germany vs Ivory Coast",
+      "match_id": "PM_GERMANY_VS_IVORY_COAST",
+      "market": "polymarket",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "model",
+      "currency": "USD",
+      "decimal_odds": 1.5151515151515151,
+      "stake": 1.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "polymarket order; token=110881534500357968934646596900153818247967390745149544995654778360419076918150; side=BUY; LIVE; order_id=0xbb4f34ad2f204501d118778114b5cf0dda45c633650aa333675370bed7657d5a"
+    },
     {
       "id": 108,
       "ts_utc": "2026-06-20T09:26:45",
