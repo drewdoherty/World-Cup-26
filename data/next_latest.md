@@ -1,23 +1,23 @@
-<!-- generated: 2026-06-20T02:27:53 -->
-⚽ *Next match* — Turkey vs Paraguay
-Kickoff 2026-06-20 03:00:00+00:00
+<!-- generated: 2026-06-20T03:31:25 -->
+⚽ *Next match* — Netherlands vs Sweden
+Kickoff 2026-06-20 17:00:00+00:00
 
 *Winner* (model blend)
-  Turkey          45.0%  fair 2.22  best 2.05 (unibet_uk) -7.8%
-  Draw            28.8%  fair 3.47  best 3.45 (betfair_ex_uk) -0.5%
-  Paraguay        26.2%  fair 3.82  best 4.30 (betfair_ex_uk) +12.4% ✅  £14.15
+  Netherlands     55.4%  fair 1.81  best 1.77 (matchbook) -2.0%
+  Draw            24.4%  fair 4.10  best 4.20 (betfair_ex_uk) +2.6% ✅  £3.00
+  Sweden          20.2%  fair 4.95  best 5.00 (betfair_ex_uk) +1.0%  £0.96
   _stake = ¼-Kelly @ £1500 bankroll (+EV picks)_
 
-*Corners* (model, exp 8.2)
-  O/U 8.5: over 43.4% / under 56.6%  fair 2.30 / 1.77
+*Corners* (model, exp 8.5)
+  O/U 8.5: over 47.6% / under 52.4%  fair 2.10 / 1.91
 
 *Anytime scorer* (best book price, vig in)
-  Deniz Gul           3.25 (William Hill)  imp 31%
-  Alex Adrian Arce B  3.80 (William Hill)  imp 26%
-  Baris Alper Yilmaz  3.80 (William Hill)  imp 26%
-  Can Yilmaz Uzun     3.80 (William Hill)  imp 26%
-  Gabriel Avalos      3.80 (William Hill)  imp 26%
+  Brian Brobbey       2.50 (William Hill)  imp 40%
+  Memphis Depay       2.50 (Sky Bet)  imp 40%
+  Donyell Malen       2.64 (Betfair)  imp 38%
+  Wout Weghorst       2.88 (Betfair)  imp 35%
+  Cody Gakpo          2.94 (Betfair)  imp 34%
 
 *Scorelines* (top 6)
-1-0 14.6% | 1-1 13.3% | 0-0 11.3% | 2-1 9.1% | 0-1 9.1% | 2-0 8.9%
-  O/U 2.5: over 38.0% / under 62.0%   BTTS 44.3%
+1-0 12.8% | 1-1 11.6% | 2-0 10.7% | 2-1 10.2% | 0-0 7.8% | 0-1 6.3%
+  O/U 2.5: over 47.5% / under 52.5%   BTTS 49.0%
