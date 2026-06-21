@@ -343,3 +343,38 @@ def test_engine_coerce():
     assert Engine.coerce("codex") is Engine.CODEX
     with pytest.raises(ValueError):
         Engine.coerce("bard")
+
+
+# -- error surfacing from claude stdout (regression: "agent exited 1") ------
+
+
+def test_run_agent_surfaces_stdout_error_not_logged_in(cfg, monkeypatch):
+    # claude --output-format json writes the real reason to STDOUT, not stderr.
+    out = '{"type":"result","is_error":true,"result":"Not logged in · Please run /login"}'
+    monkeypatch.setattr(runner, "_run", make_fake_run(agent_rc=1, agent_stdout=out))
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    res = runner.run_agent(cfg, "claude", "do x", Path("/tmp/wt"))
+    assert res.returncode != 0
+    assert "Not logged in" in res.error
+    assert "agent exited" not in res.error
+
+
+def test_run_agent_treats_is_error_as_failure_on_exit_0(cfg, monkeypatch):
+    out = '{"is_error":true,"result":"boom"}'
+    monkeypatch.setattr(runner, "_run", make_fake_run(agent_rc=0, agent_stdout=out))
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    res = runner.run_agent(cfg, "claude", "do x", Path("/tmp/wt"))
+    assert res.returncode != 0
+    assert res.error == "boom"
+
+
+def test_run_task_cleans_up_worktree_on_failure(cfg, monkeypatch):
+    fake = make_fake_run(agent_rc=1, agent_stdout='{"is_error":true,"result":"nope"}')
+    monkeypatch.setattr(runner, "_run", fake)
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    rec = _record()
+    runner.run_task(cfg, rec)
+    assert rec.status == TaskStatus.FAILED.value
+    assert "nope" in rec.error
+    removes = [c for c in fake.state["calls"] if "worktree" in c and "remove" in c]
+    assert removes, "a failed run must reclaim its worktree"

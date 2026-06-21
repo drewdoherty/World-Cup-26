@@ -152,10 +152,21 @@ def run_agent(cfg: ConductorConfig, engine: str, task: str, cwd: Path) -> AgentR
         return AgentResult(124, error="agent timed out after %.0fs" % cfg.agent_timeout)
 
     summary, tokens = _parse_agent_output(engine, res.stdout)
-    error = ""
-    if res.returncode != 0:
-        error = (res.stderr or "").strip()[-500:] or "agent exited %d" % res.returncode
-    return AgentResult(res.returncode, summary, tokens, res.stdout, res.stderr, error)
+    # claude --output-format json reports its real failure on STDOUT, not
+    # stderr — e.g. {"is_error":true,"result":"Not logged in · Please run
+    # /login"} with exit 1, or even is_error with exit 0. Read it so the bot
+    # surfaces the actual reason instead of a bare "agent exited 1".
+    obj = _last_json_object(res.stdout) if Engine.coerce(engine) is Engine.CLAUDE else None
+    is_error = bool(obj.get("is_error")) if obj else False
+    if res.returncode != 0 or is_error:
+        detail = ""
+        if obj:
+            detail = str(obj.get("result") or obj.get("error") or "").strip()
+        if not detail:
+            detail = (res.stderr or "").strip()[-500:] or (res.stdout or "").strip()[-500:] \
+                or "agent exited %d" % res.returncode
+        return AgentResult(res.returncode or 1, summary, tokens, res.stdout, res.stderr, detail)
+    return AgentResult(res.returncode, summary, tokens, res.stdout, res.stderr, "")
 
 
 # -- git: commit / push ---------------------------------------------------
@@ -259,6 +270,13 @@ def _pr_body(record: TaskRecord) -> str:
 # -- orchestration --------------------------------------------------------
 
 
+def remove_worktree(cfg: ConductorConfig, path: Optional[str]) -> None:
+    """Best-effort removal of a task worktree (reclaims failed / no-op runs)."""
+    if not path:
+        return
+    _run([cfg.git_bin, "-C", str(cfg.repo_root), "worktree", "remove", "--force", str(path)])
+
+
 def run_task(cfg: ConductorConfig, record: TaskRecord, notify: Optional[Notify] = None) -> TaskRecord:
     """Run one task end to end, mutating *record* in place at each step.
 
@@ -312,4 +330,8 @@ def run_task(cfg: ConductorConfig, record: TaskRecord, notify: Optional[Notify] 
         return record
     finally:
         record.finished_at = time.time()
+        # Reclaim the worktree when nothing was pushed (failed / no-op runs) so
+        # repeated failures don't pile up throwaway worktrees.
+        if record.status in (TaskStatus.FAILED.value, TaskStatus.NO_CHANGES.value):
+            remove_worktree(cfg, record.worktree_path)
         _emit()
