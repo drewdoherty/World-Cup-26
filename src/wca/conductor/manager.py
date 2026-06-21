@@ -16,6 +16,7 @@ import uuid
 from concurrent.futures import Future, ThreadPoolExecutor
 from typing import Callable, Dict, List, Optional
 
+from wca.conductor.dispatcher import choose_engine
 from wca.conductor import runner
 from wca.conductor.config import ConductorConfig
 from wca.conductor.models import Engine, TaskRecord, TaskStatus
@@ -45,17 +46,35 @@ class ConductorManager:
             raise ValueError("empty task")
 
         with self._lock:
-            record = self._new_record_locked(engine, task, chat_id)
-            budget = self.cfg.token_budget
-            if budget is not None and self._spent_locked() >= budget:
-                record.status = TaskStatus.REJECTED.value
-                record.error = "token budget %d exhausted (spent %d)" % (budget, self._spent_locked())
-                return record
-            future = self._pool.submit(runner.run_task, self.cfg, record, self.notify)
-            self._futures[record.id] = future
+            return self._submit_locked(engine, task, chat_id)
+
+    def submit_auto(self, task: str, chat_id: str = "") -> TaskRecord:
+        """Accept a task after picking the engine with the dispatcher."""
+        task = (task or "").strip()
+        if not task:
+            raise ValueError("empty task")
+
+        with self._lock:
+            codex_available = self.cfg.codex_auto_limit > self._active_engine_locked(Engine.CODEX.value)
+            decision = choose_engine(task, codex_available=codex_available)
+            return self._submit_locked(
+                decision.engine.value, task, chat_id, route_reason=decision.reason,
+            )
+
+    def _submit_locked(self, engine: str, task: str, chat_id: str,
+                       route_reason: str = "") -> TaskRecord:
+        record = self._new_record_locked(engine, task, chat_id, route_reason)
+        budget = self.cfg.token_budget
+        if budget is not None and self._spent_locked() >= budget:
+            record.status = TaskStatus.REJECTED.value
+            record.error = "token budget %d exhausted (spent %d)" % (budget, self._spent_locked())
+            return record
+        future = self._pool.submit(runner.run_task, self.cfg, record, self.notify)
+        self._futures[record.id] = future
         return record
 
-    def _new_record_locked(self, engine: str, task: str, chat_id: str) -> TaskRecord:
+    def _new_record_locked(self, engine: str, task: str, chat_id: str,
+                           route_reason: str = "") -> TaskRecord:
         self._counter += 1
         rid = self._counter
         shortid = uuid.uuid4().hex[:6]
@@ -70,6 +89,7 @@ class ConductorManager:
             shortid=shortid,
             branch=branch,
             status=TaskStatus.QUEUED.value,
+            route_reason=route_reason,
             created_at=time.time(),
         )
         self._records[rid] = record
@@ -96,6 +116,13 @@ class ConductorManager:
 
     def _spent_locked(self) -> int:
         return sum(r.tokens for r in self._records.values())
+
+    def _active_engine_locked(self, engine: str) -> int:
+        return sum(
+            1 for r in self._records.values()
+            if r.engine == engine
+            and r.status in {TaskStatus.QUEUED.value, TaskStatus.RUNNING.value, TaskStatus.PUSHED.value}
+        )
 
     def spent_tokens(self) -> int:
         with self._lock:
@@ -144,6 +171,8 @@ class ConductorManager:
             if r.pr_url:
                 label = "PR" if r.status == TaskStatus.DONE.value else "diff"
                 row += "\n   [%s](%s)" % (label, r.pr_url)
+            if r.route_reason:
+                row += "\n   route: %s" % r.route_reason
             if r.error and r.status in {TaskStatus.FAILED.value, TaskStatus.REJECTED.value, TaskStatus.PUSHED.value}:
                 err = r.error if len(r.error) <= 90 else r.error[:87] + "..."
                 row += "\n   ⚠️ %s" % err

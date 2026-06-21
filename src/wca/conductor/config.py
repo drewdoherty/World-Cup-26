@@ -36,6 +36,7 @@ class ConductorConfig:
 
     max_parallel: int = 3
     token_budget: Optional[int] = None  # None / 0 -> unlimited
+    codex_auto_limit: int = 1  # max queued/running automatic Codex tasks
 
     git_bin: str = "git"
     gh_bin: str = "gh"
@@ -61,6 +62,8 @@ class ConductorConfig:
             self.token_budget = None
         if self.max_parallel < 1:
             self.max_parallel = 1
+        if self.codex_auto_limit < 0:
+            self.codex_auto_limit = 0
 
     # -- env --------------------------------------------------------------
 
@@ -95,7 +98,8 @@ class ConductorConfig:
 
         Recognised env: ``CLAUDE_BIN``, ``CODEX_BIN``, ``GH_BIN``,
         ``WCA_CONDUCTOR_MAX_PARALLEL``, ``WCA_CONDUCTOR_TOKEN_BUDGET``,
-        ``WCA_CONDUCTOR_BASE_BRANCH``, ``WCA_CONDUCTOR_BRANCH_PREFIX``.
+        ``WCA_CONDUCTOR_BASE_BRANCH``, ``WCA_CONDUCTOR_BRANCH_PREFIX``,
+        ``WCA_CONDUCTOR_CODEX_AUTO_LIMIT``.
         """
         def _int(name: str, default: Optional[int]) -> Optional[int]:
             raw = os.environ.get(name)
@@ -112,6 +116,7 @@ class ConductorConfig:
             branch_prefix=os.environ.get("WCA_CONDUCTOR_BRANCH_PREFIX", "conductor"),
             max_parallel=_int("WCA_CONDUCTOR_MAX_PARALLEL", 3) or 3,
             token_budget=_int("WCA_CONDUCTOR_TOKEN_BUDGET", None),
+            codex_auto_limit=_int("WCA_CONDUCTOR_CODEX_AUTO_LIMIT", 1) or 0,
             gh_bin=os.environ.get("GH_BIN", "gh"),
             claude_bin=os.environ.get("CLAUDE_BIN", "claude"),
             codex_bin=os.environ.get("CODEX_BIN", "codex"),

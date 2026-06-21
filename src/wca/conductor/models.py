@@ -100,6 +100,7 @@ class TaskRecord:
     status: str = TaskStatus.QUEUED.value
     summary: str = ""
     error: str = ""
+    route_reason: str = ""
     tokens: int = 0
     returncode: Optional[int] = None
     pr_url: Optional[str] = None

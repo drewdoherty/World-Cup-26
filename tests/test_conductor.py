@@ -14,6 +14,7 @@ import pytest
 
 from wca.conductor import runner
 from wca.conductor.config import ConductorConfig
+from wca.conductor.dispatcher import choose_engine
 from wca.conductor.manager import ConductorManager
 from wca.conductor.models import Engine, TaskRecord, TaskStatus
 
@@ -266,6 +267,44 @@ def test_manager_unknown_engine_rejected(tmp_path):
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
     with pytest.raises(ValueError):
         mgr.submit("gpt5", "nope")
+
+
+def test_dispatcher_sends_background_work_to_claude():
+    decision = choose_engine("run a background Telegram report sender", codex_available=True)
+    assert decision.engine is Engine.CLAUDE
+    assert "background" in decision.reason
+
+
+def test_dispatcher_spends_codex_only_on_mechanical_tasks():
+    decision = choose_engine("fix typo in README wording", codex_available=True)
+    assert decision.engine is Engine.CODEX
+
+
+def test_dispatcher_overflows_codex_to_claude_when_cap_reached():
+    decision = choose_engine("fix typo in README wording", codex_available=False)
+    assert decision.engine is Engine.CLAUDE
+    assert "cap" in decision.reason
+
+
+def test_manager_submit_auto_routes_and_records_reason(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "_run", make_fake_run())
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
+    rec = mgr.submit_auto("build a background bot monitor")
+    mgr._futures[rec.id].result(timeout=10)
+    assert rec.engine == Engine.CLAUDE.value
+    assert rec.route_reason.startswith("Claude:")
+
+
+def test_manager_submit_auto_respects_codex_auto_limit_zero(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "_run", make_fake_run())
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    cfg = ConductorConfig(repo_root=tmp_path, max_parallel=1, codex_auto_limit=0)
+    mgr = ConductorManager(cfg)
+    rec = mgr.submit_auto("fix typo in README wording")
+    mgr._futures[rec.id].result(timeout=10)
+    assert rec.engine == Engine.CLAUDE.value
+    assert "Codex auto cap" in rec.route_reason
 
 
 def test_status_table_empty_and_populated(tmp_path, monkeypatch):

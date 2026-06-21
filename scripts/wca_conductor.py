@@ -11,6 +11,7 @@ worktrees land in ``.claude/worktrees`` where the cleanup script expects them::
 
 Commands (admin-gated where they spend tokens / write branches):
 
+    /task <task>     auto-route: Claude-first; Codex only for small mechanical edits
     /claude <task>   dispatch a task to Claude Code, headless
     /codex  <task>   dispatch a task to Codex, headless
     /status          show the per-task table (read from real results)
@@ -74,6 +75,7 @@ def _help_text(manager: ConductorManager) -> str:
         "*WCA dev-conductor*",
         "Fan dev tasks out to headless agents — one worktree + branch + PR each.",
         "",
+        "`/task <task>` — auto-route (Claude-first; Codex for tiny mechanical edits)",
         "`/claude <task>` — dispatch to Claude Code",
         "`/codex <task>` — dispatch to Codex",
         "`/status` — per-task table",
@@ -159,6 +161,22 @@ class ConductorBot:
             % (record.id, engine, record.branch)
         )
 
+    def _dispatch_auto(self, arg: str, chat_id: str, user_id: str) -> str:
+        if not _is_admin(user_id, self.admin):
+            return "🚫 Not authorized to dispatch tasks."
+        task = arg.strip()
+        if not task:
+            return "Usage: `/task <task>`"
+        record = self.manager.submit_auto(task, chat_id=chat_id)
+        if record.status == TaskStatus.REJECTED.value:
+            return "🚫 `#%d` rejected: %s" % (record.id, record.error)
+        reason = "\nRoute: %s" % record.route_reason if record.route_reason else ""
+        return (
+            "🚀 `#%d` routed to *%s* on `%s`.%s\n"
+            "I'll post the PR link when it finishes. `/status` to track."
+            % (record.id, record.engine, record.branch, reason)
+        )
+
     def handle(self, message: Dict[str, object]) -> Optional[str]:
         text = str(message.get("text") or "").strip()
         if not text:
@@ -174,6 +192,8 @@ class ConductorBot:
             return _help_text(self.manager)
         if cmd == "/status":
             return self.manager.status_table()
+        if cmd == "/task":
+            return self._dispatch_auto(arg, chat_id, user_id)
         if cmd == "/claude":
             return self._dispatch(Engine.CLAUDE.value, arg, chat_id, user_id)
         if cmd == "/codex":
