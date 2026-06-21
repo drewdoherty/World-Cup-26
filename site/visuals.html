@@ -37,6 +37,18 @@
   .adv-gt .adv-pt { color: var(--text); font-weight: 600; }
   .adv-gt tr.adv-q .adv-tm { color: var(--accent); }
   .dim { color: var(--muted); }
+  /* edge⇄kelly matrix (shared with Scores & Markets; classes mirror scores.html) */
+  .adv-edge-leg { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 8px; font-size: 11px; color: var(--text-dim); align-items: center; }
+  .adv-edge-leg .d { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; vertical-align: -1px; }
+  .adv-edge-wrap { overflow-x: auto; }
+  .adv-edge-grid { display: grid; gap: 3px; min-width: 560px; }
+  .adv-edge-grid .eh { text-align: center; font-size: 9px; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); padding: 2px 0; }
+  .adv-edge-grid .et { display: flex; align-items: center; font-size: 11.5px; color: var(--text); padding-right: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .adv-edge-grid .ec { border-radius: 3px; padding: 6px 0; text-align: center; font-size: 11px; color: var(--text); font-variant-numeric: tabular-nums; }
+  .adv-edge-toggle { display: inline-flex; margin: 0 0 9px; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .adv-edge-toggle .adv-emode { background: transparent; border: 0; color: var(--text-dim); font: inherit; font-size: 10px; letter-spacing: .5px; text-transform: uppercase; padding: 3px 12px; cursor: pointer; }
+  .adv-edge-toggle .adv-emode + .adv-emode { border-left: 1px solid var(--border); }
+  .adv-edge-toggle .adv-emode.on { background: rgba(63,224,138,0.16); color: var(--accent); }
 </style>
 </head>
 <body>
@@ -61,16 +73,19 @@
          the progression chart + the model-vs-Polymarket table; group standings
          moved alongside it. -->
 
-    <!-- ===== Exhibit 1: Model Edge vs Polymarket // Advancement ===== -->
+    <!-- ===== Exhibit 1: Model Edge vs Polymarket // Advancement (live) =====
+         Renders the same live edge⇄kelly matrix as Scores & Markets, via the
+         shared adv_edge_matrix.js, fed from advancement_data.json. Not a PNG —
+         it reflects current model-vs-market state every time the data refreshes. -->
     <section class="panel">
       <div class="panel-head">
         <span class="panel-label">Exhibit 1 // Model Edge vs Polymarket // Advancement</span>
-        <span class="panel-meta">381 PM markets · live scoring</span>
+        <span class="panel-meta" id="adv-edge-meta"></span>
       </div>
       <div class="panel-body viz-grid">
-        <p class="viz-lead">Model's fee-adjusted edge over Polymarket prices by team and stage. <b style="color:var(--accent)">Green</b> = model rates team higher (value to back); <b style="color:var(--accent)">red</b> = model rates lower (fade). Cell intensity scales with size (stake volume). Updated as probabilities shift.</p>
-        <img src="./img/model-edge-vs-polymarket-advancement.png" alt="Model edge vs Polymarket by team and stage (GRP, R32, R16, QF, SF, FINAL, WIN)" class="viz-svg" style="border-radius: 4px; border: 1px solid #2a2f37;"/>
-        <p class="viz-note">model blend (Elo 50% + Dixon-Coles 50%) vs Shin-devigged Polymarket · 36 WC matches completed · edges persist through tournament progression</p>
+        <p class="viz-lead">Model's fee-adjusted edge over the <b style="color:var(--accent)">live</b> Polymarket price for every team reaching each stage. <b style="color:var(--accent)">Green</b> = model rates the team above the market (value to back); <b style="color:var(--accent)">red</b> = below (fade/lay). Switch to <b style="color:var(--accent)">kelly</b> for the recommended &frac14;-Kelly stake (% of the $1,310 PM pool, capped 5%). Reads <code>advancement_data.json</code> &mdash; never a snapshot.</p>
+        <div id="adv-edge"><div class="empty">Loading live edge matrix&hellip;</div></div>
+        <p class="viz-note" id="adv-edge-foot">model blend (Elo + Dixon-Coles) vs Shin-devigged Polymarket · regenerated each publish</p>
       </div>
     </section>
 
@@ -249,6 +264,7 @@
     <span class="foot-mark">WORLD CUP ALPHA</span>
   </footer>
 </div>
+<script src="./adv_edge_matrix.js"></script>
 <script src="./visuals.js"></script>
 </body>
 </html>
