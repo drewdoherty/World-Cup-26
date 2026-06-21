@@ -466,6 +466,15 @@
   // Improvement map per stage (§9).
   var IMPROVE = [
     {
+      stage: "Latest model decisions — Q&A (2026-06-21)",
+      items: [
+        "Blend vs Elo/DC agreement gate — KEEP the market-anchored blend, REJECT an agreement gate. Market-only scored best on the latest holdout (Brier ≈0.50, below the blend); Elo & DC agree on the favourite in 29 of 30 matches (only Ghana v Panama disagreed), so an agreement bucket is one row of noise — untrainable.",
+        "Is Elo useful — KEEP but improve. Its fitted blend weight is ≈0.00 (collinear with DC, which is stronger). External feeds (eloratings / FIFA / 538-SPI / Opta / ClubElo) are collinear, discontinued, paywalled or club-only. Fixes: cut neutral-venue home advantage, seed from the DC prior, grid-optimise K. The de-vigged market remains the best external source.",
+        "Polymarket edge — NOT in moneylines (efficient, arb-proven). It sits in thin, slow-to-resharpen advancement / outright markets (fee-adjusted gaps up to +21.1%). The sim is un-anchored, so these are conservative model-vs-market disagreements, not free money. Execute via the 5%-min-edge / longshot-cap / liquidity-floor / dedup / quarter-Kelly loop with the real repo caps.",
+        "Early-response backtest — NO EVIDENCE YET. The +14.42% ROI is one-match noise (Australia v Turkey); the high-edge cohort (≥20%, n=10) lost −6.9% and CLV is flat (−0.33%). True CLV vs Polymarket can't be computed without a PM price time-series (only ~9 unlabelled fills today) — fixing PM trade-logging is the prerequisite before any PM edge can be validated."
+      ]
+    },
+    {
       stage: "Ingestion",
       items: [
         "SHIPPED: cleaning overlay + 2-source (ESPN + TheSportsDB) verification → martj42_cleaned.csv, 3×/day CI.",
