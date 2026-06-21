@@ -171,7 +171,7 @@ _TAG_TOKEN = r"(?:account\s*[12]|acc[12]|a[12]|[12]|model|offer|punt)"
 _MONEY_RE = re.compile(
     r"^\s*(?:"
     r"[yn]\s+(?:bet|pm)-\d+"            # Y/N BET-<id> | Y/N PM-<n>
-    r"|(?:yes|no|y|n)(?:\s+" + _TAG_TOKEN + r")*"  # yes/no [+ tag overrides]
+    r"|(?:yes|no|y|n)(?:\s+" + _TAG_TOKEN + r")*(?:\s+venue\s*=\s*.*)?"  # yes/no [+ tags] [+ venue=<name>]
     r"|redeem\s+\S+"                   # REDEEM ALL | REDEEM <order_id>
     r")\s*$",
     re.IGNORECASE,
@@ -1119,6 +1119,7 @@ def resolve_tags(
     default_account: str = "1",
     default_source: str = "punt",
     allow_bare_account: bool = False,
+    allow_venue_override: bool = False,
 ) -> Dict[str, str]:
     """Parse account/source tags out of a screenshot caption or yes-reply.
 
@@ -1137,12 +1138,31 @@ def resolve_tags(
     "2". This is opt-in so caption text (which may contain stray digits like a
     stake) never false-matches an account.
 
+    With ``allow_venue_override=True`` (the yes-reply path), a trailing
+    ``venue=<name>`` token overrides the detected sportsbook, e.g.
+    ``yes a1 model venue=paddypower``. ``venue=`` MUST be the last token so a
+    multi-word name (``paddy power``) is captured whole; the canonical venue is
+    added under the ``"venue"`` key (omitted when no ``venue=`` token is given).
+
     Last matching token wins for each dimension. Returns
-    ``{"account": ..., "source": ...}``.
+    ``{"account": ..., "source": ...}`` (plus ``"venue"`` when overridden).
     """
     account = default_account
     source = default_source
-    t = " " + (text or "").lower() + " "
+    raw = text or ""
+    venue: Optional[str] = None
+    # ``venue=<name>`` (yes-reply path only) overrides the detected sportsbook.
+    # It must be the LAST token so a multi-word name is captured whole. Strip it
+    # out before account/source parsing so the venue name can never false-match
+    # an account digit or a source word (e.g. ``venue=punt arena``).
+    if allow_venue_override:
+        vm = re.search(r"\bvenue\s*=\s*(.*)$", raw, flags=re.IGNORECASE)
+        if vm:
+            name = vm.group(1).strip()
+            if name:
+                venue = _canon_platform(name)
+            raw = raw[: vm.start()]
+    t = " " + raw.lower() + " "
     bare2 = bare1 = False
     if allow_bare_account:
         # Strip the leading verb so ``yes``/``y`` is never read as a token, then
@@ -1160,7 +1180,10 @@ def resolve_tags(
         source = "offer"
     elif re.search(r"\bpunt\b", t):
         source = "punt"
-    return {"account": account, "source": source}
+    result = {"account": account, "source": source}
+    if venue is not None:
+        result["venue"] = venue
+    return result
 
 
 _SOURCE_WORD = {"model": "model", "offer": "offer", "punt": "punt"}
@@ -1204,12 +1227,14 @@ def _format_extracted(bets: List[Any], tags: Optional[Dict[str, str]] = None) ->
         src = _SOURCE_WORD.get(tags.get("source", "punt"), tags.get("source", "punt"))
         lines.append(
             "\nTags: account *%s* | source *%s*  "
-            "(override in your reply, e.g. `yes a2 offer`)" % (acct, src)
+            "(override in your reply, e.g. `yes a2 offer venue=bet365`)" % (acct, src)
         )
     lines.append(
         "\nReply *yes* to log all to the ledger, *no* to discard. "
         "Tag the reply to set provenance, e.g. `yes 2 offer` / `yes punt` "
-        "(account `1`/`2`, source `model`/`offer`/`punt`; default 1 / punt)."
+        "(account `1`/`2`, source `model`/`offer`/`punt`; default 1 / punt). "
+        "Override the venue (sportsbooks only) with `venue=<name>` as the *last* "
+        "token, e.g. `yes a1 model venue=paddypower`."
     )
     return "\n".join(lines)
 
@@ -1316,15 +1341,36 @@ def handle_photo_confirmation(
         default_account=parked_tags.get("account", "1"),
         default_source=parked_tags.get("source", "punt"),
         allow_bare_account=True,
+        allow_venue_override=True,
     )
     account = tags["account"]
     source = tags["source"]
+    # ``venue=<name>`` repoints the bet's platform — sportsbooks ONLY. An
+    # override resolving to a prediction market (Polymarket/Kalshi) is rejected
+    # so a betslip reply can never mislabel an on-chain venue as a sportsbook.
+    venue_override = tags.get("venue")
+    reject_note = ""
+    if venue_override and _venue_of(venue_override) != "sportsbook":
+        reject_note = (
+            "\n⚠️ Ignored `venue=%s` — venue override is for sportsbooks only "
+            "(not Polymarket/Kalshi)." % venue_override
+        )
+        venue_override = None
 
     if ts_utc is None:
         ts_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
     logged: List[str] = []
+    venue_applied = False
     for b in bets:
         match_id = "MANUAL_" + _slug(b.match_desc)
+        # Apply the venue override only to sportsbook bets (a screenshot slip is
+        # virtually always one); a non-sportsbook detected venue is left as-is.
+        detected_platform = _canon_platform(b.bookmaker or "unknown")
+        if venue_override and _venue_of(detected_platform) == "sportsbook":
+            platform = venue_override
+            venue_applied = True
+        else:
+            platform = detected_platform
         # A combo (Bet Builder / accumulator) is ONE bet at ONE combined price
         # with ONE total stake; its leg breakdown lives in notes, never as extra
         # rows. Tag offer/free bets "SNR" (stake-not-returned) so the /bets and
@@ -1338,6 +1384,8 @@ def handle_photo_confirmation(
             extra.append(combo_notes)
         if source == "offer" or getattr(b, "is_free_bet", False):
             extra.append("SNR")
+        if platform != detected_platform:
+            extra.append("venue_override=%s" % platform)
         note = "screenshot ingest; currency=%s; conf %.2f%s%s" % (
             getattr(b, "currency", None) or "GBP",
             getattr(b, "confidence", 0.0),
@@ -1351,7 +1399,7 @@ def handle_photo_confirmation(
                 b.match_desc,
                 b.market or "unknown",
                 b.selection,
-                _canon_platform(b.bookmaker or "unknown"),
+                platform,
                 float(b.decimal_odds or 0.0),
                 float(b.stake or 0.0),
                 notes=note,
@@ -1364,8 +1412,9 @@ def handle_photo_confirmation(
             logged.append("ERR %s: %s" % (b.selection, exc))
     _autosync(db_path, "screenshot ingest")
     a2 = " (A2)" if account == "2" else ""
-    return "Logged %d to the ledger [%s%s]:\n%s" % (
-        len(logged), source, a2, "\n".join(logged)
+    venue_note = ("\n📍 Venue → *%s*." % venue_override) if venue_applied else ""
+    return "Logged %d to the ledger [%s%s]:\n%s%s%s" % (
+        len(logged), source, a2, "\n".join(logged), venue_note, reject_note
     )
 
 

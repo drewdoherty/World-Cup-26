@@ -85,6 +85,56 @@ def test_bare_digit_not_matched_in_captions():
     assert app.resolve_tags("stake 2 units offer")["account"] == "1"
 
 
+# ---------------------------------------------------------------------------
+# venue= override parsing (yes-reply path only).
+# ---------------------------------------------------------------------------
+
+def test_resolve_tags_no_venue_key_without_flag():
+    # The venue key is only emitted on the opt-in yes-reply path.
+    assert "venue" not in app.resolve_tags("yes venue=bet365", allow_bare_account=True)
+
+
+def test_resolve_tags_venue_override_basic():
+    tags = app.resolve_tags("yes venue=paddypower", allow_venue_override=True)
+    assert tags == {"account": "1", "source": "punt", "venue": "Paddy Power"}
+
+
+def test_resolve_tags_venue_with_account_and_source():
+    tags = app.resolve_tags(
+        "yes a2 model venue=bet365", allow_bare_account=True, allow_venue_override=True
+    )
+    # _canon_platform title-cases an unmapped lowercase name (bet365 -> Bet365).
+    assert tags == {"account": "2", "source": "model", "venue": "Bet365"}
+
+
+def test_resolve_tags_venue_multiword_captured_whole():
+    # venue= is the last token, so a multi-word name is captured intact.
+    tags = app.resolve_tags("yes a1 venue=paddy power", allow_venue_override=True)
+    assert tags["venue"] == "Paddy Power"
+
+
+def test_resolve_tags_venue_name_does_not_pollute_account_source():
+    # Tokens inside the venue name must NOT set account/source — the venue span
+    # is stripped before tag parsing.
+    tags = app.resolve_tags(
+        "yes venue=punters 2 bar", allow_bare_account=True, allow_venue_override=True
+    )
+    assert tags["account"] == "1" and tags["source"] == "punt"
+    assert tags["venue"] == "Punters 2 Bar"
+
+
+def test_resolve_tags_empty_venue_token_is_no_override():
+    # `yes venue=` (no name) -> no venue key, logs against the detected venue.
+    assert "venue" not in app.resolve_tags("yes venue=", allow_venue_override=True)
+
+
+def test_venue_reply_is_a_money_action():
+    # A venue= yes-reply still writes the ledger, so it must stay admin-gated.
+    assert app._is_money_action("yes a1 model venue=paddypower")
+    assert app._is_money_action("yes venue=paddy power")
+    assert app._is_money_action("yes venue=")
+
+
 def test_resolve_tags_does_not_falsematch_words():
     # 'a2'/'acc2' must be word-bounded; embedded substrings should not trip.
     assert app.resolve_tags("data2base")["account"] == "1"
@@ -195,6 +245,70 @@ def test_confirmation_bare_digit_account_override(tmp_path):
     row = con.execute("select account, source from bets").fetchone()
     con.close()
     assert row == ("2", "offer")
+
+
+def test_confirmation_venue_override_persists_platform(tmp_path):
+    db = str(tmp_path / "t.db")
+    pending = {7: [_bet(bookmaker="bet365")]}
+    ptags = {7: {"account": "1", "source": "punt"}}
+    out = app.handle_photo_confirmation("yes a1 model venue=paddypower", 7, db, pending,
+                                        pending_tags=ptags, ts_utc="2026-06-11T18:00:00")
+    assert "Venue" in out and "Paddy Power" in out
+    con = sqlite3.connect(db)
+    row = con.execute("select platform, account, source, notes from bets").fetchone()
+    con.close()
+    assert row[0] == "Paddy Power"          # overridden venue
+    assert row[1] == "1" and row[2] == "model"
+    assert "venue_override=Paddy Power" in row[3]
+
+
+def test_confirmation_venue_override_only_keeps_detected_tags(tmp_path):
+    db = str(tmp_path / "t.db")
+    pending = {7: [_bet(bookmaker="bet365")]}
+    ptags = {7: {"account": "2", "source": "offer"}}
+    # venue= alone must not disturb the parked account/source.
+    app.handle_photo_confirmation("yes venue=skybet", 7, db, pending,
+                                  pending_tags=ptags, ts_utc="2026-06-11T18:00:00")
+    con = sqlite3.connect(db)
+    row = con.execute("select platform, account, source from bets").fetchone()
+    con.close()
+    assert row == ("Sky Bet", "2", "offer")
+
+
+def test_confirmation_rejects_prediction_market_venue(tmp_path):
+    db = str(tmp_path / "t.db")
+    pending = {7: [_bet(bookmaker="bet365")]}
+    ptags = {7: {"account": "1", "source": "punt"}}
+    out = app.handle_photo_confirmation("yes venue=polymarket", 7, db, pending,
+                                        pending_tags=ptags, ts_utc="2026-06-11T18:00:00")
+    assert "sportsbooks only" in out
+    con = sqlite3.connect(db)
+    row = con.execute("select platform from bets").fetchone()
+    con.close()
+    assert row[0] == "Bet365"               # detected venue kept, override ignored
+
+
+def test_confirmation_empty_venue_override_logs_detected(tmp_path):
+    db = str(tmp_path / "t.db")
+    pending = {7: [_bet(bookmaker="bet365")]}
+    ptags = {7: {"account": "1", "source": "punt"}}
+    out = app.handle_photo_confirmation("yes venue=", 7, db, pending,
+                                        pending_tags=ptags, ts_utc="2026-06-11T18:00:00")
+    assert "Venue" not in out               # no override applied
+    con = sqlite3.connect(db)
+    row = con.execute("select platform from bets").fetchone()
+    con.close()
+    assert row[0] == "Bet365"
+
+
+def test_order_confirm_precedence_over_venue_token(tmp_path):
+    # `y pm-1 ...` is an order confirm — never a betslip reply, even with venue=.
+    db = str(tmp_path / "t.db")
+    pending = {7: [_bet()]}
+    ptags = {7: {"account": "1", "source": "punt"}}
+    out = app.handle_photo_confirmation("y pm-1 venue=bet365", 7, db, pending,
+                                        pending_tags=ptags)
+    assert out is None and 7 in pending     # slip stays parked, deferred to order handler
 
 
 @pytest.mark.parametrize("reply", ["yes", "yes 2", "yes 2 punt", "yes punt 2", "no offer"])
