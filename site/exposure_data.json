@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-21 03:59:52 UTC"
+    "generated": "2026-06-21 05:00:19 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -9,15 +9,14 @@
     "p_profit": 0,
     "p_loss": 0,
     "p_big_win": 0,
-    "n_scenarios": 243
+    "n_scenarios": 81
   },
   "correlation": {
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0089,
+        "prob": 0.0592,
         "results": [
-          "Tunisia",
           "Spain",
           "Belgium",
           "Uruguay",
@@ -26,9 +25,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0134,
+        "prob": 0.0891,
         "results": [
-          "Tunisia",
           "Spain",
           "Belgium",
           "Uruguay",
@@ -37,9 +35,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0302,
+        "prob": 0.2005,
         "results": [
-          "Tunisia",
           "Spain",
           "Belgium",
           "Uruguay",
@@ -48,9 +45,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0031,
+        "prob": 0.0203,
         "results": [
-          "Tunisia",
           "Spain",
           "Belgium",
           "Draw",
@@ -59,9 +55,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0046,
+        "prob": 0.0305,
         "results": [
-          "Tunisia",
           "Spain",
           "Belgium",
           "Draw",
@@ -72,9 +67,8 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0089,
+        "prob": 0.0592,
         "results": [
-          "Tunisia",
           "Spain",
           "Belgium",
           "Uruguay",
@@ -83,9 +77,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0134,
+        "prob": 0.0891,
         "results": [
-          "Tunisia",
           "Spain",
           "Belgium",
           "Uruguay",
@@ -94,9 +87,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0302,
+        "prob": 0.2005,
         "results": [
-          "Tunisia",
           "Spain",
           "Belgium",
           "Uruguay",
@@ -108,12 +100,30 @@
   },
   "fixtures": [
     {
-      "fixture": "Tunisia vs Japan",
-      "kickoff": "2026-06-21T04:00:00+00:00",
+      "fixture": "Spain vs Saudi Arabia",
+      "kickoff": "2026-06-21T16:00:00+00:00",
       "results": [
         {
-          "outcome": "Tunisia",
-          "prob": 0.1508,
+          "outcome": "Spain",
+          "prob": 0.8602,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "Spain",
+            "best_venue": "smarkets",
+            "best_odds": 1.13,
+            "model_prob": 0.8602,
+            "ev_pct": -2.8,
+            "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
+          }
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.1039,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -121,40 +131,13 @@
           "live": []
         },
         {
-          "outcome": "Draw",
-          "prob": 0.2385,
+          "outcome": "Saudi Arabia",
+          "prob": 0.036,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
-          "blindspot": true,
-          "live": [],
-          "plug": {
-            "available": true,
-            "outcome": "Draw",
-            "best_venue": "smarkets",
-            "best_odds": 4.5,
-            "model_prob": 0.2385,
-            "ev_pct": 7.3,
-            "recommendation": "PLUG: +EV to back (7.3% edge) \u2014 fills the gap and adds value"
-          }
-        },
-        {
-          "outcome": "Japan",
-          "prob": 0.6107,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": true,
-          "live": [],
-          "plug": {
-            "available": true,
-            "outcome": "Japan",
-            "best_venue": "betfair_ex_uk",
-            "best_odds": 1.5,
-            "model_prob": 0.6107,
-            "ev_pct": -8.4,
-            "recommendation": "LEAVE UNHEDGED: plugging costs 8.4% EV \u2014 take the variance"
-          }
+          "blindspot": false,
+          "live": []
         }
       ],
       "events": [
@@ -178,50 +161,9 @@
       "summary": {
         "max_win": 0.0,
         "stake_at_risk": 0,
-        "best_outcome": "Tunisia",
-        "worst_outcome": "Tunisia",
-        "n_blindspots": 2
-      }
-    },
-    {
-      "fixture": "Spain vs Saudi Arabia",
-      "kickoff": "2026-06-21T16:00:00+00:00",
-      "results": [
-        {
-          "outcome": "Spain",
-          "prob": 0.859,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Draw",
-          "prob": 0.104,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Saudi Arabia",
-          "prob": 0.037,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        }
-      ],
-      "events": [],
-      "summary": {
-        "max_win": 0.0,
-        "stake_at_risk": 0,
         "best_outcome": "Spain",
         "worst_outcome": "Spain",
-        "n_blindspots": 0
+        "n_blindspots": 1
       }
     },
     {
@@ -271,7 +213,7 @@
       "results": [
         {
           "outcome": "Uruguay",
-          "prob": 0.6639,
+          "prob": 0.6646,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -280,7 +222,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2278,
+          "prob": 0.2276,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -289,7 +231,7 @@
         },
         {
           "outcome": "Cape Verde",
-          "prob": 0.1084,
+          "prob": 0.1078,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -312,7 +254,7 @@
       "results": [
         {
           "outcome": "New Zealand",
-          "prob": 0.17,
+          "prob": 0.1697,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -321,7 +263,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2546,
+          "prob": 0.2555,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -330,7 +272,7 @@
         },
         {
           "outcome": "Egypt",
-          "prob": 0.5755,
+          "prob": 0.5748,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -350,33 +292,18 @@
   ],
   "blindspots": [
     {
-      "fixture": "Tunisia vs Japan",
-      "outcome": "Japan",
-      "prob": 0.6107,
+      "fixture": "Spain vs Saudi Arabia",
+      "outcome": "Spain",
+      "prob": 0.8602,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
-        "outcome": "Japan",
-        "best_venue": "betfair_ex_uk",
-        "best_odds": 1.5,
-        "model_prob": 0.6107,
-        "ev_pct": -8.4,
-        "recommendation": "LEAVE UNHEDGED: plugging costs 8.4% EV \u2014 take the variance"
-      }
-    },
-    {
-      "fixture": "Tunisia vs Japan",
-      "outcome": "Draw",
-      "prob": 0.2385,
-      "net_pnl": 0.0,
-      "plug": {
-        "available": true,
-        "outcome": "Draw",
+        "outcome": "Spain",
         "best_venue": "smarkets",
-        "best_odds": 4.5,
-        "model_prob": 0.2385,
-        "ev_pct": 7.3,
-        "recommendation": "PLUG: +EV to back (7.3% edge) \u2014 fills the gap and adds value"
+        "best_odds": 1.13,
+        "model_prob": 0.8602,
+        "ev_pct": -2.8,
+        "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     }
   ],

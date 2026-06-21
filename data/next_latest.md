@@ -1,23 +1,23 @@
-<!-- generated: 2026-06-21T03:36:31 -->
-⚽ *Next match* — Tunisia vs Japan
-Kickoff 2026-06-21 04:00:00+00:00
+<!-- generated: 2026-06-21T04:40:13 -->
+⚽ *Next match* — Spain vs Saudi Arabia
+Kickoff 2026-06-21 16:00:00+00:00
 
 *Winner* (model blend)
-  Tunisia         15.1%  fair 6.63  best 9.20 (betfair_ex_uk) +38.7% ✅  £17.72
-  Draw            23.8%  fair 4.19  best 4.70 (betfair_ex_uk) +12.1% ✅  £12.25
-  Japan           61.1%  fair 1.64  best 1.46 (betfair_ex_uk) -10.8%
+  Spain           86.0%  fair 1.16  best 1.13 (betfair_ex_uk) -2.8%
+  Draw            10.4%  fair 9.63  best 12.00 (skybet) +24.6% ✅  £8.40
+  Saudi Arabia     3.6%  fair 27.79  best 32.00 (betfair_ex_uk) +15.1% ✅  £1.83
   _stake = ¼-Kelly @ £1500 bankroll (+EV picks)_
 
-*Corners* (model, exp 8.1)
-  O/U 8.5: over 42.1% / under 57.9%  fair 2.38 / 1.73
+*Corners* (model, exp 8.8)
+  O/U 8.5: over 51.0% / under 49.0%  fair 1.96 / 2.04
 
 *Anytime scorer* (best book price, vig in)
-  Koki Ogawa          2.30 (William Hill)  imp 43%
-  Kento Shiogai       2.45 (William Hill)  imp 41%
-  Ayase Ueda          2.58 (Betfair)  imp 39%
-  Keisuke Goto        2.60 (William Hill)  imp 38%
-  Daizen Maeda        3.00 (William Hill)  imp 33%
+  Mikel Oyarzabal     1.80 (Betfair)  imp 56%
+  Borja Iglesias      1.92 (Betfair)  imp 52%
+  Lamine Yamal        1.96 (Betfair)  imp 51%
+  Ferran Torres Garc  2.14 (Betfair)  imp 47%
+  Nico Williams       2.25 (William Hill)  imp 44%
 
 *Scorelines* (top 6)
-0-1 20.2% | 0-2 13.1% | 1-2 11.0% | 1-1 10.6% | 0-0 10.3% | 1-0 6.1%
-  O/U 2.5: over 37.0% / under 63.0%   BTTS 39.1%
+2-0 17.9% | 1-0 14.6% | 3-0 14.3% | 4-0 8.5% | 2-1 8.0% | 3-1 6.4%
+  O/U 2.5: over 56.3% / under 43.7%   BTTS 31.6%
