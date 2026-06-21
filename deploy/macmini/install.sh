@@ -32,6 +32,10 @@ cmd_for() {
     buildcard)  printf '%s\n' "$RUN1" buildcard "$VENV_PY" scripts/wca_build_card.py --db data/wca.db --env .env --hours-ahead 30 --skip-scorers ;;
     autopull)   printf '%s\n' "/bin/bash" "$HERE/autopull.sh" ;;
     backup)     printf '%s\n' "/bin/bash" "$HERE/backup.sh" ;;
+    pmpropose)    printf '%s\n' "$RUN1" pmpropose    "$VENV_PY" scripts/wca_pm_propose.py    --db data/wca.db --env .env ;;
+    pmredeem)     printf '%s\n' "$RUN1" pmredeem     "$VENV_PY" scripts/wca_pm_redeem.py     --db data/wca.db --env .env --notify ;;
+    closecapture) printf '%s\n' "$RUN1" closecapture "$VENV_PY" scripts/wca_close_capture.py --db data/wca.db ;;
+    publish)      printf '%s\n' "/bin/bash" "$REPO_ROOT/deploy/publish_site.sh" ;;
     *) echo "unknown service $1" >&2; return 1 ;;
   esac
 }
