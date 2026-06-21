@@ -478,3 +478,19 @@ def test_submit_auto_routes_to_codex_when_claude_down(tmp_path, monkeypatch):
     rec = mgr.submit_auto("write a research report on the model")
     assert rec.engine == "codex"
     assert rec.status != TaskStatus.REJECTED.value
+
+
+# -- worktree creation is serialized (regression: concurrent `git worktree add`) -
+
+
+def test_create_worktree_holds_worktree_lock(cfg, monkeypatch):
+    seen = {}
+
+    def fake(cmd, cwd=None, env=None, timeout=None):
+        if "worktree" in cmd and "add" in cmd:
+            seen["locked"] = runner._WORKTREE_LOCK.locked()
+        return _cp(cmd)
+
+    monkeypatch.setattr(runner, "_run", fake)
+    runner.create_worktree(cfg, "conductor/x", "leaf")
+    assert seen.get("locked") is True, "git worktree add must run under _WORKTREE_LOCK"
