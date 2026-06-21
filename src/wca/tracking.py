@@ -938,6 +938,9 @@ def build_tracking_data(
             "ev": b.get("ev"),
             # Currency for the per-bet P&L tooltip (Polymarket settles in USD).
             "ccy": "$" if str(b.get("platform") or "").lower() == "polymarket" else "£",
+            # Settlement timestamp (fallback to placement) for the time axis on
+            # the return-per-unit chart.
+            "ts": b.get("settled_ts") or b.get("ts_utc"),
         }
         for b in settled
     ]

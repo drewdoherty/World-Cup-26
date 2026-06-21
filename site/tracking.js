@@ -708,6 +708,136 @@
     }
   }
 
+  // ---- 6. Return per unit staked over time --------------------------------
+
+  // Polymarket advancement/knockout (tournament-progression / outright) vs
+  // 1X2-match. Sportsbook (£) is its own series. Matches the desk's split.
+  var _ADV_RE = /reach|eliminat|round of| r16| r32|quarter|semi|golden boot|top scorer|win the world cup|to lift|advance|qualif|group winner|champion|outright/;
+  function betKind(b) {
+    if ((b.ccy || "£") !== "$") return "sb";
+    var s = ((b.market || "") + " " + (b.match || "") + " " + (b.selection || "")).toLowerCase();
+    return _ADV_RE.test(s) ? "pm_adv" : "pm_match";
+  }
+  function _parseTs(ts) {
+    if (!ts) return null;
+    var s = String(ts).replace(" ", "T");
+    if (!/[zZ]|[+\-]\d\d:?\d\d$/.test(s)) s += "Z";
+    var t = Date.parse(s);
+    return isNaN(t) ? null : t;
+  }
+  var _MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function _dayLabel(t) { var dt = new Date(t); return _MON[dt.getUTCMonth()] + " " + dt.getUTCDate(); }
+  function _pctRoi(roi) { return (roi >= 0 ? "+" : "") + Math.round(roi * 100) + "%"; }
+  function _pctile(sorted, q) {
+    if (!sorted.length) return 0;
+    return sorted[Math.min(sorted.length - 1, Math.max(0, Math.round(q * (sorted.length - 1))))];
+  }
+
+  // Cumulative net return per unit staked (running pl / running stake), per
+  // series, over the settled history (ordered by settlement time).
+  function _retSeries(d) {
+    var bets = (d.bets || []).filter(function (b) {
+      return b.pl !== null && b.pl !== undefined && !isNaN(b.pl) && Number(b.stake) > 0;
+    }).slice().sort(function (a, b) {
+      return (_parseTs(a.ts) || a.id || 0) - (_parseTs(b.ts) || b.id || 0);
+    });
+    var acc = { sb: { cw: 0, cp: 0, pts: [] }, pm_match: { cw: 0, cp: 0, pts: [] }, pm_adv: { cw: 0, cp: 0, pts: [] } };
+    bets.forEach(function (b) {
+      var s = acc[betKind(b)];
+      s.cw += Number(b.stake) || 0;
+      s.cp += Number(b.pl) || 0;
+      s.pts.push({ t: _parseTs(b.ts), roi: s.cw > 0 ? s.cp / s.cw : 0, pl: s.cp, wag: s.cw, n: s.pts.length + 1 });
+    });
+    return acc;
+  }
+
+  function _retTip(label, ccy, p) {
+    var lines = [label + "  (bet " + p.n + ")"];
+    if (p.t != null) lines.push(_dayLabel(p.t));
+    lines.push("return: " + _pctRoi(p.roi) + " per " + ccy + "1");
+    lines.push("cum P/L: " + (p.pl >= 0 ? "+" : "−") + ccy + Math.abs(p.pl).toFixed(2) +
+      "  /  wagered " + ccy + p.wag.toFixed(2));
+    return lines.join("\n");
+  }
+
+  // Scatter joined by lines: cumulative return per unit, 3 series. Y-axis is
+  // clamped to the bulk (early small-sample ROI clips at the top).
+  function retChartSVG(acc) {
+    var series = [
+      { key: "sb", color: "#3fe08a", ccy: "£", label: "sportsbook (£)" },
+      { key: "pm_match", color: "#60a5fa", ccy: "$", label: "PM 1X2 / match ($)" },
+      { key: "pm_adv", color: "#f2c14e", ccy: "$", label: "PM advancement / knockout ($)" }
+    ];
+    var all = [];
+    series.forEach(function (s) { (acc[s.key].pts || []).forEach(function (p) { if (p.t != null) all.push(p); }); });
+    if (!all.length) return '<div class="empty">No settled bets yet</div>';
+    var ts = all.map(function (p) { return p.t; });
+    var tmin = Math.min.apply(null, ts), tmax = Math.max.apply(null, ts);
+    if (tmax <= tmin) tmax = tmin + 1;
+    var roisSorted = all.map(function (p) { return p.roi; }).sort(function (a, b) { return a - b; });
+    var yhi = _pctile(roisSorted, 0.90), ylo = _pctile(roisSorted, 0.03);
+    series.forEach(function (s) { var pts = acc[s.key].pts; if (pts.length) { var v = pts[pts.length - 1].roi; if (v > yhi) yhi = v; if (v < ylo) ylo = v; } });
+    if (yhi < 0) yhi = 0;
+    if (ylo > 0) ylo = 0;
+    var pad = (yhi - ylo) * 0.1 || 0.1, ymax = yhi + pad, ymin = ylo - pad;
+    var W = 720, H = 300, P = { l: 52, r: 116, t: 16, b: 38 };
+    var plotW = W - P.l - P.r, plotH = H - P.t - P.b;
+    function px(t) { return P.l + (t - tmin) / (tmax - tmin) * plotW; }
+    function pyRaw(y) { return P.t + (1 - (y - ymin) / (ymax - ymin)) * plotH; }
+    function py(y) { return Math.max(P.t, Math.min(P.t + plotH, pyRaw(y))); }
+    var out = ['<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" class="tr-barsvg">'];
+    for (var g = Math.ceil(ymin / 0.25) * 0.25; g <= ymax + 1e-9; g += 0.25) {
+      var yy = pyRaw(g), zero = Math.abs(g) < 1e-9;
+      out.push('<line class="' + (zero ? "cx-axis" : "cx-grid") + '" x1="' + P.l + '" y1="' + yy.toFixed(1) + '" x2="' + (W - P.r) + '" y2="' + yy.toFixed(1) + '"/>');
+      out.push('<text class="cx-tick" x="' + (P.l - 7) + '" y="' + (yy + 3).toFixed(1) + '" text-anchor="end">' + (g > 0 ? "+" : "") + Math.round(g * 100) + '%</text>');
+    }
+    var seen = {};
+    all.slice().sort(function (a, b) { return a.t - b.t; }).forEach(function (p) {
+      var day = _dayLabel(p.t);
+      if (seen[day]) return;
+      seen[day] = 1;
+      var x = px(p.t);
+      out.push('<line class="cx-grid" x1="' + x.toFixed(1) + '" y1="' + P.t + '" x2="' + x.toFixed(1) + '" y2="' + (H - P.b) + '" opacity="0.5"/>');
+      out.push('<text class="cx-tick" x="' + x.toFixed(1) + '" y="' + (H - P.b + 14) + '" text-anchor="middle">' + esc(day) + '</text>');
+    });
+    series.forEach(function (s) {
+      var pts = (acc[s.key].pts || []).filter(function (p) { return p.t != null; });
+      if (!pts.length) return;
+      out.push('<polyline points="' + pts.map(function (p) { return px(p.t).toFixed(1) + "," + py(p.roi).toFixed(1); }).join(" ") +
+        '" fill="none" stroke="' + s.color + '" stroke-width="1.8" opacity="0.9"/>');
+      pts.forEach(function (p) {
+        out.push('<circle cx="' + px(p.t).toFixed(1) + '" cy="' + py(p.roi).toFixed(1) + '" r="2.4" fill="' + s.color +
+          '"><title>' + esc(_retTip(s.label, s.ccy, p)) + '</title></circle>');
+      });
+      var last = pts[pts.length - 1];
+      out.push('<text x="' + (px(last.t) + 6).toFixed(1) + '" y="' + (py(last.roi) + 3).toFixed(1) + '" fill="' + s.color + '" font-size="10" font-weight="600">' + _pctRoi(last.roi) + '</text>');
+    });
+    series.forEach(function (s, i) {
+      var n = (acc[s.key].pts || []).length;
+      var lab = s.label + " — " + (n ? n + " bets" : "0 settled");
+      var yo = P.t + 2 + i * 14;
+      out.push('<rect x="' + (P.l + 6) + '" y="' + yo + '" width="9" height="9" fill="' + s.color + '"/>' +
+        '<text x="' + (P.l + 19) + '" y="' + (yo + 9) + '" fill="#d4dae0" font-size="10">' + esc(lab) + '</text>');
+    });
+    out.push('</svg>');
+    return out.join("");
+  }
+
+  function renderReturnPerUnit(d) {
+    var acc = _retSeries(d);
+    var nsb = acc.sb.pts.length, npm = acc.pm_match.pts.length + acc.pm_adv.pts.length;
+    if (!(nsb || npm)) {
+      $("retunit").innerHTML = '<div class="empty">No settled bets yet</div>';
+      $("retunit-meta").textContent = "";
+      return;
+    }
+    $("retunit").innerHTML = retChartSVG(acc) +
+      '<div class="vt-note">Cumulative net return per £1 / $1 staked (settled P/L ÷ stake) over the full ' +
+      'betting history, split by venue and bet type. Hover a point for the running figure. The y-axis is ' +
+      'clamped to keep the lines legible — an early small-sample sportsbook ROI spike clips at the top.</div>';
+    $("retunit-meta").textContent = nsb + " £ · " + npm + " $ settled";
+  }
+
   function render(d) {
     renderStats(d);
     renderOutcomeBars(d);
@@ -715,6 +845,7 @@
     renderCalibration(d);
     renderClvPl(d);
     renderBetPnl(d);
+    renderReturnPerUnit(d);
     renderPending(d);
     renderFooter(d);
   }
