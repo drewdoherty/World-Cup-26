@@ -710,13 +710,10 @@
 
   // ---- 6. Return per unit staked over time --------------------------------
 
-  // Polymarket advancement/knockout (tournament-progression / outright) vs
-  // 1X2-match. Sportsbook (£) is its own series. Matches the desk's split.
-  var _ADV_RE = /reach|eliminat|round of| r16| r32|quarter|semi|golden boot|top scorer|win the world cup|to lift|advance|qualif|group winner|champion|outright/;
+  // Two venues: sportsbook settles in £, Polymarket in $. One line each, matching
+  // the approved mockup ("return for every £1 / $1 wagered").
   function betKind(b) {
-    if ((b.ccy || "£") !== "$") return "sb";
-    var s = ((b.market || "") + " " + (b.match || "") + " " + (b.selection || "")).toLowerCase();
-    return _ADV_RE.test(s) ? "pm_adv" : "pm_match";
+    return (b.ccy || "£") === "$" ? "pm" : "sb";
   }
   function _parseTs(ts) {
     if (!ts) return null;
@@ -727,10 +724,11 @@
   }
   var _MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   function _dayLabel(t) { var dt = new Date(t); return _MON[dt.getUTCMonth()] + " " + dt.getUTCDate(); }
-  function _pctRoi(roi) { return (roi >= 0 ? "+" : "") + Math.round(roi * 100) + "%"; }
-  function _pctile(sorted, q) {
-    if (!sorted.length) return 0;
-    return sorted[Math.min(sorted.length - 1, Math.max(0, Math.round(q * (sorted.length - 1))))];
+  function _money(ccy, v) { return (v >= 0 ? "+" : "−") + ccy + Math.abs(v).toFixed(2); }
+  function _niceStep(range) {
+    var raw = (range || 1) / 5, mag = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10));
+    var n = raw / mag;
+    return ((n >= 5 ? 5 : n >= 2 ? 2 : 1) * mag) || 0.25;
   }
 
   // Cumulative net return per unit staked (running pl / running stake), per
@@ -741,7 +739,7 @@
     }).slice().sort(function (a, b) {
       return (_parseTs(a.ts) || a.id || 0) - (_parseTs(b.ts) || b.id || 0);
     });
-    var acc = { sb: { cw: 0, cp: 0, pts: [] }, pm_match: { cw: 0, cp: 0, pts: [] }, pm_adv: { cw: 0, cp: 0, pts: [] } };
+    var acc = { sb: { cw: 0, cp: 0, pts: [] }, pm: { cw: 0, cp: 0, pts: [] } };
     bets.forEach(function (b) {
       var s = acc[betKind(b)];
       s.cw += Number(b.stake) || 0;
@@ -754,19 +752,18 @@
   function _retTip(label, ccy, p) {
     var lines = [label + "  (bet " + p.n + ")"];
     if (p.t != null) lines.push(_dayLabel(p.t));
-    lines.push("return: " + _pctRoi(p.roi) + " per " + ccy + "1");
-    lines.push("cum P/L: " + (p.pl >= 0 ? "+" : "−") + ccy + Math.abs(p.pl).toFixed(2) +
-      "  /  wagered " + ccy + p.wag.toFixed(2));
+    lines.push("return: " + _money(ccy, p.roi) + " per " + ccy + "1");
+    lines.push("cum P/L: " + _money(ccy, p.pl) + "  /  wagered " + ccy + p.wag.toFixed(2));
     return lines.join("\n");
   }
 
-  // Scatter joined by lines: cumulative return per unit, 3 series. Y-axis is
-  // clamped to the bulk (early small-sample ROI clips at the top).
+  // Scatter joined by lines: cumulative net return per unit, 2 series (£ / $).
+  // Full range (option A) — the early small-sample sportsbook spike shows in full;
+  // y-axis is in decimal currency per unit staked, break-even on the zero line.
   function retChartSVG(acc) {
     var series = [
       { key: "sb", color: "#3fe08a", ccy: "£", label: "sportsbook (£)" },
-      { key: "pm_match", color: "#60a5fa", ccy: "$", label: "PM 1X2 / match ($)" },
-      { key: "pm_adv", color: "#f2c14e", ccy: "$", label: "PM advancement / knockout ($)" }
+      { key: "pm", color: "#60a5fa", ccy: "$", label: "polymarket ($)" }
     ];
     var all = [];
     series.forEach(function (s) { (acc[s.key].pts || []).forEach(function (p) { if (p.t != null) all.push(p); }); });
@@ -774,22 +771,21 @@
     var ts = all.map(function (p) { return p.t; });
     var tmin = Math.min.apply(null, ts), tmax = Math.max.apply(null, ts);
     if (tmax <= tmin) tmax = tmin + 1;
-    var roisSorted = all.map(function (p) { return p.roi; }).sort(function (a, b) { return a - b; });
-    var yhi = _pctile(roisSorted, 0.90), ylo = _pctile(roisSorted, 0.03);
-    series.forEach(function (s) { var pts = acc[s.key].pts; if (pts.length) { var v = pts[pts.length - 1].roi; if (v > yhi) yhi = v; if (v < ylo) ylo = v; } });
+    var rois = all.map(function (p) { return p.roi; });
+    var yhi = Math.max.apply(null, rois), ylo = Math.min.apply(null, rois);
     if (yhi < 0) yhi = 0;
     if (ylo > 0) ylo = 0;
-    var pad = (yhi - ylo) * 0.1 || 0.1, ymax = yhi + pad, ymin = ylo - pad;
+    var pad = (yhi - ylo) * 0.08 || 0.1, ymax = yhi + pad, ymin = ylo - pad;
+    var step = _niceStep(ymax - ymin);
     var W = 720, H = 300, P = { l: 52, r: 116, t: 16, b: 38 };
     var plotW = W - P.l - P.r, plotH = H - P.t - P.b;
     function px(t) { return P.l + (t - tmin) / (tmax - tmin) * plotW; }
-    function pyRaw(y) { return P.t + (1 - (y - ymin) / (ymax - ymin)) * plotH; }
-    function py(y) { return Math.max(P.t, Math.min(P.t + plotH, pyRaw(y))); }
+    function py(y) { return P.t + (1 - (y - ymin) / (ymax - ymin)) * plotH; }
     var out = ['<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" class="tr-barsvg">'];
-    for (var g = Math.ceil(ymin / 0.25) * 0.25; g <= ymax + 1e-9; g += 0.25) {
-      var yy = pyRaw(g), zero = Math.abs(g) < 1e-9;
+    for (var g = Math.ceil(ymin / step) * step; g <= ymax + 1e-9; g += step) {
+      var yy = py(g), zero = Math.abs(g) < 1e-9;
       out.push('<line class="' + (zero ? "cx-axis" : "cx-grid") + '" x1="' + P.l + '" y1="' + yy.toFixed(1) + '" x2="' + (W - P.r) + '" y2="' + yy.toFixed(1) + '"/>');
-      out.push('<text class="cx-tick" x="' + (P.l - 7) + '" y="' + (yy + 3).toFixed(1) + '" text-anchor="end">' + (g > 0 ? "+" : "") + Math.round(g * 100) + '%</text>');
+      out.push('<text class="cx-tick" x="' + (P.l - 7) + '" y="' + (yy + 3).toFixed(1) + '" text-anchor="end">' + (zero ? "0" : (g > 0 ? "+" : "−") + Math.abs(g).toFixed(2)) + '</text>');
     }
     var seen = {};
     all.slice().sort(function (a, b) { return a.t - b.t; }).forEach(function (p) {
@@ -800,6 +796,7 @@
       out.push('<line class="cx-grid" x1="' + x.toFixed(1) + '" y1="' + P.t + '" x2="' + x.toFixed(1) + '" y2="' + (H - P.b) + '" opacity="0.5"/>');
       out.push('<text class="cx-tick" x="' + x.toFixed(1) + '" y="' + (H - P.b + 14) + '" text-anchor="middle">' + esc(day) + '</text>');
     });
+    var gpeak = null, gpcol = null, gpccy = null, glast = null;
     series.forEach(function (s) {
       var pts = (acc[s.key].pts || []).filter(function (p) { return p.t != null; });
       if (!pts.length) return;
@@ -810,8 +807,14 @@
           '"><title>' + esc(_retTip(s.label, s.ccy, p)) + '</title></circle>');
       });
       var last = pts[pts.length - 1];
-      out.push('<text x="' + (px(last.t) + 6).toFixed(1) + '" y="' + (py(last.roi) + 3).toFixed(1) + '" fill="' + s.color + '" font-size="10" font-weight="600">' + _pctRoi(last.roi) + '</text>');
+      out.push('<text x="' + (px(last.t) + 6).toFixed(1) + '" y="' + (py(last.roi) + 3).toFixed(1) + '" fill="' + s.color + '" font-size="10" font-weight="600">' + _money(s.ccy, last.roi) + '</text>');
+      var peak = pts.reduce(function (m, p) { return p.roi > m.roi ? p : m; }, pts[0]);
+      if (!gpeak || peak.roi > gpeak.roi) { gpeak = peak; gpcol = s.color; gpccy = s.ccy; glast = last; }
     });
+    // One peak label for the global max, when an early spike dwarfs its endpoint.
+    if (gpeak && glast && gpeak !== glast && (gpeak.roi - glast.roi) > 0.4) {
+      out.push('<text x="' + (px(gpeak.t) + 6).toFixed(1) + '" y="' + (py(gpeak.roi) + 3).toFixed(1) + '" fill="' + gpcol + '" font-size="10" font-weight="600">' + _money(gpccy, gpeak.roi) + ' peak</text>');
+    }
     series.forEach(function (s, i) {
       var n = (acc[s.key].pts || []).length;
       var lab = s.label + " — " + (n ? n + " bets" : "0 settled");
@@ -825,16 +828,16 @@
 
   function renderReturnPerUnit(d) {
     var acc = _retSeries(d);
-    var nsb = acc.sb.pts.length, npm = acc.pm_match.pts.length + acc.pm_adv.pts.length;
+    var nsb = acc.sb.pts.length, npm = acc.pm.pts.length;
     if (!(nsb || npm)) {
       $("retunit").innerHTML = '<div class="empty">No settled bets yet</div>';
       $("retunit-meta").textContent = "";
       return;
     }
     $("retunit").innerHTML = retChartSVG(acc) +
-      '<div class="vt-note">Cumulative net return per £1 / $1 staked (settled P/L ÷ stake) over the full ' +
-      'betting history, split by venue and bet type. Hover a point for the running figure. The y-axis is ' +
-      'clamped to keep the lines legible — an early small-sample sportsbook ROI spike clips at the top.</div>';
+      '<div class="vt-note">Cumulative net return per &pound;1 / $1 staked (settled P/L &divide; stake) over the full ' +
+      'betting history, by venue. Full range, so 0 = break-even and the early small-sample sportsbook spike shows ' +
+      'in full before it mean-reverts toward the long-run figure. Hover a point for the running figure.</div>';
     $("retunit-meta").textContent = nsb + " £ · " + npm + " $ settled";
   }
 
