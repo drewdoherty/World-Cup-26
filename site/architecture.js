@@ -466,6 +466,15 @@
   // Improvement map per stage (§9).
   var IMPROVE = [
     {
+      stage: "Latest model decisions — Q&A (2026-06-21)",
+      items: [
+        "Blend vs an Elo/DC agreement gate — KEEP the 0.25/0.25/0.50 market-anchored blend, REJECT an agreement gate. On the committed leave-one-tournament-out fit (log-loss, n=64) the optimiser lands ≈ 0.00 Elo / 0.32 DC / 0.68 market and clears market-only in only ~60% of bootstraps — inside its own noise — so the de-vigged market stays the anchor. (Earlier 'Brier 0.4959 / 29-of-30 favourite agreement' figures are not reproducible from committed artifacts — directional, not exact.)",
+        "Is Elo useful — KEEP but improve; today it adds no orthogonal signal. Its fitted blend weight is ≈ 0.00 (collinear with Dixon-Coles, which is stronger: DC-only CV log-loss 0.9725 < Elo-only 0.9808). External feeds (eloratings / FIFA / 538-SPI / Opta / ClubElo) are collinear, discontinued, paywalled or club-only. Proposed (not yet shipped) fixes: dilute the undiluted neutral-venue 100-pt host bonus, seed ratings from the DC prior, grid-optimise K. The de-vigged market remains the best external source.",
+        "Polymarket edge — NOT in moneylines (efficient, arb-proven). It sits in thin, slow-to-resharpen advancement / outright markets (fee-adjusted gaps reached ~+21% in the June recon). But the sim is UN-ANCHORED (0.5 Elo + 0.5 DC, no market term) — unlike the 1X2 card, which blends in the de-vigged market — so a large 'edge' can be model error rather than alpha, not proven free money; and these edges move fast (several 18-Jun 'edges' had collapsed or flipped negative by 21-Jun once group results landed). Real committed caps: quarter-Kelly, 5%-per-bet ($65.50) cap, YES/NO dedup. (Caveat: the advancement engine has no 5%-min-edge gate — it surfaces edges down to +0.3%; the 2% gate and the odds>10 longshot cap live on the sportsbook path.)",
+        "Early-response backtest — NO VALIDATED EDGE YET. No committed backtest reproduces the headline +14% ROI (it is one-match noise, Australia v Turkey); CLV is flat-to-negative (settled +0.34% over n=25, but the rolling card window is -1.5%, so the ladder stays at rung 0). True CLV-vs-Polymarket is uncomputable: there is no PM price time-series and pm_order_log holds only ~6 unlabelled dry-run rows. Fixing PM trade-logging is the prerequisite before any PM edge can be called real."
+      ]
+    },
+    {
       stage: "Ingestion",
       items: [
         "SHIPPED: cleaning overlay + 2-source (ESPN + TheSportsDB) verification → martj42_cleaned.csv, 3×/day CI.",
