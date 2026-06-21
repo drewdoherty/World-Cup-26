@@ -1,0 +1,72 @@
+#!/bin/bash
+# Install the World Cup Alpha production services as launchd agents on the Mac mini.
+# Idempotent: re-running re-generates and reloads every job.
+#
+#   bash deploy/macmini/install.sh
+#
+# Daemons get KeepAlive (auto-restart + start at login). Interval jobs run on a timer.
+# Nothing here touches application Python — it only schedules the existing scripts.
+set -euo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$HERE/../.." && pwd)"
+VENV_PY="$REPO_ROOT/.venv/bin/python"
+RUN1="$HERE/run_singleton.sh"
+AGENTS="$HOME/Library/LaunchAgents"
+LOGS="$REPO_ROOT/logs"
+
+# shellcheck source=/dev/null
+source "$HERE/services.env"
+
+[ -x "$VENV_PY" ] || { echo "ERROR: venv not found at $VENV_PY — create it first."; exit 1; }
+mkdir -p "$AGENTS" "$LOGS" "$REPO_ROOT/data/backups"
+chmod +x "$RUN1" "$HERE"/*.sh 2>/dev/null || true
+
+# Program arguments for each service (one token per line).
+cmd_for() {
+  case "$1" in
+    bot)        printf '%s\n' "$RUN1" bot       "$VENV_PY" scripts/wca_bot.py       --db data/wca.db --env .env ;;
+    snapshotd)  printf '%s\n' "$RUN1" snapshotd "$VENV_PY" scripts/wca_snapshotd.py --db data/wca.db --env .env ;;
+    newsd)      printf '%s\n' "$RUN1" newsd     "$VENV_PY" scripts/wca_newsd.py     --db data/wca.db --env .env --interval 600 --max-per-cycle 2 ;;
+    promosd)    printf '%s\n' "$RUN1" promosd   "$VENV_PY" scripts/wca_promosd.py   --db data/wca.db --env .env --interval 21600 --max-per-cycle 2 ;;
+    buildcard)  printf '%s\n' "$RUN1" buildcard "$VENV_PY" scripts/wca_build_card.py --db data/wca.db --env .env --hours-ahead 30 --skip-scorers ;;
+    autopull)   printf '%s\n' "/bin/bash" "$HERE/autopull.sh" ;;
+    backup)     printf '%s\n' "/bin/bash" "$HERE/backup.sh" ;;
+    *) echo "unknown service $1" >&2; return 1 ;;
+  esac
+}
+
+emit_plist() { # label  keepalive(true|false)  interval(0=none)  <args-on-stdin>
+  local label="$1" keepalive="$2" interval="$3"
+  echo '<?xml version="1.0" encoding="UTF-8"?>'
+  echo '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">'
+  echo '<plist version="1.0"><dict>'
+  echo "  <key>Label</key><string>${label}</string>"
+  echo '  <key>ProgramArguments</key><array>'
+  while IFS= read -r a; do [ -n "$a" ] && echo "    <string>${a}</string>"; done
+  echo '  </array>'
+  echo "  <key>WorkingDirectory</key><string>${REPO_ROOT}</string>"
+  echo "  <key>StandardOutPath</key><string>${LOGS}/${label##*.}.log</string>"
+  echo "  <key>StandardErrorPath</key><string>${LOGS}/${label##*.}.log</string>"
+  echo '  <key>RunAtLoad</key><true/>'
+  [ "$keepalive" = "true" ] && echo '  <key>KeepAlive</key><true/>' && echo '  <key>ThrottleInterval</key><integer>30</integer>'
+  [ "$interval" -gt 0 ] && echo "  <key>StartInterval</key><integer>${interval}</integer>"
+  echo '</dict></plist>'
+}
+
+install_one() { # name keepalive interval
+  local name="$1" keepalive="$2" interval="$3"
+  local label="${WCA_LABEL_PREFIX}.${name}"
+  local plist="$AGENTS/${label}.plist"
+  cmd_for "$name" | emit_plist "$label" "$keepalive" "$interval" > "$plist"
+  launchctl unload "$plist" 2>/dev/null || true
+  launchctl load -w "$plist"
+  echo "  loaded $label"
+}
+
+echo "Installing WCA services from $REPO_ROOT"
+for d in "${WCA_DAEMONS[@]}"; do install_one "$d" true 0; done
+for j in "${WCA_INTERVAL_JOBS[@]}"; do
+  var="WCA_INTERVAL_${j}"; install_one "$j" false "${!var}"
+done
+echo "Done. Verify with:  launchctl list | grep ${WCA_LABEL_PREFIX}"
