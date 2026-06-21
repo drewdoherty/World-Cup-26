@@ -1,11 +1,11 @@
-<!-- generated: 2026-06-21T04:40:13 -->
+<!-- generated: 2026-06-21T05:43:36 -->
 ⚽ *Next match* — Spain vs Saudi Arabia
 Kickoff 2026-06-21 16:00:00+00:00
 
 *Winner* (model blend)
   Spain           86.0%  fair 1.16  best 1.13 (betfair_ex_uk) -2.8%
-  Draw            10.4%  fair 9.63  best 12.00 (skybet) +24.6% ✅  £8.40
-  Saudi Arabia     3.6%  fair 27.79  best 32.00 (betfair_ex_uk) +15.1% ✅  £1.83
+  Draw            10.4%  fair 9.63  best 12.00 (skybet) +24.6% ✅  £8.39
+  Saudi Arabia     3.6%  fair 27.81  best 30.03 (smarkets) +8.0% ✅  £1.03
   _stake = ¼-Kelly @ £1500 bankroll (+EV picks)_
 
 *Corners* (model, exp 8.8)
