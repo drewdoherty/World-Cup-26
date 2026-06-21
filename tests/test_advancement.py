@@ -17,12 +17,14 @@ from wca.advancement import (
     PM_POOL_BANKROLL,
     PM_STAGE_EVENTS,
     WC2026_GROUPS,
+    _market_consensus_lookup,
     _no_ask,
     _yes_mid,
     compare_to_polymarket,
     make_prob_fn,
     pm_taker_fee,
 )
+from wca.card import BlendWeights
 from wca.data.results import load_results
 from wca.sim.tournament2026 import GROUP_LETTERS, TournamentSimulator
 
@@ -201,6 +203,70 @@ def test_make_prob_fn_host_advantage_helps_host_in_group(tiny_models):
     p_group = prob_fn(host, opp, False)[0]
     p_ko = prob_fn(host, opp, True)[0]
     assert p_group >= p_ko - 1e-9
+
+
+def _odds_df_fixture(home: str = "Mexico", away: str = "South Africa") -> pd.DataFrame:
+    rows = []
+    for book, odds in {
+        "book_a": {home: 2.20, "Draw": 3.20, away: 3.80},
+        "book_b": {home: 2.10, "Draw": 3.30, away: 3.90},
+    }.items():
+        for outcome, price in odds.items():
+            rows.append(
+                {
+                    "event_id": "evt1",
+                    "commence_time": "2026-06-11T19:00:00Z",
+                    "home_team": home,
+                    "away_team": away,
+                    "bookmaker_key": book,
+                    "market": "h2h",
+                    "outcome_name": outcome,
+                    "decimal_odds": price,
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+def test_market_consensus_lookup_is_order_aware():
+    odds_df = _odds_df_fixture()
+    lookup = _market_consensus_lookup(odds_df)
+    fwd = lookup[("Mexico", "South Africa")]
+    rev = lookup[("South Africa", "Mexico")]
+    assert fwd[0] == pytest.approx(rev[2])
+    assert fwd[1] == pytest.approx(rev[1])
+    assert fwd[2] == pytest.approx(rev[0])
+    assert sum(fwd) == pytest.approx(1.0)
+
+
+def test_make_prob_fn_uses_market_when_available(tiny_models):
+    odds_df = _odds_df_fixture()
+    expected = _market_consensus_lookup(odds_df)[("Mexico", "South Africa")]
+    prob_fn = make_prob_fn(
+        tiny_models,
+        odds_df=odds_df,
+        weights=BlendWeights(elo=0.0, dc=0.0, market=1.0),
+    )
+    assert prob_fn("Mexico", "South Africa", False) == pytest.approx(expected)
+    rev_expected = (expected[2], expected[1], expected[0])
+    assert prob_fn("South Africa", "Mexico", False) == pytest.approx(rev_expected)
+
+
+def test_make_prob_fn_falls_back_without_market(tiny_models):
+    odds_df = _odds_df_fixture()
+    market_only = make_prob_fn(
+        tiny_models,
+        odds_df=odds_df,
+        weights=BlendWeights(elo=0.0, dc=0.0, market=1.0),
+    )
+    model_only = make_prob_fn(
+        tiny_models,
+        weights=BlendWeights(elo=0.5, dc=0.5, market=0.0),
+    )
+    # Knockout pairings are generated and have no tradable 1X2 market, so even
+    # a market-only requested blend must fall back deterministically to Elo+DC.
+    assert market_only("Mexico", "South Africa", True) == pytest.approx(
+        model_only("Mexico", "South Africa", True)
+    )
 
 
 # ---------------------------------------------------------------------------

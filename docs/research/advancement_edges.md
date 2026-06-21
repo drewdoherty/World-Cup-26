@@ -7,7 +7,7 @@ Monte-Carlo simulation of the 2026 FIFA World Cup (`20000` sims, seed `42`) comp
 ## Methodology
 
 1. **Models.** Elo (rating + ordered-logit outcome model) and a time-decayed Dixon-Coles model are fit on the full international results history (`wca.card.fit_models`).
-2. **prob_fn (honest caveat).** Every simulated match is driven by a **straight 50/50 average of the Elo and Dixon-Coles 1X2 probabilities** — there is **no market term**. The group-stage card anchors ~50% on the de-vigged market, but there are *no* odds for the later rounds, so a market-anchored blend is impossible here. These edges are therefore an independent, noisier model view, not ground truth.
+2. **prob_fn (honest caveat).** Every simulated match is driven by the same card-style convex blend where a complete tradable 1X2 market exists: Elo + Dixon-Coles + de-vigged market consensus. Fixtures without market consensus (normally later knockout ties) fall back to the Elo + Dixon-Coles model blend, with those two model weights renormalised. These edges remain a noisy model-vs-market view, not ground truth.
 3. **Venue.** The three hosts (United States, Mexico, Canada) get the home-advantage bonus on their own group fixtures (derived from the scheduled-fixture `neutral` flag, as `wca.card` does). Every other group match and **all** knockout matches are neutral.
 4. **Knockout draws / ET / penalties.** A 90-minute knockout draw is resolved by the simulator's extra-time / penalty model. "Advancing" therefore **includes** winning on penalties — matching Polymarket resolution ("reach stage X" = the team is in stage X, however it got there).
 5. **Stage mapping.** `advance to Knockout Stages` = reach the Round of 32 (top-2 or one of the eight best third-placed teams); `Reach Round of 16/QF/SF/Final` = win the preceding knockout tie; `World Cup Winner` = win the final; `Group X Winner` = finish 1st in the group. These match each market's resolution exactly.
@@ -439,7 +439,7 @@ Sorted by P(win). Group letter in parentheses.
 
 ## Honest caveats
 
-- **No market anchor in the sim.** Unlike the group-stage card, the simulated probabilities use only the 50/50 Elo+DC blend. They embed all of that blend's known limitations (the blend does not beat the de-vigged market with confidence on the backtest) and add Monte-Carlo noise on top. Large edges most likely reflect model error, not free money — size conservatively.
+- **Market coverage is fixture-limited.** The sim is market-anchored only where a complete tradable 1X2 market exists. Generated later-round fixtures fall back to the model blend, so deep-run probabilities still carry material model and Monte-Carlo uncertainty. Large edges most likely reflect model error or stale markets, not free money — size conservatively.
 - **Monte-Carlo noise.** With `20000` sims the standard error on a 50% probability is ~0.35 pp; deep-run probabilities (SF/Final/Win) are smaller and proportionally noisier. Re-run with more sims before acting on a marginal edge.
 - **NO-side price approximation.** When a YES bid is missing we approximate the NO ask as `1 − YES_mid`, which is slightly optimistic; verify the live NO order book before sizing a NO position.
 - **Host venue in Dixon-Coles.** The host home bonus is applied via Elo only; Dixon-Coles is queried neutral (it has no per-host venue term). This very slightly understates host strength in their group.
