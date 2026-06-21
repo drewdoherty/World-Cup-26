@@ -79,6 +79,7 @@ def _help_text(manager: ConductorManager) -> str:
         "`/claude <task>` — dispatch to Claude Code",
         "`/codex <task>` — dispatch to Codex",
         "`/status` — per-task table",
+        "`/health` — live engine auth/availability",
         "`/cancel <id>` — cancel a not-yet-started task",
         "",
         "_PR-only · max-parallel cap · dry-run env (no live keys/ledger)._",
@@ -192,6 +193,8 @@ class ConductorBot:
             return _help_text(self.manager)
         if cmd == "/status":
             return self.manager.status_table()
+        if cmd == "/health":
+            return self.manager.health_table()
         if cmd == "/task":
             return self._dispatch_auto(arg, chat_id, user_id)
         if cmd == "/claude":
