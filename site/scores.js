@@ -323,6 +323,77 @@
     el.hidden = false;
   }
 
+  // ---- advancement: model edge vs Polymarket + group standings ------------
+  function renderEdgeMatrix(d) {
+    var el = $("adv-edge");
+    if (!el) return;
+    var teams = (d.teams || []).filter(function (t) {
+      return t.model && (Number(t.model.win) || 0) > 0.003;
+    });
+    teams.sort(function (a, b) { return (Number(b.model.win) || 0) - (Number(a.model.win) || 0); });
+    teams = teams.slice(0, 18);
+    if (!teams.length) { el.innerHTML = '<div class="empty">No advancement data yet</div>'; return; }
+    var stages = [["group_winner", "Grp"], ["R32", "R32"], ["R16", "R16"], ["QF", "QF"],
+                  ["SF", "SF"], ["Final", "Final"], ["win", "Win"]];
+    function bg(v) {
+      if (v === null) return "transparent";
+      var a = Math.min(1, Math.abs(v) / 0.15) * 0.8 + 0.06;
+      return (v >= 0 ? "rgba(63,224,138," : "rgba(224,96,63,") + a.toFixed(2) + ")";
+    }
+    var leg = '<div class="adv-edge-leg">' +
+      '<span><span class="d" style="background:rgba(63,224,138,0.85)"></span>model above market &mdash; back</span>' +
+      '<span><span class="d" style="background:rgba(224,96,63,0.85)"></span>model below market &mdash; fade</span>' +
+      '<span style="color:var(--muted)">cells: edge in points &middot; intensity = size</span></div>';
+    var cols = "132px repeat(" + stages.length + ", 1fr)";
+    var h = '<div class="adv-edge-grid" style="grid-template-columns:' + cols + '"><div></div>';
+    stages.forEach(function (s) { h += '<div class="eh">' + s[1] + "</div>"; });
+    teams.forEach(function (t) {
+      h += '<div class="et">' + esc(t.team) + "</div>";
+      stages.forEach(function (s) {
+        var pmObj = t.pm ? t.pm[s[0]] : null;
+        var v = (pmObj && pmObj.edge_adj != null) ? Number(pmObj.edge_adj) : null;
+        var txt = v === null ? '<span style="color:var(--muted)">&middot;</span>'
+          : (v >= 0 ? "+" : "") + (v * 100).toFixed(1);
+        h += '<div class="ec" style="background:' + bg(v) + '">' + txt + "</div>";
+      });
+    });
+    h += "</div>";
+    el.innerHTML = leg + '<div class="adv-edge-wrap">' + h + "</div>";
+  }
+
+  function renderGroups(d) {
+    var el = $("adv-groups");
+    if (!el) return;
+    var groups = d.groups || {};
+    var letters = Object.keys(groups).sort();
+    if (!letters.length) { el.innerHTML = '<div class="empty">No group results yet</div>'; return; }
+    var html = letters.map(function (g) {
+      var rows = (groups[g] || []).map(function (r) {
+        var gd = (r.gd > 0 ? "+" : "") + r.gd;
+        return '<tr class="' + (r.pos <= 2 ? "adv-q" : "") + '"><td>' + r.pos +
+          '</td><td class="adv-tm">' + esc(r.team) + "</td><td>" + r.p + "</td><td>" +
+          r.w + "</td><td>" + r.d + "</td><td>" + r.l + "</td><td>" + gd +
+          '</td><td class="adv-pt">' + r.pts + "</td></tr>";
+      }).join("");
+      return '<div class="adv-grp"><div class="adv-grp-h">Group ' + esc(g) + "</div>" +
+        '<table class="adv-gt"><thead><tr><th></th><th>team</th><th>P</th><th>W</th>' +
+        "<th>D</th><th>L</th><th>GD</th><th>Pt</th></tr></thead><tbody>" + rows +
+        "</tbody></table></div>";
+    }).join("");
+    el.innerHTML = '<div class="adv-grid">' + html + "</div>";
+  }
+
+  function renderAdvancement(d) {
+    if (!d) return;
+    var mg = d.meta || {};
+    var em = $("adv-edge-meta");
+    if (em) em.textContent = (mg.n_pm_markets ? mg.n_pm_markets + " PM markets" : (mg.model_generated || ""));
+    var gm = $("adv-groups-meta");
+    if (gm) gm.textContent = (d.groups ? Object.keys(d.groups).length + " groups" : "");
+    try { renderEdgeMatrix(d); } catch (e) {}
+    try { renderGroups(d); } catch (e) {}
+  }
+
   // ---- boot ---------------------------------------------------------------
   function fetchJson(url) {
     return fetch(url + "?t=" + Date.now(), { cache: "no-store" })
@@ -333,10 +404,12 @@
     Promise.all([
       fetchJson("./scores_data.json").catch(function () { return null; }),
       fetchJson("./exposure_data.json").catch(function () { return null; }),
+      fetchJson("./advancement_data.json").catch(function () { return null; }),
     ]).then(function (res) {
-      var scoresData = res[0], expData = res[1];
+      var scoresData = res[0], expData = res[1], advData = res[2];
       if (!scoresData) { showNoData("SCORES FEED UNAVAILABLE"); scoresData = { fixtures: [], meta: {} }; }
       if (!expData) { showNoData("EXPOSURE FEED UNAVAILABLE"); }
+      renderAdvancement(advData);
       renderRisk(expData);
       renderScores(scoresData, expData);
       renderFooter(scoresData, expData);

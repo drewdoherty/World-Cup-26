@@ -7,6 +7,26 @@
 <meta name="color-scheme" content="dark">
 <title>WORLD CUP ALPHA // SCORES</title>
 <link rel="stylesheet" href="./style.css">
+<style>
+  .viz-sub { font-size: 11px; color: var(--text-dim); line-height: 1.6; margin: 0 0 10px; }
+  .empty { color: var(--text-dim); font-size: 12px; padding: 8px 0; }
+  .adv-edge-leg { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 8px; font-size: 11px; color: var(--text-dim); align-items: center; }
+  .adv-edge-leg .d { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; vertical-align: -1px; }
+  .adv-edge-wrap { overflow-x: auto; }
+  .adv-edge-grid { display: grid; gap: 3px; min-width: 560px; }
+  .adv-edge-grid .eh { text-align: center; font-size: 9px; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); padding: 2px 0; }
+  .adv-edge-grid .et { display: flex; align-items: center; font-size: 11.5px; color: var(--text); padding-right: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .adv-edge-grid .ec { border-radius: 3px; padding: 6px 0; text-align: center; font-size: 11px; color: var(--text); font-variant-numeric: tabular-nums; }
+  .adv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(208px, 1fr)); gap: 10px; }
+  .adv-grp { border: 1px solid var(--border); border-radius: 3px; padding: 6px 9px; background: var(--panel-2); }
+  .adv-grp-h { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+  .adv-gt { width: 100%; border-collapse: collapse; font-size: 11px; font-variant-numeric: tabular-nums; }
+  .adv-gt th { color: var(--muted); font-size: 8.5px; text-transform: uppercase; font-weight: 500; text-align: right; padding: 1px 3px; }
+  .adv-gt td { text-align: right; padding: 1px 3px; color: var(--text-dim); }
+  .adv-gt .adv-tm { text-align: left; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 96px; }
+  .adv-gt .adv-pt { color: var(--text); font-weight: 600; }
+  .adv-gt tr.adv-q .adv-tm { color: var(--accent); }
+</style>
 </head>
 <body>
 <div id="app">
@@ -33,6 +53,28 @@
   </div>
 
   <main>
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">Model Edge vs Polymarket // Advancement</span>
+        <span class="panel-meta" id="adv-edge-meta"></span>
+      </div>
+      <div class="panel-body">
+        <p class="viz-sub">Model&rsquo;s fee-adjusted edge over the live Polymarket price for each team reaching each stage. <span style="color:var(--accent)">green = model rates the team above the market</span> (value to back); red = below (fade/lay). Intensity scales with the size of the edge.</p>
+        <div id="adv-edge"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">Group Stage // Standings</span>
+        <span class="panel-meta" id="adv-groups-meta"></span>
+      </div>
+      <div class="panel-body">
+        <p class="viz-sub" style="margin-bottom:10px">Live group tables &mdash; top two (highlighted) advance directly; the best third-placed teams fill the rest of the 32.</p>
+        <div id="adv-groups"></div>
+      </div>
+    </section>
+
     <section class="panel">
       <div class="panel-head">
         <span class="panel-label">Risk &amp; Blind Spots // Portfolio Exposure</span>

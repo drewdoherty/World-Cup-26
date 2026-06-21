@@ -152,22 +152,8 @@
     $("adv-groups").innerHTML = '<div class="adv-grid">' + html + "</div>";
   }
 
-  fetch("./advancement_data.json", { cache: "no-store" })
-    .then(function (r) { return r.ok ? r.json() : null; })
-    .catch(function () { return null; })
-    .then(function (d) {
-      if (!d) return;
-      var mg = d.meta || {};
-      var pm = $("adv-prog-meta");
-      if (pm) pm.textContent = (mg.model_generated ? "model " + mg.model_generated : "");
-      var mm = $("adv-mvp-meta");
-      if (mm) mm.textContent = (mg.n_pm_markets ? mg.n_pm_markets + " PM markets" : "");
-      var gm = $("adv-groups-meta");
-      if (gm) gm.textContent = (d.groups ? Object.keys(d.groups).length + " groups" : "");
-      try { renderProgression(d); } catch (e) {}
-      try { renderMvp(d); } catch (e) {}
-      try { renderGroups(d); } catch (e) {}
-    });
+  // Advancement panels (progression, model-vs-Polymarket, standings) moved to
+  // Scores & Markets (scores.html / scores.js) as the edge matrix + standings.
 
   // ---- Exhibit 3: advancement over time (existing) -------------------------
 

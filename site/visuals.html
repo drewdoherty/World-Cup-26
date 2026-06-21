@@ -57,42 +57,9 @@
   </header>
 
   <main>
-    <!-- ===== Tournament progression (data-driven) ===== -->
-    <section class="panel">
-      <div class="panel-head">
-        <span class="panel-label">Tournament Progression // Group Stage &rarr; Final</span>
-        <span class="panel-meta" id="adv-prog-meta"></span>
-      </div>
-      <div class="panel-body viz-grid">
-        <p class="viz-sub">Each line is one team&rsquo;s modelled survival probability through the bracket &mdash; from in the group stage (100%) to lifting the trophy. The bracket is incomplete: group games are still being played, so the deep-round numbers are projections. The 12 likeliest winners are coloured; hover any line for the team&rsquo;s full path and its Polymarket comparison.</p>
-        <div id="adv-progress"></div>
-      </div>
-    </section>
-
-    <!-- ===== Model implied advancement vs Polymarket ===== -->
-    <section class="panel">
-      <div class="panel-head">
-        <span class="panel-label">Model Implied Advancement vs Polymarket</span>
-        <span class="panel-meta" id="adv-mvp-meta"></span>
-      </div>
-      <div class="panel-body viz-grid">
-        <p class="viz-sub">Our Monte-Carlo probability of each outcome vs the live Polymarket price for the same market. <b style="color:var(--accent)">edge</b> = model &minus; market (percentage points): positive means we think it&rsquo;s likelier than the market does. Pick an outcome:</p>
-        <div id="adv-mvp-controls"></div>
-        <div id="adv-mvp"></div>
-      </div>
-    </section>
-
-    <!-- ===== Group standings ===== -->
-    <section class="panel">
-      <div class="panel-head">
-        <span class="panel-label">Group Stage // Standings</span>
-        <span class="panel-meta" id="adv-groups-meta"></span>
-      </div>
-      <div class="panel-body">
-        <p class="viz-sub" style="margin-bottom:10px">Live group tables &mdash; the data behind the left edge of the progression chart. Top two (highlighted) advance directly; the best third-placed teams fill the rest of the 32.</p>
-        <div id="adv-groups"></div>
-      </div>
-    </section>
+    <!-- Advancement panels moved to Scores & Markets: the edge matrix replaced
+         the progression chart + the model-vs-Polymarket table; group standings
+         moved alongside it. -->
 
     <!-- ===== Exhibit 1: how far back does the data go? ===== -->
     <section class="panel">
