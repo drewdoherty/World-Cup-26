@@ -55,10 +55,23 @@ def _now_iso() -> str:
 # -- results lookup -------------------------------------------------------
 
 
-def build_results_lookup(results_path: str) -> Dict[Tuple[str, str], List[Tuple[str, str]]]:
-    """``(home_canon, away_canon) -> [(date_iso, "H-A"), ...]`` for concluded games."""
+def build_results_lookup(
+    results_path: str, since: str = "2026-06-01"
+) -> Dict[Tuple[str, str], List[Tuple[str, str]]]:
+    """``(home_canon, away_canon) -> [(date_iso, "H-A"), ...]`` for concluded games.
+
+    ``since`` (ISO date) excludes pre-tournament history. results.csv holds 100+
+    years of internationals, so without this an unplayed WC fixture (e.g.
+    England vs Ghana, 2026-06-23) would false-match a historical friendly
+    (England 1-1 Ghana, 2011) and wrongly settle the bet. Pass since="" to
+    disable (not recommended).
+    """
+    import pandas as pd
+
     df = add_outcome_column(load_results(results_path))
     df = df[df["outcome"].notna()]
+    if since:
+        df = df[df["date"] >= pd.Timestamp(since)]
     lut: Dict[Tuple[str, str], List[Tuple[str, str]]] = {}
     for _, r in df.iterrows():
         key = (str(r["home_team"]).strip().casefold(), str(r["away_team"]).strip().casefold())
@@ -218,6 +231,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     p.add_argument("--apply", action="store_true", help="write changes (backs up the DB first)")
     p.add_argument("--backup-dir", default="data/backups", help="where to write the pre-apply backup")
     p.add_argument("--skip-closes", action="store_true", help="skip the closing_odds/clv backfill pass")
+    p.add_argument("--since", default="2026-06-01",
+                   help="ignore results before this date (excludes pre-tournament history)")
     args = p.parse_args(argv)
 
     def log(msg: str) -> None:
@@ -231,7 +246,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         bak = backup_db(args.db, args.backup_dir)
         log("backup -> %s" % bak)
 
-    lut = build_results_lookup(args.results)
+    log("results window: matches on/after %s only" % (args.since or "(all history)"))
+    lut = build_results_lookup(args.results, since=args.since)
     con = store._connect(args.db)
     try:
         log("\n[1] settle concluded open bets (%s)" % _AUTO_NOTE)

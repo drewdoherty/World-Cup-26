@@ -57,6 +57,20 @@ def test_grade_1x2_unmappable_selection_returns_none():
     assert audit.grade_1x2("Some Bet Builder leg", "Scotland", "Morocco", "1-0") is None
 
 
+def test_results_lookup_excludes_pre_tournament_history(tmp_path):
+    csv = tmp_path / "r.csv"
+    csv.write_text(
+        "date,home_team,away_team,home_score,away_score,tournament,city,country,neutral\n"
+        "2011-03-29,England,Ghana,1,1,Friendly,London,England,FALSE\n"
+        "2026-06-14,Scotland,Morocco,0,2,FIFA World Cup,Foxborough,United States,TRUE\n"
+    )
+    lut = audit.build_results_lookup(str(csv), since="2026-06-01")
+    # historical England-Ghana friendly must NOT settle the unplayed WC fixture
+    assert audit.result_for("England vs Ghana", lut) is None
+    # an in-window result is still found
+    assert audit.result_for("Scotland vs Morocco", lut) == ("Scotland", "Morocco", "0-2")
+
+
 def test_result_for_found_and_ambiguous():
     lut = {("a", "b"): [("2026-06-10", "1-0")]}
     assert audit.result_for("A vs B", lut) == ("A", "B", "1-0")
