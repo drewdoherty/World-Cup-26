@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-21 09:02:30 UTC"
+    "generated": "2026-06-21 10:08:23 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -176,8 +176,17 @@
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "Belgium",
+            "best_venue": "smarkets",
+            "best_odds": 1.46,
+            "model_prob": 0.6077,
+            "ev_pct": -11.3,
+            "recommendation": "LEAVE UNHEDGED: plugging costs 11.3% EV \u2014 take the variance"
+          }
         },
         {
           "outcome": "Draw",
@@ -185,8 +194,17 @@
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "Draw",
+            "best_venue": "smarkets",
+            "best_odds": 5.0,
+            "model_prob": 0.2341,
+            "ev_pct": 17.1,
+            "recommendation": "PLUG: +EV to back (17.1% edge) \u2014 fills the gap and adds value"
+          }
         },
         {
           "outcome": "Iran",
@@ -198,13 +216,22 @@
           "live": []
         }
       ],
-      "events": [],
+      "events": [
+        {
+          "type": "Bet Builder",
+          "selection": "Full Time Result -> Belgium + Anytime Goalscorer -> Romelu Lukaku",
+          "stake": 10.0,
+          "potential_profit": 13.7,
+          "free": false,
+          "odds": 2.37
+        }
+      ],
       "summary": {
         "max_win": 0.0,
         "stake_at_risk": 0,
         "best_outcome": "Belgium",
         "worst_outcome": "Belgium",
-        "n_blindspots": 0
+        "n_blindspots": 2
       }
     },
     {
@@ -304,6 +331,36 @@
         "model_prob": 0.8633,
         "ev_pct": -3.3,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
+      }
+    },
+    {
+      "fixture": "Belgium vs Iran",
+      "outcome": "Belgium",
+      "prob": 0.6077,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": true,
+        "outcome": "Belgium",
+        "best_venue": "smarkets",
+        "best_odds": 1.46,
+        "model_prob": 0.6077,
+        "ev_pct": -11.3,
+        "recommendation": "LEAVE UNHEDGED: plugging costs 11.3% EV \u2014 take the variance"
+      }
+    },
+    {
+      "fixture": "Belgium vs Iran",
+      "outcome": "Draw",
+      "prob": 0.2341,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": true,
+        "outcome": "Draw",
+        "best_venue": "smarkets",
+        "best_odds": 5.0,
+        "model_prob": 0.2341,
+        "ev_pct": 17.1,
+        "recommendation": "PLUG: +EV to back (17.1% edge) \u2014 fills the gap and adds value"
       }
     }
   ],
