@@ -1,22 +1,22 @@
-<!-- generated: 2026-06-21T07:51:04 -->
+<!-- generated: 2026-06-21T08:54:36 -->
 ⚽ *Next match* — Spain vs Saudi Arabia
 Kickoff 2026-06-21 16:00:00+00:00
 
 *Winner* (model blend)
-  Spain           86.5%  fair 1.16  best 1.12 (betfair_ex_uk) -3.2%
-  Draw            10.0%  fair 10.03  best 12.50 (betfair_ex_uk) +24.6% ✅  £8.04
-  Saudi Arabia     3.6%  fair 27.96  best 30.00 (casumo) +7.3% ✅  £0.94
+  Spain           86.3%  fair 1.16  best 1.12 (betfair_ex_uk) -3.3%
+  Draw            10.0%  fair 10.05  best 13.00 (skybet) +29.4% ✅  £9.18
+  Saudi Arabia     3.7%  fair 26.91  best 29.00 (betvictor) +7.8% ✅  £1.04
   _stake = ¼-Kelly @ £1500 bankroll (+EV picks)_
 
 *Corners* (model, exp 8.8)
   O/U 8.5: over 51.0% / under 49.0%  fair 1.96 / 2.04
 
 *Anytime scorer* (best book price, vig in)
-  Borja Iglesias      1.55 (William Hill)  imp 65%
-  Mikel Oyarzabal     1.67 (Sky Bet)  imp 60%
-  Lamine Yamal        1.80 (Sky Bet)  imp 56%
-  Ferran Torres Garc  1.91 (Sky Bet)  imp 52%
-  Nico Williams       2.20 (Sky Bet)  imp 45%
+  Mikel Oyarzabal     1.91 (Betfair)  imp 52%
+  Borja Iglesias      2.00 (Betfair)  imp 50%
+  Lamine Yamal        2.10 (Betfair)  imp 48%
+  Ferran Torres Garc  2.16 (Betfair)  imp 46%
+  Nico Williams       2.42 (Betfair)  imp 41%
 
 *Scorelines* (top 6)
 2-0 18.0% | 1-0 14.7% | 3-0 14.3% | 4-0 8.6% | 2-1 8.0% | 3-1 6.4%
