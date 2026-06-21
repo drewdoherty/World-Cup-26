@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-21 09:02:19 UTC"
+    "generated": "2026-06-21T09:35:36"
   },
   "totals": {
-    "wagered": 744.836,
-    "open_stake": 115.46000000000001,
+    "wagered": 754.8359999999999,
+    "open_stake": 125.46000000000001,
     "settled_pl": 37.96049999999998,
-    "n_bets": 85
+    "n_bets": 86
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 590.08,
-      "open_stake": 51.0,
+      "wagered": 600.08,
+      "open_stake": 61.0,
       "settled_pl": 64.15549999999999,
-      "n_bets": 66
+      "n_bets": 67
     },
     "USD": {
       "wagered": 154.756,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 590.08,
-      "open_stake": 51.0,
+      "wagered": 600.08,
+      "open_stake": 61.0,
       "settled_pl": 64.15549999999999,
-      "n_bets": 66,
+      "n_bets": 67,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 442.0800000000001,
-      "open_stake": 45.0,
+      "wagered": 452.08000000000015,
+      "open_stake": 55.0,
       "settled_pl": 98.15549999999999,
-      "n_bets": 49,
+      "n_bets": 50,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,20 @@
     }
   },
   "source_summary": {
+    "punt": {
+      "GBP": {
+        "wagered": 183.06,
+        "open_stake": 40.0,
+        "settled_pl": -41.33,
+        "n_bets": 13
+      },
+      "USD": {
+        "wagered": 13.366,
+        "open_stake": 1.0,
+        "settled_pl": -2.367,
+        "n_bets": 10
+      }
+    },
     "model": {
       "USD": {
         "wagered": 141.39,
@@ -84,20 +98,6 @@
         "n_bets": 23
       }
     },
-    "punt": {
-      "GBP": {
-        "wagered": 173.06,
-        "open_stake": 30.0,
-        "settled_pl": -41.33,
-        "n_bets": 12
-      },
-      "USD": {
-        "wagered": 13.366,
-        "open_stake": 1.0,
-        "settled_pl": -2.367,
-        "n_bets": 10
-      }
-    },
     "hedge": {
       "GBP": {
         "wagered": 6.0,
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "Bet365": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 20.0,
+      "open_stake": 20.0,
+      "settled_pl": 0.0,
+      "n_bets": 2
+    },
     "polymarket": {
       "venue": "polymarket",
       "currency": "USD",
@@ -125,14 +133,6 @@
       "n_bets": 14
     },
     "Ladbrokes": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 10.0,
-      "open_stake": 10.0,
-      "settled_pl": 0.0,
-      "n_bets": 1
-    },
-    "Bet365": {
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 10.0,
@@ -215,6 +215,14 @@
   },
   "platforms_by_account": {
     "1": {
+      "Bet365": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 20.0,
+        "open_stake": 20.0,
+        "settled_pl": 0.0,
+        "n_bets": 2
+      },
       "polymarket": {
         "venue": "polymarket",
         "currency": "USD",
@@ -232,14 +240,6 @@
         "n_bets": 13
       },
       "Ladbrokes": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 10.0,
-        "open_stake": 10.0,
-        "settled_pl": 0.0,
-        "n_bets": 1
-      },
-      "Bet365": {
         "venue": "sportsbook",
         "currency": "GBP",
         "wagered": 10.0,
@@ -2489,6 +2489,26 @@
     "n_with_close": 28
   },
   "positions": [
+    {
+      "id": 110,
+      "ts_utc": "2026-06-21T09:35:36",
+      "match": "Belgium vs Iran",
+      "match_id": "MANUAL_BELGIUM_VS_IRAN",
+      "market": "Bet Builder",
+      "selection": "Full Time Result -> Belgium + Anytime Goalscorer -> Romelu Lukaku",
+      "platform": "Bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 2.37,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; Bet Builder; legs: Full Time Result -> Belgium | Anytime Goalscorer -> Romelu Lukaku"
+    },
     {
       "id": 109,
       "ts_utc": "2026-06-20T13:09:58",
