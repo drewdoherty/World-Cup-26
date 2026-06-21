@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-21 11:15:06 UTC"
+    "generated": "2026-06-21 12:00:25 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -9,56 +9,61 @@
     "p_profit": 0,
     "p_loss": 0,
     "p_big_win": 0,
-    "n_scenarios": 81
+    "n_scenarios": 243
   },
   "correlation": {
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0593,
+        "prob": 0.0379,
         "results": [
           "Spain",
           "Belgium",
           "Uruguay",
-          "New Zealand"
+          "New Zealand",
+          "Argentina"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0902,
+        "prob": 0.0136,
         "results": [
           "Spain",
           "Belgium",
           "Uruguay",
+          "New Zealand",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.2029,
+        "prob": 0.008,
         "results": [
           "Spain",
           "Belgium",
           "Uruguay",
-          "Egypt"
+          "New Zealand",
+          "Austria"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0202,
+        "prob": 0.0574,
         "results": [
           "Spain",
           "Belgium",
+          "Uruguay",
           "Draw",
-          "New Zealand"
+          "Argentina"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0307,
+        "prob": 0.0206,
         "results": [
           "Spain",
           "Belgium",
+          "Uruguay",
           "Draw",
           "Draw"
         ]
@@ -67,32 +72,35 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0593,
+        "prob": 0.0379,
         "results": [
           "Spain",
           "Belgium",
           "Uruguay",
-          "New Zealand"
+          "New Zealand",
+          "Argentina"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0902,
+        "prob": 0.0136,
         "results": [
           "Spain",
           "Belgium",
           "Uruguay",
+          "New Zealand",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.2029,
+        "prob": 0.008,
         "results": [
           "Spain",
           "Belgium",
           "Uruguay",
-          "Egypt"
+          "New Zealand",
+          "Austria"
         ]
       }
     ],
@@ -105,7 +113,7 @@
       "results": [
         {
           "outcome": "Spain",
-          "prob": 0.866,
+          "prob": 0.8647,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -116,14 +124,14 @@
             "outcome": "Spain",
             "best_venue": "smarkets",
             "best_odds": 1.12,
-            "model_prob": 0.866,
-            "ev_pct": -3.0,
+            "model_prob": 0.8647,
+            "ev_pct": -3.2,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.098,
+          "prob": 0.0983,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -132,7 +140,7 @@
         },
         {
           "outcome": "Saudi Arabia",
-          "prob": 0.036,
+          "prob": 0.037,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -172,7 +180,7 @@
       "results": [
         {
           "outcome": "Belgium",
-          "prob": 0.6104,
+          "prob": 0.6102,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -181,16 +189,16 @@
           "plug": {
             "available": true,
             "outcome": "Belgium",
-            "best_venue": "betfair_ex_uk",
+            "best_venue": "smarkets",
             "best_odds": 1.45,
-            "model_prob": 0.6104,
+            "model_prob": 0.6102,
             "ev_pct": -11.5,
             "recommendation": "LEAVE UNHEDGED: plugging costs 11.5% EV \u2014 take the variance"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.232,
+          "prob": 0.2323,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -201,14 +209,14 @@
             "outcome": "Draw",
             "best_venue": "smarkets",
             "best_odds": 5.0,
-            "model_prob": 0.232,
-            "ev_pct": 16.0,
-            "recommendation": "PLUG: +EV to back (16.0% edge) \u2014 fills the gap and adds value"
+            "model_prob": 0.2323,
+            "ev_pct": 16.1,
+            "recommendation": "PLUG: +EV to back (16.1% edge) \u2014 fills the gap and adds value"
           }
         },
         {
           "outcome": "Iran",
-          "prob": 0.1577,
+          "prob": 0.1576,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -240,7 +248,7 @@
       "results": [
         {
           "outcome": "Uruguay",
-          "prob": 0.6664,
+          "prob": 0.6674,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -249,7 +257,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2269,
+          "prob": 0.2259,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -258,7 +266,7 @@
         },
         {
           "outcome": "Cape Verde",
-          "prob": 0.1066,
+          "prob": 0.1067,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -281,7 +289,7 @@
       "results": [
         {
           "outcome": "New Zealand",
-          "prob": 0.1682,
+          "prob": 0.1691,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -290,7 +298,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.256,
+          "prob": 0.2559,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -299,7 +307,7 @@
         },
         {
           "outcome": "Egypt",
-          "prob": 0.5759,
+          "prob": 0.575,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -315,35 +323,76 @@
         "worst_outcome": "New Zealand",
         "n_blindspots": 0
       }
+    },
+    {
+      "fixture": "Argentina vs Austria",
+      "kickoff": "2026-06-22T17:00:00+00:00",
+      "results": [
+        {
+          "outcome": "Argentina",
+          "prob": 0.6371,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.2281,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Austria",
+          "prob": 0.1348,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Argentina",
+        "worst_outcome": "Argentina",
+        "n_blindspots": 0
+      }
     }
   ],
   "blindspots": [
     {
       "fixture": "Spain vs Saudi Arabia",
       "outcome": "Spain",
-      "prob": 0.866,
+      "prob": 0.8647,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Spain",
         "best_venue": "smarkets",
         "best_odds": 1.12,
-        "model_prob": 0.866,
-        "ev_pct": -3.0,
+        "model_prob": 0.8647,
+        "ev_pct": -3.2,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
     {
       "fixture": "Belgium vs Iran",
       "outcome": "Belgium",
-      "prob": 0.6104,
+      "prob": 0.6102,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Belgium",
-        "best_venue": "betfair_ex_uk",
+        "best_venue": "smarkets",
         "best_odds": 1.45,
-        "model_prob": 0.6104,
+        "model_prob": 0.6102,
         "ev_pct": -11.5,
         "recommendation": "LEAVE UNHEDGED: plugging costs 11.5% EV \u2014 take the variance"
       }
@@ -351,16 +400,16 @@
     {
       "fixture": "Belgium vs Iran",
       "outcome": "Draw",
-      "prob": 0.232,
+      "prob": 0.2323,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Draw",
         "best_venue": "smarkets",
         "best_odds": 5.0,
-        "model_prob": 0.232,
-        "ev_pct": 16.0,
-        "recommendation": "PLUG: +EV to back (16.0% edge) \u2014 fills the gap and adds value"
+        "model_prob": 0.2323,
+        "ev_pct": 16.1,
+        "recommendation": "PLUG: +EV to back (16.1% edge) \u2014 fills the gap and adds value"
       }
     }
   ],

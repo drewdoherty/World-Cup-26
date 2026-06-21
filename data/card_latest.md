@@ -1,64 +1,73 @@
-<!-- generated: 2026-06-21T10:07:51 -->
+<!-- generated: 2026-06-21T11:14:00 -->
 *World Cup Alpha — bet card* (7 picks)
 
-*1. Belgium vs Iran* — Iran @ *8.60* (matchbook)
-    model 15.8% / mkt 11.6%  edge *+35.6%*  [elo 26% dc 21%]
-    stake: main £17.56
+*1. Belgium vs Iran* — Iran @ *8.40* (betfair_ex_uk)
+    model 15.8% / mkt 11.4%  edge *+32.4%*  [elo 26% dc 21%]
+    stake: main £16.40
 *2. Spain vs Saudi Arabia* — Draw @ *13.00* (betfair_ex_uk)
-    model 9.8% / mkt 7.5%  edge *+27.4%*  [elo 9% dc 15%]
-    stake: main £8.56
+    model 9.8% / mkt 7.6%  edge *+27.8%*  [elo 9% dc 15%]
+    stake: main £8.68
 *3. Belgium vs Iran* — Draw @ *5.00* (betfair_ex_uk)
-    model 23.2% / mkt 20.2%  edge *+16.0%*  [elo 28% dc 28%]
-    stake: main £14.98
-*4. New Zealand vs Egypt* — New Zealand @ *6.40* (betfair_ex_uk)
-    model 16.8% / mkt 15.6%  edge *+7.6%*  [elo 30% dc 15%]
-    stake: main £5.31
-*5. New Zealand vs Egypt* — Draw @ *4.20* (betfair_ex_uk)
-    model 25.6% / mkt 23.6%  edge *+7.5%*  [elo 29% dc 28%]
-    stake: main £8.79
-*6. Spain vs Saudi Arabia* — Saudi Arabia @ *29.00* (betvictor)
-    model 3.6% / mkt 2.8%  edge *+4.3%*  [elo 4% dc 5%]
-    stake: main £0.58
+    model 23.2% / mkt 20.2%  edge *+16.1%*  [elo 28% dc 28%]
+    stake: main £15.12
+*4. New Zealand vs Egypt* — Draw @ *4.30* (betfair_ex_uk)
+    model 25.6% / mkt 23.5%  edge *+10.1%*  [elo 29% dc 29%]
+    stake: main £11.42
+*5. New Zealand vs Egypt* — New Zealand @ *6.40* (betfair_ex_uk)
+    model 16.9% / mkt 15.4%  edge *+8.2%*  [elo 30% dc 16%]
+    stake: main £5.72
+*6. Spain vs Saudi Arabia* — Saudi Arabia @ *28.00* (matchbook)
+    model 3.7% / mkt 3.0%  edge *+3.7%*  [elo 4% dc 5%]
+    stake: main £0.52
 *7. Uruguay vs Cape Verde* — Cape Verde @ *9.60* (betfair_ex_uk)
-    model 10.7% / mkt 10.5%  edge *+2.4%*  [elo 13% dc 10%]
-    stake: main £1.03
+    model 10.7% / mkt 10.5%  edge *+2.5%*  [elo 13% dc 10%]
+    stake: main £1.07
 
 _Pool: rung 0 £1500 — 27/50 settled-with-close bets, CLV -0.0151, Kelly fraction 0.25_
 
-*World Cup Alpha — scorelines* (4 fixtures)
+*World Cup Alpha — scorelines* (5 fixtures)
 
 *Spain vs Saudi Arabia*
-    2-0  18.0%  fair 5.55  back >= 5.66
-    1-0  14.7%  fair 6.78  back >= 6.92
-    3-0  14.4%  fair 6.96  back >= 7.10
-    4-0  8.6%  fair 11.64  back >= 11.88
-    2-1  8.0%  fair 12.44  back >= 12.69
-    3-1  6.4%  fair 15.61  back >= 15.92
-    O/U 2.5: over 56.6% / under 43.4%   BTTS 31.4%
+    2-0  18.1%  fair 5.54  back >= 5.65
+    1-0  14.8%  fair 6.74  back >= 6.87
+    3-0  14.3%  fair 6.98  back >= 7.12
+    4-0  8.5%  fair 11.72  back >= 11.96
+    2-1  8.0%  fair 12.42  back >= 12.67
+    3-1  6.4%  fair 15.65  back >= 15.96
+    O/U 2.5: over 56.3% / under 43.7%   BTTS 31.4%
 
 *Belgium vs Iran*
-    1-0  16.4%  fair 6.11  back >= 6.24
+    1-0  16.6%  fair 6.03  back >= 6.15
     2-0  12.7%  fair 7.86  back >= 8.02
     1-1  10.8%  fair 9.28  back >= 9.47
-    2-1  10.7%  fair 9.38  back >= 9.57
-    0-0  8.7%  fair 11.44  back >= 11.67
-    3-0  6.3%  fair 15.85  back >= 16.17
-    O/U 2.5: over 43.0% / under 57.0%   BTTS 43.3%
+    2-1  10.7%  fair 9.36  back >= 9.55
+    0-0  8.8%  fair 11.37  back >= 11.59
+    3-0  6.2%  fair 16.01  back >= 16.33
+    O/U 2.5: over 42.6% / under 57.4%   BTTS 43.0%
 
 *Uruguay vs Cape Verde*
-    1-0  18.1%  fair 5.51  back >= 5.62
+    1-0  18.2%  fair 5.50  back >= 5.61
     2-0  15.9%  fair 6.30  back >= 6.43
-    0-0  10.8%  fair 9.26  back >= 9.44
-    1-1  9.6%  fair 10.37  back >= 10.58
-    3-0  9.0%  fair 11.11  back >= 11.34
-    2-1  8.3%  fair 12.08  back >= 12.32
-    O/U 2.5: over 38.7% / under 61.3%   BTTS 33.5%
+    0-0  10.7%  fair 9.31  back >= 9.50
+    1-1  9.6%  fair 10.42  back >= 10.62
+    3-0  9.0%  fair 11.11  back >= 11.33
+    2-1  8.3%  fair 12.06  back >= 12.30
+    O/U 2.5: over 38.8% / under 61.2%   BTTS 33.5%
 
 *New Zealand vs Egypt*
-    0-1  18.8%  fair 5.31  back >= 5.42
-    0-2  13.7%  fair 7.30  back >= 7.45
-    0-0  12.6%  fair 7.91  back >= 8.06
-    1-1  10.6%  fair 9.41  back >= 9.59
-    1-0  8.3%  fair 12.02  back >= 12.26
-    1-2  8.1%  fair 12.35  back >= 12.60
-    O/U 2.5: over 33.2% / under 66.8%   BTTS 33.7%
+    0-1  19.1%  fair 5.24  back >= 5.35
+    0-2  13.6%  fair 7.34  back >= 7.49
+    0-0  12.7%  fair 7.91  back >= 8.06
+    1-1  10.6%  fair 9.41  back >= 9.60
+    1-0  8.4%  fair 11.96  back >= 12.20
+    1-2  8.2%  fair 12.23  back >= 12.47
+    O/U 2.5: over 33.0% / under 67.0%   BTTS 33.7%
+
+*Argentina vs Austria*
+    1-0  15.2%  fair 6.58  back >= 6.71
+    2-0  13.6%  fair 7.33  back >= 7.48
+    1-1  10.5%  fair 9.50  back >= 9.69
+    2-1  9.5%  fair 10.55  back >= 10.76
+    0-0  8.8%  fair 11.36  back >= 11.59
+    3-0  7.9%  fair 12.67  back >= 12.93
+    O/U 2.5: over 44.4% / under 55.6%   BTTS 41.4%
