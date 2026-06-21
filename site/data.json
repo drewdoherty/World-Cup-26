@@ -1,39 +1,39 @@
 {
   "meta": {
-    "generated": "2026-06-21 12:00:16 UTC"
+    "generated": "2026-06-21 12:33:01 UTC"
   },
   "totals": {
     "wagered": 754.8359999999999,
-    "open_stake": 125.46000000000001,
-    "settled_pl": 37.96049999999998,
+    "open_stake": 117.0,
+    "settled_pl": 31.020500000000013,
     "n_bets": 86
   },
   "totals_by_currency": {
     "GBP": {
       "wagered": 600.08,
-      "open_stake": 61.0,
-      "settled_pl": 64.15549999999999,
+      "open_stake": 56.0,
+      "settled_pl": 59.155499999999996,
       "n_bets": 67
     },
     "USD": {
       "wagered": 154.756,
-      "open_stake": 64.46,
-      "settled_pl": -26.195,
+      "open_stake": 61.0,
+      "settled_pl": -28.134999999999998,
       "n_bets": 19
     }
   },
   "venues": {
     "sportsbook": {
       "wagered": 600.08,
-      "open_stake": 61.0,
-      "settled_pl": 64.15549999999999,
+      "open_stake": 56.0,
+      "settled_pl": 59.155499999999996,
       "n_bets": 67,
       "currency": "GBP"
     },
     "polymarket": {
       "wagered": 154.756,
-      "open_stake": 64.46,
-      "settled_pl": -26.195,
+      "open_stake": 61.0,
+      "settled_pl": -28.134999999999998,
       "n_bets": 19,
       "currency": "USD"
     },
@@ -54,8 +54,8 @@
     },
     "sportsbook_2": {
       "wagered": 138.0,
-      "open_stake": 21.0,
-      "settled_pl": -45.0,
+      "open_stake": 16.0,
+      "settled_pl": -50.0,
       "n_bets": 16,
       "currency": "GBP",
       "label": "Sportsbook 2"
@@ -65,8 +65,8 @@
     "punt": {
       "GBP": {
         "wagered": 183.06,
-        "open_stake": 40.0,
-        "settled_pl": -41.33,
+        "open_stake": 35.0,
+        "settled_pl": -46.33,
         "n_bets": 13
       },
       "USD": {
@@ -79,8 +79,8 @@
     "model": {
       "USD": {
         "wagered": 141.39,
-        "open_stake": 63.46,
-        "settled_pl": -23.827999999999996,
+        "open_stake": 60.0,
+        "settled_pl": -25.767999999999994,
         "n_bets": 9
       },
       "GBP": {
@@ -120,16 +120,16 @@
       "venue": "polymarket",
       "currency": "USD",
       "wagered": 154.756,
-      "open_stake": 64.46,
-      "settled_pl": -26.195,
+      "open_stake": 61.0,
+      "settled_pl": -28.134999999999998,
       "n_bets": 19
     },
     "Betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 199.14000000000001,
-      "open_stake": 10.0,
-      "settled_pl": 18.92200000000001,
+      "open_stake": 5.0,
+      "settled_pl": 13.922000000000011,
       "n_bets": 14
     },
     "Ladbrokes": {
@@ -227,8 +227,8 @@
         "venue": "polymarket",
         "currency": "USD",
         "wagered": 152.816,
-        "open_stake": 63.46,
-        "settled_pl": -25.254999999999995,
+        "open_stake": 60.0,
+        "settled_pl": -27.195,
         "n_bets": 17
       },
       "Betfair": {
@@ -317,8 +317,8 @@
         "venue": "sportsbook",
         "currency": "GBP",
         "wagered": 5.0,
-        "open_stake": 5.0,
-        "settled_pl": 0.0,
+        "open_stake": 0.0,
+        "settled_pl": -5.0,
         "n_bets": 1
       },
       "Unknown": {
@@ -382,6 +382,81 @@
     }
   },
   "closed_positions": [
+    {
+      "id": 109,
+      "ts_utc": "2026-06-20T13:09:58",
+      "settled_ts": "2026-06-21T12:32:24",
+      "match": "Germany vs Ivory Coast",
+      "match_id": "PM_GERMANY_VS_IVORY_COAST",
+      "market": "polymarket",
+      "selection": "Germany win",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "model",
+      "currency": "USD",
+      "decimal_odds": 1.5151515151515151,
+      "stake": 1.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "won",
+      "pl": 0.52,
+      "closing_odds": null,
+      "clv": null,
+      "notes": "polymarket order; token=110881534500357968934646596900153818247967390745149544995654778360419076918150; side=BUY; LIVE; order_id=0xbb4f34ad2f204501d118778114b5cf0dda45c633650aa333675370bed7657d5a"
+    },
+    {
+      "id": 107,
+      "ts_utc": "2026-06-20T08:08:37",
+      "settled_ts": "2026-06-21T12:32:24",
+      "match": "Netherlands vs Sweden",
+      "match_id": "PM_NETHERLANDS_VS_SWEDEN",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "model",
+      "currency": "USD",
+      "decimal_odds": 4.166666666666667,
+      "stake": 2.46,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "lost",
+      "pl": -2.46,
+      "closing_odds": 4.128296927847199,
+      "clv": 0.009294326326347191,
+      "notes": "polymarket order; token=76430088308493460494891335845203272510723451292248221729565378437032576762940; side=BUY; LIVE; order_id=0xeca58abf2efdc12a1415f72d6c9c50b24e3b15d0388b84d9358a0f964a00815d | label corrected 2026-06-20: PM result=DRAW (was polymarket/Yes)"
+    },
+    {
+      "id": 103,
+      "ts_utc": "2026-06-19T17:30:17",
+      "settled_ts": "2026-06-21T12:32:24",
+      "match": "Scotland vs Morocco",
+      "match_id": "MANUAL_SCOTLAND_VS_MOROCCO",
+      "market": "Bet Builder",
+      "selection": "Match Odds -> Morocco + Player To Have 1 Or More Shots On Target - Safe Sub -> Ayoub El Kaabi + Player To Have 1 Or More Shots On Target - Safe Sub -> Lawrence Shankland + Both Teams To Score -> Yes",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 8.17,
+      "stake": 5.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "lost",
+      "pl": -5.0,
+      "closing_odds": null,
+      "clv": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.98; Bet Builder; legs: Match Odds -> Morocco | Player To Have 1 Or More Shots On Target - Safe Sub -> Ayoub El Kaabi | Player To Have 1 Or More Shots On Target - Safe Sub -> Lawrence Shankland | Both Teams To Score -> Yes"
+    },
     {
       "id": 97,
       "ts_utc": "2026-06-19T12:00:00",
@@ -2414,6 +2489,10 @@
         [
           "2026-06-20T08:24:51",
           64.16
+        ],
+        [
+          "2026-06-21T12:32:24",
+          59.16
         ]
       ]
     },
@@ -2479,6 +2558,14 @@
         [
           "2026-06-16T03:00:00",
           -26.2
+        ],
+        [
+          "2026-06-21T12:32:24",
+          -25.68
+        ],
+        [
+          "2026-06-21T12:32:24",
+          -28.14
         ]
       ]
     }
@@ -2510,26 +2597,6 @@
       "notes": "screenshot ingest; currency=GBP; conf 0.97; Bet Builder; legs: Full Time Result -> Belgium | Anytime Goalscorer -> Romelu Lukaku"
     },
     {
-      "id": 109,
-      "ts_utc": "2026-06-20T13:09:58",
-      "match": "Germany vs Ivory Coast",
-      "match_id": "PM_GERMANY_VS_IVORY_COAST",
-      "market": "polymarket",
-      "selection": "Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.5151515151515151,
-      "stake": 1.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "polymarket order; token=110881534500357968934646596900153818247967390745149544995654778360419076918150; side=BUY; LIVE; order_id=0xbb4f34ad2f204501d118778114b5cf0dda45c633650aa333675370bed7657d5a"
-    },
-    {
       "id": 108,
       "ts_utc": "2026-06-20T09:26:45",
       "match": "England vs Ghana",
@@ -2548,26 +2615,6 @@
       "ev": null,
       "kelly_fraction": null,
       "notes": "screenshot ingest; currency=GBP; conf 0.92; Bet Builder; legs: Home Team Minus 2.5 Goals -> England -2.5 Goals | Handicap Betting -> England (-2.0) | Correct Score Combinations -> England to win 1-0, 2-0 or 3-0; SNR"
-    },
-    {
-      "id": 107,
-      "ts_utc": "2026-06-20T08:08:37",
-      "match": "Netherlands vs Sweden",
-      "match_id": "PM_NETHERLANDS_VS_SWEDEN",
-      "market": "Match Odds",
-      "selection": "The Draw",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 4.166666666666667,
-      "stake": 2.46,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "polymarket order; token=76430088308493460494891335845203272510723451292248221729565378437032576762940; side=BUY; LIVE; order_id=0xeca58abf2efdc12a1415f72d6c9c50b24e3b15d0388b84d9358a0f964a00815d | label corrected 2026-06-20: PM result=DRAW (was polymarket/Yes)"
     },
     {
       "id": 106,
@@ -2628,26 +2675,6 @@
       "ev": null,
       "kelly_fraction": null,
       "notes": "screenshot ingest; currency=GBP; conf 0.95"
-    },
-    {
-      "id": 103,
-      "ts_utc": "2026-06-19T17:30:17",
-      "match": "Scotland vs Morocco",
-      "match_id": "MANUAL_SCOTLAND_VS_MOROCCO",
-      "market": "Bet Builder",
-      "selection": "Match Odds -> Morocco + Player To Have 1 Or More Shots On Target - Safe Sub -> Ayoub El Kaabi + Player To Have 1 Or More Shots On Target - Safe Sub -> Lawrence Shankland + Both Teams To Score -> Yes",
-      "platform": "Betfair",
-      "venue": "sportsbook",
-      "account": "2",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 8.17,
-      "stake": 5.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.98; Bet Builder; legs: Match Odds -> Morocco | Player To Have 1 Or More Shots On Target - Safe Sub -> Ayoub El Kaabi | Player To Have 1 Or More Shots On Target - Safe Sub -> Lawrence Shankland | Both Teams To Score -> Yes"
     },
     {
       "id": 102,
@@ -2777,46 +2804,46 @@
         {
           "score": "2-0",
           "prob": 18.1,
-          "fair": 5.54,
-          "back": 5.65
+          "fair": 5.53,
+          "back": 5.64
         },
         {
           "score": "1-0",
-          "prob": 14.8,
-          "fair": 6.74,
-          "back": 6.87
+          "prob": 14.9,
+          "fair": 6.73,
+          "back": 6.86
         },
         {
           "score": "3-0",
           "prob": 14.3,
-          "fair": 6.98,
-          "back": 7.12
+          "fair": 6.97,
+          "back": 7.11
         },
         {
           "score": "4-0",
           "prob": 8.5,
-          "fair": 11.72,
-          "back": 11.96
+          "fair": 11.71,
+          "back": 11.94
         },
         {
           "score": "2-1",
-          "prob": 8.0,
-          "fair": 12.42,
-          "back": 12.67
+          "prob": 8.1,
+          "fair": 12.41,
+          "back": 12.66
         },
         {
           "score": "3-1",
           "prob": 6.4,
-          "fair": 15.65,
-          "back": 15.96
+          "fair": 15.63,
+          "back": 15.94
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 56.3,
-        "under": 43.7
+        "over": 56.4,
+        "under": 43.6
       },
-      "btts": 31.4
+      "btts": 31.3
     },
     {
       "fixture": "Belgium vs Iran",
@@ -2848,7 +2875,7 @@
         {
           "score": "0-0",
           "prob": 8.8,
-          "fair": 11.37,
+          "fair": 11.36,
           "back": 11.59
         },
         {
@@ -2918,38 +2945,38 @@
         {
           "score": "0-1",
           "prob": 19.1,
-          "fair": 5.24,
-          "back": 5.35
+          "fair": 5.23,
+          "back": 5.33
         },
         {
           "score": "0-2",
-          "prob": 13.6,
-          "fair": 7.34,
-          "back": 7.49
+          "prob": 13.7,
+          "fair": 7.32,
+          "back": 7.46
         },
         {
           "score": "0-0",
-          "prob": 12.7,
-          "fair": 7.91,
-          "back": 8.06
+          "prob": 12.6,
+          "fair": 7.92,
+          "back": 8.07
         },
         {
           "score": "1-1",
           "prob": 10.6,
-          "fair": 9.41,
-          "back": 9.6
+          "fair": 9.43,
+          "back": 9.62
         },
         {
           "score": "1-0",
-          "prob": 8.4,
-          "fair": 11.96,
-          "back": 12.2
+          "prob": 8.3,
+          "fair": 12.07,
+          "back": 12.31
         },
         {
           "score": "1-2",
           "prob": 8.2,
-          "fair": 12.23,
-          "back": 12.47
+          "fair": 12.19,
+          "back": 12.43
         }
       ],
       "over_under": {
@@ -2977,26 +3004,26 @@
         {
           "score": "1-1",
           "prob": 10.5,
-          "fair": 9.5,
-          "back": 9.69
+          "fair": 9.51,
+          "back": 9.7
         },
         {
           "score": "2-1",
           "prob": 9.5,
-          "fair": 10.55,
-          "back": 10.76
+          "fair": 10.54,
+          "back": 10.75
         },
         {
           "score": "0-0",
           "prob": 8.8,
-          "fair": 11.36,
-          "back": 11.59
+          "fair": 11.38,
+          "back": 11.61
         },
         {
           "score": "3-0",
           "prob": 7.9,
           "fair": 12.67,
-          "back": 12.93
+          "back": 12.92
         }
       ],
       "over_under": {

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-21 12:00:25 UTC"
+    "generated": "2026-06-21 12:33:10 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -15,7 +15,7 @@
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0379,
+        "prob": 0.0376,
         "results": [
           "Spain",
           "Belgium",
@@ -26,7 +26,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0136,
+        "prob": 0.0134,
         "results": [
           "Spain",
           "Belgium",
@@ -59,7 +59,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0206,
+        "prob": 0.0205,
         "results": [
           "Spain",
           "Belgium",
@@ -72,7 +72,7 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0379,
+        "prob": 0.0376,
         "results": [
           "Spain",
           "Belgium",
@@ -83,7 +83,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0136,
+        "prob": 0.0134,
         "results": [
           "Spain",
           "Belgium",
@@ -113,7 +113,7 @@
       "results": [
         {
           "outcome": "Spain",
-          "prob": 0.8647,
+          "prob": 0.8657,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -124,14 +124,14 @@
             "outcome": "Spain",
             "best_venue": "smarkets",
             "best_odds": 1.12,
-            "model_prob": 0.8647,
-            "ev_pct": -3.2,
+            "model_prob": 0.8657,
+            "ev_pct": -3.0,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.0983,
+          "prob": 0.0973,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -180,7 +180,7 @@
       "results": [
         {
           "outcome": "Belgium",
-          "prob": 0.6102,
+          "prob": 0.61,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -189,11 +189,11 @@
           "plug": {
             "available": true,
             "outcome": "Belgium",
-            "best_venue": "smarkets",
+            "best_venue": "betfair_ex_uk",
             "best_odds": 1.45,
-            "model_prob": 0.6102,
-            "ev_pct": -11.5,
-            "recommendation": "LEAVE UNHEDGED: plugging costs 11.5% EV \u2014 take the variance"
+            "model_prob": 0.61,
+            "ev_pct": -11.6,
+            "recommendation": "LEAVE UNHEDGED: plugging costs 11.6% EV \u2014 take the variance"
           }
         },
         {
@@ -207,11 +207,11 @@
           "plug": {
             "available": true,
             "outcome": "Draw",
-            "best_venue": "smarkets",
-            "best_odds": 5.0,
+            "best_venue": "matchbook",
+            "best_odds": 5.1,
             "model_prob": 0.2323,
-            "ev_pct": 16.1,
-            "recommendation": "PLUG: +EV to back (16.1% edge) \u2014 fills the gap and adds value"
+            "ev_pct": 18.5,
+            "recommendation": "PLUG: +EV to back (18.5% edge) \u2014 fills the gap and adds value"
           }
         },
         {
@@ -289,7 +289,7 @@
       "results": [
         {
           "outcome": "New Zealand",
-          "prob": 0.1691,
+          "prob": 0.1676,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -298,7 +298,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2559,
+          "prob": 0.2556,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -307,7 +307,7 @@
         },
         {
           "outcome": "Egypt",
-          "prob": 0.575,
+          "prob": 0.5768,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -330,7 +330,7 @@
       "results": [
         {
           "outcome": "Argentina",
-          "prob": 0.6371,
+          "prob": 0.6375,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -339,7 +339,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2281,
+          "prob": 0.2277,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -370,31 +370,31 @@
     {
       "fixture": "Spain vs Saudi Arabia",
       "outcome": "Spain",
-      "prob": 0.8647,
+      "prob": 0.8657,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Spain",
         "best_venue": "smarkets",
         "best_odds": 1.12,
-        "model_prob": 0.8647,
-        "ev_pct": -3.2,
+        "model_prob": 0.8657,
+        "ev_pct": -3.0,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
     {
       "fixture": "Belgium vs Iran",
       "outcome": "Belgium",
-      "prob": 0.6102,
+      "prob": 0.61,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Belgium",
-        "best_venue": "smarkets",
+        "best_venue": "betfair_ex_uk",
         "best_odds": 1.45,
-        "model_prob": 0.6102,
-        "ev_pct": -11.5,
-        "recommendation": "LEAVE UNHEDGED: plugging costs 11.5% EV \u2014 take the variance"
+        "model_prob": 0.61,
+        "ev_pct": -11.6,
+        "recommendation": "LEAVE UNHEDGED: plugging costs 11.6% EV \u2014 take the variance"
       }
     },
     {
@@ -405,17 +405,15 @@
       "plug": {
         "available": true,
         "outcome": "Draw",
-        "best_venue": "smarkets",
-        "best_odds": 5.0,
+        "best_venue": "matchbook",
+        "best_odds": 5.1,
         "model_prob": 0.2323,
-        "ev_pct": 16.1,
-        "recommendation": "PLUG: +EV to back (16.1% edge) \u2014 fills the gap and adds value"
+        "ev_pct": 18.5,
+        "recommendation": "PLUG: +EV to back (18.5% edge) \u2014 fills the gap and adds value"
       }
     }
   ],
-  "unmapped": [
-    "Netherlands vs Sweden / The Draw"
-  ],
+  "unmapped": [],
   "off_slate_accas": [],
   "off_slate_events": [
     {
@@ -455,15 +453,6 @@
       "match": "Scotland vs Morocco"
     },
     {
-      "type": "Bet Builder",
-      "selection": "Match Odds -> Morocco + Player To Have 1 Or More Shots On Target - Safe Sub -> Ayoub El Kaabi + Player To Have 1 Or More Shots On Target - Safe Sub -> Lawrence Shankland + Both Teams To Score -> Yes",
-      "stake": 5.0,
-      "profit": 35.85,
-      "free": false,
-      "odds": 8.17,
-      "match": "Scotland vs Morocco"
-    },
-    {
       "type": "First Goal Scorer",
       "selection": "Ayoub El Kaabi",
       "stake": 5.0,
@@ -498,15 +487,6 @@
       "free": true,
       "odds": 5.52,
       "match": "England vs Ghana"
-    },
-    {
-      "type": "polymarket",
-      "selection": "Yes",
-      "stake": 1.0,
-      "profit": 0.5151515151515151,
-      "free": false,
-      "odds": 1.5151515151515151,
-      "match": "Germany vs Ivory Coast"
     }
   ]
 }

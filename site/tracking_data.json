@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-21 12:00:19 UTC"
+    "generated": "2026-06-21 12:33:04 UTC"
   },
   "summary": {
     "fixtures_complete": 31,
@@ -12,10 +12,10 @@
     "market_logloss": 0.7838,
     "top6_hits": 15,
     "bets": {
-      "settled": 72,
-      "won": 19,
-      "lost": 53,
-      "pl": 37.96,
+      "settled": 75,
+      "won": 20,
+      "lost": 55,
+      "pl": 31.02,
       "avg_clv": -0.0142,
       "clv_count": 28
     }
@@ -3179,8 +3179,8 @@
       "date": null,
       "kickoff": "2026-06-21T16:00:00+00:00",
       "model_1x2": {
-        "home": 0.8647,
-        "draw": 0.0983,
+        "home": 0.8657,
+        "draw": 0.0973,
         "away": 0.037
       },
       "model_source": "card_build",
@@ -3197,7 +3197,7 @@
       "date": null,
       "kickoff": "2026-06-21T19:00:00+00:00",
       "model_1x2": {
-        "home": 0.6102,
+        "home": 0.61,
         "draw": 0.2323,
         "away": 0.1576
       },
@@ -3233,9 +3233,9 @@
       "date": null,
       "kickoff": "2026-06-22T01:00:00+00:00",
       "model_1x2": {
-        "home": 0.1691,
-        "draw": 0.2559,
-        "away": 0.575
+        "home": 0.1676,
+        "draw": 0.2556,
+        "away": 0.5768
       },
       "model_source": "card_build",
       "model_pick": "away",
@@ -3251,8 +3251,8 @@
       "date": null,
       "kickoff": "2026-06-22T17:00:00+00:00",
       "model_1x2": {
-        "home": 0.6371,
-        "draw": 0.2281,
+        "home": 0.6375,
+        "draw": 0.2277,
         "away": 0.1348
       },
       "model_source": "card_build",
@@ -4345,6 +4345,51 @@
       "ev": null,
       "ccy": "\u00a3",
       "ts": "2026-06-20T08:24:51"
+    },
+    {
+      "id": 103,
+      "match": "Scotland vs Morocco",
+      "market": "Bet Builder",
+      "selection": "Match Odds -> Morocco + Player To Have 1 Or More Shots On Target - Safe Sub -> Ayoub El Kaabi + Player To Have 1 Or More Shots On Target - Safe Sub -> Lawrence Shankland + Both Teams To Score -> Yes",
+      "odds": 8.17,
+      "stake": 5.0,
+      "status": "lost",
+      "pl": -5.0,
+      "clv": null,
+      "source": "punt",
+      "ev": null,
+      "ccy": "\u00a3",
+      "ts": "2026-06-21T12:32:24"
+    },
+    {
+      "id": 107,
+      "match": "Netherlands vs Sweden",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "odds": 4.166666666666667,
+      "stake": 2.46,
+      "status": "lost",
+      "pl": -2.46,
+      "clv": 0.009294326326347191,
+      "source": "model",
+      "ev": null,
+      "ccy": "$",
+      "ts": "2026-06-21T12:32:24"
+    },
+    {
+      "id": 109,
+      "match": "Germany vs Ivory Coast",
+      "market": "polymarket",
+      "selection": "Germany win",
+      "odds": 1.5151515151515151,
+      "stake": 1.0,
+      "status": "won",
+      "pl": 0.52,
+      "clv": null,
+      "source": "model",
+      "ev": null,
+      "ccy": "$",
+      "ts": "2026-06-21T12:32:24"
     }
   ]
 }
