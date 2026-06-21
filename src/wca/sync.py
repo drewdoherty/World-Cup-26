@@ -1,14 +1,13 @@
-"""Best-effort site sync: regenerate site/data.json and push so the live
-Vercel site tracks the ledger automatically after a bot write.
+"""Best-effort site sync: regenerate local site JSON feeds after bot writes.
 
 Design:
-* Fully best-effort — every failure is swallowed and logged; the bot must
-  never crash because a push failed (e.g. a transient network blip or a
-  concurrent manual push). The next sync catches up.
+* Fully best-effort — every failure is swallowed and logged; the bot must never
+  crash because a site refresh failed.
 * Regenerating ``data.json`` is cheap (reads the ledger + cached card; no
   model fit), so it is safe to run inline on the bot's reply path.
-* Git work runs through a short-timeout subprocess and a rebase-pull first to
-  avoid clobbering concurrent commits.
+* Publishing is local-first. ``WCA_AUTOPUSH`` defaults to off so private local
+  operation cannot accidentally update the old public Vercel deployment. Set
+  ``WCA_AUTOPUSH=1`` only when you intentionally want git/Vercel publishing.
 """
 from __future__ import annotations
 
@@ -103,12 +102,12 @@ def _git(args: List[str], timeout: float = 45.0) -> subprocess.CompletedProcess:
 def push_site(reason: str = "ledger update", db_path: str = "data/wca.db",
               enabled: Optional[bool] = None,
               include_tracking: bool = False) -> bool:
-    """Regenerate site data and push the site JSON files. Best-effort.
+    """Regenerate site data and optionally push the site JSON files. Best-effort.
 
-    Set ``WCA_AUTOPUSH=0`` to disable pushing (regenerate only). Returns True
-    only if a push actually succeeded.  ``include_tracking`` also rebuilds and
-    pushes the Tracking-tab feed (slower; the daemon enables it only when a
-    close was captured).
+    Private/local mode is the default: when ``WCA_AUTOPUSH`` is absent or ``0``
+    this regenerates local JSON only and returns ``False`` because no push was
+    attempted. Set ``WCA_AUTOPUSH=1`` to opt back into git/Vercel publishing.
+    ``include_tracking`` also rebuilds the Tracking-tab feed.
     """
     # HARD GUARD: never push during a test run. pytest sets PYTEST_CURRENT_TEST
     # for every test, so any bot test that exercises the confirm path cannot
@@ -117,7 +116,7 @@ def push_site(reason: str = "ledger update", db_path: str = "data/wca.db",
     if os.environ.get("PYTEST_CURRENT_TEST"):
         return False
     if enabled is None:
-        enabled = os.environ.get("WCA_AUTOPUSH", "1") != "0"
+        enabled = os.environ.get("WCA_AUTOPUSH", "0") == "1"
     refreshed = refresh_site_data(db_path, include_tracking=include_tracking)
     if not enabled:
         return False

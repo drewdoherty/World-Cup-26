@@ -57,6 +57,7 @@ CARD_PATH = "data/card_latest.md"
 NEXT_PATH = "data/next_latest.md"
 SCORES_FEED_PATH = "site/scores_data.json"
 RESULTS_PATH = "data/processed/wc2026_results.json"
+COMPLETED_FIXTURES_PATH = "data/processed/completed_fixtures.json"
 CARD_MAX_AGE_HOURS = 6.0
 # The odds feed behind /accas and /boost should refresh frequently; warn beyond
 # this. Structure snapshots change rarely, so its window is generous.
@@ -238,6 +239,23 @@ def _finished_fixture_tokens(results_path: str = RESULTS_PATH) -> List[tuple[str
         toks = _fixture_tokens(str(row.get("fixture") or ""))
         if toks is not None:
             out.append(toks)
+    out.extend(_completed_fixture_tokens())
+    return out
+
+
+def _completed_fixture_tokens(path: str = COMPLETED_FIXTURES_PATH) -> List[tuple[str, str]]:
+    try:
+        with open(_resolve_repo_path(path), "r", encoding="utf-8") as fh:
+            payload = json.load(fh)
+    except Exception:
+        return []
+    rows = payload.get("fixtures") if isinstance(payload, dict) else payload
+    out: List[tuple[str, str]] = []
+    for row in rows or []:
+        fixture = row.get("fixture") if isinstance(row, dict) else row
+        toks = _fixture_tokens(str(fixture or ""))
+        if toks is not None:
+            out.append(toks)
     return out
 
 
@@ -246,9 +264,22 @@ def _matches_finished_fixture(match_desc: Any, finished: List[tuple[str, str]]) 
     if not text:
         return False
     for home, away in finished:
-        if home in text and away in text:
+        if _team_token_in_text(home, text) and _team_token_in_text(away, text):
             return True
     return False
+
+
+def _team_token_in_text(team: str, text: str) -> bool:
+    variants = {team}
+    try:
+        from wca.data import teamnames
+        for alias, canonical in getattr(teamnames, "ALIASES", {}).items():
+            canon_norm = re.sub(r"[^a-z0-9]+", " ", str(canonical).lower()).strip()
+            if canon_norm == team:
+                variants.add(re.sub(r"[^a-z0-9]+", " ", str(alias).lower()).strip())
+    except Exception:
+        pass
+    return any(v and v in text for v in variants)
 
 
 def _is_match_specific_market(market: Any) -> bool:
@@ -352,7 +383,11 @@ def _pool_rows(db_path: str) -> Dict[str, Dict[str, float]]:
     con = sqlite3.connect(db_path)
     con.row_factory = sqlite3.Row
     try:
-        for r in con.execute("SELECT platform, status, stake, settled_pl, decimal_odds, notes, account FROM bets"):
+        finished = _finished_fixture_tokens()
+        for r in con.execute(
+            "SELECT platform, status, stake, settled_pl, decimal_odds, notes, "
+            "account, match_desc, market FROM bets"
+        ):
             v = _venue_of(r["platform"])
             # Polymarket runs two physical accounts: acct 1 = manual (MetaMask),
             # acct 2 = the automated bot (World-Cup-26 deposit wallet, Mac mini).
@@ -362,7 +397,11 @@ def _pool_rows(db_path: str) -> Dict[str, Dict[str, float]]:
             d = pools.setdefault(v, {"open": 0.0, "settled_pl": 0.0, "deposited": 0.0, "n": 0})
             d["n"] += 1
             if r["status"] == "open":
-                d["open"] += float(r["stake"] or 0.0)
+                if (
+                    not _matches_finished_fixture(r["match_desc"], finished)
+                    and not _is_malformed_match_position(r)
+                ):
+                    d["open"] += float(r["stake"] or 0.0)
             elif r["status"] in ("won", "lost"):
                 d["settled_pl"] += float(r["settled_pl"] or 0.0)
         for e in con.execute("SELECT amount, reason FROM bankroll_events"):
@@ -386,6 +425,7 @@ def handle_summary(db_path: str) -> str:
         return "N/A" if v != v else "%.2f%%" % (v * 100)
 
     pools = _pool_rows(db_path)
+    active_open, hidden_open = _active_open_counts(db_path)
 
     # Build a compact code-block table for the pool rows.
     pool_table_rows = []
@@ -404,10 +444,13 @@ def handle_summary(db_path: str) -> str:
 
     lines = [
         "\U0001f4b0 *World Cup Alpha — portfolio*",
-        "Bets: %d (open %d / won %d / lost %d / void %d)"
-        % (s["total_bets"], s["open_bets"], s["won_bets"], s["lost_bets"], s["void_bets"]),
-        "At risk (open): %.2f   Settled staked: %.2f   P&L: %.2f   ROI: %s"
-        % (s.get("open_staked", 0.0), s["total_staked"], s["total_pl"], pct(s["roi"])),
+        "Bets: %d (active open %d / settlement queue %d / won %d / lost %d / void %d)"
+        % (
+            s["total_bets"], active_open["n"], hidden_open["n"],
+            s["won_bets"], s["lost_bets"], s["void_bets"],
+        ),
+        "At risk (active): %s   Settled staked: %.2f   P&L: %.2f   ROI: %s"
+        % (_money_parts(active_open["by_ccy"]), s["total_staked"], s["total_pl"], pct(s["roi"])),
         "Avg CLV: %s   Beat close: %s" % (pct(s["avg_clv"]), pct(s["pct_beat_close"])),
         "",
         "*Bankroll by pool*",
@@ -431,7 +474,49 @@ def handle_summary(db_path: str) -> str:
         )
     if not pools:
         lines.append("(no pools yet — record deposits with `bankroll add`)")
+    if hidden_open["n"]:
+        lines.append("")
+        lines.append(
+            "⚠️ Settlement queue: %d FT/open row(s) hidden from active risk (%s)."
+            % (hidden_open["n"], _money_parts(hidden_open["by_ccy"]))
+        )
     return "\n".join(lines)
+
+
+def _money_parts(by_ccy: Dict[str, float]) -> str:
+    parts = []
+    for ccy in ("GBP", "USD", "EUR"):
+        val = by_ccy.get(ccy)
+        if val:
+            parts.append("%s%.2f" % ({"GBP": "£", "USD": "$", "EUR": "€"}[ccy], val))
+    return "0.00" if not parts else " + ".join(parts)
+
+
+def _active_open_counts(db_path: str) -> tuple[Dict[str, Any], Dict[str, Any]]:
+    import sqlite3
+
+    active = {"n": 0, "by_ccy": {}}
+    hidden = {"n": 0, "by_ccy": {}}
+    finished = _finished_fixture_tokens()
+    con = sqlite3.connect(db_path)
+    con.row_factory = sqlite3.Row
+    try:
+        rows = con.execute(
+            "SELECT match_desc, market, platform, stake FROM bets WHERE status='open'"
+        ).fetchall()
+    finally:
+        con.close()
+    for r in rows:
+        venue = _venue_of(r["platform"])
+        ccy = "$" if venue in ("polymarket", "polymarket-auto", "kalshi") else "£"
+        ccy_key = "USD" if ccy == "$" else "GBP"
+        bucket = hidden if (
+            _matches_finished_fixture(r["match_desc"], finished)
+            or _is_malformed_match_position(r)
+        ) else active
+        bucket["n"] += 1
+        bucket["by_ccy"][ccy_key] = bucket["by_ccy"].get(ccy_key, 0.0) + float(r["stake"] or 0.0)
+    return active, hidden
 
 
 def handle_bets(db_path: str, results_path: str = RESULTS_PATH) -> str:
@@ -1504,6 +1589,10 @@ def handle_accas(scores_path: str = "site/scores_data.json") -> str:
             scores_feed = accas.merge_snapshot_feed(
                 scores_feed,
                 accas.load_latest_snapshot_feed(),
+            )
+            scores_feed = accas.merge_model_predictions(
+                scores_feed,
+                accas.load_model_predictions_feed(),
             )
             finished = _finished_fixture_tokens()
             scores_feed["fixtures"] = [

@@ -37,9 +37,94 @@ Output shape (consumed by the front-end JS)::
 from __future__ import annotations
 
 import sqlite3
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 from wca import promos
+
+
+ACCOUNT_KEYS = ("a1", "a2")
+
+SITE_ALIASES = {
+    "bet365": "Bet365",
+    "bet 365": "Bet365",
+    "paddypower": "Paddy Power",
+    "paddy power": "Paddy Power",
+    "virginbet": "Virgin Bet",
+    "virgin bet": "Virgin Bet",
+    "betfair sportsbook": "Betfair Sportsbook",
+    "betfair_sportsbook": "Betfair Sportsbook",
+    "betfair sb": "Betfair Sportsbook",
+    "betfair": "Betfair Sportsbook",
+    "betfair exchange": "Betfair Exchange",
+    "betfair_ex_uk": "Betfair Exchange",
+    "betfair ex uk": "Betfair Exchange",
+    "smarkets": "Smarkets",
+    "polymarket": "Polymarket",
+    "kalshi": "Kalshi",
+    "betfred": "Betfred",
+    "skybet": "Sky Bet",
+    "sky bet": "Sky Bet",
+    "william hill": "William Hill",
+    "unibet": "Unibet",
+    "matchbook": "Matchbook",
+}
+
+
+def _norm_token(v: Any) -> str:
+    return " ".join(str(v or "").strip().lower().replace("_", " ").split())
+
+
+def _canonical_site(v: Any) -> str:
+    raw = str(v or "").strip()
+    norm = _norm_token(raw)
+    return SITE_ALIASES.get(norm, promos.canonical_site_name(raw))
+
+
+def _account_key(v: Any) -> str:
+    norm = _norm_token(v)
+    if norm in {"2", "a2", "account 2", "acc 2", "mum", "mother"}:
+        return "a2"
+    return "a1"
+
+
+def _empty_usage() -> Dict[str, Dict[str, int]]:
+    return {a: {"total": 0, "open": 0, "closed": 0} for a in ACCOUNT_KEYS}
+
+
+def ledger_usage_by_site(conn: sqlite3.Connection) -> Dict[str, Dict[str, Dict[str, int]]]:
+    """Derive sportsbook/prediction-market account usage from the bets ledger.
+
+    A venue/account is considered *used* once it has any open or closed ledger
+    bet. Missing old schemas degrade to an empty usage map.
+    """
+    try:
+        rows = conn.execute(
+            "SELECT platform, account, status, COUNT(*) AS n "
+            "FROM bets GROUP BY platform, account, status"
+        ).fetchall()
+    except sqlite3.Error:
+        return {}
+
+    out: Dict[str, Dict[str, Dict[str, int]]] = {}
+    for r in rows:
+        site = _canonical_site(r["platform"])
+        if not site:
+            continue
+        acct = _account_key(r["account"])
+        site_usage = out.setdefault(site, _empty_usage())
+        bucket = "open" if str(r["status"] or "").lower() == "open" else "closed"
+        n = int(r["n"] or 0)
+        site_usage[acct]["total"] += n
+        site_usage[acct][bucket] += n
+    return out
+
+
+def _used_accounts(usage: Dict[str, Dict[str, int]]) -> List[str]:
+    return [a.upper() for a in ACCOUNT_KEYS if (usage.get(a) or {}).get("total", 0) > 0]
+
+
+def _available_accounts(usage: Dict[str, Dict[str, int]]) -> List[str]:
+    return [a.upper() for a in ACCOUNT_KEYS if (usage.get(a) or {}).get("total", 0) == 0]
 
 
 def _promo_view(row: sqlite3.Row) -> Dict[str, Any]:
@@ -48,6 +133,7 @@ def _promo_view(row: sqlite3.Row) -> Dict[str, Any]:
         "title": row["title"] or "",
         "description": row["description"] or "",
         "url": row["url"] or "",
+        "source": row["source"] or "",
     }
 
 
@@ -93,6 +179,22 @@ def build_promos_data(
         bevals = promos.recent_boost_evals(conn, limit=50)
     except sqlite3.Error:
         bevals = []
+    usage = ledger_usage_by_site(conn)
+
+    filtered_signups: List[Dict[str, Any]] = []
+    for row in signups:
+        site = _canonical_site(row.get("site"))
+        site_usage = usage.get(site, _empty_usage())
+        available = _available_accounts(site_usage)
+        used = _used_accounts(site_usage)
+        if not available:
+            continue
+        o = dict(row)
+        o["site"] = site
+        o["available_accounts"] = available
+        o["used_accounts"] = used
+        o["ledger_usage"] = site_usage
+        filtered_signups.append(o)
 
     # Group active ongoing/boost promotions by site (signups + watchlist are
     # surfaced in their own top-level sections, not under each site card).
@@ -139,6 +241,7 @@ def build_promos_data(
                 "name": name,
                 "kind": entry.get("kind", ""),
                 "scrape": _scrape_block(name),
+                "ledger_usage": usage.get(name, _empty_usage()),
                 "ongoing": ongoing_by_site.get(name, []),
                 "boosts": boosts_by_site.get(name, []),
             }
@@ -156,6 +259,7 @@ def build_promos_data(
                 "name": name,
                 "kind": "",
                 "scrape": _scrape_block(name),
+                "ledger_usage": usage.get(name, _empty_usage()),
                 "ongoing": ongoing_by_site.get(name, []),
                 "boosts": boosts_by_site.get(name, []),
             }
@@ -197,8 +301,9 @@ def build_promos_data(
     return {
         "meta": {"generated": now_utc},
         "sites": sites_out,
-        "signup_offers": signups,
+        "signup_offers": filtered_signups,
         "watchlist": watchlist,
         "boost_evals": boost_evals_out,
         "scrape_health": scrape_health,
+        "ledger_usage": usage,
     }

@@ -68,6 +68,43 @@
     return '<a class="promo-link" target="_blank" rel="noopener noreferrer" href="' +
       esc(url) + '">' + text + '</a>';
   }
+  function acctList(xs) {
+    if (!xs || !xs.length) return "—";
+    return xs.map(function (x) {
+      return '<span class="promo-acct-chip">' + esc(x) + '</span>';
+    }).join(" ");
+  }
+  function usedAccountsFromUsage(usage) {
+    var out = [];
+    usage = usage || {};
+    ["a1", "a2"].forEach(function (a) {
+      var row = usage[a] || {};
+      if (Number(row.total || 0) > 0) out.push(a.toUpperCase());
+    });
+    return out;
+  }
+  function availableAccountsFromUsage(usage) {
+    var out = [];
+    usage = usage || {};
+    ["a1", "a2"].forEach(function (a) {
+      var row = usage[a] || {};
+      if (Number(row.total || 0) <= 0) out.push(a.toUpperCase());
+    });
+    return out;
+  }
+  function usageSummary(usage) {
+    usage = usage || {};
+    return ["a1", "a2"].map(function (a) {
+      var row = usage[a] || {};
+      var total = Number(row.total || 0);
+      var open = Number(row.open || 0);
+      var closed = Number(row.closed || 0);
+      var cls = total > 0 ? " used" : "";
+      return '<span class="promo-account-state' + cls + '">' +
+        esc(a.toUpperCase()) + ': ' + total + ' (' + open + ' open/' + closed + ' closed)' +
+      '</span>';
+    }).join(" ");
+  }
 
   // ---- localStorage persistence ------------------------------------------
 
@@ -125,6 +162,8 @@
 
     var rows = offers.map(function (o) {
       var siteSlug = slug(o.site);
+      var available = o.available_accounts || availableAccountsFromUsage(o.ledger_usage);
+      var used = o.used_accounts || usedAccountsFromUsage(o.ledger_usage);
       return '<tr>' +
         '<td class="pos-time pos-match" title="' + esc(o.site) + '">' +
           orDash(o.site) + '</td>' +
@@ -134,8 +173,9 @@
         '<td class="num">' + orDash(o.free_bet_value) + '</td>' +
         '<td class="num">' + orDash(o.expiry) + '</td>' +
         '<td>' + orDash(o.promo_code) + '</td>' +
-        chkCellHtml("used.a1." + siteSlug, "Used on account 1 — " + (o.site || "")) +
-        chkCellHtml("used.a2." + siteSlug, "Used on account 2 — " + (o.site || "")) +
+        '<td>' + acctList(available) + '</td>' +
+        '<td>' + acctList(used) + '</td>' +
+        chkCellHtml("reviewed." + siteSlug, "Reviewed manually — " + (o.site || "")) +
       '</tr>';
     }).join("");
 
@@ -145,8 +185,8 @@
           '<th>Site</th><th>Offer</th>' +
           '<th class="num">Min odds</th><th class="num">Free bet</th>' +
           '<th class="num">Expiry</th><th>Promo code</th>' +
-          '<th class="promo-chk-cell">Used (a1)</th>' +
-          '<th class="promo-chk-cell">Used (a2)</th>' +
+          '<th>Available</th><th>Already used</th>' +
+          '<th class="promo-chk-cell">Reviewed</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
       '</table>';
@@ -165,7 +205,20 @@
           site: s.name,
           title: p.title,
           description: p.description,
-          url: p.url
+          url: p.url,
+          source: p.source,
+          ledger_usage: s.ledger_usage || {}
+        });
+      });
+      (s.boosts || []).forEach(function (p) {
+        out.push({
+          site: s.name,
+          title: p.title,
+          description: p.description,
+          url: p.url,
+          source: p.source,
+          ledger_usage: s.ledger_usage || {},
+          isBoost: true
         });
       });
     });
@@ -193,6 +246,9 @@
           linkOr(p.url, p.title) + '</td>' +
         '<td class="pos-sel" title="' + esc(p.description) + '">' +
           orDash(p.description) + '</td>' +
+        '<td>' + (p.isBoost ? '<span class="promo-type-chip boost">BOOST</span>' : '<span class="promo-type-chip">ONGOING</span>') + '</td>' +
+        '<td>' + orDash(p.source) + '</td>' +
+        '<td>' + usageSummary(p.ledger_usage) + '</td>' +
         chkCellHtml("optin.a1." + promoId, "Opted in on account 1 — " + (p.title || "")) +
         chkCellHtml("optin.a2." + promoId, "Opted in on account 2 — " + (p.title || "")) +
       '</tr>';
@@ -202,6 +258,7 @@
       '<table class="pos-table">' +
         '<thead><tr>' +
           '<th>Site</th><th>Promo</th><th>Details</th>' +
+          '<th>Type</th><th>Source</th><th>Ledger use</th>' +
           '<th class="promo-chk-cell">Opt-in (a1)</th>' +
           '<th class="promo-chk-cell">Opt-in (a2)</th>' +
         '</tr></thead>' +

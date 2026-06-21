@@ -245,6 +245,27 @@ class TestSeedFromRecon:
         assert "Sky Bet" in sites
         conn.close()
 
+    def test_manual_current_promos_seed_betfred_slate(self) -> None:
+        db = _tmp_db()
+        conn = _conn(db)
+        counts = promos.seed_manual_current_promos(conn, now_utc=FIXED_NOW)
+        assert counts["new"] >= 8
+        rows = conn.execute(
+            "SELECT promo_type, title, source FROM promotions "
+            "WHERE site='Betfred' AND status='active' ORDER BY title"
+        ).fetchall()
+        titles = {r["title"] for r in rows}
+        assert "Sports Welcome Offer" in titles
+        assert "Bet Builder Offer — Belgium vs Iran" in titles
+        assert "Bet Builder Winning Bonus — Uruguay vs Cape Verde" in titles
+        assert "2-Up Early Payout" in titles
+        assert all(r["source"] == "manual" for r in rows)
+        assert any(r["promo_type"] == "signup" for r in rows)
+        # Idempotent: second run only refreshes unchanged rows.
+        counts2 = promos.seed_manual_current_promos(conn, now_utc=LATER_NOW)
+        assert counts2["new"] == 0
+        conn.close()
+
     def test_idempotent(self) -> None:
         db = _tmp_db()
         conn = _conn(db)

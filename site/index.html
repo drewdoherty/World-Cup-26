@@ -35,7 +35,17 @@
   <main class="grid">
     <!-- Venues -->
     <section class="panel panel-venues">
-      <div class="panel-head"><span class="panel-label">💰 Venues</span><span class="panel-meta" id="venues-meta"></span></div>
+      <div class="panel-head">
+        <span class="panel-label">💰 Venues</span>
+        <span class="panel-controls">
+          <select class="chart-select venue-select" id="venue-account-select" aria-label="Sportsbook account">
+            <option value="all">All</option>
+            <option value="1">Sportsbook 1</option>
+            <option value="2">Sportsbook 2</option>
+          </select>
+        </span>
+        <span class="panel-meta" id="venues-meta"></span>
+      </div>
       <div class="panel-body" id="venues"></div>
     </section>
 

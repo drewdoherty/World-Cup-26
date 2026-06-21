@@ -460,6 +460,12 @@ def build_scores_data(
 
     card_body = _read_card_body(card_path)
     parsed = sitedata.parse_scorelines(card_body)
+    if os.path.normpath(str(card_path)) == os.path.normpath("data/card_latest.md"):
+        finished = sitedata._finished_fixture_tokens()
+        parsed = [
+            fx for fx in parsed
+            if not sitedata._matches_finished_fixture(fx.get("fixture"), finished)
+        ]
 
     fixtures: List[Dict[str, Any]] = []
     for fx in parsed:

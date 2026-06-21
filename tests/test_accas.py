@@ -69,24 +69,30 @@ def test_promo_catalog_contains_user_requested_accounts_and_terms():
 
     virgin = by_site[("Virgin Bet", "50% winnings boost — Scotland vs Morocco bet builder")]
     assert virgin["accounts"] == ["A1", "A2"]
-    assert virgin["min_legs"] == 4
+    assert virgin["min_legs"] == 3
     assert virgin["min_total_odds"] == pytest.approx(2.0)
     assert virgin["boost_pct"] == pytest.approx(50.0)
-    assert "4+ legs" in virgin["notes"]
+    assert "combined min odds EVS" in virgin["notes"]
     assert "Bet Builders only" in virgin["notes"]
 
-    paddy = by_site[("Paddy Power", "England/Ghana free acca")]
-    assert paddy["accounts"] == ["A1", "A2"]
-    assert paddy["min_legs"] == 3
-    assert paddy["min_total_odds"] == pytest.approx(2.0)
+    paddy_free = by_site[("Paddy Power", "England/Ghana £5 free Bet Builder x2")]
+    assert paddy_free["accounts"] == ["A1 token 1", "A1 token 2"]
+    assert paddy_free["min_legs"] == 3
+    assert paddy_free["min_total_odds"] == pytest.approx(2.0)
+
+    paddy_moneyback = by_site[("Paddy Power", "Money-back acca insurance x2")]
+    assert paddy_moneyback["accounts"] == ["A1 token 1", "A1 token 2"]
+    assert paddy_moneyback["venue_keys"] == ["paddypower"]
 
     betfair = by_site[("Betfair Sportsbook", "Max £10 free bet acca")]
     assert betfair["max_free_bet"] == pytest.approx(10.0)
     assert betfair["min_leg_odds"] == pytest.approx(1.5)
+    assert betfair["max_leg_odds"] == pytest.approx(6.0)
 
     betfred = by_site[("Betfred", "ENG/SCOT World Cup bet builder")]
     assert betfred["min_legs"] == 3
     assert betfred["min_total_odds"] == pytest.approx(4.0)
+    assert "pre-built" in betfred["notes"]
 
 
 def test_betfair_acca_uses_only_legs_at_1_5_or_better():
@@ -95,24 +101,25 @@ def test_betfair_acca_uses_only_legs_at_1_5_or_better():
     assert betfair["status"] == "ready"
     assert len(betfair["legs"]) >= 3
     assert all(float(leg["odds"]) >= 1.5 for leg in betfair["legs"])
+    assert all(float(leg["odds"]) <= 6.0 for leg in betfair["legs"])
     assert betfair["total_odds"] >= 1.5 ** 3
 
 
 def test_virgin_builder_is_component_ranked_not_joint_priced():
     rows = accas.build_promo_accas(_feed())
-    virgin = next(r for r in rows if r["site"] == "Virgin Bet")
-    assert virgin["status"] == "ready"
-    assert len(virgin["legs"]) == 4
-    assert "joint bet-builder EV not priced yet" in virgin["reason"]
-    assert [leg["market"] for leg in virgin["legs"]] == [
-        "Match result",
-        "Goals",
-        "BTTS",
-        "Score lean",
+    virgin = next(r for r in rows if r["site"] == "Virgin Bet" and "Scotland" in r["title"])
+    assert virgin["status"] == "manual"
+    assert len(virgin["legs"]) == 3
+    assert "Exposure guard" in virgin["reason"]
+    assert [leg["selection"] for leg in virgin["legs"]] == [
+        "Under 3.5 goals",
+        "BTTS No",
+        "Scotland under 1.5 team goals",
     ]
+    assert "Morocco" not in [leg["selection"] for leg in virgin["legs"]]
 
 
-def test_bet_builder_below_min_total_is_incomplete():
+def test_betfred_manual_builder_does_not_pretend_joint_price():
     feed = {
         "meta": {"generated": "2026-06-19 10:00:00 UTC"},
         "fixtures": [
@@ -128,16 +135,16 @@ def test_bet_builder_below_min_total_is_incomplete():
     }
     rows = accas.build_promo_accas(feed)
     betfred = next(r for r in rows if r["site"] == "Betfred")
-    assert betfred["status"] == "incomplete"
-    assert "below promo minimum" in betfred["reason"]
-    assert betfred["total_odds"] < betfred["min_total_odds"]
+    assert betfred["status"] == "manual"
+    assert "Manual price in the app" in betfred["reason"]
+    assert betfred["total_odds"] == pytest.approx(1.0)
 
 
 def test_specific_fixture_missing_is_pending_not_fabricated():
     feed = {"meta": {"generated": "x"}, "fixtures": [_fixture("Brazil vs Haiti")]}
     rows = accas.build_promo_accas(feed)
-    paddy = next(r for r in rows if r["site"] == "Paddy Power")
-    virgin = next(r for r in rows if r["site"] == "Virgin Bet")
+    paddy = next(r for r in rows if r["site"] == "Paddy Power" and "England/Ghana" in r["title"])
+    virgin = next(r for r in rows if r["site"] == "Virgin Bet" and "Scotland" in r["title"])
     assert paddy["status"] == "pending"
     assert paddy["legs"] == []
     assert "fixture not present" in paddy["reason"]
@@ -154,7 +161,9 @@ def test_format_includes_promos_accounts_and_warning():
     assert "Virgin Bet" in out
     assert "A1/A2" in out
     assert "50% winnings boost" in out
-    assert "joint-priced" in out
+    assert "app-priced" in out
+    assert "betfair_sb_uk" not in out
+    assert "Betfair Sportsbook" in out
 
 
 def test_handle_accas_loads_scores_json(tmp_path):

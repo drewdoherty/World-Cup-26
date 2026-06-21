@@ -83,6 +83,33 @@ def _seeded_conn() -> sqlite3.Connection:
         boosted_odds=3.5, was_odds=3.0, model_prob=0.40, fair_odds=2.5,
         edge=0.40, is_plus_ev=True, priceable=True, reason=None, source="scrape",
     )
+    # Ledger rows drive server-side used/unused account status.
+    conn.execute(
+        "CREATE TABLE bets ("
+        "id INTEGER PRIMARY KEY, platform TEXT, account TEXT, status TEXT)"
+    )
+    conn.execute(
+        "INSERT INTO bets(platform, account, status) VALUES "
+        "('Sky Bet', '1', 'won'), "
+        "('Betfred', '2', 'open'), "
+        "('Paddypower', '1', 'lost'), "
+        "('Paddy Power', '2', 'open')"
+    )
+    promos._upsert_seed_row(
+        conn,
+        {
+            "site": "Paddy Power",
+            "title": "Bet £5 Get £40",
+            "description": "Bet £5, get £40 in free bets",
+            "promo_type": "signup",
+            "terms": promos._encode_signup_terms(
+                min_stake="£5", min_odds="evens", free_bet_value="£40",
+                expiry="30 days", promo_code="Y",
+            ),
+            "url": "",
+        },
+        "2026-06-13T00:00:00",
+    )
     return conn
 
 
@@ -97,7 +124,7 @@ class TestBuildPromosData:
         # Exact top-level key set from the shared contract.
         assert set(data.keys()) == {
             "meta", "sites", "signup_offers", "watchlist",
-            "boost_evals", "scrape_health",
+            "boost_evals", "scrape_health", "ledger_usage",
         }
         assert data["meta"] == {"generated": FIXED_NOW}
 
@@ -124,7 +151,9 @@ class TestBuildPromosData:
             assert entry["name"] in names
         # Each site card has the required keys.
         for s in data["sites"]:
-            assert set(s.keys()) == {"name", "kind", "scrape", "ongoing", "boosts"}
+            assert set(s.keys()) == {
+                "name", "kind", "scrape", "ledger_usage", "ongoing", "boosts",
+            }
             assert set(s["scrape"].keys()) == {"status", "last_seen"}
         # Paddy Power got an ongoing + a boost; Bet365 shows blocked; an
         # un-fetched site shows 'never'.
@@ -132,6 +161,8 @@ class TestBuildPromosData:
         assert pp["scrape"]["status"] == "ok"
         assert len(pp["ongoing"]) == 1
         assert len(pp["boosts"]) == 1
+        assert pp["ledger_usage"]["a1"]["total"] == 1
+        assert pp["ledger_usage"]["a2"]["total"] == 1
         b365 = next(s for s in data["sites"] if s["name"] == "Bet365")
         assert b365["scrape"]["status"] == "blocked"
         unfetched = next(s for s in data["sites"] if s["name"] == "Unibet")
@@ -148,9 +179,13 @@ class TestBuildPromosData:
         sky = next(o for o in data["signup_offers"] if o["site"] == "Sky Bet")
         assert set(sky.keys()) == {
             "site", "offer", "min_odds", "min_stake", "free_bet_value",
-            "expiry", "promo_code", "url",
+            "expiry", "promo_code", "url", "available_accounts",
+            "used_accounts", "ledger_usage",
         }
         assert sky["free_bet_value"] == "£50"
+        assert sky["used_accounts"] == ["A1"]
+        assert sky["available_accounts"] == ["A2"]
+        assert not any(o["site"] == "Paddy Power" for o in data["signup_offers"])
         # Watchlist row.
         assert any(w["site"] == "Virgin Bet" for w in data["watchlist"])
         for w in data["watchlist"]:

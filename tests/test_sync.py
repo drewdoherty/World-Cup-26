@@ -56,6 +56,30 @@ def test_push_site_disabled_only_refreshes(tmp_path, monkeypatch):
     assert (tmp_path / "site" / "data.json").exists()  # still refreshed
 
 
+def test_push_site_defaults_to_local_only(tmp_path, monkeypatch):
+    # Private/local operation is the default: unless WCA_AUTOPUSH=1 is explicitly
+    # set, bot/daemon syncs regenerate JSON but do not touch git/Vercel.
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    monkeypatch.delenv("WCA_AUTOPUSH", raising=False)
+    db = str(tmp_path / "t.db")
+    record_bet("2026-06-11T10:00:00", "M", "A vs B", "h2h", "A", "virginbet",
+               2.0, 5.0, db_path=db)
+    monkeypatch.setattr(sync, "_REPO", str(tmp_path))
+    (tmp_path / "site").mkdir()
+    (tmp_path / "data").mkdir()
+    called = {"git": False}
+
+    def fake_git(*a, **k):
+        called["git"] = True
+        raise AssertionError("git should not run unless WCA_AUTOPUSH=1")
+
+    monkeypatch.setattr(sync, "_git", fake_git)
+    result = sync.push_site(reason="x", db_path=db)
+    assert result is False
+    assert called["git"] is False
+    assert (tmp_path / "site" / "data.json").exists()
+
+
 def test_push_site_never_raises_on_git_failure(tmp_path, monkeypatch):
     monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
     db = str(tmp_path / "t.db")

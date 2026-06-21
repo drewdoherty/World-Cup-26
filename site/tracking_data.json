@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-20 13:44:55 UTC"
+    "generated": "2026-06-21 08:14:27 UTC"
   },
   "summary": {
     "fixtures_complete": 28,
@@ -12,7 +12,7 @@
     "market_logloss": 0.9515,
     "top6_hits": 14,
     "bets": {
-      "settled": 61,
+      "settled": 68,
       "won": 17,
       "lost": 44,
       "pl": 182.32,
@@ -2908,7 +2908,80 @@
       "pending": false
     }
   ],
-  "pending": [],
+  "pending": [
+    {
+      "fixture": "Spain vs Saudi Arabia",
+      "date": null,
+      "kickoff": "2026-06-21T16:00:00+00:00",
+      "model_1x2": {
+        "home": 0.8649,
+        "draw": 0.0975,
+        "away": 0.0377
+      },
+      "model_source": "card_build",
+      "model_pick": "home",
+      "top_scoreline": {
+        "score": "2-0",
+        "prob": 18.0
+      },
+      "picks": [],
+      "pending": true
+    },
+    {
+      "fixture": "Belgium vs Iran",
+      "date": null,
+      "kickoff": "2026-06-21T19:00:00+00:00",
+      "model_1x2": {
+        "home": 0.5826,
+        "draw": 0.2418,
+        "away": 0.1756
+      },
+      "model_source": "card_build",
+      "model_pick": "home",
+      "top_scoreline": {
+        "score": "1-0",
+        "prob": 15.8
+      },
+      "picks": [],
+      "pending": true
+    },
+    {
+      "fixture": "Uruguay vs Cape Verde",
+      "date": null,
+      "kickoff": "2026-06-21T22:00:00+00:00",
+      "model_1x2": {
+        "home": 0.6676,
+        "draw": 0.2225,
+        "away": 0.11
+      },
+      "model_source": "card_build",
+      "model_pick": "home",
+      "top_scoreline": {
+        "score": "1-0",
+        "prob": 18.2
+      },
+      "picks": [],
+      "pending": true
+    },
+    {
+      "fixture": "New Zealand vs Egypt",
+      "date": null,
+      "kickoff": "2026-06-22T01:00:00+00:00",
+      "model_1x2": {
+        "home": 0.192,
+        "draw": 0.2624,
+        "away": 0.5456
+      },
+      "model_source": "card_build",
+      "model_pick": "away",
+      "top_scoreline": {
+        "score": "0-1",
+        "prob": 18.1
+      },
+      "picks": [],
+      "pending": true
+    }
+  ],
   "bets": [
     {
       "id": 1,
@@ -3518,6 +3591,76 @@
       "stake": 6.0,
       "status": "lost",
       "pl": -6.0,
+      "clv": null
+    },
+    {
+      "id": 86,
+      "match": "England vs Ghana",
+      "selection": "England -2.5 Goals",
+      "odds": 0.0,
+      "stake": 5.0,
+      "status": "void",
+      "pl": 0.0,
+      "clv": null
+    },
+    {
+      "id": 87,
+      "match": "England vs Ghana",
+      "selection": "England (-2.0)",
+      "odds": 0.0,
+      "stake": 5.0,
+      "status": "void",
+      "pl": 0.0,
+      "clv": null
+    },
+    {
+      "id": 89,
+      "match": "Netherlands vs Sweden",
+      "selection": "Netherlands 1-0",
+      "odds": 8.5,
+      "stake": 5.0,
+      "status": "void",
+      "pl": 0.0,
+      "clv": null
+    },
+    {
+      "id": 90,
+      "match": "Netherlands vs Sweden",
+      "selection": "Over 1.5",
+      "odds": 1.22,
+      "stake": 5.0,
+      "status": "void",
+      "pl": 0.0,
+      "clv": null
+    },
+    {
+      "id": 91,
+      "match": "Netherlands vs Sweden",
+      "selection": "Wout Weghorst",
+      "odds": 1.95,
+      "stake": 5.0,
+      "status": "void",
+      "pl": 0.0,
+      "clv": null
+    },
+    {
+      "id": 92,
+      "match": "Netherlands vs Sweden",
+      "selection": "Memphis Depay",
+      "odds": 1.75,
+      "stake": 5.0,
+      "status": "void",
+      "pl": 0.0,
+      "clv": null
+    },
+    {
+      "id": 93,
+      "match": "Scotland vs Morocco",
+      "selection": "Ayoub El Kaabi",
+      "odds": 5.5,
+      "stake": 5.0,
+      "status": "void",
+      "pl": 0.0,
       "clv": null
     }
   ]

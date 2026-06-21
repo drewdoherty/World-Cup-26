@@ -37,6 +37,33 @@
     text-align: center;
     white-space: nowrap;
   }
+  .promo-acct-chip, .promo-type-chip, .promo-account-state {
+    display: inline-flex;
+    align-items: center;
+    min-height: 18px;
+    padding: 2px 6px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: rgba(255,255,255,0.03);
+    color: var(--text-dim);
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    margin: 1px 2px 1px 0;
+  }
+  .promo-acct-chip {
+    border-color: rgba(74,222,128,0.35);
+    color: var(--pos);
+  }
+  .promo-account-state.used {
+    border-color: rgba(253,224,71,0.38);
+    color: var(--betfair);
+  }
+  .promo-type-chip.boost {
+    border-color: rgba(96,165,250,0.38);
+    color: var(--polymarket);
+  }
 
   /* Watchlist — readable cards. */
   .promo-watch { display: flex; flex-direction: column; gap: 11px; }
@@ -147,9 +174,9 @@
     <!-- 1. Sign-up offers -->
     <section class="panel" style="margin-top:14px">
       <div class="panel-head">
-        <span class="panel-label">01 // Sign-up Offers</span>
+        <span class="panel-label">01 // Unused Sign-up Offers</span>
         <span class="panel-meta">
-          <span class="promo-local-note">used-flags stored locally on this device</span>
+          <span class="promo-local-note">filtered by ledger venue/account usage</span>
           <span id="signup-meta"></span>
         </span>
       </div>
@@ -196,11 +223,13 @@
     </section>
 
     <div class="track-note">
-      Sign-up "Used" flags and opt-in toggles are personal trackers held in this
-      browser's localStorage &mdash; per device, not synced. Boost evaluations are
-      graded against the model's fair price at capture time; a green marker means
-      the boosted odds cleared the fair line (+EV). Scrape health is the honest
-      record of which promo pages the scraper could reach.
+      Sign-up offers are filtered from the ledger: if A1 or A2 has any open or
+      closed bet at that venue, that account is marked used; fully-used signup
+      rows are hidden. Opt-in toggles are still personal trackers held in this
+      browser's localStorage. Boost evaluations are graded against the model's
+      fair price at capture time; a green marker means the boosted odds cleared
+      the fair line (+EV). Scrape health is the honest record of which promo
+      pages the scraper could reach.
     </div>
   </main>
 

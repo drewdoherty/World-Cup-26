@@ -240,6 +240,12 @@ def run_cycle(
             counts = promos.seed_from_recon(conn, now_utc=now)
             _log("seeded from recon: signup=%d ongoing=%d (catalog had %d rows)"
                  % (counts["signup"], counts["ongoing"], n_promos))
+        manual = promos.seed_manual_current_promos(conn, now_utc=now)
+        if manual["new"] or manual["changed"] or manual["removed"]:
+            _log(
+                "manual promo slate reconciled: new=%d changed=%d removed=%d"
+                % (manual["new"], manual["changed"], manual["removed"])
+            )
 
         # Load the boost-grading scores feed once per cycle if the engine exists.
         scores_feed = None

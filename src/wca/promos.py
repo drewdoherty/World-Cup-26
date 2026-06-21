@@ -155,6 +155,13 @@ SITES: List[Dict[str, Any]] = [
         "boosts_url": None,
         "expect_promos": True,
     },
+    {
+        "name": "Betfred",
+        "kind": "book",
+        "promos_url": "https://www.betfred.com/promotions",
+        "boosts_url": None,
+        "expect_promos": True,
+    },
     # --- Exchanges (peer-to-peer; no bookmaker-style promos) ---
     {
         "name": "Smarkets",
@@ -188,6 +195,119 @@ SITES: List[Dict[str, Any]] = [
 ]
 
 EXCLUDED_SEED_SITES = {"Ladbrokes"}
+
+
+MANUAL_CURRENT_PROMOS: Tuple[Dict[str, str], ...] = (
+    {
+        "site": "Betfred",
+        "title": "Sports Welcome Offer",
+        "description": (
+            "New customers only. Register, deposit with Debit Card, and place first "
+            "bet £10+ at Evens (2.0)+ on Sports within 7 days to get £30 in Sports "
+            "Free Bets and £20 in Bet Builder Free Bets within 24 hours of settlement. "
+            "7-day expiry. Eligibility and payment exclusions apply."
+        ),
+        "promo_type": "signup",
+        "terms": "",
+        "url": "",
+    },
+    {
+        "site": "Betfred",
+        "title": "Bet Builder Offer — Belgium vs Iran",
+        "description": (
+            "Opt in. Bet Builder single (3/1+) on BEL/IRN. 3+ legs. 100% stake "
+            "back, max £5 Free Bets, if the Bet Builder loses. No pre-built "
+            "builders. Paid in 24hrs. Removed after 48hrs."
+        ),
+        "promo_type": "ongoing",
+        "terms": "fixture=Belgium vs Iran; min_legs=3; min_total_odds=4.0; max_refund=£5; refund=free_bet_if_loses",
+        "url": "",
+    },
+    {
+        "site": "Betfred",
+        "title": "Bet Builder Winning Bonus — Uruguay vs Cape Verde",
+        "description": (
+            "Opt in required. Bet Builder single (3/1+) on selected matches. 3+ "
+            "legs. 50% cash winnings bonus. No pre-built builders. Paid in 24hrs. "
+            "£50 max stake. Max one bonus per customer."
+        ),
+        "promo_type": "ongoing",
+        "terms": "fixture=Uruguay vs Cape Verde; min_legs=3; min_total_odds=4.0; boost=50% cash bonus; max_stake=£50",
+        "url": "",
+    },
+    {
+        "site": "Betfred",
+        "title": "Bet £10 & Get £10 In Free Bets",
+        "description": (
+            "Opt-in required. Bet Builder single (3/1+) on any ENG/SCOT World Cup "
+            "match. 3+ legs. Min stake £10. Pre-built builders do not apply. Max "
+            "£10 in Free Bets for Bet Builder. Paid on settlement. 5-day expiry."
+        ),
+        "promo_type": "ongoing",
+        "terms": "teams=ENG/SCOT; min_legs=3; min_total_odds=4.0; min_stake=£10; free_bet=£10; expiry=5 days",
+        "url": "",
+    },
+    {
+        "site": "Betfred",
+        "title": "Matchday Turbo Boosts",
+        "description": (
+            "Look out for boosted odds every matchday. Singles only. Max stakes "
+            "vary. Limited availability."
+        ),
+        "promo_type": "boost",
+        "terms": "singles_only=true; max_stakes=vary; availability=limited",
+        "url": "",
+    },
+    {
+        "site": "Betfred",
+        "title": "Double or Treble Odds — First Goalscorer",
+        "description": (
+            "Pre-match single on First Goalscorer market in selected games. Get "
+            "double or treble odds if your winning First Goalscorer bet scores a "
+            "second or third. Paid in cash on market settlement. 90 mins only."
+        ),
+        "promo_type": "ongoing",
+        "terms": "market=first_goalscorer; pre_match=true; settlement=90min; uplift=double_or_treble_odds",
+        "url": "",
+    },
+    {
+        "site": "Betfred",
+        "title": "2-Up Early Payout",
+        "description": (
+            "Pre-match Football bets on the 2 Up Early Payout market in selected "
+            "games. Paid as a winner within 5 minutes if your team goes 2 goals "
+            "ahead. Selected leagues only. 90 mins only."
+        ),
+        "promo_type": "ongoing",
+        "terms": "market=match_winner; pre_match=true; settlement=90min; early_payout=2_goals_ahead",
+        "url": "",
+    },
+    {
+        "site": "Betfred",
+        "title": "Acca Flex",
+        "description": (
+            "Football accumulators, 5+ legs, all markets. Min odds 1/2 per leg. "
+            "5%-100% cash bonus if all selections win. £10 max refund if one leg "
+            "loses. Paid within 24hrs of bet settlement. No Cash Out bets."
+        ),
+        "promo_type": "ongoing",
+        "terms": "min_legs=5; min_leg_odds=1.5; cash_bonus=5%-100%; one_leg_loses_refund_max=£10; no_cashout=true",
+        "url": "",
+    },
+    {
+        "site": "Betfred",
+        "title": "Beat Fred",
+        "description": (
+            "Free to Play. Individual game periods. Answer 6 questions prior to "
+            "start. 6 correct: share £25,000. 5 correct: £2 Free Bets. 4 correct: "
+            "£1 Free Bets. 3 correct: £0.50 Free Bets. 0-2: no win. 7-day expiry. "
+            "Credited within 48 hours."
+        ),
+        "promo_type": "ongoing",
+        "terms": "free_to_play=true; questions=6; prize_pool=£25000; free_bet_ladder=5:£2,4:£1,3:£0.50",
+        "url": "",
+    },
+)
 
 
 def site_by_name(name: str) -> Optional[Dict[str, Any]]:
@@ -1145,6 +1265,41 @@ def seed_from_recon(
         if _upsert_seed_row(conn, cand, now):
             counts["ongoing"] += 1
 
+    conn.commit()
+    return counts
+
+
+def seed_manual_current_promos(
+    conn: sqlite3.Connection,
+    now_utc: Optional[str] = None,
+) -> Dict[str, int]:
+    """Seed current in-app/manual promos captured from operator screenshots.
+
+    These are not web-scraped rows: ``source='manual'`` makes that explicit.
+    Unlike recon seeds, these represent the *currently visible* in-app promo
+    slate, so re-running this function reconciles the manual rows for each site
+    and marks old manual rows removed if they are no longer in the curated list.
+    """
+    now = now_utc or _now_utc()
+    by_site: Dict[str, List[Dict[str, Any]]] = {}
+    for raw in MANUAL_CURRENT_PROMOS:
+        cand = dict(raw)
+        cand["site"] = canonical_site_name(cand.get("site") or "")
+        if cand.get("promo_type") == "signup" and cand.get("site") == "Betfred":
+            cand["terms"] = _encode_signup_terms(
+                min_stake="£10",
+                min_odds="evens",
+                free_bet_value="£30 sports + £20 Bet Builder",
+                expiry="7 days",
+                promo_code="",
+            )
+        by_site.setdefault(cand["site"], []).append(cand)
+
+    counts = {"new": 0, "changed": 0, "removed": 0, "unchanged": 0}
+    for site, cands in sorted(by_site.items()):
+        diff = diff_and_upsert(conn, site, cands, now, source="manual")
+        for key in counts:
+            counts[key] += len(diff.get(key, []))
     conn.commit()
     return counts
 

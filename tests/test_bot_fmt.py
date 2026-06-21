@@ -117,11 +117,12 @@ class TestSummaryFormat:
 
     # Legacy substrings from test_bot_bets.py must still hold.
 
-    def test_legacy_at_risk_open_label(self, tmp_path):
+    def test_active_at_risk_label(self, tmp_path):
         db = str(tmp_path / "t.db")
         _seed(db)
         out = app.handle_summary(db)
-        assert "At risk (open):" in out
+        assert "At risk (active):" in out
+        assert "Settlement queue" in out
 
     def test_legacy_sportsbook_pool_line(self, tmp_path):
         db = str(tmp_path / "t.db")
@@ -159,7 +160,8 @@ class TestBetsFormat:
         _seed(db)
         out = app.handle_bets(db)
         assert "Active open bets" in out
-        assert "(3)" in out
+        assert "(2)" in out
+        assert "1 FT hidden" in out
 
     def test_code_block_fences_present(self, tmp_path):
         db = str(tmp_path / "t.db")
@@ -174,10 +176,9 @@ class TestBetsFormat:
         # Table header columns.
         assert "#" in out          # per-bet id prefix
         assert "\u2192" in out      # stake->win arrow rows
-        # match names render on the id line (no fixed header row anymore)
-        assert "USA v Paraguay" in out
-        # selection + odds + stake all live on the indented second line
-        assert "Paraguay      4.20" in out
+        # completed fixtures are hidden from active exposure.
+        assert "USA v Paraguay" not in out
+        assert "Treble" in out
 
     # Legacy substrings from test_bot_bets.py must still hold verbatim.
 
@@ -187,11 +188,11 @@ class TestBetsFormat:
         out = app.handle_bets(db)
         assert "SPORTSBOOK" in out and "POLYMARKET" in out
 
-    def test_legacy_paraguay_win(self, tmp_path):
+    def test_completed_row_hidden_from_active_win_total(self, tmp_path):
         db = str(tmp_path / "t.db")
         _seed(db)
         out = app.handle_bets(db)
-        assert "£18.18" in out
+        assert "£18.18" not in out
 
     def test_legacy_free_marker(self, tmp_path):
         db = str(tmp_path / "t.db")
@@ -199,11 +200,11 @@ class TestBetsFormat:
         out = app.handle_bets(db)
         assert "(free)" in out
 
-    def test_legacy_sportsbook_max_win_loss(self, tmp_path):
+    def test_active_sportsbook_max_win_loss(self, tmp_path):
         db = str(tmp_path / "t.db")
         _seed(db)
         out = app.handle_bets(db)
-        assert "max win £57.00 / max loss £5.68" in out
+        assert "max win £38.82 / max loss £0.00" in out
 
     def test_legacy_polymarket_max_win_loss(self, tmp_path):
         db = str(tmp_path / "t.db")

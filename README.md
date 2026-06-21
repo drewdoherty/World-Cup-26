@@ -2,7 +2,7 @@
 
 A quantitative betting **research platform and live operation** for the 2026 FIFA World Cup. Built from zero in the ~25 hours before the opening match; now running through the tournament. It tests one question with real money and pre-registered metrics: **can systematic +EV betting on international football be demonstrated — and measured honestly — across bookmakers and prediction markets?**
 
-**Live dashboard:** https://fifa-world-cup-2026-betting-gamblin.vercel.app ([scores & markets](https://fifa-world-cup-2026-betting-gamblin.vercel.app/scores) · [under the hood](https://fifa-world-cup-2026-betting-gamblin.vercel.app/architecture))
+**Private dashboard:** run `WCA_AUTOPUSH=0 ./.venv/bin/python scripts/wca_local_site.py --db data/wca.db`, then open `http://127.0.0.1:8742`. The old Vercel deployment is no longer the default operating surface.
 
 Three bankroll pools: UK sportsbooks (£1,000 notional, CLV-gated ladder to £5,000), Polymarket ($1,310 USDC), Kalshi (planned). Recommendations-only at the sportsbooks; semi-automated with a human confirm gate on prediction markets.
 
@@ -93,7 +93,7 @@ flowchart TD
 - **Adaptive odds daemon** (`wca_snapshotd`): hourly idle → 5-min closing window → 3-min in-play, quota-aware with a hard reserve, never sleeps past a closing line. Snapshots feed the CLV ledger and the live line-movement charts.
 - **Telegram bot**: `/card` `/next` `/scores` `/accas` `/bets` `/summary` `/clv` `/pm` `/boost` `/structure` `/settle` `/ping` + **betslip-screenshot ingestion** (Claude vision reads any slip → confirm → ledger) and a **Y/N confirm gate** for Polymarket orders. Multi-chat with an **admin gate**: money-touching actions are restricted to one user id; groups get read-only commands. Live-DB commands (`/summary` `/bets` `/clv` `/pm`) rebuild on every read; cache-backed commands (`/card` `/next` `/scores` `/accas` `/boost` `/structure`) carry an explicit **⚠️ STALE banner** when the data behind them is older than its freshness window, so a command never silently serves stale numbers.
 - **Polymarket trade ideas** (`wca_pm_propose`): one consolidated message covering the **next 5 matches**, led by an exposure-and-hedge header. When there is open sportsbook exposure from a model/free-bet source on a match, proposals are labelled as **hedges** of that exposure (or adds to it); otherwise they are the best model-fair-vs-market EV picks.
-- **Auto-publishing**: every ledger write — including bot `/settle` settlements — and every in-play polling cycle regenerates the site data and pushes, so the public dashboard's open *and* closed positions track the ledger with no manual steps.
+- **Local-first publishing**: every ledger write — including bot `/settle` settlements — can regenerate the site data locally. Git/Vercel publishing is opt-in via `WCA_AUTOPUSH=1`; private operation defaults to `WCA_AUTOPUSH=0`.
 - **Polymarket CLOB client** (no SDK): raw EIP-712 signing for EOA *and* proxy-wallet account classes (works around the official SDKs' signer-address bug), dry-run by default, per-order/daily caps, World-Cup-only allowlist.
 
 ## Repository map
@@ -116,7 +116,7 @@ src/wca/
 └── sync.py            # auto regenerate + push site on ledger writes
 scripts/               # wca_bot, wca_snapshotd, wca_build_card, wca_site,
                        # wca_event_ev, wca_arb, wca_advancement, wca_pm_probe, wca_cli
-site/                  # static terminal dashboard (Vercel): positions open/closed,
+site/                  # static terminal dashboard (localhost by default): positions open/closed,
                        # P&L, line-movement & staking charts, scores vs market, architecture
 backtests/             # halflife sweep, blend fit, WC2022 closing-odds pull
 docs/                  # SYSTEM_MAP, recon (7 verified reports), research + bibliography
@@ -136,6 +136,8 @@ cp .env.example .env                                 # add your keys
 ./.venv/bin/python scripts/wca_snapshotd.py          # adaptive odds daemon
 ./.venv/bin/python scripts/wca_bot.py                # Telegram ops bot
 ./.venv/bin/python scripts/wca_site.py               # regenerate dashboard data
+WCA_AUTOPUSH=0 ./.venv/bin/python scripts/wca_local_site.py --db data/wca.db
+                                                       # private local dashboard
 ```
 
 ## Environment
@@ -147,6 +149,7 @@ cp .env.example .env                                 # add your keys
 | `TELEGRAM_ADMIN_USER_ID` | admin gate — only this user can confirm orders / log bets |
 | `ANTHROPIC_API_KEY` | Claude vision for betslip-screenshot ingestion |
 | `POLYMARKET_PRIVATE_KEY` / `POLYMARKET_FUNDER` | CLOB order signing (dry-run default: `PM_DRY_RUN=1`) |
+| `WCA_AUTOPUSH` | `0` for private/local mode; set `1` only to push site JSON to GitHub/Vercel |
 | `BETFAIR_APP_KEY` … | exchange API (planned: correct-score markets + execution) |
 
 **Never commit `.env`.** It is gitignored; the private key controls real funds.

@@ -75,6 +75,7 @@ def main(argv=None) -> int:
     conn = promos._connect(args.db)
     try:
         promos.init_db(conn)
+        promos.seed_manual_current_promos(conn, now_utc=now_utc)
         data = promosdata.build_promos_data(conn, scores_feed, now_utc)
     finally:
         conn.close()

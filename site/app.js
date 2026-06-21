@@ -248,9 +248,12 @@
     // Per-bookmaker rows nested under each venue, coloured by book.
     var plats = d.platforms || {};
 
-    function platformRows(venueKey, venueWagered, ccy) {
+    function platformRows(venueKey, venueWagered, ccy, account) {
       var rows = Object.keys(plats).filter(function (p) {
-        return (plats[p].venue || "sportsbook") === venueKey && Number(plats[p].wagered || 0) > 0;
+        var blk = plats[p] || {};
+        if ((blk.venue || "sportsbook") !== venueKey) return false;
+        if (account && String(blk.account || "1") !== String(account)) return false;
+        return Number(blk.wagered || 0) > 0;
       }).sort(function (a, b) { return plats[b].wagered - plats[a].wagered; });
       if (!rows.length) return "";
       return '<div class="venue-books">' + rows.map(function (p) {
@@ -260,11 +263,12 @@
         var plBit = pl !== 0
           ? ' · <span class="' + (pl >= 0 ? "pos" : "neg") + '">' + signedMoney(pl, ccy) + '</span>'
           : "";
+        var name = blk.platform || p;
         return '<div class="venue-book-row">' +
-          '<span class="book-dot" style="background:' + bookColor(p) + '"></span>' +
-          '<span class="book-name">' + esc(p) + '</span>' +
+          '<span class="book-dot" style="background:' + bookColor(name) + '"></span>' +
+          '<span class="book-name">' + esc(name) + accountSuffix(blk.account) + '</span>' +
           '<span class="book-bar"><span style="display:block;height:100%;width:' +
-            (frac * 100).toFixed(1) + '%;background:' + bookColor(p) + ';opacity:.55"></span></span>' +
+            (frac * 100).toFixed(1) + '%;background:' + bookColor(name) + ';opacity:.55"></span></span>' +
           '<span class="book-amt num">' + money(blk.wagered, ccy) +
             ' <span class="dim">(' + blk.n_bets + ')</span>' + plBit + '</span>' +
         '</div>';
@@ -285,9 +289,8 @@
       // account 1 keeps the canonical green, account 2 uses a teal-green.
       var color = (k === "sportsbook_2") ? "#34d399"
         : (VENUE_COLOR[pvk] || "#9ca3af");
-      // Per-book rows only under sportsbook_1 (or the combined sportsbook /
-      // non-sportsbook venues) — never duplicated under sportsbook_2.
-      var books = (k === "sportsbook_2") ? "" : platformRows(pvk, amt, ccy);
+      var acct = k === "sportsbook_1" ? "1" : (k === "sportsbook_2" ? "2" : null);
+      var books = platformRows(pvk, amt, ccy, acct);
       return '' +
         '<div class="venue-row">' +
           '<div class="venue-top">' +
@@ -307,6 +310,22 @@
     html += sourceSummaryLine(d);
 
     $("venues").innerHTML = html;
+    var select = $("venue-account-select");
+    if (select && !select.dataset.bound) {
+      select.dataset.bound = "1";
+      select.addEventListener("change", function () {
+        var val = select.value;
+        var targets = document.querySelectorAll(".venue-row");
+        targets.forEach(function (row) {
+          var name = (row.querySelector(".venue-name") || {}).textContent || "";
+          var show = val === "all" ||
+            (val === "1" && /sportsbook 1/i.test(name)) ||
+            (val === "2" && /sportsbook 2/i.test(name)) ||
+            (!/sportsbook/i.test(name));
+          row.hidden = !show;
+        });
+      });
+    }
   }
 
   // Optional "SOURCE // P&L" footer line built from d.source_summary, a map
@@ -376,6 +395,7 @@
       var edge = (p.model_prob != null && p.market_prob_devig != null)
         ? (p.model_prob - p.market_prob_devig) : null;
       return '<tr title="' + esc(metaTitle(p)) + '">' +
+        '<td class="num pos-id">#' + esc(p.id == null ? "—" : String(p.id)) + '</td>' +
         '<td class="num dim pos-time" style="border-left-color:' + col + '">' +
           esc(timeOnly(p.ts_utc)) + '</td>' +
         '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
@@ -389,7 +409,6 @@
           esc(edge == null ? '—' : pctSigned(edge, 1)) + '</td>' +
         '<td class="r num ' + evClass(p.ev) + '">' +
           esc(p.ev === null || p.ev === undefined ? '—' : pct(p.ev, 1)) + '</td>' +
-        '<td class="r num dim">' + esc(p.kelly_fraction == null ? '—' : num(p.kelly_fraction, 3)) + '</td>' +
         '<td class="pos-src">' + sourceChip(p.source) + '</td>' +
         '<td><span class="pill book ' + venue + '" style="color:' + col +
           ';border-color:' + col + '">' + esc(p.platform || venue) +
@@ -400,10 +419,10 @@
     $("positions").innerHTML =
       '<table class="pos-table pos-table-wide">' +
         '<thead><tr>' +
-          '<th>Time</th><th>Match</th><th>Market</th><th>Selection</th>' +
+          '<th>ID</th><th>Time</th><th>Match</th><th>Market</th><th>Selection</th>' +
           '<th class="r">Odds</th><th class="r">Stake</th>' +
           '<th class="r">Model</th><th class="r">Mkt</th>' +
-          '<th class="r">Edge</th><th class="r">EV</th><th class="r">Kelly</th>' +
+          '<th class="r">Edge</th><th class="r">EV</th>' +
           '<th>Source</th><th>Venue</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
@@ -1042,6 +1061,7 @@
       var plTxt = p.status === "void" ? "void" : signedMoney(pl, p.currency);
       return '<tr title="' + esc(metaTitle(p)) +
           '" style="border-left:2px solid ' + bookColor(p.platform) + '">' +
+        '<td class="num pos-id">#' + esc(p.id == null ? "—" : String(p.id)) + '</td>' +
         '<td class="num dim">' + esc(timeOnly(p.settled_ts || p.ts_utc)) + '</td>' +
         '<td class="pos-match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
         '<td class="pos-mkt dim" title="' + esc(p.market) + '">' + esc(marketShort(p.market)) + '</td>' +
@@ -1065,7 +1085,7 @@
     el.innerHTML =
       '<table class="pos-table pos-table-wide">' +
         '<thead><tr>' +
-          '<th>Settled</th><th>Match</th><th>Market</th><th>Selection</th>' +
+          '<th>ID</th><th>Settled</th><th>Match</th><th>Market</th><th>Selection</th>' +
           '<th class="r">Odds</th><th class="r">Stake</th>' +
           '<th class="r">Model</th><th class="r">EV</th>' +
           '<th class="r">Close</th><th class="r">P&L</th><th class="r">CLV</th>' +

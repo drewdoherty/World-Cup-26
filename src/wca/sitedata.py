@@ -199,6 +199,7 @@ def _read_card_body(card_path: str) -> str:
 
 
 RESULTS_PATH = "data/processed/wc2026_results.json"
+COMPLETED_FIXTURES_PATH = "data/processed/completed_fixtures.json"
 
 
 def _repo_root() -> str:
@@ -250,6 +251,29 @@ def _finished_fixture_tokens(results_path: str = RESULTS_PATH) -> List[tuple]:
         toks = _fixture_tokens(str(row.get("fixture") or ""))
         if toks is not None:
             out.append(toks)
+    out.extend(_completed_fixture_tokens())
+    return out
+
+
+def _completed_fixture_tokens(path: str = COMPLETED_FIXTURES_PATH) -> List[tuple]:
+    """Completed fixture names that are not score-verified yet.
+
+    These tokens are deliberately used only for active exposure filtering.
+    They must not feed tracking metrics or settlement P&L, because they carry
+    no score/outcome.
+    """
+    try:
+        with open(_resolve_repo_path(path), "r", encoding="utf-8") as fh:
+            payload = json.load(fh)
+    except Exception:
+        return []
+    rows = payload.get("fixtures") if isinstance(payload, dict) else payload
+    out: List[tuple] = []
+    for row in rows or []:
+        fixture = row.get("fixture") if isinstance(row, dict) else row
+        toks = _fixture_tokens(str(fixture or ""))
+        if toks is not None:
+            out.append(toks)
     return out
 
 
@@ -258,9 +282,22 @@ def _matches_finished_fixture(match_desc: Any, finished: List[tuple]) -> bool:
     if not text:
         return False
     for home, away in finished:
-        if home in text and away in text:
+        if _team_token_in_text(home, text) and _team_token_in_text(away, text):
             return True
     return False
+
+
+def _team_token_in_text(team: str, text: str) -> bool:
+    variants = {team}
+    try:
+        from wca.data import teamnames
+        for alias, canonical in getattr(teamnames, "ALIASES", {}).items():
+            canon_norm = re.sub(r"[^a-z0-9]+", " ", str(canonical).lower()).strip()
+            if canon_norm == team:
+                variants.add(re.sub(r"[^a-z0-9]+", " ", str(alias).lower()).strip())
+    except Exception:
+        pass
+    return any(v and v in text for v in variants)
 
 
 def _is_match_specific_market(market: Any) -> bool:
@@ -429,12 +466,17 @@ def build_site_data(
 
     sb_by_account: Dict[str, Dict[str, Any]] = {"1": _acct_block(), "2": _acct_block()}
     source_summary: Dict[str, Any] = {}
+    finished_fixtures = _finished_fixture_tokens()
     for b in stats.get("bets") or []:
         stake = float(b.get("stake") or 0.0)
         status = (b.get("status") or "").strip().lower()
         venue = dashboard.venue_for_platform(b.get("platform"))
         ccy = VENUE_CURRENCY.get(venue, "GBP")
         is_open = status == "open"
+        is_active_open = is_open and not (
+            _matches_finished_fixture(b.get("match_desc"), finished_fixtures)
+            or _is_malformed_match_position(b)
+        )
         pl = float(b.get("settled_pl") or 0.0) if status in ("won", "lost") else 0.0
 
         if venue == "sportsbook":
@@ -442,7 +484,7 @@ def build_site_data(
             blk = sb_by_account.setdefault(acct, _acct_block())
             blk["wagered"] += stake
             blk["n_bets"] += 1
-            if is_open:
+            if is_active_open:
                 blk["open_stake"] += stake
             blk["settled_pl"] += pl
 
@@ -452,7 +494,7 @@ def build_site_data(
         )
         sblk["wagered"] += stake
         sblk["n_bets"] += 1
-        if is_open:
+        if is_active_open:
             sblk["open_stake"] += stake
         sblk["settled_pl"] += pl
 
@@ -460,6 +502,11 @@ def build_site_data(
         blk = sb_by_account.get(acct) or _acct_block()
         blk["label"] = label
         venues["sportsbook_%s" % acct] = blk
+    if "sportsbook" in venues:
+        venues["sportsbook"]["open_stake"] = sum(
+            float(block.get("open_stake") or 0.0)
+            for block in sb_by_account.values()
+        )
 
     # Totals PER CURRENCY — £ and $ are never added together. The legacy
     # single-number "totals" block is kept for backward compatibility but the
@@ -491,7 +538,6 @@ def build_site_data(
         "n_with_close": int(clv_in.get("n_with_close") or 0),
     }
 
-    finished_fixtures = _finished_fixture_tokens()
     positions = _positions_from_bets(stats.get("bets") or [], finished_fixtures)
 
     # Closed (settled/void) positions with realized P&L per bet.
@@ -560,21 +606,39 @@ def build_site_data(
     for b in stats.get("bets") or []:
         plat = (b.get("platform") or "unknown").strip()
         venue = dashboard.venue_for_platform(plat)
-        blk = platforms.setdefault(plat, {
+        account = str(b.get("account") or "1")
+        key = "%s__a%s" % (plat, account) if venue == "sportsbook" else plat
+        blk = platforms.setdefault(key, {
+            "platform": plat,
+            "account": account,
             "venue": venue,
             "currency": VENUE_CURRENCY.get(venue, "GBP"),
             "wagered": 0.0, "open_stake": 0.0, "settled_pl": 0.0, "n_bets": 0,
         })
         stake = float(b.get("stake") or 0.0)
         status = (b.get("status") or "").lower()
+        is_active_open = status == "open" and not (
+            _matches_finished_fixture(b.get("match_desc"), finished_fixtures)
+            or _is_malformed_match_position(b)
+        )
         blk["wagered"] += stake
         blk["n_bets"] += 1
-        if status == "open":
+        if is_active_open:
             blk["open_stake"] += stake
         elif status in ("won", "lost"):
             blk["settled_pl"] += float(b.get("settled_pl") or 0.0)
 
-    predictions = parse_scorelines(_read_card_body(card_path))
+    # Only apply the manual completed-fixtures filter to the live/default card.
+    # Test cards and ad-hoc exported cards should parse literally; otherwise a
+    # repo-local override like "Mexico vs South Africa is completed" would make
+    # isolated fixtures disappear from callers that never opted into live state.
+    default_card = os.path.abspath(_resolve_repo_path("data/card_latest.md"))
+    card_abs = os.path.abspath(_resolve_repo_path(card_path))
+    prediction_finished = finished_fixtures if card_abs == default_card else []
+    predictions = [
+        fx for fx in parse_scorelines(_read_card_body(card_path))
+        if not _matches_finished_fixture(fx.get("fixture"), prediction_finished)
+    ]
 
     return {
         "meta": {"generated": now_utc},
