@@ -232,13 +232,33 @@
     var plStr = byCcy ? moneyByCcyHTML(byCcy, "settled_pl")
       : '<span class="' + plCls + '">' + esc(signedMoney(pl)) + "</span>";
 
+    // Net return per unit staked (settled P/L ÷ wagered), one tile per
+    // currency. A normalised companion to Settled P&L: "+10.7%" means 10.7p
+    // of profit for every £1 put through. Never mixes currencies — each unit
+    // (£/$/€) gets its own sign-coloured tile; currencies with nothing settled
+    // (wagered 0) are skipped.
+    var retTicks = [];
+    if (byCcy) {
+      ["GBP", "USD", "EUR"].forEach(function (ccy) {
+        var blk = byCcy[ccy];
+        if (!blk) return;
+        var w = Number(blk.wagered || 0);
+        if (w <= 0) return;
+        var r = Number(blk.settled_pl || 0) / w;
+        var rStr = (r >= 0 ? "+" : "") + (r * 100).toFixed(1) + "%";
+        retTicks.push(["Return / " + sym(ccy) + "1",
+          '<span class="' + (r < 0 ? "neg" : "pos") + '">' + esc(rStr) + "</span>", ""]);
+      });
+    }
+
     var ticks = [
       ["Total Wagered", esc(wagered), ""],
       ["Open Exposure", esc(openExp), ""],
-      ["Settled P&L", plStr, ""],
+      ["Settled P&L", plStr, ""]
+    ].concat(retTicks).concat([
       ["Avg CLV", esc(clvVal), hasClv ? (Number(clv.avg_clv) >= 0 ? "pos" : "neg") : "dim"],
       ["Bet Count", esc(String(t.n_bets || 0)), ""]
-    ];
+    ]);
 
     // P&L by source (model / offer / punt), moved here from the venues panel.
     // Each currency leg is coloured by its own sign via moneyByCcyHTML.
