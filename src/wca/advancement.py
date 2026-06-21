@@ -48,7 +48,7 @@ World Cup Group <X> Winner                  group_position 1st  finished 1st in 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -123,6 +123,9 @@ PM_TAKER_FEE_COEF: float = 0.03
 PM_POOL_BANKROLL: float = 1310.0
 PM_KELLY_FRACTION: float = 0.25
 PM_PER_BET_CAP: float = 0.05
+MIN_ACTIONABLE_FEE_ADJ_EDGE: float = 0.05
+MIN_ACTIONABLE_DEPTH_USD: float = 1.0
+MIN_ACTIONABLE_STAKE_USD: float = 1.0
 
 # Default dilution of each co-host's home bonus on the venue-aware path. The
 # legacy path (venue_aware=False) ignores this and uses the full bonus.
@@ -463,6 +466,13 @@ class AdvancementEdge:
     fee_adj_edge: float  # sim_prob - pm_price - fee (per $ at risk)
     fee_adj_ev_per_dollar: float  # same as fee_adj_edge here (binary $1 payout)
     stake: float  # quarter-Kelly stake on the PM pool, capped
+    token_id: Optional[str] = None
+    depth_usd: Optional[float] = None
+    min_edge_gate: float = MIN_ACTIONABLE_FEE_ADJ_EDGE
+    min_depth_usd: float = MIN_ACTIONABLE_DEPTH_USD
+    gate_status: str = "actionable"
+    gate_reason: str = ""
+    is_actionable: bool = True
 
     @property
     def edge_pct(self) -> float:
@@ -494,6 +504,62 @@ def _fee_adjusted_kelly_stake(
     return kelly_mod.stake(
         float(sim_prob), decimal_odds, bankroll, fraction=fraction, cap=cap
     )
+
+
+def _parse_pm_array(raw: Any) -> Optional[List[Any]]:
+    """Decode a Polymarket JSON-string array, tolerantly."""
+    if raw is None:
+        return None
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, str):
+        import json
+
+        try:
+            decoded = json.loads(raw)
+        except json.JSONDecodeError:
+            return None
+        return decoded if isinstance(decoded, list) else None
+    return None
+
+
+def _token_for_outcome(market: Dict[str, Any], outcome: str) -> Optional[str]:
+    """Return the CLOB token id for a Yes/No outcome in a Gamma market."""
+    token_ids = _parse_pm_array(market.get("clobTokenIds"))
+    if not token_ids:
+        return None
+    target = outcome.strip().lower()
+    outcomes = _parse_pm_array(market.get("outcomes")) or []
+    idx = 0 if target == "yes" else 1
+    for i, item in enumerate(outcomes):
+        if str(item).strip().lower() == target:
+            idx = i
+            break
+    if idx >= len(token_ids):
+        return None
+    return str(token_ids[idx])
+
+
+def _book_buy_depth_usd(book: Any, buy_price: float) -> Optional[float]:
+    """USD notional available to buy at ``buy_price`` or better on CLOB asks."""
+    if not isinstance(book, dict):
+        return None
+    depth = 0.0
+    seen = False
+    for lvl in book.get("asks") or []:
+        if not isinstance(lvl, dict):
+            continue
+        try:
+            price = float(lvl.get("price"))
+            size = float(lvl.get("size"))
+        except (TypeError, ValueError):
+            continue
+        if price <= 0.0 or size <= 0.0:
+            continue
+        if price <= float(buy_price) + 1e-12:
+            depth += price * size
+            seen = True
+    return depth if seen else 0.0
 
 
 def _team_markets(event: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
@@ -537,6 +603,9 @@ def compare_to_polymarket(
     bankroll: float = PM_POOL_BANKROLL,
     fraction: float = PM_KELLY_FRACTION,
     cap: float = PM_PER_BET_CAP,
+    min_fee_adj_edge: float = MIN_ACTIONABLE_FEE_ADJ_EDGE,
+    min_depth_usd: float = MIN_ACTIONABLE_DEPTH_USD,
+    order_book_getter: Optional[Callable[[str], Any]] = None,
 ) -> pd.DataFrame:
     """Match Polymarket advancement / group-winner markets to the simulation.
 
@@ -555,6 +624,16 @@ def compare_to_polymarket(
         :func:`wca.data.polymarket.find_world_cup_markets`).
     bankroll, fraction, cap:
         Polymarket pool sizing parameters.
+    min_fee_adj_edge:
+        Minimum fee-adjusted edge required for the row to be actionable.
+        Sub-threshold rows remain in the returned diagnostics.
+    min_depth_usd:
+        Minimum executable ask-side notional, in USD, required at the chosen
+        buy price when ``order_book_getter`` is supplied.
+    order_book_getter:
+        Optional callable compatible with ``PolymarketTrader.get_order_book``.
+        It is called with the chosen side's CLOB token id and should return the
+        CLOB ``/book`` payload.
 
     Returns
     -------
@@ -608,13 +687,38 @@ def compare_to_polymarket(
                 label = "Win Group %s" % group_letter
 
             if yes_edge >= no_edge:
-                side, side_p, side_price, side_fee, side_edge, side_stake = (
+                side, side_p, side_price, side_fee, side_edge, side_stake, token_id = (
                     "YES", sim_p, yes_buy, yes_fee, yes_edge, yes_stake,
+                    _token_for_outcome(market, "Yes"),
                 )
             else:
-                side, side_p, side_price, side_fee, side_edge, side_stake = (
+                side, side_p, side_price, side_fee, side_edge, side_stake, token_id = (
                     "NO", 1.0 - sim_p, no_buy, no_fee, no_edge, no_stake,
+                    _token_for_outcome(market, "No"),
                 )
+
+            depth_usd: Optional[float] = None
+            depth_checked = False
+            if order_book_getter is not None and float(min_depth_usd) > 0.0:
+                depth_checked = True
+                if token_id:
+                    try:
+                        depth_usd = _book_buy_depth_usd(
+                            order_book_getter(token_id), side_price
+                        )
+                    except Exception:  # noqa: BLE001 - diagnostic gate, not fatal
+                        depth_usd = None
+
+            reasons: List[str] = []
+            if side_edge < float(min_fee_adj_edge):
+                reasons.append("below-edge-gate")
+            if side_stake < MIN_ACTIONABLE_STAKE_USD:
+                reasons.append("dust-stake")
+            if depth_checked and (
+                depth_usd is None or depth_usd < float(min_depth_usd)
+            ):
+                reasons.append("insufficient-depth")
+            is_actionable = not reasons
 
             edges.append(
                 AdvancementEdge(
@@ -632,6 +736,13 @@ def compare_to_polymarket(
                     fee_adj_edge=side_edge,
                     fee_adj_ev_per_dollar=side_edge,
                     stake=side_stake,
+                    token_id=token_id,
+                    depth_usd=depth_usd,
+                    min_edge_gate=float(min_fee_adj_edge),
+                    min_depth_usd=float(min_depth_usd),
+                    gate_status="actionable" if is_actionable else "blocked",
+                    gate_reason=", ".join(reasons),
+                    is_actionable=is_actionable,
                 )
             )
 
@@ -651,6 +762,13 @@ def compare_to_polymarket(
             "fee_adj_edge": e.fee_adj_edge,
             "fee_adj_ev_per_dollar": e.fee_adj_ev_per_dollar,
             "stake": e.stake,
+            "token_id": e.token_id,
+            "depth_usd": e.depth_usd,
+            "min_edge_gate": e.min_edge_gate,
+            "min_depth_usd": e.min_depth_usd,
+            "gate_status": e.gate_status,
+            "gate_reason": e.gate_reason,
+            "is_actionable": e.is_actionable,
         }
         for e in edges
     ]

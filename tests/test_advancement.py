@@ -14,6 +14,8 @@ import pytest
 
 from wca.advancement import (
     HOST_NATIONS,
+    MIN_ACTIONABLE_DEPTH_USD,
+    MIN_ACTIONABLE_FEE_ADJ_EDGE,
     PM_POOL_BANKROLL,
     PM_STAGE_EVENTS,
     WC2026_GROUPS,
@@ -265,6 +267,8 @@ def _mkt(git: str, yes_bid: float, yes_ask: float) -> Dict:
         "groupItemTitle": git,
         "bestBid": yes_bid,
         "bestAsk": yes_ask,
+        "outcomes": ["Yes", "No"],
+        "clobTokenIds": ["yes_%s" % git, "no_%s" % git],
         "priceMap": {"Yes": mid, "No": 1 - mid},
     }
 
@@ -364,6 +368,79 @@ def test_stakes_respect_pool_cap():
     ]
     out = compare_to_polymarket(sim_df, pm_events)
     assert (out["stake"] <= PM_POOL_BANKROLL * 0.05 + 1e-6).all()
+
+
+def test_default_edge_gate_keeps_below_gate_rows_as_diagnostics():
+    sim_df = _sim_df_fixture()
+    pm_events = [
+        {
+            "title": "World Cup: Nation To Reach Round of 16",
+            # Turkey sim R16 = 0.35, ask = 0.32, fee ~= 0.0065 -> edge < 5%.
+            "markets": [_mkt("Turkiye", 0.30, 0.32)],
+        }
+    ]
+    out = compare_to_polymarket(sim_df, pm_events)
+    assert len(out) == 1
+    row = out.iloc[0]
+    assert row["team"] == "Turkey"
+    assert row["fee_adj_edge"] < MIN_ACTIONABLE_FEE_ADJ_EDGE
+    assert bool(row["is_actionable"]) is False
+    assert "below-edge-gate" in row["gate_reason"]
+
+
+def test_order_book_depth_gate_blocks_thin_buy_price():
+    sim_df = _sim_df_fixture()
+    pm_events = [
+        {
+            "title": "World Cup: Nation To Reach Round of 16",
+            "markets": [_mkt("USA", 0.30, 0.32)],
+        }
+    ]
+
+    def thin_book(token_id):
+        assert token_id == "yes_USA"
+        return {
+            "asks": [
+                {"price": "0.32", "size": "2.0"},  # $0.64 at the buy price
+                {"price": "0.33", "size": "100.0"},  # worse than buy price
+            ],
+            "bids": [],
+        }
+
+    out = compare_to_polymarket(
+        sim_df,
+        pm_events,
+        min_depth_usd=MIN_ACTIONABLE_DEPTH_USD,
+        order_book_getter=thin_book,
+    )
+    row = out.iloc[0]
+    assert row["fee_adj_edge"] > MIN_ACTIONABLE_FEE_ADJ_EDGE
+    assert row["depth_usd"] == pytest.approx(0.64)
+    assert bool(row["is_actionable"]) is False
+    assert "insufficient-depth" in row["gate_reason"]
+
+
+def test_order_book_depth_gate_passes_sufficient_buy_price():
+    sim_df = _sim_df_fixture()
+    pm_events = [
+        {
+            "title": "World Cup: Nation To Reach Round of 16",
+            "markets": [_mkt("USA", 0.30, 0.32)],
+        }
+    ]
+
+    out = compare_to_polymarket(
+        sim_df,
+        pm_events,
+        order_book_getter=lambda _token_id: {
+            "asks": [{"price": "0.32", "size": "10.0"}],
+            "bids": [],
+        },
+    )
+    row = out.iloc[0]
+    assert row["depth_usd"] == pytest.approx(3.2)
+    assert bool(row["is_actionable"]) is True
+    assert row["gate_reason"] == ""
 
 
 def test_pm_stage_event_titles_cover_all_stages():

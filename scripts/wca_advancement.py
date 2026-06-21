@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import os
 import pickle
 import sys
 from pathlib import Path
@@ -97,8 +98,12 @@ def _write_report(
     n_events_scored: int,
     matched_markets: int,
     generated_utc: str,
+    min_fee_adj_edge: float = 0.05,
+    min_depth_usd: float = 1.0,
+    depth_checked: bool = False,
 ) -> None:
     from wca.advancement import (
+        MIN_ACTIONABLE_STAKE_USD,
         PM_KELLY_FRACTION,
         PM_PER_BET_CAP,
         PM_POOL_BANKROLL,
@@ -108,6 +113,11 @@ def _write_report(
 
     lines: List[str] = []
     a = lines.append
+    actionable_df = (
+        edges_df[edges_df["is_actionable"]].copy()
+        if (not edges_df.empty and "is_actionable" in edges_df.columns)
+        else edges_df
+    )
 
     a("# Tournament-advancement edges — sim vs Polymarket")
     a("")
@@ -117,8 +127,14 @@ def _write_report(
         "Monte-Carlo simulation of the 2026 FIFA World Cup (`%d` sims, seed `%d`) "
         "compared to live Polymarket advancement and group-winner markets. "
         "Edges are **fee-adjusted** and sized **quarter-Kelly** on the "
-        "$%.0f Polymarket pool (%.0f%% per-bet cap)."
-        % (n_sims, seed, PM_POOL_BANKROLL, PM_PER_BET_CAP * 100)
+        "$%.0f Polymarket pool (%.0f%% per-bet cap). The actionable list "
+        "requires fee-adjusted edge ≥ %.1f%%, stake ≥ $%.0f, and, when CLOB "
+        "books are available, order-book depth ≥ $%.0f at the buy price."
+        % (
+            n_sims, seed, PM_POOL_BANKROLL, PM_PER_BET_CAP * 100,
+            min_fee_adj_edge * 100, MIN_ACTIONABLE_STAKE_USD,
+            min_depth_usd,
+        )
     )
     a("")
 
@@ -173,26 +189,34 @@ def _write_report(
         "(`fraction=%.2f`)."
         % (PM_PER_BET_CAP * 100, PM_POOL_BANKROLL, PM_KELLY_FRACTION)
     )
+    a(
+        "8. **Quality gate.** The top/actionable output excludes rows below "
+        "`min_fee_adj_edge` (default %.1f%%), below the existing $%.0f dust "
+        "stake floor, or below the order-book depth floor (default $%.0f) "
+        "when CLOB books are available. Excluded rows stay in the full "
+        "diagnostic table with a gate reason."
+        % (min_fee_adj_edge * 100, MIN_ACTIONABLE_STAKE_USD, min_depth_usd)
+    )
     a("")
     a(
         "**Coverage.** %d Polymarket World-Cup events pulled; %d scored "
         "(advancement + group-winner); %d team-stage markets matched to the "
-        "simulation."
-        % (n_events_total, n_events_scored, matched_markets)
+        "simulation; %d passed the actionable quality gate."
+        % (n_events_total, n_events_scored, matched_markets, len(actionable_df))
     )
     a("")
 
     # -- Top edges ----------------------------------------------------------
     a("## Top edges")
     a("")
-    if edges_df.empty:
-        a("_No matched markets._")
+    if actionable_df.empty:
+        a("_No actionable markets passed the quality gate._")
     else:
         a(
             "| # | Team | Market | Side | Sim P | PM price | Fee | Fee-adj edge | Stake ($) |"
         )
         a("|---|------|--------|------|-------|----------|-----|--------------|-----------|")
-        top = edges_df.head(20)
+        top = actionable_df.head(20)
         for i, (_, r) in enumerate(top.iterrows(), 1):
             a(
                 "| %d | %s | %s | %s | %s | %.3f | %.3f | **%+.1f%%** | %.2f |"
@@ -205,25 +229,27 @@ def _write_report(
     a("")
 
     # -- Full edge table ----------------------------------------------------
-    a("## All matched markets (fee-adjusted edge, descending)")
+    a("## All matched markets (diagnostic, fee-adjusted edge descending)")
     a("")
     if edges_df.empty:
         a("_No matched markets._")
     else:
         a(
-            "| Team | Grp | Market | Side | Sim P | YES mid | Buy price | Fee | Raw edge | Fee-adj edge | Stake ($) |"
+            "| Team | Grp | Market | Side | Sim P | YES mid | Buy price | Fee | Raw edge | Fee-adj edge | Stake ($) | Depth ($) | Gate |"
         )
         a(
-            "|------|-----|--------|------|-------|---------|-----------|-----|----------|--------------|-----------|"
+            "|------|-----|--------|------|-------|---------|-----------|-----|----------|--------------|-----------|-----------|------|"
         )
         for _, r in edges_df.iterrows():
+            depth = "n/a" if pd.isna(r.get("depth_usd")) else "%.2f" % r["depth_usd"]
+            gate = "actionable" if bool(r.get("is_actionable")) else str(r.get("gate_reason") or "blocked")
             a(
-                "| %s | %s | %s | %s | %s | %.3f | %.3f | %.3f | %+.1f%% | %+.1f%% | %.2f |"
+                "| %s | %s | %s | %s | %s | %.3f | %.3f | %.3f | %+.1f%% | %+.1f%% | %.2f | %s | %s |"
                 % (
                     r["team"], r["group"], r["stage_label"], r["side"],
                     _fmt_pct(r["sim_prob"]), r["pm_yes_mid"], r["pm_price"],
                     r["fee"], r["raw_edge"] * 100, r["fee_adj_edge"] * 100,
-                    r["stake"],
+                    r["stake"], depth, gate,
                 )
             )
     a("")
@@ -270,6 +296,12 @@ def _write_report(
         "approximate the NO ask as `1 − YES_mid`, which is slightly optimistic; "
         "verify the live NO order book before sizing a NO position."
     )
+    if not depth_checked:
+        a(
+            "- **Depth not checked.** CLOB order books were not available in "
+            "this run, so the liquidity gate was not enforced. Re-run with "
+            "Polymarket trader credentials configured before acting."
+        )
     a(
         "- **Host venue in Dixon-Coles.** The host home bonus is applied via "
         "Elo only; Dixon-Coles is queried neutral (it has no per-host venue "
@@ -323,6 +355,18 @@ def main() -> None:
         help="Opt-in socio-economic shrinkage prior for low-data teams in "
         "Dixon-Coles (Klement / Hoffmann-Ging-Ramasamy). Refits to a separate "
         "model cache. Default off. See docs/research/backtests/structural_prior.md.",
+    )
+    parser.add_argument(
+        "--min-fee-adj-edge",
+        type=float,
+        default=0.05,
+        help="Minimum fee-adjusted edge for actionable/top output (default: 0.05 = 5%%).",
+    )
+    parser.add_argument(
+        "--min-depth-usd",
+        type=float,
+        default=1.0,
+        help="Minimum CLOB ask-side notional at the buy price for actionable output (default: $1).",
     )
     parser.add_argument("--top", type=int, default=10)
     args = parser.parse_args()
@@ -380,28 +424,66 @@ def main() -> None:
     )
 
     # 4. Compare.
-    edges_df = compare_to_polymarket(sim_df, scored_events)
-    print("  %d team-stage markets matched." % len(edges_df))
+    order_book_getter = None
+    depth_checked = False
+    if args.min_depth_usd > 0:
+        try:
+            from wca.pm.trader import PolymarketTrader
+
+            if os.environ.get("POLYMARKET_PRIVATE_KEY"):
+                trader = PolymarketTrader()
+                order_book_getter = trader.get_order_book
+                depth_checked = True
+            else:
+                print(
+                    "  CLOB depth gate requested but POLYMARKET_PRIVATE_KEY is not set; "
+                    "depth diagnostics will be n/a.",
+                    file=sys.stderr,
+                )
+        except Exception as exc:  # noqa: BLE001 - report still useful without books
+            print(
+                "  CLOB depth diagnostics unavailable: %s" % exc,
+                file=sys.stderr,
+            )
+    edges_df = compare_to_polymarket(
+        sim_df,
+        scored_events,
+        min_fee_adj_edge=args.min_fee_adj_edge,
+        min_depth_usd=args.min_depth_usd,
+        order_book_getter=order_book_getter,
+    )
+    actionable_df = (
+        edges_df[edges_df["is_actionable"]].copy()
+        if (not edges_df.empty and "is_actionable" in edges_df.columns)
+        else edges_df
+    )
+    print(
+        "  %d team-stage markets matched; %d actionable after quality gate."
+        % (len(edges_df), len(actionable_df))
+    )
 
     # 5. Report.
     generated = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     _write_report(
         args.out, sim_df, edges_df, args.n_sims, args.seed,
         len(pm_events), len(scored_events), len(edges_df), generated,
+        min_fee_adj_edge=args.min_fee_adj_edge,
+        min_depth_usd=args.min_depth_usd,
+        depth_checked=depth_checked,
     )
     print("Report written: %s" % args.out)
 
     # 6. Print top-N.
     print()
-    print("Top %d fee-adjusted edges:" % args.top)
-    if edges_df.empty:
-        print("  (no matched markets)")
+    print("Top %d actionable fee-adjusted edges:" % args.top)
+    if actionable_df.empty:
+        print("  (no actionable markets passed the quality gate)")
     else:
         print(
             "  %-22s %-22s %-4s %7s %8s %9s %8s"
             % ("TEAM", "MARKET", "SIDE", "SIM", "PRICE", "EDGE", "STAKE")
         )
-        for _, r in edges_df.head(args.top).iterrows():
+        for _, r in actionable_df.head(args.top).iterrows():
             print(
                 "  %-22s %-22s %-4s %6.1f%% %8.3f %+8.1f%% %7.2f"
                 % (
