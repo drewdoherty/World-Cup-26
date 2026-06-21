@@ -35,6 +35,7 @@ cmd_for() {
     pmpropose)    printf '%s\n' "$RUN1" pmpropose    "$VENV_PY" scripts/wca_pm_propose.py    --db data/wca.db --env .env ;;
     pmredeem)     printf '%s\n' "$RUN1" pmredeem     "$VENV_PY" scripts/wca_pm_redeem.py     --db data/wca.db --env .env --notify ;;
     closecapture) printf '%s\n' "$RUN1" closecapture "$VENV_PY" scripts/wca_close_capture.py --db data/wca.db ;;
+    ledger_audit) printf '%s\n' "$RUN1" ledger_audit "$VENV_PY" scripts/wca_ledger_audit.py --db data/wca.db --results data/raw/martj42_cleaned.csv --apply --no-backup ;;
     publish)      printf '%s\n' "/bin/bash" "$REPO_ROOT/deploy/publish_site.sh" ;;
     *) echo "unknown service $1" >&2; return 1 ;;
   esac

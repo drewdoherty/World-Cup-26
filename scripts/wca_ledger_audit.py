@@ -227,9 +227,12 @@ def pass_closes(con, db_path, lut, apply, log):
 def main(argv: Optional[List[str]] = None) -> int:
     p = argparse.ArgumentParser(description="One-time ledger audit & repair (dry-run by default)")
     p.add_argument("--db", default="data/wca.db", help="canonical ledger (run on the mini)")
-    p.add_argument("--results", default="data/raw/results.csv", help="concluded-match results CSV")
+    p.add_argument("--results", default="data/raw/martj42_cleaned.csv",
+                   help="concluded-match results CSV (default: the 2-source-verified, git-tracked cleaned file)")
     p.add_argument("--apply", action="store_true", help="write changes (backs up the DB first)")
     p.add_argument("--backup-dir", default="data/backups", help="where to write the pre-apply backup")
+    p.add_argument("--no-backup", action="store_true",
+                   help="skip the pre-apply backup (for scheduled runs where another job already snapshots the DB)")
     p.add_argument("--skip-closes", action="store_true", help="skip the closing_odds/clv backfill pass")
     p.add_argument("--since", default="2026-06-01",
                    help="ignore results before this date (excludes pre-tournament history)")
@@ -242,9 +245,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     log("== WCA ledger audit — %s ==" % mode)
     log("db=%s  results=%s" % (args.db, args.results))
 
-    if args.apply:
+    if args.apply and not args.no_backup:
         bak = backup_db(args.db, args.backup_dir)
         log("backup -> %s" % bak)
+    elif args.apply:
+        log("backup skipped (--no-backup); relying on the scheduled DB backup job")
 
     log("results window: matches on/after %s only" % (args.since or "(all history)"))
     lut = build_results_lookup(args.results, since=args.since)
