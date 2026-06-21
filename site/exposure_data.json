@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-21 12:33:10 UTC"
+    "generated": "2026-06-21 18:50:59 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -9,61 +9,56 @@
     "p_profit": 0,
     "p_loss": 0,
     "p_big_win": 0,
-    "n_scenarios": 243
+    "n_scenarios": 81
   },
   "correlation": {
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0376,
+        "prob": 0.0593,
         "results": [
           "Spain",
           "Belgium",
           "Uruguay",
-          "New Zealand",
-          "Argentina"
+          "New Zealand"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0134,
+        "prob": 0.0902,
         "results": [
           "Spain",
           "Belgium",
           "Uruguay",
-          "New Zealand",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.008,
+        "prob": 0.2029,
         "results": [
           "Spain",
           "Belgium",
           "Uruguay",
-          "New Zealand",
-          "Austria"
+          "Egypt"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0574,
+        "prob": 0.0202,
         "results": [
           "Spain",
           "Belgium",
-          "Uruguay",
           "Draw",
-          "Argentina"
+          "New Zealand"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0205,
+        "prob": 0.0307,
         "results": [
           "Spain",
           "Belgium",
-          "Uruguay",
           "Draw",
           "Draw"
         ]
@@ -72,35 +67,32 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0376,
+        "prob": 0.0593,
         "results": [
           "Spain",
           "Belgium",
           "Uruguay",
-          "New Zealand",
-          "Argentina"
+          "New Zealand"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0134,
+        "prob": 0.0902,
         "results": [
           "Spain",
           "Belgium",
           "Uruguay",
-          "New Zealand",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.008,
+        "prob": 0.2029,
         "results": [
           "Spain",
           "Belgium",
           "Uruguay",
-          "New Zealand",
-          "Austria"
+          "Egypt"
         ]
       }
     ],
@@ -113,25 +105,16 @@
       "results": [
         {
           "outcome": "Spain",
-          "prob": 0.8657,
+          "prob": 0.866,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
-          "blindspot": true,
-          "live": [],
-          "plug": {
-            "available": true,
-            "outcome": "Spain",
-            "best_venue": "smarkets",
-            "best_odds": 1.12,
-            "model_prob": 0.8657,
-            "ev_pct": -3.0,
-            "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
-          }
+          "blindspot": false,
+          "live": []
         },
         {
           "outcome": "Draw",
-          "prob": 0.0973,
+          "prob": 0.098,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -140,7 +123,7 @@
         },
         {
           "outcome": "Saudi Arabia",
-          "prob": 0.037,
+          "prob": 0.036,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -148,30 +131,13 @@
           "live": []
         }
       ],
-      "events": [
-        {
-          "type": "Match Result",
-          "selection": "The Draw",
-          "stake": 6.0,
-          "potential_profit": 22.2,
-          "free": false,
-          "odds": 4.7
-        },
-        {
-          "type": "Match Result",
-          "selection": "The Draw",
-          "stake": 10.0,
-          "potential_profit": 37.0,
-          "free": false,
-          "odds": 4.7
-        }
-      ],
+      "events": [],
       "summary": {
         "max_win": 0.0,
         "stake_at_risk": 0,
         "best_outcome": "Spain",
         "worst_outcome": "Spain",
-        "n_blindspots": 1
+        "n_blindspots": 0
       }
     },
     {
@@ -180,7 +146,7 @@
       "results": [
         {
           "outcome": "Belgium",
-          "prob": 0.61,
+          "prob": 0.6104,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -190,15 +156,15 @@
             "available": true,
             "outcome": "Belgium",
             "best_venue": "betfair_ex_uk",
-            "best_odds": 1.45,
-            "model_prob": 0.61,
-            "ev_pct": -11.6,
-            "recommendation": "LEAVE UNHEDGED: plugging costs 11.6% EV \u2014 take the variance"
+            "best_odds": 1.46,
+            "model_prob": 0.6104,
+            "ev_pct": -10.9,
+            "recommendation": "LEAVE UNHEDGED: plugging costs 10.9% EV \u2014 take the variance"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.2323,
+          "prob": 0.232,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -207,16 +173,16 @@
           "plug": {
             "available": true,
             "outcome": "Draw",
-            "best_venue": "matchbook",
-            "best_odds": 5.1,
-            "model_prob": 0.2323,
-            "ev_pct": 18.5,
-            "recommendation": "PLUG: +EV to back (18.5% edge) \u2014 fills the gap and adds value"
+            "best_venue": "smarkets",
+            "best_odds": 5.0,
+            "model_prob": 0.232,
+            "ev_pct": 16.0,
+            "recommendation": "PLUG: +EV to back (16.0% edge) \u2014 fills the gap and adds value"
           }
         },
         {
           "outcome": "Iran",
-          "prob": 0.1576,
+          "prob": 0.1577,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -227,7 +193,7 @@
       "events": [
         {
           "type": "Bet Builder",
-          "selection": "Full Time Result -> Belgium + Anytime Goalscorer -> Romelu Lukaku",
+          "selection": "Belgium win + Romelu Lukaku to score",
           "stake": 10.0,
           "potential_profit": 13.7,
           "free": false,
@@ -248,7 +214,7 @@
       "results": [
         {
           "outcome": "Uruguay",
-          "prob": 0.6674,
+          "prob": 0.6664,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -257,7 +223,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2259,
+          "prob": 0.2269,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -266,7 +232,7 @@
         },
         {
           "outcome": "Cape Verde",
-          "prob": 0.1067,
+          "prob": 0.1066,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -289,7 +255,7 @@
       "results": [
         {
           "outcome": "New Zealand",
-          "prob": 0.1676,
+          "prob": 0.1682,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -298,7 +264,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2556,
+          "prob": 0.256,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -307,7 +273,7 @@
         },
         {
           "outcome": "Egypt",
-          "prob": 0.5768,
+          "prob": 0.5759,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -323,93 +289,37 @@
         "worst_outcome": "New Zealand",
         "n_blindspots": 0
       }
-    },
-    {
-      "fixture": "Argentina vs Austria",
-      "kickoff": "2026-06-22T17:00:00+00:00",
-      "results": [
-        {
-          "outcome": "Argentina",
-          "prob": 0.6375,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Draw",
-          "prob": 0.2277,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Austria",
-          "prob": 0.1348,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        }
-      ],
-      "events": [],
-      "summary": {
-        "max_win": 0.0,
-        "stake_at_risk": 0,
-        "best_outcome": "Argentina",
-        "worst_outcome": "Argentina",
-        "n_blindspots": 0
-      }
     }
   ],
   "blindspots": [
     {
-      "fixture": "Spain vs Saudi Arabia",
-      "outcome": "Spain",
-      "prob": 0.8657,
-      "net_pnl": 0.0,
-      "plug": {
-        "available": true,
-        "outcome": "Spain",
-        "best_venue": "smarkets",
-        "best_odds": 1.12,
-        "model_prob": 0.8657,
-        "ev_pct": -3.0,
-        "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
-      }
-    },
-    {
       "fixture": "Belgium vs Iran",
       "outcome": "Belgium",
-      "prob": 0.61,
+      "prob": 0.6104,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Belgium",
         "best_venue": "betfair_ex_uk",
-        "best_odds": 1.45,
-        "model_prob": 0.61,
-        "ev_pct": -11.6,
-        "recommendation": "LEAVE UNHEDGED: plugging costs 11.6% EV \u2014 take the variance"
+        "best_odds": 1.46,
+        "model_prob": 0.6104,
+        "ev_pct": -10.9,
+        "recommendation": "LEAVE UNHEDGED: plugging costs 10.9% EV \u2014 take the variance"
       }
     },
     {
       "fixture": "Belgium vs Iran",
       "outcome": "Draw",
-      "prob": 0.2323,
+      "prob": 0.232,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Draw",
-        "best_venue": "matchbook",
-        "best_odds": 5.1,
-        "model_prob": 0.2323,
-        "ev_pct": 18.5,
-        "recommendation": "PLUG: +EV to back (18.5% edge) \u2014 fills the gap and adds value"
+        "best_venue": "smarkets",
+        "best_odds": 5.0,
+        "model_prob": 0.232,
+        "ev_pct": 16.0,
+        "recommendation": "PLUG: +EV to back (16.0% edge) \u2014 fills the gap and adds value"
       }
     }
   ],
@@ -435,8 +345,8 @@
       "match": "2026 FIFA World Cup - Japan Round of 16"
     },
     {
-      "type": "polymarket",
-      "selection": "Ghana eliminated R32 - No",
+      "type": "Polymarket advancement: Will Ghana be eliminated in the Round of 32 at the 2026 FIFA World Cup?",
+      "selection": "No \u2014 Ghana not eliminated in Round of 32",
       "stake": 1.0,
       "profit": 0.4708000000000001,
       "free": false,
@@ -444,44 +354,8 @@
       "match": "Ghana eliminated R32 of the World Cup"
     },
     {
-      "type": "Player Shots on Target",
-      "selection": "Scott McTominay to have 1 or more shots on target including woodwork",
-      "stake": 5.0,
-      "profit": 7.5,
-      "free": false,
-      "odds": 2.5,
-      "match": "Scotland vs Morocco"
-    },
-    {
-      "type": "First Goal Scorer",
-      "selection": "Ayoub El Kaabi",
-      "stake": 5.0,
-      "profit": 22.5,
-      "free": false,
-      "odds": 5.5,
-      "match": "Scotland vs Morocco"
-    },
-    {
-      "type": "Bet Builder",
-      "selection": "Match Result -> Brazil + Anytime Goal Scorer -> Neymar + Player To Score Or Assist (Sub Switch) -> Vinicius Junior",
-      "stake": 10.0,
-      "profit": 13.599999999999998,
-      "free": false,
-      "odds": 2.36,
-      "match": "Brazil vs Haiti"
-    },
-    {
-      "type": "Bet Builder",
-      "selection": "Full Time -> Morocco - 2UP + Most Corners - 1st Half -> Morocco + Most Corners - 2nd Half -> Morocco",
-      "stake": 10.0,
-      "profit": 38.0,
-      "free": false,
-      "odds": 4.8,
-      "match": "Scotland vs Morocco"
-    },
-    {
-      "type": "Bet Builder",
-      "selection": "Home Team Minus 2.5 Goals -> England -2.5 Goals + Handicap Betting -> England (-2.0) + Correct Score Combinations -> England to win 1-0, 2-0 or 3-0",
+      "type": "Bet Builder / Acca: Home Team Minus 2.5 Goals + Handicap Betting + Correct Score Combinations",
+      "selection": "England -2.5 goals + England (-2.0) + England to win 1-0/2-0/3-0",
       "stake": 5.0,
       "profit": 22.599999999999998,
       "free": true,
