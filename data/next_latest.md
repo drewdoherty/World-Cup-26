@@ -1,11 +1,11 @@
-<!-- generated: 2026-06-21T00:26:12 -->
+<!-- generated: 2026-06-21T01:29:41 -->
 ⚽ *Next match* — Tunisia vs Japan
 Kickoff 2026-06-21 04:00:00+00:00
 
 *Winner* (model blend)
-  Tunisia         15.5%  fair 6.46  best 8.40 (betfair_ex_uk) +30.1% ✅  £15.25
-  Draw            24.2%  fair 4.14  best 4.80 (betfair_ex_uk) +16.0% ✅  £15.82
-  Japan           60.3%  fair 1.66  best 1.48 (coral) -10.7%
+  Tunisia         15.4%  fair 6.49  best 8.40 (betfair_ex_uk) +29.4% ✅  £14.92
+  Draw            24.2%  fair 4.14  best 4.70 (betfair_ex_uk) +13.6% ✅  £13.79
+  Japan           60.4%  fair 1.66  best 1.49 (matchbook) -10.0%
   _stake = ¼-Kelly @ £1500 bankroll (+EV picks)_
 
 *Corners* (model, exp 8.1)
