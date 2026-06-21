@@ -61,51 +61,16 @@
          the progression chart + the model-vs-Polymarket table; group standings
          moved alongside it. -->
 
-    <!-- ===== Exhibit 1: how far back does the data go? ===== -->
+    <!-- ===== Exhibit 1: Model Edge vs Polymarket // Advancement ===== -->
     <section class="panel">
       <div class="panel-head">
-        <span class="panel-label">Exhibit 1 // How Far Back Does The Data Go?</span>
-        <span class="panel-meta">half-life 8y · Elo running</span>
+        <span class="panel-label">Exhibit 1 // Model Edge vs Polymarket // Advancement</span>
+        <span class="panel-meta">381 PM markets · live scoring</span>
       </div>
       <div class="panel-body viz-grid">
-        <div class="viz-qa">
-          <p class="viz-q">&ldquo;How far back did you use? Feels like it&rsquo;s only valid if the team is at least ~50% the same squad.&rdquo;</p>
-          <p class="viz-a">Good instinct &mdash; and the model already encodes it. We hold <b>every international since 1872</b> (49,477 matches), but nothing is weighted equally. Dixon-Coles applies an <b>8-year exponential half-life</b>: a match 8 years ago counts <b>half</b> as much as one today, 16 years ago a <b>quarter</b>. There is no hard cutoff &mdash; influence fades smoothly. Separately, <b>Elo is a running rating</b> updated after every single match, so a team&rsquo;s number already reflects its recent trajectory; old results are superseded, not re-counted. Your &ldquo;~50% same squad&rdquo; line maps almost exactly to the <b>~4&ndash;8 year window</b> that dominates the fit. By the time a squad has fully turned over, those matches carry &lt;50% weight and Elo has re-converged on the current side.</p>
-        </div>
-        <!-- decay curve (computed: 0.5 ** (years/8)) -->
-        <svg class="viz-svg" viewBox="0 0 720 280" role="img"
-             aria-label="Exponential time-decay weight curve, 8-year half-life">
-          <!-- axes -->
-          <line x1="56" y1="20" x2="56" y2="232" stroke="#2a2f37" stroke-width="1"/>
-          <line x1="56" y1="232" x2="690" y2="232" stroke="#2a2f37" stroke-width="1"/>
-          <!-- y gridlines + labels (100/75/50/25/0%) -->
-          <g fill="#4a525c" font-size="10" font-family="monospace">
-            <line x1="56" y1="32"  x2="690" y2="32"  stroke="#191d23"/><text x="50" y="35" text-anchor="end">100%</text>
-            <line x1="56" y1="82"  x2="690" y2="82"  stroke="#191d23"/><text x="50" y="85" text-anchor="end">75%</text>
-            <line x1="56" y1="132" x2="690" y2="132" stroke="#191d23"/><text x="50" y="135" text-anchor="end">50%</text>
-            <line x1="56" y1="182" x2="690" y2="182" stroke="#191d23"/><text x="50" y="185" text-anchor="end">25%</text>
-            <text x="50" y="235" text-anchor="end">0%</text>
-          </g>
-          <!-- decay curve: x = 56 + (yrs/24)*634, y = 32 + (1 - w)*200, w=0.5^(yrs/8) -->
-          <path d="M56.0,32.0 L82.4,48.6 L108.8,63.8 L135.2,77.8 L161.7,90.6 L188.1,102.3
-                   L214.5,113.1 L267.3,132.0 L320.2,147.9 L373.0,161.3 L478.7,182.0
-                   L584.3,196.6 L690.0,207.0"
-                fill="none" stroke="#3fe08a" stroke-width="2"/>
-          <!-- half-life marker at 8y (x=267.3, w=0.5 -> y=132) -->
-          <line x1="267" y1="32" x2="267" y2="232" stroke="#3fe08a" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
-          <circle cx="267" cy="132" r="3.5" fill="#3fe08a"/>
-          <text x="273" y="128" fill="#3fe08a" font-size="10" font-family="monospace">8y half-life = 50% weight</text>
-          <!-- x labels -->
-          <g fill="#4a525c" font-size="10" font-family="monospace" text-anchor="middle">
-            <text x="56"  y="248">today</text>
-            <text x="161" y="248">4y</text>
-            <text x="267" y="248">8y</text>
-            <text x="425" y="248">14y</text>
-            <text x="584" y="248">20y</text>
-            <text x="373" y="266" fill="#6b7480">match age &rarr; weight in the Dixon-Coles fit</text>
-          </g>
-        </svg>
-        <p class="viz-note">data 1872&ndash;2026 · 49,477 matches · weighting computed live from half_life_years=8.0</p>
+        <p class="viz-lead">Model's fee-adjusted edge over Polymarket prices by team and stage. <b style="color:var(--accent)">Green</b> = model rates team higher (value to back); <b style="color:var(--accent)">red</b> = model rates lower (fade). Cell intensity scales with size (stake volume). Updated as probabilities shift.</p>
+        <img src="./img/model-edge-vs-polymarket-advancement.png" alt="Model edge vs Polymarket by team and stage (GRP, R32, R16, QF, SF, FINAL, WIN)" class="viz-svg" style="border-radius: 4px; border: 1px solid #2a2f37;"/>
+        <p class="viz-note">model blend (Elo 50% + Dixon-Coles 50%) vs Shin-devigged Polymarket · 36 WC matches completed · edges persist through tournament progression</p>
       </div>
     </section>
 
