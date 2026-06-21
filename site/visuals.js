@@ -155,6 +155,25 @@
   // Advancement panels (progression, model-vs-Polymarket, standings) moved to
   // Scores & Markets (scores.html / scores.js) as the edge matrix + standings.
 
+  // ---- Exhibit 1: live model-edge-vs-Polymarket matrix ---------------------
+  // Renders the same edge⇄kelly matrix as Scores & Markets via the shared
+  // window.WCAEdgeMatrix, fed live from advancement_data.json (cache-busted) so
+  // the table reflects current model-vs-market state, never a stale snapshot.
+  fetch("./advancement_data.json?t=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .catch(function () { return null; })
+    .then(function (adv) {
+      if (!adv) return;
+      var mg = adv.meta || {};
+      var meta = $("adv-edge-meta");
+      if (meta) meta.textContent = mg.n_pm_markets ? mg.n_pm_markets + " PM markets" : (mg.model_generated || "");
+      var foot = $("adv-edge-foot");
+      if (foot && mg.generated) {
+        foot.textContent = "model blend (Elo + Dixon-Coles) vs Shin-devigged Polymarket · data " + mg.generated;
+      }
+      if (window.WCAEdgeMatrix) window.WCAEdgeMatrix("adv-edge", adv);
+    });
+
   // ---- Exhibit 3: advancement over time (existing) -------------------------
 
   fetch("./advancement_history.json", { cache: "no-store" })

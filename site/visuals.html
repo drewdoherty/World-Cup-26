@@ -37,6 +37,18 @@
   .adv-gt .adv-pt { color: var(--text); font-weight: 600; }
   .adv-gt tr.adv-q .adv-tm { color: var(--accent); }
   .dim { color: var(--muted); }
+  /* edge⇄kelly matrix (shared with Scores & Markets; classes mirror scores.html) */
+  .adv-edge-leg { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 8px; font-size: 11px; color: var(--text-dim); align-items: center; }
+  .adv-edge-leg .d { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; vertical-align: -1px; }
+  .adv-edge-wrap { overflow-x: auto; }
+  .adv-edge-grid { display: grid; gap: 3px; min-width: 560px; }
+  .adv-edge-grid .eh { text-align: center; font-size: 9px; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); padding: 2px 0; }
+  .adv-edge-grid .et { display: flex; align-items: center; font-size: 11.5px; color: var(--text); padding-right: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .adv-edge-grid .ec { border-radius: 3px; padding: 6px 0; text-align: center; font-size: 11px; color: var(--text); font-variant-numeric: tabular-nums; }
+  .adv-edge-toggle { display: inline-flex; margin: 0 0 9px; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .adv-edge-toggle .adv-emode { background: transparent; border: 0; color: var(--text-dim); font: inherit; font-size: 10px; letter-spacing: .5px; text-transform: uppercase; padding: 3px 12px; cursor: pointer; }
+  .adv-edge-toggle .adv-emode + .adv-emode { border-left: 1px solid var(--border); }
+  .adv-edge-toggle .adv-emode.on { background: rgba(63,224,138,0.16); color: var(--accent); }
 </style>
 </head>
 <body>
@@ -61,51 +73,19 @@
          the progression chart + the model-vs-Polymarket table; group standings
          moved alongside it. -->
 
-    <!-- ===== Exhibit 1: how far back does the data go? ===== -->
+    <!-- ===== Exhibit 1: Model Edge vs Polymarket // Advancement (live) =====
+         Renders the same live edge⇄kelly matrix as Scores & Markets, via the
+         shared adv_edge_matrix.js, fed from advancement_data.json. Not a PNG —
+         it reflects current model-vs-market state every time the data refreshes. -->
     <section class="panel">
       <div class="panel-head">
-        <span class="panel-label">Exhibit 1 // How Far Back Does The Data Go?</span>
-        <span class="panel-meta">half-life 8y · Elo running</span>
+        <span class="panel-label">Exhibit 1 // Model Edge vs Polymarket // Advancement</span>
+        <span class="panel-meta" id="adv-edge-meta"></span>
       </div>
       <div class="panel-body viz-grid">
-        <div class="viz-qa">
-          <p class="viz-q">&ldquo;How far back did you use? Feels like it&rsquo;s only valid if the team is at least ~50% the same squad.&rdquo;</p>
-          <p class="viz-a">Good instinct &mdash; and the model already encodes it. We hold <b>every international since 1872</b> (49,477 matches), but nothing is weighted equally. Dixon-Coles applies an <b>8-year exponential half-life</b>: a match 8 years ago counts <b>half</b> as much as one today, 16 years ago a <b>quarter</b>. There is no hard cutoff &mdash; influence fades smoothly. Separately, <b>Elo is a running rating</b> updated after every single match, so a team&rsquo;s number already reflects its recent trajectory; old results are superseded, not re-counted. Your &ldquo;~50% same squad&rdquo; line maps almost exactly to the <b>~4&ndash;8 year window</b> that dominates the fit. By the time a squad has fully turned over, those matches carry &lt;50% weight and Elo has re-converged on the current side.</p>
-        </div>
-        <!-- decay curve (computed: 0.5 ** (years/8)) -->
-        <svg class="viz-svg" viewBox="0 0 720 280" role="img"
-             aria-label="Exponential time-decay weight curve, 8-year half-life">
-          <!-- axes -->
-          <line x1="56" y1="20" x2="56" y2="232" stroke="#2a2f37" stroke-width="1"/>
-          <line x1="56" y1="232" x2="690" y2="232" stroke="#2a2f37" stroke-width="1"/>
-          <!-- y gridlines + labels (100/75/50/25/0%) -->
-          <g fill="#4a525c" font-size="10" font-family="monospace">
-            <line x1="56" y1="32"  x2="690" y2="32"  stroke="#191d23"/><text x="50" y="35" text-anchor="end">100%</text>
-            <line x1="56" y1="82"  x2="690" y2="82"  stroke="#191d23"/><text x="50" y="85" text-anchor="end">75%</text>
-            <line x1="56" y1="132" x2="690" y2="132" stroke="#191d23"/><text x="50" y="135" text-anchor="end">50%</text>
-            <line x1="56" y1="182" x2="690" y2="182" stroke="#191d23"/><text x="50" y="185" text-anchor="end">25%</text>
-            <text x="50" y="235" text-anchor="end">0%</text>
-          </g>
-          <!-- decay curve: x = 56 + (yrs/24)*634, y = 32 + (1 - w)*200, w=0.5^(yrs/8) -->
-          <path d="M56.0,32.0 L82.4,48.6 L108.8,63.8 L135.2,77.8 L161.7,90.6 L188.1,102.3
-                   L214.5,113.1 L267.3,132.0 L320.2,147.9 L373.0,161.3 L478.7,182.0
-                   L584.3,196.6 L690.0,207.0"
-                fill="none" stroke="#3fe08a" stroke-width="2"/>
-          <!-- half-life marker at 8y (x=267.3, w=0.5 -> y=132) -->
-          <line x1="267" y1="32" x2="267" y2="232" stroke="#3fe08a" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
-          <circle cx="267" cy="132" r="3.5" fill="#3fe08a"/>
-          <text x="273" y="128" fill="#3fe08a" font-size="10" font-family="monospace">8y half-life = 50% weight</text>
-          <!-- x labels -->
-          <g fill="#4a525c" font-size="10" font-family="monospace" text-anchor="middle">
-            <text x="56"  y="248">today</text>
-            <text x="161" y="248">4y</text>
-            <text x="267" y="248">8y</text>
-            <text x="425" y="248">14y</text>
-            <text x="584" y="248">20y</text>
-            <text x="373" y="266" fill="#6b7480">match age &rarr; weight in the Dixon-Coles fit</text>
-          </g>
-        </svg>
-        <p class="viz-note">data 1872&ndash;2026 · 49,477 matches · weighting computed live from half_life_years=8.0</p>
+        <p class="viz-lead">Model's fee-adjusted edge over the <b style="color:var(--accent)">live</b> Polymarket price for every team reaching each stage. <b style="color:var(--accent)">Green</b> = model rates the team above the market (value to back); <b style="color:var(--accent)">red</b> = below (fade/lay). Switch to <b style="color:var(--accent)">kelly</b> for the recommended &frac14;-Kelly stake (% of the $1,310 PM pool, capped 5%). Reads <code>advancement_data.json</code> &mdash; never a snapshot.</p>
+        <div id="adv-edge"><div class="empty">Loading live edge matrix&hellip;</div></div>
+        <p class="viz-note" id="adv-edge-foot">model blend (Elo + Dixon-Coles) vs Shin-devigged Polymarket · regenerated each publish</p>
       </div>
     </section>
 
@@ -284,6 +264,7 @@
     <span class="foot-mark">WORLD CUP ALPHA</span>
   </footer>
 </div>
+<script src="./adv_edge_matrix.js"></script>
 <script src="./visuals.js"></script>
 </body>
 </html>

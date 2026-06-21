@@ -324,41 +324,11 @@
   }
 
   // ---- advancement: model edge vs Polymarket + group standings ------------
+  // The edge⇄kelly matrix renderer lives in the shared adv_edge_matrix.js (one
+  // source of truth, also used by the Visuals page) so the two can never drift.
+  // scores.html loads it before this file.
   function renderEdgeMatrix(d) {
-    var el = $("adv-edge");
-    if (!el) return;
-    var teams = (d.teams || []).filter(function (t) {
-      return t.model && (Number(t.model.win) || 0) > 0.003;
-    });
-    teams.sort(function (a, b) { return (Number(b.model.win) || 0) - (Number(a.model.win) || 0); });
-    teams = teams.slice(0, 18);
-    if (!teams.length) { el.innerHTML = '<div class="empty">No advancement data yet</div>'; return; }
-    var stages = [["group_winner", "Grp"], ["R32", "R32"], ["R16", "R16"], ["QF", "QF"],
-                  ["SF", "SF"], ["Final", "Final"], ["win", "Win"]];
-    function bg(v) {
-      if (v === null) return "transparent";
-      var a = Math.min(1, Math.abs(v) / 0.15) * 0.8 + 0.06;
-      return (v >= 0 ? "rgba(63,224,138," : "rgba(224,96,63,") + a.toFixed(2) + ")";
-    }
-    var leg = '<div class="adv-edge-leg">' +
-      '<span><span class="d" style="background:rgba(63,224,138,0.85)"></span>model above market &mdash; back</span>' +
-      '<span><span class="d" style="background:rgba(224,96,63,0.85)"></span>model below market &mdash; fade</span>' +
-      '<span style="color:var(--muted)">cells: edge in points &middot; intensity = size</span></div>';
-    var cols = "132px repeat(" + stages.length + ", 1fr)";
-    var h = '<div class="adv-edge-grid" style="grid-template-columns:' + cols + '"><div></div>';
-    stages.forEach(function (s) { h += '<div class="eh">' + s[1] + "</div>"; });
-    teams.forEach(function (t) {
-      h += '<div class="et">' + esc(t.team) + "</div>";
-      stages.forEach(function (s) {
-        var pmObj = t.pm ? t.pm[s[0]] : null;
-        var v = (pmObj && pmObj.edge_adj != null) ? Number(pmObj.edge_adj) : null;
-        var txt = v === null ? '<span style="color:var(--muted)">&middot;</span>'
-          : (v >= 0 ? "+" : "") + (v * 100).toFixed(1);
-        h += '<div class="ec" style="background:' + bg(v) + '">' + txt + "</div>";
-      });
-    });
-    h += "</div>";
-    el.innerHTML = leg + '<div class="adv-edge-wrap">' + h + "</div>";
+    if (window.WCAEdgeMatrix) window.WCAEdgeMatrix("adv-edge", d);
   }
 
   function renderGroups(d) {
