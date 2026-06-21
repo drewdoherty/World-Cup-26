@@ -378,3 +378,25 @@ def test_run_task_cleans_up_worktree_on_failure(cfg, monkeypatch):
     assert "nope" in rec.error
     removes = [c for c in fake.state["calls"] if "worktree" in c and "remove" in c]
     assert removes, "a failed run must reclaim its worktree"
+
+
+# -- codex sandbox (regression: read-only -> agent can't edit -> NO_CHANGES) -
+
+
+def test_codex_args_default_to_workspace_write(tmp_path):
+    cfg = ConductorConfig(repo_root=tmp_path)
+    binary, args = cfg.cli_for("codex")
+    assert "--sandbox" in args and "workspace-write" in args
+
+
+def test_codex_command_puts_sandbox_flag_before_prompt(cfg, monkeypatch):
+    fake = make_fake_run()
+    monkeypatch.setattr(runner, "_run", fake)
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    runner.run_agent(cfg, "codex", "do the thing", Path("/tmp/wt"))
+    agent_cmds = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")]
+    assert agent_cmds, "expected a codex invocation"
+    cmd = agent_cmds[0]
+    assert "exec" in cmd and "--sandbox" in cmd and "workspace-write" in cmd
+    # flags must precede the positional prompt or codex won't parse them
+    assert cmd.index("--sandbox") < cmd.index("do the thing")

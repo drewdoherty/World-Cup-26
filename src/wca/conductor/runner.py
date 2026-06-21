@@ -144,7 +144,8 @@ def run_agent(cfg: ConductorConfig, engine: str, task: str, cwd: Path) -> AgentR
     if Engine.coerce(engine) is Engine.CLAUDE:
         cmd = [binary, "-p", task, *extra]
     else:
-        cmd = [binary, "exec", task, *extra]
+        # codex: flags before the positional prompt (e.g. -s workspace-write).
+        cmd = [binary, "exec", *extra, task]
 
     try:
         res = _run(cmd, cwd=str(cwd), env=cfg.agent_env(), timeout=cfg.agent_timeout)

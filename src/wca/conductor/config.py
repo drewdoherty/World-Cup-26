@@ -27,6 +27,13 @@ def _default_claude_args() -> List[str]:
     return ["--output-format", "json", "--permission-mode", "acceptEdits"]
 
 
+def _default_codex_args() -> List[str]:
+    # codex exec defaults to a READ-ONLY sandbox, so without this the agent
+    # can't modify files and every task lands as NO_CHANGES. workspace-write
+    # lets it edit within the worktree (approval is already "never" in exec).
+    return ["--sandbox", "workspace-write"]
+
+
 @dataclass
 class ConductorConfig:
     repo_root: Path
@@ -43,7 +50,7 @@ class ConductorConfig:
     claude_bin: str = "claude"
     codex_bin: str = "codex"
     claude_args: List[str] = field(default_factory=_default_claude_args)
-    codex_args: List[str] = field(default_factory=list)
+    codex_args: List[str] = field(default_factory=_default_codex_args)
     agent_timeout: float = 1800.0  # 30 min hard cap per agent run
 
     create_pr: bool = True   # attempt `gh pr create`; falls back to compare link
