@@ -17,6 +17,26 @@
   .viz-a { color: var(--text-dim); font-size: 12px; line-height: 1.7; margin: 0; }
   .viz-a b { color: var(--accent); font-weight: 600; }
   .viz-note { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 8px; }
+  .adv-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; }
+  .adv-leg { font-size: 11px; color: var(--text-dim); display: inline-flex; align-items: center; gap: 5px; }
+  .adv-dot { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+  .adv-stage { background: var(--panel-2); color: var(--text-dim); border: 1px solid var(--border-2); border-radius: 3px; font-family: var(--mono); font-size: 11px; padding: 3px 9px; margin: 0 5px 5px 0; cursor: pointer; }
+  .adv-stage[aria-pressed="true"] { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+  .tbl, .adv-tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .tbl th, .tbl td, .adv-tbl th, .adv-tbl td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--border); }
+  .tbl th, .adv-tbl th { color: var(--muted); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
+  .adv-tbl td.r, .adv-tbl th.r { text-align: right; font-variant-numeric: tabular-nums; }
+  .adv-tbl td { color: var(--text); }
+  .adv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(208px, 1fr)); gap: 10px; }
+  .adv-grp { border: 1px solid var(--border); border-radius: 3px; padding: 6px 9px; background: var(--panel-2); }
+  .adv-grp-h { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+  .adv-gt { width: 100%; border-collapse: collapse; font-size: 11px; font-variant-numeric: tabular-nums; }
+  .adv-gt th { color: var(--muted); font-size: 8.5px; text-transform: uppercase; font-weight: 500; text-align: right; padding: 1px 3px; }
+  .adv-gt td { text-align: right; padding: 1px 3px; color: var(--text-dim); }
+  .adv-gt .adv-tm { text-align: left; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 96px; }
+  .adv-gt .adv-pt { color: var(--text); font-weight: 600; }
+  .adv-gt tr.adv-q .adv-tm { color: var(--accent); }
+  .dim { color: var(--muted); }
 </style>
 </head>
 <body>
@@ -37,6 +57,43 @@
   </header>
 
   <main>
+    <!-- ===== Tournament progression (data-driven) ===== -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">Tournament Progression // Group Stage &rarr; Final</span>
+        <span class="panel-meta" id="adv-prog-meta"></span>
+      </div>
+      <div class="panel-body viz-grid">
+        <p class="viz-sub">Each line is one team&rsquo;s modelled survival probability through the bracket &mdash; from in the group stage (100%) to lifting the trophy. The bracket is incomplete: group games are still being played, so the deep-round numbers are projections. The 12 likeliest winners are coloured; hover any line for the team&rsquo;s full path and its Polymarket comparison.</p>
+        <div id="adv-progress"></div>
+      </div>
+    </section>
+
+    <!-- ===== Model implied advancement vs Polymarket ===== -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">Model Implied Advancement vs Polymarket</span>
+        <span class="panel-meta" id="adv-mvp-meta"></span>
+      </div>
+      <div class="panel-body viz-grid">
+        <p class="viz-sub">Our Monte-Carlo probability of each outcome vs the live Polymarket price for the same market. <b style="color:var(--accent)">edge</b> = model &minus; market (percentage points): positive means we think it&rsquo;s likelier than the market does. Pick an outcome:</p>
+        <div id="adv-mvp-controls"></div>
+        <div id="adv-mvp"></div>
+      </div>
+    </section>
+
+    <!-- ===== Group standings ===== -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">Group Stage // Standings</span>
+        <span class="panel-meta" id="adv-groups-meta"></span>
+      </div>
+      <div class="panel-body">
+        <p class="viz-sub" style="margin-bottom:10px">Live group tables &mdash; the data behind the left edge of the progression chart. Top two (highlighted) advance directly; the best third-placed teams fill the rest of the 32.</p>
+        <div id="adv-groups"></div>
+      </div>
+    </section>
+
     <!-- ===== Exhibit 1: how far back does the data go? ===== -->
     <section class="panel">
       <div class="panel-head">
