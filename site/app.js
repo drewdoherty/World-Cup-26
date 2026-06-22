@@ -430,10 +430,10 @@
 
   // Small terminal chip for a bet's source (model/offer/punt). Unknown/absent
   // source -> em-dash cell so old data.json rows stay clean.
-  var SRC_ABBR = { model: "MDL", offer: "OFR", punt: "PNT" };
+  var SRC_ABBR = { model: "MDL", offer: "OFR", punt: "PNT", hedge: "HDG" };
   function sourceChip(src) {
     var s = String(src === null || src === undefined ? "" : src).toLowerCase().trim();
-    if (s !== "model" && s !== "offer" && s !== "punt") {
+    if (s !== "model" && s !== "offer" && s !== "punt" && s !== "hedge") {
       return '<span class="dim">—</span>';
     }
     return '<span class="src-chip src-' + s + '" title="' + esc(s) + '">' +
@@ -444,6 +444,16 @@
   function accountSuffix(account) {
     var a = String(account === null || account === undefined ? "" : account).trim();
     return a === "2" ? ' <span class="acct-chip">A2</span>' : '';
+  }
+  // Manual-override cell (open + closed tables). A bet is "manually overwritten"
+  // when its row carries a manual_override note (set on this source-of-truth
+  // machine via scripts/wca_override.py); the auto-grader then leaves it alone.
+  // Shows a ✎ badge with the full reason on hover; em-dash when untouched.
+  function overrideCell(p) {
+    var o = (p.manual_override == null) ? "" : String(p.manual_override).trim();
+    if (!o) return '<td class="pos-ovr" data-label="Override"><span class="dim">—</span></td>';
+    return '<td class="pos-ovr" data-label="Override" title="' + esc(o) +
+      '"><span class="ovr-flag" style="color:#f2c14e;font-weight:600">✎ manual</span></td>';
   }
 
   function renderPositions(d) {
@@ -484,6 +494,7 @@
         '<td data-label="Venue"><span class="pill book ' + venue + '" style="color:' + col +
           ';border-color:' + col + '">' + esc(p.platform || venue) +
           accountSuffix(p.account) + '</span></td>' +
+        overrideCell(p) +
         '</tr>';
     }).join("");
 
@@ -494,7 +505,7 @@
           '<th class="r">Odds</th><th class="r">Stake</th>' +
           '<th class="r">Model</th><th class="r">Mkt</th>' +
           '<th class="r">Edge</th><th class="r">EV</th>' +
-          '<th>Source</th><th>Venue</th>' +
+          '<th>Source</th><th>Venue</th><th>Override</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
       '</table>';
@@ -1153,6 +1164,7 @@
           '" style="color:' + bookColor(p.platform) + ';border-color:' +
           bookColor(p.platform) + '">' + esc(p.platform || "") +
           accountSuffix(p.account) + '</span></td>' +
+        overrideCell(p) +
         '</tr>';
     }).join("");
     el.innerHTML =
@@ -1162,7 +1174,7 @@
           '<th class="r">Odds</th><th class="r">Stake</th>' +
           '<th class="r">Model</th><th class="r">EV</th>' +
           '<th class="r">Close</th><th class="r">P&L</th><th class="r">CLV</th>' +
-          '<th>Source</th><th>Venue</th>' +
+          '<th>Source</th><th>Venue</th><th>Override</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
       '</table>';

@@ -239,6 +239,7 @@ def _positions_from_bets(bets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             "ev": _opt_num(b.get("ev")),
             "kelly_fraction": _opt_num(b.get("kelly_fraction")),
             "notes": b.get("notes"),
+            "manual_override": b.get("manual_override"),
         })
     return positions
 
@@ -416,6 +417,7 @@ def build_site_data(
             "closing_odds": _opt_num(b.get("closing_odds")),
             "clv": _opt_num(b.get("clv")),
             "notes": b.get("notes"),
+            "manual_override": b.get("manual_override"),
         })
 
     # Realized P&L curves: cumulative settled P&L over settlement time, one

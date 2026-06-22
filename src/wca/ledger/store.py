@@ -71,7 +71,8 @@ CREATE TABLE IF NOT EXISTS bets (
     settled_pl          REAL,
     closing_odds        REAL,
     clv                 REAL,
-    notes               TEXT
+    notes               TEXT,
+    manual_override     TEXT
 )
 """
 
@@ -131,6 +132,9 @@ def init_db(db_path: str = _DEFAULT_DB) -> None:
         conn.execute(_DDL_BETS)
         conn.execute(_DDL_BANKROLL_EVENTS)
         conn.execute(_DDL_ODDS_SNAPSHOTS)
+        _ensure_account_source_columns(conn)
+        _ensure_settled_ts_column(conn)
+        _ensure_manual_override_column(conn)
 
 
 # ---------------------------------------------------------------------------
@@ -248,6 +252,20 @@ def _ensure_settled_ts_column(conn) -> None:
     """Add the settled_ts column to pre-existing databases (idempotent)."""
     try:
         conn.execute("ALTER TABLE bets ADD COLUMN settled_ts TEXT")
+    except Exception:
+        pass  # already present
+
+
+def _ensure_manual_override_column(conn) -> None:
+    """Add the manual_override column to pre-existing databases (idempotent).
+
+    ``manual_override`` holds a free-text note when a bet has been hand-edited
+    on the source-of-truth machine (via ``scripts/wca_override.py``). When set,
+    automated graders/backfills must leave the bet untouched so the manual
+    correction is never clobbered.
+    """
+    try:
+        conn.execute("ALTER TABLE bets ADD COLUMN manual_override TEXT")
     except Exception:
         pass  # already present
 
