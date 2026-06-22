@@ -494,3 +494,17 @@ def test_create_worktree_holds_worktree_lock(cfg, monkeypatch):
     monkeypatch.setattr(runner, "_run", fake)
     runner.create_worktree(cfg, "conductor/x", "leaf")
     assert seen.get("locked") is True, "git worktree add must run under _WORKTREE_LOCK"
+
+
+def test_submit_auto_ignores_codex_cap_when_claude_down(tmp_path, monkeypatch):
+    # Regression: with claude logged out and the Codex auto-cap "reached", a
+    # /task must still go to Codex — not mis-route to a dead Claude.
+    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, codex_auto_limit=1))
+    _stub_health(mgr, claude_ok=False, codex_ok=True)
+    # simulate one Codex task already active (cap of 1 reached)
+    mgr._records[99] = TaskRecord(id=99, engine="codex", task="busy",
+                                  status=TaskStatus.RUNNING.value)
+    rec = mgr.submit_auto("write a background research report")
+    assert rec.engine == "codex"
+    assert rec.status != TaskStatus.REJECTED.value

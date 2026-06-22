@@ -108,9 +108,14 @@ class ConductorManager:
         codex_ok = self.engine_health(Engine.CODEX.value).ok
         with self._lock:
             codex_cap_ok = self.cfg.codex_auto_limit > self._active_engine_locked(Engine.CODEX.value)
+        # The codex_auto_limit is a *conservation* cap (send overflow to Claude
+        # to spend scarce Codex sparingly) — NOT a hard availability gate. When
+        # Claude is unavailable there is nothing to conserve, so ignore the cap
+        # rather than mis-route extra /task jobs to a logged-out Claude.
+        codex_available = codex_ok and (codex_cap_ok or not claude_ok)
         decision = choose_engine(
             task,
-            codex_available=codex_ok and codex_cap_ok,
+            codex_available=codex_available,
             claude_available=claude_ok,
         )
         if not claude_ok and not codex_ok:
