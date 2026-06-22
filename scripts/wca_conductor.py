@@ -26,13 +26,24 @@ every spawned agent. See :mod:`wca.conductor`.
 from __future__ import annotations
 
 import argparse
+import io
 import os
+import subprocess
 import sys
 import threading
 import time
 import uuid
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Tuple
+
+# Report artifacts a finished task can send back (auto-attached + via /report).
+# Generated data feeds are excluded — they are noise, not a "report".
+_REPORT_EXTS = {".md", ".csv", ".txt", ".png", ".svg", ".pdf"}
+_IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+_REPORT_EXCLUDE_PREFIXES = ("site/", "data/", ".github/", "node_modules/")
+_MAX_REPORT_FILES = 6
+_TELEGRAM_PHOTO_MAX = 10 * 1024 * 1024   # Bot API sendPhoto ceiling
+_TELEGRAM_DOC_MAX = 48 * 1024 * 1024     # Bot API sendDocument ceiling (~50 MB)
 
 # Make ``src`` importable when run from a worktree (editable install resolves to
 # the main checkout otherwise — the known worktree PYTHONPATH quirk).
@@ -103,6 +114,8 @@ def _help_text(manager: ConductorManager) -> str:
         "`/watch [id]` — LIVE: what each agent is doing right now",
         "`/usage` — Anthropic token spend & limits (real-time)",
         "`/prs` — open task PRs (review from your phone)",
+        "`/report <id>` — send a task's report files (.md/.csv/.png…) back to you",
+        "`/chart` — token-spend chart (PNG)",
         "`/log <id>` — full detail of one task",
         "`/health` — live engine auth/availability",
         "`/retry <id>` — re-run a failed task",
@@ -110,6 +123,8 @@ def _help_text(manager: ConductorManager) -> str:
         "",
         "📎 *Paste a screenshot* with a caption (or just a description) and the "
         "agent reads it as visual context to debug.",
+        "📄 Report files a task writes are *sent back to you* automatically; "
+        "`/report <id>` re-fetches them.",
         "",
         "_Sequential by default · PR-only · dry-run env · auto-notifies on start, finish & hiccups._",
     ]
@@ -129,8 +144,9 @@ _MENU_KEYBOARD = {
         [{"text": "📋 Status", "callback_data": "status"},
          {"text": "🔭 Live", "callback_data": "watch"}],
         [{"text": "💸 Usage", "callback_data": "usage"},
-         {"text": "🔀 PRs", "callback_data": "prs"}],
-        [{"text": "❤️ Health", "callback_data": "health"}],
+         {"text": "📊 Chart", "callback_data": "chart"}],
+        [{"text": "🔀 PRs", "callback_data": "prs"},
+         {"text": "❤️ Health", "callback_data": "health"}],
     ]
 }
 
@@ -145,6 +161,8 @@ _COMMANDS = [
     {"command": "watch", "description": "live agent activity: /watch [id]"},
     {"command": "usage", "description": "Anthropic token spend & limits"},
     {"command": "prs", "description": "open task PRs"},
+    {"command": "report", "description": "send a task's report files: /report <id>"},
+    {"command": "chart", "description": "token-spend chart (PNG)"},
     {"command": "log", "description": "full detail of a task: /log <id>"},
     {"command": "health", "description": "engine auth/availability"},
     {"command": "retry", "description": "re-run a failed task: /retry <id>"},
@@ -213,6 +231,12 @@ class ConductorBot:
         if record.finished_at is not None and record.id not in self._announced_done:
             self._announced_done.add(record.id)
             self._send(chat, self._completion_text(record))
+            # Auto-attach any report files the task produced (.md/.csv/.png/...).
+            if record.status in (TaskStatus.DONE.value, TaskStatus.PUSHED.value):
+                try:
+                    self._send_report_files(chat, record)
+                except Exception as exc:  # noqa: BLE001 - never let attach kill the notifier
+                    print("[conductor] auto-attach failed: %s" % exc, flush=True)
 
     def _health_watch(self, interval: float = 300.0) -> None:
         """Background watcher: alert the notify chat when an engine's health flips."""
@@ -345,6 +369,106 @@ class ConductorBot:
             except OSError:
                 pass
 
+    # -- task output: report files + charts -------------------------------
+
+    def _task_report_files(self, record: TaskRecord) -> List[Tuple[str, bytes, bool]]:
+        """Report-like files a task ADDED/MODIFIED, as ``(name, bytes, is_image)``.
+
+        Read straight from the task's branch via git (so it works even after the
+        worktree is reclaimed), filtered to report extensions, excluding generated
+        data/site feeds, size-capped to Telegram's limits, and count-capped.
+        """
+        if not record.branch:
+            return []
+        cfg = self.manager.cfg
+        git, repo, base = cfg.git_bin, str(cfg.repo_root), cfg.base_branch
+        try:
+            listing = subprocess.run(
+                [git, "-C", repo, "diff", "--name-only", "--diff-filter=AM",
+                 "%s...%s" % (base, record.branch)],
+                capture_output=True, text=True, timeout=30,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return []
+        if listing.returncode != 0:
+            return []
+        out: List[Tuple[str, bytes, bool]] = []
+        for path in listing.stdout.splitlines():
+            path = path.strip()
+            if not path or os.path.splitext(path)[1].lower() not in _REPORT_EXTS:
+                continue
+            if any(path.startswith(p) for p in _REPORT_EXCLUDE_PREFIXES):
+                continue
+            try:
+                blob = subprocess.run(  # no text=True -> raw bytes (images!)
+                    [git, "-C", repo, "show", "%s:%s" % (record.branch, path)],
+                    capture_output=True, timeout=30,
+                )
+            except (OSError, subprocess.SubprocessError):
+                continue
+            if blob.returncode != 0 or not blob.stdout:
+                continue
+            is_image = os.path.splitext(path)[1].lower() in _IMAGE_EXTS
+            if len(blob.stdout) > (_TELEGRAM_PHOTO_MAX if is_image else _TELEGRAM_DOC_MAX):
+                continue
+            out.append((os.path.basename(path), blob.stdout, is_image))
+            if len(out) >= _MAX_REPORT_FILES:
+                break
+        return out
+
+    def _send_report_files(self, chat_id: str, record: TaskRecord) -> int:
+        """Send a task's report files (images inline, the rest as documents)."""
+        files = self._task_report_files(record)
+        sent = 0
+        for name, content, is_image in files:
+            caption = "📄 %s · from #%d" % (name, record.id)
+            try:
+                with self._send_lock:
+                    if is_image:
+                        self.client.send_photo(chat_id, content, filename=name, caption=caption)
+                    else:
+                        self.client.send_document(chat_id, content, filename=name, caption=caption)
+                sent += 1
+            except TelegramError as exc:
+                print("[conductor] report send failed (%s): %s" % (name, exc), flush=True)
+        return sent
+
+    def _render_usage_chart(self) -> Optional[bytes]:
+        """Render conductor token-spend-by-task as a PNG. None if matplotlib is
+        unavailable (the chart command then falls back to the text table)."""
+        try:
+            import matplotlib
+            matplotlib.use("Agg")  # headless: no display in the bot process
+            import matplotlib.pyplot as plt
+        except Exception:  # noqa: BLE001 - matplotlib is an optional extra
+            return None
+        recs = [r for r in self.manager.records() if r.tokens]
+        if not recs:
+            return None
+        recs = sorted(recs, key=lambda r: r.tokens)[-15:]  # top 15 spenders
+        labels = ["#%d %s" % (r.id, r.engine) for r in recs]
+        vals = [r.tokens for r in recs]
+        colors = ["#d97706" if r.engine == "claude" else "#2563eb" for r in recs]
+        try:
+            fig, ax = plt.subplots(figsize=(7.5, max(2.5, 0.42 * len(recs))))
+            ax.barh(labels, vals, color=colors)
+            ax.set_xlabel("tokens")
+            ax.set_title("Conductor token spend by task")
+            for i, v in enumerate(vals):
+                ax.text(v, i, " %s" % format(v, ","), va="center", fontsize=8)
+            fig.tight_layout()
+            buf = io.BytesIO()
+            fig.savefig(buf, format="png", dpi=120)
+            plt.close(fig)
+            return buf.getvalue()
+        except Exception as exc:  # noqa: BLE001
+            print("[conductor] chart render failed: %s" % exc, flush=True)
+            try:
+                plt.close("all")
+            except Exception:
+                pass
+            return None
+
     def handle(self, message: Dict[str, object],
                images_override: Optional[List[str]] = None) -> Optional[str]:
         # A photo carries its command/description in `caption`, not `text`.
@@ -424,6 +548,30 @@ class ConductorBot:
                 return self.manager.task_detail(int(arg.strip()))
             except ValueError:
                 return "Usage: `/log <id>`"
+        if cmd == "/report":
+            try:
+                tid = int(arg.strip())
+            except ValueError:
+                return "Usage: `/report <id>` — send the report files a task produced"
+            rec = self.manager.get(tid)
+            if rec is None:
+                return "No task `#%d`." % tid
+            n = self._send_report_files(chat_id, rec)
+            if n:
+                return None  # the files (with captions) are the reply
+            return "No report files (.md/.csv/.txt/.png/.svg/.pdf) in `#%d`." % tid
+        if cmd == "/chart":
+            png = self._render_usage_chart()
+            if png is None:
+                return ("📊 No chart available (need `matplotlib`, or no token "
+                        "spend yet).\n\n" + self.manager.usage_table())
+            try:
+                with self._send_lock:
+                    self.client.send_photo(chat_id, png, filename="conductor_usage.png",
+                                           caption="📊 Conductor token spend by task")
+            except TelegramError as exc:
+                return "Chart send failed: %s" % exc
+            return None
         if cmd == "/retry":
             if not _is_admin(user_id, self.admin):
                 return "🚫 Not authorized."
@@ -471,6 +619,18 @@ class ConductorBot:
             except TelegramError:
                 pass
         if not _authorized(chat_id, self.allowed):
+            return
+        if data == "chart":  # sends a photo, not a text view
+            png = self._render_usage_chart()
+            if png is None:
+                self._send(chat_id, "📊 No chart available yet.\n\n" + self.manager.usage_table())
+                return
+            try:
+                with self._send_lock:
+                    self.client.send_photo(chat_id, png, filename="conductor_usage.png",
+                                           caption="📊 Conductor token spend by task")
+            except TelegramError as exc:
+                self._send(chat_id, "Chart send failed: %s" % exc)
             return
         text = _view(self.manager, data)
         if text:

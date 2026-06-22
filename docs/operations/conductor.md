@@ -41,6 +41,25 @@ repo's `info/exclude` so `git add -A` can't stage it even on a stale base. The
 `data/conductor_uploads/` originals are gitignored and **age-pruned** (>24h) by
 the background watcher, so `/retry` can still re-attach a recent screenshot.
 
+## Getting output back (files & charts)
+
+The bot can reply with **files and images**, not just text:
+
+* **Report files auto-attach.** When a task finishes (DONE/PUSHED), any
+  report-like files it ADDED/MODIFIED — `.md`, `.csv`, `.txt`, `.png`, `.svg`,
+  `.pdf` — are sent back to the chat (images inline, the rest as documents).
+  Generated `site/` & `data/` feeds and code files are excluded; capped at 6
+  files, read straight from the task branch via git (works after the worktree is
+  reclaimed). `/report <id>` re-fetches them on demand.
+* **`/chart`** renders the conductor's token spend per task as a PNG. This needs
+  `matplotlib` in the venv (an optional extra — `pip install matplotlib`); if it
+  isn't installed, `/chart` falls back to the `/usage` text table.
+
+To get a *report* back, phrase the task to WRITE a file (e.g. "...and write the
+findings to `docs/reports/x.md`") — the conductor only commits files, so a pure
+"explain X" task produces no artifact to attach. Live MODEL charts
+(edges/CLV/exposure) belong in `@gamble1_bot`, not here.
+
 ## Sequential vs parallel
 
 `max_parallel` defaults to **1 (sequential)**. An earlier 8-way "swarm" raced on

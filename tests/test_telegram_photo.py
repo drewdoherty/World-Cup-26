@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 from pathlib import Path
 from typing import Any, Dict
 from unittest.mock import MagicMock, patch
@@ -281,6 +282,8 @@ class _StubClient:
     def __init__(self, fail: bool = False) -> None:
         self.saved: list = []
         self.sent: list = []
+        self.docs: list = []
+        self.photos: list = []
         self.fail = fail
 
     def save_image(self, message, dest_dir, stem):  # noqa: ANN001
@@ -291,6 +294,16 @@ class _StubClient:
 
     def send_message(self, chat_id, text, parse_mode="Markdown", reply_markup=None):  # noqa: ANN001
         self.sent.append((str(chat_id), text))
+        return {}
+
+    def send_document(self, chat_id, document, filename=None, caption=None):  # noqa: ANN001
+        content = bytes(document) if isinstance(document, (bytes, bytearray)) else document
+        self.docs.append((str(chat_id), filename, caption, content))
+        return {}
+
+    def send_photo(self, chat_id, photo, filename=None, caption=None):  # noqa: ANN001
+        content = bytes(photo) if isinstance(photo, (bytes, bytearray)) else photo
+        self.photos.append((str(chat_id), filename, caption, content))
         return {}
 
 
@@ -444,3 +457,134 @@ class TestUploadsPrune:
         bot._prune_uploads(max_age_hours=24.0)
         assert not old.exists()
         assert recent.exists()
+
+
+# ---------------------------------------------------------------------------
+# TelegramClient.send_document / send_photo (multipart upload)
+# ---------------------------------------------------------------------------
+
+class TestSendFile:
+    def test_send_document_from_bytes(self) -> None:
+        client = _make_client()
+        client._session.post = MagicMock(
+            return_value=_fake_post_response({"ok": True, "result": {"message_id": 5}})
+        )
+        res = client.send_document(1, b"# report\nfindings", filename="r.md", caption="cap")
+        assert res["message_id"] == 5
+        url, kwargs = client._session.post.call_args[0][0], client._session.post.call_args[1]
+        assert "sendDocument" in url
+        assert kwargs["data"]["chat_id"] == "1"
+        assert kwargs["data"]["caption"] == "cap"
+        assert "document" in kwargs["files"]  # multipart file part
+
+    def test_send_photo_from_path(self, tmp_path) -> None:
+        p = tmp_path / "chart.png"
+        p.write_bytes(b"\x89PNG\r\n\x1a\nx")
+        client = _make_client()
+        client._session.post = MagicMock(
+            return_value=_fake_post_response({"ok": True, "result": {"message_id": 7}})
+        )
+        res = client.send_photo(1, str(p))
+        assert res["message_id"] == 7
+        url, kwargs = client._session.post.call_args[0][0], client._session.post.call_args[1]
+        assert "sendPhoto" in url and "photo" in kwargs["files"]
+
+    def test_send_document_surfaces_api_error(self) -> None:
+        client = _make_client()
+        client._session.post = MagicMock(
+            return_value=_fake_post_response({"ok": False, "error_code": 413, "description": "Too Big"})
+        )
+        with pytest.raises(TelegramError, match="413"):
+            client.send_document(1, b"x", filename="x.bin")
+
+
+# ---------------------------------------------------------------------------
+# ConductorBot — report files + usage chart
+# ---------------------------------------------------------------------------
+
+def _git_repo_with_report(tmp_path) -> Path:
+    """A repo with a `main` branch and a `conductor/x` task branch that adds a
+    .md report + .png chart (kept) plus code + a site/ file (must be excluded)."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    def g(*args):
+        subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True)
+
+    subprocess.run(["git", "init", "-q", "-b", "main", str(repo)], check=True, capture_output=True)
+    g("config", "user.email", "t@t"); g("config", "user.name", "t")
+    (repo / "seed.txt").write_text("x")
+    g("add", "-A"); g("commit", "-qm", "seed")
+    g("checkout", "-qb", "conductor/x")
+    (repo / "report.md").write_text("# Report\nfindings here")
+    (repo / "chart.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"fakepngdata")
+    (repo / "code.py").write_text("print(1)")                 # excluded: not a report ext
+    (repo / "site").mkdir()
+    (repo / "site" / "data.json").write_text("{}")            # excluded: generated feed
+    g("add", "-A"); g("commit", "-qm", "task")
+    g("checkout", "-q", "main")
+    return repo
+
+
+def _report_bot(repo):
+    mgr = ConductorManager(ConductorConfig(repo_root=repo, base_branch="main"))
+    client = _StubClient()
+    bot = wca_conductor.ConductorBot(client, mgr, allowed=set(), admin=None)
+    return bot, client, mgr
+
+
+class TestTaskReportFiles:
+    def test_filters_to_report_files_and_reads_content(self, tmp_path) -> None:
+        repo = _git_repo_with_report(tmp_path)
+        bot, _client, _mgr = _report_bot(repo)
+        rec = TaskRecord(id=3, engine="claude", task="t", branch="conductor/x")
+        files = bot._task_report_files(rec)
+        by = {name: (content, is_image) for name, content, is_image in files}
+        assert set(by) == {"report.md", "chart.png"}     # code.py + site/data.json excluded
+        assert by["chart.png"][1] is True                # routed as image
+        assert by["report.md"][1] is False
+        assert b"findings here" in by["report.md"][0]     # content read from the branch
+
+    def test_send_report_files_routes_images_and_docs(self, tmp_path) -> None:
+        repo = _git_repo_with_report(tmp_path)
+        bot, client, _mgr = _report_bot(repo)
+        rec = TaskRecord(id=3, engine="claude", task="t", branch="conductor/x")
+        n = bot._send_report_files("1", rec)
+        assert n == 2
+        assert [p[1] for p in client.photos] == ["chart.png"]
+        assert [d[1] for d in client.docs] == ["report.md"]
+
+    def test_report_command_sends_files(self, tmp_path) -> None:
+        repo = _git_repo_with_report(tmp_path)
+        bot, client, mgr = _report_bot(repo)
+        mgr._records[3] = TaskRecord(id=3, engine="claude", task="t", branch="conductor/x")
+        reply = bot.handle({"text": "/report 3", "chat": {"id": 1}, "from": {"id": 1}})
+        assert reply is None                              # the files ARE the reply
+        assert len(client.photos) + len(client.docs) == 2
+
+    def test_report_command_no_files(self, tmp_path) -> None:
+        b, _client, _calls = _make_bot(tmp_path)
+        b.manager._records[4] = TaskRecord(id=4, engine="claude", task="t", branch=None)
+        reply = b.handle({"text": "/report 4", "chat": {"id": 1}, "from": {"id": 1}})
+        assert "No report files" in reply
+
+    def test_no_branch_returns_nothing(self, tmp_path) -> None:
+        bot, _client, _calls = _make_bot(tmp_path)
+        assert bot._task_report_files(TaskRecord(id=9, engine="claude", task="t", branch=None)) == []
+
+
+class TestUsageChart:
+    def test_chart_command(self, tmp_path) -> None:
+        bot, client, _calls = _make_bot(tmp_path)
+        bot.manager._records[1] = TaskRecord(
+            id=1, engine="claude", task="t", tokens=500, status=TaskStatus.DONE.value
+        )
+        reply = bot.handle({"text": "/chart", "chat": {"id": 1}, "from": {"id": 1}})
+        try:
+            import matplotlib  # noqa: F401
+            assert reply is None                          # a photo was sent
+            assert len(client.photos) == 1
+            assert client.photos[0][1] == "conductor_usage.png"
+            assert client.photos[0][3][:8] == b"\x89PNG\r\n\x1a\n"  # real PNG bytes
+        except ImportError:
+            assert reply is not None and "matplotlib" in reply
