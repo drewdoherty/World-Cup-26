@@ -44,6 +44,7 @@ class ConductorConfig:
     max_parallel: int = 3
     token_budget: Optional[int] = None  # None / 0 -> unlimited
     codex_auto_limit: int = 1  # max queued/running automatic Codex tasks
+    disabled_engines: List[str] = field(default_factory=list)  # e.g. ["codex"] when exhausted/off
 
     git_bin: str = "git"
     gh_bin: str = "gh"
@@ -71,6 +72,10 @@ class ConductorConfig:
             self.max_parallel = 1
         if self.codex_auto_limit < 0:
             self.codex_auto_limit = 0
+        self.disabled_engines = [e.strip().lower() for e in self.disabled_engines if e and e.strip()]
+
+    def is_disabled(self, engine: str) -> bool:
+        return Engine.coerce(engine).value in self.disabled_engines
 
     # -- env --------------------------------------------------------------
 
@@ -124,6 +129,7 @@ class ConductorConfig:
             max_parallel=_int("WCA_CONDUCTOR_MAX_PARALLEL", 3) or 3,
             token_budget=_int("WCA_CONDUCTOR_TOKEN_BUDGET", None),
             codex_auto_limit=_int("WCA_CONDUCTOR_CODEX_AUTO_LIMIT", 1) or 0,
+            disabled_engines=[e for e in os.environ.get("WCA_CONDUCTOR_DISABLED_ENGINES", "").split(",") if e.strip()],
             gh_bin=os.environ.get("GH_BIN", "gh"),
             claude_bin=os.environ.get("CLAUDE_BIN", "claude"),
             codex_bin=os.environ.get("CODEX_BIN", "codex"),

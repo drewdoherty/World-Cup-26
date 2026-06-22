@@ -234,6 +234,7 @@ def test_manager_rejects_over_budget(tmp_path, monkeypatch):
 
     monkeypatch.setattr(runner, "run_task", fake_run_task)
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1, token_budget=500))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
     first = mgr.submit("claude", "task one")
     mgr._futures[first.id].result(timeout=10)
     second = mgr.submit("claude", "task two")
@@ -254,6 +255,7 @@ def test_manager_cancel_queued_task(tmp_path, monkeypatch):
 
     monkeypatch.setattr(runner, "run_task", blocking_run_task)
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
     running = mgr.submit("claude", "occupies the worker")
     queued = mgr.submit("codex", "stuck in the queue")
     cancelled = mgr.cancel(queued.id)
@@ -283,7 +285,7 @@ def test_dispatcher_spends_codex_only_on_mechanical_tasks():
 def test_dispatcher_overflows_codex_to_claude_when_cap_reached():
     decision = choose_engine("fix typo in README wording", codex_available=False)
     assert decision.engine is Engine.CLAUDE
-    assert "cap" in decision.reason
+    assert "unavailable" in decision.reason
 
 
 def test_manager_submit_auto_routes_and_records_reason(tmp_path, monkeypatch):
@@ -304,7 +306,7 @@ def test_manager_submit_auto_respects_codex_auto_limit_zero(tmp_path, monkeypatc
     rec = mgr.submit_auto("fix typo in README wording")
     mgr._futures[rec.id].result(timeout=10)
     assert rec.engine == Engine.CLAUDE.value
-    assert "Codex auto cap" in rec.route_reason
+    assert "unavailable" in rec.route_reason
 
 
 def test_status_table_empty_and_populated(tmp_path, monkeypatch):
@@ -400,3 +402,160 @@ def test_codex_command_puts_sandbox_flag_before_prompt(cfg, monkeypatch):
     assert "exec" in cmd and "--sandbox" in cmd and "workspace-write" in cmd
     # flags must precede the positional prompt or codex won't parse them
     assert cmd.index("--sandbox") < cmd.index("do the thing")
+
+
+# -- engine health + availability-aware routing ----------------------------
+
+from wca.conductor import health  # noqa: E402
+from wca.conductor.dispatcher import choose_engine  # noqa: E402
+from wca.conductor.health import EngineHealth  # noqa: E402
+
+
+def test_probe_claude_detects_not_logged_in(cfg, monkeypatch):
+    out = '{"is_error":true,"result":"Not logged in · Please run /login"}'
+    monkeypatch.setattr(health.runner, "_run", make_fake_run(agent_rc=1, agent_stdout=out))
+    monkeypatch.setattr(health.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    h = health.probe_claude(cfg)
+    assert h.ok is False and "logged in" in h.reason.lower()
+
+
+def test_probe_claude_ok(cfg, monkeypatch):
+    monkeypatch.setattr(health.runner, "_run", make_fake_run(agent_stdout='{"result":"ok"}'))
+    monkeypatch.setattr(health.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    assert health.probe_claude(cfg).ok is True
+
+
+def test_probe_codex_uses_auth_file(cfg, monkeypatch):
+    monkeypatch.setattr(health.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(health.os.path, "exists", lambda p: True)
+    monkeypatch.setattr(health.os.path, "getsize", lambda p: 4000)
+    assert health.probe_codex(cfg).ok is True
+    monkeypatch.setattr(health.os.path, "exists", lambda p: False)
+    assert health.probe_codex(cfg).ok is False
+
+
+def test_choose_engine_falls_back_when_claude_unavailable():
+    # a Claude-first task with claude down -> Codex
+    d = choose_engine("refactor the model", codex_available=True, claude_available=False)
+    assert d.engine is Engine.CODEX
+
+
+def test_choose_engine_no_healthy_engine_returns_preferred():
+    d = choose_engine("refactor the model", codex_available=False, claude_available=False)
+    assert d.engine is Engine.CLAUDE and "no healthy engine" in d.reason
+
+
+def _stub_health(mgr, claude_ok, codex_ok):
+    def fake(engine, force=False):
+        e = Engine.coerce(engine).value
+        ok = claude_ok if e == "claude" else codex_ok
+        return EngineHealth(e, ok, "ok" if ok else "%s logged out" % e)
+    mgr.engine_health = fake  # type: ignore[assignment]
+
+
+def test_explicit_claude_reroutes_to_codex_when_logged_out(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _stub_health(mgr, claude_ok=False, codex_ok=True)
+    rec = mgr.submit("claude", "do background work")
+    assert rec.engine == "codex"
+    assert "rerouted claude" in rec.route_reason
+    assert rec.status != TaskStatus.REJECTED.value
+
+
+def test_explicit_claude_rejected_when_both_down(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _stub_health(mgr, claude_ok=False, codex_ok=False)
+    rec = mgr.submit("claude", "do work")
+    assert rec.status == TaskStatus.REJECTED.value and "logged out" in rec.error
+
+
+def test_submit_auto_routes_to_codex_when_claude_down(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _stub_health(mgr, claude_ok=False, codex_ok=True)
+    rec = mgr.submit_auto("write a research report on the model")
+    assert rec.engine == "codex"
+    assert rec.status != TaskStatus.REJECTED.value
+
+
+# -- worktree creation is serialized (regression: concurrent `git worktree add`) -
+
+
+def test_create_worktree_holds_worktree_lock(cfg, monkeypatch):
+    seen = {}
+
+    def fake(cmd, cwd=None, env=None, timeout=None):
+        if "worktree" in cmd and "add" in cmd:
+            seen["locked"] = runner._WORKTREE_LOCK.locked()
+        return _cp(cmd)
+
+    monkeypatch.setattr(runner, "_run", fake)
+    runner.create_worktree(cfg, "conductor/x", "leaf")
+    assert seen.get("locked") is True, "git worktree add must run under _WORKTREE_LOCK"
+
+
+def test_submit_auto_ignores_codex_cap_when_claude_down(tmp_path, monkeypatch):
+    # Regression: with claude logged out and the Codex auto-cap "reached", a
+    # /task must still go to Codex — not mis-route to a dead Claude.
+    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, codex_auto_limit=1))
+    _stub_health(mgr, claude_ok=False, codex_ok=True)
+    # simulate one Codex task already active (cap of 1 reached)
+    mgr._records[99] = TaskRecord(id=99, engine="codex", task="busy",
+                                  status=TaskStatus.RUNNING.value)
+    rec = mgr.submit_auto("write a background research report")
+    assert rec.engine == "codex"
+    assert rec.status != TaskStatus.REJECTED.value
+
+
+# -- disabled engines (e.g. Codex exhausted -> Claude-only cluster) ---------
+
+
+def test_disabled_engine_reports_unavailable(tmp_path):
+    cfg = ConductorConfig(repo_root=tmp_path, disabled_engines=["Codex"])
+    assert cfg.is_disabled("codex") and not cfg.is_disabled("claude")
+    h = ConductorManager(cfg).engine_health("codex")
+    assert h.ok is False and "disabled" in h.reason
+
+
+def test_from_env_reads_disabled_engines(tmp_path, monkeypatch):
+    monkeypatch.setenv("WCA_CONDUCTOR_DISABLED_ENGINES", "codex")
+    cfg = ConductorConfig.from_env(tmp_path)
+    assert cfg.disabled_engines == ["codex"]
+
+
+def test_explicit_codex_reroutes_to_claude_when_disabled(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, disabled_engines=["codex"]))
+    # claude healthy, codex disabled -> /codex reroutes to claude
+    mgr._health["claude"] = EngineHealth("claude", True, "ok", checked_at=9e18)
+    rec = mgr.submit("codex", "do a thing")
+    assert rec.engine == "claude" and rec.status != TaskStatus.REJECTED.value
+
+
+# -- /model usage + /agents views ------------------------------------------
+
+
+def test_model_usage_table_groups_ongoing_and_parked_by_agent(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _stub_health(mgr, claude_ok=True, codex_ok=False)
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="build the thing", status=TaskStatus.RUNNING.value, tokens=120)
+    mgr._records[2] = TaskRecord(id=2, engine="claude", task="waiting in line", status=TaskStatus.QUEUED.value)
+    out = mgr.model_usage_table()
+    assert "Model usage" in out
+    assert "1 running" in out and "1 parked" in out
+    assert "#1" in out and "build the thing" in out
+    assert "codex" in out  # both engines listed
+
+
+def test_agents_spec_table_shows_specs_and_architecture(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, disabled_engines=["codex"]))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    out = mgr.agents_spec_table()
+    assert "Agents" in out and "Shared architecture" in out
+    assert "claude" in out and "codex" in out
+    assert "disabled" in out          # codex marked disabled
+    assert "workspace-write" in out   # codex args surfaced
+    assert "PR-only" in out or "never commits" in out

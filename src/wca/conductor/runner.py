@@ -18,6 +18,7 @@ import json
 import re
 import shutil
 import subprocess
+import threading
 import time
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple
@@ -27,6 +28,12 @@ from wca.conductor.models import AgentResult, Engine, PrResult, TaskRecord, Task
 
 # Notifier called at each lifecycle transition (manager wires this to Telegram).
 Notify = Callable[[TaskRecord], None]
+
+# `git worktree add`/`remove` mutate the shared .git/worktrees registry + index,
+# which is NOT safe under concurrency: parallel tasks racing here fail with
+# "worktree add failed". Serialize just these fast git ops (the slow agent run
+# stays parallel).
+_WORKTREE_LOCK = threading.Lock()
 
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
 _REMOTE_RE = re.compile(r"(?:git@[^:]+:|https?://[^/]+/)(?P<slug>[^/]+/[^/]+?)(?:\.git)?/?$")
@@ -73,10 +80,11 @@ def create_worktree(cfg: ConductorConfig, branch: str, leaf: str) -> Path:
         raise ValueError("refusing to use base branch %r as a task branch" % branch)
     cfg.worktrees_dir.mkdir(parents=True, exist_ok=True)
     path = cfg.worktrees_dir / leaf
-    res = _run([
-        cfg.git_bin, "-C", str(cfg.repo_root),
-        "worktree", "add", "-b", branch, str(path), cfg.base_branch,
-    ])
+    with _WORKTREE_LOCK:  # serialize the shared-.git race
+        res = _run([
+            cfg.git_bin, "-C", str(cfg.repo_root),
+            "worktree", "add", "-b", branch, str(path), cfg.base_branch,
+        ])
     if res.returncode != 0:
         raise RuntimeError("worktree add failed: %s" % (res.stderr.strip() or res.stdout.strip()))
     return path
@@ -275,7 +283,8 @@ def remove_worktree(cfg: ConductorConfig, path: Optional[str]) -> None:
     """Best-effort removal of a task worktree (reclaims failed / no-op runs)."""
     if not path:
         return
-    _run([cfg.git_bin, "-C", str(cfg.repo_root), "worktree", "remove", "--force", str(path)])
+    with _WORKTREE_LOCK:  # same shared-.git registry as create_worktree
+        _run([cfg.git_bin, "-C", str(cfg.repo_root), "worktree", "remove", "--force", str(path)])
 
 
 def run_task(cfg: ConductorConfig, record: TaskRecord, notify: Optional[Notify] = None) -> TaskRecord:

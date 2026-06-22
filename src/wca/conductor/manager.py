@@ -17,9 +17,13 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from typing import Callable, Dict, List, Optional
 
 from wca.conductor.dispatcher import choose_engine
+from wca.conductor import health as _health_mod
 from wca.conductor import runner
 from wca.conductor.config import ConductorConfig
+from wca.conductor.health import EngineHealth
 from wca.conductor.models import Engine, TaskRecord, TaskStatus
+
+_HEALTH_TTL = 300.0  # seconds an engine-health probe stays cached
 
 Notify = Callable[[TaskRecord], None]
 
@@ -35,28 +39,100 @@ class ConductorManager:
         self._pool = ThreadPoolExecutor(
             max_workers=cfg.max_parallel, thread_name_prefix="conductor"
         )
+        self._health: Dict[str, EngineHealth] = {}
+        self._health_lock = threading.Lock()  # separate: probing runs subprocesses
+
+    # -- engine health ----------------------------------------------------
+
+    def engine_health(self, engine: str, force: bool = False) -> EngineHealth:
+        """Return cached health for *engine*, re-probing past the TTL.
+
+        Probing shells out, so it is NEVER done while holding ``self._lock``.
+        """
+        engine = Engine.coerce(engine).value
+        if self.cfg.is_disabled(engine):
+            # operator turned this engine off (e.g. Codex exhausted) — treat as
+            # unavailable so routing falls back without a (failing) probe/run.
+            return EngineHealth(engine, False, "%s disabled via config" % engine)
+        with self._health_lock:
+            cached = self._health.get(engine)
+            if cached is not None and not force and (time.time() - cached.checked_at) < _HEALTH_TTL:
+                return cached
+        probed = _health_mod.probe_engine(self.cfg, engine)
+        probed.checked_at = time.time()
+        with self._health_lock:
+            self._health[engine] = probed
+        return probed
+
+    def healthy(self, engine: str) -> bool:
+        return self.engine_health(engine).ok
+
+    def refresh_health(self) -> Dict[str, EngineHealth]:
+        return {e.value: self.engine_health(e.value, force=True) for e in Engine}
 
     # -- submission -------------------------------------------------------
 
     def submit(self, engine: str, task: str, chat_id: str = "") -> TaskRecord:
-        """Accept a task. Returns the record (possibly already REJECTED)."""
+        """Accept an explicit-engine task, rerouting around a dead engine.
+
+        If the requested engine is logged-out/unavailable, reroute to the other
+        engine when it is healthy; if neither is healthy, REJECT with the real
+        reason (e.g. "claude not logged in — run `claude setup-token`").
+        """
         engine = Engine.coerce(engine).value  # validate / normalise
         task = (task or "").strip()
         if not task:
             raise ValueError("empty task")
 
+        route_reason = ""
+        primary = self.engine_health(engine)  # probes outside the lock
+        if not primary.ok:
+            other = Engine.CODEX.value if engine == Engine.CLAUDE.value else Engine.CLAUDE.value
+            secondary = self.engine_health(other)
+            if secondary.ok:
+                route_reason = "rerouted %s→%s (%s)" % (engine, other, primary.reason)
+                engine = other
+            else:
+                with self._lock:
+                    record = self._new_record_locked(engine, task, chat_id)
+                record.status = TaskStatus.REJECTED.value
+                record.error = primary.reason
+                return record
+
         with self._lock:
-            return self._submit_locked(engine, task, chat_id)
+            return self._submit_locked(engine, task, chat_id, route_reason=route_reason)
 
     def submit_auto(self, task: str, chat_id: str = "") -> TaskRecord:
-        """Accept a task after picking the engine with the dispatcher."""
+        """Accept a task after picking the engine with the health-aware router."""
         task = (task or "").strip()
         if not task:
             raise ValueError("empty task")
 
+        claude_ok = self.engine_health(Engine.CLAUDE.value).ok  # probe outside lock
+        codex_ok = self.engine_health(Engine.CODEX.value).ok
         with self._lock:
-            codex_available = self.cfg.codex_auto_limit > self._active_engine_locked(Engine.CODEX.value)
-            decision = choose_engine(task, codex_available=codex_available)
+            codex_cap_ok = self.cfg.codex_auto_limit > self._active_engine_locked(Engine.CODEX.value)
+        # The codex_auto_limit is a *conservation* cap (send overflow to Claude
+        # to spend scarce Codex sparingly) — NOT a hard availability gate. When
+        # Claude is unavailable there is nothing to conserve, so ignore the cap
+        # rather than mis-route extra /task jobs to a logged-out Claude.
+        codex_available = codex_ok and (codex_cap_ok or not claude_ok)
+        decision = choose_engine(
+            task,
+            codex_available=codex_available,
+            claude_available=claude_ok,
+        )
+        if not claude_ok and not codex_ok:
+            with self._lock:
+                record = self._new_record_locked(decision.engine.value, task, chat_id,
+                                                 route_reason=decision.reason)
+            record.status = TaskStatus.REJECTED.value
+            record.error = "no healthy engine: claude (%s), codex (%s)" % (
+                self.engine_health(Engine.CLAUDE.value).reason,
+                self.engine_health(Engine.CODEX.value).reason,
+            )
+            return record
+        with self._lock:
             return self._submit_locked(
                 decision.engine.value, task, chat_id, route_reason=decision.reason,
             )
@@ -136,6 +212,81 @@ class ConductorManager:
         with self._lock:
             return self._records.get(task_id)
 
+    def health_table(self, force: bool = True) -> str:
+        """Markdown summary of each engine's live auth/availability."""
+        lines = ["*Conductor — engine health*"]
+        for e in Engine:
+            h = self.engine_health(e.value, force=force)
+            lines.append("%s *%s* — %s" % ("✅" if h.ok else "❌", e.value, h.reason))
+        return "\n".join(lines)
+
+    def model_usage_table(self) -> str:
+        """Per-agent view of ongoing (running) and parked (queued) tasks.
+
+        'Parked' = accepted but waiting for a worker slot (max-parallel cap).
+        """
+        records = self.records()
+        active = {TaskStatus.QUEUED.value, TaskStatus.RUNNING.value, TaskStatus.PUSHED.value}
+        lines = ["*Model usage* — ongoing & parked tasks by agent"]
+        for e in Engine:
+            ev = e.value
+            h = self.engine_health(ev)
+            mine = [r for r in records if r.engine == ev]
+            running = [r for r in mine if r.status == TaskStatus.RUNNING.value]
+            parked = [r for r in mine if r.status == TaskStatus.QUEUED.value]
+            pushed = [r for r in mine if r.status == TaskStatus.PUSHED.value]
+            toks = sum(r.tokens for r in mine)
+            badge = "✅" if h.ok else ("🚫" if self.cfg.is_disabled(ev) else "❌")
+            lines.append("\n%s *%s* — %d running · %d parked · %d pushing · %d tok" % (
+                badge, ev, len(running), len(parked), len(pushed), toks))
+            if not h.ok:
+                lines.append("   _%s_" % h.reason)
+            shown = running + parked + pushed
+            for r in shown:
+                icon = self._ICON.get(r.status, "•")
+                task = r.task if len(r.task) <= 44 else r.task[:41] + "..."
+                row = "   %s `#%d` %s — %s" % (icon, r.id, r.status, task)
+                if r.tokens:
+                    row += " · %d tok" % r.tokens
+                lines.append(row)
+            if not shown:
+                lines.append("   _idle_")
+        done = sum(1 for r in records if r.status not in active)
+        lines.append("\n_%d active across the fleet · %d finished · cap %d_" % (
+            self.active_count(), done, self.cfg.max_parallel))
+        return "\n".join(lines)
+
+    def agents_spec_table(self) -> str:
+        """Spec + architecture for each agent in the fleet."""
+        c = self.cfg
+        lines = ["*Agents* — fleet specification & architecture", ""]
+        roles = {
+            Engine.CLAUDE.value: "default route · background / high-context / research work",
+            Engine.CODEX.value: "scarce route · small mechanical edits (auto-cap %d)" % c.codex_auto_limit,
+        }
+        for e in Engine:
+            ev = e.value
+            binary, args = c.cli_for(ev)
+            h = self.engine_health(ev)
+            if c.is_disabled(ev):
+                state = "🚫 disabled via config"
+            else:
+                state = "✅ available" if h.ok else "❌ %s" % h.reason
+            short_bin = binary if len(binary) <= 48 else "…" + binary[-46:]
+            lines.append("*%s* — %s" % (ev, state))
+            lines.append("   role: %s" % roles.get(ev, "—"))
+            lines.append("   cli: `%s`" % short_bin)
+            lines.append("   args: `%s`" % (" ".join(args) or "(none)"))
+            lines.append("")
+        lines.append("*Shared architecture*")
+        lines.append("• one task → fresh git worktree on a new branch off `%s`" % c.base_branch)
+        lines.append("• agent runs headless → commit → push → PR (PR-only; never commits `main`)")
+        lines.append("• router probes auth and skips logged-out / disabled engines")
+        lines.append("• sandbox env: `PM_DRY_RUN=1`, `WCA_DB_PATH=data/dev.db`, Polymarket key stripped")
+        budget = (" · token budget %d" % c.token_budget) if c.token_budget else ""
+        lines.append("• caps: max-parallel %d%s; worktree add/remove serialized" % (c.max_parallel, budget))
+        return "\n".join(lines)
+
     def active_count(self) -> int:
         with self._lock:
             return sum(
@@ -191,12 +342,21 @@ class ConductorManager:
     # -- preflight --------------------------------------------------------
 
     def preflight(self) -> List[str]:
-        """Return human-readable warnings about missing runtime prerequisites."""
+        """Return human-readable warnings about missing/unauthenticated CLIs.
+
+        Reports real engine *auth* state (not just PATH presence), so a logged-
+        out Claude shows up here instead of failing silently at dispatch.
+        """
         warnings: List[str] = []
-        if shutil.which(self.cfg.claude_bin) is None:
-            warnings.append("`claude` CLI not on PATH (%s) — /claude tasks will fail" % self.cfg.claude_bin)
-        if shutil.which(self.cfg.codex_bin) is None:
-            warnings.append("`codex` CLI not on PATH (%s) — /codex tasks will fail" % self.cfg.codex_bin)
+        claude = self.engine_health(Engine.CLAUDE.value)
+        if not claude.ok:
+            warnings.append("claude unavailable: %s" % claude.reason)
+        codex = self.engine_health(Engine.CODEX.value)
+        if not codex.ok:
+            warnings.append("codex unavailable: %s" % codex.reason)
+        if claude.ok or codex.ok:
+            healthy = ", ".join(e for e, h in (("claude", claude), ("codex", codex)) if h.ok)
+            warnings.append("healthy engine(s): %s" % healthy)
         if shutil.which(self.cfg.gh_bin) is None:
             warnings.append("`gh` CLI not found — PRs fall back to compare links")
         else:

@@ -78,7 +78,11 @@ def _help_text(manager: ConductorManager) -> str:
         "`/task <task>` — auto-route (Claude-first; Codex for tiny mechanical edits)",
         "`/claude <task>` — dispatch to Claude Code",
         "`/codex <task>` — dispatch to Codex",
+        "`/menu` — interactive button menu",
+        "`/model` — model usage: ongoing & parked tasks by agent",
+        "`/agents` — agent specs & architecture",
         "`/status` — per-task table",
+        "`/health` — live engine auth/availability",
         "`/cancel <id>` — cancel a not-yet-started task",
         "",
         "_PR-only · max-parallel cap · dry-run env (no live keys/ledger)._",
@@ -89,6 +93,43 @@ def _help_text(manager: ConductorManager) -> str:
         lines.append("⚠️ *Runtime checks:*")
         lines.extend("• " + w for w in warnings)
     return "\n".join(lines)
+
+
+# Inline-keyboard menu (BotFather-style) + the registered slash-command list.
+_MENU_KEYBOARD = {
+    "inline_keyboard": [
+        [{"text": "📊 Model usage", "callback_data": "model_usage"},
+         {"text": "🤖 Agents", "callback_data": "agents"}],
+        [{"text": "📋 Status", "callback_data": "status"},
+         {"text": "❤️ Health", "callback_data": "health"}],
+    ]
+}
+
+_COMMANDS = [
+    {"command": "task", "description": "auto-route a task to an agent"},
+    {"command": "claude", "description": "dispatch a task to Claude"},
+    {"command": "codex", "description": "dispatch a task to Codex"},
+    {"command": "menu", "description": "interactive button menu"},
+    {"command": "model", "description": "model usage — ongoing & parked tasks"},
+    {"command": "agents", "description": "agent specs & architecture"},
+    {"command": "status", "description": "per-task table"},
+    {"command": "health", "description": "engine auth/availability"},
+    {"command": "cancel", "description": "cancel a queued task"},
+    {"command": "help", "description": "usage + runtime checks"},
+]
+
+
+def _view(manager: ConductorManager, name: str) -> Optional[str]:
+    """Render a named read-only view (shared by commands + menu callbacks)."""
+    if name == "model_usage":
+        return manager.model_usage_table()
+    if name == "agents":
+        return manager.agents_spec_table()
+    if name == "status":
+        return manager.status_table()
+    if name == "health":
+        return manager.health_table()
+    return None
 
 
 class ConductorBot:
@@ -107,10 +148,10 @@ class ConductorBot:
 
     # -- outbound ---------------------------------------------------------
 
-    def _send(self, chat_id: str, text: str) -> None:
+    def _send(self, chat_id: str, text: str, reply_markup: Optional[Dict] = None) -> None:
         with self._send_lock:
             try:
-                self.client.send_message(chat_id, text)
+                self.client.send_message(chat_id, text, reply_markup=reply_markup)
             except TelegramError as exc:
                 print("[conductor] send failed: %s" % exc, flush=True)
 
@@ -190,8 +231,17 @@ class ConductorBot:
 
         if cmd in ("/start", "/help"):
             return _help_text(self.manager)
+        if cmd == "/menu":
+            self._send(chat_id, "*WCA dev-conductor* — pick a view:", reply_markup=_MENU_KEYBOARD)
+            return None
+        if cmd == "/model":
+            return self.manager.model_usage_table()
+        if cmd == "/agents":
+            return self.manager.agents_spec_table()
         if cmd == "/status":
             return self.manager.status_table()
+        if cmd == "/health":
+            return self.manager.health_table()
         if cmd == "/task":
             return self._dispatch_auto(arg, chat_id, user_id)
         if cmd == "/claude":
@@ -215,6 +265,22 @@ class ConductorBot:
             return "Unknown command. `/help` for usage."
         return None
 
+    def handle_callback(self, cb: Dict[str, object]) -> None:
+        """Render the view for a tapped inline-keyboard button."""
+        data = str(cb.get("data") or "")
+        msg = cb.get("message") or {}
+        chat_id = str((msg.get("chat") or {}).get("id", ""))  # type: ignore[union-attr]
+        with self._send_lock:
+            try:
+                self.client.answer_callback_query(str(cb.get("id")))  # dismiss spinner
+            except TelegramError:
+                pass
+        if not _authorized(chat_id, self.allowed):
+            return
+        text = _view(self.manager, data)
+        if text:
+            self._send(chat_id, text)
+
     # -- main loop --------------------------------------------------------
 
     def run(self, poll_timeout: int = 25) -> None:
@@ -223,6 +289,10 @@ class ConductorBot:
             self.manager.cfg.max_parallel, self.manager.cfg.token_budget or "∞"), flush=True)
         for w in warnings:
             print("[conductor] WARN: %s" % w.replace("`", ""), flush=True)
+        try:
+            self.client.set_my_commands(_COMMANDS)  # populate Telegram's '/' menu
+        except TelegramError as exc:
+            print("[conductor] set_my_commands failed: %s" % exc, flush=True)
 
         offset: Optional[int] = None
         import time as _time
@@ -235,6 +305,13 @@ class ConductorBot:
                 continue
             for update in updates:
                 offset = int(update["update_id"]) + 1
+                callback = update.get("callback_query")
+                if callback:
+                    try:
+                        self.handle_callback(callback)
+                    except Exception as exc:  # noqa: BLE001 - never die on one update
+                        print("[conductor] callback error: %s" % exc, flush=True)
+                    continue
                 message = update.get("message") or update.get("edited_message")
                 if not message:
                     continue
