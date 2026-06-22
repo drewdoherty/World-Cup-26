@@ -140,6 +140,7 @@ def main() -> None:
             build_card,
             build_score_cards,
             apply_daily_exposure_caps,
+            extract_scores_venue,
             format_card,
             format_scores,
             resolve_pool_bankroll,
@@ -168,7 +169,7 @@ def main() -> None:
         odds_df, quota = theoddsapi.get_odds(
             "soccer_fifa_world_cup",
             regions=args.regions,
-            markets="h2h",
+            markets="h2h,totals",  # totals needed for O/U 2.5 venue comparison in /scores and /next
         )
     except Exception as exc:
         print("ERROR: odds pull failed: %s" % exc, file=sys.stderr)
@@ -223,10 +224,14 @@ def main() -> None:
         print("ERROR: card generation failed: %s" % exc, file=sys.stderr)
         sys.exit(1)
 
+    # Build O/U 2.5 venue data from the bulk totals pull (BTTS is per-event only,
+    # so it only appears in the /next card, not the main /scores card).
+    venue_data = extract_scores_venue(odds_df)
+
     card_text = (
         format_card(recs, pools)
         + "\n\n_Pool: %s_\n\n" % pool_bank.reason
-        + format_scores(score_cards)
+        + format_scores(score_cards, venue_data=venue_data)
     )
 
     # ------------------------------------------------------------------
@@ -259,6 +264,7 @@ def main() -> None:
     if args.next_out:
         try:
             from wca.nextmatch import (
+                NEXT_MATCH_MARKETS,
                 SCORER_MARKETS,
                 build_next_match,
                 format_next_match,
@@ -276,13 +282,12 @@ def main() -> None:
                 nxt = select_next_blend(blends)
                 if nxt is not None:
                     try:
-                        # Both anytime + first-goalscorer player-prop markets
-                        # (each costs extra Odds API credits per region/market).
+                        # Scorer markets + btts (for best-venue comparison in /next).
                         scorer_df, quota = theoddsapi.get_event_odds(
                             "soccer_fifa_world_cup",
                             str(nxt.fx["event_id"]),
                             regions=args.regions,
-                            markets=SCORER_MARKETS,
+                            markets=NEXT_MATCH_MARKETS,
                         )
                     except Exception as exc:
                         print("WARN: scorer odds pull failed: %s" % exc, file=sys.stderr)

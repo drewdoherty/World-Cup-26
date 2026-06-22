@@ -49,7 +49,45 @@ DEFAULT_CORNERS_LINE = 8.5
 ANYTIME_SCORER_MARKET = "player_goal_scorer_anytime"
 FIRST_SCORER_MARKET = "player_first_goal_scorer"
 SCORER_MARKETS = "%s,%s" % (ANYTIME_SCORER_MARKET, FIRST_SCORER_MARKET)
+# NEXT_MATCH_MARKETS adds btts to the per-event pull so the /next card can
+# show which sportsbook has the best BTTS price alongside the model probability.
+NEXT_MATCH_MARKETS = SCORER_MARKETS + ",btts"
 DEFAULT_SQUADS_PATH = "data/squads.json"
+
+
+def _best_odds_for(
+    df: Optional[pd.DataFrame],
+    market: str,
+    outcome_name: str,
+    outcome_point: Optional[float] = None,
+) -> Tuple[Optional[str], Optional[float]]:
+    """Best (max) decimal odds + bookmaker title for a market/outcome.
+
+    Searches *df* for rows matching *market* and *outcome_name* (case-insensitive),
+    optionally filtered to *outcome_point* (e.g. 2.5 for O/U 2.5 goals).
+    Returns ``(book_title, decimal_odds)`` or ``(None, None)`` when unavailable.
+    """
+    if df is None or df.empty or "market" not in df.columns:
+        return None, None
+    rows = df[df["market"] == market].copy()
+    if rows.empty:
+        return None, None
+    rows = rows[rows["outcome_name"].str.lower() == outcome_name.lower()]
+    if outcome_point is not None and "outcome_point" in rows.columns:
+        pts = pd.to_numeric(rows["outcome_point"], errors="coerce")
+        rows = rows[pts == outcome_point]
+    if rows.empty:
+        return None, None
+    odds = pd.to_numeric(rows["decimal_odds"], errors="coerce")
+    valid = odds.dropna()
+    if valid.empty:
+        return None, None
+    idx = valid.idxmax()
+    o = float(odds.loc[idx])
+    if o <= 1.0:
+        return None, None
+    book = rows.loc[idx].get("bookmaker_title")
+    return (str(book) if book is not None else None), o
 
 
 @dataclass
@@ -125,6 +163,21 @@ class NextMatchCard:
     bankroll: float = 1500.0
     kelly_fraction: float = 0.25
     kelly_cap: float = 0.05
+    # Best sportsbook prices for prop markets (None when the per-event pull was
+    # skipped or the market was unavailable from TheOddsAPI for this fixture).
+    btts_yes_book: Optional[str] = None
+    btts_yes_odds: Optional[float] = None
+    btts_no_book: Optional[str] = None
+    btts_no_odds: Optional[float] = None
+    # Best sportsbook O/U 2.5 goals (from the bulk totals market pull).
+    ou25_over_book: Optional[str] = None
+    ou25_over_odds: Optional[float] = None
+    ou25_under_book: Optional[str] = None
+    ou25_under_odds: Optional[float] = None
+    # Polymarket decimal odds per 1X2 outcome (None when lookup was skipped or
+    # the market could not be resolved). Used for cross-venue comparison in the
+    # winner block: shown as "best" when it beats all sportsbooks.
+    pm_winner: Dict[str, Optional[float]] = field(default_factory=dict)
 
 
 def select_next_blend(blends: Sequence[_FixtureBlend]) -> Optional[_FixtureBlend]:
@@ -458,12 +511,41 @@ def build_next_match(
     if fb is None:
         return None
 
+    # Resolve Polymarket events once so both the 1X2 comparison and the
+    # goalscorer block share one network fetch.
+    _pm_events: Optional[List[dict]] = pm_events
+    if pm_lookup and _pm_events is None:
+        try:
+            from wca.data import polymarket as _pm_mod
+            _pm_events = _pm_mod.find_world_cup_markets(include_closed=False)
+        except Exception:
+            _pm_events = []
+
+    # Build the winner block: best across sportsbooks, with a side lookup for
+    # the Polymarket price so format_next_match can show whichever is better.
     winner: Dict[str, Tuple[float, Optional[str], float, float]] = {}
+    pm_winner: Dict[str, Optional[float]] = {}
+    _team_label: Dict[str, str] = {"home": fb.home, "draw": "Draw", "away": fb.away}
     for outcome in OUTCOMES:
         p = fb.blended[outcome]
         book, odds = best_price(fb.books, outcome)
         edge = kelly_mod.edge(p, odds) if book is not None and odds > 1.0 else float("nan")
         winner[outcome] = (p, book, odds, edge)
+
+        # Polymarket 1X2 comparison (best-effort; never blocks the card).
+        pm_dec: Optional[float] = None
+        if pm_lookup and _pm_events is not None:
+            try:
+                from wca.data import polymarket as _pm_mod
+                res = _pm_mod.resolve_outcome_token(
+                    fb.home, fb.away, _team_label[outcome], events=_pm_events
+                )
+                price = float((res or {}).get("price") or 0)
+                if price > 0:
+                    pm_dec = 1.0 / price
+            except Exception:
+                pm_dec = None
+        pm_winner[outcome] = pm_dec
 
     pred = models.dc.predict(fb.home, fb.away, neutral=fb.neutral, warn=False)
     scores = scoreline_card(
@@ -487,12 +569,27 @@ def build_next_match(
         scorer_df,
         top_n_per_team=top_scorers_per_team,
         squads_path=squads_path,
-        pm_events=pm_events,
+        pm_events=_pm_events,
         pm_lookup=pm_lookup,
         lambda_home=lam_h,
         lambda_away=lam_a,
         players_path=players_path,
     )
+
+    # BTTS best sportsbook price from the per-event scorer_df (the build script
+    # must request markets=NEXT_MATCH_MARKETS which includes "btts").
+    btts_yes_book, btts_yes_odds = _best_odds_for(scorer_df, "btts", "Yes")
+    btts_no_book, btts_no_odds = _best_odds_for(scorer_df, "btts", "No")
+
+    # O/U 2.5 goals best sportsbook price from the main odds_df (the build
+    # script must request markets="h2h,totals" so the totals rows are present).
+    _fx_odds = (
+        odds_df[odds_df["event_id"] == fb.fx["event_id"]]
+        if "event_id" in odds_df.columns
+        else odds_df
+    )
+    ou25_over_book, ou25_over_odds = _best_odds_for(_fx_odds, "totals", "Over", 2.5)
+    ou25_under_book, ou25_under_odds = _best_odds_for(_fx_odds, "totals", "Under", 2.5)
 
     return NextMatchCard(
         home=fb.home,
@@ -510,6 +607,15 @@ def build_next_match(
         bankroll=bankroll,
         kelly_fraction=kelly_fraction,
         kelly_cap=kelly_cap,
+        btts_yes_book=btts_yes_book,
+        btts_yes_odds=btts_yes_odds,
+        btts_no_book=btts_no_book,
+        btts_no_odds=btts_no_odds,
+        ou25_over_book=ou25_over_book,
+        ou25_over_odds=ou25_over_odds,
+        ou25_under_book=ou25_under_book,
+        ou25_under_odds=ou25_under_odds,
+        pm_winner=pm_winner,
     )
 
 
@@ -647,11 +753,36 @@ def format_next_match(card: Optional[NextMatchCard]) -> str:
     staked = False
     for outcome in OUTCOMES:
         p, book, odds, edge = card.winner[outcome]
+        pm_dec = (card.pm_winner or {}).get(outcome)
         fair = (1.0 / p) if p > 0 else float("inf")
         line = "  %-14s %5.1f%%  fair %.2f" % (names[outcome][:14], p * 100, fair)
-        if book is not None and odds > 1.0:
+
+        # Determine the best available venue (sportsbook vs Polymarket).
+        pm_beats_sb = (
+            pm_dec is not None
+            and pm_dec > 1.0
+            and (book is None or pm_dec > odds)
+        )
+        if pm_beats_sb:
+            eff_odds = pm_dec
+            eff_edge = kelly_mod.edge(p, pm_dec)
+            flag = " ✅" if eff_edge >= card.min_edge else ""
+            line += "  best %.2f (Polymarket) %+.1f%%%s" % (pm_dec, eff_edge * 100, flag)
+            if book is not None and odds > 1.0:
+                line += "  sb %.2f (%s)" % (odds, book)
+            stk = kelly_mod.stake(
+                p, pm_dec, card.bankroll, card.kelly_fraction, card.kelly_cap
+            )
+            if stk > 0:
+                line += "  £%.2f" % stk
+                staked = True
+        elif book is not None and odds > 1.0:
+            eff_odds = odds
             flag = " ✅" if edge >= card.min_edge else ""
             line += "  best %.2f (%s) %+.1f%%%s" % (odds, book, edge * 100, flag)
+            # Show PM as reference when available but not the best price.
+            if pm_dec is not None and pm_dec > 1.0:
+                line += "  PM %.2f" % pm_dec
             stk = kelly_mod.stake(
                 p, odds, card.bankroll, card.kelly_fraction, card.kelly_cap
             )
@@ -693,6 +824,18 @@ def format_next_match(card: Optional[NextMatchCard]) -> str:
             "  O/U 2.5: over %.1f%% / under %.1f%%   BTTS %.1f%%"
             % (ou25[0] * 100, ou25[1] * 100, c.btts * 100)
         )
+        # Best sportsbook venue line for O/U 2.5 and BTTS.
+        venue_parts = []
+        if card.ou25_over_odds and card.ou25_over_book:
+            venue_parts.append(
+                "O/U Over %.2f (%s)" % (card.ou25_over_odds, card.ou25_over_book)
+            )
+        if card.btts_yes_odds and card.btts_yes_book:
+            venue_parts.append(
+                "BTTS Yes %.2f (%s)" % (card.btts_yes_odds, card.btts_yes_book)
+            )
+        if venue_parts:
+            lines.append("  best: " + "  |  ".join(venue_parts))
     return "\n".join(lines)
 
 

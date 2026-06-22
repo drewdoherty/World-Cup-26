@@ -732,6 +732,63 @@ def apply_daily_exposure_caps(
     return recs
 
 
+def extract_scores_venue(
+    odds_df: pd.DataFrame,
+) -> Dict[Tuple[str, str], Dict[str, Tuple[Optional[str], Optional[float]]]]:
+    """Best sportsbook O/U 2.5 prices per fixture for the scorelines card.
+
+    Returns ``{(home_canonical, away_canonical): {"ou25_over": (book, odds), ...}}``.
+    Only ``totals`` market rows are used (O/U 2.5 goals from the bulk pull).
+    BTTS is excluded here because it is only available via the per-event endpoint.
+    """
+    from wca.data.teamnames import canonical
+
+    result: Dict[Tuple[str, str], Dict[str, Tuple[Optional[str], Optional[float]]]] = {}
+    if odds_df is None or odds_df.empty or "market" not in odds_df.columns:
+        return result
+
+    totals = odds_df[odds_df["market"] == "totals"]
+    if totals.empty:
+        return result
+
+    group_cols = [c for c in ("event_id", "home_team", "away_team") if c in totals.columns]
+    if len(group_cols) < 2:  # need at least home_team + away_team
+        return result
+
+    for keys, grp in totals.groupby(group_cols, sort=False):
+        if len(group_cols) == 3:
+            _, home, away = keys
+        else:
+            home, away = keys
+        home_c, away_c = canonical(str(home)), canonical(str(away))
+
+        pts = pd.to_numeric(grp.get("outcome_point", pd.Series(dtype=float)), errors="coerce")
+        grp25 = grp[pts == 2.5]
+        if grp25.empty:
+            continue
+
+        vd: Dict[str, Tuple[Optional[str], Optional[float]]] = {}
+        for outcome_name, key in [("Over", "ou25_over"), ("Under", "ou25_under")]:
+            rows = grp25[grp25["outcome_name"].str.lower() == outcome_name.lower()]
+            if rows.empty:
+                continue
+            o_series = pd.to_numeric(rows["decimal_odds"], errors="coerce")
+            valid = o_series.dropna()
+            if valid.empty:
+                continue
+            idx = valid.idxmax()
+            o = float(o_series.loc[idx])
+            if o <= 1.0:
+                continue
+            book = rows.loc[idx].get("bookmaker_title")
+            vd[key] = (str(book) if book is not None else None, o)
+
+        if vd:
+            result[(home_c, away_c)] = vd
+
+    return result
+
+
 def format_card(recs: Sequence[Recommendation], pools: Sequence[PoolConfig]) -> str:
     """Human-readable card for the terminal or Telegram (Markdown)."""
     if not recs:
@@ -755,7 +812,9 @@ def format_card(recs: Sequence[Recommendation], pools: Sequence[PoolConfig]) -> 
 
 
 def format_scores(
-    cards: Sequence[ScorelineCard], min_edge: float = 0.02
+    cards: Sequence[ScorelineCard],
+    min_edge: float = 0.02,
+    venue_data: Optional[Dict[Tuple[str, str], Dict[str, Tuple[Optional[str], Optional[float]]]]] = None,
 ) -> str:
     """Human-readable scoreline card for the terminal or Telegram (Markdown).
 
@@ -764,7 +823,14 @@ def format_scores(
     ``back >=`` price is the minimum decimal odds at which backing that
     scoreline clears ``min_edge`` (each card's own ``min_edge`` is used; the
     argument is a display-only fallback for cards that predate it).
+
+    ``venue_data`` is an optional mapping from ``(home_canonical, away_canonical)``
+    to a dict of best-book prices, as returned by :func:`extract_scores_venue`.
+    When supplied, a "best:" line is appended under the O/U 2.5 / BTTS line to
+    indicate which sportsbook currently has the best odds for each market.
     """
+    from wca.data.teamnames import canonical
+
     if not cards:
         return "*No scoreline cards* for the current slate."
     lines: List[str] = ["*World Cup Alpha — scorelines* (%d fixtures)" % len(cards)]
@@ -783,4 +849,16 @@ def format_scores(
             "    O/U 2.5: over %.1f%% / under %.1f%%   BTTS %.1f%%"
             % (p_over * 100, (1.0 - p_over) * 100, c.btts * 100)
         )
+        # Best sportsbook venue for O/U 2.5 (from the bulk totals market pull).
+        if venue_data is not None:
+            vd = venue_data.get((canonical(c.home), canonical(c.away))) or {}
+            venue_parts = []
+            ou_over = vd.get("ou25_over")
+            if ou_over and ou_over[0] and ou_over[1]:
+                venue_parts.append("O/U Over %.2f (%s)" % (ou_over[1], ou_over[0]))
+            ou_under = vd.get("ou25_under")
+            if ou_under and ou_under[0] and ou_under[1]:
+                venue_parts.append("Under %.2f (%s)" % (ou_under[1], ou_under[0]))
+            if venue_parts:
+                lines.append("    best: " + "  |  ".join(venue_parts))
     return "\n".join(lines)
