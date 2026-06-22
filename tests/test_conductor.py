@@ -559,3 +559,45 @@ def test_agents_spec_table_shows_specs_and_architecture(tmp_path):
     assert "disabled" in out          # codex marked disabled
     assert "workspace-write" in out   # codex args surfaced
     assert "PR-only" in out or "never commits" in out
+
+
+# -- /usage, /prs, /log, /retry, swarm cap ---------------------------------
+
+
+def test_max_parallel_defaults_to_swarm(tmp_path):
+    assert ConductorConfig(repo_root=tmp_path).max_parallel == 8
+
+
+def test_usage_table_sums_per_engine_spend(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, disabled_engines=["codex"]))
+    _stub_health(mgr, claude_ok=True, codex_ok=False)
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="t1", status=TaskStatus.DONE.value, tokens=1500)
+    mgr._records[2] = TaskRecord(id=2, engine="claude", task="t2", status=TaskStatus.RUNNING.value, tokens=300)
+    out = mgr.usage_table()
+    assert "Anthropic usage" in out and "claude" in out
+    assert "1,800" in out  # total spend, comma-grouped
+
+
+def test_prs_lists_only_linked_records(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="has pr",
+                                 status=TaskStatus.DONE.value, pr_url="https://x/pull/1")
+    mgr._records[2] = TaskRecord(id=2, engine="claude", task="no pr", status=TaskStatus.FAILED.value)
+    out = mgr.prs()
+    assert "#1" in out and "pull/1" in out and "#2" not in out
+
+
+def test_task_detail_and_retry(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="failed thing",
+                                 status=TaskStatus.FAILED.value, error="boom")
+    detail = mgr.task_detail(1)
+    assert "failed thing" in detail and "boom" in detail
+    mgr._counter = 100  # so the retry's new id doesn't collide with the seeded one
+    new = mgr.retry(1)
+    assert new.id != 1 and new.task == "failed thing"
+    # a non-retryable (DONE) task returns itself unchanged
+    mgr._records[5] = TaskRecord(id=5, engine="claude", task="done", status=TaskStatus.DONE.value)
+    assert mgr.retry(5).id == 5

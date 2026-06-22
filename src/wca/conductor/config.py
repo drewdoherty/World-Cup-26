@@ -41,7 +41,7 @@ class ConductorConfig:
     worktrees_dir: Optional[Path] = None  # defaults to repo_root/.claude/worktrees
     branch_prefix: str = "conductor"
 
-    max_parallel: int = 3
+    max_parallel: int = 8  # parallel agent swarm (compute is cheap; watch Claude usage via /usage)
     token_budget: Optional[int] = None  # None / 0 -> unlimited
     codex_auto_limit: int = 1  # max queued/running automatic Codex tasks
     disabled_engines: List[str] = field(default_factory=list)  # e.g. ["codex"] when exhausted/off
@@ -126,7 +126,7 @@ class ConductorConfig:
             repo_root=Path(repo_root),
             base_branch=os.environ.get("WCA_CONDUCTOR_BASE_BRANCH", "main"),
             branch_prefix=os.environ.get("WCA_CONDUCTOR_BRANCH_PREFIX", "conductor"),
-            max_parallel=_int("WCA_CONDUCTOR_MAX_PARALLEL", 3) or 3,
+            max_parallel=_int("WCA_CONDUCTOR_MAX_PARALLEL", 8) or 8,
             token_budget=_int("WCA_CONDUCTOR_TOKEN_BUDGET", None),
             codex_auto_limit=_int("WCA_CONDUCTOR_CODEX_AUTO_LIMIT", 1) or 0,
             disabled_engines=[e for e in os.environ.get("WCA_CONDUCTOR_DISABLED_ENGINES", "").split(",") if e.strip()],
