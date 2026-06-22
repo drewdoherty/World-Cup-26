@@ -36,23 +36,31 @@ def test_feed_generated_reads_meta(tmp_path):
 
 
 def test_accas_flags_stale_feed(tmp_path, monkeypatch):
-    # An empty-fixtures feed returns the no-odds message; a stale, populated
-    # feed must carry the banner. We stub accas building to isolate the banner.
+    # A stale scores feed must produce a STALE banner in the reply.
+    # We stub the inline build to isolate the staleness-banner logic.
     feed = tmp_path / "scores.json"
     feed.write_text(json.dumps({"meta": {"generated": "2026-06-01 00:00:00 UTC"},
                                 "fixtures": [{"x": 1}]}), encoding="utf-8")
 
-    import pandas as pd
-    from wca import accas
-    from wca import boosts
+    from wca import accas as accas_mod
+    from wca.accas import AccaReport
 
-    monkeypatch.setattr(boosts, "load_scores_feed",
-                        lambda p: pd.DataFrame([{"x": 1}]))
-    monkeypatch.setattr(accas, "build_accas_from_odds",
-                        lambda *a, **k: [{"legs": []}])
-    monkeypatch.setattr(accas, "format_accas", lambda lst: "ACCA-BODY")
+    dummy_report = AccaReport(
+        date_str="2026-06-01",
+        fixtures_analysed=1,
+        safe=None,
+        value=None,
+        longshot=None,
+        no_bet_reason="test stub",
+    )
+    monkeypatch.setattr(accas_mod, "build_accas_report", lambda *a, **k: dummy_report)
+    monkeypatch.setattr(accas_mod, "format_acca_report", lambda r: "ACCA-BODY")
 
-    reply = app.handle_accas(scores_path=str(feed))
+    # Pass a non-existent cache path so the handler falls back to inline build.
+    reply = app.handle_accas(
+        accas_path=str(tmp_path / "missing_cache.md"),
+        scores_path=str(feed),
+    )
     assert "STALE" in reply
     assert "ACCA-BODY" in reply
 
