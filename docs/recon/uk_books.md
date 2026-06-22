@@ -59,6 +59,27 @@ All sign-up offers are one-time; once burned they are gone. Claim all before pla
 | William Hill | Bet £10, get £30 free bets (3x£10). Min odds 1/2. E-wallets excluded. | £10 at 1/2+ | £30 (3x£10) | 30 days | None | squawka.com; horseracing.net | confirmed |
 | Ladbrokes | Bet £10, get £50 in free bets (new customers) | £10 at 1/2+ | £50 | 30 days | None | Multiple secondary sources | likely |
 | Unibet | Bet £10, get £30 in free bets (3x£10, 7-day expiry, at evens+) | £10 at evens (2.0) | £30 (3x£10) | 7 days | None | sportsmole.co.uk | confirmed |
+| Betfred | Bet £10, get £50 in free bets (£30 sports + £20 acca/Bet Builder). Debit card only. | £10 at evens (2.0) | £50 | 7 days | None | freebets.com; goal.com | confirmed |
+| BetMGM | Bet £10, get £40 in free bets (2x£10 Bet Builder + 2x£10 sports). Excludes virtuals/esports. | £10 at 1/1 (2.0) | £40 | 7 days | None | goal.com; freebets.com | confirmed |
+| Bet UK | Bet £10, get £40 in free bets (2x£10 Bet Builder + 2x£10 sports). Shares platform/T&Cs with BetMGM — expect linked-account checks if both claimed. | £10 | £40 | 7 days | None | freebets.com | likely |
+| Betway | Bet £10, get £40 in free bet tokens (4x£10). Pre-event only, debit card. | £10 at 2.0 | £40 | 7 days | None | freebets.com; goal.com | confirmed |
+| kwiff | Bet £10, get £40 in free bets (4x£10, various). Cashout excluded; claim within 5 days. | £10 at 2.0 | £40 | 7 days | None | freebets.com | confirmed |
+| Tote | Bet £10, get £40 in free bets. | £10 | £40 | — | None | freebets.com; goal.com | likely |
+| BoyleSports | Bet £10, get £40 (£30 sports free bets + £10 casino). | £10 | £40 | 7 days | None | goal.com | confirmed |
+| talkSPORT BET | Bet £10, get up to £40 in free bets + boost tokens. | £10 | up to £40 | 7 days | None | goal.com | likely |
+| SBK | Bet £20, get £40 in free bets (credited within 48h). Min deposit £10. | £5+ at 2.0 | £40 | 48 hours | None | freebets.com | likely |
+| Betfair | Bet £10, get £30 in free multi/acca bets (3x£10). Sportsbook only — acca-only free bets extract lower. | £10 at evens (2.0) | £30 | 30 days | None | freebets.com | confirmed |
+| Coral | Bet £5, get £30 in free bets. Shares platform with Ladbrokes (Entain). | £5 | £30 | 7 days | None | goal.com | confirmed |
+| Parimatch | Bet £10, get £30 in free bets (6x£5). | £10 at 2.0 | £30 | — | None | freebets.com; goal.com | confirmed |
+| QuinnBet | Get 50% of day-1 net losses back as a free bet, up to £50. Min 3 bets on different events, £10+. | £10+ at evens (2.0) | up to £50 (cashback) | — | None | freebets.com | likely |
+| Midnite | Bet £10, get £30 in free bets. Claim within 14 days of signup. | £10 at 1/1 (2.0) | £30 | 7 days | None | freebets.com | likely |
+| Betano | Bet £10, get £20 football free bets + 3x 200% profit boosts. | £10 at 1/1 (2.0) | £20 + boosts | 14 days | None | goal.com; freebets.com | likely |
+| SpreadEx | Up to £100 in free bets (spread betting — fiddly to extract, lower priority). | varies | up to £100 | — | None | freebets.com | unverified |
+| Easybet | Bet £20, get £30 (4x£5 predictions + £10 exchange). Debit card only. | £20 | £30 | 72 hours | YES30 | freebets.com | unverified |
+| Polymarket (crypto/PM) | Deposit $20, get $50 trading bonus. Onchain prediction market — Bahrain-accessible; already core to the model. Verify current promo code before use. | n/a (prediction market) | $50 | — | CBSSPORTS (verify) | cbssports.com | likely |
+| Cloudbet (crypto) | Welcome up to $2,500: 10% rakeback + daily cash drops, paid as CASH with NO rollover. Value scales with deposit/turnover. | n/a (crypto sportsbook) | up to $2,500 (cash rakeback) | 30 days | None | cloudbet.com; cryptoslate.com | likely |
+| BC.Game (crypto) | Up to 360% match across first 4 deposits. High wagering — only worth it for active turnover. | n/a (crypto sportsbook) | up to 360% match | — | None | cryptoslate.com | likely |
+| Kalshi (PM) | $10–$15 trading bonus + $25 referral both sides. US-only (CFTC) — very likely geoblocked from Bahrain; verify access first. | n/a (prediction market) | $10–$25 | — | GRINDERS / CBSSPORTS | rotogrinders.com; cbssports.com | unverified |
 
 **EV note for small bankroll:** At a typical 50% conversion rate for SNR free bets (stake is not returned), the Paddy Power £40 + £50 Bet Builder bundle is the highest nominal gross value (~£45 EV). Sky Bet's £50 at 7-day expiry is aggressive — must use quickly. Ladbrokes £50 is the best single-ticket value if confirmed.
 
