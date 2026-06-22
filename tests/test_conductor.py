@@ -41,7 +41,7 @@ def make_fake_run(
     """
     state = {"calls": [], "agent_env": None}
 
-    def fake(cmd, cwd=None, env=None, timeout=None):
+    def fake(cmd, cwd=None, env=None, timeout=None, on_event=None):
         state["calls"].append(list(cmd))
         if cmd[0] == "git":
             sub = cmd[3] if len(cmd) > 3 else ""
@@ -58,8 +58,13 @@ def make_fake_run(
             return _cp(cmd)
         if cmd[0] == "gh":
             return _cp(cmd, rc=pr_rc, out=pr_url if pr_rc == 0 else "", err="" if pr_rc == 0 else "not logged in")
-        # otherwise: the agent invocation
+        # otherwise: the agent invocation. If streaming, emit a couple of
+        # stream-json events so live-activity wiring is exercised.
         state["agent_env"] = env
+        if on_event is not None:
+            on_event({"type": "system", "subtype": "init"})
+            on_event({"type": "assistant", "message": {"content": [
+                {"type": "tool_use", "name": "Edit", "input": {"file_path": "src/wca/x.py"}}]}})
         return _cp(cmd, rc=agent_rc, out=agent_stdout, err="" if agent_rc == 0 else "boom")
 
     fake.state = state
@@ -601,3 +606,43 @@ def test_task_detail_and_retry(tmp_path, monkeypatch):
     # a non-retryable (DONE) task returns itself unchanged
     mgr._records[5] = TaskRecord(id=5, engine="claude", task="done", status=TaskStatus.DONE.value)
     assert mgr.retry(5).id == 5
+
+
+# -- live per-agent activity (streaming) -----------------------------------
+
+
+def test_activity_from_event_tool_use():
+    ev = {"type": "assistant", "message": {"content": [
+        {"type": "tool_use", "name": "Edit", "input": {"file_path": "src/a.py"}}]}}
+    act = runner._activity_from_event(ev)
+    assert act.startswith("🔧 Edit") and "src/a.py" in act
+
+
+def test_activity_from_event_text_system_result():
+    txt = runner._activity_from_event({"type": "assistant", "message": {"content": [
+        {"type": "text", "text": "Looking at the code"}]}})
+    assert txt.startswith("💬")
+    assert runner._activity_from_event({"type": "system", "subtype": "init"}) is not None
+    assert runner._activity_from_event({"type": "result"}) is None
+
+
+def test_run_task_records_live_activity(cfg, patched):
+    # the patched fake emits a tool_use event during the streamed agent run
+    rec = _record()
+    runner.run_task(cfg, rec)
+    assert "Edit" in rec.activity and rec.activity_at > 0
+
+
+def test_watch_shows_running_activity(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="t",
+                                 status=TaskStatus.RUNNING.value, activity="🔧 Edit src/x.py")
+    assert "Edit src/x.py" in mgr.watch() and "#1" in mgr.watch()
+    assert "Edit src/x.py" in mgr.watch(1)
+    assert "No task" in mgr.watch(999)
+
+
+def test_run_uses_streaming_only_with_on_event(cfg, monkeypatch):
+    # claude_args now request stream-json; the runner streams only when given a hook
+    bin_, args = cfg.cli_for("claude")
+    assert "stream-json" in args and "--verbose" in args

@@ -82,6 +82,7 @@ def _help_text(manager: ConductorManager) -> str:
         "`/model` — model usage: ongoing & parked tasks by agent",
         "`/agents` — agent specs & architecture",
         "`/status` — per-task table",
+        "`/watch [id]` — LIVE: what each agent is doing right now",
         "`/usage` — Anthropic token spend & limits (real-time)",
         "`/prs` — open task PRs (review from your phone)",
         "`/log <id>` — full detail of one task",
@@ -105,9 +106,10 @@ _MENU_KEYBOARD = {
         [{"text": "📊 Model usage", "callback_data": "model_usage"},
          {"text": "🤖 Agents", "callback_data": "agents"}],
         [{"text": "📋 Status", "callback_data": "status"},
-         {"text": "❤️ Health", "callback_data": "health"}],
+         {"text": "🔭 Live", "callback_data": "watch"}],
         [{"text": "💸 Usage", "callback_data": "usage"},
          {"text": "🔀 PRs", "callback_data": "prs"}],
+        [{"text": "❤️ Health", "callback_data": "health"}],
     ]
 }
 
@@ -119,6 +121,7 @@ _COMMANDS = [
     {"command": "model", "description": "model usage — ongoing & parked tasks"},
     {"command": "agents", "description": "agent specs & architecture"},
     {"command": "status", "description": "per-task table"},
+    {"command": "watch", "description": "live agent activity: /watch [id]"},
     {"command": "usage", "description": "Anthropic token spend & limits"},
     {"command": "prs", "description": "open task PRs"},
     {"command": "log", "description": "full detail of a task: /log <id>"},
@@ -137,6 +140,8 @@ def _view(manager: ConductorManager, name: str) -> Optional[str]:
         return manager.agents_spec_table()
     if name == "status":
         return manager.status_table()
+    if name == "watch":
+        return manager.watch()
     if name == "health":
         return manager.health_table()
     if name == "usage":
@@ -281,6 +286,13 @@ class ConductorBot:
             return self.manager.agents_spec_table()
         if cmd == "/status":
             return self.manager.status_table()
+        if cmd == "/watch":
+            if arg.strip():
+                try:
+                    return self.manager.watch(int(arg.strip()))
+                except ValueError:
+                    return "Usage: `/watch [id]`"
+            return self.manager.watch()
         if cmd == "/health":
             return self.manager.health_table()
         if cmd == "/usage":

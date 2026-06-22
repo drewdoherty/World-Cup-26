@@ -277,6 +277,8 @@ class ConductorManager:
             lines.append("route: %s" % r.route_reason)
         if r.branch:
             lines.append("branch: `%s`" % r.branch)
+        if r.status == TaskStatus.RUNNING.value and r.activity:
+            lines.append("↳ now: %s" % r.activity)
         if r.pr_url:
             lines.append(r.pr_url)
         if r.tokens:
@@ -285,6 +287,22 @@ class ConductorManager:
             lines.append("summary: %s" % (r.summary if len(r.summary) <= 350 else r.summary[:347] + "..."))
         if r.error:
             lines.append("⚠️ %s" % (r.error if len(r.error) <= 350 else r.error[:347] + "..."))
+        return "\n".join(lines)
+
+    def watch(self, task_id: Optional[int] = None) -> str:
+        """Live activity: one task (`/watch <id>`) or every running task (`/watch`)."""
+        if task_id is not None:
+            r = self.get(task_id)
+            if r is None:
+                return "No task `#%d`." % task_id
+            act = r.activity or ("(no activity yet)" if r.status == TaskStatus.RUNNING.value else r.status)
+            return "🔭 *#%d* %s · %s\n↳ %s" % (r.id, r.engine, r.status, act)
+        running = [r for r in self.records() if r.status == TaskStatus.RUNNING.value]
+        if not running:
+            return "_No tasks running._"
+        lines = ["🔭 *Live activity* (%d running)" % len(running)]
+        for r in running:
+            lines.append("`#%d` %s\n   ↳ %s" % (r.id, r.engine, r.activity or "(starting…)"))
         return "\n".join(lines)
 
     def health_table(self, force: bool = True) -> str:
@@ -323,6 +341,8 @@ class ConductorManager:
                 row = "   %s `#%d` %s — %s" % (icon, r.id, r.status, task)
                 if r.tokens:
                     row += " · %d tok" % r.tokens
+                if r.status == TaskStatus.RUNNING.value and r.activity:
+                    row += "\n      ↳ %s" % r.activity  # live: what the agent is doing now
                 lines.append(row)
             if not shown:
                 lines.append("   _idle_")
@@ -394,6 +414,8 @@ class ConductorManager:
             if r.tokens:
                 row += " · %d tok" % r.tokens
             row += "\n   %s" % task
+            if r.status == TaskStatus.RUNNING.value and r.activity:
+                row += "\n   ↳ %s" % r.activity  # live agent activity
             if r.pr_url:
                 label = "PR" if r.status == TaskStatus.DONE.value else "diff"
                 row += "\n   [%s](%s)" % (label, r.pr_url)

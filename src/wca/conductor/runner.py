@@ -44,16 +44,67 @@ def _run(
     cwd: Optional[str] = None,
     env: Optional[dict] = None,
     timeout: Optional[float] = None,
+    on_event: Optional[Callable[[dict], None]] = None,
 ) -> subprocess.CompletedProcess:
-    """Run *cmd*, capturing text output. The single seam tests patch."""
-    return subprocess.run(
-        cmd,
-        cwd=cwd,
-        env=env,
-        timeout=timeout,
-        capture_output=True,
-        text=True,
-    )
+    """Run *cmd*, capturing text output. The single seam tests patch.
+
+    With ``on_event`` it STREAMS: stdout is read line-by-line and every parsed
+    JSON object (e.g. a claude ``--output-format stream-json`` event) is handed
+    to ``on_event`` live, so callers can surface per-agent activity in flight.
+    Without it, it blocks like ``subprocess.run`` (git/gh).
+    """
+    if on_event is None:
+        return subprocess.run(cmd, cwd=cwd, env=env, timeout=timeout, capture_output=True, text=True)
+
+    proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, text=True, bufsize=1)
+    killer = threading.Timer(timeout, proc.kill) if timeout else None
+    if killer:
+        killer.start()
+    out: List[str] = []
+    try:
+        for line in proc.stdout or []:
+            out.append(line)
+            s = line.strip()
+            if not s.startswith("{"):
+                continue
+            try:
+                ev = json.loads(s)
+            except ValueError:
+                continue
+            try:
+                on_event(ev)
+            except Exception:  # noqa: BLE001 - a bad handler must not kill the run
+                pass
+        proc.wait()
+    finally:
+        if killer:
+            killer.cancel()
+    err = proc.stderr.read() if proc.stderr else ""
+    return subprocess.CompletedProcess(cmd, proc.returncode or 0, "".join(out), err)
+
+
+def _activity_from_event(ev: dict) -> Optional[str]:
+    """Turn one stream-json event into a short 'what the agent is doing' line."""
+    t = ev.get("type")
+    if t == "system":
+        return "🟢 starting…"
+    if t == "assistant":
+        blocks = ((ev.get("message") or {}).get("content")) or []
+        for b in reversed(blocks):
+            if not isinstance(b, dict):
+                continue
+            if b.get("type") == "tool_use":
+                inp = b.get("input") or {}
+                hint = (inp.get("file_path") or inp.get("path") or inp.get("command")
+                        or inp.get("pattern") or inp.get("description") or "")
+                hint = str(hint).splitlines()[0] if hint else ""
+                return "🔧 %s%s" % (b.get("name", "tool"), (" " + hint[:48]) if hint else "")
+            if b.get("type") == "text":
+                txt = " ".join((b.get("text") or "").split())
+                if txt:
+                    return "💬 %s" % txt[:64]
+    return None
 
 
 # -- naming ---------------------------------------------------------------
@@ -142,21 +193,33 @@ def _last_json_object(text: str) -> Optional[dict]:
     return None
 
 
-def run_agent(cfg: ConductorConfig, engine: str, task: str, cwd: Path) -> AgentResult:
-    """Invoke the headless agent for *engine* inside *cwd*."""
+def run_agent(cfg: ConductorConfig, engine: str, task: str, cwd: Path,
+              on_activity: Optional[Callable[[str], None]] = None) -> AgentResult:
+    """Invoke the headless agent for *engine* inside *cwd*.
+
+    ``on_activity`` (claude only) receives a short live activity string per
+    stream-json event (tool calls, edits, messages) so callers can show what the
+    agent is doing in flight.
+    """
     binary, extra = cfg.cli_for(engine)
     # Only treat a bare name as missing; an absolute path may exist off-PATH.
     if "/" not in binary and shutil.which(binary) is None:
         return AgentResult(127, error="%s CLI not found on PATH (%s)" % (engine, binary))
 
+    on_event = None
     if Engine.coerce(engine) is Engine.CLAUDE:
         cmd = [binary, "-p", task, *extra]
+        if on_activity is not None:
+            def on_event(ev: dict) -> None:  # noqa: E306 - streamed activity hook
+                act = _activity_from_event(ev)
+                if act:
+                    on_activity(act)
     else:
         # codex: flags before the positional prompt (e.g. -s workspace-write).
         cmd = [binary, "exec", *extra, task]
 
     try:
-        res = _run(cmd, cwd=str(cwd), env=cfg.agent_env(), timeout=cfg.agent_timeout)
+        res = _run(cmd, cwd=str(cwd), env=cfg.agent_env(), timeout=cfg.agent_timeout, on_event=on_event)
     except subprocess.TimeoutExpired:
         return AgentResult(124, error="agent timed out after %.0fs" % cfg.agent_timeout)
 
@@ -308,7 +371,11 @@ def run_task(cfg: ConductorConfig, record: TaskRecord, notify: Optional[Notify] 
         worktree = create_worktree(cfg, record.branch or "", _worktree_leaf(cfg, record))
         record.worktree_path = str(worktree)
 
-        agent = run_agent(cfg, record.engine, record.task, worktree)
+        def _set_activity(act: str) -> None:
+            record.activity = act
+            record.activity_at = time.time()
+
+        agent = run_agent(cfg, record.engine, record.task, worktree, on_activity=_set_activity)
         record.tokens = agent.tokens
         record.returncode = agent.returncode
         record.summary = agent.summary

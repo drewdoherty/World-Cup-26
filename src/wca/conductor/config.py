@@ -22,9 +22,10 @@ _DEFAULT_OVERRIDES = {"PM_DRY_RUN": "1", "WCA_DB_PATH": "data/dev.db"}
 
 
 def _default_claude_args() -> List[str]:
-    # Headless JSON output (so we can parse the result + token usage) and
-    # auto-accept edits so the agent can actually modify files in its worktree.
-    return ["--output-format", "json", "--permission-mode", "acceptEdits"]
+    # stream-json (needs --verbose in print mode) emits live events as the agent
+    # works, so the conductor surfaces per-task activity in flight. The final
+    # event still carries the result + token usage, so parsing is unchanged.
+    return ["--output-format", "stream-json", "--verbose", "--permission-mode", "acceptEdits"]
 
 
 def _default_codex_args() -> List[str]:
