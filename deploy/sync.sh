@@ -26,9 +26,10 @@ if ! git fetch origin main --quiet 2>>"$LOG"; then
   exit 0
 fi
 
-# model_predictions.json / card_latest.md / next_latest.md are build_card outputs,
-# refreshed hourly and committed by com.wca.publish. They are DELIBERATELY NOT
-# discarded here: discarding reverted the working tree to the last committed
+# model_predictions.json / card_latest.md / next_latest.md / goalscorers_latest.md
+# are build_card outputs, refreshed hourly and committed by com.wca.publish.
+# They are DELIBERATELY NOT discarded here: discarding reverted the working tree
+# to the last committed
 # (stale) blob within 5 min of every build, which is exactly why /card, /next —
 # and the exposure/scores model 1X2 (model_predictions.json) — went stale.
 # --autostash below preserves the fresh uncommitted copy across the rebase; the

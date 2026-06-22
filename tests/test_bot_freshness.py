@@ -40,14 +40,13 @@ def test_accas_flags_stale_feed(tmp_path, monkeypatch):
     # feed must carry the banner. We stub accas building to isolate the banner.
     feed = tmp_path / "scores.json"
     feed.write_text(json.dumps({"meta": {"generated": "2026-06-01 00:00:00 UTC"},
-                                "fixtures": [{"x": 1}]}), encoding="utf-8")
+                                "fixtures": [{"fixture": "A vs B", "venues": []}]}),
+                    encoding="utf-8")
 
-    import pandas as pd
     from wca import accas
     from wca import boosts
 
-    monkeypatch.setattr(boosts, "load_scores_feed",
-                        lambda p: pd.DataFrame([{"x": 1}]))
+    # load_scores_feed returns a dict; the real call reads the file above.
     monkeypatch.setattr(accas, "build_accas_from_odds",
                         lambda *a, **k: [{"legs": []}])
     monkeypatch.setattr(accas, "format_accas", lambda lst: "ACCA-BODY")

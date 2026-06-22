@@ -914,24 +914,14 @@ def handle_accas(scores_path: str = "site/scores_data.json") -> str:
 
     try:
         scores_feed = load_scores_feed(scores_path)
-        if scores_feed.empty:
+        if not scores_feed.get("fixtures"):
             return (
                 "*Accumulators*\n"
                 "No odds data available yet. Try again after odds are loaded."
             )
 
-        # Load fixtures meta for context
-        try:
-            from wca.data.results import load_results
-            from wca.data.cleaning import resolve_results_path
-
-            fixtures_meta = load_results(resolve_results_path())
-        except Exception:
-            fixtures_meta = pd.DataFrame()
-
-        # Build accas from the scores feed
         acca_list = accas.build_accas_from_odds(
-            scores_feed, fixtures_meta, max_fixtures=5, min_legs=4, min_leg_odds=2.0
+            scores_feed, max_fixtures=5, min_legs=4, min_leg_odds=2.0
         )
         if not acca_list:
             return (

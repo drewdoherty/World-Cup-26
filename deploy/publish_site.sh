@@ -29,7 +29,7 @@ stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 #    the exact model 1X2 used by scores/exposure).
 git add site/data.json site/linemove.json site/scores_data.json site/tracking_data.json \
         site/exposure_data.json site/advancement_history.json site/advancement_data.json \
-        data/card_latest.md data/next_latest.md data/model_predictions.json \
+        data/card_latest.md data/next_latest.md data/goalscorers_latest.md data/model_predictions.json \
         data/advancement_current_vs_pretournament.json
 if git diff --cached --quiet; then
   echo "$(stamp) publish: no site changes"; exit 0
