@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 
 from wca.conductor import runner
+from wca.conductor import manager as mgr_mod
 from wca.conductor.config import ConductorConfig
 from wca.conductor.dispatcher import choose_engine
 from wca.conductor.manager import ConductorManager
@@ -648,6 +649,85 @@ def test_run_uses_streaming_only_with_on_event(cfg, monkeypatch):
     # claude_args now request stream-json; the runner streams only when given a hook
     bin_, args = cfg.cli_for("claude")
     assert "stream-json" in args and "--verbose" in args
+
+
+# -- collision-proofing: parallel swarm stays race-free --------------------
+
+
+def test_swarm_runs_many_tasks_in_parallel_without_collision(tmp_path, monkeypatch):
+    # The worktree-add race was the historical collision; _WORKTREE_LOCK + a
+    # per-worktree index make cap>1 safe. Stress 12 tasks through a 4-wide pool
+    # and assert no id/branch collision and every task completes.
+    monkeypatch.setattr(runner, "_run", make_fake_run())
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=4))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    recs = [mgr.submit("claude", "task %d" % i) for i in range(12)]
+    for r in recs:
+        mgr._futures[r.id].result(timeout=20)
+    final = [mgr.get(r.id) for r in recs]
+    assert all(f.status == TaskStatus.DONE.value for f in final)
+    assert len({f.branch for f in final}) == 12          # unique branches
+    assert sorted(f.id for f in final) == list(range(1, 13))  # counter never raced
+
+
+# -- /merge: gated, green-only PR merge ------------------------------------
+
+
+def _done_pr_record(mgr, rid=1):
+    rec = TaskRecord(id=rid, engine="claude", task="t", status=TaskStatus.DONE.value,
+                     branch="conductor/x", pr_url="https://github.com/o/r/pull/9")
+    mgr._records[rid] = rec
+    return rec
+
+
+def test_merge_refuses_without_open_pr(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="t",
+                                 status=TaskStatus.PUSHED.value, pr_url=None)
+    ok, msg = mgr.merge_task(1)
+    assert ok is False and "no open PR" in msg
+
+
+def test_merge_refuses_when_not_green(tmp_path, monkeypatch):
+    import subprocess as sp
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _done_pr_record(mgr)
+    monkeypatch.setattr(mgr_mod.shutil, "which", lambda b: "/usr/bin/gh")
+
+    def fake_run(cmd, **kw):
+        if "view" in cmd:
+            return sp.CompletedProcess(cmd, 0, '{"state":"OPEN","statusCheckRollup":[{"conclusion":"FAILURE"}]}', "")
+        return sp.CompletedProcess(cmd, 0, "", "")
+    monkeypatch.setattr(mgr_mod.subprocess, "run", fake_run)
+    ok, msg = mgr.merge_task(1)
+    assert ok is False and "not green" in msg
+
+
+def test_merge_squash_merges_when_green(tmp_path, monkeypatch):
+    import subprocess as sp
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _done_pr_record(mgr)
+    monkeypatch.setattr(mgr_mod.shutil, "which", lambda b: "/usr/bin/gh")
+    calls = []
+
+    def fake_run(cmd, **kw):
+        calls.append(cmd)
+        if "view" in cmd:
+            return sp.CompletedProcess(cmd, 0, '{"state":"OPEN","statusCheckRollup":[{"conclusion":"SUCCESS"}]}', "")
+        return sp.CompletedProcess(cmd, 0, "Merged", "")
+    monkeypatch.setattr(mgr_mod.subprocess, "run", fake_run)
+    ok, msg = mgr.merge_task(1)
+    assert ok is True and "merged" in msg.lower()
+    assert any("merge" in c and "--squash" in c and "--delete-branch" in c for c in calls)
+
+
+def test_merge_refuses_without_gh(tmp_path, monkeypatch):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _done_pr_record(mgr)
+    monkeypatch.setattr(mgr_mod.shutil, "which", lambda b: None)
+    ok, msg = mgr.merge_task(1)
+    assert ok is False and "gh" in msg.lower()
 
 
 # -- sequential default (revert: parallel raced the shared .git registry) --

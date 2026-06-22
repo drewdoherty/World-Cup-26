@@ -573,6 +573,38 @@ class TestTaskReportFiles:
         assert bot._task_report_files(TaskRecord(id=9, engine="claude", task="t", branch=None)) == []
 
 
+class TestDiffAndMerge:
+    def test_diff_command_sends_summary_and_patch(self, tmp_path) -> None:
+        repo = _git_repo_with_report(tmp_path)
+        bot, client, mgr = _report_bot(repo)
+        mgr._records[3] = TaskRecord(id=3, engine="claude", task="t", branch="conductor/x")
+        reply = bot.handle({"text": "/diff 3", "chat": {"id": 1}, "from": {"id": 1}})
+        assert reply is None                                   # digest + patch ARE the reply
+        assert any("diff" in text.lower() for _cid, text in client.sent)  # stat summary inline
+        assert any(d[1] == "task-3.patch" for d in client.docs)           # full patch attached
+
+    def test_diff_command_unknown_task(self, tmp_path) -> None:
+        bot, _client, _calls = _make_bot(tmp_path)
+        assert "No task" in bot.handle({"text": "/diff 99", "chat": {"id": 1}, "from": {"id": 1}})
+
+    def test_merge_command_is_admin_gated(self, tmp_path) -> None:
+        bot, _client, _calls = _make_bot(tmp_path, admin="999")   # sender id is 1, not 999
+        reply = bot.handle({"text": "/merge 3", "chat": {"id": 1}, "from": {"id": 1}})
+        assert "Not authorized" in reply
+
+    def test_merge_command_delegates_to_manager(self, tmp_path) -> None:
+        bot, _client, _calls = _make_bot(tmp_path)               # admin None -> everyone admin
+        bot.manager.merge_task = lambda tid: (True, "merged `#%d`" % tid)  # type: ignore
+        reply = bot.handle({"text": "/merge 5", "chat": {"id": 1}, "from": {"id": 1}})
+        assert reply.startswith("✅") and "5" in reply
+
+    def test_merge_command_reports_refusal(self, tmp_path) -> None:
+        bot, _client, _calls = _make_bot(tmp_path)
+        bot.manager.merge_task = lambda tid: (False, "not green")  # type: ignore
+        reply = bot.handle({"text": "/merge 5", "chat": {"id": 1}, "from": {"id": 1}})
+        assert reply.startswith("🚫") and "not green" in reply
+
+
 class TestUsageChart:
     def test_chart_command(self, tmp_path) -> None:
         bot, client, _calls = _make_bot(tmp_path)

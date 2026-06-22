@@ -206,6 +206,59 @@ class ConductorManager:
             return old
         return self.submit(old.engine, old.task, chat_id=old.chat_id, images=old.images)
 
+    def merge_task(self, task_id: int) -> "tuple[bool, str]":
+        """Squash-merge a task's PR via ``gh`` — but ONLY if it's open and green.
+
+        Returns ``(ok, message)``. Refuses unless the task produced a real PR,
+        that PR is OPEN, and every status check has passed (no checks configured
+        counts as green). The admin gate is enforced by the bot before this runs;
+        this method is the safety floor (state + green-only).
+        """
+        import json as _json
+
+        r = self.get(task_id)
+        if r is None:
+            return False, "no task `#%d`" % task_id
+        if r.status != TaskStatus.DONE.value or not (r.pr_url and "/pull/" in r.pr_url):
+            return False, "`#%d` has no open PR to merge (status %s)" % (task_id, r.status)
+        if shutil.which(self.cfg.gh_bin) is None:
+            return False, "`gh` not available — can't merge (authenticate it on the host)"
+        try:
+            view = subprocess.run(
+                [self.cfg.gh_bin, "pr", "view", r.branch or "",
+                 "--json", "state,mergeStateStatus,statusCheckRollup"],
+                capture_output=True, text=True, timeout=30,
+            )
+        except (OSError, subprocess.SubprocessError) as exc:
+            return False, "gh view failed: %s" % exc
+        if view.returncode != 0:
+            return False, "gh view failed: %s" % ((view.stderr or "").strip()[:200])
+        try:
+            info = _json.loads(view.stdout or "{}")
+        except ValueError:
+            info = {}
+        if info.get("state") != "OPEN":
+            return False, "`#%d` PR is %s, not OPEN" % (task_id, info.get("state") or "?")
+        rollup = info.get("statusCheckRollup") or []
+        not_green = [
+            c for c in rollup
+            if (c.get("conclusion") or c.get("state") or "").upper()
+            not in ("SUCCESS", "NEUTRAL", "SKIPPED", "")
+        ]
+        if not_green:
+            return False, "`#%d` not green — %d check(s) failing/pending; review on GitHub" % (
+                task_id, len(not_green))
+        try:
+            res = subprocess.run(
+                [self.cfg.gh_bin, "pr", "merge", r.branch or "", "--squash", "--delete-branch"],
+                capture_output=True, text=True, timeout=90,
+            )
+        except (OSError, subprocess.SubprocessError) as exc:
+            return False, "merge failed: %s" % exc
+        if res.returncode != 0:
+            return False, "merge failed: %s" % ((res.stderr or res.stdout or "").strip()[:200])
+        return True, "merged `#%d` (squash) and deleted `%s`" % (task_id, r.branch)
+
     def shutdown(self) -> None:
         self._pool.shutdown(wait=False)
 

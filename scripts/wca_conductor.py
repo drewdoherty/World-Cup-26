@@ -44,6 +44,8 @@ _REPORT_EXCLUDE_PREFIXES = ("site/", "data/", ".github/", "node_modules/")
 _MAX_REPORT_FILES = 6
 _TELEGRAM_PHOTO_MAX = 10 * 1024 * 1024   # Bot API sendPhoto ceiling
 _TELEGRAM_DOC_MAX = 48 * 1024 * 1024     # Bot API sendDocument ceiling (~50 MB)
+_DIFF_STAT_MAX = 1400                     # chars of --stat to inline in chat
+_DIFF_PATCH_MAX = 256 * 1024             # bytes of full patch to attach as a file
 
 # Make ``src`` importable when run from a worktree (editable install resolves to
 # the main checkout otherwise — the known worktree PYTHONPATH quirk).
@@ -115,6 +117,8 @@ def _help_text(manager: ConductorManager) -> str:
         "`/usage` — Anthropic token spend & limits (real-time)",
         "`/prs` — open task PRs (review from your phone)",
         "`/report <id>` — send a task's report files (.md/.csv/.png…) back to you",
+        "`/diff <id>` — summarised change + full .patch file",
+        "`/merge <id>` — squash-merge a *green* task PR (admin)",
         "`/chart` — token-spend chart (PNG)",
         "`/log <id>` — full detail of one task",
         "`/health` — live engine auth/availability",
@@ -162,6 +166,8 @@ _COMMANDS = [
     {"command": "usage", "description": "Anthropic token spend & limits"},
     {"command": "prs", "description": "open task PRs"},
     {"command": "report", "description": "send a task's report files: /report <id>"},
+    {"command": "diff", "description": "summarised change + .patch: /diff <id>"},
+    {"command": "merge", "description": "squash-merge a green PR: /merge <id>"},
     {"command": "chart", "description": "token-spend chart (PNG)"},
     {"command": "log", "description": "full detail of a task: /log <id>"},
     {"command": "health", "description": "engine auth/availability"},
@@ -231,8 +237,15 @@ class ConductorBot:
         if record.finished_at is not None and record.id not in self._announced_done:
             self._announced_done.add(record.id)
             self._send(chat, self._completion_text(record))
-            # Auto-attach any report files the task produced (.md/.csv/.png/...).
+            # Summarise the change + attach report files the task produced.
             if record.status in (TaskStatus.DONE.value, TaskStatus.PUSHED.value):
+                try:
+                    dig = self._diff_digest(record)
+                    if dig and dig[0]:
+                        self._send(chat, "🔧 `#%d` changes:\n```\n%s\n```"
+                                   % (record.id, dig[0][:_DIFF_STAT_MAX]))
+                except Exception as exc:  # noqa: BLE001
+                    print("[conductor] diff summary failed: %s" % exc, flush=True)
                 try:
                     self._send_report_files(chat, record)
                 except Exception as exc:  # noqa: BLE001 - never let attach kill the notifier
@@ -433,6 +446,50 @@ class ConductorBot:
                 print("[conductor] report send failed (%s): %s" % (name, exc), flush=True)
         return sent
 
+    def _diff_digest(self, record: TaskRecord) -> Optional[Tuple[str, bytes]]:
+        """A task's change as ``(stat_summary, full_patch_bytes)`` vs base.
+
+        ``git diff --stat base...branch`` gives the summarised view; the full
+        unified diff rides along as a ``.patch`` the caller can attach. Returns
+        None if the task has no branch or git fails.
+        """
+        if not record.branch:
+            return None
+        cfg = self.manager.cfg
+        git, repo, base = cfg.git_bin, str(cfg.repo_root), cfg.base_branch
+        spec = "%s...%s" % (base, record.branch)
+        try:
+            stat = subprocess.run([git, "-C", repo, "diff", "--stat", spec],
+                                  capture_output=True, text=True, timeout=30)
+            patch = subprocess.run([git, "-C", repo, "diff", spec],
+                                   capture_output=True, timeout=30)  # bytes
+        except (OSError, subprocess.SubprocessError):
+            return None
+        if stat.returncode != 0:
+            return None
+        summary = (stat.stdout or "").strip()
+        patch_bytes = patch.stdout if patch.returncode == 0 else b""
+        if not summary:
+            return None
+        return summary, patch_bytes
+
+    def _send_diff(self, chat_id: str, record: TaskRecord) -> bool:
+        """Send a task's summarised diff (stat inline + full .patch attached)."""
+        dig = self._diff_digest(record)
+        if dig is None:
+            return False
+        summary, patch = dig
+        self._send(chat_id, "🔧 *#%d diff* · `%s`\n```\n%s\n```" % (
+            record.id, record.branch, summary[:_DIFF_STAT_MAX]))
+        if patch and len(patch) <= _DIFF_PATCH_MAX:
+            try:
+                with self._send_lock:
+                    self.client.send_document(chat_id, patch, filename="task-%d.patch" % record.id,
+                                              caption="full diff · #%d" % record.id)
+            except TelegramError as exc:
+                print("[conductor] diff attach failed: %s" % exc, flush=True)
+        return True
+
     def _render_usage_chart(self) -> Optional[bytes]:
         """Render conductor token-spend-by-task as a PNG. None if matplotlib is
         unavailable (the chart command then falls back to the text table)."""
@@ -560,6 +617,26 @@ class ConductorBot:
             if n:
                 return None  # the files (with captions) are the reply
             return "No report files (.md/.csv/.txt/.png/.svg/.pdf) in `#%d`." % tid
+        if cmd == "/diff":
+            try:
+                tid = int(arg.strip())
+            except ValueError:
+                return "Usage: `/diff <id>` — summarised change + full .patch"
+            rec = self.manager.get(tid)
+            if rec is None:
+                return "No task `#%d`." % tid
+            if not self._send_diff(chat_id, rec):
+                return "No diff for `#%d` (no branch / nothing changed)." % tid
+            return None  # the digest + patch ARE the reply
+        if cmd == "/merge":
+            if not _is_admin(user_id, self.admin):
+                return "🚫 Not authorized."
+            try:
+                tid = int(arg.strip())
+            except ValueError:
+                return "Usage: `/merge <id>` — squash-merge a GREEN task PR"
+            ok, msg = self.manager.merge_task(tid)
+            return ("✅ " if ok else "🚫 ") + msg
         if cmd == "/chart":
             png = self._render_usage_chart()
             if png is None:
