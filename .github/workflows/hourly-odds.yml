@@ -40,6 +40,10 @@ jobs:
         run: |
           mkdir -p logs
           python scripts/wca_scores_data.py --hours-ahead 48 >> logs/scores.log 2>&1 || true
+          # Enhanced Scores & Markets panel: model scorelines for every upcoming
+          # current+next-stage game, pivotable by stage/team. Reuses the committed
+          # advancement_data.json for the advancement side.
+          python scripts/wca_scores_markets_data.py >> logs/scores.log 2>&1 || true
 
       # The runner has no ledger DB (gitignored), so the SQLite side goes to
       # a throwaway file — the durable output is the raw JSON dump in
@@ -55,7 +59,7 @@ jobs:
         run: |
           git config user.email "bot@world-cup-alpha.local"
           git config user.name "World Cup Alpha Bot"
-          git add site/scores_data.json data/raw/snapshots
+          git add site/scores_data.json site/scores_markets.json data/raw/snapshots
           git diff --cached --quiet || git commit -m "Auto-sync: hourly scores feed + odds snapshot"
           for i in 1 2 3; do
             git pull --rebase -X theirs origin main && git push origin main && break

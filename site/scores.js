@@ -323,6 +323,114 @@
     el.hidden = false;
   }
 
+  // ---- enhanced Scorelines panel: all current+next-stage games, pivotable
+  //      by stage or by team (data from scores_markets.json) ----------------
+  function renderScoresMarkets(d) {
+    var el = $("scores");
+    if (!el) return false;
+    if (!d || !d.group_games || !d.group_games.length) return false;
+    if ($("scores-meta")) {
+      $("scores-meta").textContent = d.group_games.length + " games · model markets";
+    }
+    var byTeam = d.by_team || {};
+    var teams = Object.keys(byTeam).sort();
+    var state = { mode: "stage", stage: "group", team: (byTeam.Iran ? "Iran" : teams[0]) };
+    var pc = function (v) { return Math.round((v || 0) * 100); };
+    var isIE = function (g) {
+      return (g.home === "Iran" && g.away === "Egypt") || (g.home === "Egypt" && g.away === "Iran");
+    };
+    function bar(x) {
+      return '<span class="sm-bar"><i class="sm-h" style="width:' + pc(x[0]) +
+        '%"></i><i class="sm-d" style="width:' + pc(x[1]) + '%"></i><i class="sm-a" style="width:' +
+        pc(x[2]) + '%"></i></span>';
+    }
+    function gameRow(g) {
+      return '<div class="sm-row' + (isIE(g) ? " sm-hl" : "") + '">' +
+        '<div class="sm-fix"><span class="sm-tm">' + esc(g.home) + " v " + esc(g.away) +
+        '</span><span class="sm-meta">' + esc(String(g.date).slice(5)) + " · Grp " + esc(g.group) +
+        '</span></div>' +
+        '<div class="sm-1x2">' + bar(g.x1x2) + '<span class="sm-n">' + pc(g.x1x2[0]) + "·" +
+        pc(g.x1x2[1]) + "·" + pc(g.x1x2[2]) + "</span></div>" +
+        '<div class="sm-m"><b>' + esc(g.top) + "</b> " + pc(g.topp) + "%</div>" +
+        '<div class="sm-m">O2.5 ' + pc(g.over25) + "%</div>" +
+        '<div class="sm-m">BTTS ' + pc(g.btts) + "%</div>" +
+        '<div class="sm-m sm-dim">xg ' + g.eg[0] + "-" + g.eg[1] + "</div></div>";
+    }
+    function contentStage() {
+      if (state.stage === "group") {
+        var byG = {};
+        d.group_games.forEach(function (g) { (byG[g.group] = byG[g.group] || []).push(g); });
+        return Object.keys(byG).sort().map(function (g) {
+          return '<div class="sm-grp"><div class="sm-gh">GROUP ' + g + "</div>" +
+            byG[g].map(gameRow).join("") + "</div>";
+        }).join("");
+      }
+      if (state.stage === "r32") {
+        return '<div class="sm-note">Projected qualifiers (model) — actual fixtures set once the group stage finalises.</div>' +
+          '<div class="sm-projgrid">' + (d.r32_projected || []).map(function (p) {
+            return '<div class="sm-proj"><div class="sm-gh">GRP ' + esc(p.group) + "</div>" +
+              p.teams.map(function (t) {
+                return '<div class="sm-pt"><span class="sm-pos">' + t.pos + "</span>" +
+                  esc(t.team) + '<span class="sm-padv">' + pc(t.p_adv) + "% adv</span></div>";
+              }).join("") + "</div>";
+          }).join("") + "</div>";
+      }
+      return '<div class="empty">' + esc(state.stage.toUpperCase()) + " — not yet reached</div>";
+    }
+    function contentTeam() {
+      var t = byTeam[state.team];
+      if (!t) return '<div class="empty">No data</div>';
+      var a = t.adv || {};
+      var chip = function (lbl, v) {
+        return "<span>" + lbl + " <b>" + (v != null ? pc(v) + "%" : "—") + "</b></span>";
+      };
+      var advLine = '<div class="sm-tadv">' + chip("Advance (R32)", a.R32) +
+        chip("Win group", a.group_winner) + chip("Reach R16", a.R16) +
+        chip("Reach QF", a.QF) + chip("Reach final", a.Final) + "</div>";
+      var games = (t.games || []).map(gameRow).join("") ||
+        '<div class="empty">No upcoming games this stage</div>';
+      return advLine + '<div class="sm-grp"><div class="sm-gh">' + esc(state.team) +
+        " — UPCOMING</div>" + games + "</div>";
+    }
+    function render() {
+      var modes = '<div class="sm-modes">' +
+        '<span class="sm-mtab' + (state.mode === "stage" ? " on" : "") + '" data-mode="stage">BY STAGE</span>' +
+        '<span class="sm-mtab' + (state.mode === "team" ? " on" : "") + '" data-mode="team">BY TEAM</span></div>';
+      var sub;
+      if (state.mode === "stage") {
+        sub = '<div class="sm-stages">' + (d.stages || []).map(function (s) {
+          var cls = "sm-stab" + (s.key === state.stage ? " on" : "") +
+            (s.status === "next" ? " sm-next" : "") + (s.status === "locked" ? " sm-lock" : "");
+          var bdg = s.status === "current" ? '<i class="sm-bdg">● ' + s.count + " left</i>" :
+            (s.status === "next" ? '<i class="sm-bdg">▷ next</i>' : "");
+          return '<span class="' + cls + '" data-stage="' + s.key + '">' + esc(s.label) + bdg + "</span>";
+        }).join("") + "</div>";
+      } else {
+        sub = '<div class="sm-chips">' + teams.map(function (tm) {
+          return '<span class="sm-chip' + (tm === state.team ? " on" : "") + '" data-team="' +
+            esc(tm) + '">' + esc(tm) + "</span>";
+        }).join("") + "</div>";
+      }
+      el.innerHTML = modes + sub + '<div class="sm-cbody">' +
+        (state.mode === "stage" ? contentStage() : contentTeam()) + "</div>";
+    }
+    if (!el._smWired) {
+      el.addEventListener("click", function (e) {
+        var t = e.target.closest && e.target.closest("[data-mode],[data-stage],[data-team]");
+        if (!t) return;
+        if (t.getAttribute("data-mode")) state.mode = t.getAttribute("data-mode");
+        else if (t.getAttribute("data-stage")) {
+          if (t.className.indexOf("sm-lock") >= 0) return;
+          state.stage = t.getAttribute("data-stage");
+        } else if (t.getAttribute("data-team")) state.team = t.getAttribute("data-team");
+        render();
+      });
+      el._smWired = true;
+    }
+    render();
+    return true;
+  }
+
   // ---- advancement: model edge vs Polymarket + group standings ------------
   // The edge⇄kelly matrix renderer lives in the shared adv_edge_matrix.js (one
   // source of truth, also used by the Visuals page) so the two can never drift.
@@ -375,14 +483,25 @@
       fetchJson("./scores_data.json").catch(function () { return null; }),
       fetchJson("./exposure_data.json").catch(function () { return null; }),
       fetchJson("./advancement_data.json").catch(function () { return null; }),
+      fetchJson("./scores_markets.json").catch(function () { return null; }),
     ]).then(function (res) {
-      var scoresData = res[0], expData = res[1], advData = res[2];
-      if (!scoresData) { showNoData("SCORES FEED UNAVAILABLE"); scoresData = { fixtures: [], meta: {} }; }
+      var scoresData = res[0], expData = res[1], advData = res[2], marketsData = res[3];
       if (!expData) { showNoData("EXPOSURE FEED UNAVAILABLE"); }
       renderAdvancement(advData);
       renderRisk(expData);
-      renderScores(scoresData, expData);
-      renderFooter(scoresData, expData);
+      // Enhanced panel from scores_markets.json; fall back to the legacy
+      // card-fixture view if that feed is unavailable.
+      var enhanced = renderScoresMarkets(marketsData);
+      if (!enhanced) {
+        if (!scoresData) { showNoData("SCORES FEED UNAVAILABLE"); scoresData = { fixtures: [], meta: {} }; }
+        renderScores(scoresData, expData);
+      }
+      renderFooter({
+        meta: {
+          generated: (marketsData && marketsData.meta && marketsData.meta.generated) ||
+            (scoresData && scoresData.meta && scoresData.meta.generated) || ""
+        }
+      }, expData);
     });
   }
 
