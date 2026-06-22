@@ -9,6 +9,7 @@ https://core.telegram.org/bots/api for the endpoints used.
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import requests
@@ -166,6 +167,31 @@ class TelegramClient:
             return None
         file_info = self.get_file(file_id)
         return self.download_file(file_info["file_path"])
+
+    def save_image(
+        self, message: Dict[str, Any], dest_dir: "str | os.PathLike[str]", stem: str
+    ) -> Optional[str]:
+        """Download the image attached to *message* and write it under *dest_dir*.
+
+        Picks the highest-resolution ``photo`` (or an ``image/*`` ``document``),
+        preserves the source file extension (defaulting to ``.jpg``), and writes
+        it to ``<dest_dir>/<stem><ext>``. Creates *dest_dir* if needed.
+
+        Returns the absolute path written, or ``None`` when *message* has no
+        image. Raises :class:`TelegramError` on a transport/API failure.
+        """
+        file_id = largest_photo_file_id(message) or image_document_file_id(message)
+        if file_id is None:
+            return None
+        info = self.get_file(file_id)
+        remote_path = str(info.get("file_path") or "")
+        ext = os.path.splitext(remote_path)[1].lower() or ".jpg"
+        data = self.download_file(remote_path)
+        dest = Path(dest_dir)
+        dest.mkdir(parents=True, exist_ok=True)
+        out = dest / ("%s%s" % (stem, ext))
+        out.write_bytes(data)
+        return str(out)
 
     # -- receiving ---------------------------------------------------------
 

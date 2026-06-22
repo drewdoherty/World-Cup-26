@@ -1,11 +1,14 @@
-"""Tests for TelegramClient photo-download helpers.
+"""Tests for TelegramClient photo-download helpers + conductor image routing.
 
 No real network calls are made; ``requests.Session`` methods are monkeypatched
-with lightweight fakes.
+with lightweight fakes. The conductor-bot tests stub ``ConductorManager`` so no
+real agent/git pipeline runs.
 """
 from __future__ import annotations
 
+import importlib.util
 import json
+from pathlib import Path
 from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 
@@ -209,3 +212,235 @@ class TestDownloadPhoto:
         )
         with pytest.raises(TelegramError):
             client.download_photo(self._photo_message())
+
+
+# ---------------------------------------------------------------------------
+# TelegramClient.save_image
+# ---------------------------------------------------------------------------
+
+class TestSaveImage:
+    def _photo_message(self) -> Dict[str, Any]:
+        return {
+            "photo": [
+                {"file_id": "small_id", "width": 90, "height": 90, "file_size": 500},
+                {"file_id": "large_id", "width": 800, "height": 600, "file_size": 50000},
+            ],
+        }
+
+    def test_writes_file_with_source_extension(self, tmp_path) -> None:
+        client = _make_client()
+        client.get_file = MagicMock(return_value={"file_path": "photos/file_9.JPG"})
+        client.download_file = MagicMock(return_value=b"JPEGDATA")
+        out = client.save_image(self._photo_message(), tmp_path, "abc")
+        assert out is not None
+        assert out.endswith("abc.jpg")  # extension lower-cased
+        assert Path(out).read_bytes() == b"JPEGDATA"
+        client.get_file.assert_called_once_with("large_id")  # highest-res photo
+
+    def test_defaults_extension_when_remote_has_none(self, tmp_path) -> None:
+        client = _make_client()
+        client.get_file = MagicMock(return_value={"file_path": "photos/file_noext"})
+        client.download_file = MagicMock(return_value=b"DATA")
+        out = client.save_image(self._photo_message(), tmp_path, "xyz")
+        assert out.endswith("xyz.jpg")
+
+    def test_handles_image_document(self, tmp_path) -> None:
+        client = _make_client()
+        client.get_file = MagicMock(return_value={"file_path": "documents/shot.png"})
+        client.download_file = MagicMock(return_value=b"PNG")
+        msg = {"document": {"file_id": "doc1", "mime_type": "image/png", "file_name": "shot.png"}}
+        out = client.save_image(msg, tmp_path, "d1")
+        assert out.endswith("d1.png")
+        client.get_file.assert_called_once_with("doc1")
+
+    def test_returns_none_without_image(self, tmp_path) -> None:
+        client = _make_client()
+        client.get_file = MagicMock()
+        client.download_file = MagicMock()
+        assert client.save_image({"text": "hi"}, tmp_path, "n") is None
+        client.get_file.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# ConductorBot — caption + screenshot routing
+# ---------------------------------------------------------------------------
+
+_CONDUCTOR_PATH = Path(__file__).resolve().parent.parent / "scripts" / "wca_conductor.py"
+_spec = importlib.util.spec_from_file_location("wca_conductor", _CONDUCTOR_PATH)
+wca_conductor = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(wca_conductor)  # type: ignore[union-attr]
+
+from wca.conductor.config import ConductorConfig  # noqa: E402
+from wca.conductor.manager import ConductorManager  # noqa: E402
+from wca.conductor.models import TaskRecord, TaskStatus  # noqa: E402
+
+
+class _StubClient:
+    """Stands in for TelegramClient: records save_image/send calls, no network."""
+
+    def __init__(self, fail: bool = False) -> None:
+        self.saved: list = []
+        self.sent: list = []
+        self.fail = fail
+
+    def save_image(self, message, dest_dir, stem):  # noqa: ANN001
+        if self.fail:
+            raise TelegramError("simulated download failure")
+        self.saved.append(stem)
+        return "/tmp/uploads/%s.jpg" % stem
+
+    def send_message(self, chat_id, text, parse_mode="Markdown", reply_markup=None):  # noqa: ANN001
+        self.sent.append((str(chat_id), text))
+        return {}
+
+
+def _make_bot(tmp_path, admin=None, fail=False):  # noqa: ANN001
+    """A ConductorBot whose manager.submit/submit_auto are captured, not run."""
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    calls: list = []
+
+    def fake_submit(engine, task, chat_id="", images=None):  # noqa: ANN001
+        calls.append({"kind": "submit", "engine": engine, "task": task, "images": images})
+        return TaskRecord(id=7, engine=engine, task=task, branch="conductor/x",
+                          status=TaskStatus.QUEUED.value)
+
+    def fake_submit_auto(task, chat_id="", images=None):  # noqa: ANN001
+        calls.append({"kind": "auto", "task": task, "images": images})
+        return TaskRecord(id=8, engine="claude", task=task, branch="conductor/y",
+                          status=TaskStatus.QUEUED.value, route_reason="auto")
+
+    mgr.submit = fake_submit            # type: ignore[assignment]
+    mgr.submit_auto = fake_submit_auto  # type: ignore[assignment]
+    client = _StubClient(fail=fail)
+    bot = wca_conductor.ConductorBot(client, mgr, allowed=set(), admin=admin)
+    return bot, client, calls
+
+
+def _photo_msg(caption: str | None = None, file_id: str = "big",
+               media_group_id: str | None = None, user_id: int = 1) -> Dict[str, Any]:
+    msg: Dict[str, Any] = {
+        "photo": [{"file_id": file_id, "width": 1280, "height": 720, "file_size": 9000}],
+        "chat": {"id": 1},
+        "from": {"id": user_id},
+    }
+    if caption is not None:
+        msg["caption"] = caption
+    if media_group_id is not None:
+        msg["media_group_id"] = media_group_id
+    return msg
+
+
+class TestConductorImageRouting:
+    def test_photo_with_claude_caption_dispatches_with_image(self, tmp_path) -> None:
+        bot, client, calls = _make_bot(tmp_path)
+        reply = bot.handle(_photo_msg("/claude debug this layout"))
+        assert "dispatched" in reply and "📎" in reply
+        assert len(calls) == 1
+        assert calls[0] == {"kind": "submit", "engine": "claude",
+                            "task": "debug this layout", "images": ["/tmp/uploads/%s.jpg" % client.saved[0]]}
+
+    def test_photo_with_plain_caption_auto_routes_with_image(self, tmp_path) -> None:
+        bot, client, calls = _make_bot(tmp_path)
+        reply = bot.handle(_photo_msg("fix the broken header"))
+        assert "routed" in reply and "📎" in reply
+        assert calls[0]["kind"] == "auto"
+        assert calls[0]["task"] == "fix the broken header"
+        assert calls[0]["images"] == ["/tmp/uploads/%s.jpg" % client.saved[0]]
+
+    def test_photo_without_caption_asks_for_instruction(self, tmp_path) -> None:
+        bot, client, calls = _make_bot(tmp_path)
+        reply = bot.handle(_photo_msg(None))
+        assert reply.startswith("📎 Got your screenshot")
+        assert calls == []            # nothing dispatched
+        assert client.saved == []     # and nothing downloaded
+
+    def test_image_document_with_caption_dispatches(self, tmp_path) -> None:
+        bot, client, calls = _make_bot(tmp_path)
+        msg = {
+            "document": {"file_id": "d", "mime_type": "image/png", "file_name": "bug.png"},
+            "caption": "/claude what's wrong here",
+            "chat": {"id": 1}, "from": {"id": 1},
+        }
+        reply = bot.handle(msg)
+        assert "dispatched" in reply
+        assert calls[0]["images"] == ["/tmp/uploads/%s.jpg" % client.saved[0]]
+
+    def test_text_command_does_not_download_images(self, tmp_path) -> None:
+        bot, client, calls = _make_bot(tmp_path)
+        reply = bot.handle({"text": "/status", "chat": {"id": 1}, "from": {"id": 1}})
+        assert reply is not None
+        assert client.saved == []     # no image work on a plain command
+        assert calls == []
+
+    def test_plain_text_without_command_is_ignored(self, tmp_path) -> None:
+        bot, client, calls = _make_bot(tmp_path)
+        assert bot.handle({"text": "hello", "chat": {"id": 1}, "from": {"id": 1}}) is None
+        assert calls == []
+
+    # -- hardening: download failure, admin gate, albums --------------------
+
+    def test_download_failure_warns_and_dispatches_without_image(self, tmp_path) -> None:
+        bot, client, calls = _make_bot(tmp_path, fail=True)
+        reply = bot.handle(_photo_msg("/claude debug this"))
+        assert "couldn't download" in reply           # user is told
+        assert calls[0]["images"] == []               # dispatched without the image
+        assert client.saved == []                     # (save_image raised)
+
+    def test_non_admin_is_rejected_before_any_download(self, tmp_path) -> None:
+        # admin set to a different user id than the sender (1)
+        bot, client, calls = _make_bot(tmp_path, admin="999")
+        reply = bot.handle(_photo_msg("/claude debug this", user_id=1))
+        assert "Not authorized" in reply
+        assert calls == []                            # no dispatch
+        assert client.saved == []                     # crucially, no wasted download
+
+    def test_album_groups_members_into_one_task(self, tmp_path) -> None:
+        bot, client, calls = _make_bot(tmp_path)
+        members = [
+            _photo_msg("/claude compare these two screens", file_id="a", media_group_id="G"),
+            _photo_msg(None, file_id="b", media_group_id="G"),
+        ]
+        bot._handle_album(members)
+        assert len(calls) == 1                        # ONE task, not two
+        assert calls[0]["engine"] == "claude"
+        assert calls[0]["task"] == "compare these two screens"
+        assert len(calls[0]["images"]) == 2           # both screenshots attached
+        # exactly one reply, mentioning both screenshots
+        assert len(client.sent) == 1
+        assert "2 screenshots" in client.sent[0][1]
+
+    def test_album_without_caption_asks_once_and_downloads_nothing(self, tmp_path) -> None:
+        bot, client, calls = _make_bot(tmp_path)
+        members = [
+            _photo_msg(None, file_id="a", media_group_id="G"),
+            _photo_msg(None, file_id="b", media_group_id="G"),
+        ]
+        bot._handle_album(members)
+        assert calls == []                            # nothing dispatched
+        assert client.saved == []                     # no wasted downloads
+        assert len(client.sent) == 1                  # a single "add a caption" hint
+        assert client.sent[0][1].startswith("📎 Got your screenshot")
+
+    def test_album_override_pluralizes_attach_note(self, tmp_path) -> None:
+        bot, client, calls = _make_bot(tmp_path)
+        reply = bot.handle(_photo_msg("/claude x"), images_override=["/a.png", "/b.png", "/c.png"])
+        assert "3 screenshots attached" in reply
+        assert calls[0]["images"] == ["/a.png", "/b.png", "/c.png"]
+
+
+class TestUploadsPrune:
+    def test_prunes_old_files_keeps_recent(self, tmp_path) -> None:
+        import os
+        bot, _client, _calls = _make_bot(tmp_path)
+        d = bot._uploads_dir()
+        d.mkdir(parents=True, exist_ok=True)
+        old = d / "old.png"
+        old.write_bytes(b"x")
+        recent = d / "recent.png"
+        recent.write_bytes(b"y")
+        # age the 'old' file well past the 24h cutoff
+        old_ts = __import__("time").time() - 48 * 3600
+        os.utime(old, (old_ts, old_ts))
+        bot._prune_uploads(max_age_hours=24.0)
+        assert not old.exists()
+        assert recent.exists()

@@ -29,6 +29,8 @@ import argparse
 import os
 import sys
 import threading
+import time
+import uuid
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
@@ -39,7 +41,12 @@ _SRC = _REPO_ROOT / "src"
 if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
-from wca.bot.telegram import TelegramClient, TelegramError  # noqa: E402
+from wca.bot.telegram import (  # noqa: E402
+    TelegramClient,
+    TelegramError,
+    image_document_file_id,
+    largest_photo_file_id,
+)
 from wca.conductor.config import ConductorConfig  # noqa: E402
 from wca.conductor.manager import ConductorManager  # noqa: E402
 from wca.conductor.models import Engine, TaskRecord, TaskStatus  # noqa: E402
@@ -70,6 +77,17 @@ def _is_admin(user_id: str, admin: Optional[str]) -> bool:
     return str(user_id) == str(admin)
 
 
+def _msg_text(message: Dict[str, object]) -> str:
+    """The user's text for a message — caption for a photo, else plain text."""
+    return str(message.get("text") or message.get("caption") or "").strip()
+
+
+# Telegram delivers an "album" (multiple images in one send) as separate update
+# objects sharing a media_group_id; only one carries the caption. Cap how many we
+# pull per album (Telegram's own album limit is 10).
+_MAX_ALBUM_IMAGES = 10
+
+
 def _help_text(manager: ConductorManager) -> str:
     lines = [
         "*WCA dev-conductor*",
@@ -90,7 +108,10 @@ def _help_text(manager: ConductorManager) -> str:
         "`/retry <id>` — re-run a failed task",
         "`/cancel <id>` — cancel a not-yet-started task",
         "",
-        "_Parallel swarm · PR-only · dry-run env · auto-notifies on start, finish & hiccups._",
+        "📎 *Paste a screenshot* with a caption (or just a description) and the "
+        "agent reads it as visual context to debug.",
+        "",
+        "_Sequential by default · PR-only · dry-run env · auto-notifies on start, finish & hiccups._",
     ]
     warnings = manager.preflight()
     if warnings:
@@ -196,6 +217,7 @@ class ConductorBot:
     def _health_watch(self, interval: float = 300.0) -> None:
         """Background watcher: alert the notify chat when an engine's health flips."""
         while not self._stop.is_set():
+            self._prune_uploads()  # age out stale pasted screenshots (keeps disk bounded)
             for e in Engine:
                 ev = e.value
                 try:
@@ -233,47 +255,145 @@ class ConductorBot:
 
     # -- inbound ----------------------------------------------------------
 
-    def _dispatch(self, engine: str, arg: str, chat_id: str, user_id: str) -> str:
+    @staticmethod
+    def _attach_note(images: Optional[List[str]]) -> str:
+        n = len(images or [])
+        if not n:
+            return ""
+        return "\n📎 %d screenshot%s attached for context." % (n, "" if n == 1 else "s")
+
+    def _dispatch(self, engine: str, arg: str, chat_id: str, user_id: str,
+                  images: Optional[List[str]] = None) -> str:
         if not _is_admin(user_id, self.admin):
             return "🚫 Not authorized to dispatch tasks."
         task = arg.strip()
         if not task:
             return "Usage: `/%s <task>`" % engine
-        record = self.manager.submit(engine, task, chat_id=chat_id)
+        record = self.manager.submit(engine, task, chat_id=chat_id, images=images)
         if record.status == TaskStatus.REJECTED.value:
             return "🚫 `#%d` rejected: %s" % (record.id, record.error)
         return (
-            "🚀 `#%d` dispatched to *%s* on `%s`.\n"
+            "🚀 `#%d` dispatched to *%s* on `%s`.%s\n"
             "I'll post the PR link when it finishes. `/status` to track."
-            % (record.id, engine, record.branch)
+            % (record.id, engine, record.branch, self._attach_note(images))
         )
 
-    def _dispatch_auto(self, arg: str, chat_id: str, user_id: str) -> str:
+    def _dispatch_auto(self, arg: str, chat_id: str, user_id: str,
+                       images: Optional[List[str]] = None) -> str:
         if not _is_admin(user_id, self.admin):
             return "🚫 Not authorized to dispatch tasks."
         task = arg.strip()
         if not task:
             return "Usage: `/task <task>`"
-        record = self.manager.submit_auto(task, chat_id=chat_id)
+        record = self.manager.submit_auto(task, chat_id=chat_id, images=images)
         if record.status == TaskStatus.REJECTED.value:
             return "🚫 `#%d` rejected: %s" % (record.id, record.error)
         reason = "\nRoute: %s" % record.route_reason if record.route_reason else ""
         return (
-            "🚀 `#%d` routed to *%s* on `%s`.%s\n"
+            "🚀 `#%d` routed to *%s* on `%s`.%s%s\n"
             "I'll post the PR link when it finishes. `/status` to track."
-            % (record.id, record.engine, record.branch, reason)
+            % (record.id, record.engine, record.branch, reason, self._attach_note(images))
         )
 
-    def handle(self, message: Dict[str, object]) -> Optional[str]:
-        text = str(message.get("text") or "").strip()
-        if not text:
+    # -- attachments ------------------------------------------------------
+
+    def _uploads_dir(self) -> Path:
+        return Path(self.manager.cfg.repo_root) / "data" / "conductor_uploads"
+
+    def _save_one(self, message: Dict[str, object]) -> Optional[str]:
+        """Download a single message's image to the uploads dir; None on failure."""
+        stem = uuid.uuid4().hex[:8]
+        try:
+            return self.client.save_image(message, self._uploads_dir(), stem)
+        except TelegramError as exc:
+            print("[conductor] image download failed: %s" % exc, flush=True)
             return None
-        cmd, _, arg = text.partition(" ")
-        cmd = cmd.lower().split("@", 1)[0]  # strip @botname in groups
+
+    def _save_message_images(self, message: Dict[str, object]) -> List[str]:
+        """Download the screenshot attached to *message*. Empty on failure."""
+        path = self._save_one(message)
+        return [path] if path else []
+
+    def _save_album_images(self, members: List[Dict[str, object]]) -> List[str]:
+        """Download every image across an album's member messages (capped)."""
+        paths: List[str] = []
+        for m in members[:_MAX_ALBUM_IMAGES]:
+            p = self._save_one(m)
+            if p:
+                paths.append(p)
+        return paths
+
+    def _prune_uploads(self, max_age_hours: float = 24.0) -> None:
+        """Best-effort: delete pasted screenshots older than *max_age_hours*.
+
+        The originals in ``data/conductor_uploads/`` outlive a task (so `/retry`
+        can re-stage them), but on a long-running host they would otherwise grow
+        unbounded. Age-based, never eager, so an in-flight retry isn't starved.
+        """
+        d = self._uploads_dir()
+        if not d.exists():
+            return
+        cutoff = time.time() - max_age_hours * 3600.0
+        try:
+            entries = list(d.iterdir())
+        except OSError:
+            return
+        for f in entries:
+            try:
+                if f.is_file() and f.stat().st_mtime < cutoff:
+                    f.unlink()
+            except OSError:
+                pass
+
+    def handle(self, message: Dict[str, object],
+               images_override: Optional[List[str]] = None) -> Optional[str]:
+        # A photo carries its command/description in `caption`, not `text`.
+        text = _msg_text(message)
+        has_image = bool(largest_photo_file_id(message) or image_document_file_id(message)) \
+            or bool(images_override)
         chat = message.get("chat") or {}
         user = message.get("from") or {}
         chat_id = str(chat.get("id", ""))  # type: ignore[union-attr]
         user_id = str(user.get("id", ""))  # type: ignore[union-attr]
+
+        if not text and not has_image:
+            return None
+        # A bare screenshot with no instruction isn't actionable — ask for one.
+        if has_image and not text:
+            return (
+                "📎 Got your screenshot. Add a caption telling me what to do with it, e.g.\n"
+                "`/claude debug why this layout breaks` — or just describe it and I'll auto-route."
+            )
+
+        cmd, _, arg = text.partition(" ")
+        cmd = cmd.lower().split("@", 1)[0]  # strip @botname in groups
+        _DISPATCH = ("/task", "/claude", "/codex")
+        is_dispatch = (not cmd.startswith("/")) or cmd in _DISPATCH
+
+        # Admin-gate dispatch BEFORE any download, so a non-admin can't trigger a
+        # wasted getFile+CDN fetch (and an orphaned file) just by attaching a photo.
+        if has_image and is_dispatch and not _is_admin(user_id, self.admin):
+            return "🚫 Not authorized to dispatch tasks."
+
+        # Resolve the screenshot(s): album members are pre-downloaded and passed
+        # in via images_override; a lone photo is downloaded here, on demand.
+        images: List[str] = []
+        download_failed = False
+        if has_image and is_dispatch:
+            if images_override is not None:
+                images = list(images_override)
+            else:
+                images = self._save_message_images(message)
+            # has_image guaranteed a file_id, so an empty result means the
+            # download actually failed — tell the user instead of dispatching blind.
+            download_failed = not images
+        warn = ("\n⚠️ couldn't download your screenshot — running without it; "
+                "re-send to attach." if download_failed else "")
+
+        # Image + a plain (non-slash) caption → auto-route the caption as a task,
+        # so "snap a screenshot, describe the bug, send" just works.
+        if has_image and not cmd.startswith("/"):
+            return self._dispatch_auto(text, chat_id, user_id, images=images) + warn
 
         if cmd in ("/start", "/help"):
             return _help_text(self.manager)
@@ -318,11 +438,11 @@ class ConductorBot:
                 return "Can't retry `#%d` (status %s — only failed / no-change tasks)." % (tid, rec.status)
             return "🔁 retrying as `#%d` on *%s* (`%s`)." % (rec.id, rec.engine, rec.branch)
         if cmd == "/task":
-            return self._dispatch_auto(arg, chat_id, user_id)
+            return self._dispatch_auto(arg, chat_id, user_id, images=images) + warn
         if cmd == "/claude":
-            return self._dispatch(Engine.CLAUDE.value, arg, chat_id, user_id)
+            return self._dispatch(Engine.CLAUDE.value, arg, chat_id, user_id, images=images) + warn
         if cmd == "/codex":
-            return self._dispatch(Engine.CODEX.value, arg, chat_id, user_id)
+            return self._dispatch(Engine.CODEX.value, arg, chat_id, user_id, images=images) + warn
         if cmd == "/cancel":
             if not _is_admin(user_id, self.admin):
                 return "🚫 Not authorized."
@@ -356,6 +476,36 @@ class ConductorBot:
         if text:
             self._send(chat_id, text)
 
+    def _handle_message(self, message: Dict[str, object], chat_id: str) -> None:
+        """Route one (non-album) message and send any reply."""
+        try:
+            reply = self.handle(message)
+        except Exception as exc:  # noqa: BLE001 - never die on one message
+            reply = "Error: %s" % exc
+        if reply:
+            self._send(chat_id, reply)
+
+    def _handle_album(self, members: List[Dict[str, object]]) -> None:
+        """Route a Telegram album (multiple images, one shared caption) as ONE task.
+
+        Telegram splits an album across several updates; the caption rides on
+        exactly one member. We dispatch once via the captioned member with every
+        image attached, and download only when it will actually be used (a
+        caption is present AND the sender is an admin).
+        """
+        base = next((m for m in members if _msg_text(m)), members[0])
+        chat_id = str((base.get("chat") or {}).get("id", ""))  # type: ignore[union-attr]
+        user_id = str((base.get("from") or {}).get("id", ""))  # type: ignore[union-attr]
+        images: List[str] = []
+        if _msg_text(base) and _is_admin(user_id, self.admin):
+            images = self._save_album_images(members)
+        try:
+            reply = self.handle(base, images_override=images)
+        except Exception as exc:  # noqa: BLE001
+            reply = "Error: %s" % exc
+        if reply:
+            self._send(chat_id, reply)
+
     # -- main loop --------------------------------------------------------
 
     def run(self, poll_timeout: int = 25) -> None:
@@ -368,10 +518,13 @@ class ConductorBot:
             self.client.set_my_commands(_COMMANDS)  # populate Telegram's '/' menu
         except TelegramError as exc:
             print("[conductor] set_my_commands failed: %s" % exc, flush=True)
+        self._prune_uploads()  # clear stale pasted screenshots left over from a prior run
         # background watcher: alerts the notify chat when an engine flips up/down
         threading.Thread(target=self._health_watch, name="health-watch", daemon=True).start()
         if self._notify_chat:
-            self._send(self._notify_chat, "🟢 *conductor online* — %d-way swarm. /help" % self.manager.cfg.max_parallel)
+            cap = self.manager.cfg.max_parallel
+            mode = "sequential" if cap <= 1 else "%d-way swarm" % cap
+            self._send(self._notify_chat, "🟢 *conductor online* — %s. /help" % mode)
 
         offset: Optional[int] = None
         import time as _time
@@ -387,6 +540,7 @@ class ConductorBot:
                     self._send(self._notify_chat, "⚠️ *conductor poll error* — %s" % str(exc)[:150])
                 _time.sleep(5)
                 continue
+            albums: Dict[str, List[Dict[str, object]]] = {}
             for update in updates:
                 offset = int(update["update_id"]) + 1
                 callback = update.get("callback_query")
@@ -403,12 +557,19 @@ class ConductorBot:
                 if not _authorized(chat_id, self.allowed):
                     self._send(chat_id, "Unauthorized chat `%s`." % chat_id)
                     continue
+                # Buffer album members (multiple images, one send) and dispatch the
+                # whole group once after the batch — so extra members don't each
+                # trigger a spurious "add a caption" reply.
+                mgid = message.get("media_group_id")
+                if mgid:
+                    albums.setdefault(str(mgid), []).append(message)
+                    continue
+                self._handle_message(message, chat_id)
+            for members in albums.values():
                 try:
-                    reply = self.handle(message)
-                except Exception as exc:  # noqa: BLE001 - never die on one message
-                    reply = "Error: %s" % exc
-                if reply:
-                    self._send(chat_id, reply)
+                    self._handle_album(members)
+                except Exception as exc:  # noqa: BLE001 - never die on one album
+                    print("[conductor] album error: %s" % exc, flush=True)
 
 
 def _build_config(args: argparse.Namespace) -> ConductorConfig:

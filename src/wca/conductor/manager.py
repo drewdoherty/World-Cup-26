@@ -72,12 +72,16 @@ class ConductorManager:
 
     # -- submission -------------------------------------------------------
 
-    def submit(self, engine: str, task: str, chat_id: str = "") -> TaskRecord:
+    def submit(self, engine: str, task: str, chat_id: str = "",
+               images: Optional[List[str]] = None) -> TaskRecord:
         """Accept an explicit-engine task, rerouting around a dead engine.
 
         If the requested engine is logged-out/unavailable, reroute to the other
         engine when it is healthy; if neither is healthy, REJECT with the real
         reason (e.g. "claude not logged in — run `claude setup-token`").
+
+        ``images`` are local paths to pasted screenshots the agent should read
+        as visual context (see :func:`runner.stage_images`).
         """
         engine = Engine.coerce(engine).value  # validate / normalise
         task = (task or "").strip()
@@ -94,15 +98,16 @@ class ConductorManager:
                 engine = other
             else:
                 with self._lock:
-                    record = self._new_record_locked(engine, task, chat_id)
+                    record = self._new_record_locked(engine, task, chat_id, images=images)
                 record.status = TaskStatus.REJECTED.value
                 record.error = primary.reason
                 return record
 
         with self._lock:
-            return self._submit_locked(engine, task, chat_id, route_reason=route_reason)
+            return self._submit_locked(engine, task, chat_id, route_reason=route_reason, images=images)
 
-    def submit_auto(self, task: str, chat_id: str = "") -> TaskRecord:
+    def submit_auto(self, task: str, chat_id: str = "",
+                    images: Optional[List[str]] = None) -> TaskRecord:
         """Accept a task after picking the engine with the health-aware router."""
         task = (task or "").strip()
         if not task:
@@ -125,7 +130,7 @@ class ConductorManager:
         if not claude_ok and not codex_ok:
             with self._lock:
                 record = self._new_record_locked(decision.engine.value, task, chat_id,
-                                                 route_reason=decision.reason)
+                                                 route_reason=decision.reason, images=images)
             record.status = TaskStatus.REJECTED.value
             record.error = "no healthy engine: claude (%s), codex (%s)" % (
                 self.engine_health(Engine.CLAUDE.value).reason,
@@ -134,12 +139,12 @@ class ConductorManager:
             return record
         with self._lock:
             return self._submit_locked(
-                decision.engine.value, task, chat_id, route_reason=decision.reason,
+                decision.engine.value, task, chat_id, route_reason=decision.reason, images=images,
             )
 
     def _submit_locked(self, engine: str, task: str, chat_id: str,
-                       route_reason: str = "") -> TaskRecord:
-        record = self._new_record_locked(engine, task, chat_id, route_reason)
+                       route_reason: str = "", images: Optional[List[str]] = None) -> TaskRecord:
+        record = self._new_record_locked(engine, task, chat_id, route_reason, images=images)
         budget = self.cfg.token_budget
         if budget is not None and self._spent_locked() >= budget:
             record.status = TaskStatus.REJECTED.value
@@ -150,7 +155,7 @@ class ConductorManager:
         return record
 
     def _new_record_locked(self, engine: str, task: str, chat_id: str,
-                           route_reason: str = "") -> TaskRecord:
+                           route_reason: str = "", images: Optional[List[str]] = None) -> TaskRecord:
         self._counter += 1
         rid = self._counter
         shortid = uuid.uuid4().hex[:6]
@@ -162,6 +167,7 @@ class ConductorManager:
             engine=engine,
             task=task,
             chat_id=str(chat_id),
+            images=list(images or []),
             shortid=shortid,
             branch=branch,
             status=TaskStatus.QUEUED.value,
@@ -198,7 +204,7 @@ class ConductorManager:
             return None
         if old.status not in self._RETRYABLE:
             return old
-        return self.submit(old.engine, old.task, chat_id=old.chat_id)
+        return self.submit(old.engine, old.task, chat_id=old.chat_id, images=old.images)
 
     def shutdown(self) -> None:
         self._pool.shutdown(wait=False)

@@ -569,8 +569,10 @@ def test_agents_spec_table_shows_specs_and_architecture(tmp_path):
 # -- /usage, /prs, /log, /retry, swarm cap ---------------------------------
 
 
-def test_max_parallel_defaults_to_swarm(tmp_path):
-    assert ConductorConfig(repo_root=tmp_path).max_parallel == 8
+def test_max_parallel_defaults_to_sequential_revert(tmp_path):
+    # Reverted from an 8-way swarm: parallel runs raced the shared .git
+    # worktree registry/index and produced collisions. Sequential by default.
+    assert ConductorConfig(repo_root=tmp_path).max_parallel == 1
 
 
 def test_usage_table_sums_per_engine_spend(tmp_path):
@@ -646,3 +648,161 @@ def test_run_uses_streaming_only_with_on_event(cfg, monkeypatch):
     # claude_args now request stream-json; the runner streams only when given a hook
     bin_, args = cfg.cli_for("claude")
     assert "stream-json" in args and "--verbose" in args
+
+
+# -- sequential default (revert: parallel raced the shared .git registry) --
+
+
+def test_max_parallel_defaults_to_sequential(tmp_path):
+    assert ConductorConfig(repo_root=tmp_path).max_parallel == 1
+
+
+def test_from_env_max_parallel_defaults_to_one(tmp_path, monkeypatch):
+    monkeypatch.delenv("WCA_CONDUCTOR_MAX_PARALLEL", raising=False)
+    assert ConductorConfig.from_env(tmp_path).max_parallel == 1
+
+
+def test_env_can_still_opt_into_a_swarm(tmp_path, monkeypatch):
+    monkeypatch.setenv("WCA_CONDUCTOR_MAX_PARALLEL", "6")
+    assert ConductorConfig.from_env(tmp_path).max_parallel == 6
+
+
+# -- leading-dash prompt safety (regression: task starting with '-') -------
+
+
+def test_claude_prompt_after_double_dash_survives_leading_dash(cfg, monkeypatch):
+    fake = make_fake_run()
+    monkeypatch.setattr(runner, "_run", fake)
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    runner.run_agent(cfg, "claude", "- send a message when done", Path("/tmp/wt"))
+    cmd = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")][0]
+    assert "--" in cmd, "option parsing must be terminated before the prompt"
+    assert cmd.index("--") < cmd.index("- send a message when done")
+    assert cmd[-1] == "- send a message when done"  # prompt is the final operand
+
+
+def test_codex_prompt_after_double_dash(cfg, monkeypatch):
+    fake = make_fake_run()
+    monkeypatch.setattr(runner, "_run", fake)
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    runner.run_agent(cfg, "codex", "-x leading dash", Path("/tmp/wt"))
+    cmd = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")][0]
+    assert "exec" in cmd and "--sandbox" in cmd
+    assert "--" in cmd and cmd[-1] == "-x leading dash"
+
+
+# -- pasted-screenshot end-to-end (image paste) ----------------------------
+
+
+def test_stage_images_copies_and_returns_relative_paths(tmp_path):
+    wt = tmp_path / "wt"
+    wt.mkdir()
+    a = tmp_path / "a.png"
+    a.write_bytes(b"PNGA")
+    b = tmp_path / "b.jpg"
+    b.write_bytes(b"JPGB")
+    rels = runner.stage_images(wt, [str(a), str(b), str(tmp_path / "missing.png")])
+    assert rels == [".conductor_inbox/01.png", ".conductor_inbox/02.jpg"]
+    assert (wt / ".conductor_inbox" / "01.png").read_bytes() == b"PNGA"
+
+
+def test_augment_task_with_images_mentions_paths():
+    out = runner.augment_task_with_images("fix the bug", [".conductor_inbox/01.png"])
+    assert "fix the bug" in out
+    assert ".conductor_inbox/01.png" in out
+    assert "Read" in out
+    # no images -> unchanged
+    assert runner.augment_task_with_images("x", []) == "x"
+
+
+def test_run_task_stages_images_into_prompt_and_cleans_up(cfg, monkeypatch, tmp_path):
+    fake = make_fake_run()
+    monkeypatch.setattr(runner, "_run", fake)
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    img = tmp_path / "shot.png"
+    img.write_bytes(b"\x89PNG\r\n\x1a\nFAKE")
+    rec = _record()
+    rec.images = [str(img)]
+    runner.run_task(cfg, rec)
+    assert rec.status == TaskStatus.DONE.value
+    # the agent's prompt pointed at the staged screenshot...
+    cmd = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")][0]
+    assert ".conductor_inbox/01.png" in cmd[-1]
+    # ...but the inbox is gone before commit, so it never reaches the PR.
+    assert not (Path(rec.worktree_path) / ".conductor_inbox").exists()
+
+
+def test_run_task_without_images_leaves_prompt_unchanged(cfg, monkeypatch):
+    fake = make_fake_run()
+    monkeypatch.setattr(runner, "_run", fake)
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    rec = _record(task="just do the thing")
+    runner.run_task(cfg, rec)
+    cmd = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")][0]
+    assert cmd[-1] == "just do the thing"  # no screenshot note appended
+
+
+def test_submit_threads_images_onto_record(tmp_path, monkeypatch):
+    captured = {}
+
+    def fake_run_task(cfg, record, notify=None):
+        captured["images"] = list(record.images)
+        record.status = TaskStatus.DONE.value
+        record.finished_at = 1.0
+        return record
+
+    monkeypatch.setattr(runner, "run_task", fake_run_task)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    rec = mgr.submit("claude", "debug this", images=["/tmp/shot.png"])
+    mgr._futures[rec.id].result(timeout=10)
+    assert rec.images == ["/tmp/shot.png"]
+    assert captured["images"] == ["/tmp/shot.png"]
+
+
+def test_submit_auto_threads_images_onto_record(tmp_path, monkeypatch):
+    captured = {}
+
+    def fake_run_task(cfg, record, notify=None):
+        captured["images"] = list(record.images)
+        record.status = TaskStatus.DONE.value
+        record.finished_at = 1.0
+        return record
+
+    monkeypatch.setattr(runner, "run_task", fake_run_task)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    rec = mgr.submit_auto("look at this screenshot", images=["/tmp/x.png"])
+    mgr._futures[rec.id].result(timeout=10)
+    assert captured["images"] == ["/tmp/x.png"]
+
+
+def test_ensure_inbox_excluded_writes_git_info_exclude(tmp_path):
+    # real git repo so rev-parse --git-common-dir resolves
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    cfg = ConductorConfig(repo_root=tmp_path)
+    runner._ensure_inbox_excluded(cfg)
+    excl = (tmp_path / ".git" / "info" / "exclude")
+    assert excl.exists()
+    assert ".conductor_inbox/" in excl.read_text()
+    # idempotent: a second call doesn't duplicate the entry
+    runner._ensure_inbox_excluded(cfg)
+    assert excl.read_text().count(".conductor_inbox/") == 1
+
+
+def test_retry_preserves_images(tmp_path, monkeypatch):
+    def fail_run_task(cfg, record, notify=None):
+        record.status = TaskStatus.FAILED.value
+        record.error = "boom"
+        record.finished_at = 1.0
+        return record
+
+    monkeypatch.setattr(runner, "run_task", fail_run_task)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    rec = mgr.submit("claude", "debug this", images=["/tmp/a.png"])
+    mgr._futures[rec.id].result(timeout=10)
+    retried = mgr.retry(rec.id)
+    assert retried.id != rec.id
+    assert retried.images == ["/tmp/a.png"]
+    mgr._futures[retried.id].result(timeout=10)
