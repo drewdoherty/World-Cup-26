@@ -111,36 +111,126 @@ def _feed_generated(path: str) -> Optional[str]:
         return None
     return None
 
-HELP_TEXT = (
-    "*World Cup Alpha* — manager console\n\n"
-    "/summary — portfolio P&L, ROI, CLV, bankroll by pool\n"
-    "/bets — open bets, stakes, max win / max loss by venue\n"
-    "/clv — closing-line-value report\n"
-    "/card — today's recommended bet card\n"
-    "/next — next match preview: winner, corners, scorers, scorelines\n"
-    "/goalscorers — anytime + first-goalscorer recs, next 5 games\n"
-    "/scores — predicted FT scorelines per fixture\n"
-    "/accas — 4+ leg accumulators (next 5 matches, min 2.0 odds per leg)\n"
-    "/structure — project structure metrics\n"
-    "/pm — Polymarket parked orders + trader status\n"
-    "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
-    "/boost — price a bookmaker price-boost vs the model (usage below)\n"
-    "/ping — liveness check\n"
-    "/help — this message\n\n"
-    "\U0001F4F8 Send a betslip *screenshot* and I'll parse the selections, then "
-    "log them to the ledger once you reply `yes`.\n"
-    "Tag the photo caption (or yes-reply) to set provenance: `a2` (account 2), "
-    "`offer`, `punt`, `model` — default is account 1 / model.\n"
-    "⚡ Caption a screenshot with `boost` and I'll read the enhanced price "
-    "and tell you if it beats the model's fair odds (no ledger write).\n"
-    "⚡ Or type it: "
-    "`/boost <site> | <match> | <market> | <selection> | <odds> [was <odds>] [inplay]`\n"
-    "e.g. `/boost bet365 | Brazil vs Morocco | Match Result | Brazil | 2.5 was 1.8`\n"
-    "Confirm a pushed bet with `Y BET-<id>`, decline with `N BET-<id>`.\n"
-    "Execute a parked Polymarket order with `Y PM-<n>`, discard with `N PM-<n>`.\n"
-    "Unfilled PM orders auto-redeem after 24h; `REDEEM ALL` or `REDEEM <order-id>` "
-    "cancels them now and frees the pUSD."
+try:
+    from zoneinfo import ZoneInfo
+    _UK_TZ = ZoneInfo("Europe/London")
+except Exception:  # pragma: no cover
+    _UK_TZ = None
+
+
+def _parse_utc(ts: Optional[str]):
+    """Parse a UTC timestamp ('Y-m-dTH:M:S', or 'Y-m-d H:M:S UTC') → aware UTC."""
+    if not ts:
+        return None
+    s = ts.strip().replace(" UTC", "").replace("Z", "")
+    try:
+        dt = datetime.fromisoformat(s)
+    except ValueError:
+        return None
+    return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt.astimezone(timezone.utc)
+
+
+def _uk_refresh_header(*timestamps: Optional[str]) -> str:
+    """A single decluttered 'data as of HH:MM <UK tz>' header (nearest minute).
+
+    Sources pull at slightly different times; show the OLDEST converted to UK
+    time so the header never overstates freshness. BST/GMT picked automatically.
+    """
+    parsed = [d for d in (_parse_utc(t) for t in timestamps) if d is not None]
+    if not parsed:
+        return ""
+    oldest = min(parsed)
+    if _UK_TZ is not None:
+        local = oldest.astimezone(_UK_TZ)
+        return "🕒 _data as of %s %s_" % (local.strftime("%H:%M"), local.strftime("%Z"))
+    return "🕒 _data as of %s UTC_" % oldest.strftime("%H:%M")
+
+
+def _cards_line(line: float = 3.5) -> str:
+    """Model (base-rate) total-cards O/U. No card market is ingested, so this is
+    the CardsModel prior — labelled as such, not a market price."""
+    try:
+        from wca.models.props import CardsModel
+        cm = CardsModel()
+        p_over = cm.prob_over(line)
+        mu = cm.mean_total()
+    except Exception:
+        return ""
+    return ("*Cards* (model, base rate, exp %.1f)\n  O/U %.1f: over %s%% / under %s%%"
+            % (mu, line, _fmt_prob(p_over), _fmt_prob(1.0 - p_over)))
+
+
+def handle_game(next_path: str = NEXT_PATH, now_utc: Optional[str] = None) -> str:
+    """Consolidated current/next-game panel: winner · scorelines · corners ·
+    cards · scorers, with a UK-time refresh header on top.
+
+    Reads the cached next-match preview (which already carries winner / corners /
+    scorelines / anytime scorers) and appends a model cards line. The bot has no
+    live in-play feed, so this is the upcoming fixture's model view.
+    """
+    if now_utc is None:
+        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    cached = cardcache.read_card(next_path, now_utc=now_utc, max_age_hours=CARD_MAX_AGE_HOURS)
+    if cached is None:
+        return ("⚽ *Current / next game*\nNo preview cached yet — the cron build "
+                "(`scripts/wca_build_card.py`) writes it here.")
+    generated = cached.get("generated")
+    body = (cached.get("text") or "(empty preview)").rstrip()
+    parts = []
+    head = _uk_refresh_header(generated)
+    if head:
+        parts.append(head)
+    banner = _stale_banner(generated, now_utc, CARD_MAX_AGE_HOURS, label="game")
+    if banner:
+        parts.append(banner.rstrip())
+    parts.append(body)
+    cards = _cards_line()
+    if cards:
+        parts.append(cards)
+    return "\n\n".join(parts)
+
+
+# Single source of truth for the command set: drives BOTH /help and the
+# Telegram "/" command menu (setMyCommands). (command, description, admin_only).
+COMMANDS = [
+    ("game", "Current/next game: winner · scorelines · corners · cards · scorers", False),
+    ("card", "Today's recommended bet card", False),
+    ("scores", "Predicted FT scorelines, all fixtures", False),
+    ("goalscorers", "Anytime + first-goalscorer picks, next 5 games", False),
+    ("summary", "Portfolio P&L, ROI, CLV, bankroll by pool", False),
+    ("bets", "Open bets, stakes, max win / max loss by venue", False),
+    ("clv", "Closing-line-value report", False),
+    ("pm", "Polymarket parked orders + trader status", False),
+    ("boost", "Price a bookmaker price-boost vs the model", False),
+    ("ping", "Liveness check", False),
+    ("help", "Show this command list", False),
+]
+
+_HELP_FOOTER = (
+    "\n\U0001F4F8 Send a betslip *screenshot* and I'll parse the selections, then "
+    "log them once you reply `yes` (caption `a2`/`offer`/`punt`/`model` to tag "
+    "provenance).\n"
+    "⚡ Caption a screenshot `boost`, or type "
+    "`/boost <site> | <match> | <market> | <selection> | <odds> [was <odds>] [inplay]`, "
+    "and I'll say if it beats the model's fair odds.\n"
+    "Confirm a pushed bet with `Y BET-<id>`; execute a parked PM order with "
+    "`Y PM-<n>`; `REDEEM ALL` / `REDEEM <id>` frees unfilled PM orders."
 )
+
+
+def _build_help_text() -> str:
+    lines = ["*World Cup Alpha* — manager console\n"]
+    for cmd, desc, admin in COMMANDS:
+        lines.append("/%s — %s%s" % (cmd, desc, " _(admin)_" if admin else ""))
+    return "\n".join(lines) + "\n" + _HELP_FOOTER
+
+
+def command_menu() -> list:
+    """Non-admin commands for the Telegram '/' menu (setMyCommands payload)."""
+    return [{"command": c, "description": d} for c, d, admin in COMMANDS if not admin]
+
+
+HELP_TEXT = _build_help_text()
 
 
 def _authorized(chat_id: int | str, allowed: Optional[str]) -> bool:
@@ -531,12 +621,12 @@ def handle_card(
             "fits the models, pulls live odds and writes the card here."
         )
     header = "*Today's card*"
-    if cached.get("generated"):
-        header += " — generated %s UTC" % cached["generated"]
-        if cached.get("stale"):
-            header += "  ⚠️ STALE"
+    if cached.get("stale"):
+        header += "  ⚠️ STALE"
+    refresh = _uk_refresh_header(cached.get("generated"))
     body = cached.get("text") or "(empty card)"
-    return header + "\n\n" + body
+    top = (refresh + "\n" + header) if refresh else header
+    return top + "\n\n" + body
 
 
 def handle_scores(
@@ -574,7 +664,8 @@ def handle_scores(
             "The build may not have included scoreline predictions."
         )
 
-    header = "⚽ *Predicted scores* — %s" % generated if generated else "⚽ *Predicted scores*"
+    refresh = _uk_refresh_header(generated)
+    header = (refresh + "\n⚽ *Predicted scores*") if refresh else "⚽ *Predicted scores*"
 
     banner = _stale_banner(generated, now_utc, CARD_MAX_AGE_HOURS, label="card")
     lines = [banner + header if banner else header, ""]
@@ -2039,20 +2130,14 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_clv(db_path)
     if cmd == "/card":
         return handle_card(db_path)
-    if cmd == "/next":
-        return handle_next(next_path=NEXT_PATH)
+    if cmd in {"/game", "/next"}:  # /next kept as an alias for the richer panel
+        return handle_game(next_path=NEXT_PATH)
     if cmd == "/goalscorers":
         return handle_goalscorers(goalscorers_path=GOALSCORERS_PATH)
     if cmd == "/scores":
         return handle_scores(card_path=CARD_PATH)
-    if cmd == "/accas":
-        return handle_accas()
-    if cmd == "/structure":
-        return handle_structure()
     if cmd == "/pm":
         return handle_pm(db_path)
-    if cmd == "/settle":
-        return handle_settle(text, db_path)
     if cmd == "/boost":
         return handle_boost(text)
     if cmd == "/ping":
@@ -2081,6 +2166,13 @@ def run(
         print("Admin gate active: money actions restricted to user %s" % admin)
     else:
         print("WARNING: TELEGRAM_ADMIN_USER_ID unset — all chat members can confirm orders.")
+
+    # Register the BotFather-style "/" command menu (best-effort; never fatal).
+    try:
+        client.set_my_commands(command_menu())
+        print("Command menu registered (%d commands)." % len(command_menu()))
+    except Exception as exc:  # noqa: BLE001
+        print("WARNING: could not set command menu: %s" % exc)
 
     print("World Cup Alpha bot started. Polling...")
     offset: Optional[int] = None

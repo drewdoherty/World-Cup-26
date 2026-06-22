@@ -354,9 +354,12 @@ class TestFormatAndBot:
         from wca.bot import app as bot_app
 
         path = str(tmp_path / "next_latest.md")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write("<!-- generated: 2026-06-11T12:00:00 -->\n*Belgium vs Iran* — Next match\n")
         monkeypatch.setattr(bot_app, "NEXT_PATH", path)
+        # /next is now an alias for the consolidated /game panel.
         reply = bot_app.dispatch("/next", db_path=str(tmp_path / "wca.db"))
-        assert "Next match" in reply
+        assert "Belgium vs Iran" in reply
 
 
 # ---------------------------------------------------------------------------

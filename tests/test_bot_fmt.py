@@ -237,7 +237,9 @@ class TestScoresFormat:
     def test_title_includes_timestamp(self, tmp_path):
         path = _write_card(str(tmp_path), ts="2026-06-11T12:00:00")
         out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
-        assert "2026-06-11T12:00:00" in out
+        # Timestamp is now a UK-time refresh header (12:00Z → 13:00 BST in June).
+        assert "data as of" in out
+        assert ("13:00" in out) or ("12:00" in out)
 
     def test_blank_line_between_fixtures(self, tmp_path):
         path = _write_card(str(tmp_path))

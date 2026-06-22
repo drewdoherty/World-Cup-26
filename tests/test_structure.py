@@ -90,15 +90,19 @@ def test_history_replaces_same_day_row(tmp_path):
     assert "xychart-beta" not in block
 
 
-def test_bot_structure_dispatch_returns_text(tmp_path):
-    from wca.bot.app import dispatch, handle_structure
+def test_structure_command_is_scrapped(tmp_path):
+    # /structure was scrapped from the bot UI: not dispatched, not advertised.
+    from wca.bot.app import dispatch, HELP_TEXT
 
     reply = dispatch("/structure", db_path=":memory:")
-    assert isinstance(reply, str)
-    assert reply.strip()
+    assert "Unknown command" in reply
+    assert "/structure" not in HELP_TEXT
 
-    # With an explicit docs dir containing a snapshot, the reply carries the
-    # metrics table but not the Mermaid chart.
+
+def test_handle_structure_helper_still_parses_metrics(tmp_path):
+    # The underlying helper is retained (unrouted); it still strips the chart.
+    from wca.bot.app import handle_structure
+
     docs = tmp_path / "arch"
     docs.mkdir()
     (docs / "structure_2026-06-11.md").write_text(
@@ -110,10 +114,4 @@ def test_bot_structure_dispatch_returns_text(tmp_path):
     reply = handle_structure(docs_dir=str(docs))
     assert "2026-06-11" in reply
     assert "| Modules | 15 |" in reply
-    assert "Complexity" not in reply
-    assert "mermaid" not in reply
-    assert "flowchart" not in reply
-
-    # HELP_TEXT advertises the command.
-    from wca.bot.app import HELP_TEXT
-    assert "/structure" in HELP_TEXT
+    assert "mermaid" not in reply and "flowchart" not in reply

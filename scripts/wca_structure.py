@@ -166,12 +166,13 @@ def compute_metrics(root=ROOT):
         with open(p, "r", encoding="utf-8", errors="replace") as fh:
             model_classes += len(re.findall(r"^class \w+", fh.read(), re.M))
 
-    # Bot commands: parse HELP_TEXT entries ("/cmd — ...") in bot/app.py.
+    # Bot commands: count the COMMANDS registry tuples in bot/app.py
+    # (e.g. ("game", "...", False)) — the single source of truth for the menu.
     bot_commands = 0
     app_path = os.path.join(root, "src/wca/bot/app.py")
     if os.path.isfile(app_path):
         with open(app_path, "r", encoding="utf-8", errors="replace") as fh:
-            bot_commands = len(set(re.findall(r'"/(\w+) ', fh.read())))
+            bot_commands = len(set(re.findall(r'\("(\w+)", "[^"]*", (?:True|False)\)', fh.read())))
 
     metrics = {
         "modules": len(modules),

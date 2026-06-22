@@ -139,7 +139,9 @@ def test_handle_card_reads_cache(tmp_path):
     path = str(tmp_path / "card.md")
     cardcache.write_card("PICKS HERE", path, ts_utc="2026-06-11T12:00:00")
     out = app.handle_card("x.db", card_path=path, now_utc="2026-06-11T13:00:00")
-    assert "PICKS HERE" in out and "generated 2026-06-11T12:00:00" in out
+    # Timestamp now shown as a UK-time refresh header (12:00Z → 13:00 BST).
+    assert "PICKS HERE" in out and "data as of" in out
+    assert ("13:00" in out) or ("12:00" in out)
     assert "STALE" not in out
 
 

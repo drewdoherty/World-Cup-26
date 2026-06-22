@@ -154,6 +154,18 @@ class TelegramClient:
         file_info = self.get_file(file_id)
         return self.download_file(file_info["file_path"])
 
+    # -- command menu ------------------------------------------------------
+
+    def set_my_commands(self, commands: List[Dict[str, str]]) -> Any:
+        """Register the bot's slash-command menu (the BotFather '/' panel).
+
+        *commands* is a list of ``{"command": "...", "description": "..."}``
+        dicts (command without the leading slash). Telegram shows these as the
+        autocomplete menu next to the input box. Idempotent — safe to call on
+        every startup.
+        """
+        return self._call("setMyCommands", {"commands": commands})
+
     # -- receiving ---------------------------------------------------------
 
     def get_updates(
