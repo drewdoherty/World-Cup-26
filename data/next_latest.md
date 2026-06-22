@@ -1,18 +1,23 @@
-<!-- generated: 2026-06-21T11:59:45 -->
-⚽ *Next match* — Spain vs Saudi Arabia
-Kickoff 2026-06-21 16:00:00+00:00
+<!-- generated: 2026-06-22T04:02:11 -->
+⚽ *Next match* — Argentina vs Austria
+Kickoff 2026-06-22 17:00:00+00:00
 
 *Winner* (model blend)
-  Spain           86.6%  fair 1.16  best 1.12 (betfair_ex_uk) -3.0%
-  Draw             9.7%  fair 10.28  best 13.00 (betfair_ex_uk) +26.5% ✅  £8.29
-  Saudi Arabia     3.7%  fair 27.02  best 29.00 (betvictor) +7.3% ✅  £0.98
+  Argentina       65.1%  fair 1.54  best 1.53 (betway) -0.4%
+  Draw            22.4%  fair 4.46  best 4.40 (betfair_ex_uk) -1.3%
+  Austria         12.5%  fair 8.02  best 8.20 (betfair_ex_uk) +2.3% ✅  £1.18
   _stake = ¼-Kelly @ £1500 bankroll (+EV picks)_
 
-*Corners* (model, exp 8.8)
-  O/U 8.5: over 50.9% / under 49.1%  fair 1.96 / 2.04
+*Corners* (model, exp 8.4)
+  O/U 8.5: over 46.1% / under 53.9%  fair 2.17 / 1.86
 
-*Top goalscorers* — no scorer market available yet.
+*Anytime scorer* (best book price, vig in)
+  Lionel Messi        2.10 (Betfair)  imp 48%
+  Lautaro Martinez    2.52 (Betfair)  imp 40%
+  Jose Manuel Albert  2.60 (William Hill)  imp 38%
+  Julian Alvarez      2.60 (Betfair)  imp 38%
+  Giuliano Simeone    3.70 (William Hill)  imp 27%
 
 *Scorelines* (top 6)
-2-0 18.1% | 1-0 14.9% | 3-0 14.3% | 4-0 8.5% | 2-1 8.1% | 3-1 6.4%
-  O/U 2.5: over 56.4% / under 43.6%   BTTS 31.3%
+1-0 15.6% | 2-0 14.0% | 1-1 10.3% | 2-1 9.7% | 0-0 8.8% | 3-0 8.1%
+  O/U 2.5: over 44.3% / under 55.7%   BTTS 40.9%
