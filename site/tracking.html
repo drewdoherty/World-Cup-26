@@ -6,128 +6,14 @@
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="dark">
 <title>WORLD CUP ALPHA // TRACKING</title>
+<meta http-equiv="refresh" content="0; url=./index.html">
+<link rel="canonical" href="./index.html">
 <link rel="stylesheet" href="./style.css">
+<script>location.replace("./index.html");</script>
 </head>
 <body>
-<div id="app">
-  <!-- Ticker bar -->
-  <header class="ticker" id="ticker">
-    <div class="brand">
-      <span class="brand-mark">WCA</span>
-      <span class="brand-sub">WORLD CUP ALPHA</span>
-    </div>
-    <nav class="scores-nav">
-      <a class="scores-nav-link" href="./index.html">&larr; Terminal</a>
-      <a class="scores-nav-link" href="./scores.html">Scores &amp; Markets</a>
-      <a class="scores-nav-link" href="./architecture.html">Under The Hood</a>
-      <a class="scores-nav-link" href="./visuals.html">Visuals</a>
-      <a class="scores-nav-link" href="./promos.html">Promos &amp; Offers</a>
-      <span class="scores-nav-here">Tracking</span>
-    </nav>
-  </header>
-
-  <!-- Connection / no-data banner -->
-  <div class="nodata" id="nodata" hidden>
-    <span class="nodata-dot"></span>
-    <span id="nodata-msg">NO DATA FEED</span>
-  </div>
-
-  <main>
-    <!-- Headline stats -->
-    <section class="panel" style="margin-top:14px">
-      <div class="panel-head">
-        <span class="panel-label">Prediction Tracking // Model vs Reality</span>
-        <span class="panel-meta" id="stats-meta"></span>
-      </div>
-      <div class="track-stats" id="stats"></div>
-    </section>
-
-    <!-- Chart 1: model vs market on the actual outcome -->
-    <section class="panel">
-      <div class="panel-head">
-        <span class="panel-label">01 // Model vs Market On The Actual Outcome</span>
-        <span class="panel-meta">edge by Match No. &mdash; bar up/green = model beat the close; hover for standings &amp; scorelines</span>
-      </div>
-      <div class="panel-body" id="outcome-bars"></div>
-    </section>
-
-    <!-- Chart 2: prediction scoreboard -->
-    <section class="panel">
-      <div class="panel-head">
-        <span class="panel-label">02 // Prediction Scoreboard</span>
-        <span class="panel-meta" id="board-meta"></span>
-      </div>
-      <div class="panel-body panel-scroll" id="scoreboard"></div>
-    </section>
-
-    <!-- Charts 3 + 4 -->
-    <div class="track-grid">
-      <section class="panel">
-        <div class="panel-head">
-          <span class="panel-label">03 // Calibration (1X2 Legs)</span>
-          <span class="panel-meta">bins come later as N grows</span>
-        </div>
-        <div class="panel-body" id="calibration"></div>
-      </section>
-      <section class="panel">
-        <div class="panel-head">
-          <span class="panel-label">04 // CLV vs P/L (Settled Bets)</span>
-          <span class="panel-meta" id="clv-meta"></span>
-        </div>
-        <div class="panel-body" id="clv-pl"></div>
-      </section>
-    </div>
-
-    <!-- 05 // P&L by bet: model +EV/-EV facets + by-source dropdown -->
-    <section class="panel">
-      <div class="panel-head">
-        <span class="panel-label">05 // P&amp;L by Bet — Model EV &amp; by Source</span>
-        <span class="panel-meta" id="betpnl-meta"></span>
-      </div>
-      <div class="panel-body" id="betpnl"></div>
-    </section>
-
-    <!-- 06 // Return per unit staked over time (sportsbook £ / Polymarket $) -->
-    <section class="panel">
-      <div class="panel-head">
-        <span class="panel-label">06 // Return per &pound;1 / $1 Staked</span>
-        <span class="panel-meta" id="retunit-meta"></span>
-      </div>
-      <div class="panel-body" id="retunit"></div>
-    </section>
-
-    <!-- 07 // Realized conviction: cumulative model edge on actual outcomes -->
-    <section class="panel">
-      <div class="panel-head">
-        <span class="panel-label">07 // Realized Conviction vs The Market</span>
-        <span class="panel-meta" id="conviction-meta"></span>
-      </div>
-      <div class="panel-body" id="conviction"></div>
-    </section>
-
-    <!-- Pending fixtures -->
-    <section class="panel">
-      <div class="panel-head">
-        <span class="panel-label">On The Board // Awaiting Results</span>
-        <span class="panel-meta" id="pending-meta"></span>
-      </div>
-      <div class="panel-body panel-scroll" id="pending"></div>
-    </section>
-
-    <div class="track-note">
-      Pre-match predictions reconstructed from daily card history; results updated
-      as matches settle. Model 1X2 uses the exact blended triple persisted at
-      card-build time where available (from 13 Jun); earlier fixtures are
-      approximate (rebuilt from the top-6 scoreline ladder). Market 1X2 is the
-      de-vigged consensus at the last odds capture before kickoff.
-    </div>
-  </main>
-
-  <footer class="foot">
-    <span class="foot-gen" id="foot-gen"></span>
-    <span class="foot-mark">WORLD CUP ALPHA</span>
-  </footer>
-</div>
-<script src="./tracking.js"></script>
+<p style="padding:24px;font-family:monospace;color:#3fe08a">
+  Tracking has moved into the <a href="./index.html" style="color:#3fe08a">Terminal</a>&hellip;
+</p>
 </body>
 </html>
