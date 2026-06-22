@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-21 11:35:10 UTC"
+    "generated": "2026-06-22 12:00:00 UTC"
   },
   "sites": [
     {
@@ -124,10 +124,32 @@
       "kind": "book",
       "scrape": {
         "status": "ok",
-        "last_seen": "2026-06-21T11:35:01"
+        "last_seen": "2026-06-22T11:55:02"
       },
-      "ongoing": [],
-      "boosts": []
+      "ongoing": [
+        {
+          "title": "Price Promise",
+          "description": "If a price you back pre-match shortens before kick-off, Virgin Bet pays out at the best (longest) price. Applies to single, fixed-odds bets on football match markets.",
+          "url": ""
+        },
+        {
+          "title": "Acca Insurance (5+ legs)",
+          "description": "One leg of your 5+ selection acca lets you down? Get a free bet refund up to £10. Qualifying acca must be at minimum odds of 1/2 (1.50) per leg.",
+          "url": ""
+        }
+      ],
+      "boosts": [
+        {
+          "title": "Argentina Enhanced — Match Result",
+          "description": "Argentina to beat Austria BOOSTED to 1.80 (was 1.55). Max stake £10 at enhanced price. Argentina vs Austria, today.",
+          "url": ""
+        },
+        {
+          "title": "Belgium vs Iran Over 2.5 Goals Boost",
+          "description": "Over 2.5 Goals BOOSTED to 1.75 (was 1.67). Max stake £10.",
+          "url": ""
+        }
+      ]
     },
     {
       "name": "William Hill",
@@ -196,10 +218,37 @@
       "kind": "book",
       "scrape": {
         "status": "blocked",
-        "last_seen": "2026-06-21T11:35:01"
+        "last_seen": "2026-06-22T11:55:02"
       },
-      "ongoing": [],
-      "boosts": []
+      "ongoing": [
+        {
+          "title": "Multiples Profit Boost — up to 70%",
+          "description": "Accumulator / multi-selection profit boost on WC26 matches: 3 legs=10%, 4=20%, 5=30%, 6=40%, 7=50%, 8+=70%. Each leg must be min 1/5 (1.20). Max bonus £500 per bet. Applies to pre-match, fixed-odds multiples.",
+          "url": ""
+        },
+        {
+          "title": "2 Goals Up — Early Payout",
+          "description": "Back a team to win in 90 minutes; if they go 2 goals ahead at any point, bet settles as a winner. Applies to single match-result bets. No additional opt-in needed.",
+          "url": ""
+        }
+      ],
+      "boosts": [
+        {
+          "title": "Spain Price Boost — Match Result",
+          "description": "Spain to beat Saudi Arabia BOOSTED to 1.33 (was 1.07). Max stake £25 at enhanced price. Spain vs Saudi Arabia, today.",
+          "url": ""
+        },
+        {
+          "title": "Spain Over 2.5 Goals Boost",
+          "description": "Over 2.5 Goals — Spain vs Saudi Arabia BOOSTED to 1.90 (was 1.75). Max stake £10.",
+          "url": ""
+        },
+        {
+          "title": "Belgium Price Boost — Match Result",
+          "description": "Belgium to beat Iran BOOSTED to 2.00 (was 1.65). Max stake £10 at enhanced price. Belgium vs Iran, today.",
+          "url": ""
+        }
+      ]
     },
     {
       "name": "Smarkets",
@@ -369,7 +418,99 @@
       "why": "flagged in recon as a check-the-app / no-standing-promo note"
     }
   ],
-  "boost_evals": [],
+  "boost_evals": [
+    {
+      "ts": "2026-06-22T11:55:00",
+      "site": "Betfair Sportsbook",
+      "fixture": "Belgium vs Iran",
+      "market": "Match Result",
+      "selection": "Belgium",
+      "boosted_odds": 2.00,
+      "model_prob": 0.610,
+      "fair_odds": 1.6393,
+      "edge": 0.220,
+      "is_plus_ev": true,
+      "source": "manual:beteval"
+    },
+    {
+      "ts": "2026-06-22T11:30:00",
+      "site": "Betfair Sportsbook",
+      "fixture": "Argentina vs Austria",
+      "market": "Both Teams to Score",
+      "selection": "Yes",
+      "boosted_odds": 2.25,
+      "model_prob": 0.414,
+      "fair_odds": 2.4155,
+      "edge": -0.0685,
+      "is_plus_ev": false,
+      "source": "manual:beteval"
+    },
+    {
+      "ts": "2026-06-22T10:59:00",
+      "site": "Virgin Bet",
+      "fixture": "Belgium vs Iran",
+      "market": "Total Goals Over/Under",
+      "selection": "Over 2.5",
+      "boosted_odds": 1.75,
+      "model_prob": 0.426,
+      "fair_odds": 2.3474,
+      "edge": -0.2545,
+      "is_plus_ev": false,
+      "source": "manual:beteval"
+    },
+    {
+      "ts": "2026-06-22T10:28:00",
+      "site": "Bet365",
+      "fixture": "Uruguay vs Cape Verde",
+      "market": "Match Result",
+      "selection": "Uruguay",
+      "boosted_odds": 1.83,
+      "model_prob": 0.6672,
+      "fair_odds": 1.4987,
+      "edge": 0.2210,
+      "is_plus_ev": true,
+      "source": "manual:beteval"
+    },
+    {
+      "ts": "2026-06-22T09:55:00",
+      "site": "Virgin Bet",
+      "fixture": "Argentina vs Austria",
+      "market": "Match Result",
+      "selection": "Argentina",
+      "boosted_odds": 1.80,
+      "model_prob": 0.6372,
+      "fair_odds": 1.5693,
+      "edge": 0.1470,
+      "is_plus_ev": true,
+      "source": "manual:beteval"
+    },
+    {
+      "ts": "2026-06-22T09:31:00",
+      "site": "Betfair Sportsbook",
+      "fixture": "Spain vs Saudi Arabia",
+      "market": "Total Goals Over/Under",
+      "selection": "Over 2.5",
+      "boosted_odds": 1.90,
+      "model_prob": 0.564,
+      "fair_odds": 1.7730,
+      "edge": 0.0716,
+      "is_plus_ev": true,
+      "source": "manual:beteval"
+    },
+    {
+      "ts": "2026-06-22T08:28:00",
+      "site": "Bet365",
+      "fixture": "Spain vs Saudi Arabia",
+      "market": "Match Result",
+      "selection": "Spain",
+      "boosted_odds": 1.33,
+      "model_prob": 0.8657,
+      "fair_odds": 1.1552,
+      "edge": 0.1513,
+      "is_plus_ev": true,
+      "source": "manual:beteval"
+    }
+  ],
   "scrape_health": [
     {
       "site": "Paddy Power",
@@ -393,7 +534,7 @@
       "site": "Virgin Bet",
       "status": "ok",
       "http_status": 200,
-      "last_ok_utc": "2026-06-21T11:35:01"
+      "last_ok_utc": "2026-06-22T11:55:02"
     },
     {
       "site": "William Hill",
