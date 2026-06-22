@@ -122,6 +122,7 @@ HELP_TEXT = (
     "/scores — predicted FT scorelines per fixture\n"
     "/accas — 4+ leg accumulators (next 5 matches, min 2.0 odds per leg)\n"
     "/structure — project structure metrics\n"
+    "/pick — on-demand agent analysis (usage: `/pick <Home> vs <Away>`)\n"
     "/pm — Polymarket parked orders + trader status\n"
     "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
     "/boost — price a bookmaker price-boost vs the model (usage below)\n"
@@ -1973,6 +1974,46 @@ def handle_redeem(text: str, db_path: str = "data/wca.db") -> str:
     return msg
 
 
+def handle_pick(text: str, db_path: str) -> str:
+    """Run the 8-agent pipeline on demand for one fixture.
+
+    Usage: ``/pick <Home> vs <Away>``
+    e.g.  ``/pick Netherlands vs Sweden``
+    """
+    # Strip the command prefix and extract the fixture spec.
+    parts = text.strip().split(None, 1)
+    if len(parts) < 2 or not parts[1].strip():
+        return (
+            "Usage: `/pick <Home> vs <Away>`\n"
+            "e.g. `/pick Netherlands vs Sweden`\n\n"
+            "Runs the full 8-agent analysis pipeline (data → model → edge → "
+            "adversarial review → sizing) and returns the result."
+        )
+
+    spec = parts[1].strip()
+    try:
+        from wca.agents.orchestrator import parse_fixture_spec
+
+        home, away = parse_fixture_spec(spec)
+    except ValueError as exc:
+        return "❌ %s" % exc
+
+    try:
+        from wca.agents.orchestrator import run_pipeline
+        from wca.agents.publisher import format_alert
+
+        result = run_pipeline(
+            home=home,
+            away=away,
+            db_path=db_path,
+            send_telegram=False,
+        )
+        return format_alert(result)
+    except Exception as exc:
+        logger.exception("Agent pipeline failed for %s", spec)
+        return "❌ Pipeline error: %s" % exc
+
+
 def dispatch(text: str, db_path: str) -> str:
     """Map an incoming text message to a reply."""
     confirm = handle_confirmation(text, db_path)
@@ -2006,6 +2047,8 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_accas()
     if cmd == "/structure":
         return handle_structure()
+    if cmd == "/pick":
+        return handle_pick(text, db_path)
     if cmd == "/pm":
         return handle_pm(db_path)
     if cmd == "/settle":
