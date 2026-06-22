@@ -82,10 +82,15 @@ def _help_text(manager: ConductorManager) -> str:
         "`/model` — model usage: ongoing & parked tasks by agent",
         "`/agents` — agent specs & architecture",
         "`/status` — per-task table",
+        "`/watch [id]` — LIVE: what each agent is doing right now",
+        "`/usage` — Anthropic token spend & limits (real-time)",
+        "`/prs` — open task PRs (review from your phone)",
+        "`/log <id>` — full detail of one task",
         "`/health` — live engine auth/availability",
+        "`/retry <id>` — re-run a failed task",
         "`/cancel <id>` — cancel a not-yet-started task",
         "",
-        "_PR-only · max-parallel cap · dry-run env (no live keys/ledger)._",
+        "_Parallel swarm · PR-only · dry-run env · auto-notifies on start, finish & hiccups._",
     ]
     warnings = manager.preflight()
     if warnings:
@@ -101,7 +106,10 @@ _MENU_KEYBOARD = {
         [{"text": "📊 Model usage", "callback_data": "model_usage"},
          {"text": "🤖 Agents", "callback_data": "agents"}],
         [{"text": "📋 Status", "callback_data": "status"},
-         {"text": "❤️ Health", "callback_data": "health"}],
+         {"text": "🔭 Live", "callback_data": "watch"}],
+        [{"text": "💸 Usage", "callback_data": "usage"},
+         {"text": "🔀 PRs", "callback_data": "prs"}],
+        [{"text": "❤️ Health", "callback_data": "health"}],
     ]
 }
 
@@ -113,7 +121,12 @@ _COMMANDS = [
     {"command": "model", "description": "model usage — ongoing & parked tasks"},
     {"command": "agents", "description": "agent specs & architecture"},
     {"command": "status", "description": "per-task table"},
+    {"command": "watch", "description": "live agent activity: /watch [id]"},
+    {"command": "usage", "description": "Anthropic token spend & limits"},
+    {"command": "prs", "description": "open task PRs"},
+    {"command": "log", "description": "full detail of a task: /log <id>"},
     {"command": "health", "description": "engine auth/availability"},
+    {"command": "retry", "description": "re-run a failed task: /retry <id>"},
     {"command": "cancel", "description": "cancel a queued task"},
     {"command": "help", "description": "usage + runtime checks"},
 ]
@@ -127,8 +140,14 @@ def _view(manager: ConductorManager, name: str) -> Optional[str]:
         return manager.agents_spec_table()
     if name == "status":
         return manager.status_table()
+    if name == "watch":
+        return manager.watch()
     if name == "health":
         return manager.health_table()
+    if name == "usage":
+        return manager.usage_table()
+    if name == "prs":
+        return manager.prs()
     return None
 
 
@@ -136,14 +155,19 @@ class ConductorBot:
     """Glue between Telegram long-poll and the :class:`ConductorManager`."""
 
     def __init__(self, client: TelegramClient, manager: ConductorManager,
-                 allowed: Set[str], admin: Optional[str]) -> None:
+                 allowed: Set[str], admin: Optional[str],
+                 notify_chat: Optional[str] = None) -> None:
         self.client = client
         self.manager = manager
         self.allowed = allowed
         self.admin = admin
         self._send_lock = threading.Lock()      # requests.Session isn't thread-safe
-        self._announced: Set[int] = set()
-        # Completion notifier (called from worker threads).
+        self._announced_start: Set[int] = set()
+        self._announced_done: Set[int] = set()
+        self._notify_chat = notify_chat          # proactive hiccup / health alerts
+        self._stop = threading.Event()
+        self._health_state: Dict[str, bool] = {}
+        # Per-task lifecycle notifier (called from worker threads).
         manager.notify = self._on_update
 
     # -- outbound ---------------------------------------------------------
@@ -156,15 +180,35 @@ class ConductorBot:
                 print("[conductor] send failed: %s" % exc, flush=True)
 
     def _on_update(self, record: TaskRecord) -> None:
-        """Worker-thread callback: announce each task once, when it finishes."""
-        if record.finished_at is None:
+        """Worker-thread callback: notify on START and on COMPLETION."""
+        chat = record.chat_id or self._notify_chat
+        if not chat:
             return
-        if record.id in self._announced:
+        if record.status == TaskStatus.RUNNING.value and record.id not in self._announced_start:
+            self._announced_start.add(record.id)
+            task = record.task if len(record.task) <= 60 else record.task[:57] + "..."
+            self._send(chat, "⚙️ `#%d` started on *%s*\n_%s_" % (record.id, record.engine, task))
             return
-        self._announced.add(record.id)
-        if not record.chat_id:
-            return
-        self._send(record.chat_id, self._completion_text(record))
+        if record.finished_at is not None and record.id not in self._announced_done:
+            self._announced_done.add(record.id)
+            self._send(chat, self._completion_text(record))
+
+    def _health_watch(self, interval: float = 300.0) -> None:
+        """Background watcher: alert the notify chat when an engine's health flips."""
+        while not self._stop.is_set():
+            for e in Engine:
+                ev = e.value
+                try:
+                    ok = self.manager.engine_health(ev, force=True).ok
+                    reason = self.manager.engine_health(ev).reason
+                except Exception:  # noqa: BLE001 - watcher must never die
+                    continue
+                prev = self._health_state.get(ev)
+                if prev is not None and prev != ok and self._notify_chat:
+                    badge = "🟢 recovered" if ok else "⚠️ unavailable"
+                    self._send(self._notify_chat, "%s *%s* — %s" % (badge, ev, reason))
+                self._health_state[ev] = ok
+            self._stop.wait(interval)
 
     @staticmethod
     def _completion_text(r: TaskRecord) -> str:
@@ -183,6 +227,8 @@ class ConductorBot:
             lines.append("Tokens: %d" % r.tokens)
         if r.error and r.status in {TaskStatus.FAILED.value, TaskStatus.PUSHED.value}:
             lines.append("⚠️ %s" % (r.error if len(r.error) <= 200 else r.error[:197] + "..."))
+        if r.status in {TaskStatus.FAILED.value, TaskStatus.NO_CHANGES.value}:
+            lines.append("→ `/retry %d` · `/log %d`" % (r.id, r.id))
         return "\n".join(lines)
 
     # -- inbound ----------------------------------------------------------
@@ -240,8 +286,37 @@ class ConductorBot:
             return self.manager.agents_spec_table()
         if cmd == "/status":
             return self.manager.status_table()
+        if cmd == "/watch":
+            if arg.strip():
+                try:
+                    return self.manager.watch(int(arg.strip()))
+                except ValueError:
+                    return "Usage: `/watch [id]`"
+            return self.manager.watch()
         if cmd == "/health":
             return self.manager.health_table()
+        if cmd == "/usage":
+            return self.manager.usage_table()
+        if cmd == "/prs":
+            return self.manager.prs()
+        if cmd == "/log":
+            try:
+                return self.manager.task_detail(int(arg.strip()))
+            except ValueError:
+                return "Usage: `/log <id>`"
+        if cmd == "/retry":
+            if not _is_admin(user_id, self.admin):
+                return "🚫 Not authorized."
+            try:
+                tid = int(arg.strip())
+            except ValueError:
+                return "Usage: `/retry <id>`"
+            rec = self.manager.retry(tid)
+            if rec is None:
+                return "No task `#%d`." % tid
+            if rec.id == tid:
+                return "Can't retry `#%d` (status %s — only failed / no-change tasks)." % (tid, rec.status)
+            return "🔁 retrying as `#%d` on *%s* (`%s`)." % (rec.id, rec.engine, rec.branch)
         if cmd == "/task":
             return self._dispatch_auto(arg, chat_id, user_id)
         if cmd == "/claude":
@@ -293,14 +368,23 @@ class ConductorBot:
             self.client.set_my_commands(_COMMANDS)  # populate Telegram's '/' menu
         except TelegramError as exc:
             print("[conductor] set_my_commands failed: %s" % exc, flush=True)
+        # background watcher: alerts the notify chat when an engine flips up/down
+        threading.Thread(target=self._health_watch, name="health-watch", daemon=True).start()
+        if self._notify_chat:
+            self._send(self._notify_chat, "🟢 *conductor online* — %d-way swarm. /help" % self.manager.cfg.max_parallel)
 
         offset: Optional[int] = None
         import time as _time
+        poll_fails = 0
         while True:
             try:
                 updates = self.client.get_updates(offset=offset, poll_timeout=poll_timeout)
+                poll_fails = 0
             except TelegramError as exc:
+                poll_fails += 1
                 print("[conductor] poll error: %s" % exc, flush=True)
+                if poll_fails == 3 and self._notify_chat:  # alert once on a sustained outage
+                    self._send(self._notify_chat, "⚠️ *conductor poll error* — %s" % str(exc)[:150])
                 _time.sleep(5)
                 continue
             for update in updates:
@@ -376,7 +460,9 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     allowed = {c.strip() for c in os.environ.get("TELEGRAM_CHAT_ID", "").split(",") if c.strip()}
     admin = os.environ.get("TELEGRAM_ADMIN_USER_ID") or None
-    bot = ConductorBot(client, manager, allowed, admin)
+    # proactive notifications (start/finish/hiccups) go here; default = the chat id
+    notify_chat = os.environ.get("WCA_CONDUCTOR_NOTIFY_CHAT") or (sorted(allowed)[0] if allowed else None)
+    bot = ConductorBot(client, manager, allowed, admin, notify_chat=notify_chat)
     try:
         bot.run(poll_timeout=args.poll_timeout)
     except KeyboardInterrupt:

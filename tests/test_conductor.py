@@ -41,7 +41,7 @@ def make_fake_run(
     """
     state = {"calls": [], "agent_env": None}
 
-    def fake(cmd, cwd=None, env=None, timeout=None):
+    def fake(cmd, cwd=None, env=None, timeout=None, on_event=None):
         state["calls"].append(list(cmd))
         if cmd[0] == "git":
             sub = cmd[3] if len(cmd) > 3 else ""
@@ -58,8 +58,13 @@ def make_fake_run(
             return _cp(cmd)
         if cmd[0] == "gh":
             return _cp(cmd, rc=pr_rc, out=pr_url if pr_rc == 0 else "", err="" if pr_rc == 0 else "not logged in")
-        # otherwise: the agent invocation
+        # otherwise: the agent invocation. If streaming, emit a couple of
+        # stream-json events so live-activity wiring is exercised.
         state["agent_env"] = env
+        if on_event is not None:
+            on_event({"type": "system", "subtype": "init"})
+            on_event({"type": "assistant", "message": {"content": [
+                {"type": "tool_use", "name": "Edit", "input": {"file_path": "src/wca/x.py"}}]}})
         return _cp(cmd, rc=agent_rc, out=agent_stdout, err="" if agent_rc == 0 else "boom")
 
     fake.state = state
@@ -559,3 +564,85 @@ def test_agents_spec_table_shows_specs_and_architecture(tmp_path):
     assert "disabled" in out          # codex marked disabled
     assert "workspace-write" in out   # codex args surfaced
     assert "PR-only" in out or "never commits" in out
+
+
+# -- /usage, /prs, /log, /retry, swarm cap ---------------------------------
+
+
+def test_max_parallel_defaults_to_swarm(tmp_path):
+    assert ConductorConfig(repo_root=tmp_path).max_parallel == 8
+
+
+def test_usage_table_sums_per_engine_spend(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, disabled_engines=["codex"]))
+    _stub_health(mgr, claude_ok=True, codex_ok=False)
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="t1", status=TaskStatus.DONE.value, tokens=1500)
+    mgr._records[2] = TaskRecord(id=2, engine="claude", task="t2", status=TaskStatus.RUNNING.value, tokens=300)
+    out = mgr.usage_table()
+    assert "Anthropic usage" in out and "claude" in out
+    assert "1,800" in out  # total spend, comma-grouped
+
+
+def test_prs_lists_only_linked_records(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="has pr",
+                                 status=TaskStatus.DONE.value, pr_url="https://x/pull/1")
+    mgr._records[2] = TaskRecord(id=2, engine="claude", task="no pr", status=TaskStatus.FAILED.value)
+    out = mgr.prs()
+    assert "#1" in out and "pull/1" in out and "#2" not in out
+
+
+def test_task_detail_and_retry(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="failed thing",
+                                 status=TaskStatus.FAILED.value, error="boom")
+    detail = mgr.task_detail(1)
+    assert "failed thing" in detail and "boom" in detail
+    mgr._counter = 100  # so the retry's new id doesn't collide with the seeded one
+    new = mgr.retry(1)
+    assert new.id != 1 and new.task == "failed thing"
+    # a non-retryable (DONE) task returns itself unchanged
+    mgr._records[5] = TaskRecord(id=5, engine="claude", task="done", status=TaskStatus.DONE.value)
+    assert mgr.retry(5).id == 5
+
+
+# -- live per-agent activity (streaming) -----------------------------------
+
+
+def test_activity_from_event_tool_use():
+    ev = {"type": "assistant", "message": {"content": [
+        {"type": "tool_use", "name": "Edit", "input": {"file_path": "src/a.py"}}]}}
+    act = runner._activity_from_event(ev)
+    assert act.startswith("🔧 Edit") and "src/a.py" in act
+
+
+def test_activity_from_event_text_system_result():
+    txt = runner._activity_from_event({"type": "assistant", "message": {"content": [
+        {"type": "text", "text": "Looking at the code"}]}})
+    assert txt.startswith("💬")
+    assert runner._activity_from_event({"type": "system", "subtype": "init"}) is not None
+    assert runner._activity_from_event({"type": "result"}) is None
+
+
+def test_run_task_records_live_activity(cfg, patched):
+    # the patched fake emits a tool_use event during the streamed agent run
+    rec = _record()
+    runner.run_task(cfg, rec)
+    assert "Edit" in rec.activity and rec.activity_at > 0
+
+
+def test_watch_shows_running_activity(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="t",
+                                 status=TaskStatus.RUNNING.value, activity="🔧 Edit src/x.py")
+    assert "Edit src/x.py" in mgr.watch() and "#1" in mgr.watch()
+    assert "Edit src/x.py" in mgr.watch(1)
+    assert "No task" in mgr.watch(999)
+
+
+def test_run_uses_streaming_only_with_on_event(cfg, monkeypatch):
+    # claude_args now request stream-json; the runner streams only when given a hook
+    bin_, args = cfg.cli_for("claude")
+    assert "stream-json" in args and "--verbose" in args

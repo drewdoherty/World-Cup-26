@@ -185,6 +185,21 @@ class ConductorManager:
             record.error = "cancelled before start"
         return record
 
+    _RETRYABLE = {TaskStatus.FAILED.value, TaskStatus.REJECTED.value, TaskStatus.NO_CHANGES.value}
+
+    def retry(self, task_id: int) -> Optional[TaskRecord]:
+        """Re-dispatch a finished task as a NEW record (same engine + text).
+
+        Returns None if unknown; returns the original (unchanged) if it's not in
+        a retryable state so the caller can message why.
+        """
+        old = self.get(task_id)
+        if old is None:
+            return None
+        if old.status not in self._RETRYABLE:
+            return old
+        return self.submit(old.engine, old.task, chat_id=old.chat_id)
+
     def shutdown(self) -> None:
         self._pool.shutdown(wait=False)
 
@@ -211,6 +226,84 @@ class ConductorManager:
     def get(self, task_id: int) -> Optional[TaskRecord]:
         with self._lock:
             return self._records.get(task_id)
+
+    def usage_table(self) -> str:
+        """Real-time Anthropic token spend by the conductor, per engine + limits.
+
+        Account-wide usage/limits live in the Anthropic Console (a subscription
+        OAuth token can't expose them programmatically); this shows what the
+        conductor itself has spent — what you manage the swarm against.
+        """
+        records = self.records()
+        lines = ["*Anthropic usage* — conductor spend (real-time)"]
+        total = 0
+        for e in Engine:
+            ev = e.value
+            mine = [r for r in records if r.engine == ev]
+            toks = sum(r.tokens for r in mine)
+            total += toks
+            n_run = sum(1 for r in mine if r.status == TaskStatus.RUNNING.value)
+            h = self.engine_health(ev)
+            status = "✅" if h.ok else ("🚫 " + h.reason if self.cfg.is_disabled(ev) else "❌ " + h.reason)
+            lines.append("• *%s* — %s tok · %d task(s) · %d running · %s" % (
+                ev, format(toks, ","), len(mine), n_run, status))
+        lines.append("\n*Total:* %s tokens · %d-way parallel" % (format(total, ","), self.cfg.max_parallel))
+        if self.cfg.token_budget:
+            lines.append("Budget: %s / %s" % (format(total, ","), format(self.cfg.token_budget, ",")))
+        lines.append("\n_Account-wide usage & limits: console.anthropic.com/settings/usage. "
+                     "Your subscription's rolling limit surfaces as a task error — you'll be notified._")
+        return "\n".join(lines)
+
+    def prs(self) -> str:
+        """Tasks that produced a PR / branch link — for review from the phone."""
+        recs = [r for r in self.records() if r.pr_url]
+        if not recs:
+            return "_No task PRs yet._ Dispatch one with `/claude <task>`."
+        lines = ["*Conductor — task PRs*"]
+        for r in recs:
+            label = "PR" if r.status == TaskStatus.DONE.value else "branch"
+            task = r.task if len(r.task) <= 50 else r.task[:47] + "..."
+            lines.append("`#%d` %s · [%s](%s)\n   %s" % (r.id, r.status, label, r.pr_url, task))
+        return "\n".join(lines)
+
+    def task_detail(self, task_id: int) -> str:
+        """Full detail of one task (for /log <id>)."""
+        r = self.get(task_id)
+        if r is None:
+            return "No task `#%d`." % task_id
+        lines = ["*Task #%d* — %s · %s" % (r.id, r.engine, r.status),
+                 "_%s_" % (r.task if len(r.task) <= 200 else r.task[:197] + "...")]
+        if r.route_reason:
+            lines.append("route: %s" % r.route_reason)
+        if r.branch:
+            lines.append("branch: `%s`" % r.branch)
+        if r.status == TaskStatus.RUNNING.value and r.activity:
+            lines.append("↳ now: %s" % r.activity)
+        if r.pr_url:
+            lines.append(r.pr_url)
+        if r.tokens:
+            lines.append("tokens: %d" % r.tokens)
+        if r.summary:
+            lines.append("summary: %s" % (r.summary if len(r.summary) <= 350 else r.summary[:347] + "..."))
+        if r.error:
+            lines.append("⚠️ %s" % (r.error if len(r.error) <= 350 else r.error[:347] + "..."))
+        return "\n".join(lines)
+
+    def watch(self, task_id: Optional[int] = None) -> str:
+        """Live activity: one task (`/watch <id>`) or every running task (`/watch`)."""
+        if task_id is not None:
+            r = self.get(task_id)
+            if r is None:
+                return "No task `#%d`." % task_id
+            act = r.activity or ("(no activity yet)" if r.status == TaskStatus.RUNNING.value else r.status)
+            return "🔭 *#%d* %s · %s\n↳ %s" % (r.id, r.engine, r.status, act)
+        running = [r for r in self.records() if r.status == TaskStatus.RUNNING.value]
+        if not running:
+            return "_No tasks running._"
+        lines = ["🔭 *Live activity* (%d running)" % len(running)]
+        for r in running:
+            lines.append("`#%d` %s\n   ↳ %s" % (r.id, r.engine, r.activity or "(starting…)"))
+        return "\n".join(lines)
 
     def health_table(self, force: bool = True) -> str:
         """Markdown summary of each engine's live auth/availability."""
@@ -248,6 +341,8 @@ class ConductorManager:
                 row = "   %s `#%d` %s — %s" % (icon, r.id, r.status, task)
                 if r.tokens:
                     row += " · %d tok" % r.tokens
+                if r.status == TaskStatus.RUNNING.value and r.activity:
+                    row += "\n      ↳ %s" % r.activity  # live: what the agent is doing now
                 lines.append(row)
             if not shown:
                 lines.append("   _idle_")
@@ -319,6 +414,8 @@ class ConductorManager:
             if r.tokens:
                 row += " · %d tok" % r.tokens
             row += "\n   %s" % task
+            if r.status == TaskStatus.RUNNING.value and r.activity:
+                row += "\n   ↳ %s" % r.activity  # live agent activity
             if r.pr_url:
                 label = "PR" if r.status == TaskStatus.DONE.value else "diff"
                 row += "\n   [%s](%s)" % (label, r.pr_url)

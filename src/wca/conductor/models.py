@@ -104,6 +104,8 @@ class TaskRecord:
     tokens: int = 0
     returncode: Optional[int] = None
     pr_url: Optional[str] = None
+    activity: str = ""          # live: what the agent is doing right now
+    activity_at: float = 0.0
     created_at: float = 0.0
     started_at: Optional[float] = None
     finished_at: Optional[float] = None
