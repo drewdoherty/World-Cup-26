@@ -533,3 +533,29 @@ def test_explicit_codex_reroutes_to_claude_when_disabled(tmp_path, monkeypatch):
     mgr._health["claude"] = EngineHealth("claude", True, "ok", checked_at=9e18)
     rec = mgr.submit("codex", "do a thing")
     assert rec.engine == "claude" and rec.status != TaskStatus.REJECTED.value
+
+
+# -- /model usage + /agents views ------------------------------------------
+
+
+def test_model_usage_table_groups_ongoing_and_parked_by_agent(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _stub_health(mgr, claude_ok=True, codex_ok=False)
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="build the thing", status=TaskStatus.RUNNING.value, tokens=120)
+    mgr._records[2] = TaskRecord(id=2, engine="claude", task="waiting in line", status=TaskStatus.QUEUED.value)
+    out = mgr.model_usage_table()
+    assert "Model usage" in out
+    assert "1 running" in out and "1 parked" in out
+    assert "#1" in out and "build the thing" in out
+    assert "codex" in out  # both engines listed
+
+
+def test_agents_spec_table_shows_specs_and_architecture(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, disabled_engines=["codex"]))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    out = mgr.agents_spec_table()
+    assert "Agents" in out and "Shared architecture" in out
+    assert "claude" in out and "codex" in out
+    assert "disabled" in out          # codex marked disabled
+    assert "workspace-write" in out   # codex args surfaced
+    assert "PR-only" in out or "never commits" in out

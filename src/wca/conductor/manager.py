@@ -220,6 +220,73 @@ class ConductorManager:
             lines.append("%s *%s* — %s" % ("✅" if h.ok else "❌", e.value, h.reason))
         return "\n".join(lines)
 
+    def model_usage_table(self) -> str:
+        """Per-agent view of ongoing (running) and parked (queued) tasks.
+
+        'Parked' = accepted but waiting for a worker slot (max-parallel cap).
+        """
+        records = self.records()
+        active = {TaskStatus.QUEUED.value, TaskStatus.RUNNING.value, TaskStatus.PUSHED.value}
+        lines = ["*Model usage* — ongoing & parked tasks by agent"]
+        for e in Engine:
+            ev = e.value
+            h = self.engine_health(ev)
+            mine = [r for r in records if r.engine == ev]
+            running = [r for r in mine if r.status == TaskStatus.RUNNING.value]
+            parked = [r for r in mine if r.status == TaskStatus.QUEUED.value]
+            pushed = [r for r in mine if r.status == TaskStatus.PUSHED.value]
+            toks = sum(r.tokens for r in mine)
+            badge = "✅" if h.ok else ("🚫" if self.cfg.is_disabled(ev) else "❌")
+            lines.append("\n%s *%s* — %d running · %d parked · %d pushing · %d tok" % (
+                badge, ev, len(running), len(parked), len(pushed), toks))
+            if not h.ok:
+                lines.append("   _%s_" % h.reason)
+            shown = running + parked + pushed
+            for r in shown:
+                icon = self._ICON.get(r.status, "•")
+                task = r.task if len(r.task) <= 44 else r.task[:41] + "..."
+                row = "   %s `#%d` %s — %s" % (icon, r.id, r.status, task)
+                if r.tokens:
+                    row += " · %d tok" % r.tokens
+                lines.append(row)
+            if not shown:
+                lines.append("   _idle_")
+        done = sum(1 for r in records if r.status not in active)
+        lines.append("\n_%d active across the fleet · %d finished · cap %d_" % (
+            self.active_count(), done, self.cfg.max_parallel))
+        return "\n".join(lines)
+
+    def agents_spec_table(self) -> str:
+        """Spec + architecture for each agent in the fleet."""
+        c = self.cfg
+        lines = ["*Agents* — fleet specification & architecture", ""]
+        roles = {
+            Engine.CLAUDE.value: "default route · background / high-context / research work",
+            Engine.CODEX.value: "scarce route · small mechanical edits (auto-cap %d)" % c.codex_auto_limit,
+        }
+        for e in Engine:
+            ev = e.value
+            binary, args = c.cli_for(ev)
+            h = self.engine_health(ev)
+            if c.is_disabled(ev):
+                state = "🚫 disabled via config"
+            else:
+                state = "✅ available" if h.ok else "❌ %s" % h.reason
+            short_bin = binary if len(binary) <= 48 else "…" + binary[-46:]
+            lines.append("*%s* — %s" % (ev, state))
+            lines.append("   role: %s" % roles.get(ev, "—"))
+            lines.append("   cli: `%s`" % short_bin)
+            lines.append("   args: `%s`" % (" ".join(args) or "(none)"))
+            lines.append("")
+        lines.append("*Shared architecture*")
+        lines.append("• one task → fresh git worktree on a new branch off `%s`" % c.base_branch)
+        lines.append("• agent runs headless → commit → push → PR (PR-only; never commits `main`)")
+        lines.append("• router probes auth and skips logged-out / disabled engines")
+        lines.append("• sandbox env: `PM_DRY_RUN=1`, `WCA_DB_PATH=data/dev.db`, Polymarket key stripped")
+        budget = (" · token budget %d" % c.token_budget) if c.token_budget else ""
+        lines.append("• caps: max-parallel %d%s; worktree add/remove serialized" % (c.max_parallel, budget))
+        return "\n".join(lines)
+
     def active_count(self) -> int:
         with self._lock:
             return sum(

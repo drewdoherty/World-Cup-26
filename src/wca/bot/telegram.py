@@ -103,6 +103,19 @@ class TelegramClient:
                     raise
         return last
 
+    # -- interactive menus (inline keyboards) ------------------------------
+
+    def answer_callback_query(self, callback_query_id: str, text: Optional[str] = None) -> Any:
+        """Acknowledge a tapped inline-keyboard button (dismisses the spinner)."""
+        payload: Dict[str, Any] = {"callback_query_id": callback_query_id}
+        if text:
+            payload["text"] = text
+        return self._call("answerCallbackQuery", payload)
+
+    def set_my_commands(self, commands: List[Dict[str, str]]) -> Any:
+        """Register the slash-command menu (the '/' button in Telegram clients)."""
+        return self._call("setMyCommands", {"commands": commands})
+
     # -- file / photo download ---------------------------------------------
 
     def get_file(self, file_id: str) -> Dict[str, Any]:
