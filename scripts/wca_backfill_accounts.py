@@ -34,6 +34,7 @@ if _SRC not in sys.path:
 import sqlite3  # noqa: E402
 
 from wca.ledger import store  # noqa: E402
+from wca.venues import canon_platform  # noqa: E402
 
 
 _DEFAULT_DB = os.path.join(_REPO_ROOT, "data", "wca.db")
@@ -165,7 +166,7 @@ def backfill(db_path: str = _DEFAULT_DB) -> None:
             dup = conn.execute(
                 "SELECT 1 FROM bets WHERE selection = ? AND account = ? "
                 "AND platform = ? LIMIT 1",
-                (bet["selection"], bet["account"], bet["platform"]),
+                (bet["selection"], bet["account"], canon_platform(bet["platform"])),
             ).fetchone()
             if dup is not None:
                 continue

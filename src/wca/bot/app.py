@@ -199,40 +199,10 @@ def _is_admin(user_id: str, admin: Optional[str]) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def _canon_platform(raw: str) -> str:
-    """Normalise a bookmaker name from a screenshot to the canonical DB string.
+from wca.venues import canon_platform
 
-    Betfair Exchange (betfair_ex_uk, "Betfair Exchange", bare "Betfair") -> "Betfair"
-    Betfair Sportsbook ("Betfair Sportsbook", betfair_sportsbook)        -> "Betfair Sportsbook"
-    Everything else: title-case the raw value.
-    """
-    p = (raw or "").strip()
-    pl = p.lower()
-    # Exchange variants — bare "Betfair" or anything mentioning "exchange"
-    if pl in ("betfair", "betfair_ex_uk", "betfair_ex_eu", "betfair exchange", "betfair ex"):
-        return "Betfair"
-    if "betfair" in pl and "exchange" in pl:
-        return "Betfair"
-    # Sportsbook variants
-    if pl in ("betfair_sportsbook", "betfair sportsbook", "betfair sports"):
-        return "Betfair Sportsbook"
-    if "betfair" in pl and ("sports" in pl or "sb" in pl):
-        return "Betfair Sportsbook"
-    # Other known normalizations
-    _MAP = {
-        "paddy power": "Paddy Power",
-        "paddypower": "Paddy Power",
-        "skybet": "Sky Bet",
-        "sky bet": "Sky Bet",
-        "virgin bet": "Virgin Bet",
-        "virginbet": "Virgin Bet",
-        "bet 365": "bet365",
-        "betfair": "Betfair",  # fallback bare match (already caught above but safety)
-    }
-    if pl in _MAP:
-        return _MAP[pl]
-    # Return as-is (title-case if all-lower or all-slug)
-    return p if any(c.isupper() for c in p) else p.title().replace("_", " ")
+# Backward-compat alias: existing call sites/tests rely on the private name.
+_canon_platform = canon_platform
 
 
 _VENUE_SYMBOL = {"sportsbook": "£", "polymarket": "$", "polymarket-auto": "$", "kalshi": "$"}

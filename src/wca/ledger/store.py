@@ -40,6 +40,8 @@ from __future__ import annotations
 import sqlite3
 from typing import Optional
 
+from wca.venues import canon_platform
+
 
 # ---------------------------------------------------------------------------
 # Default path (relative to the repo root, used only when the caller does not
@@ -206,6 +208,9 @@ def record_bet(
         The auto-assigned row ``id`` of the newly inserted bet.
     """
     init_db(db_path)
+    # Canonicalise the venue name at the single write choke point so every
+    # write path (bot screenshot, wca_cli, bot/app direct insert) is normalised.
+    platform = canon_platform(platform)
     sql = """
         INSERT INTO bets
             (ts_utc, match_id, match_desc, market, selection, platform,
