@@ -841,6 +841,149 @@
     $("retunit-meta").textContent = nsb + " £ · " + npm + " $ settled";
   }
 
+  // ---- 7. Realized conviction: cumulative model edge on actual outcomes -----
+
+  // result_edge = model P(actual outcome) − market P(actual outcome) per fixture;
+  // >0 means the model put more probability on what happened than the market did.
+  // We accumulate it over kickoff order (realized conviction) and overlay
+  // cumulative settled sportsbook P/L (£) to contrast theory vs money made.
+  function _convSeries(d) {
+    var fx = (d.fixtures || []).filter(function (f) {
+      return f.result_edge !== null && f.result_edge !== undefined && f.outcome;
+    }).slice().sort(function (a, b) {
+      return (_parseTs(a.kickoff) || 0) - (_parseTs(b.kickoff) || 0);
+    });
+    var cum = 0, conv = [];
+    fx.forEach(function (f, i) {
+      var e = Number(f.result_edge);
+      cum += e;
+      conv.push({ t: _parseTs(f.kickoff), e: e, cum: cum, fx: f.fixture, oc: f.outcome,
+                  mp: Number(f.model_prob_outcome), kp: Number(f.market_prob_outcome), n: i + 1 });
+    });
+    var bets = (d.bets || []).filter(function (b) {
+      return b.pl !== null && b.pl !== undefined && !isNaN(b.pl) && (b.ccy || "£") === "£";
+    }).slice().sort(function (a, b) {
+      return (_parseTs(a.ts) || a.id || 0) - (_parseTs(b.ts) || b.id || 0);
+    });
+    var pc = 0, pl = [];
+    bets.forEach(function (b) {
+      pc += Number(b.pl) || 0;
+      pl.push({ t: _parseTs(b.ts), pl: pc, d1: Number(b.pl) || 0, clv: b.clv, n: pl.length + 1 });
+    });
+    var clvs = (d.bets || []).filter(function (b) { return b.clv !== null && b.clv !== undefined && !isNaN(b.clv); });
+    var avgClv = clvs.length ? clvs.reduce(function (s, b) { return s + Number(b.clv); }, 0) / clvs.length : null;
+    return { conv: conv, pl: pl, avgClv: avgClv };
+  }
+
+  function _shortFx(name) {
+    function ab(s) { s = (s || "").trim(); return s.length > 11 ? s.slice(0, 10) + "…" : s; }
+    var parts = String(name || "").split(/\s+vs?\s+/i);
+    return parts.length === 2 ? ab(parts[0]) + " v " + ab(parts[1]) : ab(name);
+  }
+
+  function _convTip(p) {
+    var lines = [p.fx + (p.t != null ? "  (" + _dayLabel(p.t) + ")" : "")];
+    lines.push("actual: " + p.oc + "  —  model " + Math.round((p.mp || 0) * 100) + "% vs market " + Math.round((p.kp || 0) * 100) + "%");
+    lines.push("edge on result: " + (p.e >= 0 ? "+" : "−") + Math.abs(p.e * 100).toFixed(1) + "pp");
+    lines.push("cumulative: " + (p.cum >= 0 ? "+" : "−") + Math.abs(p.cum * 100).toFixed(1) + "pp");
+    return lines.join("\n");
+  }
+
+  // Dual-axis, zero-aligned: cumulative conviction (pp, left) + settled £ P/L (right).
+  function convChartSVG(s) {
+    var conv = s.conv, pl = s.pl;
+    if (!conv.length) return '<div class="empty">No graded fixtures with market prices yet</div>';
+    var GREEN = "#3fe08a", RED = "#e0603f", AMBER = "#f2c14e";
+    var ts = [];
+    conv.forEach(function (p) { if (p.t != null) ts.push(p.t); });
+    pl.forEach(function (p) { if (p.t != null) ts.push(p.t); });
+    var tmin = Math.min.apply(null, ts), tmax = Math.max.apply(null, ts);
+    if (tmax <= tmin) tmax = tmin + 1;
+    var cums = conv.map(function (p) { return p.cum * 100; });
+    var cHi = Math.max(0, Math.max.apply(null, cums)), cLo = Math.min(0, Math.min.apply(null, cums));
+    var cpad = (cHi - cLo) * 0.1 || 5; cHi += cpad; cLo -= cpad;
+    var W = 720, H = 320, P = { l: 50, r: 120, t: 18, b: 40 };
+    var plotW = W - P.l - P.r, plotH = H - P.t - P.b;
+    function px(t) { return P.l + (t - tmin) / (tmax - tmin) * plotW; }
+    function pyL(v) { return P.t + (1 - (v - cLo) / (cHi - cLo)) * plotH; }
+    var zeroY = pyL(0);
+    var pls = pl.map(function (p) { return p.pl; });
+    var pHi = pls.length ? Math.max(0, Math.max.apply(null, pls)) : 0;
+    var pLo = pls.length ? Math.min(0, Math.min.apply(null, pls)) : 0;
+    pHi = pHi * 1.12 || 1; pLo = pLo * 1.12 || -1;
+    function pyR(v) {
+      if (v >= 0) return zeroY - (pHi ? (v / pHi) * (zeroY - P.t) : 0);
+      return zeroY + (pLo ? (v / pLo) * ((P.t + plotH) - zeroY) : 0);
+    }
+    var out = ['<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" class="tr-barsvg">'];
+    var lstep = _niceStep(cHi - cLo);
+    for (var g = Math.ceil(cLo / lstep) * lstep; g <= cHi + 1e-9; g += lstep) {
+      var yy = pyL(g), zero = Math.abs(g) < 1e-9;
+      out.push('<line class="' + (zero ? "cx-axis" : "cx-grid") + '" x1="' + P.l + '" y1="' + yy.toFixed(1) + '" x2="' + (W - P.r) + '" y2="' + yy.toFixed(1) + '"/>');
+      out.push('<text class="cx-tick" x="' + (P.l - 7) + '" y="' + (yy + 3).toFixed(1) + '" text-anchor="end">' + (zero ? "0" : (g > 0 ? "+" : "−") + Math.abs(g).toFixed(0)) + '</text>');
+    }
+    var seen = {};
+    conv.forEach(function (p) {
+      if (p.t == null) return;
+      var day = _dayLabel(p.t);
+      if (seen[day]) return; seen[day] = 1;
+      out.push('<text class="cx-tick" x="' + px(p.t).toFixed(1) + '" y="' + (H - P.b + 14) + '" text-anchor="middle">' + esc(day) + '</text>');
+    });
+    [pHi, pLo].forEach(function (v) {
+      if (Math.abs(v) < 1e-9) return;
+      out.push('<text x="' + (W - P.r + 7) + '" y="' + (pyR(v) + 3).toFixed(1) + '" text-anchor="start" font-size="9" fill="' + AMBER + '">' + _money("£", v) + '</text>');
+    });
+    if (pl.length) {
+      out.push('<polyline points="' + pl.filter(function (p) { return p.t != null; }).map(function (p) { return px(p.t).toFixed(1) + "," + pyR(p.pl).toFixed(1); }).join(" ") +
+        '" fill="none" stroke="' + AMBER + '" stroke-width="1.6" stroke-dasharray="4 3" opacity="0.85"/>');
+      var lp = pl[pl.length - 1];
+      out.push('<text x="' + (px(lp.t) + 6).toFixed(1) + '" y="' + (pyR(lp.pl) + 3).toFixed(1) + '" fill="' + AMBER + '" font-size="10" font-weight="600">' + _money("£", lp.pl) + '</text>');
+    }
+    for (var i = 1; i < conv.length; i++) {
+      var a = conv[i - 1], b = conv[i];
+      out.push('<line x1="' + px(a.t).toFixed(1) + '" y1="' + pyL(a.cum * 100).toFixed(1) + '" x2="' + px(b.t).toFixed(1) + '" y2="' + pyL(b.cum * 100).toFixed(1) +
+        '" stroke="' + (b.cum >= 0 ? GREEN : RED) + '" stroke-width="2"/>');
+    }
+    conv.forEach(function (p) {
+      var miss = p.e <= -0.12;
+      out.push('<circle cx="' + px(p.t).toFixed(1) + '" cy="' + pyL(p.cum * 100).toFixed(1) + '" r="' + (miss ? 4 : 2.3) + '" fill="' + (miss ? RED : (p.cum >= 0 ? GREEN : RED)) +
+        '"' + (miss ? ' stroke="#fff" stroke-width="0.8"' : '') + '><title>' + esc(_convTip(p)) + '</title></circle>');
+      if (miss) {
+        var lx = px(p.t), ly = pyL(p.cum * 100);
+        var anc = lx > (P.l + plotW * 0.55) ? "end" : "start", dx = anc === "end" ? -7 : 7;
+        out.push('<text x="' + (lx + dx).toFixed(1) + '" y="' + (ly + 13).toFixed(1) + '" text-anchor="' + anc + '" fill="' + RED + '" font-size="9" font-weight="600">' + esc(_shortFx(p.fx)) + " " + (p.e * 100).toFixed(0) + 'pp</text>');
+      }
+    });
+    var lc = conv[conv.length - 1];
+    out.push('<text x="' + (px(lc.t) + 6).toFixed(1) + '" y="' + (pyL(lc.cum * 100) + 3).toFixed(1) + '" fill="' + (lc.cum >= 0 ? GREEN : RED) + '" font-size="10" font-weight="600">' + (lc.cum >= 0 ? "+" : "−") + Math.abs(lc.cum * 100).toFixed(0) + 'pp</text>');
+    [["model conviction (cum, pp)", GREEN], ["settled P/L (£)", AMBER]].forEach(function (L, i) {
+      var yo = P.t + 2 + i * 14;
+      out.push('<rect x="' + (P.l + 6) + '" y="' + yo + '" width="9" height="9" fill="' + L[1] + '"/>' +
+        '<text x="' + (P.l + 19) + '" y="' + (yo + 9) + '" fill="#d4dae0" font-size="10">' + esc(L[0]) + '</text>');
+    });
+    out.push('</svg>');
+    return out.join("");
+  }
+
+  function renderConviction(d) {
+    var s = _convSeries(d);
+    if (!s.conv.length) {
+      $("conviction").innerHTML = '<div class="empty">No graded fixtures with market prices yet</div>';
+      $("conviction-meta").textContent = "";
+      return;
+    }
+    var lastPl = s.pl.length ? s.pl[s.pl.length - 1].pl : 0;
+    $("conviction").innerHTML = convChartSVG(s) +
+      '<div class="vt-note">Cumulative <b>model conviction</b> = running &Sigma; (model &minus; market) probability on each ' +
+      'fixture’s actual result; above 0 the model assigned more probability to what happened than the market did. The amber ' +
+      'line overlays cumulative settled sportsbook P/L (&pound;, right axis, zero-aligned); red points are <b>high-conviction ' +
+      'misses</b> (model confidently wrong). Note the conviction can sink while realized P/L holds up &mdash; selective, ' +
+      'CLV-aware staking, not raw model edge. Hover any point for detail.</div>';
+    $("conviction-meta").textContent = s.conv.length + " fixtures · avg CLV " +
+      (s.avgClv == null ? "n/a" : (s.avgClv >= 0 ? "+" : "−") + Math.abs(s.avgClv * 100).toFixed(1) + "%") +
+      " · £ P/L " + _money("£", lastPl);
+  }
+
   function render(d) {
     renderStats(d);
     renderOutcomeBars(d);
@@ -849,6 +992,7 @@
     renderClvPl(d);
     renderBetPnl(d);
     renderReturnPerUnit(d);
+    renderConviction(d);
     renderPending(d);
     renderFooter(d);
   }
