@@ -308,7 +308,8 @@ class TestWriteSiteData:
         card = _write_card(tmp_path)
         out = os.path.join(str(tmp_path), "nested", "data.json")
         returned = sitedata.write_site_data(
-            db, out_path=out, card_path=card, now_utc="2026-06-11 15:00:00 UTC"
+            db, out_path=out, card_path=card, now_utc="2026-06-11 15:00:00 UTC",
+            include_pm_live=False,  # deterministic: no live data-API fetch in tests
         )
         assert returned == out
         assert os.path.exists(out)

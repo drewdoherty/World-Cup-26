@@ -255,6 +255,87 @@ def _opt_num(value: Any) -> Optional[float]:
         return None
 
 
+# Polymarket proxy wallet(s) holding live positions. These are placed manually
+# in the PM UI and live ONLY on-chain (not in the SQLite ledger), so we read
+# them from Polymarket's public data-API at site-build time — the source of
+# truth, independent of which ledger fork ran the build. Overridable via the
+# WCA_PM_PROXIES env (comma-separated) or POLYMARKET_FUNDER.
+_PM_PROXIES_DEFAULT = ("0x86b4c55a4df1fbea0f325e842434e0a537caa549",)
+
+
+def live_pm_positions(
+    proxies: Optional[List[str]] = None, min_value: float = 0.1
+) -> Optional[List[Dict[str, Any]]]:
+    """Fetch live Polymarket positions and project them into the positions
+    shape. Returns ``None`` on total failure so callers fall back to the
+    ledger-only positions (the function never raises)."""
+    import json as _json
+    import os as _os
+    import urllib.request as _u
+
+    if proxies is None:
+        env = (
+            _os.environ.get("WCA_PM_PROXIES")
+            or _os.environ.get("POLYMARKET_FUNDER")
+            or ""
+        )
+        proxies = [p.strip() for p in env.split(",") if p.strip()] or list(
+            _PM_PROXIES_DEFAULT
+        )
+
+    out: List[Dict[str, Any]] = []
+    for i, proxy in enumerate(proxies):
+        acct = "1" if i == 0 else "2"
+        url = (
+            "https://data-api.polymarket.com/positions?user=%s"
+            "&sizeThreshold=0.1&limit=200" % proxy
+        )
+        try:
+            req = _u.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            rows = _json.load(_u.urlopen(req, timeout=20))
+        except Exception:
+            continue
+        for p in rows or []:
+            try:
+                cv = float(p.get("currentValue") or 0.0)
+            except (TypeError, ValueError):
+                cv = 0.0
+            if cv < min_value:
+                continue  # resolved / dust — not an open holding
+            avg = _opt_num(p.get("avgPrice")) or 0.0
+            iv = _opt_num(p.get("initialValue")) or 0.0
+            # The API's percentPnl field is unreliable; derive P&L from cost vs
+            # current value (cashPnl == currentValue - initialValue).
+            cash_pnl = round(cv - iv, 2)
+            out.append({
+                "id": "pm-" + str(p.get("conditionId") or "")[:12],
+                "ts_utc": "",
+                "match": p.get("title"),
+                "match_id": p.get("conditionId"),
+                "market": p.get("title"),
+                "selection": p.get("outcome"),
+                "platform": "polymarket",
+                "venue": "polymarket",
+                "account": acct,
+                "source": "manual",
+                "currency": "USD",
+                "decimal_odds": (1.0 / avg) if avg > 0 else None,
+                "stake": _opt_num(p.get("initialValue")),
+                "model_prob": None,
+                "market_prob_devig": None,
+                "ev": None,
+                "kelly_fraction": None,
+                "cur_value": round(cv, 2),
+                "cur_price": _opt_num(p.get("curPrice")),
+                "avg_price": avg,
+                "shares": _opt_num(p.get("size")),
+                "cash_pnl": cash_pnl,
+                "pct_pnl": (cash_pnl / iv) if iv else None,
+                "notes": "live PM position (data-API)",
+            })
+    return out or None
+
+
 # ---------------------------------------------------------------------------
 # Public API.
 # ---------------------------------------------------------------------------
@@ -264,6 +345,7 @@ def build_site_data(
     db_path: str,
     card_path: str = "data/card_latest.md",
     now_utc: str = "",
+    pm_positions: Optional[List[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     """Build the full ``data.json`` payload for the static site.
 
@@ -386,6 +468,26 @@ def build_site_data(
 
     positions = _positions_from_bets(stats.get("bets") or [])
 
+    # Live Polymarket holdings are the source of truth for the PM venue (placed
+    # manually in the UI, not in the ledger). When provided, they REPLACE the
+    # ledger-derived PM rows in the positions list and the polymarket venue /
+    # USD-total open_stake + count, so the terminal shows the real book.
+    if pm_positions is not None:
+        positions = [p for p in positions if p.get("venue") != "polymarket"]
+        positions = list(pm_positions) + positions
+        pm_stake = sum(float(p.get("stake") or 0.0) for p in pm_positions)
+        pm_n = len(pm_positions)
+        pm_blk = venues.get("polymarket")
+        old_stake = float(pm_blk.get("open_stake") or 0.0) if pm_blk else 0.0
+        old_n = int(pm_blk.get("n_bets") or 0) if pm_blk else 0
+        if pm_blk is not None:
+            pm_blk["open_stake"] = pm_stake
+            pm_blk["n_bets"] = pm_n
+        usd = totals_by_currency.get("USD")
+        if usd is not None:
+            usd["open_stake"] += pm_stake - old_stake
+            usd["n_bets"] += pm_n - old_n
+
     # Closed (settled/void) positions with realized P&L per bet.
     closed_positions: List[Dict[str, Any]] = []
     for b in stats.get("bets") or []:
@@ -504,12 +606,20 @@ def write_site_data(
     out_path: str = "site/data.json",
     card_path: str = "data/card_latest.md",
     now_utc: str = "",
+    include_pm_live: bool = True,
 ) -> str:
     """Build the site payload and write it to ``out_path`` as JSON.
 
     Parent directories are created as needed.  Returns ``out_path``.
+
+    When ``include_pm_live`` (the default for site generation) live Polymarket
+    positions are pulled from the data-API and merged in; failures fall back to
+    ledger-only positions silently.
     """
-    data = build_site_data(db_path, card_path=card_path, now_utc=now_utc)
+    pm = live_pm_positions() if include_pm_live else None
+    data = build_site_data(
+        db_path, card_path=card_path, now_utc=now_utc, pm_positions=pm
+    )
 
     parent = os.path.dirname(os.path.abspath(out_path))
     if parent:
