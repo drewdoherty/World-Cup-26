@@ -460,7 +460,19 @@ def render_card(recs, pools, score_cards=None) -> str:
     parts = [format_card(recs, pools)]
     if score_cards:
         parts.append("")
-        parts.append(format_scores(score_cards))
+        # Use the first pool's sizing params so scoreline stakes match bet stakes.
+        if pools:
+            p = pools[0]
+            parts.append(
+                format_scores(
+                    score_cards,
+                    bankroll=p.bankroll,
+                    kelly_fraction=p.kelly_fraction,
+                    per_bet_cap=p.per_bet_cap,
+                )
+            )
+        else:
+            parts.append(format_scores(score_cards))
     return "\n".join(parts)
 
 
@@ -493,6 +505,18 @@ def handle_card(
         if cached.get("stale"):
             header += "  ⚠️ STALE"
     body = cached.get("text") or "(empty card)"
+
+    # The pool line (settled-with-close count, CLV, rung) is baked at card-build
+    # time — refresh it live so the count is never stale when bets settle between
+    # cron runs.
+    try:
+        import re as _re
+        from wca.card import resolve_pool_bankroll
+        fresh = resolve_pool_bankroll(db_path)
+        body = _re.sub(r"_Pool: [^_]+_", "_Pool: %s_" % fresh.reason, body)
+    except Exception:
+        pass
+
     return header + "\n\n" + body
 
 
@@ -907,7 +931,7 @@ def handle_boost(text: str, *, scores_path: str = "site/scores_data.json") -> st
     return banner + format_boost_verdict(boost, ev)
 
 
-def handle_accas(scores_path: str = "site/scores_data.json") -> str:
+def handle_accas(scores_path: str = "site/scores_data.json", db_path: str = "data/wca.db") -> str:
     """`/accas` — multi-leg accumulators for the next 5 matches (4+ legs, min 2.0 odds)."""
     from wca import accas
     from wca.boosts import load_scores_feed
@@ -929,6 +953,14 @@ def handle_accas(scores_path: str = "site/scores_data.json") -> str:
         except Exception:
             fixtures_meta = pd.DataFrame()
 
+        # Resolve bankroll for stake sizing (best-effort; silently omit on failure).
+        bankroll: Optional[float] = None
+        try:
+            from wca.card import resolve_pool_bankroll
+            bankroll = resolve_pool_bankroll(db_path).bankroll
+        except Exception:
+            pass
+
         # Build accas from the scores feed
         acca_list = accas.build_accas_from_odds(
             scores_feed, fixtures_meta, max_fixtures=5, min_legs=4, min_leg_odds=2.0
@@ -944,7 +976,7 @@ def handle_accas(scores_path: str = "site/scores_data.json") -> str:
             _feed_generated(scores_path), now_utc, SCORES_FEED_MAX_AGE_HOURS,
             label="odds feed",
         )
-        return banner + accas.format_accas(acca_list)
+        return banner + accas.format_accas(acca_list, bankroll=bankroll)
     except Exception as exc:
         return f"*Accumulators*\nError building accas: {exc}"
 
@@ -2003,7 +2035,7 @@ def dispatch(text: str, db_path: str) -> str:
     if cmd == "/scores":
         return handle_scores(card_path=CARD_PATH)
     if cmd == "/accas":
-        return handle_accas()
+        return handle_accas(db_path=db_path)
     if cmd == "/structure":
         return handle_structure()
     if cmd == "/pm":

@@ -50,7 +50,7 @@ def test_accas_flags_stale_feed(tmp_path, monkeypatch):
                         lambda p: pd.DataFrame([{"x": 1}]))
     monkeypatch.setattr(accas, "build_accas_from_odds",
                         lambda *a, **k: [{"legs": []}])
-    monkeypatch.setattr(accas, "format_accas", lambda lst: "ACCA-BODY")
+    monkeypatch.setattr(accas, "format_accas", lambda lst, **kw: "ACCA-BODY")
 
     reply = app.handle_accas(scores_path=str(feed))
     assert "STALE" in reply

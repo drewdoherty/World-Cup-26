@@ -226,7 +226,12 @@ def main() -> None:
     card_text = (
         format_card(recs, pools)
         + "\n\n_Pool: %s_\n\n" % pool_bank.reason
-        + format_scores(score_cards)
+        + format_scores(
+            score_cards,
+            bankroll=pool.bankroll,
+            kelly_fraction=pool.kelly_fraction,
+            per_bet_cap=pool.per_bet_cap,
+        )
     )
 
     # ------------------------------------------------------------------

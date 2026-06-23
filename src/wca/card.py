@@ -755,15 +755,23 @@ def format_card(recs: Sequence[Recommendation], pools: Sequence[PoolConfig]) -> 
 
 
 def format_scores(
-    cards: Sequence[ScorelineCard], min_edge: float = 0.02
+    cards: Sequence[ScorelineCard],
+    min_edge: float = 0.02,
+    bankroll: Optional[float] = None,
+    kelly_fraction: float = 0.25,
+    per_bet_cap: float = 0.05,
 ) -> str:
     """Human-readable scoreline card for the terminal or Telegram (Markdown).
 
-    Per fixture: the top-6 scorelines (``"2-1  12.3%  fair 8.13  back >= 8.46"``)
+    Per fixture: the top-6 scorelines (``"2-1  12.3%  fair 8.13  back >= 8.46  £X.XX"``)
     followed by one line with over/under 2.5 and BTTS probabilities. The
     ``back >=`` price is the minimum decimal odds at which backing that
     scoreline clears ``min_edge`` (each card's own ``min_edge`` is used; the
     argument is a display-only fallback for cards that predate it).
+
+    When ``bankroll`` is supplied, a quarter-Kelly stake in GBP is appended to
+    each scoreline line (sized at the ``back >=`` minimum price, capped at
+    ``per_bet_cap`` of the bankroll).
     """
     if not cards:
         return "*No scoreline cards* for the current slate."
@@ -773,9 +781,18 @@ def format_scores(
         lines.append("")
         lines.append("*%s vs %s*" % (c.home, c.away))
         for h, a, p in c.top_scorelines:
+            price = c.min_price(p, me)
+            sizing = ""
+            if bankroll is not None:
+                stk = kelly_mod.stake(
+                    p, price, bankroll,
+                    fraction=kelly_fraction, cap=per_bet_cap,
+                )
+                if stk > 0:
+                    sizing = "  £%.2f" % stk
             lines.append(
-                "    %d-%d  %.1f%%  fair %.2f  back >= %.2f"
-                % (h, a, p * 100, c.fair_odds(p), c.min_price(p, me))
+                "    %d-%d  %.1f%%  fair %.2f  back >= %.2f%s"
+                % (h, a, p * 100, c.fair_odds(p), price, sizing)
             )
         ou25 = c.over_under.get(2.5)
         p_over = ou25[0] if ou25 is not None else float("nan")

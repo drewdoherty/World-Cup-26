@@ -183,26 +183,41 @@ def build_accas_from_odds(
     return accas
 
 
-def format_accas(accas: List[Dict[str, Any]]) -> str:
-    """Format accas as a human-readable Telegram message."""
+def format_accas(accas: List[Dict[str, Any]], bankroll: Optional[float] = None) -> str:
+    """Format accas as a human-readable Telegram message.
+
+    When ``bankroll`` is supplied, a suggested flat stake (0.5% of bankroll,
+    rounded to nearest 50p, minimum £2) is shown per acca.  Accas have no
+    model edge, so a small flat stake is used rather than Kelly sizing.
+    """
     if not accas:
         return "*Accumulators*\nNo +EV accas found for the next 5 matches."
 
     lines = ["🎯 *Accumulators (next 5 matches):*", ""]
+
+    # Flat stake: 0.5% of bankroll rounded to nearest 50p, minimum £2.
+    stake_str = ""
+    if bankroll is not None and bankroll > 0:
+        raw = bankroll * 0.005
+        rounded = max(2.0, round(raw / 0.5) * 0.5)
+        stake_str = "  _suggested stake £%.2f_" % rounded
 
     for i, acca in enumerate(accas, 1):
         legs = acca.get("legs", [])
         total_odds = float(acca.get("total_odds", 0))
         implied_prob = float(acca.get("implied_prob", 0))
 
-        lines.append(f"*Acca {i}:* {total_odds:.2f} @ {implied_prob*100:.1f}% implied")
+        lines.append(
+            "*Acca %d:* %.2f @ %.1f%% implied%s"
+            % (i, total_odds, implied_prob * 100, stake_str)
+        )
 
         for j, leg in enumerate(legs, 1):
             fixture = leg.get("fixture", "?")
             market = leg.get("market", "?")
             selection = leg.get("selection", "?")
             odds = float(leg.get("odds", 0))
-            lines.append(f"  {j}. {fixture} — {selection} ({market}) @ {odds:.2f}")
+            lines.append("  %d. %s — %s (%s) @ %.2f" % (j, fixture, selection, market, odds))
 
         lines.append("")
 
