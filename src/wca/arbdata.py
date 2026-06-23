@@ -104,6 +104,12 @@ def build_arb_data(
                         lose_legs.append({"venue": venue, "currency": "GBP", "net": lnet,
                                           "desc": "%s lay @ %.2f" % (venue, e["lay"]),
                                           "confidence": "execution-grade"})
+            # Tag every candidate with its event so best_lock's hard guard can
+            # refuse any accidental cross-team/cross-fixture pairing.
+            for leg in win_legs + lose_legs:
+                leg["fixture"] = fk
+                leg["outcome"] = team
+                leg["market"] = "h2h"
             res = arbfx.best_lock(fixture=fk, market="h2h", outcome=team,
                                   win_legs=win_legs, lose_legs=lose_legs,
                                   fx_usd_per_gbp=fx_usd_per_gbp)
