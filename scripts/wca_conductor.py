@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """WCA dev-conductor — a *separate* Telegram bot that fans tasks out to
-headless coding agents (``claude -p`` / ``codex exec``), one git worktree +
+headless Claude Code agents (``claude -p``), one git worktree +
 branch + PR per task.
 
 This is dev infrastructure, NOT the betting bot. It must run on a dev box with
@@ -11,9 +11,8 @@ worktrees land in ``.claude/worktrees`` where the cleanup script expects them::
 
 Commands (admin-gated where they spend tokens / write branches):
 
-    /task <task>     auto-route: Claude-first; Codex only for small mechanical edits
-    /claude <task>   dispatch a task to Claude Code, headless
-    /codex  <task>   dispatch a task to Codex, headless
+    /task <task>     dispatch a task to Claude Code, headless
+    /claude <task>   dispatch a task to Claude Code, headless (alias of /task)
     /status          show the per-task table (read from real results)
     /cancel <id>     cancel a task that hasn't started yet
     /help            usage + runtime warnings
@@ -106,9 +105,8 @@ def _help_text(manager: ConductorManager) -> str:
         "*WCA dev-conductor*",
         "Fan dev tasks out to headless agents — one worktree + branch + PR each.",
         "",
-        "`/task <task>` — auto-route (Claude-first; Codex for tiny mechanical edits)",
-        "`/claude <task>` — dispatch to Claude Code",
-        "`/codex <task>` — dispatch to Codex",
+        "`/task <task>` — dispatch to Claude Code, headless",
+        "`/claude <task>` — dispatch to Claude Code (alias of /task)",
         "`/menu` — interactive button menu",
         "`/model` — model usage: ongoing & parked tasks by agent",
         "`/agents` — agent specs & architecture",
@@ -157,7 +155,6 @@ _MENU_KEYBOARD = {
 _COMMANDS = [
     {"command": "task", "description": "auto-route a task to an agent"},
     {"command": "claude", "description": "dispatch a task to Claude"},
-    {"command": "codex", "description": "dispatch a task to Codex"},
     {"command": "menu", "description": "interactive button menu"},
     {"command": "model", "description": "model usage — ongoing & parked tasks"},
     {"command": "agents", "description": "agent specs & architecture"},
@@ -548,7 +545,7 @@ class ConductorBot:
 
         cmd, _, arg = text.partition(" ")
         cmd = cmd.lower().split("@", 1)[0]  # strip @botname in groups
-        _DISPATCH = ("/task", "/claude", "/codex")
+        _DISPATCH = ("/task", "/claude")
         is_dispatch = (not cmd.startswith("/")) or cmd in _DISPATCH
 
         # Admin-gate dispatch BEFORE any download, so a non-admin can't trigger a
@@ -666,8 +663,6 @@ class ConductorBot:
             return self._dispatch_auto(arg, chat_id, user_id, images=images) + warn
         if cmd == "/claude":
             return self._dispatch(Engine.CLAUDE.value, arg, chat_id, user_id, images=images) + warn
-        if cmd == "/codex":
-            return self._dispatch(Engine.CODEX.value, arg, chat_id, user_id, images=images) + warn
         if cmd == "/cancel":
             if not _is_admin(user_id, self.admin):
                 return "🚫 Not authorized."

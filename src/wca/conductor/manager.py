@@ -8,7 +8,6 @@ token-budget accounting. Submissions over budget are *rejected* (returned with
 
 from __future__ import annotations
 
-import shutil
 import subprocess
 import threading
 import time
@@ -74,67 +73,47 @@ class ConductorManager:
 
     def submit(self, engine: str, task: str, chat_id: str = "",
                images: Optional[List[str]] = None) -> TaskRecord:
-        """Accept an explicit-engine task, rerouting around a dead engine.
+        """Accept an explicit-engine task (Claude-only).
 
-        If the requested engine is logged-out/unavailable, reroute to the other
-        engine when it is healthy; if neither is healthy, REJECT with the real
-        reason (e.g. "claude not logged in — run `claude setup-token`").
+        If Claude is logged-out/unavailable, REJECT with the real reason (e.g.
+        "claude not logged in — run `claude setup-token`"). There is no other
+        engine to reroute to since Codex was removed from the swarm.
 
         ``images`` are local paths to pasted screenshots the agent should read
         as visual context (see :func:`runner.stage_images`).
         """
-        engine = Engine.coerce(engine).value  # validate / normalise
+        engine = Engine.coerce(engine).value  # validate / normalise (claude only)
         task = (task or "").strip()
         if not task:
             raise ValueError("empty task")
 
-        route_reason = ""
         primary = self.engine_health(engine)  # probes outside the lock
         if not primary.ok:
-            other = Engine.CODEX.value if engine == Engine.CLAUDE.value else Engine.CLAUDE.value
-            secondary = self.engine_health(other)
-            if secondary.ok:
-                route_reason = "rerouted %s→%s (%s)" % (engine, other, primary.reason)
-                engine = other
-            else:
-                with self._lock:
-                    record = self._new_record_locked(engine, task, chat_id, images=images)
-                record.status = TaskStatus.REJECTED.value
-                record.error = primary.reason
-                return record
+            with self._lock:
+                record = self._new_record_locked(engine, task, chat_id, images=images)
+            record.status = TaskStatus.REJECTED.value
+            record.error = primary.reason
+            return record
 
         with self._lock:
-            return self._submit_locked(engine, task, chat_id, route_reason=route_reason, images=images)
+            return self._submit_locked(engine, task, chat_id, route_reason="", images=images)
 
     def submit_auto(self, task: str, chat_id: str = "",
                     images: Optional[List[str]] = None) -> TaskRecord:
-        """Accept a task after picking the engine with the health-aware router."""
+        """Accept a task and route it (Claude-only) with a health check."""
         task = (task or "").strip()
         if not task:
             raise ValueError("empty task")
 
         claude_ok = self.engine_health(Engine.CLAUDE.value).ok  # probe outside lock
-        codex_ok = self.engine_health(Engine.CODEX.value).ok
-        with self._lock:
-            codex_cap_ok = self.cfg.codex_auto_limit > self._active_engine_locked(Engine.CODEX.value)
-        # The codex_auto_limit is a *conservation* cap (send overflow to Claude
-        # to spend scarce Codex sparingly) — NOT a hard availability gate. When
-        # Claude is unavailable there is nothing to conserve, so ignore the cap
-        # rather than mis-route extra /task jobs to a logged-out Claude.
-        codex_available = codex_ok and (codex_cap_ok or not claude_ok)
-        decision = choose_engine(
-            task,
-            codex_available=codex_available,
-            claude_available=claude_ok,
-        )
-        if not claude_ok and not codex_ok:
+        decision = choose_engine(task, claude_available=claude_ok)
+        if not claude_ok:
             with self._lock:
                 record = self._new_record_locked(decision.engine.value, task, chat_id,
                                                  route_reason=decision.reason, images=images)
             record.status = TaskStatus.REJECTED.value
-            record.error = "no healthy engine: claude (%s), codex (%s)" % (
+            record.error = "no healthy engine: claude (%s)" % (
                 self.engine_health(Engine.CLAUDE.value).reason,
-                self.engine_health(Engine.CODEX.value).reason,
             )
             return record
         with self._lock:
@@ -221,13 +200,15 @@ class ConductorManager:
             return False, "no task `#%d`" % task_id
         if r.status != TaskStatus.DONE.value or not (r.pr_url and "/pull/" in r.pr_url):
             return False, "`#%d` has no open PR to merge (status %s)" % (task_id, r.status)
-        if shutil.which(self.cfg.gh_bin) is None:
+        gh = self.cfg.resolve_bin(self.cfg.gh_bin)
+        if gh is None:
             return False, "`gh` not available — can't merge (authenticate it on the host)"
+        env = self.cfg.agent_env()
         try:
             view = subprocess.run(
-                [self.cfg.gh_bin, "pr", "view", r.branch or "",
+                [gh, "pr", "view", r.branch or "",
                  "--json", "state,mergeStateStatus,statusCheckRollup"],
-                capture_output=True, text=True, timeout=30,
+                capture_output=True, text=True, timeout=30, env=env,
             )
         except (OSError, subprocess.SubprocessError) as exc:
             return False, "gh view failed: %s" % exc
@@ -250,8 +231,8 @@ class ConductorManager:
                 task_id, len(not_green))
         try:
             res = subprocess.run(
-                [self.cfg.gh_bin, "pr", "merge", r.branch or "", "--squash", "--delete-branch"],
-                capture_output=True, text=True, timeout=90,
+                [gh, "pr", "merge", r.branch or "", "--squash", "--delete-branch"],
+                capture_output=True, text=True, timeout=90, env=env,
             )
         except (OSError, subprocess.SubprocessError) as exc:
             return False, "merge failed: %s" % exc
@@ -266,13 +247,6 @@ class ConductorManager:
 
     def _spent_locked(self) -> int:
         return sum(r.tokens for r in self._records.values())
-
-    def _active_engine_locked(self, engine: str) -> int:
-        return sum(
-            1 for r in self._records.values()
-            if r.engine == engine
-            and r.status in {TaskStatus.QUEUED.value, TaskStatus.RUNNING.value, TaskStatus.PUSHED.value}
-        )
 
     def spent_tokens(self) -> int:
         with self._lock:
@@ -415,8 +389,7 @@ class ConductorManager:
         c = self.cfg
         lines = ["*Agents* — fleet specification & architecture", ""]
         roles = {
-            Engine.CLAUDE.value: "default route · background / high-context / research work",
-            Engine.CODEX.value: "scarce route · small mechanical edits (auto-cap %d)" % c.codex_auto_limit,
+            Engine.CLAUDE.value: "sole route · all conductor work (Codex removed 2026-06)",
         }
         for e in Engine:
             ev = e.value
@@ -463,7 +436,7 @@ class ConductorManager:
     def status_table(self) -> str:
         records = self.records()
         if not records:
-            return "_No conductor tasks yet._ Send `/claude <task>` or `/codex <task>`."
+            return "_No conductor tasks yet._ Send `/task <task>` or `/claude <task>`."
 
         lines = ["*Conductor — tasks*"]
         for r in records:
@@ -507,22 +480,39 @@ class ConductorManager:
         claude = self.engine_health(Engine.CLAUDE.value)
         if not claude.ok:
             warnings.append("claude unavailable: %s" % claude.reason)
-        codex = self.engine_health(Engine.CODEX.value)
-        if not codex.ok:
-            warnings.append("codex unavailable: %s" % codex.reason)
-        if claude.ok or codex.ok:
-            healthy = ", ".join(e for e, h in (("claude", claude), ("codex", codex)) if h.ok)
-            warnings.append("healthy engine(s): %s" % healthy)
-        if shutil.which(self.cfg.gh_bin) is None:
-            warnings.append("`gh` CLI not found — PRs fall back to compare links")
+        else:
+            warnings.append("healthy engine(s): claude")
+        gh = self.cfg.resolve_bin(self.cfg.gh_bin)
+        if gh is None:
+            warnings.append("`gh` CLI not found — PRs use the REST API fallback or a compare link")
         else:
             try:
                 auth = subprocess.run(
-                    [self.cfg.gh_bin, "auth", "status"],
+                    [gh, "auth", "status"],
                     capture_output=True, text=True, timeout=15,
+                    env=self.cfg.agent_env(),
                 )
                 if auth.returncode != 0:
-                    warnings.append("`gh` not authenticated (`gh auth login`) — PRs fall back to compare links")
+                    warnings.append("`gh` not authenticated (`gh auth login`) — PRs use the REST API fallback or a compare link")
             except (OSError, subprocess.SubprocessError):
                 warnings.append("`gh auth status` check failed — PRs may fall back to compare links")
         return warnings
+
+    # -- anti-collision ---------------------------------------------------
+
+    def find_active_duplicate(self, task: str) -> Optional[TaskRecord]:
+        """The oldest ACTIVE task whose slug matches *task*, or ``None``.
+
+        Two dispatches that slugify identically are almost always the same
+        feature requested twice; running both branches off ``main`` produced the
+        divergent, conflicting implementations the swarm hit. The bot calls this
+        before submit to warn the operator (see AGENTS.md anti-collision policy).
+        """
+        slug = runner.slugify(task)
+        active = {TaskStatus.QUEUED.value, TaskStatus.RUNNING.value, TaskStatus.PUSHED.value}
+        with self._lock:
+            for rid in sorted(self._records):
+                r = self._records[rid]
+                if r.status in active and runner.slugify(r.task) == slug:
+                    return r
+        return None
