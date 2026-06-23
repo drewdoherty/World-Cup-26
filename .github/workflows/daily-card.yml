@@ -50,8 +50,17 @@ jobs:
           python scripts/wca_build_card.py --hours-ahead 96 >> logs/card.log 2>&1
 
       - name: Regenerate site data
+        # The CI runner has no ledger DB (data/wca.db is gitignored), so
+        # build_site_data returns empty GBP positions and would clobber the
+        # mini's canonical site/data.json that holds the real sportsbook book.
+        # Skip entirely — the Mac Mini's com.wca.build_card service owns this
+        # file and pushes it to main with the full ledger.
         run: |
-          python scripts/wca_site.py >> logs/site.log 2>&1
+          if [ -f data/wca.db ]; then
+            python scripts/wca_site.py >> logs/site.log 2>&1
+          else
+            echo "SKIP: no data/wca.db on CI runner — site/data.json preserved (mini owns it)"
+          fi
 
       - name: Regenerate scores feed
         env:
