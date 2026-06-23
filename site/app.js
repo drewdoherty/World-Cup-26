@@ -251,14 +251,24 @@
       });
     }
 
-    var ticks = [
-      ["Total Wagered", esc(wagered), ""],
-      ["Open Exposure", esc(openExp), ""],
-      ["Settled P&L", plStr, ""]
-    ].concat(retTicks).concat([
+    // PRIMARY row — the four headline KPIs. CLV leads (it is the project's
+    // primary KPI). "Return" uses the first per-currency return tile (£ where
+    // present); any further currency returns spill into the secondary row.
+    var primaryReturn = retTicks.length
+      ? [retTicks[0][0], retTicks[0][1], ""]
+      : ["Return", '<span class="dim">N/A</span>', "dim"];
+    var primaryTicks = [
       ["Avg CLV", esc(clvVal), hasClv ? (Number(clv.avg_clv) >= 0 ? "pos" : "neg") : "dim"],
+      ["Settled P&L", plStr, ""],
+      primaryReturn,
       ["Bet Count", esc(String(t.n_bets || 0)), ""]
-    ]);
+    ];
+
+    // SECONDARY row — everything else, collapsed by default behind "more".
+    var secondaryTicks = [
+      ["Total Wagered", esc(wagered), ""],
+      ["Open Exposure", esc(openExp), ""]
+    ].concat(retTicks.slice(1));
 
     // P&L by source (model / offer / punt), moved here from the venues panel.
     // Each currency leg is coloured by its own sign via moneyByCcyHTML.
@@ -267,16 +277,38 @@
       .forEach(function (pair) {
         var byCcy = ss[pair[0]];
         if (byCcy && ["GBP", "USD", "EUR"].some(function (c) { return byCcy[c]; })) {
-          ticks.push([pair[1], moneyByCcyHTML(byCcy, "settled_pl"), ""]);
+          secondaryTicks.push([pair[1], moneyByCcyHTML(byCcy, "settled_pl"), ""]);
         }
       });
 
-    $("ticker-stats").innerHTML = ticks.map(function (row) {
+    function tickHTML(row) {
       return '<div class="tick">' +
         '<div class="tick-label">' + esc(row[0]) + '</div>' +
         '<div class="tick-value num ' + row[2] + '">' + row[1] + '</div>' +
         '</div>';
-    }).join("");
+    }
+
+    // Primary tiles, then a "more" toggle, then the (hidden) secondary tiles.
+    var html = primaryTicks.map(tickHTML).join("");
+    if (secondaryTicks.length) {
+      html += '<button type="button" class="tick-more" id="tick-more" ' +
+        'aria-expanded="false">more &#9662;</button>' +
+        '<div class="tick-secondary" id="tick-secondary" hidden>' +
+        secondaryTicks.map(tickHTML).join("") + '</div>';
+    }
+    $("ticker-stats").innerHTML = html;
+
+    var moreBtn = $("tick-more");
+    if (moreBtn) {
+      moreBtn.addEventListener("click", function () {
+        var sec = $("tick-secondary");
+        if (!sec) return;
+        var open = !sec.hidden;
+        sec.hidden = open;
+        moreBtn.setAttribute("aria-expanded", String(!open));
+        moreBtn.innerHTML = open ? "more &#9662;" : "less &#9652;";
+      });
+    }
   }
 
   var VENUE_COLOR = { sportsbook: "#4ade80", polymarket: "#60a5fa", kalshi: "#a855f7" };

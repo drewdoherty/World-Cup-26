@@ -119,6 +119,32 @@ body {
   white-space: nowrap;
 }
 
+/* Compact KPI strip: four headline tiles lead, the rest collapse behind a
+   "more" toggle that expands a full-width secondary row of tiles. */
+.tick-more {
+  align-self: center;
+  margin: 0 14px;
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tick-more:hover { color: var(--accent); border-color: var(--accent); }
+.tick-secondary {
+  flex: 1 1 100%;
+  display: flex;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+}
+.tick-secondary[hidden] { display: none; }
+
 /* ---------------------------------------------------------------- No data */
 
 .nodata {

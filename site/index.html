@@ -16,11 +16,12 @@
       <span class="brand-mark">WCA</span>
       <span class="brand-sub">WORLD CUP ALPHA</span>
     </div>
-    <a class="terminal-nav-link" href="./scores.html">Scores &amp; Markets &rarr;</a>
-    <a class="terminal-nav-link" href="./architecture.html">Under The Hood &rarr;</a>
-    <a class="terminal-nav-link" href="./visuals.html">Visuals &rarr;</a>
-    <a class="terminal-nav-link" href="./tracking.html">Tracking &rarr;</a>
-    <a class="terminal-nav-link" href="./promos.html">Promos &amp; Offers &rarr;</a>
+    <nav class="scores-nav">
+      <span class="scores-nav-here">Terminal</span>
+      <a class="scores-nav-link" href="./scores.html">Scores &amp; Markets</a>
+      <a class="scores-nav-link" href="./architecture.html">Under The Hood</a>
+      <a class="scores-nav-link" href="./promos.html">Promos &amp; Offers</a>
+    </nav>
     <div class="ticker-stats" id="ticker-stats">
       <!-- ticker tiles injected here -->
     </div>
@@ -82,6 +83,88 @@
         </div>
       </div>
     </section>
+
+    <!-- ================= Tracking (folded in from the old Tracking tab) ====== -->
+    <section class="panel" style="margin-top:14px">
+      <div class="panel-head">
+        <span class="panel-label">Tracking // Prediction Tracking — Model vs Reality</span>
+        <span class="panel-meta" id="stats-meta"></span>
+      </div>
+      <div class="track-stats" id="stats"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">01 // Model vs Market On The Actual Outcome</span>
+        <span class="panel-meta">edge by Match No. &mdash; bar up/green = model beat the close; hover for standings &amp; scorelines</span>
+      </div>
+      <div class="panel-body" id="outcome-bars"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">02 // Prediction Scoreboard</span>
+        <span class="panel-meta" id="board-meta"></span>
+      </div>
+      <div class="panel-body panel-scroll" id="scoreboard"></div>
+    </section>
+
+    <div class="track-grid">
+      <section class="panel">
+        <div class="panel-head">
+          <span class="panel-label">03 // Calibration (1X2 Legs)</span>
+          <span class="panel-meta">bins come later as N grows</span>
+        </div>
+        <div class="panel-body" id="calibration"></div>
+      </section>
+      <section class="panel">
+        <div class="panel-head">
+          <span class="panel-label">04 // CLV vs P/L (Settled Bets)</span>
+          <span class="panel-meta" id="clv-meta"></span>
+        </div>
+        <div class="panel-body" id="clv-pl"></div>
+      </section>
+    </div>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">05 // P&amp;L by Bet — Model EV &amp; by Source</span>
+        <span class="panel-meta" id="betpnl-meta"></span>
+      </div>
+      <div class="panel-body" id="betpnl"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">06 // Return per &pound;1 / $1 Staked</span>
+        <span class="panel-meta" id="retunit-meta"></span>
+      </div>
+      <div class="panel-body" id="retunit"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">07 // Realized Conviction vs The Market</span>
+        <span class="panel-meta" id="conviction-meta"></span>
+      </div>
+      <div class="panel-body" id="conviction"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">On The Board // Awaiting Results</span>
+        <span class="panel-meta" id="pending-meta"></span>
+      </div>
+      <div class="panel-body panel-scroll" id="pending"></div>
+    </section>
+
+    <div class="track-note">
+      Pre-match predictions reconstructed from daily card history; results updated
+      as matches settle. Model 1X2 uses the exact blended triple persisted at
+      card-build time where available (from 13 Jun); earlier fixtures are
+      approximate (rebuilt from the top-6 scoreline ladder). Market 1X2 is the
+      de-vigged consensus at the last odds capture before kickoff.
+    </div>
   </main>
 
   <footer class="foot">
@@ -90,5 +173,6 @@
   </footer>
 </div>
 <script src="./app.js"></script>
+<script src="./tracking.js"></script>
 </body>
 </html>
