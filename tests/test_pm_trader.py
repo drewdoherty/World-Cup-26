@@ -658,14 +658,49 @@ def _tmp_db() -> str:
     return path
 
 
+def test_ensure_log_table_adds_market_column_to_existing_db(throwaway_key):
+    import sqlite3
+
+    db = _tmp_db()
+    con = sqlite3.connect(db)
+    try:
+        con.execute(
+            "CREATE TABLE pm_order_log ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "ts_utc TEXT NOT NULL, "
+            "day_utc TEXT NOT NULL, "
+            "token_id TEXT NOT NULL, "
+            "side TEXT NOT NULL, "
+            "price REAL NOT NULL, "
+            "size REAL NOT NULL, "
+            "notional REAL NOT NULL, "
+            "order_id TEXT, "
+            "dry_run INTEGER NOT NULL DEFAULT 0)"
+        )
+        con.commit()
+    finally:
+        con.close()
+
+    t = _trader(throwaway_key, dry_run=True, db_path=db)
+    t._ensure_log_table()
+
+    con = sqlite3.connect(db)
+    try:
+        cols = [row[1] for row in con.execute("PRAGMA table_info(pm_order_log)")]
+    finally:
+        con.close()
+    assert "market" in cols
+
+
 def test_dry_run_never_posts(throwaway_key):
     session, _ = _creds_session()
     db = _tmp_db()
     t = _trader(throwaway_key, session=session, dry_run=True, db_path=db, max_order_usd=30.0)
     # token, price, size, side  (bot positional order)
+    question = "2026 FIFA World Cup: Brazil to win?"
     result = t.place_order(
         "1", 0.5, 10.0, "BUY",
-        market_question="2026 FIFA World Cup: Brazil to win?",
+        market_question=question,
     )
     assert result["dry_run"] is True
     assert result["submitted"] is False
@@ -673,6 +708,17 @@ def test_dry_run_never_posts(throwaway_key):
     assert result["request"]["order"]["side"] == "BUY"
     posts = [c for c in session.calls if c["method"] == "POST" and c["url"].endswith("/order")]
     assert posts == []
+    import sqlite3
+
+    con = sqlite3.connect(db)
+    try:
+        rows = con.execute(
+            "SELECT token_id, market, side, notional, order_id, dry_run "
+            "FROM pm_order_log WHERE dry_run = 1"
+        ).fetchall()
+    finally:
+        con.close()
+    assert rows == [("1", question, "BUY", pytest.approx(5.0), None, 1)]
 
 
 def test_dry_run_flag_per_call_overrides_config(throwaway_key):
@@ -844,19 +890,20 @@ def test_live_order_success_writes_pm_order_log_row(throwaway_key):
         return _resp({"orderID": "srv-9", "success": True})
 
     t, db = _live_trader(throwaway_key, _live_creds_handler(post))
-    out = t.place_order("42", 0.4, 25.0, "BUY", market_question="World Cup final")
+    question = "World Cup final"
+    out = t.place_order("42", 0.4, 25.0, "BUY", market_question=question)
     assert out["submitted"] is True
     import sqlite3
 
     con = sqlite3.connect(db)
     try:
         rows = con.execute(
-            "SELECT token_id, side, notional, order_id, dry_run FROM pm_order_log "
+            "SELECT token_id, market, side, notional, order_id, dry_run FROM pm_order_log "
             "WHERE dry_run = 0"
         ).fetchall()
     finally:
         con.close()
-    assert rows == [("42", "BUY", pytest.approx(10.0), "srv-9", 0)]
+    assert rows == [("42", question, "BUY", pytest.approx(10.0), "srv-9", 0)]
 
 
 def test_live_order_network_error_raises_unconfirmed(throwaway_key):
