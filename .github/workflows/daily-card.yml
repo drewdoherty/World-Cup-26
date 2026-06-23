@@ -47,7 +47,7 @@ jobs:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: |
           mkdir -p logs
-          python scripts/wca_build_card.py --hours-ahead 48 >> logs/card.log 2>&1
+          python scripts/wca_build_card.py --hours-ahead 96 >> logs/card.log 2>&1
 
       - name: Regenerate site data
         run: |
@@ -57,7 +57,7 @@ jobs:
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: |
-          python scripts/wca_scores_data.py --hours-ahead 48 >> logs/scores.log 2>&1 || true
+          python scripts/wca_scores_data.py --hours-ahead 96 >> logs/scores.log 2>&1 || true
 
       # NOTE: the prediction-tracking feed (site/tracking_data.json) is NOT
       # rebuilt here on purpose — it needs the ledger DB and full git history,

@@ -39,7 +39,31 @@ jobs:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: |
           mkdir -p logs
-          python scripts/wca_scores_data.py --hours-ahead 48 >> logs/scores.log 2>&1 || true
+          # Run with explicit exit-code check so failures appear red in CI.
+          # `|| true` was hiding silent crashes (bad API key / no upcoming events),
+          # which caused `git diff --cached --quiet` to be true → no commit at all.
+          if python scripts/wca_scores_data.py --hours-ahead 96 >> logs/scores.log 2>&1; then
+            echo "scores: OK"
+          else
+            echo "WARN: wca_scores_data.py failed (see logs) — touching file to stamp the run" | tee -a logs/scores.log
+            # Always update the generation timestamp so there is a diff to commit,
+            # making the staleness visible on the site rather than silently serving
+            # a file from hours ago.
+            python - <<'PY'
+import json, datetime, os, sys
+path = "site/scores_data.json"
+try:
+    with open(path) as fh:
+        data = json.load(fh)
+except Exception:
+    data = {"fixtures": []}
+data.setdefault("meta", {})["generated"] = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+data["meta"]["error"] = "wca_scores_data.py failed — no new fixtures fetched"
+with open(path, "w") as fh:
+    json.dump(data, fh, indent=2)
+print("Stamped %s with error metadata." % path)
+PY
+          fi
           # Enhanced Scores & Markets panel: model scorelines for every upcoming
           # current+next-stage game, pivotable by stage/team. Reuses the committed
           # advancement_data.json for the advancement side.

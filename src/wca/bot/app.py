@@ -113,6 +113,25 @@ def _feed_generated(path: str) -> Optional[str]:
         return None
     return None
 
+# Telegram slash-command menu (registered with setMyCommands at startup).
+# /restart and /structure are intentionally omitted: restart is admin-only
+# and confusing to expose publicly; structure changes rarely.
+_TELEGRAM_COMMANDS = [
+    {"command": "summary",     "description": "Portfolio P&L, ROI, CLV, bankroll by pool"},
+    {"command": "bets",        "description": "Open bets, stakes, max win / max loss by venue"},
+    {"command": "clv",         "description": "Closing-line-value report"},
+    {"command": "card",        "description": "Today's recommended bet card"},
+    {"command": "next",        "description": "Next match preview: winner, corners, scorers"},
+    {"command": "goalscorers", "description": "Anytime + first-goalscorer recs, next 5 games"},
+    {"command": "scores",      "description": "Predicted FT scorelines per fixture"},
+    {"command": "accas",       "description": "4+ leg accumulators, next 5 matches"},
+    {"command": "pm",          "description": "Polymarket parked orders + trader status"},
+    {"command": "settle",      "description": "Settle a bet: /settle <id> <outcome> [odds]"},
+    {"command": "boost",       "description": "Price a bookmaker boost vs the model"},
+    {"command": "ping",        "description": "Liveness check"},
+    {"command": "help",        "description": "Command list"},
+]
+
 HELP_TEXT = (
     "*World Cup Alpha* — manager console\n\n"
     "/summary — portfolio P&L, ROI, CLV, bankroll by pool\n"
@@ -2192,6 +2211,15 @@ def run(
         print("Admin gate active: money actions restricted to user %s" % admin)
     else:
         print("WARNING: TELEGRAM_ADMIN_USER_ID unset — all chat members can confirm orders.")
+
+    # Register the slash-command menu so the '/' button shows the available
+    # commands in the Telegram client.  Best-effort: a failure here must never
+    # prevent the bot from starting.
+    try:
+        client.set_my_commands(_TELEGRAM_COMMANDS)
+        print("Telegram command menu registered (%d commands)." % len(_TELEGRAM_COMMANDS))
+    except Exception as exc:
+        print("WARNING: could not register Telegram commands: %s" % exc)
 
     print("World Cup Alpha bot started. Polling...")
     offset: Optional[int] = None
