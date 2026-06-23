@@ -102,6 +102,12 @@ def test_expected_score_symmetry():
         assert expected_score(d) + expected_score(-d) == pytest.approx(1.0)
 
 
+def test_initial_ratings_seed_known_teams_only():
+    rater = EloRater(initial_rating=1500.0, initial_ratings={"Brazil": 1625.0})
+    assert rater.get_rating("Brazil") == pytest.approx(1625.0)
+    assert rater.get_rating("Unknown") == pytest.approx(1500.0)
+
+
 # ---------------------------------------------------------------------------
 # Conservation: winner gains what loser drops.
 # ---------------------------------------------------------------------------
