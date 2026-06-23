@@ -7,6 +7,8 @@ without git, the network, or the agent CLIs.
 
 from __future__ import annotations
 
+import os
+
 import subprocess
 from pathlib import Path
 
@@ -44,7 +46,7 @@ def make_fake_run(
 
     def fake(cmd, cwd=None, env=None, timeout=None, on_event=None):
         state["calls"].append(list(cmd))
-        if cmd[0] == "git":
+        if os.path.basename(cmd[0]) == "git":
             sub = cmd[3] if len(cmd) > 3 else ""
             if sub == "worktree":
                 return _cp(cmd)
@@ -57,7 +59,7 @@ def make_fake_run(
             if sub == "remote":
                 return _cp(cmd, out=remote)
             return _cp(cmd)
-        if cmd[0] == "gh":
+        if os.path.basename(cmd[0]) == "gh":
             return _cp(cmd, rc=pr_rc, out=pr_url if pr_rc == 0 else "", err="" if pr_rc == 0 else "not logged in")
         # otherwise: the agent invocation. If streaming, emit a couple of
         # stream-json events so live-activity wiring is exercised.
@@ -82,7 +84,7 @@ def patched(monkeypatch):
     """Patch the runner's subprocess seam and make all binaries 'present'."""
     fake = make_fake_run()
     monkeypatch.setattr(runner, "_run", fake)
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     return fake
 
 
@@ -113,7 +115,7 @@ def test_parse_claude_jsonl_takes_last_object():
 
 
 def test_parse_codex_fallback_to_last_lines():
-    summary, tokens = runner._parse_agent_output("codex", "line one\nline two\n")
+    summary, tokens = runner._parse_agent_output("claude", "line one\nline two\n")
     assert "line two" in summary
     assert tokens == 0
 
@@ -185,7 +187,7 @@ def test_run_task_never_pushes_base_branch(cfg, patched):
 
 def test_run_task_agent_failure_marks_failed(cfg, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run(agent_rc=1))
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     rec = _record()
     runner.run_task(cfg, rec)
     assert rec.status == TaskStatus.FAILED.value
@@ -194,7 +196,7 @@ def test_run_task_agent_failure_marks_failed(cfg, monkeypatch):
 
 def test_run_task_no_changes(cfg, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run(has_changes=False))
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     rec = _record()
     runner.run_task(cfg, rec)
     assert rec.status == TaskStatus.NO_CHANGES.value
@@ -202,7 +204,7 @@ def test_run_task_no_changes(cfg, monkeypatch):
 
 def test_run_task_pr_fallback_to_compare_link(cfg, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run(pr_rc=1))
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     rec = _record()
     runner.run_task(cfg, rec)
     assert rec.status == TaskStatus.PUSHED.value
@@ -212,7 +214,7 @@ def test_run_task_pr_fallback_to_compare_link(cfg, monkeypatch):
 
 def test_run_task_missing_cli_fails_cleanly(cfg, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run())
-    monkeypatch.setattr(runner.shutil, "which", lambda b: None)  # nothing on PATH
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: None)  # nothing installed
     rec = _record()
     runner.run_task(cfg, rec)
     assert rec.status == TaskStatus.FAILED.value
@@ -224,7 +226,7 @@ def test_run_task_missing_cli_fails_cleanly(cfg, monkeypatch):
 
 def test_manager_submit_runs_to_done(tmp_path, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run())
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
     rec = mgr.submit("claude", "do work", chat_id="99")
     mgr._futures[rec.id].result(timeout=10)
@@ -263,7 +265,7 @@ def test_manager_cancel_queued_task(tmp_path, monkeypatch):
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
     _stub_health(mgr, claude_ok=True, codex_ok=True)
     running = mgr.submit("claude", "occupies the worker")
-    queued = mgr.submit("codex", "stuck in the queue")
+    queued = mgr.submit("claude", "stuck in the queue")
     cancelled = mgr.cancel(queued.id)
     assert cancelled.status == TaskStatus.REJECTED.value
     assert cancelled.error == "cancelled before start"
@@ -278,46 +280,24 @@ def test_manager_unknown_engine_rejected(tmp_path):
 
 
 def test_dispatcher_sends_background_work_to_claude():
-    decision = choose_engine("run a background Telegram report sender", codex_available=True)
+    decision = choose_engine("run a background Telegram report sender")
     assert decision.engine is Engine.CLAUDE
-    assert "background" in decision.reason
-
-
-def test_dispatcher_spends_codex_only_on_mechanical_tasks():
-    decision = choose_engine("fix typo in README wording", codex_available=True)
-    assert decision.engine is Engine.CODEX
-
-
-def test_dispatcher_overflows_codex_to_claude_when_cap_reached():
-    decision = choose_engine("fix typo in README wording", codex_available=False)
-    assert decision.engine is Engine.CLAUDE
-    assert "unavailable" in decision.reason
+    assert decision.reason == "Claude"
 
 
 def test_manager_submit_auto_routes_and_records_reason(tmp_path, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run())
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
     rec = mgr.submit_auto("build a background bot monitor")
     mgr._futures[rec.id].result(timeout=10)
     assert rec.engine == Engine.CLAUDE.value
-    assert rec.route_reason.startswith("Claude:")
-
-
-def test_manager_submit_auto_respects_codex_auto_limit_zero(tmp_path, monkeypatch):
-    monkeypatch.setattr(runner, "_run", make_fake_run())
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
-    cfg = ConductorConfig(repo_root=tmp_path, max_parallel=1, codex_auto_limit=0)
-    mgr = ConductorManager(cfg)
-    rec = mgr.submit_auto("fix typo in README wording")
-    mgr._futures[rec.id].result(timeout=10)
-    assert rec.engine == Engine.CLAUDE.value
-    assert "unavailable" in rec.route_reason
+    assert rec.route_reason.startswith("Claude")
 
 
 def test_status_table_empty_and_populated(tmp_path, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run())
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
     assert "No conductor tasks" in mgr.status_table()
     rec = mgr.submit("claude", "render me")
@@ -348,7 +328,8 @@ def test_config_zero_budget_means_unlimited(tmp_path):
 
 def test_engine_coerce():
     assert Engine.coerce("CLAUDE") is Engine.CLAUDE
-    assert Engine.coerce("codex") is Engine.CODEX
+    with pytest.raises(ValueError):
+        Engine.coerce("codex")  # removed from the swarm 2026-06
     with pytest.raises(ValueError):
         Engine.coerce("bard")
 
@@ -360,7 +341,7 @@ def test_run_agent_surfaces_stdout_error_not_logged_in(cfg, monkeypatch):
     # claude --output-format json writes the real reason to STDOUT, not stderr.
     out = '{"type":"result","is_error":true,"result":"Not logged in · Please run /login"}'
     monkeypatch.setattr(runner, "_run", make_fake_run(agent_rc=1, agent_stdout=out))
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     res = runner.run_agent(cfg, "claude", "do x", Path("/tmp/wt"))
     assert res.returncode != 0
     assert "Not logged in" in res.error
@@ -370,7 +351,7 @@ def test_run_agent_surfaces_stdout_error_not_logged_in(cfg, monkeypatch):
 def test_run_agent_treats_is_error_as_failure_on_exit_0(cfg, monkeypatch):
     out = '{"is_error":true,"result":"boom"}'
     monkeypatch.setattr(runner, "_run", make_fake_run(agent_rc=0, agent_stdout=out))
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     res = runner.run_agent(cfg, "claude", "do x", Path("/tmp/wt"))
     assert res.returncode != 0
     assert res.error == "boom"
@@ -379,7 +360,7 @@ def test_run_agent_treats_is_error_as_failure_on_exit_0(cfg, monkeypatch):
 def test_run_task_cleans_up_worktree_on_failure(cfg, monkeypatch):
     fake = make_fake_run(agent_rc=1, agent_stdout='{"is_error":true,"result":"nope"}')
     monkeypatch.setattr(runner, "_run", fake)
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     rec = _record()
     runner.run_task(cfg, rec)
     assert rec.status == TaskStatus.FAILED.value
@@ -389,25 +370,6 @@ def test_run_task_cleans_up_worktree_on_failure(cfg, monkeypatch):
 
 
 # -- codex sandbox (regression: read-only -> agent can't edit -> NO_CHANGES) -
-
-
-def test_codex_args_default_to_workspace_write(tmp_path):
-    cfg = ConductorConfig(repo_root=tmp_path)
-    binary, args = cfg.cli_for("codex")
-    assert "--sandbox" in args and "workspace-write" in args
-
-
-def test_codex_command_puts_sandbox_flag_before_prompt(cfg, monkeypatch):
-    fake = make_fake_run()
-    monkeypatch.setattr(runner, "_run", fake)
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
-    runner.run_agent(cfg, "codex", "do the thing", Path("/tmp/wt"))
-    agent_cmds = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")]
-    assert agent_cmds, "expected a codex invocation"
-    cmd = agent_cmds[0]
-    assert "exec" in cmd and "--sandbox" in cmd and "workspace-write" in cmd
-    # flags must precede the positional prompt or codex won't parse them
-    assert cmd.index("--sandbox") < cmd.index("do the thing")
 
 
 # -- engine health + availability-aware routing ----------------------------
@@ -420,34 +382,19 @@ from wca.conductor.health import EngineHealth  # noqa: E402
 def test_probe_claude_detects_not_logged_in(cfg, monkeypatch):
     out = '{"is_error":true,"result":"Not logged in · Please run /login"}'
     monkeypatch.setattr(health.runner, "_run", make_fake_run(agent_rc=1, agent_stdout=out))
-    monkeypatch.setattr(health.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     h = health.probe_claude(cfg)
     assert h.ok is False and "logged in" in h.reason.lower()
 
 
 def test_probe_claude_ok(cfg, monkeypatch):
     monkeypatch.setattr(health.runner, "_run", make_fake_run(agent_stdout='{"result":"ok"}'))
-    monkeypatch.setattr(health.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     assert health.probe_claude(cfg).ok is True
 
 
-def test_probe_codex_uses_auth_file(cfg, monkeypatch):
-    monkeypatch.setattr(health.shutil, "which", lambda b: "/usr/bin/%s" % b)
-    monkeypatch.setattr(health.os.path, "exists", lambda p: True)
-    monkeypatch.setattr(health.os.path, "getsize", lambda p: 4000)
-    assert health.probe_codex(cfg).ok is True
-    monkeypatch.setattr(health.os.path, "exists", lambda p: False)
-    assert health.probe_codex(cfg).ok is False
-
-
-def test_choose_engine_falls_back_when_claude_unavailable():
-    # a Claude-first task with claude down -> Codex
-    d = choose_engine("refactor the model", codex_available=True, claude_available=False)
-    assert d.engine is Engine.CODEX
-
-
 def test_choose_engine_no_healthy_engine_returns_preferred():
-    d = choose_engine("refactor the model", codex_available=False, claude_available=False)
+    d = choose_engine("refactor the model", claude_available=False)
     assert d.engine is Engine.CLAUDE and "no healthy engine" in d.reason
 
 
@@ -459,31 +406,12 @@ def _stub_health(mgr, claude_ok, codex_ok):
     mgr.engine_health = fake  # type: ignore[assignment]
 
 
-def test_explicit_claude_reroutes_to_codex_when_logged_out(tmp_path, monkeypatch):
-    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
-    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
-    _stub_health(mgr, claude_ok=False, codex_ok=True)
-    rec = mgr.submit("claude", "do background work")
-    assert rec.engine == "codex"
-    assert "rerouted claude" in rec.route_reason
-    assert rec.status != TaskStatus.REJECTED.value
-
-
 def test_explicit_claude_rejected_when_both_down(tmp_path, monkeypatch):
     monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
     _stub_health(mgr, claude_ok=False, codex_ok=False)
     rec = mgr.submit("claude", "do work")
     assert rec.status == TaskStatus.REJECTED.value and "logged out" in rec.error
-
-
-def test_submit_auto_routes_to_codex_when_claude_down(tmp_path, monkeypatch):
-    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
-    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
-    _stub_health(mgr, claude_ok=False, codex_ok=True)
-    rec = mgr.submit_auto("write a research report on the model")
-    assert rec.engine == "codex"
-    assert rec.status != TaskStatus.REJECTED.value
 
 
 # -- worktree creation is serialized (regression: concurrent `git worktree add`) -
@@ -502,43 +430,13 @@ def test_create_worktree_holds_worktree_lock(cfg, monkeypatch):
     assert seen.get("locked") is True, "git worktree add must run under _WORKTREE_LOCK"
 
 
-def test_submit_auto_ignores_codex_cap_when_claude_down(tmp_path, monkeypatch):
-    # Regression: with claude logged out and the Codex auto-cap "reached", a
-    # /task must still go to Codex — not mis-route to a dead Claude.
-    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
-    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, codex_auto_limit=1))
-    _stub_health(mgr, claude_ok=False, codex_ok=True)
-    # simulate one Codex task already active (cap of 1 reached)
-    mgr._records[99] = TaskRecord(id=99, engine="codex", task="busy",
-                                  status=TaskStatus.RUNNING.value)
-    rec = mgr.submit_auto("write a background research report")
-    assert rec.engine == "codex"
-    assert rec.status != TaskStatus.REJECTED.value
-
-
 # -- disabled engines (e.g. Codex exhausted -> Claude-only cluster) ---------
-
-
-def test_disabled_engine_reports_unavailable(tmp_path):
-    cfg = ConductorConfig(repo_root=tmp_path, disabled_engines=["Codex"])
-    assert cfg.is_disabled("codex") and not cfg.is_disabled("claude")
-    h = ConductorManager(cfg).engine_health("codex")
-    assert h.ok is False and "disabled" in h.reason
 
 
 def test_from_env_reads_disabled_engines(tmp_path, monkeypatch):
     monkeypatch.setenv("WCA_CONDUCTOR_DISABLED_ENGINES", "codex")
     cfg = ConductorConfig.from_env(tmp_path)
     assert cfg.disabled_engines == ["codex"]
-
-
-def test_explicit_codex_reroutes_to_claude_when_disabled(tmp_path, monkeypatch):
-    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
-    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, disabled_engines=["codex"]))
-    # claude healthy, codex disabled -> /codex reroutes to claude
-    mgr._health["claude"] = EngineHealth("claude", True, "ok", checked_at=9e18)
-    rec = mgr.submit("codex", "do a thing")
-    assert rec.engine == "claude" and rec.status != TaskStatus.REJECTED.value
 
 
 # -- /model usage + /agents views ------------------------------------------
@@ -553,7 +451,7 @@ def test_model_usage_table_groups_ongoing_and_parked_by_agent(tmp_path):
     assert "Model usage" in out
     assert "1 running" in out and "1 parked" in out
     assert "#1" in out and "build the thing" in out
-    assert "codex" in out  # both engines listed
+    assert "claude" in out  # the sole engine
 
 
 def test_agents_spec_table_shows_specs_and_architecture(tmp_path):
@@ -561,9 +459,8 @@ def test_agents_spec_table_shows_specs_and_architecture(tmp_path):
     _stub_health(mgr, claude_ok=True, codex_ok=True)
     out = mgr.agents_spec_table()
     assert "Agents" in out and "Shared architecture" in out
-    assert "claude" in out and "codex" in out
-    assert "disabled" in out          # codex marked disabled
-    assert "workspace-write" in out   # codex args surfaced
+    assert "claude" in out
+    assert "sole route" in out        # claude-only role text
     assert "PR-only" in out or "never commits" in out
 
 
@@ -659,7 +556,7 @@ def test_swarm_runs_many_tasks_in_parallel_without_collision(tmp_path, monkeypat
     # per-worktree index make cap>1 safe. Stress 12 tasks through a 4-wide pool
     # and assert no id/branch collision and every task completes.
     monkeypatch.setattr(runner, "_run", make_fake_run())
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=4))
     _stub_health(mgr, claude_ok=True, codex_ok=True)
     recs = [mgr.submit("claude", "task %d" % i) for i in range(12)]
@@ -693,7 +590,7 @@ def test_merge_refuses_when_not_green(tmp_path, monkeypatch):
     import subprocess as sp
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
     _done_pr_record(mgr)
-    monkeypatch.setattr(mgr_mod.shutil, "which", lambda b: "/usr/bin/gh")
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/gh")
 
     def fake_run(cmd, **kw):
         if "view" in cmd:
@@ -708,7 +605,7 @@ def test_merge_squash_merges_when_green(tmp_path, monkeypatch):
     import subprocess as sp
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
     _done_pr_record(mgr)
-    monkeypatch.setattr(mgr_mod.shutil, "which", lambda b: "/usr/bin/gh")
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/gh")
     calls = []
 
     def fake_run(cmd, **kw):
@@ -725,7 +622,7 @@ def test_merge_squash_merges_when_green(tmp_path, monkeypatch):
 def test_merge_refuses_without_gh(tmp_path, monkeypatch):
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
     _done_pr_record(mgr)
-    monkeypatch.setattr(mgr_mod.shutil, "which", lambda b: None)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: None)
     ok, msg = mgr.merge_task(1)
     assert ok is False and "gh" in msg.lower()
 
@@ -753,22 +650,12 @@ def test_env_can_still_opt_into_a_swarm(tmp_path, monkeypatch):
 def test_claude_prompt_after_double_dash_survives_leading_dash(cfg, monkeypatch):
     fake = make_fake_run()
     monkeypatch.setattr(runner, "_run", fake)
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     runner.run_agent(cfg, "claude", "- send a message when done", Path("/tmp/wt"))
-    cmd = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")][0]
+    cmd = [c for c in fake.state["calls"] if c and os.path.basename(c[0]) not in ("git", "gh")][0]
     assert "--" in cmd, "option parsing must be terminated before the prompt"
     assert cmd.index("--") < cmd.index("- send a message when done")
     assert cmd[-1] == "- send a message when done"  # prompt is the final operand
-
-
-def test_codex_prompt_after_double_dash(cfg, monkeypatch):
-    fake = make_fake_run()
-    monkeypatch.setattr(runner, "_run", fake)
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
-    runner.run_agent(cfg, "codex", "-x leading dash", Path("/tmp/wt"))
-    cmd = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")][0]
-    assert "exec" in cmd and "--sandbox" in cmd
-    assert "--" in cmd and cmd[-1] == "-x leading dash"
 
 
 # -- pasted-screenshot end-to-end (image paste) ----------------------------
@@ -798,7 +685,7 @@ def test_augment_task_with_images_mentions_paths():
 def test_run_task_stages_images_into_prompt_and_cleans_up(cfg, monkeypatch, tmp_path):
     fake = make_fake_run()
     monkeypatch.setattr(runner, "_run", fake)
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     img = tmp_path / "shot.png"
     img.write_bytes(b"\x89PNG\r\n\x1a\nFAKE")
     rec = _record()
@@ -806,7 +693,7 @@ def test_run_task_stages_images_into_prompt_and_cleans_up(cfg, monkeypatch, tmp_
     runner.run_task(cfg, rec)
     assert rec.status == TaskStatus.DONE.value
     # the agent's prompt pointed at the staged screenshot...
-    cmd = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")][0]
+    cmd = [c for c in fake.state["calls"] if c and os.path.basename(c[0]) not in ("git", "gh")][0]
     assert ".conductor_inbox/01.png" in cmd[-1]
     # ...but the inbox is gone before commit, so it never reaches the PR.
     assert not (Path(rec.worktree_path) / ".conductor_inbox").exists()
@@ -815,10 +702,10 @@ def test_run_task_stages_images_into_prompt_and_cleans_up(cfg, monkeypatch, tmp_
 def test_run_task_without_images_leaves_prompt_unchanged(cfg, monkeypatch):
     fake = make_fake_run()
     monkeypatch.setattr(runner, "_run", fake)
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     rec = _record(task="just do the thing")
     runner.run_task(cfg, rec)
-    cmd = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")][0]
+    cmd = [c for c in fake.state["calls"] if c and os.path.basename(c[0]) not in ("git", "gh")][0]
     assert cmd[-1] == "just do the thing"  # no screenshot note appended
 
 
@@ -886,3 +773,26 @@ def test_retry_preserves_images(tmp_path, monkeypatch):
     assert retried.id != rec.id
     assert retried.images == ["/tmp/a.png"]
     mgr._futures[retried.id].result(timeout=10)
+
+
+# -- Claude-only routing + anti-collision (Codex removed 2026-06) ----------
+
+
+def test_choose_engine_is_claude_only():
+    for t in ("fix typo in readme", "refactor the model", "rename a var"):
+        d = choose_engine(t)
+        assert d.engine is Engine.CLAUDE
+
+
+def test_engine_has_no_codex_member():
+    assert [e.value for e in Engine] == ["claude"]
+
+
+def test_find_active_duplicate_flags_same_slug(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=2))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    first = mgr.submit("claude", "design and implement /accas function")
+    dup = mgr.find_active_duplicate("design and implement /accas function")
+    assert dup is not None and dup.id == first.id
+    assert mgr.find_active_duplicate("a totally different task") is None

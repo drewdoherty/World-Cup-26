@@ -12,10 +12,9 @@ from typing import List, Optional
 
 
 class Engine(str, Enum):
-    """Which headless coding agent runs the task."""
+    """Which headless coding agent runs the task (Claude-only since 2026-06)."""
 
     CLAUDE = "claude"
-    CODEX = "codex"
 
     @classmethod
     def coerce(cls, value: str) -> "Engine":

@@ -1,8 +1,8 @@
 """WCA dev-conductor — fan tasks out to headless coding agents.
 
 A *separate* dev-only subsystem (NOT the betting bot): one Telegram interface
-that dispatches a task to a headless coding agent (``claude -p`` or
-``codex exec``), each in its own fresh git worktree + branch off ``main``,
+that dispatches a task to a headless Claude Code agent (``claude -p``),
+each in its own fresh git worktree + branch off ``main``,
 then commits, pushes, and opens a PR. Several tasks run in parallel.
 
 Guardrails baked in (see :mod:`wca.conductor.runner` / :mod:`wca.conductor.manager`):

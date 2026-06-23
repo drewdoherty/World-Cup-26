@@ -1,22 +1,13 @@
-"""Engine health/availability probing for availability-aware routing.
+"""Engine health/availability probing (Claude-only).
 
-The router must not dispatch to a logged-out engine. We probe each engine's
-auth state cheaply and cache it (see :class:`ConductorManager`), so ``/task``
-— and even an explicit ``/claude`` when Claude is logged out — can fall back
-to a healthy engine instead of failing with "agent exited 1".
-
-Probes:
-* **claude** — a real ``claude -p "ok" --output-format json`` (the only
-  reliable signal; a logged-out CLI returns ``is_error`` + "Not logged in" on
-  stdout instantly). Reuses :func:`runner._last_json_object`.
-* **codex** — a cheap file heuristic (``~/.codex/auth.json`` present &
-  non-empty) to avoid spending Codex tokens just to check health.
+The router must not dispatch to a logged-out engine. We probe Claude's auth
+state cheaply and cache it (see :class:`ConductorManager`) so ``/claude`` /
+``/task`` report a clear "not logged in" reason instead of failing with a bare
+"agent exited 1". Codex was removed from the swarm (2026-06).
 """
 
 from __future__ import annotations
 
-import os
-import shutil
 import subprocess
 from dataclasses import dataclass
 
@@ -33,22 +24,16 @@ class EngineHealth:
     checked_at: float = 0.0
 
 
-def _bin_present(binary: str) -> bool:
-    """True if *binary* is runnable (abs path exists, or bare name on PATH)."""
-    if not binary:
-        return False
-    if "/" in binary:
-        return os.path.exists(binary)
-    return shutil.which(binary) is not None
-
-
 def probe_claude(cfg: ConductorConfig, timeout: float = 30.0) -> EngineHealth:
     eng = Engine.CLAUDE.value
-    if not _bin_present(cfg.claude_bin):
+    # Resolve on the AUGMENTED PATH (incl. ~/.local/bin, Homebrew) so an
+    # installed CLI is found even under a minimal launch env.
+    binary = cfg.resolve_bin(cfg.claude_bin)
+    if binary is None:
         return EngineHealth(eng, False, "claude CLI not found (%s)" % cfg.claude_bin)
     try:
         res = runner._run(
-            [cfg.claude_bin, "-p", "ok", "--output-format", "json"],
+            [binary, "-p", "ok", "--output-format", "json"],
             env=cfg.agent_env(),
             timeout=timeout,
         )
@@ -66,20 +51,6 @@ def probe_claude(cfg: ConductorConfig, timeout: float = 30.0) -> EngineHealth:
     return EngineHealth(eng, True, "ok")
 
 
-def probe_codex(cfg: ConductorConfig) -> EngineHealth:
-    eng = Engine.CODEX.value
-    if not _bin_present(cfg.codex_bin):
-        return EngineHealth(eng, False, "codex CLI not found (%s)" % cfg.codex_bin)
-    auth = os.path.expanduser("~/.codex/auth.json")
-    try:
-        if os.path.exists(auth) and os.path.getsize(auth) > 0:
-            return EngineHealth(eng, True, "ok")
-    except OSError:
-        pass
-    return EngineHealth(eng, False, "codex not logged in — run `codex login`")
-
-
 def probe_engine(cfg: ConductorConfig, engine: str) -> EngineHealth:
-    if Engine.coerce(engine) is Engine.CLAUDE:
-        return probe_claude(cfg)
-    return probe_codex(cfg)
+    Engine.coerce(engine)  # validate (raises on anything but claude)
+    return probe_claude(cfg)
