@@ -1,23 +1,18 @@
-<!-- generated: 2026-06-22T04:02:11 -->
-⚽ *Next match* — Argentina vs Austria
-Kickoff 2026-06-22 17:00:00+00:00
+<!-- generated: 2026-06-23T19:27:22 -->
+⚽ *Next match* — England vs Ghana
+Kickoff 2026-06-23 20:00:00+00:00
 
 *Winner* (model blend)
-  Argentina       65.1%  fair 1.54  best 1.53 (betway) -0.4%
-  Draw            22.4%  fair 4.46  best 4.40 (betfair_ex_uk) -1.3%
-  Austria         12.5%  fair 8.02  best 8.20 (betfair_ex_uk) +2.3% ✅  £1.18
+  England         79.5%  fair 1.26  best 1.20 (betfair_ex_uk) -4.6%
+  Draw            14.5%  fair 6.88  best 8.20 (betfair_ex_uk) +19.2% ✅  £10.00
+  Ghana            5.9%  fair 16.85  best 20.00 (betfair_ex_uk) +18.7% ✅  £3.70
   _stake = ¼-Kelly @ £1500 bankroll (+EV picks)_
 
 *Corners* (model, exp 8.4)
-  O/U 8.5: over 46.1% / under 53.9%  fair 2.17 / 1.86
+  O/U 8.5: over 45.9% / under 54.1%  fair 2.18 / 1.85
 
-*Anytime scorer* (best book price, vig in)
-  Lionel Messi        2.10 (Betfair)  imp 48%
-  Lautaro Martinez    2.52 (Betfair)  imp 40%
-  Jose Manuel Albert  2.60 (William Hill)  imp 38%
-  Julian Alvarez      2.60 (Betfair)  imp 38%
-  Giuliano Simeone    3.70 (William Hill)  imp 27%
+*Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-1-0 15.6% | 2-0 14.0% | 1-1 10.3% | 2-1 9.7% | 0-0 8.8% | 3-0 8.1%
-  O/U 2.5: over 44.3% / under 55.7%   BTTS 40.9%
+1-0 19.0% | 2-0 18.4% | 3-0 11.6% | 2-1 9.3% | 0-0 6.6% | 1-1 6.3%
+  O/U 2.5: over 46.0% / under 54.0%   BTTS 32.1%
