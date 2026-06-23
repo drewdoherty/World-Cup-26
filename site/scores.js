@@ -202,11 +202,21 @@
     return rows + evHtml + summ;
   }
 
+  // ---- date formatting helper ---------------------------------------------
+  function fmtDate(d) {
+    var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    var parts = d.split("-");
+    if (parts.length < 3) return d;
+    var m = months[parseInt(parts[1], 10) - 1] || parts[1];
+    return m + " " + parseInt(parts[2], 10);
+  }
+
   // ---- fixture card -------------------------------------------------------
-  function renderFixtureCard(fx, exp) {
+  function renderFixtureCard(fx, exp, dateKey) {
     var kickoff = timeOnly(fx.kickoff || (exp && exp.kickoff));
     var kickHtml = kickoff ? '<span class="sc-kick num">' + esc(kickoff) + '</span>' : '';
-    return '<div class="sc-card">' +
+    var dateAttr = dateKey ? ' data-date="' + esc(dateKey) + '"' : '';
+    return '<div class="sc-card"' + dateAttr + '>' +
         '<div class="sc-head">' +
           '<span class="sc-title">' + esc(fx.fixture) + '</span>' + kickHtml +
         '</div>' +
@@ -304,11 +314,58 @@
       $("scores-meta").textContent = "0";
       return;
     }
-    $("scores-meta").textContent =
-      fixtures.length + " fixture" + (fixtures.length === 1 ? "" : "s");
-    $("scores").innerHTML = fixtures.map(function (fx) {
-      return renderFixtureCard(fx, expByName[fx.fixture]);
+
+    // Collect unique dates from kickoffs (YYYY-MM-DD), preserving order
+    var dates = [], seenDates = {};
+    fixtures.forEach(function (fx) {
+      var exp = expByName[fx.fixture];
+      var ko = fx.kickoff || (exp && exp.kickoff);
+      var dk = ko ? String(ko).slice(0, 10) : "";
+      if (dk && !seenDates[dk]) { seenDates[dk] = true; dates.push(dk); }
+    });
+    dates.sort();
+
+    // Build card HTML with data-date attributes
+    var cardsHtml = fixtures.map(function (fx) {
+      var exp = expByName[fx.fixture];
+      var ko = fx.kickoff || (exp && exp.kickoff);
+      var dk = ko ? String(ko).slice(0, 10) : "";
+      return renderFixtureCard(fx, exp, dk);
     }).join("");
+
+    // Build tabs only when there are multiple distinct dates
+    var tabsHtml = "";
+    if (dates.length > 1) {
+      var items = '<button class="sc-tab sc-tab-active" data-filter="all">All</button>';
+      items += dates.map(function (d) {
+        return '<button class="sc-tab" data-filter="' + esc(d) + '">' + esc(fmtDate(d)) + '</button>';
+      }).join("");
+      tabsHtml = '<div class="sc-tabs">' + items + '</div>';
+    }
+
+    $("scores-meta").textContent = fixtures.length + " fixture" + (fixtures.length === 1 ? "" : "s");
+    $("scores").innerHTML = tabsHtml + '<div class="sc-cards">' + cardsHtml + '</div>';
+
+    // Wire up tab filtering
+    if (dates.length > 1) {
+      $("scores").addEventListener("click", function (e) {
+        var btn = e.target.closest ? e.target.closest(".sc-tab") : null;
+        if (!btn) return;
+        var filter = btn.getAttribute("data-filter");
+        var allTabs = $("scores").querySelectorAll(".sc-tab");
+        for (var i = 0; i < allTabs.length; i++) {
+          allTabs[i].classList.toggle("sc-tab-active", allTabs[i] === btn);
+        }
+        var cards = $("scores").querySelectorAll(".sc-card");
+        var count = 0;
+        for (var j = 0; j < cards.length; j++) {
+          var show = filter === "all" || cards[j].getAttribute("data-date") === filter;
+          cards[j].style.display = show ? "" : "none";
+          if (show) count++;
+        }
+        $("scores-meta").textContent = count + " fixture" + (count === 1 ? "" : "s");
+      });
+    }
   }
 
   function renderFooter(scoresData, expData) {
