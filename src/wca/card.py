@@ -35,12 +35,53 @@ import pandas as pd
 from wca.data.teamnames import canonical
 from wca.markets import devig as devig_mod
 from wca.markets import kelly as kelly_mod
+from wca.models import venues as venues_mod
 from wca.models.dixon_coles import DixonColesModel
 from wca.models.elo import EloOutcomeModel, EloRater
 from wca.models.scores import ScorelineCard, scoreline_card
 
 # 1X2 outcome order used throughout: home, draw, away.
 OUTCOMES = ("home", "draw", "away")
+
+# 2026 is a neutral-venue, three-co-host tournament, not a single-country home
+# tournament. Use half of the classic 100 Elo-point home edge for a host's own
+# neutral group fixtures: it is large enough to price crowd/travel familiarity,
+# but avoids treating every co-host match as a full domestic home international.
+DEFAULT_NEUTRAL_HOST_FACTOR = 0.5
+
+# Map a one-unit Dixon-Coles log-goal strength prior to Elo points. The default
+# structural DC prior is 0.15 at one standard deviation, so this yields a modest
+# 60-point Elo seed at 1 sd: informative for cold-start teams, quickly swamped by
+# match history for established teams.
+DEFAULT_ELO_POINTS_PER_DC_PRIOR = 400.0
+
+# The 2026 logged-results grid currently chooses a very conservative 0.05x
+# multiplier on the World Football Elo K ladder. Keep it reported as an
+# opt-in calibration knob; the default remains the established ladder because
+# the logged sample is still only 31 matches and tiny samples can invert the
+# ordered-logit slope.
+LOGGED_RESULTS_ELO_K_SCALE = 0.05
+DEFAULT_ELO_K_SCALE = 1.0
+
+
+def _elo_initial_ratings_from_dc_prior(
+    *,
+    prior_scale: float,
+    points_per_dc_prior: float = DEFAULT_ELO_POINTS_PER_DC_PRIOR,
+    base_rating: float = 1500.0,
+) -> Dict[str, float]:
+    """Convert the Dixon-Coles structural prior into per-team Elo seeds."""
+    from wca.models.structural import dc_priors_from_factors
+
+    seed_atk, seed_dfc = dc_priors_from_factors(scale=prior_scale)
+    teams = set(seed_atk) | set(seed_dfc)
+    out: Dict[str, float] = {}
+    for team in teams:
+        prior = 0.5 * (
+            float(seed_atk.get(team, 0.0)) + float(seed_dfc.get(team, 0.0))
+        )
+        out[team] = float(base_rating) + float(points_per_dc_prior) * prior
+    return out
 
 
 @dataclass
@@ -294,6 +335,10 @@ def fit_models(
     reference_date: Optional[str] = None,
     structural_prior: bool = False,
     structural_prior_scale: Optional[float] = None,
+    elo_seed_from_dc_prior: bool = True,
+    elo_prior_scale: Optional[float] = None,
+    elo_points_per_dc_prior: float = DEFAULT_ELO_POINTS_PER_DC_PRIOR,
+    elo_k_scale: float = DEFAULT_ELO_K_SCALE,
 ) -> FittedModels:
     """Fit Elo (rating + outcome) and Dixon-Coles on the results history.
 
@@ -318,8 +363,39 @@ def fit_models(
     """
     played = _played(results)
 
+    # -- Shared Dixon-Coles priors -----------------------------------------
+    from wca.models.dixon_coles import xi_from_half_life
+
+    # Structural shrinkage prior (opt-in, default off). When enabled, low-data
+    # teams shrink toward a socio-economic estimate instead of the global mean.
+    atk_prior = dfc_prior = None
+    from wca.models.structural import DEFAULT_PRIOR_SCALE, dc_priors_from_factors
+
+    scale = DEFAULT_PRIOR_SCALE if structural_prior_scale is None else structural_prior_scale
+    if structural_prior:
+        atk_prior, dfc_prior = dc_priors_from_factors(scale=scale)
+
+    # Elo uses the same DC prior family as an initial-rating seed by default,
+    # without forcing the Dixon-Coles likelihood itself to use structural
+    # shrinkage. Missing teams retain the flat Elo default.
+    elo_initial_ratings: Dict[str, float] = {}
+    if elo_seed_from_dc_prior:
+        seed_scale = scale if elo_prior_scale is None else elo_prior_scale
+        elo_initial_ratings = _elo_initial_ratings_from_dc_prior(
+            prior_scale=seed_scale,
+            points_per_dc_prior=elo_points_per_dc_prior,
+        )
+
     # -- Elo ratings --------------------------------------------------------
-    rater = EloRater()
+    k_factors = None
+    if elo_k_scale != 1.0:
+        from wca.models.elo import DEFAULT_K_FACTORS
+
+        k_factors = {
+            k: float(v) * float(elo_k_scale)
+            for k, v in DEFAULT_K_FACTORS.items()
+        }
+    rater = EloRater(initial_ratings=elo_initial_ratings, k_factors=k_factors)
     out = rater.rate_matches(played, return_history=True)
     history = out["history"]
 
@@ -337,19 +413,6 @@ def fit_models(
     elo_outcome = EloOutcomeModel().fit(diffs, outcomes)
 
     # -- Dixon-Coles --------------------------------------------------------
-    from wca.models.dixon_coles import xi_from_half_life
-
-    # Structural shrinkage prior (opt-in, default off). When enabled, low-data
-    # teams shrink toward a socio-economic estimate instead of the global mean.
-    atk_prior = dfc_prior = None
-    if structural_prior:
-        from wca.models.structural import DEFAULT_PRIOR_SCALE, dc_priors_from_factors
-
-        scale = (
-            DEFAULT_PRIOR_SCALE if structural_prior_scale is None else structural_prior_scale
-        )
-        atk_prior, dfc_prior = dc_priors_from_factors(scale=scale)
-
     dc = DixonColesModel(
         xi=xi_from_half_life(half_life_years),
         attack_prior=atk_prior,
@@ -509,6 +572,7 @@ def _iter_fixture_blends(
     fixtures_meta: pd.DataFrame,
     weights: BlendWeights,
     host_nations: Sequence[str],
+    neutral_host_factor: float = DEFAULT_NEUTRAL_HOST_FACTOR,
 ) -> List[_FixtureBlend]:
     """Compute the blended 1X2 for every fixture with a usable market.
 
@@ -541,7 +605,16 @@ def _iter_fixture_blends(
         elif not neutral:
             host = home  # genuine home team
 
-        e_h, e_d, e_a = elo_probs(models, home, away, neutral=neutral, host=host)
+        host_points = None
+        if neutral and host is not None:
+            host_points = venues_mod.host_advantage_points(
+                models.rater.home_advantage,
+                factor=neutral_host_factor,
+            )
+
+        e_h, e_d, e_a = elo_probs(
+            models, home, away, neutral=neutral, host=host, host_points=host_points
+        )
         d_h, d_d, d_a = dc_probs(models, home, away, neutral=neutral)
         mkt = market_consensus(books)  # type: ignore[arg-type]
         if mkt is None:
@@ -576,6 +649,7 @@ def fixture_blends(
     fixtures_meta: pd.DataFrame,
     weights: BlendWeights = BlendWeights(),
     host_nations: Sequence[str] = ("United States", "Mexico", "Canada", "USA"),
+    neutral_host_factor: float = DEFAULT_NEUTRAL_HOST_FACTOR,
 ) -> List[_FixtureBlend]:
     """Public wrapper over :func:`_iter_fixture_blends` for persistence.
 
@@ -584,7 +658,7 @@ def fixture_blends(
     private helper.
     """
     return _iter_fixture_blends(
-        models, odds_df, fixtures_meta, weights, host_nations
+        models, odds_df, fixtures_meta, weights, host_nations, neutral_host_factor
     )
 
 
@@ -596,6 +670,7 @@ def build_card(
     weights: BlendWeights = BlendWeights(),
     min_edge: float = 0.02,
     host_nations: Sequence[str] = ("United States", "Mexico", "Canada", "USA"),
+    neutral_host_factor: float = DEFAULT_NEUTRAL_HOST_FACTOR,
 ) -> List[Recommendation]:
     """Generate ranked recommendations for every +EV outcome in the slate.
 
@@ -617,9 +692,11 @@ def build_card(
         Minimum edge (EV per unit) to include a recommendation.
     host_nations:
         Nations that receive host advantage on a neutral venue.
+    neutral_host_factor:
+        Multiplier for a co-host's host bonus on neutral-flagged fixtures.
     """
     blends = _iter_fixture_blends(
-        models, odds_df, fixtures_meta, weights, host_nations
+        models, odds_df, fixtures_meta, weights, host_nations, neutral_host_factor
     )
 
     recs: List[Recommendation] = []
@@ -671,6 +748,7 @@ def build_score_cards(
     weights: BlendWeights = BlendWeights(),
     min_edge: float = 0.02,
     host_nations: Sequence[str] = ("United States", "Mexico", "Canada", "USA"),
+    neutral_host_factor: float = DEFAULT_NEUTRAL_HOST_FACTOR,
     top_k: int = 6,
 ) -> List[ScorelineCard]:
     """Full-time scoreline cards reconciled to the *same* blended 1X2 as the bets.
@@ -693,7 +771,7 @@ def build_score_cards(
         Number of top scorelines per fixture (default 6).
     """
     blends = _iter_fixture_blends(
-        models, odds_df, fixtures_meta, weights, host_nations
+        models, odds_df, fixtures_meta, weights, host_nations, neutral_host_factor
     )
 
     cards: List[ScorelineCard] = []

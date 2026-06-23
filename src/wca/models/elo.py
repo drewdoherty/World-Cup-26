@@ -51,7 +51,7 @@ from __future__ import annotations
 
 import json
 import math
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -183,6 +183,10 @@ class EloRater:
     ----------
     initial_rating:
         Rating assigned to a team the first time it is seen. Default 1500.
+    initial_ratings:
+        Optional per-team initial ratings. Teams absent from the mapping still
+        start at ``initial_rating``. This lets callers seed Elo from an external
+        prior while preserving the flat default for standalone use.
     home_advantage:
         Rating points added to the home team's effective rating when the match
         is *not* played at a neutral venue. Default 100 (eloratings.net uses
@@ -201,11 +205,17 @@ class EloRater:
     def __init__(
         self,
         initial_rating: float = 1500.0,
+        initial_ratings: Optional[Mapping[str, float]] = None,
         home_advantage: float = 100.0,
         k_factors: Optional[Dict[str, float]] = None,
         host_advantage: bool = True,
     ) -> None:
         self.initial_rating = float(initial_rating)
+        self.initial_ratings: Dict[str, float] = (
+            {str(k): float(v) for k, v in initial_ratings.items()}
+            if initial_ratings is not None
+            else {}
+        )
         self.home_advantage = float(home_advantage)
         self.k_factors: Dict[str, float] = dict(
             k_factors if k_factors is not None else DEFAULT_K_FACTORS
@@ -217,7 +227,10 @@ class EloRater:
 
     def get_rating(self, team: str) -> float:
         """Current rating of ``team`` (creating it at ``initial_rating``)."""
-        return self.ratings.get(team, self.initial_rating)
+        return self.ratings.get(
+            team,
+            self.initial_ratings.get(team, self.initial_rating),
+        )
 
     def k_for(self, tournament: str) -> float:
         """K-factor for a tournament name via :func:`classify_tournament`."""
@@ -411,6 +424,7 @@ class EloRater:
         """Serialise the rater (config + current ratings) to a plain dict."""
         return {
             "initial_rating": self.initial_rating,
+            "initial_ratings": dict(self.initial_ratings),
             "home_advantage": self.home_advantage,
             "k_factors": dict(self.k_factors),
             "host_advantage": self.host_advantage,
@@ -422,6 +436,7 @@ class EloRater:
         """Reconstruct an :class:`EloRater` from :meth:`to_dict` output."""
         obj = cls(
             initial_rating=data.get("initial_rating", 1500.0),
+            initial_ratings=data.get("initial_ratings"),
             home_advantage=data.get("home_advantage", 100.0),
             k_factors=data.get("k_factors"),
             host_advantage=data.get("host_advantage", True),
@@ -452,6 +467,7 @@ DRAW = 1
 HOME_WIN = 2
 
 _EPS = 1e-12
+_MIN_BETA = 0.05
 
 
 def _sigmoid(z: np.ndarray) -> np.ndarray:
@@ -549,10 +565,16 @@ class EloOutcomeModel:
         if x.shape[0] == 0:
             raise ValueError("cannot fit on empty data")
 
-        # Parameterise with (beta, c_lo, gap) where gap >= 0 via softplus so the
-        # cut-point ordering c_lo <= c_hi is guaranteed.
+        # Parameterise with (raw_beta, c_lo, gap). ``beta`` and ``gap`` are
+        # constrained positive via softplus: Elo advantage must monotonically
+        # increase the home-outcome probability, and the cut-point ordering
+        # c_lo <= c_hi is guaranteed.
         def unpack(theta: np.ndarray) -> Tuple[float, float, float]:
-            beta = theta[0]
+            beta = (
+                _MIN_BETA
+                + math.log1p(math.exp(-abs(theta[0])))
+                + max(theta[0], 0.0)
+            )
             c_lo = theta[1]
             gap = math.log1p(math.exp(-abs(theta[2]))) + max(theta[2], 0.0)  # softplus
             c_hi = c_lo + gap
