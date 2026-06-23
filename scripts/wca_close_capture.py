@@ -60,6 +60,13 @@ def main(argv=None) -> int:
         "de-vigged close, OVERWRITING existing closing_odds — converts legacy "
         "raw-quote closes. Use with --dry-run first; back up the DB.",
     )
+    parser.add_argument(
+        "--rebackfill-pm",
+        action="store_true",
+        help="Stamp closing_odds + CLV for ALL Polymarket bets (platform="
+        "'polymarket') using sportsbook consensus — covers bets recorded "
+        "before the pm_moneyline label convention. Use with --dry-run first.",
+    )
     args = parser.parse_args(argv)
 
     if not os.path.exists(args.db):
@@ -68,6 +75,9 @@ def main(argv=None) -> int:
 
     if args.rebackfill:
         return _run_rebackfill(args)
+
+    if args.rebackfill_pm:
+        return _run_rebackfill_pm(args)
 
     skipped: list = []
     try:
@@ -140,6 +150,48 @@ def _run_rebackfill(args) -> int:
         )
     print(
         "rebackfill summary: %d changed, %d already-fair, %d total"
+        % (len(changed), len(unchanged), len(records))
+    )
+    actionable = [s for s in skipped if s["reason"] in closecapture.ACTIONABLE_SKIPS]
+    for rec in actionable:
+        print(
+            "  skipped bet %s: %s — %s (%s)"
+            % (rec["bet_id"], rec["match"], rec["selection"], rec["reason"]),
+            file=sys.stderr,
+        )
+    return 0
+
+
+def _run_rebackfill_pm(args) -> int:
+    """Backfill CLV for all Polymarket bets using sportsbook consensus."""
+    skipped: list = []
+    try:
+        records = closecapture.rebackfill_pm_closes_db(
+            args.db, now_utc=args.now, dry_run=args.dry_run, skipped_out=skipped
+        )
+    except sqlite3.Error as exc:
+        print("ERROR: %s" % exc, file=sys.stderr)
+        return 1
+
+    verb = "would set" if args.dry_run else "set"
+    changed = [r for r in records if r["changed"]]
+    unchanged = [r for r in records if not r["changed"]]
+    if not records:
+        print("rebackfill-pm: no Polymarket bets with a computable close")
+    for rec in changed:
+        old = "none" if rec["old_closing"] is None else "%.3f" % rec["old_closing"]
+        old_clv = "—" if rec["old_clv"] is None else "%+.2f%%" % (rec["old_clv"] * 100)
+        print(
+            "%s bet %d [%s]: %s — %s @ %.3f | close %s -> %.3f | "
+            "CLV %s -> %+.2f%% (%d books @ %s)"
+            % (
+                verb, rec["bet_id"], rec["status"], rec["match"], rec["selection"],
+                rec["decimal_odds"], old, rec["new_closing"],
+                old_clv, rec["new_clv"] * 100.0, rec["books"], rec["close_ts"],
+            )
+        )
+    print(
+        "rebackfill-pm summary: %d changed, %d already-set, %d total"
         % (len(changed), len(unchanged), len(records))
     )
     actionable = [s for s in skipped if s["reason"] in closecapture.ACTIONABLE_SKIPS]
