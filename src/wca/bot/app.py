@@ -488,6 +488,9 @@ def handle_card(
     scoreline section) is too slow to run inline on every Telegram poll, so it
     runs on cron and caches its formatted output. This handler reads that cache
     and flags staleness; if no cache exists yet it says so honestly.
+
+    Rule 1 (provenance): every reply leads with source path + generation
+    timestamp + fetch time.  No generation timestamp -> NO BET.
     """
     if now_utc is None:
         now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
@@ -500,13 +503,19 @@ def handle_card(
             "No card cached yet. The cron build (`scripts/wca_build_card.py`) "
             "fits the models, pulls live odds and writes the card here."
         )
-    header = "*Today's card*"
-    if cached.get("generated"):
-        header += " — generated %s UTC" % cached["generated"]
-        if cached.get("stale"):
-            header += "  ⚠️ STALE"
+    generated = cached.get("generated")
+    if not generated:
+        return (
+            "*Today's card*\n"
+            "NO BET — `%s` has no generation timestamp; "
+            "data age is unknown." % card_path
+        )
     body = cached.get("text") or "(empty card)"
-    return header + "\n\n" + body
+    banner = _stale_banner(generated, now_utc, CARD_MAX_AGE_HOURS, label="card")
+    provenance = "_Source: %s — generated %s UTC — fetched %s_" % (
+        card_path, generated, now_utc
+    )
+    return "%s*Today's card*\n%s\n\n%s" % (banner, provenance, body)
 
 
 def handle_scores(
@@ -596,6 +605,9 @@ def handle_next(
     The preview (blended winner probs, corners model, market anytime scorers,
     reconciled scoreline distribution) is built on cron alongside the main
     card; this handler only reads the cache and flags staleness.
+
+    Rule 1 (provenance): every reply leads with source path + generation
+    timestamp.  No generation timestamp -> NO BET.
     """
     if now_utc is None:
         now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
@@ -608,10 +620,17 @@ def handle_next(
             "No preview cached yet. The cron build (`scripts/wca_build_card.py`) "
             "writes it alongside the main card — try again after the next build."
         )
+    generated = cached.get("generated")
+    if not generated:
+        return (
+            "*Next match*\n"
+            "NO BET — `%s` has no generation timestamp; "
+            "data age is unknown." % next_path
+        )
     body = cached.get("text") or "(empty preview)"
-    if cached.get("stale"):
-        body = "⚠️ STALE (generated %s UTC)\n\n%s" % (cached.get("generated"), body)
-    return body
+    banner = _stale_banner(generated, now_utc, CARD_MAX_AGE_HOURS, label="card")
+    provenance = "_Source: %s — generated %s UTC_\n\n" % (next_path, generated)
+    return banner + provenance + body
 
 
 def handle_goalscorers(
@@ -624,6 +643,9 @@ def handle_goalscorers(
     book / Polymarket prices, with player-level model edges + Kelly £ stakes
     where a share exists). Built on cron alongside the main card; this handler
     reads the cache and flags staleness.
+
+    Rule 1 (provenance): every reply leads with source path + generation
+    timestamp.  No generation timestamp -> NO BET.
     """
     if now_utc is None:
         now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
@@ -636,10 +658,17 @@ def handle_goalscorers(
             "No card cached yet. The cron build (`scripts/wca_build_card.py`) "
             "writes it alongside the main card — try again after the next build."
         )
+    generated = cached.get("generated")
+    if not generated:
+        return (
+            "*Goalscorers*\n"
+            "NO BET — `%s` has no generation timestamp; "
+            "data age is unknown." % goalscorers_path
+        )
     body = cached.get("text") or "(empty card)"
-    if cached.get("stale"):
-        body = "⚠️ STALE (generated %s UTC)\n\n%s" % (cached.get("generated"), body)
-    return body
+    banner = _stale_banner(generated, now_utc, CARD_MAX_AGE_HOURS, label="card")
+    provenance = "_Source: %s — generated %s UTC_\n\n" % (goalscorers_path, generated)
+    return banner + provenance + body
 
 
 def _fmt_prob(prob: Optional[float]) -> str:
@@ -921,45 +950,55 @@ def handle_boost(text: str, *, scores_path: str = "site/scores_data.json") -> st
 
 
 def handle_accas(scores_path: str = "site/scores_data.json") -> str:
-    """`/accas` — multi-leg accumulators for the next 5 matches (4+ legs, min 2.0 odds)."""
+    """`/accas` — multi-leg accumulators for the next 5 matches (4+ legs, min 2.0 odds).
+
+    Reads model fair odds from scores_data.json via accas.load_odds_df(), applies
+    the rung-0 longshot guard (odds > 10x excluded), and builds 4+ leg accas.
+    Odds shown are model fair values (1/model_prob), not market prices.
+
+    Rule 1 (provenance): every reply leads with source path + generation
+    timestamp.  No generation timestamp -> NO BET.
+    """
     from wca import accas
-    from wca.boosts import load_scores_feed
 
     try:
-        scores_feed = load_scores_feed(scores_path)
-        if scores_feed.empty:
+        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+        generated = _feed_generated(scores_path)
+        banner = _stale_banner(generated, now_utc, SCORES_FEED_MAX_AGE_HOURS, label="odds feed")
+
+        if not generated:
             return (
                 "*Accumulators*\n"
-                "No odds data available yet. Try again after odds are loaded."
+                "NO BET — `%s` has no generation timestamp; "
+                "data age is unknown." % scores_path
             )
 
-        # Load fixtures meta for context
-        try:
-            from wca.data.results import load_results
-            from wca.data.cleaning import resolve_results_path
+        provenance = "_Source: %s — %s — fetched %s UTC_\n\n" % (
+            scores_path, generated, now_utc
+        )
 
-            fixtures_meta = load_results(resolve_results_path())
-        except Exception:
-            fixtures_meta = pd.DataFrame()
+        odds_df = accas.load_odds_df(scores_path)
+        if odds_df.empty:
+            return (
+                "%s%s*Accumulators*\n"
+                "NO BET — no fixture data in `%s`." % (banner, provenance, scores_path)
+            )
 
-        # Build accas from the scores feed
         acca_list = accas.build_accas_from_odds(
-            scores_feed, fixtures_meta, max_fixtures=5, min_legs=4, min_leg_odds=2.0
+            odds_df, max_fixtures=5, min_legs=4, min_leg_odds=2.0
         )
         if not acca_list:
             return (
-                "*Accumulators*\n"
-                "No valid 4+ leg accas found with 2.0+ odds per leg in next 5 matches."
+                "%s%s*Accumulators*\n"
+                "NO BET — no valid 4+ leg accas found with ≥2.0 fair-odds legs "
+                "in the next 5 fixtures. All qualifying legs may be short-price "
+                "favourites (fair odds < 2.0) or fewer than 4 fixtures have "
+                "model data." % (banner, provenance)
             )
 
-        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
-        banner = _stale_banner(
-            _feed_generated(scores_path), now_utc, SCORES_FEED_MAX_AGE_HOURS,
-            label="odds feed",
-        )
-        return banner + accas.format_accas(acca_list)
+        return banner + provenance + accas.format_accas(acca_list)
     except Exception as exc:
-        return f"*Accumulators*\nError building accas: {exc}"
+        return "*Accumulators*\nError building accas: %s" % exc
 
 
 def handle_boost_photo(
