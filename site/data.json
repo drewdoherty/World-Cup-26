@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-23T20:40:19"
+    "generated": "2026-06-23 20:49:41 UTC"
   },
   "totals": {
     "wagered": 1358.3760000000002,
@@ -17,9 +17,9 @@
     },
     "USD": {
       "wagered": 616.2959999999999,
-      "open_stake": 522.54,
+      "open_stake": 665.0444000000001,
       "settled_pl": -28.134999999999998,
-      "n_bets": 31
+      "n_bets": 16
     }
   },
   "venues": {
@@ -32,9 +32,9 @@
     },
     "polymarket": {
       "wagered": 616.2959999999999,
-      "open_stake": 522.54,
+      "open_stake": 665.0444000000001,
       "settled_pl": -28.134999999999998,
-      "n_bets": 31,
+      "n_bets": 16,
       "currency": "USD"
     },
     "kalshi": {
@@ -397,7 +397,8 @@
       "pl": 13.0,
       "closing_odds": null,
       "clv": null,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 128,
@@ -422,7 +423,8 @@
       "pl": 10.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.93; boost"
+      "notes": "screenshot ingest; currency=GBP; conf 0.93; boost",
+      "manual_override": null
     },
     {
       "id": 127,
@@ -447,7 +449,8 @@
       "pl": 45.72,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.95; Accumulator; legs: Full Time Result -> Norway | Full Time Result -> Algeria | Full Time Result -> France"
+      "notes": "screenshot ingest; currency=GBP; conf 0.95; Accumulator; legs: Full Time Result -> Norway | Full Time Result -> Algeria | Full Time Result -> France",
+      "manual_override": null
     },
     {
       "id": 114,
@@ -472,7 +475,8 @@
       "pl": 0.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "LOST free-bet: Belgium 0-0 Iran (2026-06-21, ESPN+TheSportsDB verified) — 0-0 so Kevin De Bruyne did not score. 0 P/L. No CLV."
+      "notes": "LOST free-bet: Belgium 0-0 Iran (2026-06-21, ESPN+TheSportsDB verified) — 0-0 so Kevin De Bruyne did not score. 0 P/L. No CLV.",
+      "manual_override": "manual: settled LOST (free-bet £0) from verified Belgium 0-0 Iran (2026-06-22)"
     },
     {
       "id": 113,
@@ -497,7 +501,8 @@
       "pl": 6.25,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.95; boost; Bet Builder; legs: To Score in Both Halves -> Spain to Score in Both Halves | Home Team Total Corners 3-Way -> Spain: Over 5 Corners; SNR"
+      "notes": "screenshot ingest; currency=GBP; conf 0.95; boost; Bet Builder; legs: To Score in Both Halves -> Spain to Score in Both Halves | Home Team Total Corners 3-Way -> Spain: Over 5 Corners; SNR",
+      "manual_override": "ESPN(ev 760453): Spain 4-0 Saudi. Both-halves leg WON (1H Yamal 10',Oyarzabal 21',24'; 2H own-goal 49' counts per std/Bet365 rule); corners leg WON (Spain 6 > 5). Free bet won -> +6.25"
     },
     {
       "id": 112,
@@ -522,7 +527,8 @@
       "pl": -5.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.88; boost; Accumulator; legs: Half Time -> Spain | Half Time -> Belgium | Half Time -> Uruguay"
+      "notes": "screenshot ingest; currency=GBP; conf 0.88; boost; Accumulator; legs: Half Time -> Spain | Half Time -> Belgium | Half Time -> Uruguay",
+      "manual_override": "Belgium 0-0 Iran (ESPN+TSDB verified): Belgium scored 0 -> 'HT->Belgium' leg failed -> acca LOST (Spain/Uruguay legs moot) | platform corrected Ladbrokes->Virgin Bet (user)"
     },
     {
       "id": 111,
@@ -547,7 +553,8 @@
       "pl": 0.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "LOST free-bet: Belgium 0-0 Iran (2026-06-21, ESPN+TheSportsDB verified) — Belgium did not win (win leg failed). 0 P/L. No CLV."
+      "notes": "LOST free-bet: Belgium 0-0 Iran (2026-06-21, ESPN+TheSportsDB verified) — Belgium did not win (win leg failed). 0 P/L. No CLV.",
+      "manual_override": "manual: settled LOST (free-bet £0) from verified Belgium 0-0 Iran (2026-06-22)"
     },
     {
       "id": 110,
@@ -572,7 +579,8 @@
       "pl": -10.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "LOST: Belgium 0-0 Iran (2026-06-21, ESPN+TheSportsDB verified) — Belgium did not win (win leg failed). No CLV (bet builder)."
+      "notes": "LOST: Belgium 0-0 Iran (2026-06-21, ESPN+TheSportsDB verified) — Belgium did not win (win leg failed). No CLV (bet builder).",
+      "manual_override": "manual: settled LOST from verified Belgium 0-0 Iran (ESPN+TheSportsDB, 2026-06-22)"
     },
     {
       "id": 109,
@@ -597,7 +605,8 @@
       "pl": 0.52,
       "closing_odds": null,
       "clv": null,
-      "notes": "polymarket order; token=110881534500357968934646596900153818247967390745149544995654778360419076918150; side=BUY; LIVE; order_id=0xbb4f34ad2f204501d118778114b5cf0dda45c633650aa333675370bed7657d5a"
+      "notes": "polymarket order; token=110881534500357968934646596900153818247967390745149544995654778360419076918150; side=BUY; LIVE; order_id=0xbb4f34ad2f204501d118778114b5cf0dda45c633650aa333675370bed7657d5a",
+      "manual_override": null
     },
     {
       "id": 107,
@@ -622,7 +631,8 @@
       "pl": -2.46,
       "closing_odds": 4.128296927847199,
       "clv": 0.009294326326347191,
-      "notes": "polymarket order; token=76430088308493460494891335845203272510723451292248221729565378437032576762940; side=BUY; LIVE; order_id=0xeca58abf2efdc12a1415f72d6c9c50b24e3b15d0388b84d9358a0f964a00815d | label corrected 2026-06-20: PM result=DRAW (was polymarket/Yes)"
+      "notes": "polymarket order; token=76430088308493460494891335845203272510723451292248221729565378437032576762940; side=BUY; LIVE; order_id=0xeca58abf2efdc12a1415f72d6c9c50b24e3b15d0388b84d9358a0f964a00815d | label corrected 2026-06-20: PM result=DRAW (was polymarket/Yes)",
+      "manual_override": null
     },
     {
       "id": 106,
@@ -647,7 +657,8 @@
       "pl": -10.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92; boost; Bet Builder; legs: Full Time -> Morocco - 2UP | Most Corners - 1st Half -> Morocco | Most Corners - 2nd Half -> Morocco"
+      "notes": "screenshot ingest; currency=GBP; conf 0.92; boost; Bet Builder; legs: Full Time -> Morocco - 2UP | Most Corners - 1st Half -> Morocco | Most Corners - 2nd Half -> Morocco",
+      "manual_override": "platform corrected Ladbrokes->Virgin Bet (user)"
     },
     {
       "id": 105,
@@ -672,7 +683,8 @@
       "pl": -10.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92; Bet Builder; legs: Match Result -> Brazil | Anytime Goal Scorer -> Neymar | Player To Score Or Assist (Sub Switch) -> Vinicius Junior"
+      "notes": "screenshot ingest; currency=GBP; conf 0.92; Bet Builder; legs: Match Result -> Brazil | Anytime Goal Scorer -> Neymar | Player To Score Or Assist (Sub Switch) -> Vinicius Junior",
+      "manual_override": "ESPN(ev 760444)/FIFA/Sky: Brazil 3-0 Haiti; scorers Cunha 23',36' + Vinicius 45+3'. Neymar did NOT play/score -> 'Anytime Neymar' leg failed -> builder LOST"
     },
     {
       "id": 104,
@@ -697,7 +709,8 @@
       "pl": -5.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.95"
+      "notes": "screenshot ingest; currency=GBP; conf 0.95",
+      "manual_override": null
     },
     {
       "id": 103,
@@ -722,7 +735,8 @@
       "pl": -5.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.98; Bet Builder; legs: Match Odds -> Morocco | Player To Have 1 Or More Shots On Target - Safe Sub -> Ayoub El Kaabi | Player To Have 1 Or More Shots On Target - Safe Sub -> Lawrence Shankland | Both Teams To Score -> Yes"
+      "notes": "screenshot ingest; currency=GBP; conf 0.98; Bet Builder; legs: Match Odds -> Morocco | Player To Have 1 Or More Shots On Target - Safe Sub -> Ayoub El Kaabi | Player To Have 1 Or More Shots On Target - Safe Sub -> Lawrence Shankland | Both Teams To Score -> Yes",
+      "manual_override": null
     },
     {
       "id": 102,
@@ -747,7 +761,8 @@
       "pl": 0.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "Betfair Exchange UK A2 hedge; £10 FREE BET/bonus The Draw 4.70 LOST -> 0.00 (Betfair bet 1:432758479761, settled screenshot)"
+      "notes": "Betfair Exchange UK A2 hedge; £10 FREE BET/bonus The Draw 4.70 LOST -> 0.00 (Betfair bet 1:432758479761, settled screenshot)",
+      "manual_override": "manual: USA v Australia metadata + free-bet £0 settle from Betfair settled screenshot (2026-06-22)"
     },
     {
       "id": 101,
@@ -772,7 +787,8 @@
       "pl": -6.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "Betfair Exchange UK A2 hedge; £6 cash back The Draw 4.70 LOST -> -6.00 (Betfair bet 1:432758479762, settled screenshot)"
+      "notes": "Betfair Exchange UK A2 hedge; £6 cash back The Draw 4.70 LOST -> -6.00 (Betfair bet 1:432758479762, settled screenshot)",
+      "manual_override": "manual: USA v Australia metadata + settle LOST from Betfair settled screenshot (2026-06-22)"
     },
     {
       "id": 97,
@@ -797,7 +813,8 @@
       "pl": 0.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "Bet Builder x3, money-back-as-free-bet (Bonus Used GBP10, SNR; potential returns GBP41.20 = profit only). Legs: Over 3.5 Goals; Home Team Over 2.5; Folarin Balogun anytime scorer (Safe Sub). Bet ID O/28625888/0000007. Logged manually as ONE combined bet (bot vision wrongly split it into 3 legs). | ts set to ingest date (slip shows no placement time); Bet ID O/28625888/0000007 | settled 2026-06-19: US 2-0 Australia, Over 3.5 leg failed -> LOST; SNR free bet (no cash loss)"
+      "notes": "Bet Builder x3, money-back-as-free-bet (Bonus Used GBP10, SNR; potential returns GBP41.20 = profit only). Legs: Over 3.5 Goals; Home Team Over 2.5; Folarin Balogun anytime scorer (Safe Sub). Bet ID O/28625888/0000007. Logged manually as ONE combined bet (bot vision wrongly split it into 3 legs). | ts set to ingest date (slip shows no placement time); Bet ID O/28625888/0000007 | settled 2026-06-19: US 2-0 Australia, Over 3.5 leg failed -> LOST; SNR free bet (no cash loss)",
+      "manual_override": null
     },
     {
       "id": 96,
@@ -822,7 +839,8 @@
       "pl": -12.09,
       "closing_odds": 5.863631612788238,
       "clv": 0.0232566430186969,
-      "notes": "screenshot ingest; currency=GBP; conf 0.93 | model/market backfilled from model_predictions_log 2026-06-19 pre-KO | settled 2026-06-19: Scotland 0-1 Morocco (/scores) -> Scotland LOST"
+      "notes": "screenshot ingest; currency=GBP; conf 0.93 | model/market backfilled from model_predictions_log 2026-06-19 pre-KO | settled 2026-06-19: Scotland 0-1 Morocco (/scores) -> Scotland LOST",
+      "manual_override": null
     },
     {
       "id": 95,
@@ -847,7 +865,8 @@
       "pl": 28.05,
       "closing_odds": 4.036219265317766,
       "clv": -0.008973562370357069,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97 | model/market backfilled from model_predictions_log 2026-06-19 pre-KO | settled 2026-06-19: Turkey 0-1 Paraguay (/scores) -> Paraguay WON"
+      "notes": "screenshot ingest; currency=GBP; conf 0.97 | model/market backfilled from model_predictions_log 2026-06-19 pre-KO | settled 2026-06-19: Turkey 0-1 Paraguay (/scores) -> Paraguay WON",
+      "manual_override": null
     },
     {
       "id": 94,
@@ -872,7 +891,8 @@
       "pl": -12.5,
       "closing_odds": 12.48208591598545,
       "clv": -0.5080950378544762,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92 | settled LOST vs Canada 6-0 Qatar (verified feed); model/market backfilled from model_predictions_log 2026-06-18 pre-KO"
+      "notes": "screenshot ingest; currency=GBP; conf 0.92 | settled LOST vs Canada 6-0 Qatar (verified feed); model/market backfilled from model_predictions_log 2026-06-18 pre-KO",
+      "manual_override": null
     },
     {
       "id": 93,
@@ -897,7 +917,8 @@
       "pl": -5.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92; boost"
+      "notes": "screenshot ingest; currency=GBP; conf 0.92; boost",
+      "manual_override": null
     },
     {
       "id": 92,
@@ -922,7 +943,8 @@
       "pl": 26.22,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92 | settled WON vs Mexico 1-0 South Korea (verified feed); model/market backfilled from model_predictions_log 2026-06-18 pre-KO"
+      "notes": "screenshot ingest; currency=GBP; conf 0.92 | settled WON vs Mexico 1-0 South Korea (verified feed); model/market backfilled from model_predictions_log 2026-06-18 pre-KO",
+      "manual_override": null
     },
     {
       "id": 91,
@@ -947,7 +969,8 @@
       "pl": -10.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92 | settled LOST per user (Betfred graded): a leg failed in the bet builder"
+      "notes": "screenshot ingest; currency=GBP; conf 0.92 | settled LOST per user (Betfred graded): a leg failed in the bet builder",
+      "manual_override": null
     },
     {
       "id": 90,
@@ -972,7 +995,8 @@
       "pl": -10.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.82 | settled LOST: Czech Republic 1-1 South Africa (no win, BTTS yes) — both legs fail (verified feed)"
+      "notes": "screenshot ingest; currency=GBP; conf 0.82 | settled LOST: Czech Republic 1-1 South Africa (no win, BTTS yes) — both legs fail (verified feed)",
+      "manual_override": null
     },
     {
       "id": 89,
@@ -997,7 +1021,8 @@
       "pl": 9.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "free bet (Virgin, stake not returned); won £9; one-off manual add"
+      "notes": "free bet (Virgin, stake not returned); won £9; one-off manual add",
+      "manual_override": null
     },
     {
       "id": 88,
@@ -1022,7 +1047,8 @@
       "pl": -10.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.88; boost"
+      "notes": "screenshot ingest; currency=GBP; conf 0.88; boost",
+      "manual_override": null
     },
     {
       "id": 86,
@@ -1047,7 +1073,8 @@
       "pl": -87.6,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.95; merged fills 6.85+53.15=60.00 (was rows 86+87)"
+      "notes": "screenshot ingest; currency=GBP; conf 0.95; merged fills 6.85+53.15=60.00 (was rows 86+87)",
+      "manual_override": null
     },
     {
       "id": 85,
@@ -1072,7 +1099,8 @@
       "pl": -10.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92"
+      "notes": "screenshot ingest; currency=GBP; conf 0.92",
+      "manual_override": null
     },
     {
       "id": 84,
@@ -1097,7 +1125,8 @@
       "pl": -10.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.82"
+      "notes": "screenshot ingest; currency=GBP; conf 0.82",
+      "manual_override": null
     },
     {
       "id": 83,
@@ -1122,7 +1151,8 @@
       "pl": -30.68,
       "closing_odds": null,
       "clv": null,
-      "notes": "RECONCILED 2026-06-16: bot-executed (Y PM-5) on PM2 0xd42e..., 55.04 sh @ 0.55 = $30.68 (data-api TRADE 2026-06-15T19:19:18Z). Found on-chain but unlogged (execution-logging gap) — backfilled."
+      "notes": "RECONCILED 2026-06-16: bot-executed (Y PM-5) on PM2 0xd42e..., 55.04 sh @ 0.55 = $30.68 (data-api TRADE 2026-06-15T19:19:18Z). Found on-chain but unlogged (execution-logging gap) — backfilled.",
+      "manual_override": null
     },
     {
       "id": 82,
@@ -1147,7 +1177,8 @@
       "pl": -6.0,
       "closing_odds": null,
       "clv": null,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 81,
@@ -1172,7 +1203,8 @@
       "pl": 43.50000000000001,
       "closing_odds": 3.8999548914661544,
       "clv": -0.2974277712812414,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92"
+      "notes": "screenshot ingest; currency=GBP; conf 0.92",
+      "manual_override": null
     },
     {
       "id": 80,
@@ -1197,7 +1229,8 @@
       "pl": -20.0,
       "closing_odds": 8.0,
       "clv": 0.17500000000000004,
-      "notes": "screenshot ingest; currency=GBP; conf 0.98"
+      "notes": "screenshot ingest; currency=GBP; conf 0.98",
+      "manual_override": null
     },
     {
       "id": 79,
@@ -1222,7 +1255,8 @@
       "pl": 2.1535,
       "closing_odds": 3.8999548914661544,
       "clv": 0.012832227532516782,
-      "notes": "Filled on Smarkets (0%% comm) at actual price; marginal diff vs card."
+      "notes": "Filled on Smarkets (0%% comm) at actual price; marginal diff vs card.",
+      "manual_override": null
     },
     {
       "id": 78,
@@ -1247,7 +1281,8 @@
       "pl": -1.8,
       "closing_odds": 4.561833963736138,
       "clv": 0.030287388221973854,
-      "notes": "Filled on Smarkets (0%% comm) at actual price; marginal diff vs card."
+      "notes": "Filled on Smarkets (0%% comm) at actual price; marginal diff vs card.",
+      "manual_override": null
     },
     {
       "id": 77,
@@ -1272,7 +1307,8 @@
       "pl": -1.95,
       "closing_odds": null,
       "clv": null,
-      "notes": "Filled on Smarkets (0%% comm) at actual price; marginal diff vs card."
+      "notes": "Filled on Smarkets (0%% comm) at actual price; marginal diff vs card.",
+      "manual_override": null
     },
     {
       "id": 76,
@@ -1297,7 +1333,8 @@
       "pl": -2.68,
       "closing_odds": null,
       "clv": null,
-      "notes": "Platform Smarkets; FILL PRICE UNCONFIRMED (not in screenshot) - verify."
+      "notes": "Platform Smarkets; FILL PRICE UNCONFIRMED (not in screenshot) - verify.",
+      "manual_override": null
     },
     {
       "id": 75,
@@ -1322,7 +1359,8 @@
       "pl": -5.37,
       "closing_odds": null,
       "clv": null,
-      "notes": "Filled on Smarkets (0%% comm) at actual price; marginal diff vs card."
+      "notes": "Filled on Smarkets (0%% comm) at actual price; marginal diff vs card.",
+      "manual_override": null
     },
     {
       "id": 74,
@@ -1347,7 +1385,8 @@
       "pl": -6.67,
       "closing_odds": null,
       "clv": null,
-      "notes": "Platform Smarkets; FILL PRICE UNCONFIRMED (not in screenshot) - verify."
+      "notes": "Platform Smarkets; FILL PRICE UNCONFIRMED (not in screenshot) - verify.",
+      "manual_override": null
     },
     {
       "id": 73,
@@ -1372,7 +1411,8 @@
       "pl": -18.48,
       "closing_odds": null,
       "clv": null,
-      "notes": "Filled on Smarkets (0%% comm) at actual price; marginal diff vs card."
+      "notes": "Filled on Smarkets (0%% comm) at actual price; marginal diff vs card.",
+      "manual_override": null
     },
     {
       "id": 72,
@@ -1397,7 +1437,8 @@
       "pl": -10.0,
       "closing_odds": 5.827198229143171,
       "clv": 0.09829797242731764,
-      "notes": "Betfair Exchange Free-£10-when-you-bet-£10 qualifier. HEDGE against the Scotland-long real-money book (Betfred builders id67/68 + Shankland FGS id70). +8% model EV (16.8% @6.40). Real money, normal settle: win +£54, lose -£10. Settles ~03:00 14th (in 8-14 Jun window). Unlocks £10 SNR free bet -> plan: Australia @5.70 (+39%)."
+      "notes": "Betfair Exchange Free-£10-when-you-bet-£10 qualifier. HEDGE against the Scotland-long real-money book (Betfred builders id67/68 + Shankland FGS id70). +8% model EV (16.8% @6.40). Real money, normal settle: win +£54, lose -£10. Settles ~03:00 14th (in 8-14 Jun window). Unlocks £10 SNR free bet -> plan: Australia @5.70 (+39%).",
+      "manual_override": null
     },
     {
       "id": 71,
@@ -1422,7 +1463,8 @@
       "pl": 40.0,
       "closing_odds": 5.555440204568628,
       "clv": -0.09998131275211108,
-      "notes": "screenshot ingest; currency=GBP; conf 0.95"
+      "notes": "screenshot ingest; currency=GBP; conf 0.95",
+      "manual_override": null
     },
     {
       "id": 70,
@@ -1447,7 +1489,8 @@
       "pl": -10.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "Standalone FGS single to capture Betfred Double Delight & Hat-Trick Heaven. Base odds 4.5; settles: no first goal -> lose £10; scores 1st only -> £35 profit @4.5; scores 1st + brace -> odds DOUBLE to 9.0 (£80 profit); + hat-trick -> TREBLE to 13.5 (£125). Market-calibrated edge ~+15% (prudent de-vig), driven by the boost. Manual settle for brace/hat-trick upside."
+      "notes": "Standalone FGS single to capture Betfred Double Delight & Hat-Trick Heaven. Base odds 4.5; settles: no first goal -> lose £10; scores 1st only -> £35 profit @4.5; scores 1st + brace -> odds DOUBLE to 9.0 (£80 profit); + hat-trick -> TREBLE to 13.5 (£125). Market-calibrated edge ~+15% (prudent de-vig), driven by the boost. Manual settle for brace/hat-trick upside.",
+      "manual_override": null
     },
     {
       "id": 69,
@@ -1472,7 +1515,8 @@
       "pl": 44.07,
       "closing_odds": null,
       "clv": null,
-      "notes": "AUS 2-0 TUR (13 Jun). Legs: Under3.5✓ (2 goals), DC(Aus/Tur)✓ (Aus won), Under4.5cards⚠ (unresolved). Boost profit: £44.07. Boost doubled returns from 2.10 base odds."
+      "notes": "AUS 2-0 TUR (13 Jun). Legs: Under3.5✓ (2 goals), DC(Aus/Tur)✓ (Aus won), Under4.5cards⚠ (unresolved). Boost profit: £44.07. Boost doubled returns from 2.10 base odds.",
+      "manual_override": null
     },
     {
       "id": 68,
@@ -1497,7 +1541,8 @@
       "pl": -10.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "Betfred Bet-£10-Get-£10 qualifier #2. Ref 1018975607. REAL money. Qualifies (5.05>=3/1). NB Double Delight NOT captured (boost is singles-only, not bet builders)."
+      "notes": "Betfred Bet-£10-Get-£10 qualifier #2. Ref 1018975607. REAL money. Qualifies (5.05>=3/1). NB Double Delight NOT captured (boost is singles-only, not bet builders).",
+      "manual_override": null
     },
     {
       "id": 67,
@@ -1522,7 +1567,8 @@
       "pl": -10.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "Betfred Bet-£10-Get-£10 qualifier. Ref 1018950595. REAL money (stake at risk). NB priced 3.94 < 3/1(4.0) threshold — free-bet trigger AT RISK, verify in My Offers."
+      "notes": "Betfred Bet-£10-Get-£10 qualifier. Ref 1018950595. REAL money (stake at risk). NB priced 3.94 < 3/1(4.0) threshold — free-bet trigger AT RISK, verify in My Offers.",
+      "manual_override": null
     },
     {
       "id": 66,
@@ -1547,7 +1593,8 @@
       "pl": -5.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.88; boost"
+      "notes": "screenshot ingest; currency=GBP; conf 0.88; boost",
+      "manual_override": null
     },
     {
       "id": 65,
@@ -1572,7 +1619,8 @@
       "pl": 0.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "FREE BET SNR (acct-2 bonus). BetID D2863470/I/0000008. Co-hittable favourite-sweep bundle. On LOSS settled_pl=0 (no stake at risk); on WIN pl=(odds-1)*10."
+      "notes": "FREE BET SNR (acct-2 bonus). BetID D2863470/I/0000008. Co-hittable favourite-sweep bundle. On LOSS settled_pl=0 (no stake at risk); on WIN pl=(odds-1)*10.",
+      "manual_override": null
     },
     {
       "id": 64,
@@ -1597,7 +1645,8 @@
       "pl": 0.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "FREE BET SNR (acct-2 bonus). BetID D2863470/I/0000007. Co-hittable favourite-sweep bundle. On LOSS settled_pl=0 (no stake at risk); on WIN pl=(odds-1)*10."
+      "notes": "FREE BET SNR (acct-2 bonus). BetID D2863470/I/0000007. Co-hittable favourite-sweep bundle. On LOSS settled_pl=0 (no stake at risk); on WIN pl=(odds-1)*10.",
+      "manual_override": null
     },
     {
       "id": 63,
@@ -1622,7 +1671,8 @@
       "pl": 0.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "FREE BET SNR (acct-2 bonus). BetID D2863470/I/0000006. Co-hittable favourite-sweep bundle. On LOSS settled_pl=0 (no stake at risk); on WIN pl=(odds-1)*10."
+      "notes": "FREE BET SNR (acct-2 bonus). BetID D2863470/I/0000006. Co-hittable favourite-sweep bundle. On LOSS settled_pl=0 (no stake at risk); on WIN pl=(odds-1)*10.",
+      "manual_override": null
     },
     {
       "id": 62,
@@ -1647,7 +1697,8 @@
       "pl": 0.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "FREE BET SNR (acct-2 bonus). BetID D2863470/I/0000005. Co-hittable favourite-sweep bundle. On LOSS settled_pl=0 (no stake at risk); on WIN pl=(odds-1)*10."
+      "notes": "FREE BET SNR (acct-2 bonus). BetID D2863470/I/0000005. Co-hittable favourite-sweep bundle. On LOSS settled_pl=0 (no stake at risk); on WIN pl=(odds-1)*10.",
+      "manual_override": null
     },
     {
       "id": 61,
@@ -1672,7 +1723,8 @@
       "pl": 0.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "FREE BET SNR (acct-2 bonus). BetID D2863470/I/0000004. Co-hittable favourite-sweep bundle. On LOSS settled_pl=0 (no stake at risk); on WIN pl=(odds-1)*10."
+      "notes": "FREE BET SNR (acct-2 bonus). BetID D2863470/I/0000004. Co-hittable favourite-sweep bundle. On LOSS settled_pl=0 (no stake at risk); on WIN pl=(odds-1)*10.",
+      "manual_override": null
     },
     {
       "id": 60,
@@ -1697,7 +1749,8 @@
       "pl": 11.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "Betfred bet10-get30+20BB qualifier on mum's account; laid GBP 9.72 @2.16 Smarkets 0% (liability 11.28); locked QL 0.28; offers ledger id=2; exclude from CLV/calibration; KO 2026-06-13T01:00Z"
+      "notes": "Betfred bet10-get30+20BB qualifier on mum's account; laid GBP 9.72 @2.16 Smarkets 0% (liability 11.28); locked QL 0.28; offers ledger id=2; exclude from CLV/calibration; KO 2026-06-13T01:00Z",
+      "manual_override": null
     },
     {
       "id": 59,
@@ -1722,7 +1775,8 @@
       "pl": -1.9,
       "closing_odds": 4.143267462891738,
       "clv": -0.01044283606579921,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 58,
@@ -1747,7 +1801,8 @@
       "pl": -0.94,
       "closing_odds": null,
       "clv": null,
-      "notes": "FIRST AUTOMATED BOT ORDER (account 2); Y PM-6 path verified; in-play taker fill @ 0.25"
+      "notes": "FIRST AUTOMATED BOT ORDER (account 2); Y PM-6 path verified; in-play taker fill @ 0.25",
+      "manual_override": null
     },
     {
       "id": 54,
@@ -1772,7 +1827,8 @@
       "pl": 9.69,
       "closing_odds": 3.8999548914661544,
       "clv": 0.025652888640523397,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 53,
@@ -1797,7 +1853,8 @@
       "pl": -5.8,
       "closing_odds": 3.8664155597471708,
       "clv": 0.00868619519393432,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 52,
@@ -1822,7 +1879,8 @@
       "pl": -3.47,
       "closing_odds": 5.740182813491202,
       "clv": 0.04526287662792683,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 51,
@@ -1847,7 +1905,8 @@
       "pl": -3.92,
       "closing_odds": 4.561833963736138,
       "clv": -0.03547563655815211,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 50,
@@ -1872,7 +1931,8 @@
       "pl": 31.682000000000002,
       "closing_odds": 7.388091352649521,
       "clv": -0.025458720482938735,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97"
+      "notes": "screenshot ingest; currency=GBP; conf 0.97",
+      "manual_override": null
     },
     {
       "id": 49,
@@ -1897,7 +1957,8 @@
       "pl": -1.5,
       "closing_odds": null,
       "clv": null,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 48,
@@ -1922,7 +1983,8 @@
       "pl": -1.9,
       "closing_odds": null,
       "clv": null,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 47,
@@ -1947,7 +2009,8 @@
       "pl": -1.7000000000000002,
       "closing_odds": null,
       "clv": null,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 46,
@@ -1972,7 +2035,8 @@
       "pl": 8.5,
       "closing_odds": null,
       "clv": null,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 45,
@@ -1997,7 +2061,8 @@
       "pl": -1.4000000000000001,
       "closing_odds": null,
       "clv": null,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 44,
@@ -2022,7 +2087,8 @@
       "pl": -0.7670000000000001,
       "closing_odds": null,
       "clv": null,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 43,
@@ -2047,7 +2113,8 @@
       "pl": -1.5,
       "closing_odds": null,
       "clv": null,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 42,
@@ -2072,7 +2139,8 @@
       "pl": -1.1,
       "closing_odds": null,
       "clv": null,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 41,
@@ -2097,7 +2165,8 @@
       "pl": -1.0,
       "closing_odds": null,
       "clv": null,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 22,
@@ -2122,7 +2191,8 @@
       "pl": 81.27,
       "closing_odds": 5.555440204568628,
       "clv": -0.009979444027322204,
-      "notes": "screenshot ingest; currency=GBP; conf 0.85"
+      "notes": "screenshot ingest; currency=GBP; conf 0.85",
+      "manual_override": null
     },
     {
       "id": 21,
@@ -2147,7 +2217,8 @@
       "pl": -1.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92"
+      "notes": "screenshot ingest; currency=GBP; conf 0.92",
+      "manual_override": null
     },
     {
       "id": 20,
@@ -2172,7 +2243,8 @@
       "pl": -1.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.95"
+      "notes": "screenshot ingest; currency=GBP; conf 0.95",
+      "manual_override": null
     },
     {
       "id": 19,
@@ -2197,7 +2269,8 @@
       "pl": -2.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "FREE GBP2 SNR treble (Netherlands 2.0 + Brazil 1.65 + Paraguay 3.9); max-loss treats stake as 0; settles Jun 13-14"
+      "notes": "FREE GBP2 SNR treble (Netherlands 2.0 + Brazil 1.65 + Paraguay 3.9); max-loss treats stake as 0; settles Jun 13-14",
+      "manual_override": null
     },
     {
       "id": 18,
@@ -2222,7 +2295,8 @@
       "pl": 12.0,
       "closing_odds": 2.1673940055984806,
       "clv": 0.01504387034258503,
-      "notes": "Account 2 qualifier; laid GBP 9 @2.18 on exchange; KO 2026-06-13T01:00Z"
+      "notes": "Account 2 qualifier; laid GBP 9 @2.18 on exchange; KO 2026-06-13T01:00Z",
+      "manual_override": null
     },
     {
       "id": 17,
@@ -2247,7 +2321,8 @@
       "pl": -10.0,
       "closing_odds": 1.94006451980359,
       "clv": -0.03096006302391996,
-      "notes": "Account 2 dead qualifier - below min odds; KO 2026-06-12T19:00Z"
+      "notes": "Account 2 dead qualifier - below min odds; KO 2026-06-12T19:00Z",
+      "manual_override": null
     },
     {
       "id": 16,
@@ -2272,7 +2347,8 @@
       "pl": -4.42,
       "closing_odds": 16.039256882647734,
       "clv": 0.05989947816046626,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97"
+      "notes": "screenshot ingest; currency=GBP; conf 0.97",
+      "manual_override": null
     },
     {
       "id": 15,
@@ -2297,7 +2373,8 @@
       "pl": -0.3,
       "closing_odds": 5.740182813491202,
       "clv": 0.08010497251552429,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97"
+      "notes": "screenshot ingest; currency=GBP; conf 0.97",
+      "manual_override": null
     },
     {
       "id": 13,
@@ -2322,7 +2399,8 @@
       "pl": 25.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "IN-PLAY boost 5.0->6.0; placed ~19:4x UTC during match at 1-0; promo edge, no in-play player model"
+      "notes": "IN-PLAY boost 5.0->6.0; placed ~19:4x UTC during match at 1-0; promo edge, no in-play player model",
+      "manual_override": null
     },
     {
       "id": 12,
@@ -2347,7 +2425,8 @@
       "pl": -8.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.95"
+      "notes": "screenshot ingest; currency=GBP; conf 0.95",
+      "manual_override": null
     },
     {
       "id": 10,
@@ -2372,7 +2451,8 @@
       "pl": 11.969999999999999,
       "closing_odds": 2.6,
       "clv": 0.04230769230769216,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97; boost"
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; boost",
+      "manual_override": null
     },
     {
       "id": 9,
@@ -2397,7 +2477,8 @@
       "pl": -2.53,
       "closing_odds": 4.143267462891738,
       "clv": 0.04941330458192805,
-      "notes": "currency=USD; avg price 23c; taker; Polymarket portfolio screenshot 2026-06-11"
+      "notes": "currency=USD; avg price 23c; taker; Polymarket portfolio screenshot 2026-06-11",
+      "manual_override": null
     },
     {
       "id": 8,
@@ -2422,7 +2503,8 @@
       "pl": 14.224,
       "closing_odds": 2.6,
       "clv": 0.06846153846153835,
-      "notes": "currency=USD; avg price 36c; taker; Polymarket portfolio screenshot 2026-06-11"
+      "notes": "currency=USD; avg price 36c; taker; Polymarket portfolio screenshot 2026-06-11",
+      "manual_override": null
     },
     {
       "id": 7,
@@ -2447,7 +2529,8 @@
       "pl": -13.78,
       "closing_odds": 1.94006451980359,
       "clv": -0.027351935599008947,
-      "notes": "currency=USD; avg price 53c; taker; Polymarket portfolio screenshot 2026-06-11"
+      "notes": "currency=USD; avg price 53c; taker; Polymarket portfolio screenshot 2026-06-11",
+      "manual_override": null
     },
     {
       "id": 6,
@@ -2472,7 +2555,8 @@
       "pl": 9.878000000000002,
       "closing_odds": 1.493913959333996,
       "clv": -0.030064622566361998,
-      "notes": "currency=USD; avg price 69c; taker; Polymarket portfolio screenshot 2026-06-11"
+      "notes": "currency=USD; avg price 69c; taker; Polymarket portfolio screenshot 2026-06-11",
+      "manual_override": null
     },
     {
       "id": 5,
@@ -2497,7 +2581,8 @@
       "pl": -2.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "FREE £2 SNR acca (stake not returned); profit-only, win=+38.82 loss=0; all 3 legs model +EV; legs: Korea 2.7, Paraguay 4.2, Canada 1.8; exclude from CLV/calibration"
+      "notes": "FREE £2 SNR acca (stake not returned); profit-only, win=+38.82 loss=0; all 3 legs model +EV; legs: Korea 2.7, Paraguay 4.2, Canada 1.8; exclude from CLV/calibration",
+      "manual_override": null
     },
     {
       "id": 4,
@@ -2522,7 +2607,8 @@
       "pl": 10.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "Super Boost 1.22->2.0 EVS, £10 max stake; promo edge not model edge; fair ~0.80 from unboosted 1.22 devig; no SOT model yet; KO 2026-06-11T19:00Z; voids if Jimenez does not start"
+      "notes": "Super Boost 1.22->2.0 EVS, £10 max stake; promo edge not model edge; fair ~0.80 from unboosted 1.22 devig; no SOT model yet; KO 2026-06-11T19:00Z; voids if Jimenez does not start",
+      "manual_override": null
     },
     {
       "id": 3,
@@ -2547,7 +2633,8 @@
       "pl": 7.749999999999999,
       "closing_odds": null,
       "clv": null,
-      "notes": "Rocket Boost 41/50->31/20 max stake; SUB PAYOUT + VAR PAYOUT applied; no player model yet, fair prob estimated from unboosted price; KO 2026-06-11T19:00Z"
+      "notes": "Rocket Boost 41/50->31/20 max stake; SUB PAYOUT + VAR PAYOUT applied; no player model yet, fair prob estimated from unboosted price; KO 2026-06-11T19:00Z",
+      "manual_override": null
     },
     {
       "id": 2,
@@ -2572,7 +2659,8 @@
       "pl": -9.57,
       "closing_odds": 1.94006451980359,
       "clv": -0.07219580502290202,
-      "notes": "exec card pick; KO 2026-06-12T19:00Z; CLV vs Betfair close"
+      "notes": "exec card pick; KO 2026-06-12T19:00Z; CLV vs Betfair close",
+      "manual_override": null
     },
     {
       "id": 1,
@@ -2597,7 +2685,8 @@
       "pl": -5.68,
       "closing_odds": 4.143267462891738,
       "clv": 0.013692704517961785,
-      "notes": "exec card pick; KO 2026-06-13T01:00Z; CLV vs Betfair close"
+      "notes": "exec card pick; KO 2026-06-13T01:00Z; CLV vs Betfair close",
+      "manual_override": null
     }
   ],
   "pnl_series": {
@@ -2975,6 +3064,422 @@
   },
   "positions": [
     {
+      "id": "pm-0x0c4cd2055d",
+      "ts_utc": "",
+      "match": "Will Argentina win the 2026 FIFA World Cup?",
+      "match_id": "0x0c4cd2055d6ea89354ffddc55d6dbcef9355748112ea952fc925f3db6a5c457f",
+      "market": "Will Argentina win the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 8.481764206955047,
+      "stake": 23.9997,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 29.8,
+      "cur_price": 0.1465,
+      "avg_price": 0.1179,
+      "shares": 203.3898,
+      "cash_pnl": 5.8,
+      "pct_pnl": 0.24166968753776089,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0xec3847eac2",
+      "ts_utc": "",
+      "match": "Will Iran reach the Round of 16 at the 2026 FIFA World Cup?",
+      "match_id": "0xec3847eac2be33169ff18da8efa8f348fda167fcbda9b440d92e7f4aebcf42df",
+      "market": "Will Iran reach the Round of 16 at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 3.566333808844508,
+      "stake": 35.9999,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 27.6,
+      "cur_price": 0.215,
+      "avg_price": 0.2804,
+      "shares": 128.35,
+      "cash_pnl": -8.4,
+      "pct_pnl": -0.23333398148328194,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0xe8904439c2",
+      "ts_utc": "",
+      "match": "Will Colombia reach the Round of 16 at the 2026 FIFA World Cup?",
+      "match_id": "0xe8904439c2d55bf507317bf35e9b5e34890cc17716355a45a40647916cb237fb",
+      "market": "Will Colombia reach the Round of 16 at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.680672268907563,
+      "stake": 65.4999,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 66.59,
+      "cur_price": 0.605,
+      "avg_price": 0.595,
+      "shares": 110.0741,
+      "cash_pnl": 1.09,
+      "pct_pnl": 0.016641246780529438,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0xc2fcce9165",
+      "ts_utc": "",
+      "match": "Will Iran advance to the knockout stages at the 2026 FIFA World Cup?",
+      "match_id": "0xc2fcce9165ac160807304db5dc0ec730dfd6d17c02a23c0dafce10a471833725",
+      "market": "Will Iran advance to the knockout stages at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.602307322544464,
+      "stake": 65.9999,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 63.4,
+      "cur_price": 0.5995,
+      "avg_price": 0.6241,
+      "shares": 105.7498,
+      "cash_pnl": -2.6,
+      "pct_pnl": -0.039393999081816795,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x691a596c89",
+      "ts_utc": "",
+      "match": "Will Japan reach the Round of 16 at the 2026 FIFA World Cup?",
+      "match_id": "0x691a596c894b4742167158f873a7443e6bf9b4f584fc9c6a8c91abec12b182d6",
+      "market": "Will Japan reach the Round of 16 at the 2026 FIFA World Cup?",
+      "selection": "No",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.6666666666666667,
+      "stake": 60.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 54.5,
+      "cur_price": 0.545,
+      "avg_price": 0.6,
+      "shares": 100.0,
+      "cash_pnl": -5.5,
+      "pct_pnl": -0.09166666666666666,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0xd0c3a4f045",
+      "ts_utc": "",
+      "match": "Will Brazil reach the Round of 16 at the 2026 FIFA World Cup?",
+      "match_id": "0xd0c3a4f045a3f6f4d502ffc21eb2da13eb5fe232905d6d495117c25af64d6f6b",
+      "market": "Will Brazil reach the Round of 16 at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.5344483658124906,
+      "stake": 63.0098,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 61.39,
+      "cur_price": 0.635,
+      "avg_price": 0.6517,
+      "shares": 96.6812,
+      "cash_pnl": -1.62,
+      "pct_pnl": -0.025710286336411165,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x26f7aac052",
+      "ts_utc": "",
+      "match": "Will Belgium reach the Round of 16 at the 2026 FIFA World Cup?",
+      "match_id": "0x26f7aac05232d917ca3cc570afef59a88ab156a10beb0f1abddf0c7221ca5c05",
+      "market": "Will Belgium reach the Round of 16 at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.7546938059308652,
+      "stake": 54.3799,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 54.86,
+      "cur_price": 0.575,
+      "avg_price": 0.5699,
+      "shares": 95.4035,
+      "cash_pnl": 0.48,
+      "pct_pnl": 0.008826790781152595,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0xf75a1084ea",
+      "ts_utc": "",
+      "match": "Will Cape Verde advance to the knockout stages at the 2026 FIFA World Cup?",
+      "match_id": "0xf75a1084ea00a19ec34957397ea4d0a33258395ba6b50a2d4186ee0f77910c25",
+      "market": "Will Cape Verde advance to the knockout stages at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 2.3815194093831864,
+      "stake": 39.1299,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 65.68,
+      "cur_price": 0.705,
+      "avg_price": 0.4199,
+      "shares": 93.1666,
+      "cash_pnl": 26.55,
+      "pct_pnl": 0.6785092729600638,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x30d55d8124",
+      "ts_utc": "",
+      "match": "Will Brazil win the 2026 FIFA World Cup?",
+      "match_id": "0x30d55d8124ee1e12dabe89201badc45669b81dff69e4ce44d961f32878ec178a",
+      "market": "Will Brazil win the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 14.947683109118087,
+      "stake": 5.9999,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 4.43,
+      "cur_price": 0.0495,
+      "avg_price": 0.0669,
+      "shares": 89.5522,
+      "cash_pnl": -1.57,
+      "pct_pnl": -0.2616710278504642,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x339817a52e",
+      "ts_utc": "",
+      "match": "Will Croatia advance to the knockout stages at the 2026 FIFA World Cup?",
+      "match_id": "0x339817a52eeb97cc6cf99afee47a61dbc83244a4266a947d19f9b21aa9d7bbd3",
+      "market": "Will Croatia advance to the knockout stages at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.3159626266614028,
+      "stake": 65.4999,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 68.09,
+      "cur_price": 0.79,
+      "avg_price": 0.7599,
+      "shares": 86.1842,
+      "cash_pnl": 2.59,
+      "pct_pnl": 0.03954204510235893,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0xbea8b7504e",
+      "ts_utc": "",
+      "match": "Will Sweden advance to the knockout stages at the 2026 FIFA World Cup?",
+      "match_id": "0xbea8b7504ec86c42abb39512b385c4dc695ba6c1d3f4d3aa9dd0ceddb0957338",
+      "market": "Will Sweden advance to the knockout stages at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.1547344110854503,
+      "stake": 65.816,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 68.1,
+      "cur_price": 0.896,
+      "avg_price": 0.866,
+      "shares": 76.0,
+      "cash_pnl": 2.28,
+      "pct_pnl": 0.03464203233256351,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x260688608f",
+      "ts_utc": "",
+      "match": "Will Colombia advance to the knockout stages at the 2026 FIFA World Cup?",
+      "match_id": "0x260688608f7d98c9cc5755228dbf4a04eb72c13308e603ba697b5f1ff4e8fe68",
+      "market": "Will Colombia advance to the knockout stages at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.0195758564437194,
+      "stake": 65.4999,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 65.41,
+      "cur_price": 0.9795,
+      "avg_price": 0.9808,
+      "shares": 66.7775,
+      "cash_pnl": -0.09,
+      "pct_pnl": -0.0013740478993097699,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0xff5f12bade",
+      "ts_utc": "",
+      "match": "Will South Korea reach the Round of 16 at the 2026 FIFA World Cup?",
+      "match_id": "0xff5f12bade5b071a9d062d1c01765fb0c53255cd9bfe38b6fffcb3fbde6da783",
+      "market": "Will South Korea reach the Round of 16 at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 2.4764735017335315,
+      "stake": 24.9399,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 25.63,
+      "cur_price": 0.415,
+      "avg_price": 0.4038,
+      "shares": 61.7619,
+      "cash_pnl": 0.69,
+      "pct_pnl": 0.02766651029073893,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x46d7512f30",
+      "ts_utc": "",
+      "match": "Will New Zealand advance to the knockout stages at the 2026 FIFA World Cup?",
+      "match_id": "0x46d7512f30ec5b01e8194cf42457a041ca9bf675e4f58b32edcde8b3c431d18a",
+      "market": "Will New Zealand advance to the knockout stages at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 3.125,
+      "stake": 17.27,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 4.05,
+      "cur_price": 0.075,
+      "avg_price": 0.32,
+      "shares": 53.9687,
+      "cash_pnl": -13.22,
+      "pct_pnl": -0.7654892877822814,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x33ec07ceef",
+      "ts_utc": "",
+      "match": "Will Brazil win Group C in the 2026 FIFA World Cup?",
+      "match_id": "0x33ec07ceef529f87a3a070e06d5f9b6df9d3e4e6713faec26d9510786f7cd6be",
+      "market": "Will Brazil win Group C in the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.5153811183512653,
+      "stake": 5.9999,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 5.86,
+      "cur_price": 0.645,
+      "avg_price": 0.6599,
+      "shares": 9.0909,
+      "cash_pnl": -0.14,
+      "pct_pnl": -0.023333722228703814,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x375409bc5e",
+      "ts_utc": "",
+      "match": "Will England win the 2026 FIFA World Cup?",
+      "match_id": "0x375409bc5eeeff961e82b479caeccc20f33d15738e5bce1186d628aa3d9dfb1f",
+      "market": "Will England win the 2026 FIFA World Cup?",
+      "selection": "No",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.1469205184080744,
+      "stake": 5.9999,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 6.0,
+      "cur_price": 0.8725,
+      "avg_price": 0.8719,
+      "shares": 6.8807,
+      "cash_pnl": 0.0,
+      "pct_pnl": 0.0,
+      "notes": "live PM position (data-API)"
+    },
+    {
       "id": 140,
       "ts_utc": "2026-06-23T19:12:31",
       "match": "Portugal v Uzbekistan",
@@ -2992,7 +3497,8 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 139,
@@ -3012,7 +3518,8 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "notes": null
+      "notes": null,
+      "manual_override": null
     },
     {
       "id": 135,
@@ -3032,7 +3539,8 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.75; Bet Builder; legs: Half Time Result -> England | 2nd Half Result -> England | Player's shots on target -> Harry Kane - Over 1.5 | Player's shots on target -> Jude Bellingham - Over 1.5"
+      "notes": "screenshot ingest; currency=GBP; conf 0.75; Bet Builder; legs: Half Time Result -> England | 2nd Half Result -> England | Player's shots on target -> Harry Kane - Over 1.5 | Player's shots on target -> Jude Bellingham - Over 1.5",
+      "manual_override": null
     },
     {
       "id": 133,
@@ -3052,7 +3560,8 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97; Bet Builder; legs: Full Time Result -> Croatia | Both Teams to Score -> Yes | Total Goals Range -> 1-4 Goals"
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; Bet Builder; legs: Full Time Result -> Croatia | Both Teams to Score -> Yes | Total Goals Range -> 1-4 Goals",
+      "manual_override": null
     },
     {
       "id": 132,
@@ -3072,7 +3581,8 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97; Bet Builder; legs: Full Time Result -> Colombia | Both Teams to Score -> Yes | Match Goals Range -> 1-4 Goals | Anytime Goalscorer -> Luis Diaz"
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; Bet Builder; legs: Full Time Result -> Colombia | Both Teams to Score -> Yes | Match Goals Range -> 1-4 Goals | Anytime Goalscorer -> Luis Diaz",
+      "manual_override": null
     },
     {
       "id": 131,
@@ -3092,7 +3602,8 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97; Accumulator; legs: Match Odds -> Colombia | Over/Under 3.5 Goals -> Under 3.5 Goals | Over/Under 3.5 Goals -> Under 3.5 Goals"
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; Accumulator; legs: Match Odds -> Colombia | Over/Under 3.5 Goals -> Under 3.5 Goals | Over/Under 3.5 Goals -> Under 3.5 Goals",
+      "manual_override": null
     },
     {
       "id": 130,
@@ -3112,7 +3623,8 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97; Accumulator; legs: Match Odds 90 -> Portugal | Match Odds 90 -> England | Match Odds 90 -> Colombia"
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; Accumulator; legs: Match Odds 90 -> Portugal | Match Odds 90 -> England | Match Odds 90 -> Colombia",
+      "manual_override": null
     },
     {
       "id": 129,
@@ -3132,247 +3644,8 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97"
-    },
-    {
-      "id": 126,
-      "ts_utc": "2026-06-22T04:55:29Z",
-      "match": "Will Brazil win the 2026 FIFA World Cup?",
-      "match_id": "PM_BRA_WIN",
-      "market": "polymarket",
-      "selection": "Brazil win World Cup - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 14.9499,
-      "stake": 5.99,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "PM portfolio snapshot 2026-06-22: 89.6 shares @ avg 6.7c, traded $5.99, value $5.15"
-    },
-    {
-      "id": 125,
-      "ts_utc": "2026-06-22T04:55:29Z",
-      "match": "Will England win the 2026 FIFA World Cup?",
-      "match_id": "PM_ENG_WIN",
-      "market": "polymarket",
-      "selection": "England win World Cup - No",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.1467,
-      "stake": 6.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "PM portfolio snapshot 2026-06-22: 6.9 shares @ avg 87.2c, traded $6.00, value $6.02"
-    },
-    {
-      "id": 124,
-      "ts_utc": "2026-06-22T04:55:29Z",
-      "match": "Will New Zealand advance to the knockout stage?",
-      "match_id": "PM_NZL_ADV",
-      "market": "polymarket",
-      "selection": "New Zealand advance to knockout - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 3.1251,
-      "stake": 17.27,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "PM portfolio snapshot 2026-06-22: 54.0 shares @ avg 32.0c, traded $17.27, value $16.46"
-    },
-    {
-      "id": 123,
-      "ts_utc": "2026-06-22T04:55:29Z",
-      "match": "Will South Korea reach the Round of 16?",
-      "match_id": "PM_KOR_R16",
-      "market": "polymarket",
-      "selection": "South Korea reach R16 - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 2.4763,
-      "stake": 24.94,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "PM portfolio snapshot 2026-06-22: 61.8 shares @ avg 40.4c, traded $24.94, value $23.16"
-    },
-    {
-      "id": 122,
-      "ts_utc": "2026-06-22T04:55:29Z",
-      "match": "Will Argentina win the 2026 FIFA World Cup?",
-      "match_id": "PM_ARG_WIN",
-      "market": "polymarket",
-      "selection": "Argentina win World Cup - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 8.4817,
-      "stake": 23.98,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "PM portfolio snapshot 2026-06-22: 203.4 shares @ avg 11.8c, traded $23.98, value $23.90"
-    },
-    {
-      "id": 121,
-      "ts_utc": "2026-06-22T04:55:29Z",
-      "match": "Will Iran reach the Round of 16?",
-      "match_id": "PM_IRN_R16",
-      "market": "polymarket",
-      "selection": "Iran reach R16 - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 3.5663,
-      "stake": 35.99,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "PM portfolio snapshot 2026-06-22: 128.4 shares @ avg 28.0c, traded $35.99, value $25.03"
-    },
-    {
-      "id": 120,
-      "ts_utc": "2026-06-22T04:55:29Z",
-      "match": "Will Cape Verde advance to the knockout stage?",
-      "match_id": "PM_CPV_ADV",
-      "market": "polymarket",
-      "selection": "Cape Verde advance to knockout - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 2.3816,
-      "stake": 39.12,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "PM portfolio snapshot 2026-06-22: 93.2 shares @ avg 42.0c, traded $39.12, value $45.19"
-    },
-    {
-      "id": 119,
-      "ts_utc": "2026-06-22T04:55:29Z",
-      "match": "Will Belgium reach the Round of 16?",
-      "match_id": "PM_BEL_R16",
-      "market": "polymarket",
-      "selection": "Belgium reach R16 - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.7546,
-      "stake": 54.37,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "PM portfolio snapshot 2026-06-22: 95.4 shares @ avg 57.0c, traded $54.37, value $50.09"
-    },
-    {
-      "id": 118,
-      "ts_utc": "2026-06-22T04:55:29Z",
-      "match": "Will Brazil reach the Round of 16?",
-      "match_id": "PM_BRA_R16",
-      "market": "polymarket",
-      "selection": "Brazil reach R16 - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.5387,
-      "stake": 57.4,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "PM portfolio snapshot 2026-06-22: 88.3 shares @ avg 65.0c, traded $57.40, value $56.97"
-    },
-    {
-      "id": 117,
-      "ts_utc": "2026-06-22T04:55:29Z",
-      "match": "Will Colombia reach the Round of 16?",
-      "match_id": "PM_COL_R16",
-      "market": "polymarket",
-      "selection": "Colombia reach R16 - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.6807,
-      "stake": 65.49,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "PM portfolio snapshot 2026-06-22: 110.1 shares @ avg 59.5c, traded $65.49, value $64.39"
-    },
-    {
-      "id": 116,
-      "ts_utc": "2026-06-22T04:55:29Z",
-      "match": "Will Croatia advance to the knockout stage?",
-      "match_id": "PM_CRO_ADV",
-      "market": "polymarket",
-      "selection": "Croatia advance to knockout - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.3159,
-      "stake": 65.49,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "PM portfolio snapshot 2026-06-22: 86.2 shares @ avg 76.0c, traded $65.49, value $65.07"
-    },
-    {
-      "id": 115,
-      "ts_utc": "2026-06-22T04:55:29Z",
-      "match": "Will Colombia advance to the knockout stage?",
-      "match_id": "PM_COL_ADV",
-      "market": "polymarket",
-      "selection": "Colombia advance to knockout - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.0195,
-      "stake": 65.5,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "PM portfolio snapshot 2026-06-22: 66.8 shares @ avg 98.1c, traded $65.50, value $65.71"
+      "notes": "screenshot ingest; currency=GBP; conf 0.97",
+      "manual_override": null
     },
     {
       "id": 108,
@@ -3392,47 +3665,8 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92; Bet Builder; legs: Home Team Minus 2.5 Goals -> England -2.5 Goals | Handicap Betting -> England (-2.0) | Correct Score Combinations -> England to win 1-0, 2-0 or 3-0; SNR"
-    },
-    {
-      "id": 57,
-      "ts_utc": "2026-06-12T20:03:20",
-      "match": "Ghana eliminated R32 of the World Cup",
-      "match_id": "PM_ghana_r32",
-      "market": "polymarket",
-      "selection": "Ghana eliminated R32 - No",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "2",
-      "source": "punt",
-      "currency": "USD",
-      "decimal_odds": 1.4708,
-      "stake": 1.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "account-2 setup/activation bet (World-Cup-26 deposit wallet); manual UI; not model"
-    },
-    {
-      "id": 14,
-      "ts_utc": "2026-06-11T21:00:40",
-      "match": "2026 FIFA World Cup - Japan Round of 16",
-      "match_id": "WC2026_JPN_R16",
-      "market": "Will Japan reach the Round of 16 at the 2026 FIFA World Cup?",
-      "selection": "Japan reach R16 - No",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.6667,
-      "stake": 60.0,
-      "model_prob": 0.685,
-      "market_prob_devig": 0.6,
-      "ev": 0.14168950000000025,
-      "kelly_fraction": 0.25,
-      "notes": "PM portfolio snapshot 2026-06-22: 100.0 shares @ avg 60.0c (No), traded $60.00, value $52.50"
+      "notes": "screenshot ingest; currency=GBP; conf 0.92; Bet Builder; legs: Home Team Minus 2.5 Goals -> England -2.5 Goals | Handicap Betting -> England (-2.0) | Correct Score Combinations -> England to win 1-0, 2-0 or 3-0; SNR",
+      "manual_override": null
     },
     {
       "id": 11,
@@ -3452,9 +3686,11 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "notes": "currency=GBP; promo qualifier: GBP1 free bet per Kane goal all tournament (opted in); win-only, EW declined; no outright model yet"
+      "notes": "currency=GBP; promo qualifier: GBP1 free bet per Kane goal all tournament (opted in); win-only, EW declined; no outright model yet",
+      "manual_override": null
     }
   ],
+  "dropped_open_bets": [],
   "predictions": [
     {
       "fixture": "Panama vs Croatia",

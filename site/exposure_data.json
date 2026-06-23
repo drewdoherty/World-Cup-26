@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-23 19:48:57 UTC"
+    "generated": "2026-06-23 20:49:51 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -9,7 +9,7 @@
     "p_profit": 0,
     "p_loss": 0,
     "p_big_win": 0,
-    "n_scenarios": 19683
+    "n_scenarios": 6561
   },
   "correlation": {
     "worst_states": [
@@ -17,7 +17,6 @@
         "pnl": 0.0,
         "prob": 0.0001,
         "results": [
-          "England",
           "Panama",
           "Colombia",
           "Bosnia and Herzegovina",
@@ -30,9 +29,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0001,
+        "prob": 0.0002,
         "results": [
-          "England",
           "Panama",
           "Colombia",
           "Bosnia and Herzegovina",
@@ -45,9 +43,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0002,
+        "prob": 0.0003,
         "results": [
-          "England",
           "Panama",
           "Colombia",
           "Bosnia and Herzegovina",
@@ -62,7 +59,6 @@
         "pnl": 0.0,
         "prob": 0.0001,
         "results": [
-          "England",
           "Panama",
           "Colombia",
           "Bosnia and Herzegovina",
@@ -75,9 +71,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0001,
+        "prob": 0.0002,
         "results": [
-          "England",
           "Panama",
           "Colombia",
           "Bosnia and Herzegovina",
@@ -94,7 +89,6 @@
         "pnl": 0.0,
         "prob": 0.0001,
         "results": [
-          "England",
           "Panama",
           "Colombia",
           "Bosnia and Herzegovina",
@@ -107,9 +101,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0001,
+        "prob": 0.0002,
         "results": [
-          "England",
           "Panama",
           "Colombia",
           "Bosnia and Herzegovina",
@@ -122,9 +115,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0002,
+        "prob": 0.0003,
         "results": [
-          "England",
           "Panama",
           "Colombia",
           "Bosnia and Herzegovina",
@@ -140,81 +132,6 @@
   },
   "fixtures": [
     {
-      "fixture": "England vs Ghana",
-      "kickoff": "2026-06-23T20:00:00+00:00",
-      "results": [
-        {
-          "outcome": "England",
-          "prob": 0.7953,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": true,
-          "live": [],
-          "plug": {
-            "available": true,
-            "outcome": "England",
-            "best_venue": "unibet_uk",
-            "best_odds": 1.2,
-            "model_prob": 0.7953,
-            "ev_pct": -4.6,
-            "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
-          }
-        },
-        {
-          "outcome": "Draw",
-          "prob": 0.1454,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Ghana",
-          "prob": 0.0594,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        }
-      ],
-      "events": [
-        {
-          "type": "Bet Builder",
-          "selection": "Home Team Minus 2.5 Goals -> England -2.5 Goals + Handicap Betting -> England (-2.0) + Correct Score Combinations -> England to win 1-0, 2-0 or 3-0",
-          "stake": 5.0,
-          "potential_profit": 22.6,
-          "free": true,
-          "odds": 5.52
-        },
-        {
-          "type": "Accumulator",
-          "selection": "Match Odds -> Colombia + Over/Under 3.5 Goals -> Under 3.5 Goals + Over/Under 3.5 Goals -> Under 3.5 Goals",
-          "stake": 10.0,
-          "potential_profit": 29.6,
-          "free": false,
-          "odds": 3.96
-        },
-        {
-          "type": "Bet Builder",
-          "selection": "Half Time Result -> England + 2nd Half Result -> England + Player's shots on target -> Harry Kane - Over 1.5 + Player's shots on target -> Jude Bellingham - Over 1.5",
-          "stake": 0.0,
-          "potential_profit": 0.0,
-          "free": false,
-          "odds": 7.9
-        }
-      ],
-      "summary": {
-        "max_win": 0.0,
-        "stake_at_risk": 0,
-        "best_outcome": "England",
-        "worst_outcome": "England",
-        "n_blindspots": 1
-      }
-    },
-    {
       "fixture": "Panama vs Croatia",
       "kickoff": "2026-06-23T23:00:00+00:00",
       "results": [
@@ -229,7 +146,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.216,
+          "prob": 0.2151,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -240,14 +157,14 @@
             "outcome": "Draw",
             "best_venue": "smarkets",
             "best_odds": 4.8,
-            "model_prob": 0.216,
-            "ev_pct": 3.7,
-            "recommendation": "PLUG: +EV to back (3.7% edge) \u2014 fills the gap and adds value"
+            "model_prob": 0.2151,
+            "ev_pct": 3.2,
+            "recommendation": "PLUG: +EV to back (3.2% edge) \u2014 fills the gap and adds value"
           }
         },
         {
           "outcome": "Croatia",
-          "prob": 0.6562,
+          "prob": 0.6571,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -258,8 +175,8 @@
             "outcome": "Croatia",
             "best_venue": "matchbook",
             "best_odds": 1.48,
-            "model_prob": 0.6562,
-            "ev_pct": -2.9,
+            "model_prob": 0.6571,
+            "ev_pct": -2.7,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         }
@@ -288,7 +205,7 @@
       "results": [
         {
           "outcome": "Colombia",
-          "prob": 0.6526,
+          "prob": 0.6525,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -298,15 +215,15 @@
             "available": true,
             "outcome": "Colombia",
             "best_venue": "betfair_ex_uk",
-            "best_odds": 1.58,
-            "model_prob": 0.6526,
-            "ev_pct": 3.1,
-            "recommendation": "PLUG: +EV to back (3.1% edge) \u2014 fills the gap and adds value"
+            "best_odds": 1.59,
+            "model_prob": 0.6525,
+            "ev_pct": 3.7,
+            "recommendation": "PLUG: +EV to back (3.7% edge) \u2014 fills the gap and adds value"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.2276,
+          "prob": 0.2277,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -316,10 +233,10 @@
             "available": true,
             "outcome": "Draw",
             "best_venue": "betfair_ex_uk",
-            "best_odds": 4.2,
-            "model_prob": 0.2276,
-            "ev_pct": -4.4,
-            "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
+            "best_odds": 4.1,
+            "model_prob": 0.2277,
+            "ev_pct": -6.6,
+            "recommendation": "LEAVE UNHEDGED: plugging costs 6.6% EV \u2014 take the variance"
           }
         },
         {
@@ -333,6 +250,14 @@
         }
       ],
       "events": [
+        {
+          "type": "Accumulator",
+          "selection": "Match Odds -> Colombia + Over/Under 3.5 Goals -> Under 3.5 Goals + Over/Under 3.5 Goals -> Under 3.5 Goals",
+          "stake": 10.0,
+          "potential_profit": 29.6,
+          "free": false,
+          "odds": 3.96
+        },
         {
           "type": "Bet Builder",
           "selection": "Full Time Result -> Colombia + Both Teams to Score -> Yes + Match Goals Range -> 1-4 Goals + Anytime Goalscorer -> Luis Diaz",
@@ -356,7 +281,7 @@
       "results": [
         {
           "outcome": "Bosnia and Herzegovina",
-          "prob": 0.6176,
+          "prob": 0.6178,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -365,7 +290,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2176,
+          "prob": 0.2175,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -438,7 +363,7 @@
       "results": [
         {
           "outcome": "Scotland",
-          "prob": 0.1064,
+          "prob": 0.1043,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -447,7 +372,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.1933,
+          "prob": 0.1926,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -456,7 +381,7 @@
         },
         {
           "outcome": "Brazil",
-          "prob": 0.7003,
+          "prob": 0.7031,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -479,7 +404,7 @@
       "results": [
         {
           "outcome": "Morocco",
-          "prob": 0.7951,
+          "prob": 0.7959,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -488,7 +413,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.1473,
+          "prob": 0.1464,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -497,7 +422,7 @@
         },
         {
           "outcome": "Haiti",
-          "prob": 0.0575,
+          "prob": 0.0577,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -520,7 +445,7 @@
       "results": [
         {
           "outcome": "Czech Republic",
-          "prob": 0.2657,
+          "prob": 0.2659,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -529,7 +454,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2612,
+          "prob": 0.2608,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -538,7 +463,7 @@
         },
         {
           "outcome": "Mexico",
-          "prob": 0.473,
+          "prob": 0.4733,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -561,7 +486,7 @@
       "results": [
         {
           "outcome": "South Africa",
-          "prob": 0.1896,
+          "prob": 0.191,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -570,7 +495,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2735,
+          "prob": 0.2731,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -579,7 +504,7 @@
         },
         {
           "outcome": "South Korea",
-          "prob": 0.5369,
+          "prob": 0.536,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -599,78 +524,63 @@
   ],
   "blindspots": [
     {
-      "fixture": "England vs Ghana",
-      "outcome": "England",
-      "prob": 0.7953,
-      "net_pnl": 0.0,
-      "plug": {
-        "available": true,
-        "outcome": "England",
-        "best_venue": "unibet_uk",
-        "best_odds": 1.2,
-        "model_prob": 0.7953,
-        "ev_pct": -4.6,
-        "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
-      }
-    },
-    {
       "fixture": "Panama vs Croatia",
       "outcome": "Croatia",
-      "prob": 0.6562,
+      "prob": 0.6571,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Croatia",
         "best_venue": "matchbook",
         "best_odds": 1.48,
-        "model_prob": 0.6562,
-        "ev_pct": -2.9,
+        "model_prob": 0.6571,
+        "ev_pct": -2.7,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
     {
       "fixture": "Colombia vs DR Congo",
       "outcome": "Colombia",
-      "prob": 0.6526,
+      "prob": 0.6525,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Colombia",
         "best_venue": "betfair_ex_uk",
-        "best_odds": 1.58,
-        "model_prob": 0.6526,
-        "ev_pct": 3.1,
-        "recommendation": "PLUG: +EV to back (3.1% edge) \u2014 fills the gap and adds value"
+        "best_odds": 1.59,
+        "model_prob": 0.6525,
+        "ev_pct": 3.7,
+        "recommendation": "PLUG: +EV to back (3.7% edge) \u2014 fills the gap and adds value"
       }
     },
     {
       "fixture": "Colombia vs DR Congo",
       "outcome": "Draw",
-      "prob": 0.2276,
+      "prob": 0.2277,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Draw",
         "best_venue": "betfair_ex_uk",
-        "best_odds": 4.2,
-        "model_prob": 0.2276,
-        "ev_pct": -4.4,
-        "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
+        "best_odds": 4.1,
+        "model_prob": 0.2277,
+        "ev_pct": -6.6,
+        "recommendation": "LEAVE UNHEDGED: plugging costs 6.6% EV \u2014 take the variance"
       }
     },
     {
       "fixture": "Panama vs Croatia",
       "outcome": "Draw",
-      "prob": 0.216,
+      "prob": 0.2151,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Draw",
         "best_venue": "smarkets",
         "best_odds": 4.8,
-        "model_prob": 0.216,
-        "ev_pct": 3.7,
-        "recommendation": "PLUG: +EV to back (3.7% edge) \u2014 fills the gap and adds value"
+        "model_prob": 0.2151,
+        "ev_pct": 3.2,
+        "recommendation": "PLUG: +EV to back (3.2% edge) \u2014 fills the gap and adds value"
       }
     }
   ],
@@ -703,6 +613,15 @@
       "free": false,
       "odds": 1.4708,
       "match": "Ghana eliminated R32 of the World Cup"
+    },
+    {
+      "type": "Bet Builder",
+      "selection": "Home Team Minus 2.5 Goals -> England -2.5 Goals + Handicap Betting -> England (-2.0) + Correct Score Combinations -> England to win 1-0, 2-0 or 3-0",
+      "stake": 5.0,
+      "profit": 22.599999999999998,
+      "free": true,
+      "odds": 5.52,
+      "match": "England vs Ghana"
     },
     {
       "type": "polymarket",
@@ -829,6 +748,15 @@
       "free": false,
       "odds": 1.86,
       "match": "Portugal v Uzbekistan | England v Ghana | Colombia v DR Congo"
+    },
+    {
+      "type": "Bet Builder",
+      "selection": "Half Time Result -> England + 2nd Half Result -> England + Player's shots on target -> Harry Kane - Over 1.5 + Player's shots on target -> Jude Bellingham - Over 1.5",
+      "stake": 0.0,
+      "profit": 0.0,
+      "free": false,
+      "odds": 7.9,
+      "match": "England vs Ghana"
     },
     {
       "type": "Accumulator",

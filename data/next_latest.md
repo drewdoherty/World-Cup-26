@@ -1,18 +1,18 @@
-<!-- generated: 2026-06-23T19:27:22 -->
-⚽ *Next match* — England vs Ghana
-Kickoff 2026-06-23 20:00:00+00:00
+<!-- generated: 2026-06-23T20:33:35 -->
+⚽ *Next match* — Panama vs Croatia
+Kickoff 2026-06-23 23:00:00+00:00
 
 *Winner* (model blend)
-  England         79.5%  fair 1.26  best 1.20 (betfair_ex_uk) -4.6%
-  Draw            14.5%  fair 6.88  best 8.20 (betfair_ex_uk) +19.2% ✅  £10.00
-  Ghana            5.9%  fair 16.85  best 20.00 (betfair_ex_uk) +18.7% ✅  £3.70
+  Panama          12.8%  fair 7.83  best 8.40 (betfair_ex_uk) +7.3% ✅  £3.71
+  Draw            21.5%  fair 4.65  best 4.80 (betfair_ex_uk) +3.2% ✅  £3.20
+  Croatia         65.7%  fair 1.52  best 1.48 (betfair_ex_uk) -2.7%
   _stake = ¼-Kelly @ £1500 bankroll (+EV picks)_
 
-*Corners* (model, exp 8.4)
-  O/U 8.5: over 45.9% / under 54.1%  fair 2.18 / 1.85
+*Corners* (model, exp 8.5)
+  O/U 8.5: over 47.9% / under 52.1%  fair 2.09 / 1.92
 
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-1-0 19.0% | 2-0 18.4% | 3-0 11.6% | 2-1 9.3% | 0-0 6.6% | 1-1 6.3%
-  O/U 2.5: over 46.0% / under 54.0%   BTTS 32.1%
+0-1 13.9% | 0-2 13.9% | 1-1 10.0% | 0-3 8.9% | 1-2 8.8% | 0-0 8.2%
+  O/U 2.5: over 47.0% / under 53.0%   BTTS 40.9%
