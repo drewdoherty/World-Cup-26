@@ -128,6 +128,34 @@ keeping explicit `/codex` available for manual overrides.
 Spawned worktrees accumulate under `.claude/worktrees/`; reclaim them with the
 existing `bash scripts/wca_worktree_cleanup.sh --force`.
 
+## Running always-on on the Mac mini
+
+The conductor is a KeepAlive launchd daemon (`com.wca.conductor`) alongside
+`@gamble1_bot`, with its **own** dry-run env so it can never touch the live
+ledger. On the mini, in the repo root:
+
+```bash
+# 1. code: already on main (or: git pull). The 'conductor' daemon is in services.env.
+# 2. prerequisites in the venv + on PATH:
+.venv/bin/pip install matplotlib          # optional — enables /chart (else text fallback)
+#    the mini also needs the `claude` CLI installed and `gh auth login` done.
+# 3. config — a SEPARATE env from the live .env (different bot, dry-run, dev DB):
+cp .env.conductor.example .env.conductor
+$EDITOR .env.conductor                    # @WorldCupDev token, admin id, CLAUDE_CODE_OAUTH_TOKEN
+# 4. register + start the daemon (idempotent):
+bash deploy/macmini/install.sh
+# 5. verify:
+launchctl list | grep com.wca.conductor
+tail -f logs/conductor.log                # then send /help to @WorldCupDev
+```
+
+`.env.conductor` is gitignored. The daemon **crash-loops if it is missing** (no
+bot token) — create it *before* `install.sh`. Worktrees accumulate on the mini
+too; run `bash scripts/wca_worktree_cleanup.sh --force` periodically (it removes
+local checkouts only — pushed branches/PRs are untouched). `autopull` restarts
+the daemon when conductor code changes; in-memory task history resets on restart
+(known limit).
+
 ## Known limits (v0, honest)
 
 - Headless agents are less steerable than interactive — keep tasks well-scoped.
