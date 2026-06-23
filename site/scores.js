@@ -391,36 +391,52 @@
     }
     var byTeam = d.by_team || {};
     var teams = Object.keys(byTeam).sort();
-    var state = { mode: "stage", stage: "group", team: (byTeam.Iran ? "Iran" : teams[0]) };
+    var state = { mode: "stage", stage: "group", team: (byTeam.Iran ? "Iran" : teams[0]), sel: null };
     var pc = function (v) { return Math.round((v || 0) * 100); };
-    var isIE = function (g) {
-      return (g.home === "Iran" && g.away === "Egypt") || (g.home === "Egypt" && g.away === "Iran");
-    };
     function bar(x) {
       return '<span class="sm-bar"><i class="sm-h" style="width:' + pc(x[0]) +
         '%"></i><i class="sm-d" style="width:' + pc(x[1]) + '%"></i><i class="sm-a" style="width:' +
         pc(x[2]) + '%"></i></span>';
     }
+    function fixKey(g) { return g.home + " v " + g.away; }
+    function ftCell(g) {
+      // full-time score to the LEFT of the model bar (blank for upcoming games)
+      return g.ft
+        ? '<span class="sm-ft">' + g.ft[0] + "–" + g.ft[1] + "</span>"
+        : '<span class="sm-ft sm-ft-up">·</span>';
+    }
     function gameRow(g) {
-      return '<div class="sm-row' + (isIE(g) ? " sm-hl" : "") + '">' +
+      var key = fixKey(g);
+      return '<div class="sm-row' + (key === state.sel ? " sm-sel" : "") +
+        '" data-fix="' + esc(key) + '">' +
         '<div class="sm-fix"><span class="sm-tm">' + esc(g.home) + " v " + esc(g.away) +
         '</span><span class="sm-meta">' + esc(String(g.date).slice(5)) + " · Grp " + esc(g.group) +
         '</span></div>' +
-        '<div class="sm-1x2">' + bar(g.x1x2) + '<span class="sm-n">' + pc(g.x1x2[0]) + "·" +
+        '<div class="sm-1x2">' + ftCell(g) + bar(g.x1x2) + '<span class="sm-n">' + pc(g.x1x2[0]) + "·" +
         pc(g.x1x2[1]) + "·" + pc(g.x1x2[2]) + "</span></div>" +
         '<div class="sm-m"><b>' + esc(g.top) + "</b> " + pc(g.topp) + "%</div>" +
         '<div class="sm-m">O2.5 ' + pc(g.over25) + "%</div>" +
         '<div class="sm-m">BTTS ' + pc(g.btts) + "%</div>" +
         '<div class="sm-m sm-dim">xg ' + g.eg[0] + "-" + g.eg[1] + "</div></div>";
     }
+    function groupedRows(games) {
+      var byG = {};
+      games.forEach(function (g) { (byG[g.group] = byG[g.group] || []).push(g); });
+      return Object.keys(byG).sort().map(function (g) {
+        return '<div class="sm-grp"><div class="sm-gh">GROUP ' + g + "</div>" +
+          byG[g].map(gameRow).join("") + "</div>";
+      }).join("");
+    }
+    function contentGroup() {
+      // every group-stage fixture, played + upcoming, grouped by group
+      return groupedRows(d.group_games || []);
+    }
     function contentStage() {
       if (state.stage === "group") {
-        var byG = {};
-        d.group_games.forEach(function (g) { (byG[g.group] = byG[g.group] || []).push(g); });
-        return Object.keys(byG).sort().map(function (g) {
-          return '<div class="sm-grp"><div class="sm-gh">GROUP ' + g + "</div>" +
-            byG[g].map(gameRow).join("") + "</div>";
-        }).join("");
+        // BY STAGE shows what's left of the current stage (upcoming only)
+        return groupedRows((d.group_games || []).filter(function (g) {
+          return g.status !== "FT";
+        }));
       }
       if (state.stage === "r32") {
         return '<div class="sm-note">Projected qualifiers (model) — actual fixtures set once the group stage finalises.</div>' +
@@ -452,9 +468,12 @@
     function render() {
       var modes = '<div class="sm-modes">' +
         '<span class="sm-mtab' + (state.mode === "stage" ? " on" : "") + '" data-mode="stage">BY STAGE</span>' +
+        '<span class="sm-mtab' + (state.mode === "group" ? " on" : "") + '" data-mode="group">BY GROUP</span>' +
         '<span class="sm-mtab' + (state.mode === "team" ? " on" : "") + '" data-mode="team">BY TEAM</span></div>';
       var sub;
-      if (state.mode === "stage") {
+      if (state.mode === "group") {
+        sub = "";
+      } else if (state.mode === "stage") {
         sub = '<div class="sm-stages">' + (d.stages || []).map(function (s) {
           var cls = "sm-stab" + (s.key === state.stage ? " on" : "") +
             (s.status === "next" ? " sm-next" : "") + (s.status === "locked" ? " sm-lock" : "");
@@ -468,19 +487,30 @@
             esc(tm) + '">' + esc(tm) + "</span>";
         }).join("") + "</div>";
       }
-      el.innerHTML = modes + sub + '<div class="sm-cbody">' +
-        (state.mode === "stage" ? contentStage() : contentTeam()) + "</div>";
+      var body = state.mode === "group" ? contentGroup()
+        : state.mode === "stage" ? contentStage() : contentTeam();
+      el.innerHTML = modes + sub + '<div class="sm-cbody">' + body + "</div>";
     }
     if (!el._smWired) {
       el.addEventListener("click", function (e) {
-        var t = e.target.closest && e.target.closest("[data-mode],[data-stage],[data-team]");
-        if (!t) return;
-        if (t.getAttribute("data-mode")) state.mode = t.getAttribute("data-mode");
-        else if (t.getAttribute("data-stage")) {
-          if (t.className.indexOf("sm-lock") >= 0) return;
-          state.stage = t.getAttribute("data-stage");
-        } else if (t.getAttribute("data-team")) state.team = t.getAttribute("data-team");
-        render();
+        if (!e.target.closest) return;
+        var t = e.target.closest("[data-mode],[data-stage],[data-team]");
+        if (t) {
+          if (t.getAttribute("data-mode")) state.mode = t.getAttribute("data-mode");
+          else if (t.getAttribute("data-stage")) {
+            if (t.className.indexOf("sm-lock") >= 0) return;
+            state.stage = t.getAttribute("data-stage");
+          } else if (t.getAttribute("data-team")) state.team = t.getAttribute("data-team");
+          render();
+          return;
+        }
+        // click a fixture row → select it (green); clears any prior selection
+        var row = e.target.closest(".sm-row");
+        if (row && row.getAttribute("data-fix")) {
+          var key = row.getAttribute("data-fix");
+          state.sel = (state.sel === key) ? null : key;
+          render();
+        }
       });
       el._smWired = true;
     }
