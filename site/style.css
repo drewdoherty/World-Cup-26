@@ -640,6 +640,19 @@ body {
 /* --- three-column fixture card: scorelines · exposure · best price --- */
 .sc-body3 { grid-template-columns: minmax(190px, 1fr) minmax(230px, 1.1fr) minmax(150px, 0.8fr); }
 .sc-col { min-width: 0; }
+
+/* matchday tabs */
+.sc-tabs {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  padding: 10px 0 12px; border-bottom: 1px solid var(--border); margin-bottom: 10px;
+}
+.sc-tab {
+  background: none; border: 1px solid var(--border); border-radius: 3px;
+  color: var(--text-dim); cursor: pointer; font-family: inherit;
+  font-size: 9px; letter-spacing: 1px; padding: 4px 10px; text-transform: uppercase;
+}
+.sc-tab:hover { color: var(--text); border-color: var(--text-dim); }
+.sc-tab-active { background: var(--accent); border-color: var(--accent); color: #000; }
 .sc-coltag {
   font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
   color: var(--muted); margin-bottom: 7px; padding-bottom: 4px;
