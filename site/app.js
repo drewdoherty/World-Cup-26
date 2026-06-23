@@ -94,7 +94,7 @@
       h2h: "1X2", match_odds: "1X2", "match odds": "1X2",
       outright_golden_boot: "Golden Boot", golden_boot: "Golden Boot",
       outright_winner: "Winner", BETBUILDER: "Bet Builder",
-      polymarket: "PM", over_under: "O/U", totals: "O/U",
+      polymarket: "PM", pm_moneyline: "PM", over_under: "O/U", totals: "O/U",
       scoreline: "Score", correct_score: "Score", draw_no_bet: "DNB",
       btts: "BTTS", double_chance: "Dbl Chance",
       player_goal_scorer_anytime: "ATGS", player_first_goal_scorer: "FGS",

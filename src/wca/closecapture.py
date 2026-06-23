@@ -673,3 +673,127 @@ def rebackfill_fair_closes_db(
         return []
     finally:
         con.close()
+
+
+# ---------------------------------------------------------------------------
+# Polymarket CLV backfill.
+# ---------------------------------------------------------------------------
+
+
+def rebackfill_pm_closes(
+    con: sqlite3.Connection,
+    now_utc: str,
+    dry_run: bool = False,
+    skipped_out: Optional[List[Dict[str, Any]]] = None,
+) -> List[Dict[str, Any]]:
+    """Backfill ``closing_odds`` + ``clv`` for Polymarket bets using the
+    sportsbook consensus close.
+
+    Covers bets recorded with either the old ``market='polymarket'`` label
+    (before the ``pm_moneyline`` convention was adopted) or the current
+    ``market='pm_moneyline'`` label.  Both map to the same sportsbook H2H
+    close — the de-vigged consensus price at the last pre-kickoff snapshot —
+    which is the correct CLV basis for a match-winner PM bet.
+
+    Unlike :func:`rebackfill_fair_closes` this targets the ``platform``
+    column (``='polymarket'``) rather than the ``market`` column, so it
+    retroactively covers bets logged before the market label was standardised.
+    Already-stamped rows (``closing_odds IS NOT NULL``) are recomputed and
+    updated (same idempotency guarantee as the main rebackfill).
+
+    Returns one record per bet whose close was (re)computed::
+
+        {"bet_id", "match", "selection", "status", "decimal_odds",
+         "old_closing", "new_closing", "old_clv", "new_clv", "changed",
+         "close_ts", "books"}
+    """
+    now_bare = _bare_ts(now_utc)
+    if not now_bare:
+        return []
+    _skip = _skipper(skipped_out)
+
+    try:
+        bets = con.execute(
+            "SELECT id, ts_utc, match_desc, market, selection, decimal_odds, "
+            "notes, status, closing_odds, clv FROM bets "
+            "WHERE platform='polymarket'"
+        ).fetchall()
+    except sqlite3.OperationalError:
+        return []
+
+    if not bets:
+        return []
+
+    index, by_teams = _build_team_index(con)
+    closes: Dict[str, Optional[Dict[str, Any]]] = {}
+    out: List[Dict[str, Any]] = []
+    for (bet_id, ts_utc, match_desc, _market, selection, decimal_odds,
+         notes, status, old_close, old_clv) in bets:
+        if isinstance(notes, str) and _EXCLUDE_NOTE in notes.casefold():
+            _skip(bet_id, match_desc, selection, "excluded")
+            continue
+        mid, reason = _resolve_fixture(
+            match_desc, selection, notes, ts_utc, index, by_teams
+        )
+        if mid is None:
+            _skip(bet_id, match_desc, selection, reason)
+            continue
+        record, reason = _compute_close(
+            con, mid, selection, decimal_odds, index, closes, now_bare
+        )
+        if record is None:
+            _skip(bet_id, match_desc, selection, reason)
+            continue
+        new_close, new_clv = record["closing"], record["clv"]
+        changed = (
+            old_close is None
+            or abs(float(old_close) - new_close) > 1e-9
+        )
+        if not dry_run:
+            con.execute(
+                "UPDATE bets SET closing_odds=?, clv=? WHERE id=?",
+                (new_close, new_clv, bet_id),
+            )
+        out.append(
+            {
+                "bet_id": bet_id,
+                "match": match_desc,
+                "selection": selection,
+                "status": status,
+                "decimal_odds": (
+                    float(decimal_odds) if decimal_odds is not None else None
+                ),
+                "old_closing": (None if old_close is None else float(old_close)),
+                "new_closing": new_close,
+                "old_clv": (None if old_clv is None else float(old_clv)),
+                "new_clv": new_clv,
+                "changed": changed,
+                "close_ts": record["close_ts"],
+                "books": record["books"],
+            }
+        )
+    if out and not dry_run:
+        con.commit()
+    return out
+
+
+def rebackfill_pm_closes_db(
+    db_path: str,
+    now_utc: Optional[str] = None,
+    dry_run: bool = False,
+    skipped_out: Optional[List[Dict[str, Any]]] = None,
+) -> List[Dict[str, Any]]:
+    """Open *db_path* and run :func:`rebackfill_pm_closes`."""
+    if now_utc is None:
+        from datetime import timezone
+
+        now_utc = datetime.now(timezone.utc).isoformat()
+    con = sqlite3.connect(db_path)
+    try:
+        return rebackfill_pm_closes(
+            con, now_utc, dry_run=dry_run, skipped_out=skipped_out
+        )
+    except sqlite3.OperationalError:
+        return []
+    finally:
+        con.close()

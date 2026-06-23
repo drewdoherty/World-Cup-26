@@ -1717,16 +1717,23 @@ def _execute_parked_order(
         "DRY-RUN (not submitted)" if dry_run else "LIVE",
         order_id,
     )
+    model_prob = proposal.get("model_prob")
+    # PM price IS the market-implied probability (no vig on a prediction market).
+    market_prob_devig = price if 0.0 < price < 1.0 else None
+    ev_frac = proposal.get("ev")  # fractional edge from kelly.edge(), displayed as %
     try:
         bid = record_bet(
             ts_utc,
             match_id,
             match_desc,
-            proposal.get("market") or "polymarket",
+            proposal.get("market") or "pm_moneyline",  # enables auto-CLV via closecapture
             outcome or label,
             "polymarket",
             decimal_odds,
             round(price * size, 2),
+            model_prob=model_prob,
+            market_prob_devig=market_prob_devig,
+            ev=ev_frac,
             notes=notes,
             account="1",
             source="model",
