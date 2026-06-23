@@ -21,29 +21,10 @@ def _fixture_key(home: str, away: str) -> str:
     return "%s vs %s" % (home, away)
 
 
-def build_arb_data(
-    *,
-    betfair_rows: List[Dict[str, Any]],
-    pm_quotes: Dict[str, Dict[str, float]],
-    fx_usd_per_gbp: float,
-    fx_source: str,
-    now_utc: str,
-    history: Optional[List[Dict[str, Any]]] = None,
-) -> Dict[str, Any]:
-    """Pure builder (no I/O).
-
-    Parameters
-    ----------
-    betfair_rows: flat Betfair h2h rows (event_id, home_team, away_team,
-        outcome_name, decimal_odds) from :func:`wca.data.betfair.betfair_odds`.
-    pm_quotes: ``{fixture_key: {"home": yes_price, "away": yes_price,
-        "settlement": "1x2_90min"}}`` — PM YES price that the team wins.
-    fx_usd_per_gbp / fx_source: from :mod:`wca.fx`.
-    history: optional prior detections for the HYPOTHETICAL cumulative curve.
-    """
-    # Index Betfair h2h back odds per fixture+team.
-    bf: Dict[str, Dict[str, Dict[str, Any]]] = {}
-    for r in betfair_rows:
+def _index_exchange(rows, home_away):
+    """{fixture: {slot: {back, lay}}} of GBP exchange odds, canonicalised."""
+    out: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    for r in rows or []:
         if (r.get("market") or "") != "h2h":
             continue
         home, away = canonical(r.get("home_team") or ""), canonical(r.get("away_team") or "")
@@ -53,33 +34,81 @@ def build_arb_data(
         if slot is None:
             continue
         try:
-            odds = float(r.get("decimal_odds"))
+            back = float(r.get("decimal_odds"))
         except (TypeError, ValueError):
             continue
-        bf.setdefault(fk, {})[slot] = {"team": team, "odds": odds}
+        try:
+            lay = float(r["lay_odds"]) if r.get("lay_odds") is not None else None
+        except (TypeError, ValueError):
+            lay = None
+        out.setdefault(fk, {})[slot] = {"team": team, "back": back, "lay": lay}
+        home_away[fk] = (home, away)
+    return out
+
+
+def build_arb_data(
+    *,
+    betfair_rows: List[Dict[str, Any]],
+    pm_quotes: Dict[str, Dict[str, float]],
+    fx_usd_per_gbp: float,
+    fx_source: str,
+    now_utc: str,
+    smarkets_rows: Optional[List[Dict[str, Any]]] = None,
+    smarkets_grade: str = "monitoring-grade",
+    history: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
+    """Pure builder (no I/O). Best risk-free lock per (fixture, outcome) across
+    PM (USD), Betfair (GBP) and Smarkets (GBP) — all venue pairs considered.
+
+    pm_quotes: ``{fixture: {"home": yes, "away": yes, "settlement": "1x2_90min"}}``
+    where ``yes`` is the PM YES price that the team wins. Exchange rows carry
+    ``decimal_odds`` (back) and optional ``lay_odds`` (native depth only).
+    """
+    home_away: Dict[str, tuple] = {}
+    bf = _index_exchange(betfair_rows, home_away)
+    sm = _index_exchange(smarkets_rows or [], home_away)
 
     opps: List[Dict[str, Any]] = []
-    for fk, sides in bf.items():
+    for fk in set(bf) | set(sm):
         q = pm_quotes.get(fk)
-        if not q:
-            continue
-        # Settlement guard: only pair like-for-like 90-min markets.
-        confidence = "high" if q.get("settlement") == "1x2_90min" else "low"
-        if q.get("settlement") != "1x2_90min":
-            continue
-        for slot in _SIDES:
-            leg = sides.get(slot)
-            pm_price = q.get(slot)
-            if not leg or pm_price is None:
-                continue
-            opp = arbfx.evaluate_pair(
-                fixture=fk, market="h2h",
-                betfair_outcome=leg["team"], betfair_odds=leg["odds"],
-                pm_outcome="%s wins" % leg["team"], pm_price=float(pm_price),
-                fx_usd_per_gbp=fx_usd_per_gbp, confidence=confidence,
-            )
-            if opp is not None:
-                opps.append(_opp_to_row(opp))
+        if not q or q.get("settlement") != "1x2_90min":
+            continue  # settlement guard: 90-min only
+        home, away = home_away[fk]
+        for slot, team in (("home", home), ("away", away)):
+            win_legs: List[Dict[str, Any]] = []   # back the outcome
+            lose_legs: List[Dict[str, Any]] = []  # oppose it
+            # Polymarket: YES = win, NO = lose.
+            yes = q.get(slot)
+            if yes is not None:
+                wn = arbfx.pm_yes_to_decimal(float(yes))
+                ln = arbfx.pm_no_net(float(yes))
+                if wn > 1:
+                    win_legs.append({"venue": "polymarket", "currency": "USD", "net": wn,
+                                     "desc": "PM YES @ %.3f" % yes, "confidence": "monitoring-grade"})
+                if ln > 1:
+                    lose_legs.append({"venue": "polymarket", "currency": "USD", "net": ln,
+                                      "desc": "PM NO @ %.3f" % (1 - float(yes)), "confidence": "monitoring-grade"})
+            # Exchanges: back = win; lay (native depth) = lose, execution-grade.
+            for venue, idx, grade in (("betfair", bf, "monitoring-grade"), ("smarkets", sm, smarkets_grade)):
+                e = idx.get(fk, {}).get(slot)
+                if not e:
+                    continue
+                bnet = arbfx.exchange_back_net(e["back"], venue)
+                if bnet > 1:
+                    win_legs.append({"venue": venue, "currency": "GBP", "net": bnet,
+                                     "desc": "%s back @ %.2f" % (venue, e["back"]),
+                                     "confidence": grade if venue == "smarkets" else "monitoring-grade"})
+                if e.get("lay"):
+                    lnet = arbfx.exchange_lay_net(e["lay"], venue)
+                    if lnet > 1:
+                        lose_legs.append({"venue": venue, "currency": "GBP", "net": lnet,
+                                          "desc": "%s lay @ %.2f" % (venue, e["lay"]),
+                                          "confidence": "execution-grade"})
+            res = arbfx.best_lock(fixture=fk, market="h2h", outcome=team,
+                                  win_legs=win_legs, lose_legs=lose_legs,
+                                  fx_usd_per_gbp=fx_usd_per_gbp)
+            if res is not None:
+                opps.append(_lock_to_row(res))
 
     opps.sort(key=lambda o: o["guaranteed_pct"], reverse=True)
     return {
@@ -95,21 +124,20 @@ def build_arb_data(
     }
 
 
-def _opp_to_row(opp: "arbfx.ArbOpp") -> Dict[str, Any]:
-    bf_leg = next(l for l in opp.legs if l.venue == "betfair")
-    pm_leg = next(l for l in opp.legs if l.venue == "polymarket")
+def _lock_to_row(res: "arbfx.LockResult") -> Dict[str, Any]:
+    legs = [{"venue": l.venue, "currency": l.currency, "side": l.side,
+             "net": l.net, "desc": l.desc, "stake": l.stake} for l in res.legs]
     return {
-        "fixture": opp.fixture,
-        "market": opp.market,
-        "selection": opp.betfair_outcome,
-        "pm_price": opp.pm_price,            # USD YES price
-        "betfair_odds": opp.betfair_odds,    # GBP decimal
-        "fx": opp.fx_usd_per_gbp,
-        "fee_adj_edge": opp.fee_adj_edge,
-        "guaranteed_pct": opp.guaranteed_pct,
-        "stake_split": {"betfair_gbp": bf_leg.stake, "polymarket_usd": pm_leg.stake},
-        "confidence": opp.confidence,
-        "notes": opp.notes,
+        "fixture": res.fixture,
+        "market": res.market,
+        "selection": res.outcome,
+        "venue_pair": res.venue_pair,
+        "fee_adj_edge": res.fee_adj_edge,
+        "guaranteed_pct": res.guaranteed_pct,
+        "stake_split": {("%s_%s" % (l["venue"], l["currency"].lower())): l["stake"] for l in legs},
+        "legs": legs,
+        "confidence": res.confidence,
+        "notes": res.notes,
     }
 
 

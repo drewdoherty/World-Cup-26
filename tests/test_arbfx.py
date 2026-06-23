@@ -103,29 +103,80 @@ def test_invalid_inputs_return_none():
                                fx_usd_per_gbp=1.27) is None
 
 
-# -- Part C feed builder ------------------------------------------------------
+# -- 3-venue engine -----------------------------------------------------------
 
-def test_build_arb_data_pairs_and_guards_settlement():
+def test_commission_and_net_helpers():
+    assert arbfx.SMARKETS_COMMISSION == 0.02
+    # smarkets back has higher net than betfair at same odds (lower commission)
+    assert arbfx.exchange_back_net(2.0, "smarkets") > arbfx.exchange_back_net(2.0, "betfair")
+    assert arbfx.exchange_lay_net(2.0, "smarkets") > 1.0
+    assert arbfx.pm_no_net(0.40) > 1.0
+
+
+def test_best_lock_skips_same_venue_and_picks_best():
+    win = [{"venue": "betfair", "currency": "GBP", "net": 2.22, "desc": "bf"},
+           {"venue": "smarkets", "currency": "GBP", "net": 2.26, "desc": "sm"}]
+    lose = [{"venue": "smarkets", "currency": "GBP", "net": 1.95, "desc": "sm lay",
+             "confidence": "execution-grade"}]
+    res = arbfx.best_lock(fixture="A vs B", market="h2h", outcome="A",
+                          win_legs=win, lose_legs=lose, fx_usd_per_gbp=1.27)
+    assert res is not None
+    # must pick betfair-back ↔ smarkets-lay (same-venue smarkets pair is skipped)
+    assert res.venue_pair == "betfair↔smarkets"
+    assert "same-currency" in res.notes  # GBP↔GBP, no FX haircut
+
+
+def test_cross_currency_lock_caps_confidence_and_applies_haircut():
+    win = [{"venue": "smarkets", "currency": "GBP", "net": 2.30, "desc": "sm back",
+            "confidence": "execution-grade"}]
+    lose = [{"venue": "polymarket", "currency": "USD", "net": 2.40, "desc": "PM NO",
+             "confidence": "monitoring-grade"}]
+    res = arbfx.best_lock(fixture="A vs B", market="h2h", outcome="A",
+                          win_legs=win, lose_legs=lose, fx_usd_per_gbp=1.27)
+    assert res is not None and res.venue_pair == "smarkets↔polymarket"
+    assert res.confidence == "monitoring-grade"  # FX leg caps it
+
+
+# -- Part C feed builder (3 venues) -------------------------------------------
+
+def test_build_arb_data_three_venue_lock_and_pair():
     from wca import arbdata
-    rows = [
-        {"event_id": "e1", "home_team": "Brazil", "away_team": "Mexico",
-         "market": "h2h", "outcome_name": "Brazil", "decimal_odds": 2.30},
-        {"event_id": "e1", "home_team": "Brazil", "away_team": "Mexico",
-         "market": "h2h", "outcome_name": "Mexico", "decimal_odds": 3.50},
-    ]
+    bf = [{"home_team": "Brazil", "away_team": "Mexico", "market": "h2h",
+           "outcome_name": "Brazil", "decimal_odds": 2.30}]
+    sm = [{"home_team": "Brazil", "away_team": "Mexico", "market": "h2h",
+           "outcome_name": "Brazil", "decimal_odds": 2.20, "lay_odds": 2.10}]
     pm = {"Brazil vs Mexico": {"home": 0.40, "away": 0.30, "settlement": "1x2_90min"}}
-    out = arbdata.build_arb_data(betfair_rows=rows, pm_quotes=pm,
-                                 fx_usd_per_gbp=1.27, fx_source="live", now_utc="t")
+    out = arbdata.build_arb_data(betfair_rows=bf, smarkets_rows=sm, pm_quotes=pm,
+                                 fx_usd_per_gbp=1.27, fx_source="live", now_utc="t",
+                                 smarkets_grade="execution-grade")
     assert out["meta"]["monitoring_only"] is True
     assert "HYPOTHETICAL" in out["hypothetical"]["label"]
-    assert all(a["guaranteed_pct"] > 0 for a in out["arbs"])
+    assert out["arbs"], "expected at least one lock"
+    a = out["arbs"][0]
+    assert "↔" in a["venue_pair"] and a["guaranteed_pct"] > 0
 
 
 def test_build_arb_data_drops_non_90min_settlement():
     from wca import arbdata
-    rows = [{"event_id": "e1", "home_team": "Brazil", "away_team": "Mexico",
-             "market": "h2h", "outcome_name": "Brazil", "decimal_odds": 2.30}]
+    bf = [{"home_team": "Brazil", "away_team": "Mexico", "market": "h2h",
+           "outcome_name": "Brazil", "decimal_odds": 2.30}]
+    sm = [{"home_team": "Brazil", "away_team": "Mexico", "market": "h2h",
+           "outcome_name": "Brazil", "decimal_odds": 2.20, "lay_odds": 2.10}]
     pm = {"Brazil vs Mexico": {"home": 0.40, "settlement": "winner_incl_et"}}
-    out = arbdata.build_arb_data(betfair_rows=rows, pm_quotes=pm,
+    out = arbdata.build_arb_data(betfair_rows=bf, smarkets_rows=sm, pm_quotes=pm,
                                  fx_usd_per_gbp=1.27, fx_source="live", now_utc="t")
     assert out["arbs"] == []
+
+
+def test_smarkets_adapter_and_stub():
+    import pandas as pd
+    from wca.data import smarkets
+    df = pd.DataFrame([
+        {"bookmaker_key": "smarkets", "market": "h2h", "outcome_name": "Brazil", "decimal_odds": 2.2},
+        {"bookmaker_key": "bet365", "market": "h2h", "outcome_name": "Brazil", "decimal_odds": 2.1},
+    ])
+    out = smarkets.filter_smarkets(df)
+    assert list(out["bookmaker_key"].unique()) == ["smarkets"]
+    assert (out["currency"] == "GBP").all() and "lay_odds" in out.columns
+    with pytest.raises(NotImplementedError):
+        smarkets.smarkets_execution_stub("place")

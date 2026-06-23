@@ -29,25 +29,35 @@
       $("arb-table").innerHTML = '<div class="empty" style="padding:18px;color:var(--text-dim)">No risk-free opportunities right now.</div>';
       return;
     }
+    function stakeStr(legs) {
+      return (legs || []).map(function (l) {
+        var amt = l.currency === "USD" ? usd(l.stake) : gbp(l.stake);
+        return amt + " " + esc(l.venue);
+      }).join(" / ");
+    }
+    function legStr(legs) {
+      return (legs || []).map(function (l) {
+        return esc(l.side === "win" ? "back" : "oppose") + " " + esc(l.desc);
+      }).join("  ·  ");
+    }
+    function confClass(c) {
+      return c === "execution-grade" ? "pos" : (c === "low" ? "neg" : "dim");
+    }
     var rows = arbs.map(function (a) {
-      var ss = a.stake_split || {};
-      var conf = esc(a.confidence || "");
       return '<tr>' +
         '<td class="pos-time pos-match">' + esc(a.fixture) + '<span class="dim"> · ' + esc(a.selection) + '</span></td>' +
-        '<td class="r">' + usd(a.pm_price) + '</td>' +
-        '<td class="r">' + num(a.betfair_odds, 2) + '</td>' +
-        '<td class="r">' + num(a.fx, 3) + '</td>' +
+        '<td><strong>' + esc(a.venue_pair) + '</strong><br><span class="dim" style="font-size:10px">' + legStr(a.legs) + '</span></td>' +
         '<td class="r ' + (a.fee_adj_edge > 0 ? 'pos' : 'neg') + '">' + pct(a.fee_adj_edge) + '</td>' +
-        '<td class="r">' + gbp(ss.betfair_gbp) + ' / ' + usd(ss.polymarket_usd) + '</td>' +
+        '<td class="r">' + stakeStr(a.legs) + '</td>' +
         '<td class="r pos">' + pct(a.guaranteed_pct) + '</td>' +
-        '<td>' + conf + '</td>' +
+        '<td class="' + confClass(a.confidence) + '">' + esc(a.confidence || "") + '</td>' +
       '</tr>';
     }).join("");
     $("arb-table").innerHTML =
       '<table class="pos-table"><thead><tr>' +
-        '<th>Market</th><th class="r">PM $</th><th class="r">Betfair £ (dec)</th>' +
-        '<th class="r">FX</th><th class="r">Fee-adj edge</th>' +
-        '<th class="r">Stake split (BF/PM)</th><th class="r">Guaranteed %</th><th>Conf</th>' +
+        '<th>Market</th><th>Venue pair / legs</th>' +
+        '<th class="r">Fee-adj edge</th>' +
+        '<th class="r">Stake split</th><th class="r">Guaranteed %</th><th>Confidence</th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table>';
   }
 

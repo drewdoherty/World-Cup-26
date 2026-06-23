@@ -118,3 +118,116 @@ def evaluate_pair(
               % (fx_haircut * 100),
         meta={"total_outlay_gbp": total_outlay_gbp},
     )
+
+
+# ---------------------------------------------------------------------------
+# Generic N-venue locks (PM USD, Betfair GBP, Smarkets GBP). Monitoring-only.
+# ---------------------------------------------------------------------------
+
+SMARKETS_COMMISSION = 0.02  # 2% on net winnings (verified)
+_EXCHANGE_COMMISSION = {"betfair": DEFAULT_BETFAIR_COMMISSION, "smarkets": SMARKETS_COMMISSION}
+
+
+def exchange_back_net(odds: float, venue: str) -> float:
+    """Net decimal for backing an outcome on a GBP exchange."""
+    c = _EXCHANGE_COMMISSION.get(venue, 0.0)
+    return 1.0 + (odds - 1.0) * (1.0 - c) if odds and odds > 1.0 else 0.0
+
+
+def exchange_lay_net(lay_odds: float, venue: str) -> float:
+    """Net decimal of the ¬outcome payoff from LAYING at *lay_odds* (native depth)."""
+    c = _EXCHANGE_COMMISSION.get(venue, 0.0)
+    return 1.0 + (1.0 - c) / (lay_odds - 1.0) if lay_odds and lay_odds > 1.0 else 0.0
+
+
+def pm_no_net(yes_price: float) -> float:
+    """Net decimal of PM NO (¬outcome) implied from the YES price (symmetric fee)."""
+    if not (0.0 < yes_price < 1.0):
+        return 0.0
+    cost = (1.0 - yes_price) + PM_TAKER_FEE_RATE * yes_price * (1.0 - yes_price)
+    return 1.0 / cost if cost > 0 else 0.0
+
+
+@dataclass(frozen=True)
+class LockLeg:
+    venue: str
+    currency: str
+    side: str        # "win" (backs outcome) | "lose" (opposes it)
+    net: float
+    desc: str
+    stake: float = 0.0
+
+
+@dataclass(frozen=True)
+class LockResult:
+    fixture: str
+    market: str
+    outcome: str
+    venue_pair: str
+    fee_adj_edge: float
+    guaranteed_pct: float
+    confidence: str
+    legs: List[LockLeg]
+    notes: str = ""
+
+
+def evaluate_lock(win, lose, *, fx_usd_per_gbp, fx_haircut=DEFAULT_FX_HAIRCUT,
+                  total_outlay_gbp=100.0):
+    """win/lose are dicts {venue,currency,net,desc,confidence}. Return LockResult|None."""
+    wn, ln = win["net"], lose["net"]
+    if not (wn > 1.0 and ln > 1.0 and fx_usd_per_gbp and fx_usd_per_gbp > 0.0):
+        return None
+    inv = 1.0 / wn + 1.0 / ln
+    edge = 1.0 - inv
+    if edge <= 0.0:
+        return None
+    f_w, f_l = (1.0 / wn) / inv, (1.0 / ln) / inv
+    gross = (1.0 / inv) - 1.0
+    cross = win["currency"] != lose["currency"]
+    usd_frac = (f_w if win["currency"] == "USD" else 0.0) + (f_l if lose["currency"] == "USD" else 0.0)
+    guaranteed = gross - (fx_haircut * usd_frac if cross else 0.0)
+
+    def stake(frac, cur):
+        g = frac * total_outlay_gbp
+        return round(g * fx_usd_per_gbp, 2) if cur == "USD" else round(g, 2)
+
+    legs = [
+        LockLeg(win["venue"], win["currency"], "win", round(wn, 4), win["desc"], stake(f_w, win["currency"])),
+        LockLeg(lose["venue"], lose["currency"], "lose", round(ln, 4), lose["desc"], stake(f_l, lose["currency"])),
+    ]
+    conf = _min_conf(win.get("confidence", "monitoring-grade"), lose.get("confidence", "monitoring-grade"), cross)
+    return LockResult(
+        fixture=win.get("fixture", ""), market=win.get("market", ""),
+        outcome=win.get("outcome", ""),
+        venue_pair="%s↔%s" % (win["venue"], lose["venue"]),
+        fee_adj_edge=round(edge, 5), guaranteed_pct=round(guaranteed, 5),
+        confidence=conf, legs=legs,
+        notes="monitoring-only" + ("; FX haircut %.2f%%" % (fx_haircut * 100) if cross else "; same-currency (no FX)"),
+    )
+
+
+_CONF_RANK = {"execution-grade": 2, "monitoring-grade": 1, "low": 0}
+
+
+def _min_conf(a, b, cross):
+    rank = min(_CONF_RANK.get(a, 1), _CONF_RANK.get(b, 1))
+    label = {2: "execution-grade", 1: "monitoring-grade", 0: "low"}[rank]
+    # any cross-currency (FX) leg caps at monitoring-grade (FX/slippage risk)
+    if cross and rank > 1:
+        label = "monitoring-grade"
+    return label
+
+
+def best_lock(*, fixture, market, outcome, win_legs, lose_legs, fx_usd_per_gbp,
+              fx_haircut=DEFAULT_FX_HAIRCUT):
+    """Best cross-venue lock for one outcome: back it on venue A, oppose on B (A≠B)."""
+    best = None
+    for w in win_legs:
+        for l in lose_legs:
+            if w["venue"] == l["venue"]:
+                continue
+            w2 = {**w, "fixture": fixture, "market": market, "outcome": outcome}
+            res = evaluate_lock(w2, l, fx_usd_per_gbp=fx_usd_per_gbp, fx_haircut=fx_haircut)
+            if res and (best is None or res.guaranteed_pct > best.guaranteed_pct):
+                best = res
+    return best
