@@ -23,7 +23,7 @@ import datetime
 import json
 import os
 import sys
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -87,15 +87,21 @@ def build(results_path: str, advancement_path: str) -> Dict[str, Any]:
     df["_d"] = pd.to_datetime(df["date"], errors="coerce")
     wc = df[(df["tournament"] == "FIFA World Cup") & (df["_d"].dt.year == 2026)]
 
-    # --- current stage: every upcoming group game with model markets ---
+    # --- current stage: ALL group games (completed + upcoming) with model markets ---
     group_games: List[Dict[str, Any]] = []
-    for _, r in wc[wc["home_score"].isna()].sort_values("_d").iterrows():
+    n_upcoming = 0
+    for _, r in wc.sort_values("_d").iterrows():
         h, a = r["home_team"], r["away_team"]
         g = team_group.get(h)
         if not g or g != team_group.get(a):
             continue  # not a same-group fixture (knockout placeholder etc.)
         m = _market(models, h, a)
-        m.update({"home": h, "away": a, "date": str(r["_d"].date()), "group": g})
+        ft: Optional[str] = None
+        if pd.notna(r.get("home_score")) and pd.notna(r.get("away_score")):
+            ft = f"{int(r['home_score'])}-{int(r['away_score'])}"
+        else:
+            n_upcoming += 1
+        m.update({"home": h, "away": a, "date": str(r["_d"].date()), "group": g, "ft": ft})
         group_games.append(m)
 
     # --- next stage: projected R32 qualifiers (top-2 per group standings) ---
@@ -126,7 +132,7 @@ def build(results_path: str, advancement_path: str) -> Dict[str, Any]:
     stages = []
     for key, label in STAGES:
         if key == "group":
-            status, count = "current", len(group_games)
+            status, count = "current", n_upcoming  # badge shows upcoming remaining
         elif key == "r32":
             status, count = "next", len(r32_projected)
         else:
@@ -137,6 +143,7 @@ def build(results_path: str, advancement_path: str) -> Dict[str, Any]:
         "meta": {
             "generated": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
             "n_games": len(group_games),
+            "n_upcoming": n_upcoming,
             "source": "Elo+DC scorelines · advancement reused from advancement_data.json",
         },
         "stages": stages,
