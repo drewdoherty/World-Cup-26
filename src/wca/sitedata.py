@@ -208,16 +208,36 @@ def _read_card_body(card_path: str) -> str:
 VENUE_CURRENCY = {"sportsbook": "GBP", "polymarket": "USD", "kalshi": "USD"}
 CURRENCY_SYMBOL = {"GBP": "£", "USD": "$", "EUR": "€"}
 
+# Statuses that mean the bet is still live. The ledger stores "open" but
+# external ingestion paths (Betfair, third-party feeds) may log aliases.
+_OPEN_STATUSES = frozenset({"open", "matched", "pending", "active", "unsettled"})
+
+# Terminal statuses — these bets are correctly excluded from the open-positions
+# view. Anything else is reported in dropped_open_bets (never silent).
+_TERMINAL_STATUSES = frozenset({"won", "lost", "void"})
+
 
 def _positions_from_bets(bets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Project the open bets into the compact terminal "positions" shape.
 
-    Ordering follows ``gather_stats`` (newest-first by id).
+    Recognises every status in :data:`_OPEN_STATUSES` as "live" so that
+    external ingestion paths that log "matched"/"pending"/"active"/"unsettled"
+    are not silently dropped.  Terminal statuses are correctly excluded.  Any
+    unrecognised status string is also excluded here; callers compare the
+    result against ``dropped_open_bets`` so nothing is silent.
+
+    Ordering follows ``gather_stats`` (newest-first by id).  No fixture
+    mapping is applied — outrights (``match_id="outright_*"``) and
+    multi-fixture accumulators pass through unchanged.
     """
     positions: List[Dict[str, Any]] = []
     for b in bets:
         status = (b.get("status") or "").strip().lower()
-        if status != "open":
+        if status in _TERMINAL_STATUSES:
+            continue
+        if status not in _OPEN_STATUSES:
+            # Unknown — not terminal and not a recognised live alias.
+            # build_site_data captures this in dropped_open_bets.
             continue
         venue = dashboard.venue_for_platform(b.get("platform"))
         positions.append({
@@ -466,7 +486,25 @@ def build_site_data(
         "n_with_close": int(clv_in.get("n_with_close") or 0),
     }
 
-    positions = _positions_from_bets(stats.get("bets") or [])
+    all_bets = stats.get("bets") or []
+    positions = _positions_from_bets(all_bets)
+
+    # Invariant diagnostic: every non-terminal bet must appear in positions.
+    # A non-empty list means a bet is live but got silently excluded — that is
+    # always a bug and must never be silent.
+    _position_ids = {p["id"] for p in positions}
+    dropped_open_bets: List[Dict[str, Any]] = []
+    for b in all_bets:
+        raw = (b.get("status") or "").strip().lower()
+        if raw in _TERMINAL_STATUSES:
+            continue
+        if b.get("id") not in _position_ids:
+            dropped_open_bets.append({
+                "id": b.get("id"),
+                "match": b.get("match_desc"),
+                "status": b.get("status"),
+                "reason": "unrecognized_status",
+            })
 
     # Live Polymarket holdings are the source of truth for the PM venue (placed
     # manually in the UI, not in the ledger). When provided, they REPLACE the
@@ -597,6 +635,7 @@ def build_site_data(
         "pnl_series": pnl_series,
         "clv": clv,
         "positions": positions,
+        "dropped_open_bets": dropped_open_bets,
         "predictions": predictions,
     }
 

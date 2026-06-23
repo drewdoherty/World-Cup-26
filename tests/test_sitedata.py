@@ -181,7 +181,7 @@ class TestBuildSiteData:
         assert set(data.keys()) == {
             "meta", "totals", "totals_by_currency", "venues", "source_summary",
             "platforms", "platforms_by_account", "closed_positions", "pnl_series",
-            "clv", "positions", "predictions"
+            "clv", "positions", "dropped_open_bets", "predictions"
         }
         assert data["meta"]["generated"] == "2026-06-11 15:00:00 UTC"
 
@@ -225,7 +225,7 @@ class TestBuildSiteData:
                 "id", "ts_utc", "match", "match_id", "market", "selection",
                 "platform", "venue", "account", "source", "currency",
                 "decimal_odds", "stake", "model_prob", "market_prob_devig",
-                "ev", "kelly_fraction", "notes",
+                "ev", "kelly_fraction", "notes", "manual_override",
             }
         # Every position has a known venue.
         venues = {p["venue"] for p in positions}
@@ -235,6 +235,8 @@ class TestBuildSiteData:
         assert kal["model_prob"] is None
         assert kal["ev"] is None
         assert kal["stake"] == pytest.approx(7.5)
+        # No open bets should have been silently dropped.
+        assert data["dropped_open_bets"] == []
 
     def test_predictions_probs_are_floats(self, tmp_path) -> None:
         db = _tmp_db()
@@ -251,6 +253,7 @@ class TestBuildSiteData:
         assert data["totals"]["n_bets"] == 0
         assert data["totals"]["wagered"] == pytest.approx(0.0)
         assert data["positions"] == []
+        assert data["dropped_open_bets"] == []
         # Card still parsed even with no db.
         assert len(data["predictions"]) == 2
         # Venues present and zeroed.
@@ -276,6 +279,7 @@ class TestBuildSiteData:
             now_utc="now",
         )
         assert data["positions"] == []
+        assert data["dropped_open_bets"] == []
         assert data["predictions"] == []
         assert data["totals"]["n_bets"] == 0
         assert data["meta"]["generated"] == "now"
@@ -454,3 +458,214 @@ class TestClosedPositionsAndPnl:
         d = build_site_data(db, card_path=str(tmp_path / "none.md"))
         assert d["closed_positions"][0]["status"] == "void"
         assert d["closed_positions"][0]["pl"] == 0.0
+
+
+# ---------------------------------------------------------------------------
+# Synthetic GBP book: outright + acca + single + USD PM position.
+# ---------------------------------------------------------------------------
+
+
+def _seed_gbp_book(db: str) -> dict:
+    """Seed a book mirroring the real missing GBP positions scenario."""
+    ids = {}
+    # Outright with no single fixture — Golden Boot (no kickoff to map to).
+    ids["kane_outright"] = store.record_bet(
+        ts_utc="2026-06-15T10:00:00",
+        match_id="outright_golden_boot",
+        match_desc="Harry Kane to score most goals",
+        market="Golden Boot",
+        selection="Harry Kane",
+        platform="bet365",
+        decimal_odds=5.00, stake=10.0,
+        db_path=db,
+    )
+    # Multi-fixture accumulator — joined match_ids, no single kickoff.
+    ids["acca"] = store.record_bet(
+        ts_utc="2026-06-15T11:00:00",
+        match_id="M1|M2|M3",
+        match_desc="3-leg acca: England/Spain/France",
+        market="Accumulator",
+        selection="England Win | Spain Win | France Win",
+        platform="betfair_ex_uk",
+        decimal_odds=12.0, stake=5.0,
+        db_path=db,
+    )
+    # Plain GBP single.
+    ids["single"] = store.record_bet(
+        ts_utc="2026-06-15T12:00:00",
+        match_id="M4",
+        match_desc="England vs USA",
+        market="1X2",
+        selection="Home",
+        platform="paddypower",
+        decimal_odds=2.20, stake=15.0,
+        db_path=db,
+    )
+    # USD Polymarket position recorded in the ledger.
+    ids["pm_pos"] = store.record_bet(
+        ts_utc="2026-06-15T13:00:00",
+        match_id="pm_world_cup_winner",
+        match_desc="France to win World Cup",
+        market="WINNER",
+        selection="France",
+        platform="polymarket",
+        decimal_odds=3.50, stake=25.0,
+        db_path=db,
+    )
+    return ids
+
+
+class TestGBPBook:
+    """All open bets in the synthetic GBP+USD book must surface in positions."""
+
+    def test_all_four_bets_in_positions(self, tmp_path):
+        db = _tmp_db()
+        ids = _seed_gbp_book(db)
+        data = sitedata.build_site_data(db, card_path=str(tmp_path / "none.md"))
+
+        positions = data["positions"]
+        assert len(positions) == 4, (
+            "Expected 4 open positions, got %d: %r" % (len(positions), positions)
+        )
+        pos_ids = {p["id"] for p in positions}
+        for name, bid in ids.items():
+            assert bid in pos_ids, "Bet %r (id=%d) missing from positions" % (name, bid)
+
+    def test_dropped_open_bets_empty(self, tmp_path):
+        db = _tmp_db()
+        _seed_gbp_book(db)
+        data = sitedata.build_site_data(db, card_path=str(tmp_path / "none.md"))
+        assert data["dropped_open_bets"] == [], (
+            "Unexpected drops: %r" % data["dropped_open_bets"]
+        )
+
+    def test_gbp_usd_currencies_separate_never_summed(self, tmp_path):
+        db = _tmp_db()
+        _seed_gbp_book(db)
+        data = sitedata.build_site_data(db, card_path=str(tmp_path / "none.md"))
+
+        positions = data["positions"]
+        gbp_pos = [p for p in positions if p["currency"] == "GBP"]
+        usd_pos = [p for p in positions if p["currency"] == "USD"]
+        assert len(gbp_pos) == 3  # kane + acca + single
+        assert len(usd_pos) == 1  # pm_pos
+
+        tbc = data["totals_by_currency"]
+        assert "GBP" in tbc and "USD" in tbc
+        # £ totals: 10 + 5 + 15 = 30
+        assert tbc["GBP"]["wagered"] == pytest.approx(30.0)
+        assert tbc["GBP"]["open_stake"] == pytest.approx(30.0)
+        # $ totals: 25
+        assert tbc["USD"]["wagered"] == pytest.approx(25.0)
+        assert tbc["USD"]["open_stake"] == pytest.approx(25.0)
+        # GBP and USD open_stake must never be added together.
+        combined = tbc["GBP"]["open_stake"] + tbc["USD"]["open_stake"]
+        assert combined == pytest.approx(55.0)  # proves they're stored separately
+
+    def test_golden_boot_outright_fields(self, tmp_path):
+        """Outright with match_id='outright_*' must appear with correct fields."""
+        db = _tmp_db()
+        ids = _seed_gbp_book(db)
+        data = sitedata.build_site_data(db, card_path=str(tmp_path / "none.md"))
+
+        by_id = {p["id"]: p for p in data["positions"]}
+        kane = by_id[ids["kane_outright"]]
+        assert kane["market"] == "Golden Boot"
+        assert kane["selection"] == "Harry Kane"
+        assert kane["currency"] == "GBP"
+        assert kane["match_id"] == "outright_golden_boot"
+        assert kane["venue"] == "sportsbook"
+
+    def test_accumulator_passes_through(self, tmp_path):
+        """Multi-fixture acca (no single kickoff) must appear without fixture mapping."""
+        db = _tmp_db()
+        ids = _seed_gbp_book(db)
+        data = sitedata.build_site_data(db, card_path=str(tmp_path / "none.md"))
+
+        by_id = {p["id"]: p for p in data["positions"]}
+        acca = by_id[ids["acca"]]
+        assert acca["market"] == "Accumulator"
+        assert acca["currency"] == "GBP"
+        assert acca["venue"] == "sportsbook"
+
+    def test_pm_position_is_usd(self, tmp_path):
+        db = _tmp_db()
+        ids = _seed_gbp_book(db)
+        data = sitedata.build_site_data(db, card_path=str(tmp_path / "none.md"))
+
+        by_id = {p["id"]: p for p in data["positions"]}
+        pm = by_id[ids["pm_pos"]]
+        assert pm["currency"] == "USD"
+        assert pm["venue"] == "polymarket"
+
+
+# ---------------------------------------------------------------------------
+# Status alias normalisation and dropped_open_bets diagnostic.
+# ---------------------------------------------------------------------------
+
+
+def _insert_with_status(db: str, status: str) -> None:
+    """Bypass record_bet to insert a row with an arbitrary status string."""
+    import sqlite3 as _sqlite3
+    from wca.ledger.store import init_db
+
+    init_db(db)
+    with _sqlite3.connect(db) as conn:
+        conn.execute(
+            "INSERT INTO bets "
+            "(ts_utc, match_id, match_desc, market, selection, platform, "
+            "decimal_odds, stake, status) "
+            "VALUES ('2026-06-20T10:00:00', 'M1', 'A vs B', '1X2', 'Home', "
+            "'bet365', 2.5, 10.0, ?)",
+            (status,),
+        )
+
+
+class TestStatusNormalization:
+    """Live-bet status aliases must all appear in positions; unknown ones in dropped."""
+
+    @pytest.mark.parametrize("alias", ["matched", "pending", "active", "unsettled"])
+    def test_open_alias_appears_in_positions(self, tmp_path, alias):
+        db = _tmp_db()
+        _insert_with_status(db, alias)
+        data = sitedata.build_site_data(db, card_path=str(tmp_path / "none.md"))
+        assert len(data["positions"]) == 1, (
+            "status=%r not treated as open" % alias
+        )
+        assert data["dropped_open_bets"] == []
+
+    def test_unknown_status_in_dropped_not_positions(self, tmp_path):
+        """An unrecognised status string must surface in dropped_open_bets, not positions."""
+        db = _tmp_db()
+        _insert_with_status(db, "queued")
+        data = sitedata.build_site_data(db, card_path=str(tmp_path / "none.md"))
+        assert len(data["positions"]) == 0
+        assert len(data["dropped_open_bets"]) == 1
+        d = data["dropped_open_bets"][0]
+        assert d["reason"] == "unrecognized_status"
+        assert d["status"] == "queued"
+
+    def test_dropped_count_and_reason_emitted(self, tmp_path):
+        """Multiple bets with mixed statuses — only unrecognised ones in dropped."""
+        db = _tmp_db()
+        _insert_with_status(db, "open")
+        _insert_with_status(db, "matched")
+        _insert_with_status(db, "queued")   # unknown
+        _insert_with_status(db, "won")      # terminal — not dropped, just excluded
+        _insert_with_status(db, "limbo")    # unknown
+        data = sitedata.build_site_data(db, card_path=str(tmp_path / "none.md"))
+        # "open" + "matched" appear in positions
+        assert len(data["positions"]) == 2
+        # "queued" and "limbo" are unknown non-terminal → dropped
+        assert len(data["dropped_open_bets"]) == 2
+        reasons = {d["reason"] for d in data["dropped_open_bets"]}
+        assert reasons == {"unrecognized_status"}
+
+    @pytest.mark.parametrize("terminal", ["won", "lost", "void"])
+    def test_terminal_status_not_in_dropped(self, tmp_path, terminal):
+        """Settled/voided bets must NOT appear in dropped_open_bets."""
+        db = _tmp_db()
+        _insert_with_status(db, terminal)
+        data = sitedata.build_site_data(db, card_path=str(tmp_path / "none.md"))
+        assert data["dropped_open_bets"] == []
+        assert data["positions"] == []
