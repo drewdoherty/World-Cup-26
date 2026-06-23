@@ -34,7 +34,7 @@ _LOW_QUOTA_THRESHOLD = 200
 class PollPolicy:
     """Tunable cadence + budget parameters for the polling daemon."""
 
-    in_game_seconds: int = 180
+    in_game_seconds: int = 360
     pre_close_seconds: int = 300
     idle_seconds: int = 3600
     low_quota_idle_seconds: int = 10800
