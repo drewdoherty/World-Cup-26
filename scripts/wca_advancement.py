@@ -10,7 +10,7 @@ Usage::
 
     python scripts/wca_advancement.py [--n-sims N] [--seed S]
         [--results PATH] [--out PATH] [--cache PATH] [--refit] [--top N]
-        [--venue-aware] [--structural-prior]
+        [--venue-aware] [--structural-prior] [--no-market-anchor]
 
 ``--venue-aware`` and ``--structural-prior`` enable the opt-in Klement-borrowed
 features (both default off) for A/B comparison on the Polymarket markets; see
@@ -97,6 +97,8 @@ def _write_report(
     n_events_scored: int,
     matched_markets: int,
     generated_utc: str,
+    blend_weights: "BlendWeights",
+    market_anchor_fixtures: int,
 ) -> None:
     from wca.advancement import (
         PM_KELLY_FRACTION,
@@ -132,12 +134,17 @@ def _write_report(
     )
     a(
         "2. **prob_fn (honest caveat).** Every simulated match is driven by a "
-        "**straight 50/50 average of the Elo and Dixon-Coles 1X2 "
-        "probabilities** — there is **no market term**. The group-stage card "
-        "anchors ~50% on the de-vigged market, but there are *no* odds for the "
-        "later rounds, so a market-anchored blend is impossible here. These "
-        "edges are therefore an independent, noisier model view, not ground "
-        "truth."
+        "card-style convex blend where a complete tradable 1X2 market exists: "
+        "`%.2f` Elo / `%.2f` Dixon-Coles / `%.2f` de-vigged market consensus. "
+        "Fixtures without market consensus (normally later knockout ties) "
+        "fall back to the Elo + Dixon-Coles model blend, with those two model "
+        "weights renormalised. This run market-anchored %d fixture(s)."
+        % (
+            blend_weights.elo,
+            blend_weights.dc,
+            blend_weights.market,
+            market_anchor_fixtures,
+        )
     )
     a(
         "3. **Venue.** The three hosts (United States, Mexico, Canada) get the "
@@ -251,12 +258,12 @@ def _write_report(
     a("## Honest caveats")
     a("")
     a(
-        "- **No market anchor in the sim.** Unlike the group-stage card, the "
-        "simulated probabilities use only the 50/50 Elo+DC blend. They embed "
-        "all of that blend's known limitations (the blend does not beat the "
-        "de-vigged market with confidence on the backtest) and add Monte-Carlo "
-        "noise on top. Large edges most likely reflect model error, not free "
-        "money — size conservatively."
+        "- **Market coverage is fixture-limited.** The sim is market-anchored "
+        "only where a complete tradable 1X2 market exists. Generated later-round "
+        "fixtures fall back to the model blend, so deep-run probabilities still "
+        "carry material model and Monte-Carlo uncertainty. Large edges most "
+        "likely reflect model error or stale markets, not free money — size "
+        "conservatively."
     )
     a(
         "- **Monte-Carlo noise.** With `%d` sims the standard error on a 50%% "
@@ -325,10 +332,28 @@ def main() -> None:
         "model cache. Default off. See docs/research/backtests/structural_prior.md.",
     )
     parser.add_argument("--top", type=int, default=10)
+    parser.add_argument(
+        "--regions",
+        default="uk",
+        help="TheOddsAPI regions for 1X2 market anchoring (default: uk).",
+    )
+    parser.add_argument(
+        "--no-market-anchor",
+        action="store_true",
+        help="Do not pull/use 1X2 odds; fall back to the Elo + Dixon-Coles blend.",
+    )
+    parser.add_argument("--weight-elo", type=float, default=None)
+    parser.add_argument("--weight-dc", type=float, default=None)
+    parser.add_argument("--weight-market", type=float, default=None)
     args = parser.parse_args()
 
     try:
-        from wca.advancement import compare_to_polymarket, run_advancement
+        from wca.advancement import (
+            _market_consensus_lookup,
+            compare_to_polymarket,
+            run_advancement,
+        )
+        from wca.card import BlendWeights
         from wca.data.polymarket import find_world_cup_markets
         from wca.data.cleaning import resolve_results_path
     except ImportError as exc:
@@ -348,6 +373,44 @@ def main() -> None:
         args.results, cache_path, args.refit, structural_prior=args.structural_prior
     )
 
+    default_weights = BlendWeights()
+    weights = BlendWeights(
+        elo=default_weights.elo if args.weight_elo is None else args.weight_elo,
+        dc=default_weights.dc if args.weight_dc is None else args.weight_dc,
+        market=(
+            default_weights.market
+            if args.weight_market is None
+            else args.weight_market
+        ),
+    ).normalised()
+
+    odds_df = None
+    market_anchor_fixtures = 0
+    if not args.no_market_anchor:
+        try:
+            from wca.data import theoddsapi
+
+            print(
+                "Pulling live 1X2 odds for market anchoring "
+                "(regions=%s, weights %.2f/%.2f/%.2f)…"
+                % (args.regions, weights.elo, weights.dc, weights.market)
+            )
+            odds_df, quota = theoddsapi.get_odds(
+                "soccer_fifa_world_cup", regions=args.regions, markets="h2h"
+            )
+            market_anchor_fixtures = len(_market_consensus_lookup(odds_df)) // 2
+            print(
+                "  %d complete 1X2 fixture market(s); quota=%s"
+                % (market_anchor_fixtures, quota)
+            )
+        except Exception as exc:  # noqa: BLE001 - odds are an optional anchor.
+            print(
+                "Market-anchor odds pull failed (%s); using model-only fallback."
+                % exc,
+                file=sys.stderr,
+            )
+            odds_df = None
+
     # 2. Simulate.
     flags = []
     if args.venue_aware:
@@ -366,6 +429,8 @@ def main() -> None:
         models,
         n_sims=args.n_sims,
         seed=args.seed,
+        odds_df=odds_df,
+        weights=weights,
         venue_aware=args.venue_aware,
         results=played,
     )
@@ -388,6 +453,7 @@ def main() -> None:
     _write_report(
         args.out, sim_df, edges_df, args.n_sims, args.seed,
         len(pm_events), len(scored_events), len(edges_df), generated,
+        weights, market_anchor_fixtures,
     )
     print("Report written: %s" % args.out)
 

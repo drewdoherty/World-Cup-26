@@ -10,11 +10,10 @@ fee-adjusted edge and a quarter-Kelly stake for the Polymarket pool.
 Honesty caveats (read these)
 ----------------------------
 * The simulator drives every future match through ``prob_fn`` (see
-  :func:`make_prob_fn`). Because there are **no** market odds for the later
-  rounds, ``prob_fn`` is a **50/50 Elo + Dixon-Coles blend** — it does *not*
-  use any market consensus. The group-stage card pipeline anchors ~50% on the
-  de-vigged market; this one cannot, and so it is a genuinely independent (and
-  noisier) view. Treat the edges as model-vs-market disagreements to be sized
+  :func:`make_prob_fn`). Fixtures with a complete tradable 1X2 book are anchored
+  to the same de-vigged market-consensus blend as the match card; generated
+  knockout fixtures with no market fall back to an Elo + Dixon-Coles model
+  blend. Treat the edges as model-vs-market disagreements to be sized
   conservatively, not as ground truth.
 * Knockout ties (including the 90-minute-draw -> extra-time / penalties path)
   are resolved entirely inside the simulator's ET model. "Advancing" therefore
@@ -53,7 +52,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 import pandas as pd
 
-from wca.card import FittedModels, dc_probs, elo_probs
+from wca.card import BlendWeights, FittedModels, dc_probs, elo_probs, market_consensus
 from wca.data.teamnames import canonical
 from wca.markets import kelly as kelly_mod
 from wca.models import venues as venues_mod
@@ -139,7 +138,7 @@ HOST_VENUE_ALTITUDE_M: Dict[str, float] = {
 
 
 # ---------------------------------------------------------------------------
-# prob_fn: 50/50 Elo + Dixon-Coles blend (NO market input).
+# prob_fn: card-style Elo + Dixon-Coles + market blend when market exists.
 # ---------------------------------------------------------------------------
 
 
@@ -160,16 +159,21 @@ def _host_for(home: str, away: str) -> Optional[str]:
 def make_prob_fn(
     models: FittedModels,
     *,
+    odds_df: Optional[pd.DataFrame] = None,
+    weights: Optional[BlendWeights] = None,
     venue_aware: bool = False,
     host_factor: float = DEFAULT_HOST_FACTOR,
     altitude_coef: float = venues_mod.DEFAULT_ALTITUDE_COEF,
 ):
     """Build ``prob_fn(team_a, team_b, knockout) -> (p_a, p_draw, p_b)``.
 
-    A straight **50/50 average of the Elo ordered-logit and the Dixon-Coles**
-    1X2 probabilities. There is deliberately no market term: no odds exist for
-    the later rounds, so a market-anchored blend is impossible here and would be
-    dishonest to imply.
+    For fixtures with a complete tradable 1X2 market, uses the same convex
+    Elo/Dixon-Coles/market blend as :mod:`wca.card`: each book is de-vigged with
+    Shin, the median fair probability is taken as market consensus, then the
+    components are blended with ``weights``. Fixtures without market consensus
+    (normally generated knockout ties) fall back to an Elo + Dixon-Coles blend,
+    using the relative Elo/DC weights when possible and 50/50 if the model
+    weights are zero.
 
     Venue handling
     --------------
@@ -197,6 +201,14 @@ def make_prob_fn(
     """
     base_adv = models.rater.home_advantage
     factors = load_country_factors() if venue_aware else {}
+    w = (weights or BlendWeights()).normalised()
+    market_lookup = _market_consensus_lookup(odds_df)
+    model_weight_sum = w.elo + w.dc
+    if model_weight_sum > 0:
+        fallback_elo = w.elo / model_weight_sum
+        fallback_dc = w.dc / model_weight_sum
+    else:
+        fallback_elo = fallback_dc = 0.5
 
     def _host_points(host: Optional[str], opponent: Optional[str]) -> Optional[float]:
         """Diluted, altitude-adjusted host bonus, or ``None`` for legacy behaviour."""
@@ -226,15 +238,83 @@ def make_prob_fn(
         )
         # Dixon-Coles: neutral (no per-host venue term available).
         d_h, d_d, d_a = dc_probs(models, a, b, neutral=True)
-        p_a = 0.5 * e_h + 0.5 * d_h
-        p_d = 0.5 * e_d + 0.5 * d_d
-        p_b = 0.5 * e_a + 0.5 * d_a
+        mkt = None if knockout else market_lookup.get((a, b))
+        if mkt is None:
+            p_a = fallback_elo * e_h + fallback_dc * d_h
+            p_d = fallback_elo * e_d + fallback_dc * d_d
+            p_b = fallback_elo * e_a + fallback_dc * d_a
+        else:
+            m_h, m_d, m_a = mkt
+            p_a = w.elo * e_h + w.dc * d_h + w.market * m_h
+            p_d = w.elo * e_d + w.dc * d_d + w.market * m_d
+            p_b = w.elo * e_a + w.dc * d_a + w.market * m_a
         s = p_a + p_d + p_b
         if s <= 0:
             return (1 / 3, 1 / 3, 1 / 3)
         return (p_a / s, p_d / s, p_b / s)
 
     return prob_fn
+
+
+def _market_consensus_lookup(
+    odds_df: Optional[pd.DataFrame],
+) -> Dict[Tuple[str, str], Tuple[float, float, float]]:
+    """Return ordered-pair -> de-vigged market 1X2 consensus.
+
+    Keys use canonical team names. Both directions are stored so simulator
+    calls in the reverse nominal order still pick up the tradable market, with
+    home/away probabilities swapped.
+    """
+    if odds_df is None or odds_df.empty or "market" not in odds_df.columns:
+        return {}
+
+    required = {
+        "event_id",
+        "home_team",
+        "away_team",
+        "commence_time",
+        "bookmaker_key",
+        "market",
+        "outcome_name",
+        "decimal_odds",
+    }
+    if not required.issubset(set(odds_df.columns)):
+        return {}
+
+    out: Dict[Tuple[str, str], Tuple[float, float, float]] = {}
+    h2h = odds_df[odds_df["market"] == "h2h"]
+    if h2h.empty:
+        return out
+
+    for (_eid, home_raw, away_raw, _commence), grp in h2h.groupby(
+        ["event_id", "home_team", "away_team", "commence_time"], sort=False
+    ):
+        home_disp, away_disp = str(home_raw), str(away_raw)
+        home, away = canonical(home_disp), canonical(away_disp)
+        books: Dict[str, Dict[str, float]] = {}
+        for book, bgrp in grp.groupby("bookmaker_key"):
+            prices: Dict[str, float] = {}
+            for _, r in bgrp.iterrows():
+                name = str(r["outcome_name"])
+                try:
+                    odd = float(r["decimal_odds"])
+                except (TypeError, ValueError):
+                    continue
+                if name == home_disp:
+                    prices["home"] = odd
+                elif name == away_disp:
+                    prices["away"] = odd
+                elif name.lower() == "draw":
+                    prices["draw"] = odd
+            if prices:
+                books[str(book)] = prices
+        mkt = market_consensus(books)
+        if mkt is None:
+            continue
+        h, d, a = float(mkt[0]), float(mkt[1]), float(mkt[2])
+        out[(home, away)] = (h, d, a)
+        out[(away, home)] = (a, d, h)
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -300,6 +380,8 @@ def run_advancement(
     n_sims: int = 20000,
     seed: int = 42,
     groups: Optional[Dict[str, List[str]]] = None,
+    odds_df: Optional[pd.DataFrame] = None,
+    weights: Optional[BlendWeights] = None,
     venue_aware: bool = False,
     results: Optional[Sequence[Result]] = None,
 ) -> pd.DataFrame:
@@ -315,6 +397,12 @@ def run_advancement(
         RNG seed for reproducibility.
     groups:
         Group assignment; defaults to :data:`WC2026_GROUPS`.
+    odds_df:
+        Optional flat TheOddsAPI-style 1X2 odds frame. When supplied, fixtures
+        with a complete de-vigged market consensus use the market-anchored
+        blend; fixtures without one fall back to the Elo + Dixon-Coles blend.
+    weights:
+        Convex Elo/DC/market weights. Defaults to :class:`wca.card.BlendWeights`.
     results:
         Already-played group matches to fix (not re-simulate). Defaults to
         auto-loading them via :func:`load_played_group_results`; pass an empty
@@ -336,7 +424,9 @@ def run_advancement(
     if results is None:
         results = load_played_group_results(grp)
 
-    prob_fn = make_prob_fn(models, venue_aware=venue_aware)
+    prob_fn = make_prob_fn(
+        models, odds_df=odds_df, weights=weights, venue_aware=venue_aware
+    )
     sim = TournamentSimulator(grp, prob_fn, results=results)
     res = sim.simulate(n_sims=n_sims, rng_seed=seed)
 
