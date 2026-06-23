@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "generated": "2026-06-23 06:00:00 UTC",
+    "fx_usd_per_gbp": 1.272,
+    "fx_source": "live",
+    "monitoring_only": true,
+    "note": "Read-only monitoring. No execution. Profit illustration is HYPOTHETICAL."
+  },
+  "arbs": [
+    {
+      "fixture": "Brazil vs Mexico",
+      "market": "h2h",
+      "selection": "Brazil",
+      "pm_price": 0.4,
+      "betfair_odds": 2.34,
+      "fx": 1.272,
+      "fee_adj_edge": 0.15024,
+      "guaranteed_pct": 0.17441,
+      "stake_split": {
+        "betfair_gbp": 52.08,
+        "polymarket_usd": 60.95
+      },
+      "confidence": "high",
+      "notes": "monitoring-only; best-back odds, no liquidity/depth; FX haircut 0.50%"
+    },
+    {
+      "fixture": "England vs Croatia",
+      "market": "h2h",
+      "selection": "England",
+      "pm_price": 0.46,
+      "betfair_odds": 1.95,
+      "fx": 1.272,
+      "fee_adj_edge": 0.00429,
+      "guaranteed_pct": 0.00196,
+      "stake_split": {
+        "betfair_gbp": 53.05,
+        "polymarket_usd": 59.72
+      },
+      "confidence": "high",
+      "notes": "monitoring-only; best-back odds, no liquidity/depth; FX haircut 0.50%"
+    }
+  ],
+  "hypothetical": {
+    "label": "HYPOTHETICAL \u2014 modeled, not live",
+    "cum_pct": 0.17637,
+    "points": [
+      {
+        "guaranteed_pct": 0.17441,
+        "cum_pct": 0.17441
+      },
+      {
+        "guaranteed_pct": 0.00196,
+        "cum_pct": 0.17637
+      }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark">
+<title>WORLD CUP ALPHA // ARBITRAGE</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div id="app">
+  <header class="ticker" id="ticker">
+    <div class="brand">
+      <span class="brand-mark">WCA</span>
+      <span class="brand-sub">WORLD CUP ALPHA</span>
+    </div>
+    <nav class="scores-nav">
+      <a class="scores-nav-link" href="./index.html">&larr; Terminal</a>
+      <a class="scores-nav-link" href="./scores.html">Scores &amp; Markets</a>
+      <a class="scores-nav-link" href="./architecture.html">Under The Hood</a>
+      <a class="scores-nav-link" href="./visuals.html">Visuals</a>
+      <a class="scores-nav-link" href="./tracking.html">Tracking</a>
+      <a class="scores-nav-link" href="./promos.html">Promos &amp; Offers</a>
+      <span class="scores-nav-here">Arbitrage</span>
+    </nav>
+  </header>
+
+  <div class="nodata" id="nodata" hidden>
+    <span class="nodata-dot"></span>
+    <span id="nodata-msg">NO DATA FEED</span>
+  </div>
+
+  <main>
+    <section class="panel" style="margin-top:14px">
+      <div class="panel-head">
+        <span class="panel-label">01 // FX-Adjusted Pure-Arb Opportunities</span>
+        <span class="panel-meta" id="arb-meta"></span>
+      </div>
+      <div class="panel-body" style="font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--border)">
+        Monitoring only — read-only odds (The Odds API, Betfair Exchange feed) vs
+        Polymarket. Best-back prices, no live liquidity. <strong>Not executed.</strong>
+      </div>
+      <div class="panel-body panel-scroll" id="arb-table"></div>
+    </section>
+
+    <section class="panel" style="margin-top:14px">
+      <div class="panel-head">
+        <span class="panel-label">02 // Cumulative Risk-Free Profit</span>
+        <span class="panel-meta" id="hyp-tag" style="color:var(--warn)">HYPOTHETICAL — MODELED, NOT LIVE</span>
+      </div>
+      <div class="panel-body">
+        <div id="hyp-summary" style="font-size:12px;color:var(--text-dim)"></div>
+        <svg id="hyp-chart" viewBox="0 0 700 160" preserveAspectRatio="none"
+             style="width:100%;height:160px;margin-top:8px"></svg>
+        <div style="font-size:10px;color:var(--muted);margin-top:6px">
+          Illustration of what automating BOTH legs <em>could</em> compound to if every
+          detected opportunity were filled at the quoted price. No fills occur; ignores
+          liquidity, slippage, and FX execution. Not a forecast, not realised P&amp;L.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span class="foot-gen" id="foot-gen"></span>
+    <span class="foot-mark">WORLD CUP ALPHA</span>
+  </footer>
+</div>
+<script src="./arb.js"></script>
+</body>
+</html>
