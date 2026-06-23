@@ -53,11 +53,13 @@ logger = logging.getLogger(__name__)
 CARD_PATH = "data/card_latest.md"
 NEXT_PATH = "data/next_latest.md"
 GOALSCORERS_PATH = "data/goalscorers_latest.md"
+ACCAS_PATH = "data/accas_latest.md"
 SCORES_FEED_PATH = "site/scores_data.json"
 CARD_MAX_AGE_HOURS = 6.0
-# The odds feed behind /accas and /boost should refresh frequently; warn beyond
-# this. Structure snapshots change rarely, so its window is generous.
+# The odds feed behind /boost should refresh frequently; warn beyond this.
+# Structure snapshots change rarely, so its window is generous.
 SCORES_FEED_MAX_AGE_HOURS = 6.0
+ACCAS_MAX_AGE_HOURS = 6.0
 STRUCTURE_MAX_AGE_HOURS = 24.0 * 30.0
 
 
@@ -120,7 +122,7 @@ HELP_TEXT = (
     "/next — next match preview: winner, corners, scorers, scorelines\n"
     "/goalscorers — anytime + first-goalscorer recs, next 5 games\n"
     "/scores — predicted FT scorelines per fixture\n"
-    "/accas — 4+ leg accumulators (next 5 matches, min 2.0 odds per leg)\n"
+    "/accas — model-driven acca report: safe / value / longshot (+EV legs only)\n"
     "/structure — project structure metrics\n"
     "/pm — Polymarket parked orders + trader status\n"
     "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
@@ -950,46 +952,44 @@ def handle_boost(text: str, *, scores_path: str = "site/scores_data.json") -> st
     return banner + format_boost_verdict(boost, ev)
 
 
-def handle_accas(scores_path: str = "site/scores_data.json") -> str:
-    """`/accas` — multi-leg accumulators for the next 5 matches (4+ legs, min 2.0 odds)."""
-    from wca import accas
-    from wca.boosts import load_scores_feed
+def handle_accas(
+    accas_path: str = ACCAS_PATH,
+    scores_path: str = "site/scores_data.json",
+    predictions_path: str = "data/model_predictions.json",
+) -> str:
+    """`/accas` — model-driven acca report (safe / value / longshot, +EV only).
 
+    Primary path: read the pre-built cache from ``data/accas_latest.md``.
+    Fallback: build inline from cached model predictions + odds feed if the
+    cache is missing.  In both cases a staleness banner fires when the
+    underlying data is older than ``ACCAS_MAX_AGE_HOURS``.
+    """
+    from wca import accas as accas_mod
+
+    now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+
+    # --- Primary: serve from pre-built cache ---
+    cached = cardcache.read_card(accas_path, now_utc=now_utc, max_age_hours=ACCAS_MAX_AGE_HOURS)
+    if cached is not None:
+        banner = _stale_banner(
+            cached["generated"], now_utc, ACCAS_MAX_AGE_HOURS, label="accas"
+        ) if cached["stale"] else ""
+        return banner + cached["text"]
+
+    # --- Fallback: inline build from cached model data ---
     try:
-        scores_feed = load_scores_feed(scores_path)
-        if scores_feed.empty:
-            return (
-                "*Accumulators*\n"
-                "No odds data available yet. Try again after odds are loaded."
-            )
-
-        # Load fixtures meta for context
-        try:
-            from wca.data.results import load_results
-            from wca.data.cleaning import resolve_results_path
-
-            fixtures_meta = load_results(resolve_results_path())
-        except Exception:
-            fixtures_meta = pd.DataFrame()
-
-        # Build accas from the scores feed
-        acca_list = accas.build_accas_from_odds(
-            scores_feed, fixtures_meta, max_fixtures=5, min_legs=4, min_leg_odds=2.0
+        report = accas_mod.build_accas_report(
+            predictions_path=predictions_path,
+            scores_path=scores_path,
         )
-        if not acca_list:
-            return (
-                "*Accumulators*\n"
-                "No valid 4+ leg accas found with 2.0+ odds per leg in next 5 matches."
-            )
-
-        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+        text = accas_mod.format_acca_report(report)
         banner = _stale_banner(
             _feed_generated(scores_path), now_utc, SCORES_FEED_MAX_AGE_HOURS,
             label="odds feed",
         )
-        return banner + accas.format_accas(acca_list)
+        return banner + text
     except Exception as exc:
-        return f"*Accumulators*\nError building accas: {exc}"
+        return "*Accumulators*\nError building accas: %s" % exc
 
 
 def handle_boost_photo(
