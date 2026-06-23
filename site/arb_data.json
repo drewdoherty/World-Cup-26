@@ -1,0 +1,89 @@
+{
+  "meta": {
+    "generated": "2026-06-23 06:30:00 UTC",
+    "fx_usd_per_gbp": 1.272,
+    "fx_source": "live",
+    "monitoring_only": true,
+    "note": "Read-only monitoring. No execution. Profit illustration is HYPOTHETICAL."
+  },
+  "arbs": [
+    {
+      "fixture": "Brazil vs Mexico",
+      "market": "h2h",
+      "selection": "Brazil",
+      "venue_pair": "polymarket\u2194smarkets",
+      "fee_adj_edge": 0.05947,
+      "guaranteed_pct": 0.06106,
+      "stake_split": {
+        "polymarket_usd": 55.07,
+        "smarkets_gbp": 56.71
+      },
+      "legs": [
+        {
+          "venue": "polymarket",
+          "currency": "USD",
+          "side": "win",
+          "net": 2.4558,
+          "desc": "PM YES @ 0.400",
+          "stake": 55.07
+        },
+        {
+          "venue": "smarkets",
+          "currency": "GBP",
+          "side": "lose",
+          "net": 1.875,
+          "desc": "smarkets lay @ 2.12",
+          "stake": 56.71
+        }
+      ],
+      "confidence": "monitoring-grade",
+      "notes": "monitoring-only; FX haircut 0.50%"
+    },
+    {
+      "fixture": "England vs Croatia",
+      "market": "h2h",
+      "selection": "England",
+      "venue_pair": "polymarket\u2194smarkets",
+      "fee_adj_edge": 0.03255,
+      "guaranteed_pct": 0.03123,
+      "stake_split": {
+        "polymarket_usd": 61.46,
+        "smarkets_gbp": 51.68
+      },
+      "legs": [
+        {
+          "venue": "polymarket",
+          "currency": "USD",
+          "side": "win",
+          "net": 2.1393,
+          "desc": "PM YES @ 0.460",
+          "stake": 61.46
+        },
+        {
+          "venue": "smarkets",
+          "currency": "GBP",
+          "side": "lose",
+          "net": 2.0,
+          "desc": "smarkets lay @ 1.98",
+          "stake": 51.68
+        }
+      ],
+      "confidence": "monitoring-grade",
+      "notes": "monitoring-only; FX haircut 0.50%"
+    }
+  ],
+  "hypothetical": {
+    "label": "HYPOTHETICAL \u2014 modeled, not live",
+    "cum_pct": 0.09229,
+    "points": [
+      {
+        "guaranteed_pct": 0.06106,
+        "cum_pct": 0.06106
+      },
+      {
+        "guaranteed_pct": 0.03123,
+        "cum_pct": 0.09229
+      }
+    ]
+  }
+}
