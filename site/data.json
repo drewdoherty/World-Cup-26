@@ -1,40 +1,40 @@
 {
   "meta": {
-    "generated": "2026-06-22 04:57:17 UTC"
+    "generated": "2026-06-23 19:23:44 UTC"
   },
   "totals": {
-    "wagered": 1246.376,
-    "open_stake": 522.54,
-    "settled_pl": -13.729500000000016,
-    "n_bets": 102
+    "wagered": 1358.3760000000002,
+    "open_stake": 599.54,
+    "settled_pl": 54.99049999999998,
+    "n_bets": 113
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 630.0799999999999,
-      "open_stake": 0.0,
-      "settled_pl": 14.40549999999999,
-      "n_bets": 71
+      "wagered": 742.0799999999999,
+      "open_stake": 77.0,
+      "settled_pl": 83.12549999999999,
+      "n_bets": 82
     },
     "USD": {
       "wagered": 616.2959999999999,
-      "open_stake": 593.2285,
+      "open_stake": 665.0444000000001,
       "settled_pl": -28.134999999999998,
-      "n_bets": 14
+      "n_bets": 16
     }
   },
   "venues": {
     "sportsbook": {
-      "wagered": 630.0799999999999,
-      "open_stake": 0.0,
-      "settled_pl": 14.40549999999999,
-      "n_bets": 71,
+      "wagered": 742.0799999999999,
+      "open_stake": 77.0,
+      "settled_pl": 83.12549999999999,
+      "n_bets": 82,
       "currency": "GBP"
     },
     "polymarket": {
       "wagered": 616.2959999999999,
-      "open_stake": 593.2285,
+      "open_stake": 665.0444000000001,
       "settled_pl": -28.134999999999998,
-      "n_bets": 14,
+      "n_bets": 16,
       "currency": "USD"
     },
     "kalshi": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 482.08000000000015,
-      "open_stake": 15.0,
-      "settled_pl": 59.40549999999997,
-      "n_bets": 54,
+      "wagered": 594.08,
+      "open_stake": 92.0,
+      "settled_pl": 128.12550000000002,
+      "n_bets": 65,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,18 +62,32 @@
     }
   },
   "source_summary": {
+    "punt": {
+      "GBP": {
+        "wagered": 280.06,
+        "open_stake": 57.0,
+        "settled_pl": -17.61,
+        "n_bets": 24
+      },
+      "USD": {
+        "wagered": 13.366,
+        "open_stake": 1.0,
+        "settled_pl": -2.367,
+        "n_bets": 10
+      }
+    },
     "model": {
+      "GBP": {
+        "wagered": 215.02,
+        "open_stake": 20.0,
+        "settled_pl": 31.6655,
+        "n_bets": 29
+      },
       "USD": {
         "wagered": 602.93,
         "open_stake": 521.54,
         "settled_pl": -25.767999999999994,
         "n_bets": 21
-      },
-      "GBP": {
-        "wagered": 195.02,
-        "open_stake": 0.0,
-        "settled_pl": 31.6655,
-        "n_bets": 28
       }
     },
     "offer": {
@@ -82,20 +96,6 @@
         "open_stake": 15.0,
         "settled_pl": 81.07,
         "n_bets": 26
-      }
-    },
-    "punt": {
-      "GBP": {
-        "wagered": 188.06,
-        "open_stake": 0.0,
-        "settled_pl": -86.33,
-        "n_bets": 14
-      },
-      "USD": {
-        "wagered": 13.366,
-        "open_stake": 1.0,
-        "settled_pl": -2.367,
-        "n_bets": 10
       }
     },
     "hedge": {
@@ -108,6 +108,30 @@
     }
   },
   "platforms": {
+    "Bet365": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 107.0,
+      "open_stake": 37.0,
+      "settled_pl": 54.97,
+      "n_bets": 11
+    },
+    "Unknown": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 15.0,
+      "open_stake": 0.0,
+      "settled_pl": -5.0,
+      "n_bets": 3
+    },
+    "Betfair": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 239.14000000000001,
+      "open_stake": 45.0,
+      "settled_pl": 13.922000000000011,
+      "n_bets": 17
+    },
     "polymarket": {
       "venue": "polymarket",
       "currency": "USD",
@@ -116,22 +140,6 @@
       "settled_pl": -28.134999999999998,
       "n_bets": 31
     },
-    "Unknown": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 15.0,
-      "open_stake": 0.0,
-      "settled_pl": -5.0,
-      "n_bets": 2
-    },
-    "Bet365": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 35.0,
-      "open_stake": 0.0,
-      "settled_pl": -13.75,
-      "n_bets": 4
-    },
     "Virgin Bet": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -139,14 +147,6 @@
       "open_stake": 0.0,
       "settled_pl": -23.5,
       "n_bets": 9
-    },
-    "Betfair": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 199.14000000000001,
-      "open_stake": 5.0,
-      "settled_pl": 13.922000000000011,
-      "n_bets": 14
     },
     "Betfair Exchange UK": {
       "venue": "sportsbook",
@@ -215,6 +215,30 @@
   },
   "platforms_by_account": {
     "1": {
+      "Bet365": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 107.0,
+        "open_stake": 37.0,
+        "settled_pl": 54.97,
+        "n_bets": 11
+      },
+      "Unknown": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 15.0,
+        "open_stake": 0.0,
+        "settled_pl": -5.0,
+        "n_bets": 3
+      },
+      "Betfair": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 234.14000000000001,
+        "open_stake": 45.0,
+        "settled_pl": 18.92200000000001,
+        "n_bets": 16
+      },
       "polymarket": {
         "venue": "polymarket",
         "currency": "USD",
@@ -223,22 +247,6 @@
         "settled_pl": -27.195,
         "n_bets": 29
       },
-      "Unknown": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 15.0,
-        "open_stake": 0.0,
-        "settled_pl": -5.0,
-        "n_bets": 2
-      },
-      "Bet365": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 35.0,
-        "open_stake": 0.0,
-        "settled_pl": -13.75,
-        "n_bets": 4
-      },
       "Virgin Bet": {
         "venue": "sportsbook",
         "currency": "GBP",
@@ -246,14 +254,6 @@
         "open_stake": 0.0,
         "settled_pl": -23.5,
         "n_bets": 9
-      },
-      "Betfair": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 194.14000000000001,
-        "open_stake": 5.0,
-        "settled_pl": 18.92200000000001,
-        "n_bets": 13
       },
       "Betfair Sportsbook": {
         "venue": "sportsbook",
@@ -374,6 +374,84 @@
     }
   },
   "closed_positions": [
+    {
+      "id": 138,
+      "ts_utc": "2026-06-23T19:12:31",
+      "settled_ts": "2026-06-23T19:12:31",
+      "match": "Jordan vs Algeria",
+      "match_id": "MANUAL_JORDAN_VS_ALGERIA",
+      "market": "Player to Score or Assist",
+      "selection": "Musa Al-Taamari",
+      "platform": "Bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 3.6,
+      "stake": 5.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "won",
+      "pl": 13.0,
+      "closing_odds": null,
+      "clv": null,
+      "notes": null,
+      "manual_override": null
+    },
+    {
+      "id": 128,
+      "ts_utc": "2026-06-22T14:02:45",
+      "settled_ts": "2026-06-23T19:11:45",
+      "match": "Argentina vs Austria",
+      "match_id": "MANUAL_ARGENTINA_VS_AUSTRIA",
+      "market": "Player to Score or Assist",
+      "selection": "Lionel Messi",
+      "platform": "Bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 2.0,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "won",
+      "pl": 10.0,
+      "closing_odds": null,
+      "clv": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.93; boost",
+      "manual_override": null
+    },
+    {
+      "id": 127,
+      "ts_utc": "2026-06-22T14:02:01",
+      "settled_ts": "2026-06-23T19:11:45",
+      "match": "Norway v Senegal | Jordan v Algeria | France v Iraq",
+      "match_id": "MANUAL_NORWAY_V_SENEGAL_JORDAN_V_ALGERIA_FRANCE_V_IRAQ",
+      "market": "Accumulator",
+      "selection": "Full Time Result -> Norway + Full Time Result -> Algeria + Full Time Result -> France",
+      "platform": "Bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 3.53,
+      "stake": 20.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "won",
+      "pl": 45.72,
+      "closing_odds": null,
+      "clv": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.95; Accumulator; legs: Full Time Result -> Norway | Full Time Result -> Algeria | Full Time Result -> France",
+      "manual_override": null
+    },
     {
       "id": 114,
       "ts_utc": "2026-06-21T17:32:15",
@@ -2890,6 +2968,18 @@
         [
           "2026-06-22T04:00:59Z",
           14.41
+        ],
+        [
+          "2026-06-23T19:11:45",
+          24.41
+        ],
+        [
+          "2026-06-23T19:11:45",
+          70.13
+        ],
+        [
+          "2026-06-23T19:12:31",
+          83.13
         ]
       ]
     },
@@ -2991,12 +3081,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 23.9,
-      "cur_price": 0.1175,
+      "cur_value": 29.8,
+      "cur_price": 0.1465,
       "avg_price": 0.1179,
       "shares": 203.3898,
-      "cash_pnl": -0.1,
-      "pct_pnl": -0.00416671875065105,
+      "cash_pnl": 5.8,
+      "pct_pnl": 0.24166968753776089,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3017,12 +3107,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 25.03,
-      "cur_price": 0.195,
+      "cur_value": 27.6,
+      "cur_price": 0.215,
       "avg_price": 0.2804,
       "shares": 128.35,
-      "cash_pnl": -10.97,
-      "pct_pnl": -0.30472306867519083,
+      "cash_pnl": -8.4,
+      "pct_pnl": -0.23333398148328194,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3043,12 +3133,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 64.39,
-      "cur_price": 0.585,
+      "cur_value": 66.59,
+      "cur_price": 0.605,
       "avg_price": 0.595,
       "shares": 110.0741,
-      "cash_pnl": -1.11,
-      "pct_pnl": -0.016946590758153832,
+      "cash_pnl": 1.09,
+      "pct_pnl": 0.016641246780529438,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3069,12 +3159,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 60.44,
-      "cur_price": 0.5715,
+      "cur_value": 63.34,
+      "cur_price": 0.599,
       "avg_price": 0.6241,
       "shares": 105.7498,
-      "cash_pnl": -5.56,
-      "pct_pnl": -0.08424255188265437,
+      "cash_pnl": -2.66,
+      "pct_pnl": -0.04030309136832026,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3095,12 +3185,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 52.5,
-      "cur_price": 0.525,
+      "cur_value": 54.5,
+      "cur_price": 0.545,
       "avg_price": 0.6,
       "shares": 100.0,
-      "cash_pnl": -7.5,
-      "pct_pnl": -0.125,
+      "cash_pnl": -5.5,
+      "pct_pnl": -0.09166666666666666,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3121,12 +3211,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 62.36,
-      "cur_price": 0.645,
+      "cur_value": 61.88,
+      "cur_price": 0.64,
       "avg_price": 0.6517,
       "shares": 96.6812,
-      "cash_pnl": -0.65,
-      "pct_pnl": -0.010315855628806948,
+      "cash_pnl": -1.13,
+      "pct_pnl": -0.017933718247002847,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3147,12 +3237,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 50.09,
-      "cur_price": 0.525,
+      "cur_value": 54.86,
+      "cur_price": 0.575,
       "avg_price": 0.5699,
       "shares": 95.4035,
-      "cash_pnl": -4.29,
-      "pct_pnl": -0.07888944260655131,
+      "cash_pnl": 0.48,
+      "pct_pnl": 0.008826790781152595,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3173,12 +3263,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 45.19,
-      "cur_price": 0.485,
+      "cur_value": 65.68,
+      "cur_price": 0.705,
       "avg_price": 0.4199,
       "shares": 93.1666,
-      "cash_pnl": 6.06,
-      "pct_pnl": 0.15486878320670383,
+      "cash_pnl": 26.55,
+      "pct_pnl": 0.6785092729600638,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3199,12 +3289,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 5.15,
-      "cur_price": 0.0575,
+      "cur_value": 4.16,
+      "cur_price": 0.0465,
       "avg_price": 0.0669,
       "shares": 89.5522,
-      "cash_pnl": -0.85,
-      "pct_pnl": -0.14166902781713028,
+      "cash_pnl": -1.84,
+      "pct_pnl": -0.3066717778629644,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3225,12 +3315,38 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 65.07,
-      "cur_price": 0.755,
+      "cur_value": 67.65,
+      "cur_price": 0.785,
       "avg_price": 0.7599,
       "shares": 86.1842,
-      "cash_pnl": -0.43,
-      "pct_pnl": -0.006564895518924457,
+      "cash_pnl": 2.15,
+      "pct_pnl": 0.03282447759462228,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0xbea8b7504e",
+      "ts_utc": "",
+      "match": "Will Sweden advance to the knockout stages at the 2026 FIFA World Cup?",
+      "match_id": "0xbea8b7504ec86c42abb39512b385c4dc695ba6c1d3f4d3aa9dd0ceddb0957338",
+      "market": "Will Sweden advance to the knockout stages at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.1547344110854503,
+      "stake": 65.816,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 68.55,
+      "cur_price": 0.902,
+      "avg_price": 0.866,
+      "shares": 76.0,
+      "cash_pnl": 2.74,
+      "pct_pnl": 0.0416312142943965,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3251,12 +3367,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 65.71,
-      "cur_price": 0.984,
+      "cur_value": 65.41,
+      "cur_price": 0.9795,
       "avg_price": 0.9808,
       "shares": 66.7775,
-      "cash_pnl": 0.21,
-      "pct_pnl": 0.0032061117650561298,
+      "cash_pnl": -0.09,
+      "pct_pnl": -0.0013740478993097699,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3277,12 +3393,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 23.16,
-      "cur_price": 0.375,
+      "cur_value": 25.63,
+      "cur_price": 0.415,
       "avg_price": 0.4038,
       "shares": 61.7619,
-      "cash_pnl": -1.78,
-      "pct_pnl": -0.07137157727176131,
+      "cash_pnl": 0.69,
+      "pct_pnl": 0.02766651029073893,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3303,12 +3419,38 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 16.46,
-      "cur_price": 0.305,
+      "cur_value": 4.05,
+      "cur_price": 0.075,
       "avg_price": 0.32,
       "shares": 53.9687,
-      "cash_pnl": -0.81,
-      "pct_pnl": -0.04690214244354372,
+      "cash_pnl": -13.22,
+      "pct_pnl": -0.7654892877822814,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x33ec07ceef",
+      "ts_utc": "",
+      "match": "Will Brazil win Group C in the 2026 FIFA World Cup?",
+      "match_id": "0x33ec07ceef529f87a3a070e06d5f9b6df9d3e4e6713faec26d9510786f7cd6be",
+      "market": "Will Brazil win Group C in the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.5153811183512653,
+      "stake": 5.9999,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 5.91,
+      "cur_price": 0.65,
+      "avg_price": 0.6599,
+      "shares": 9.0909,
+      "cash_pnl": -0.09,
+      "pct_pnl": -0.015000250004166734,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3330,12 +3472,180 @@
       "ev": null,
       "kelly_fraction": null,
       "cur_value": 6.02,
-      "cur_price": 0.8745,
+      "cur_price": 0.8755,
       "avg_price": 0.8719,
       "shares": 6.8807,
       "cash_pnl": 0.02,
       "pct_pnl": 0.0033333888898148304,
       "notes": "live PM position (data-API)"
+    },
+    {
+      "id": 140,
+      "ts_utc": "2026-06-23T19:12:31",
+      "match": "Portugal v Uzbekistan",
+      "match_id": "MANUAL_PORTUGAL_V_UZBEKISTAN",
+      "market": "Bet Builder",
+      "selection": "Match Result -> Portugal + To Score or Assist -> Bruno Fernandes",
+      "platform": "Bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 2.0,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": null,
+      "manual_override": null
+    },
+    {
+      "id": 139,
+      "ts_utc": "2026-06-23T19:12:31",
+      "match": "Kane / Ramos / Kramaric S/A treble",
+      "match_id": "MANUAL_KANE_RAMOS_KRAMARIC_SA_TREBLE",
+      "market": "Accumulator",
+      "selection": "To Score or Assist -> Harry Kane + To Score or Assist -> Goncalo Ramos + To Score or Assist -> Andrej Kramaric",
+      "platform": "Bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 3.89,
+      "stake": 5.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": null,
+      "manual_override": null
+    },
+    {
+      "id": 135,
+      "ts_utc": "2026-06-23T11:23:48",
+      "match": "England vs Ghana",
+      "match_id": "MANUAL_ENGLAND_VS_GHANA",
+      "market": "Bet Builder",
+      "selection": "Half Time Result -> England + 2nd Half Result -> England + Player's shots on target -> Harry Kane - Over 1.5 + Player's shots on target -> Jude Bellingham - Over 1.5",
+      "platform": "Unknown",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 7.9,
+      "stake": 0.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.75; Bet Builder; legs: Half Time Result -> England | 2nd Half Result -> England | Player's shots on target -> Harry Kane - Over 1.5 | Player's shots on target -> Jude Bellingham - Over 1.5",
+      "manual_override": null
+    },
+    {
+      "id": 133,
+      "ts_utc": "2026-06-23T08:19:52",
+      "match": "Panama vs Croatia",
+      "match_id": "MANUAL_PANAMA_VS_CROATIA",
+      "market": "Bet Builder",
+      "selection": "Full Time Result -> Croatia + Both Teams to Score -> Yes + Total Goals Range -> 1-4 Goals",
+      "platform": "Bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 4.75,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; Bet Builder; legs: Full Time Result -> Croatia | Both Teams to Score -> Yes | Total Goals Range -> 1-4 Goals",
+      "manual_override": null
+    },
+    {
+      "id": 132,
+      "ts_utc": "2026-06-23T08:19:40",
+      "match": "Colombia vs DR Congo",
+      "match_id": "MANUAL_COLOMBIA_VS_DR_CONGO",
+      "market": "Bet Builder",
+      "selection": "Full Time Result -> Colombia + Both Teams to Score -> Yes + Match Goals Range -> 1-4 Goals + Anytime Goalscorer -> Luis Diaz",
+      "platform": "Bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 11.0,
+      "stake": 12.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; Bet Builder; legs: Full Time Result -> Colombia | Both Teams to Score -> Yes | Match Goals Range -> 1-4 Goals | Anytime Goalscorer -> Luis Diaz",
+      "manual_override": null
+    },
+    {
+      "id": 131,
+      "ts_utc": "2026-06-23T08:18:25",
+      "match": "Colombia vs DR Congo | Portugal vs Uzbekistan | England vs Ghana",
+      "match_id": "MANUAL_COLOMBIA_VS_DR_CONGO_PORTUGAL_VS_UZBEKISTAN_ENGL",
+      "market": "Accumulator",
+      "selection": "Match Odds -> Colombia + Over/Under 3.5 Goals -> Under 3.5 Goals + Over/Under 3.5 Goals -> Under 3.5 Goals",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 3.96,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; Accumulator; legs: Match Odds -> Colombia | Over/Under 3.5 Goals -> Under 3.5 Goals | Over/Under 3.5 Goals -> Under 3.5 Goals",
+      "manual_override": null
+    },
+    {
+      "id": 130,
+      "ts_utc": "2026-06-23T08:17:58",
+      "match": "Portugal v Uzbekistan | England v Ghana | Colombia v DR Congo",
+      "match_id": "MANUAL_PORTUGAL_V_UZBEKISTAN_ENGLAND_V_GHANA_COLOMBIA_V",
+      "market": "Accumulator",
+      "selection": "Match Odds 90 -> Portugal + Match Odds 90 -> England + Match Odds 90 -> Colombia",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 1.86,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; Accumulator; legs: Match Odds 90 -> Portugal | Match Odds 90 -> England | Match Odds 90 -> Colombia",
+      "manual_override": null
+    },
+    {
+      "id": 129,
+      "ts_utc": "2026-06-22T15:23:07",
+      "match": "France v Iraq",
+      "match_id": "MANUAL_FRANCE_V_IRAQ",
+      "market": "Player To Score",
+      "selection": "Kylian Mbappe",
+      "platform": "Betfair",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 1.61,
+      "stake": 20.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97",
+      "manual_override": null
     },
     {
       "id": 108,
@@ -3380,6 +3690,7 @@
       "manual_override": null
     }
   ],
+  "dropped_open_bets": [],
   "predictions": [
     {
       "fixture": "Argentina vs Austria",

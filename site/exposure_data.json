@@ -1,22 +1,645 @@
 {
   "meta": {
-    "generated": "2026-06-23 08:37:20 UTC"
+    "generated": "2026-06-23 19:23:54 UTC"
   },
   "portfolio": {
     "ev": 0.0,
     "best": 0.0,
     "worst": 0.0,
-    "p_profit": 0.0,
-    "p_loss": 0.0,
-    "p_big_win": 0.0,
-    "n_scenarios": 0
+    "p_profit": 0,
+    "p_loss": 0,
+    "p_big_win": 0,
+    "n_scenarios": 6561
   },
   "correlation": {
-    "worst_states": [],
-    "narrative": "no upcoming fixtures"
+    "worst_states": [
+      {
+        "pnl": 0.0,
+        "prob": 0.0022,
+        "results": [
+          "Argentina",
+          "France",
+          "Norway",
+          "Jordan",
+          "Portugal",
+          "England",
+          "Panama",
+          "Colombia"
+        ]
+      },
+      {
+        "pnl": 0.0,
+        "prob": 0.0007,
+        "results": [
+          "Argentina",
+          "France",
+          "Norway",
+          "Jordan",
+          "Portugal",
+          "England",
+          "Panama",
+          "Draw"
+        ]
+      },
+      {
+        "pnl": 0.0,
+        "prob": 0.0004,
+        "results": [
+          "Argentina",
+          "France",
+          "Norway",
+          "Jordan",
+          "Portugal",
+          "England",
+          "Panama",
+          "DR Congo"
+        ]
+      },
+      {
+        "pnl": 0.0,
+        "prob": 0.0036,
+        "results": [
+          "Argentina",
+          "France",
+          "Norway",
+          "Jordan",
+          "Portugal",
+          "England",
+          "Draw",
+          "Colombia"
+        ]
+      },
+      {
+        "pnl": 0.0,
+        "prob": 0.0012,
+        "results": [
+          "Argentina",
+          "France",
+          "Norway",
+          "Jordan",
+          "Portugal",
+          "England",
+          "Draw",
+          "Draw"
+        ]
+      }
+    ],
+    "best_states": [
+      {
+        "pnl": 0.0,
+        "prob": 0.0022,
+        "results": [
+          "Argentina",
+          "France",
+          "Norway",
+          "Jordan",
+          "Portugal",
+          "England",
+          "Panama",
+          "Colombia"
+        ]
+      },
+      {
+        "pnl": 0.0,
+        "prob": 0.0007,
+        "results": [
+          "Argentina",
+          "France",
+          "Norway",
+          "Jordan",
+          "Portugal",
+          "England",
+          "Panama",
+          "Draw"
+        ]
+      },
+      {
+        "pnl": 0.0,
+        "prob": 0.0004,
+        "results": [
+          "Argentina",
+          "France",
+          "Norway",
+          "Jordan",
+          "Portugal",
+          "England",
+          "Panama",
+          "DR Congo"
+        ]
+      }
+    ],
+    "narrative": "Upside is concentrated: the biggest payouts (\u00a30 best case) need the favourites to land together, while 0% of result-states leave the book down. Downside is driven by the real-money singles, not the free accas."
   },
-  "fixtures": [],
-  "blindspots": [],
+  "fixtures": [
+    {
+      "fixture": "Argentina vs Austria",
+      "kickoff": null,
+      "results": [
+        {
+          "outcome": "Argentina",
+          "prob": 0.6509,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.2244,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Austria",
+          "prob": 0.1247,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Argentina",
+        "worst_outcome": "Argentina",
+        "n_blindspots": 0
+      }
+    },
+    {
+      "fixture": "France vs Iraq",
+      "kickoff": null,
+      "results": [
+        {
+          "outcome": "France",
+          "prob": 0.8605,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.1042,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Iraq",
+          "prob": 0.0353,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "France",
+        "worst_outcome": "France",
+        "n_blindspots": 0
+      }
+    },
+    {
+      "fixture": "Norway vs Senegal",
+      "kickoff": null,
+      "results": [
+        {
+          "outcome": "Norway",
+          "prob": 0.4278,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.2832,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Senegal",
+          "prob": 0.289,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Norway",
+        "worst_outcome": "Norway",
+        "n_blindspots": 0
+      }
+    },
+    {
+      "fixture": "Jordan vs Algeria",
+      "kickoff": null,
+      "results": [
+        {
+          "outcome": "Jordan",
+          "prob": 0.1638,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.2407,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Algeria",
+          "prob": 0.5955,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Jordan",
+        "worst_outcome": "Jordan",
+        "n_blindspots": 0
+      }
+    },
+    {
+      "fixture": "Portugal vs Uzbekistan",
+      "kickoff": null,
+      "results": [
+        {
+          "outcome": "Portugal",
+          "prob": 0.7713,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": false,
+            "note": "no live market price found for this outcome"
+          }
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.1582,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Uzbekistan",
+          "prob": 0.0704,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [
+        {
+          "type": "Accumulator",
+          "selection": "Match Odds -> Colombia + Over/Under 3.5 Goals -> Under 3.5 Goals + Over/Under 3.5 Goals -> Under 3.5 Goals",
+          "stake": 10.0,
+          "potential_profit": 29.6,
+          "free": false,
+          "odds": 3.96
+        }
+      ],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Portugal",
+        "worst_outcome": "Portugal",
+        "n_blindspots": 1
+      }
+    },
+    {
+      "fixture": "England vs Ghana",
+      "kickoff": "2026-06-23T20:00:00+00:00",
+      "results": [
+        {
+          "outcome": "England",
+          "prob": 0.7767,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "England",
+            "best_venue": "unibet_uk",
+            "best_odds": 1.2,
+            "model_prob": 0.7767,
+            "ev_pct": -6.8,
+            "recommendation": "LEAVE UNHEDGED: plugging costs 6.8% EV \u2014 take the variance"
+          }
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.1576,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Ghana",
+          "prob": 0.0657,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [
+        {
+          "type": "Bet Builder",
+          "selection": "Home Team Minus 2.5 Goals -> England -2.5 Goals + Handicap Betting -> England (-2.0) + Correct Score Combinations -> England to win 1-0, 2-0 or 3-0",
+          "stake": 5.0,
+          "potential_profit": 22.6,
+          "free": true,
+          "odds": 5.52
+        },
+        {
+          "type": "Bet Builder",
+          "selection": "Half Time Result -> England + 2nd Half Result -> England + Player's shots on target -> Harry Kane - Over 1.5 + Player's shots on target -> Jude Bellingham - Over 1.5",
+          "stake": 0.0,
+          "potential_profit": 0.0,
+          "free": false,
+          "odds": 7.9
+        }
+      ],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "England",
+        "worst_outcome": "England",
+        "n_blindspots": 1
+      }
+    },
+    {
+      "fixture": "Panama vs Croatia",
+      "kickoff": "2026-06-23T23:00:00+00:00",
+      "results": [
+        {
+          "outcome": "Panama",
+          "prob": 0.1387,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.2332,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "Draw",
+            "best_venue": "smarkets",
+            "best_odds": 4.8,
+            "model_prob": 0.2332,
+            "ev_pct": 11.9,
+            "recommendation": "PLUG: +EV to back (11.9% edge) \u2014 fills the gap and adds value"
+          }
+        },
+        {
+          "outcome": "Croatia",
+          "prob": 0.6281,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "Croatia",
+            "best_venue": "matchbook",
+            "best_odds": 1.48,
+            "model_prob": 0.6281,
+            "ev_pct": -7.0,
+            "recommendation": "LEAVE UNHEDGED: plugging costs 7.0% EV \u2014 take the variance"
+          }
+        }
+      ],
+      "events": [
+        {
+          "type": "Bet Builder",
+          "selection": "Full Time Result -> Croatia + Both Teams to Score -> Yes + Total Goals Range -> 1-4 Goals",
+          "stake": 10.0,
+          "potential_profit": 37.5,
+          "free": false,
+          "odds": 4.75
+        }
+      ],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Panama",
+        "worst_outcome": "Panama",
+        "n_blindspots": 2
+      }
+    },
+    {
+      "fixture": "Colombia vs DR Congo",
+      "kickoff": "2026-06-24T02:00:00+00:00",
+      "results": [
+        {
+          "outcome": "Colombia",
+          "prob": 0.663,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "Colombia",
+            "best_venue": "matchbook",
+            "best_odds": 1.59,
+            "model_prob": 0.663,
+            "ev_pct": 5.4,
+            "recommendation": "PLUG: +EV to back (5.4% edge) \u2014 fills the gap and adds value"
+          }
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.223,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "Draw",
+            "best_venue": "betfair_ex_uk",
+            "best_odds": 4.2,
+            "model_prob": 0.223,
+            "ev_pct": -6.3,
+            "recommendation": "LEAVE UNHEDGED: plugging costs 6.3% EV \u2014 take the variance"
+          }
+        },
+        {
+          "outcome": "DR Congo",
+          "prob": 0.1139,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [
+        {
+          "type": "Bet Builder",
+          "selection": "Full Time Result -> Colombia + Both Teams to Score -> Yes + Match Goals Range -> 1-4 Goals + Anytime Goalscorer -> Luis Diaz",
+          "stake": 12.0,
+          "potential_profit": 120.0,
+          "free": false,
+          "odds": 11.0
+        }
+      ],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Colombia",
+        "worst_outcome": "Colombia",
+        "n_blindspots": 2
+      }
+    }
+  ],
+  "blindspots": [
+    {
+      "fixture": "England vs Ghana",
+      "outcome": "England",
+      "prob": 0.7767,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": true,
+        "outcome": "England",
+        "best_venue": "unibet_uk",
+        "best_odds": 1.2,
+        "model_prob": 0.7767,
+        "ev_pct": -6.8,
+        "recommendation": "LEAVE UNHEDGED: plugging costs 6.8% EV \u2014 take the variance"
+      }
+    },
+    {
+      "fixture": "Portugal vs Uzbekistan",
+      "outcome": "Portugal",
+      "prob": 0.7713,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": false,
+        "note": "no live market price found for this outcome"
+      }
+    },
+    {
+      "fixture": "Colombia vs DR Congo",
+      "outcome": "Colombia",
+      "prob": 0.663,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": true,
+        "outcome": "Colombia",
+        "best_venue": "matchbook",
+        "best_odds": 1.59,
+        "model_prob": 0.663,
+        "ev_pct": 5.4,
+        "recommendation": "PLUG: +EV to back (5.4% edge) \u2014 fills the gap and adds value"
+      }
+    },
+    {
+      "fixture": "Panama vs Croatia",
+      "outcome": "Croatia",
+      "prob": 0.6281,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": true,
+        "outcome": "Croatia",
+        "best_venue": "matchbook",
+        "best_odds": 1.48,
+        "model_prob": 0.6281,
+        "ev_pct": -7.0,
+        "recommendation": "LEAVE UNHEDGED: plugging costs 7.0% EV \u2014 take the variance"
+      }
+    },
+    {
+      "fixture": "Panama vs Croatia",
+      "outcome": "Draw",
+      "prob": 0.2332,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": true,
+        "outcome": "Draw",
+        "best_venue": "smarkets",
+        "best_odds": 4.8,
+        "model_prob": 0.2332,
+        "ev_pct": 11.9,
+        "recommendation": "PLUG: +EV to back (11.9% edge) \u2014 fills the gap and adds value"
+      }
+    },
+    {
+      "fixture": "Colombia vs DR Congo",
+      "outcome": "Draw",
+      "prob": 0.223,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": true,
+        "outcome": "Draw",
+        "best_venue": "betfair_ex_uk",
+        "best_odds": 4.2,
+        "model_prob": 0.223,
+        "ev_pct": -6.3,
+        "recommendation": "LEAVE UNHEDGED: plugging costs 6.3% EV \u2014 take the variance"
+      }
+    }
+  ],
   "unmapped": [],
   "off_slate_accas": [],
   "off_slate_events": [
@@ -46,15 +669,6 @@
       "free": false,
       "odds": 1.4708,
       "match": "Ghana eliminated R32 of the World Cup"
-    },
-    {
-      "type": "Bet Builder",
-      "selection": "Home Team Minus 2.5 Goals -> England -2.5 Goals + Handicap Betting -> England (-2.0) + Correct Score Combinations -> England to win 1-0, 2-0 or 3-0",
-      "stake": 5.0,
-      "profit": 22.599999999999998,
-      "free": true,
-      "odds": 5.52,
-      "match": "England vs Ghana"
     },
     {
       "type": "polymarket",
@@ -165,24 +779,6 @@
       "match": "Will Brazil win the 2026 FIFA World Cup?"
     },
     {
-      "type": "Accumulator",
-      "selection": "Full Time Result -> Norway + Full Time Result -> Algeria + Full Time Result -> France",
-      "stake": 20.0,
-      "profit": 50.599999999999994,
-      "free": false,
-      "odds": 3.53,
-      "match": "Norway v Senegal | Jordan v Algeria | France v Iraq"
-    },
-    {
-      "type": "Player to Score or Assist",
-      "selection": "Lionel Messi",
-      "stake": 10.0,
-      "profit": 10.0,
-      "free": false,
-      "odds": 2.0,
-      "match": "Argentina vs Austria"
-    },
-    {
       "type": "Player To Score",
       "selection": "Kylian Mbappe",
       "stake": 20.0,
@@ -202,30 +798,21 @@
     },
     {
       "type": "Accumulator",
-      "selection": "Match Odds -> Colombia + Over/Under 3.5 Goals -> Under 3.5 Goals + Over/Under 3.5 Goals -> Under 3.5 Goals",
-      "stake": 10.0,
-      "profit": 29.6,
+      "selection": "To Score or Assist -> Harry Kane + To Score or Assist -> Goncalo Ramos + To Score or Assist -> Andrej Kramaric",
+      "stake": 5.0,
+      "profit": 14.450000000000001,
       "free": false,
-      "odds": 3.96,
-      "match": "Colombia vs DR Congo | Portugal vs Uzbekistan | England vs Ghana"
+      "odds": 3.89,
+      "match": "Kane / Ramos / Kramaric S/A treble"
     },
     {
       "type": "Bet Builder",
-      "selection": "Full Time Result -> Colombia + Both Teams to Score -> Yes + Match Goals Range -> 1-4 Goals + Anytime Goalscorer -> Luis Diaz",
-      "stake": 12.0,
-      "profit": 120.0,
-      "free": false,
-      "odds": 11.0,
-      "match": "Colombia vs DR Congo"
-    },
-    {
-      "type": "Bet Builder",
-      "selection": "Full Time Result -> Croatia + Both Teams to Score -> Yes + Total Goals Range -> 1-4 Goals",
+      "selection": "Match Result -> Portugal + To Score or Assist -> Bruno Fernandes",
       "stake": 10.0,
-      "profit": 37.5,
+      "profit": 10.0,
       "free": false,
-      "odds": 4.75,
-      "match": "Panama vs Croatia"
+      "odds": 2.0,
+      "match": "Portugal v Uzbekistan"
     }
   ]
 }
