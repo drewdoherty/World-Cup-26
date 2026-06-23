@@ -36,6 +36,33 @@ def _load_dotenv(path: str = ".env") -> None:
 # Main
 # ---------------------------------------------------------------------------
 
+def want_goalscorers_card(goalscorers_out, goalscorers_n, skip_scorers, goalscorers_only) -> bool:
+    """Whether this run should (re)build the /goalscorers card.
+
+    The fast ``--skip-scorers`` job must NOT — otherwise it overwrites the
+    populated card with all-"no scorer market" rows (the empty-result bug). The
+    dedicated ``--goalscorers-only`` refresh always does; a normal full build
+    (no --skip-scorers) does too.
+    """
+    return bool(
+        goalscorers_out
+        and goalscorers_n
+        and goalscorers_n > 0
+        and (not skip_scorers or goalscorers_only)
+    )
+
+
+def has_scorer_markets(scorer_by_event) -> bool:
+    """True iff at least one fixture actually returned a (non-empty) scorer market.
+
+    Gate the card WRITE on this so a quiet window (no markets posted yet) or a
+    transient API miss preserves the last good card instead of clobbering it.
+    """
+    return any(
+        getattr(df, "empty", True) is False for df in (scorer_by_event or {}).values()
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Build and cache tonight's World Cup Alpha matchday card."
@@ -83,6 +110,16 @@ def main() -> None:
         "--skip-scorers",
         action="store_true",
         help="Skip the per-event anytime-scorer odds pull (saves API quota)",
+    )
+    parser.add_argument(
+        "--goalscorers-only",
+        action="store_true",
+        help=(
+            "Refresh ONLY the /goalscorers card (pull scorer markets for the next "
+            "N fixtures and write it); skip the main card, /next and predictions. "
+            "Cheap dedicated refresh so the fast --skip-scorers job never has to "
+            "clobber the scorer card."
+        ),
     )
     parser.add_argument(
         "--bankroll",
@@ -204,59 +241,61 @@ def main() -> None:
 
     print("Pool bankroll: %s" % pool_bank.reason)
 
-    # ------------------------------------------------------------------
-    # Build card. The pool uses the rung's authorised Kelly fraction so
-    # sizing tracks the same ladder that set the bankroll.
-    # ------------------------------------------------------------------
-    pool = PoolConfig(
-        name="main",
-        bankroll=pool_bank.bankroll,
-        kelly_fraction=pool_bank.kelly_fraction,
-    )
-    pools = [pool]
-
-    try:
-        recs = build_card(models, odds_df, pools, fixtures_meta=fixtures_meta)
-        recs = apply_daily_exposure_caps(recs, pools)
-        score_cards = build_score_cards(models, odds_df, fixtures_meta)
-    except Exception as exc:
-        print("ERROR: card generation failed: %s" % exc, file=sys.stderr)
-        sys.exit(1)
-
-    card_text = (
-        format_card(recs, pools)
-        + "\n\n_Pool: %s_\n\n" % pool_bank.reason
-        + format_scores(score_cards)
-    )
-
-    # ------------------------------------------------------------------
-    # Write to cache.
-    # ------------------------------------------------------------------
+    # write_card is used by every card section below (main, /next, /goalscorers),
+    # so import it once here — the --goalscorers-only path skips the main block but
+    # still needs it.
     from wca.cardcache import write_card
 
-    write_card(card_text, path=args.out, ts_utc=now_str)
-
     # ------------------------------------------------------------------
-    # Persist the exact blended 1X2 per fixture (latest + append-only log)
-    # so the site and prediction tracking read real model output rather
-    # than the top-k scoreline approximation.
+    # Build the main card (/card, /scores) + persist predictions — UNLESS this
+    # is a dedicated --goalscorers-only refresh, which touches only the scorer
+    # card and must not re-pull/rewrite the main card, /next or predictions.
     # ------------------------------------------------------------------
-    try:
-        from wca.card import fixture_blends
-        from wca.modelpreds import build_predictions, write_predictions
+    if not args.goalscorers_only:
+        # Build card. The pool uses the rung's authorised Kelly fraction so
+        # sizing tracks the same ladder that set the bankroll.
+        pool = PoolConfig(
+            name="main",
+            bankroll=pool_bank.bankroll,
+            kelly_fraction=pool_bank.kelly_fraction,
+        )
+        pools = [pool]
 
-        blends = fixture_blends(models, odds_df, fixtures_meta)
-        write_predictions(build_predictions(blends, now_str))
-        print("Model predictions persisted: %d fixtures" % len(blends))
-    except Exception as exc:
-        print("WARNING: model prediction dump failed: %s" % exc, file=sys.stderr)
+        try:
+            recs = build_card(models, odds_df, pools, fixtures_meta=fixtures_meta)
+            recs = apply_daily_exposure_caps(recs, pools)
+            score_cards = build_score_cards(models, odds_df, fixtures_meta)
+        except Exception as exc:
+            print("ERROR: card generation failed: %s" % exc, file=sys.stderr)
+            sys.exit(1)
+
+        card_text = (
+            format_card(recs, pools)
+            + "\n\n_Pool: %s_\n\n" % pool_bank.reason
+            + format_scores(score_cards)
+        )
+
+        write_card(card_text, path=args.out, ts_utc=now_str)
+
+        # Persist the exact blended 1X2 per fixture (latest + append-only log) so
+        # the site and prediction tracking read real model output rather than the
+        # top-k scoreline approximation.
+        try:
+            from wca.card import fixture_blends
+            from wca.modelpreds import build_predictions, write_predictions
+
+            blends = fixture_blends(models, odds_df, fixtures_meta)
+            write_predictions(build_predictions(blends, now_str))
+            print("Model predictions persisted: %d fixtures" % len(blends))
+        except Exception as exc:
+            print("WARNING: model prediction dump failed: %s" % exc, file=sys.stderr)
 
     # ------------------------------------------------------------------
     # Next-match preview card (/next): winner blend + corners + anytime
     # scorers + scoreline distribution for the earliest kickoff. Failures
     # here must never break the main card build.
     # ------------------------------------------------------------------
-    if args.next_out:
+    if args.next_out and not args.goalscorers_only:
         try:
             from wca.nextmatch import (
                 SCORER_MARKETS,
@@ -303,7 +342,14 @@ def main() -> None:
     # next N fixtures. One per-event scorer pull per fixture (Odds API credits),
     # priced player-level (StatsBomb npxg-share x DC lambda) with Kelly stakes.
     # ------------------------------------------------------------------
-    if args.goalscorers_out and args.goalscorers_n and args.goalscorers_n > 0:
+    # Only build the scorer card when we are actually pulling scorers. The fast
+    # --skip-scorers job must NOT run this — otherwise it overwrites a good card
+    # with an all-"no scorer market" one (the /goalscorers empty-result bug). The
+    # dedicated --goalscorers-only refresh job keeps the card current.
+    want_goalscorers = want_goalscorers_card(
+        args.goalscorers_out, args.goalscorers_n, args.skip_scorers, args.goalscorers_only
+    )
+    if want_goalscorers:
         try:
             from wca.card import _iter_fixture_blends, BlendWeights
             from wca.nextmatch import (
@@ -313,7 +359,7 @@ def main() -> None:
             )
 
             scorer_by_event = {}
-            if not args.skip_scorers and not odds_df.empty:
+            if not odds_df.empty:
                 _host = ("United States", "Mexico", "Canada", "USA")
                 _blends = sorted(
                     _iter_fixture_blends(
@@ -335,19 +381,27 @@ def main() -> None:
                         print("WARN: scorer pull failed for %s: %s" % (eid, exc),
                               file=sys.stderr)
 
-            gcards = build_goalscorer_card(
-                models, odds_df, fixtures_meta, scorer_by_event,
-                top_k_fixtures=args.goalscorers_n,
-                bankroll=pool_bank.bankroll,
-                kelly_fraction=pool_bank.kelly_fraction,
-                pm_lookup=not args.skip_scorers,
-            )
-            write_card(
-                format_goalscorer_card(gcards),
-                path=args.goalscorers_out, ts_utc=now_str,
-            )
-            print("Goalscorers card written: out=%s (%d fixtures)"
-                  % (args.goalscorers_out, len(gcards)))
+            # Preserve the last good card unless at least one fixture actually has
+            # a scorer market. Otherwise a quiet window (no markets posted yet) or
+            # a transient API miss would clobber a populated card with empties.
+            if has_scorer_markets(scorer_by_event):
+                gcards = build_goalscorer_card(
+                    models, odds_df, fixtures_meta, scorer_by_event,
+                    top_k_fixtures=args.goalscorers_n,
+                    bankroll=pool_bank.bankroll,
+                    kelly_fraction=pool_bank.kelly_fraction,
+                    pm_lookup=True,
+                )
+                write_card(
+                    format_goalscorer_card(gcards),
+                    path=args.goalscorers_out, ts_utc=now_str,
+                )
+                print("Goalscorers card written: out=%s (%d fixtures)"
+                      % (args.goalscorers_out, len(gcards)))
+            else:
+                print("Goalscorers card: no scorer markets available now — "
+                      "preserving the existing card (not overwriting with empties)",
+                      file=sys.stderr)
         except Exception as exc:
             print("WARN: goalscorers card failed: %s" % exc, file=sys.stderr)
 
@@ -356,9 +410,13 @@ def main() -> None:
         if quota is not None and quota.remaining is not None
         else "quota=unknown"
     )
-    print(
-        "Card written: %d picks, %s, out=%s" % (len(recs), quota_str, args.out)
-    )
+    if args.goalscorers_only:
+        # No main card in this mode; the goalscorers section logged its own result.
+        print("Goalscorers-only refresh complete (%s)" % quota_str)
+    else:
+        print(
+            "Card written: %d picks, %s, out=%s" % (len(recs), quota_str, args.out)
+        )
 
 
 if __name__ == "__main__":
