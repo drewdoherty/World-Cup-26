@@ -26,11 +26,26 @@ every spawned agent. See :mod:`wca.conductor`.
 from __future__ import annotations
 
 import argparse
+import io
 import os
+import subprocess
 import sys
 import threading
+import time
+import uuid
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Tuple
+
+# Report artifacts a finished task can send back (auto-attached + via /report).
+# Generated data feeds are excluded — they are noise, not a "report".
+_REPORT_EXTS = {".md", ".csv", ".txt", ".png", ".svg", ".pdf"}
+_IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+_REPORT_EXCLUDE_PREFIXES = ("site/", "data/", ".github/", "node_modules/")
+_MAX_REPORT_FILES = 6
+_TELEGRAM_PHOTO_MAX = 10 * 1024 * 1024   # Bot API sendPhoto ceiling
+_TELEGRAM_DOC_MAX = 48 * 1024 * 1024     # Bot API sendDocument ceiling (~50 MB)
+_DIFF_STAT_MAX = 1400                     # chars of --stat to inline in chat
+_DIFF_PATCH_MAX = 256 * 1024             # bytes of full patch to attach as a file
 
 # Make ``src`` importable when run from a worktree (editable install resolves to
 # the main checkout otherwise — the known worktree PYTHONPATH quirk).
@@ -39,7 +54,12 @@ _SRC = _REPO_ROOT / "src"
 if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
-from wca.bot.telegram import TelegramClient, TelegramError  # noqa: E402
+from wca.bot.telegram import (  # noqa: E402
+    TelegramClient,
+    TelegramError,
+    image_document_file_id,
+    largest_photo_file_id,
+)
 from wca.conductor.config import ConductorConfig  # noqa: E402
 from wca.conductor.manager import ConductorManager  # noqa: E402
 from wca.conductor.models import Engine, TaskRecord, TaskStatus  # noqa: E402
@@ -70,6 +90,17 @@ def _is_admin(user_id: str, admin: Optional[str]) -> bool:
     return str(user_id) == str(admin)
 
 
+def _msg_text(message: Dict[str, object]) -> str:
+    """The user's text for a message — caption for a photo, else plain text."""
+    return str(message.get("text") or message.get("caption") or "").strip()
+
+
+# Telegram delivers an "album" (multiple images in one send) as separate update
+# objects sharing a media_group_id; only one carries the caption. Cap how many we
+# pull per album (Telegram's own album limit is 10).
+_MAX_ALBUM_IMAGES = 10
+
+
 def _help_text(manager: ConductorManager) -> str:
     lines = [
         "*WCA dev-conductor*",
@@ -82,10 +113,24 @@ def _help_text(manager: ConductorManager) -> str:
         "`/model` — model usage: ongoing & parked tasks by agent",
         "`/agents` — agent specs & architecture",
         "`/status` — per-task table",
+        "`/watch [id]` — LIVE: what each agent is doing right now",
+        "`/usage` — Anthropic token spend & limits (real-time)",
+        "`/prs` — open task PRs (review from your phone)",
+        "`/report <id>` — send a task's report files (.md/.csv/.png…) back to you",
+        "`/diff <id>` — summarised change + full .patch file",
+        "`/merge <id>` — squash-merge a *green* task PR (admin)",
+        "`/chart` — token-spend chart (PNG)",
+        "`/log <id>` — full detail of one task",
         "`/health` — live engine auth/availability",
+        "`/retry <id>` — re-run a failed task",
         "`/cancel <id>` — cancel a not-yet-started task",
         "",
-        "_PR-only · max-parallel cap · dry-run env (no live keys/ledger)._",
+        "📎 *Paste a screenshot* with a caption (or just a description) and the "
+        "agent reads it as visual context to debug.",
+        "📄 Report files a task writes are *sent back to you* automatically; "
+        "`/report <id>` re-fetches them.",
+        "",
+        "_Sequential by default · PR-only · dry-run env · auto-notifies on start, finish & hiccups._",
     ]
     warnings = manager.preflight()
     if warnings:
@@ -101,6 +146,10 @@ _MENU_KEYBOARD = {
         [{"text": "📊 Model usage", "callback_data": "model_usage"},
          {"text": "🤖 Agents", "callback_data": "agents"}],
         [{"text": "📋 Status", "callback_data": "status"},
+         {"text": "🔭 Live", "callback_data": "watch"}],
+        [{"text": "💸 Usage", "callback_data": "usage"},
+         {"text": "📊 Chart", "callback_data": "chart"}],
+        [{"text": "🔀 PRs", "callback_data": "prs"},
          {"text": "❤️ Health", "callback_data": "health"}],
     ]
 }
@@ -113,7 +162,16 @@ _COMMANDS = [
     {"command": "model", "description": "model usage — ongoing & parked tasks"},
     {"command": "agents", "description": "agent specs & architecture"},
     {"command": "status", "description": "per-task table"},
+    {"command": "watch", "description": "live agent activity: /watch [id]"},
+    {"command": "usage", "description": "Anthropic token spend & limits"},
+    {"command": "prs", "description": "open task PRs"},
+    {"command": "report", "description": "send a task's report files: /report <id>"},
+    {"command": "diff", "description": "summarised change + .patch: /diff <id>"},
+    {"command": "merge", "description": "squash-merge a green PR: /merge <id>"},
+    {"command": "chart", "description": "token-spend chart (PNG)"},
+    {"command": "log", "description": "full detail of a task: /log <id>"},
     {"command": "health", "description": "engine auth/availability"},
+    {"command": "retry", "description": "re-run a failed task: /retry <id>"},
     {"command": "cancel", "description": "cancel a queued task"},
     {"command": "help", "description": "usage + runtime checks"},
 ]
@@ -127,8 +185,14 @@ def _view(manager: ConductorManager, name: str) -> Optional[str]:
         return manager.agents_spec_table()
     if name == "status":
         return manager.status_table()
+    if name == "watch":
+        return manager.watch()
     if name == "health":
         return manager.health_table()
+    if name == "usage":
+        return manager.usage_table()
+    if name == "prs":
+        return manager.prs()
     return None
 
 
@@ -136,14 +200,19 @@ class ConductorBot:
     """Glue between Telegram long-poll and the :class:`ConductorManager`."""
 
     def __init__(self, client: TelegramClient, manager: ConductorManager,
-                 allowed: Set[str], admin: Optional[str]) -> None:
+                 allowed: Set[str], admin: Optional[str],
+                 notify_chat: Optional[str] = None) -> None:
         self.client = client
         self.manager = manager
         self.allowed = allowed
         self.admin = admin
         self._send_lock = threading.Lock()      # requests.Session isn't thread-safe
-        self._announced: Set[int] = set()
-        # Completion notifier (called from worker threads).
+        self._announced_start: Set[int] = set()
+        self._announced_done: Set[int] = set()
+        self._notify_chat = notify_chat          # proactive hiccup / health alerts
+        self._stop = threading.Event()
+        self._health_state: Dict[str, bool] = {}
+        # Per-task lifecycle notifier (called from worker threads).
         manager.notify = self._on_update
 
     # -- outbound ---------------------------------------------------------
@@ -156,15 +225,49 @@ class ConductorBot:
                 print("[conductor] send failed: %s" % exc, flush=True)
 
     def _on_update(self, record: TaskRecord) -> None:
-        """Worker-thread callback: announce each task once, when it finishes."""
-        if record.finished_at is None:
+        """Worker-thread callback: notify on START and on COMPLETION."""
+        chat = record.chat_id or self._notify_chat
+        if not chat:
             return
-        if record.id in self._announced:
+        if record.status == TaskStatus.RUNNING.value and record.id not in self._announced_start:
+            self._announced_start.add(record.id)
+            task = record.task if len(record.task) <= 60 else record.task[:57] + "..."
+            self._send(chat, "⚙️ `#%d` started on *%s*\n_%s_" % (record.id, record.engine, task))
             return
-        self._announced.add(record.id)
-        if not record.chat_id:
-            return
-        self._send(record.chat_id, self._completion_text(record))
+        if record.finished_at is not None and record.id not in self._announced_done:
+            self._announced_done.add(record.id)
+            self._send(chat, self._completion_text(record))
+            # Summarise the change + attach report files the task produced.
+            if record.status in (TaskStatus.DONE.value, TaskStatus.PUSHED.value):
+                try:
+                    dig = self._diff_digest(record)
+                    if dig and dig[0]:
+                        self._send(chat, "🔧 `#%d` changes:\n```\n%s\n```"
+                                   % (record.id, dig[0][:_DIFF_STAT_MAX]))
+                except Exception as exc:  # noqa: BLE001
+                    print("[conductor] diff summary failed: %s" % exc, flush=True)
+                try:
+                    self._send_report_files(chat, record)
+                except Exception as exc:  # noqa: BLE001 - never let attach kill the notifier
+                    print("[conductor] auto-attach failed: %s" % exc, flush=True)
+
+    def _health_watch(self, interval: float = 300.0) -> None:
+        """Background watcher: alert the notify chat when an engine's health flips."""
+        while not self._stop.is_set():
+            self._prune_uploads()  # age out stale pasted screenshots (keeps disk bounded)
+            for e in Engine:
+                ev = e.value
+                try:
+                    ok = self.manager.engine_health(ev, force=True).ok
+                    reason = self.manager.engine_health(ev).reason
+                except Exception:  # noqa: BLE001 - watcher must never die
+                    continue
+                prev = self._health_state.get(ev)
+                if prev is not None and prev != ok and self._notify_chat:
+                    badge = "🟢 recovered" if ok else "⚠️ unavailable"
+                    self._send(self._notify_chat, "%s *%s* — %s" % (badge, ev, reason))
+                self._health_state[ev] = ok
+            self._stop.wait(interval)
 
     @staticmethod
     def _completion_text(r: TaskRecord) -> str:
@@ -183,51 +286,295 @@ class ConductorBot:
             lines.append("Tokens: %d" % r.tokens)
         if r.error and r.status in {TaskStatus.FAILED.value, TaskStatus.PUSHED.value}:
             lines.append("⚠️ %s" % (r.error if len(r.error) <= 200 else r.error[:197] + "..."))
+        if r.status in {TaskStatus.FAILED.value, TaskStatus.NO_CHANGES.value}:
+            lines.append("→ `/retry %d` · `/log %d`" % (r.id, r.id))
         return "\n".join(lines)
 
     # -- inbound ----------------------------------------------------------
 
-    def _dispatch(self, engine: str, arg: str, chat_id: str, user_id: str) -> str:
+    @staticmethod
+    def _attach_note(images: Optional[List[str]]) -> str:
+        n = len(images or [])
+        if not n:
+            return ""
+        return "\n📎 %d screenshot%s attached for context." % (n, "" if n == 1 else "s")
+
+    def _dispatch(self, engine: str, arg: str, chat_id: str, user_id: str,
+                  images: Optional[List[str]] = None) -> str:
         if not _is_admin(user_id, self.admin):
             return "🚫 Not authorized to dispatch tasks."
         task = arg.strip()
         if not task:
             return "Usage: `/%s <task>`" % engine
-        record = self.manager.submit(engine, task, chat_id=chat_id)
+        record = self.manager.submit(engine, task, chat_id=chat_id, images=images)
         if record.status == TaskStatus.REJECTED.value:
             return "🚫 `#%d` rejected: %s" % (record.id, record.error)
         return (
-            "🚀 `#%d` dispatched to *%s* on `%s`.\n"
+            "🚀 `#%d` dispatched to *%s* on `%s`.%s\n"
             "I'll post the PR link when it finishes. `/status` to track."
-            % (record.id, engine, record.branch)
+            % (record.id, engine, record.branch, self._attach_note(images))
         )
 
-    def _dispatch_auto(self, arg: str, chat_id: str, user_id: str) -> str:
+    def _dispatch_auto(self, arg: str, chat_id: str, user_id: str,
+                       images: Optional[List[str]] = None) -> str:
         if not _is_admin(user_id, self.admin):
             return "🚫 Not authorized to dispatch tasks."
         task = arg.strip()
         if not task:
             return "Usage: `/task <task>`"
-        record = self.manager.submit_auto(task, chat_id=chat_id)
+        record = self.manager.submit_auto(task, chat_id=chat_id, images=images)
         if record.status == TaskStatus.REJECTED.value:
             return "🚫 `#%d` rejected: %s" % (record.id, record.error)
         reason = "\nRoute: %s" % record.route_reason if record.route_reason else ""
         return (
-            "🚀 `#%d` routed to *%s* on `%s`.%s\n"
+            "🚀 `#%d` routed to *%s* on `%s`.%s%s\n"
             "I'll post the PR link when it finishes. `/status` to track."
-            % (record.id, record.engine, record.branch, reason)
+            % (record.id, record.engine, record.branch, reason, self._attach_note(images))
         )
 
-    def handle(self, message: Dict[str, object]) -> Optional[str]:
-        text = str(message.get("text") or "").strip()
-        if not text:
+    # -- attachments ------------------------------------------------------
+
+    def _uploads_dir(self) -> Path:
+        return Path(self.manager.cfg.repo_root) / "data" / "conductor_uploads"
+
+    def _save_one(self, message: Dict[str, object]) -> Optional[str]:
+        """Download a single message's image to the uploads dir; None on failure."""
+        stem = uuid.uuid4().hex[:8]
+        try:
+            return self.client.save_image(message, self._uploads_dir(), stem)
+        except TelegramError as exc:
+            print("[conductor] image download failed: %s" % exc, flush=True)
             return None
-        cmd, _, arg = text.partition(" ")
-        cmd = cmd.lower().split("@", 1)[0]  # strip @botname in groups
+
+    def _save_message_images(self, message: Dict[str, object]) -> List[str]:
+        """Download the screenshot attached to *message*. Empty on failure."""
+        path = self._save_one(message)
+        return [path] if path else []
+
+    def _save_album_images(self, members: List[Dict[str, object]]) -> List[str]:
+        """Download every image across an album's member messages (capped)."""
+        paths: List[str] = []
+        for m in members[:_MAX_ALBUM_IMAGES]:
+            p = self._save_one(m)
+            if p:
+                paths.append(p)
+        return paths
+
+    def _prune_uploads(self, max_age_hours: float = 24.0) -> None:
+        """Best-effort: delete pasted screenshots older than *max_age_hours*.
+
+        The originals in ``data/conductor_uploads/`` outlive a task (so `/retry`
+        can re-stage them), but on a long-running host they would otherwise grow
+        unbounded. Age-based, never eager, so an in-flight retry isn't starved.
+        """
+        d = self._uploads_dir()
+        if not d.exists():
+            return
+        cutoff = time.time() - max_age_hours * 3600.0
+        try:
+            entries = list(d.iterdir())
+        except OSError:
+            return
+        for f in entries:
+            try:
+                if f.is_file() and f.stat().st_mtime < cutoff:
+                    f.unlink()
+            except OSError:
+                pass
+
+    # -- task output: report files + charts -------------------------------
+
+    def _task_report_files(self, record: TaskRecord) -> List[Tuple[str, bytes, bool]]:
+        """Report-like files a task ADDED/MODIFIED, as ``(name, bytes, is_image)``.
+
+        Read straight from the task's branch via git (so it works even after the
+        worktree is reclaimed), filtered to report extensions, excluding generated
+        data/site feeds, size-capped to Telegram's limits, and count-capped.
+        """
+        if not record.branch:
+            return []
+        cfg = self.manager.cfg
+        git, repo, base = cfg.git_bin, str(cfg.repo_root), cfg.base_branch
+        try:
+            listing = subprocess.run(
+                [git, "-C", repo, "diff", "--name-only", "--diff-filter=AM",
+                 "%s...%s" % (base, record.branch)],
+                capture_output=True, text=True, timeout=30,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return []
+        if listing.returncode != 0:
+            return []
+        out: List[Tuple[str, bytes, bool]] = []
+        for path in listing.stdout.splitlines():
+            path = path.strip()
+            if not path or os.path.splitext(path)[1].lower() not in _REPORT_EXTS:
+                continue
+            if any(path.startswith(p) for p in _REPORT_EXCLUDE_PREFIXES):
+                continue
+            try:
+                blob = subprocess.run(  # no text=True -> raw bytes (images!)
+                    [git, "-C", repo, "show", "%s:%s" % (record.branch, path)],
+                    capture_output=True, timeout=30,
+                )
+            except (OSError, subprocess.SubprocessError):
+                continue
+            if blob.returncode != 0 or not blob.stdout:
+                continue
+            is_image = os.path.splitext(path)[1].lower() in _IMAGE_EXTS
+            if len(blob.stdout) > (_TELEGRAM_PHOTO_MAX if is_image else _TELEGRAM_DOC_MAX):
+                continue
+            out.append((os.path.basename(path), blob.stdout, is_image))
+            if len(out) >= _MAX_REPORT_FILES:
+                break
+        return out
+
+    def _send_report_files(self, chat_id: str, record: TaskRecord) -> int:
+        """Send a task's report files (images inline, the rest as documents)."""
+        files = self._task_report_files(record)
+        sent = 0
+        for name, content, is_image in files:
+            caption = "📄 %s · from #%d" % (name, record.id)
+            try:
+                with self._send_lock:
+                    if is_image:
+                        self.client.send_photo(chat_id, content, filename=name, caption=caption)
+                    else:
+                        self.client.send_document(chat_id, content, filename=name, caption=caption)
+                sent += 1
+            except TelegramError as exc:
+                print("[conductor] report send failed (%s): %s" % (name, exc), flush=True)
+        return sent
+
+    def _diff_digest(self, record: TaskRecord) -> Optional[Tuple[str, bytes]]:
+        """A task's change as ``(stat_summary, full_patch_bytes)`` vs base.
+
+        ``git diff --stat base...branch`` gives the summarised view; the full
+        unified diff rides along as a ``.patch`` the caller can attach. Returns
+        None if the task has no branch or git fails.
+        """
+        if not record.branch:
+            return None
+        cfg = self.manager.cfg
+        git, repo, base = cfg.git_bin, str(cfg.repo_root), cfg.base_branch
+        spec = "%s...%s" % (base, record.branch)
+        try:
+            stat = subprocess.run([git, "-C", repo, "diff", "--stat", spec],
+                                  capture_output=True, text=True, timeout=30)
+            patch = subprocess.run([git, "-C", repo, "diff", spec],
+                                   capture_output=True, timeout=30)  # bytes
+        except (OSError, subprocess.SubprocessError):
+            return None
+        if stat.returncode != 0:
+            return None
+        summary = (stat.stdout or "").strip()
+        patch_bytes = patch.stdout if patch.returncode == 0 else b""
+        if not summary:
+            return None
+        return summary, patch_bytes
+
+    def _send_diff(self, chat_id: str, record: TaskRecord) -> bool:
+        """Send a task's summarised diff (stat inline + full .patch attached)."""
+        dig = self._diff_digest(record)
+        if dig is None:
+            return False
+        summary, patch = dig
+        self._send(chat_id, "🔧 *#%d diff* · `%s`\n```\n%s\n```" % (
+            record.id, record.branch, summary[:_DIFF_STAT_MAX]))
+        if patch and len(patch) <= _DIFF_PATCH_MAX:
+            try:
+                with self._send_lock:
+                    self.client.send_document(chat_id, patch, filename="task-%d.patch" % record.id,
+                                              caption="full diff · #%d" % record.id)
+            except TelegramError as exc:
+                print("[conductor] diff attach failed: %s" % exc, flush=True)
+        return True
+
+    def _render_usage_chart(self) -> Optional[bytes]:
+        """Render conductor token-spend-by-task as a PNG. None if matplotlib is
+        unavailable (the chart command then falls back to the text table)."""
+        try:
+            import matplotlib
+            matplotlib.use("Agg")  # headless: no display in the bot process
+            import matplotlib.pyplot as plt
+        except Exception:  # noqa: BLE001 - matplotlib is an optional extra
+            return None
+        recs = [r for r in self.manager.records() if r.tokens]
+        if not recs:
+            return None
+        recs = sorted(recs, key=lambda r: r.tokens)[-15:]  # top 15 spenders
+        labels = ["#%d %s" % (r.id, r.engine) for r in recs]
+        vals = [r.tokens for r in recs]
+        colors = ["#d97706" if r.engine == "claude" else "#2563eb" for r in recs]
+        try:
+            fig, ax = plt.subplots(figsize=(7.5, max(2.5, 0.42 * len(recs))))
+            ax.barh(labels, vals, color=colors)
+            ax.set_xlabel("tokens")
+            ax.set_title("Conductor token spend by task")
+            for i, v in enumerate(vals):
+                ax.text(v, i, " %s" % format(v, ","), va="center", fontsize=8)
+            fig.tight_layout()
+            buf = io.BytesIO()
+            fig.savefig(buf, format="png", dpi=120)
+            plt.close(fig)
+            return buf.getvalue()
+        except Exception as exc:  # noqa: BLE001
+            print("[conductor] chart render failed: %s" % exc, flush=True)
+            try:
+                plt.close("all")
+            except Exception:
+                pass
+            return None
+
+    def handle(self, message: Dict[str, object],
+               images_override: Optional[List[str]] = None) -> Optional[str]:
+        # A photo carries its command/description in `caption`, not `text`.
+        text = _msg_text(message)
+        has_image = bool(largest_photo_file_id(message) or image_document_file_id(message)) \
+            or bool(images_override)
         chat = message.get("chat") or {}
         user = message.get("from") or {}
         chat_id = str(chat.get("id", ""))  # type: ignore[union-attr]
         user_id = str(user.get("id", ""))  # type: ignore[union-attr]
+
+        if not text and not has_image:
+            return None
+        # A bare screenshot with no instruction isn't actionable — ask for one.
+        if has_image and not text:
+            return (
+                "📎 Got your screenshot. Add a caption telling me what to do with it, e.g.\n"
+                "`/claude debug why this layout breaks` — or just describe it and I'll auto-route."
+            )
+
+        cmd, _, arg = text.partition(" ")
+        cmd = cmd.lower().split("@", 1)[0]  # strip @botname in groups
+        _DISPATCH = ("/task", "/claude", "/codex")
+        is_dispatch = (not cmd.startswith("/")) or cmd in _DISPATCH
+
+        # Admin-gate dispatch BEFORE any download, so a non-admin can't trigger a
+        # wasted getFile+CDN fetch (and an orphaned file) just by attaching a photo.
+        if has_image and is_dispatch and not _is_admin(user_id, self.admin):
+            return "🚫 Not authorized to dispatch tasks."
+
+        # Resolve the screenshot(s): album members are pre-downloaded and passed
+        # in via images_override; a lone photo is downloaded here, on demand.
+        images: List[str] = []
+        download_failed = False
+        if has_image and is_dispatch:
+            if images_override is not None:
+                images = list(images_override)
+            else:
+                images = self._save_message_images(message)
+            # has_image guaranteed a file_id, so an empty result means the
+            # download actually failed — tell the user instead of dispatching blind.
+            download_failed = not images
+        warn = ("\n⚠️ couldn't download your screenshot — running without it; "
+                "re-send to attach." if download_failed else "")
+
+        # Image + a plain (non-slash) caption → auto-route the caption as a task,
+        # so "snap a screenshot, describe the bug, send" just works.
+        if has_image and not cmd.startswith("/"):
+            return self._dispatch_auto(text, chat_id, user_id, images=images) + warn
 
         if cmd in ("/start", "/help"):
             return _help_text(self.manager)
@@ -240,14 +587,87 @@ class ConductorBot:
             return self.manager.agents_spec_table()
         if cmd == "/status":
             return self.manager.status_table()
+        if cmd == "/watch":
+            if arg.strip():
+                try:
+                    return self.manager.watch(int(arg.strip()))
+                except ValueError:
+                    return "Usage: `/watch [id]`"
+            return self.manager.watch()
         if cmd == "/health":
             return self.manager.health_table()
+        if cmd == "/usage":
+            return self.manager.usage_table()
+        if cmd == "/prs":
+            return self.manager.prs()
+        if cmd == "/log":
+            try:
+                return self.manager.task_detail(int(arg.strip()))
+            except ValueError:
+                return "Usage: `/log <id>`"
+        if cmd == "/report":
+            try:
+                tid = int(arg.strip())
+            except ValueError:
+                return "Usage: `/report <id>` — send the report files a task produced"
+            rec = self.manager.get(tid)
+            if rec is None:
+                return "No task `#%d`." % tid
+            n = self._send_report_files(chat_id, rec)
+            if n:
+                return None  # the files (with captions) are the reply
+            return "No report files (.md/.csv/.txt/.png/.svg/.pdf) in `#%d`." % tid
+        if cmd == "/diff":
+            try:
+                tid = int(arg.strip())
+            except ValueError:
+                return "Usage: `/diff <id>` — summarised change + full .patch"
+            rec = self.manager.get(tid)
+            if rec is None:
+                return "No task `#%d`." % tid
+            if not self._send_diff(chat_id, rec):
+                return "No diff for `#%d` (no branch / nothing changed)." % tid
+            return None  # the digest + patch ARE the reply
+        if cmd == "/merge":
+            if not _is_admin(user_id, self.admin):
+                return "🚫 Not authorized."
+            try:
+                tid = int(arg.strip())
+            except ValueError:
+                return "Usage: `/merge <id>` — squash-merge a GREEN task PR"
+            ok, msg = self.manager.merge_task(tid)
+            return ("✅ " if ok else "🚫 ") + msg
+        if cmd == "/chart":
+            png = self._render_usage_chart()
+            if png is None:
+                return ("📊 No chart available (need `matplotlib`, or no token "
+                        "spend yet).\n\n" + self.manager.usage_table())
+            try:
+                with self._send_lock:
+                    self.client.send_photo(chat_id, png, filename="conductor_usage.png",
+                                           caption="📊 Conductor token spend by task")
+            except TelegramError as exc:
+                return "Chart send failed: %s" % exc
+            return None
+        if cmd == "/retry":
+            if not _is_admin(user_id, self.admin):
+                return "🚫 Not authorized."
+            try:
+                tid = int(arg.strip())
+            except ValueError:
+                return "Usage: `/retry <id>`"
+            rec = self.manager.retry(tid)
+            if rec is None:
+                return "No task `#%d`." % tid
+            if rec.id == tid:
+                return "Can't retry `#%d` (status %s — only failed / no-change tasks)." % (tid, rec.status)
+            return "🔁 retrying as `#%d` on *%s* (`%s`)." % (rec.id, rec.engine, rec.branch)
         if cmd == "/task":
-            return self._dispatch_auto(arg, chat_id, user_id)
+            return self._dispatch_auto(arg, chat_id, user_id, images=images) + warn
         if cmd == "/claude":
-            return self._dispatch(Engine.CLAUDE.value, arg, chat_id, user_id)
+            return self._dispatch(Engine.CLAUDE.value, arg, chat_id, user_id, images=images) + warn
         if cmd == "/codex":
-            return self._dispatch(Engine.CODEX.value, arg, chat_id, user_id)
+            return self._dispatch(Engine.CODEX.value, arg, chat_id, user_id, images=images) + warn
         if cmd == "/cancel":
             if not _is_admin(user_id, self.admin):
                 return "🚫 Not authorized."
@@ -277,9 +697,51 @@ class ConductorBot:
                 pass
         if not _authorized(chat_id, self.allowed):
             return
+        if data == "chart":  # sends a photo, not a text view
+            png = self._render_usage_chart()
+            if png is None:
+                self._send(chat_id, "📊 No chart available yet.\n\n" + self.manager.usage_table())
+                return
+            try:
+                with self._send_lock:
+                    self.client.send_photo(chat_id, png, filename="conductor_usage.png",
+                                           caption="📊 Conductor token spend by task")
+            except TelegramError as exc:
+                self._send(chat_id, "Chart send failed: %s" % exc)
+            return
         text = _view(self.manager, data)
         if text:
             self._send(chat_id, text)
+
+    def _handle_message(self, message: Dict[str, object], chat_id: str) -> None:
+        """Route one (non-album) message and send any reply."""
+        try:
+            reply = self.handle(message)
+        except Exception as exc:  # noqa: BLE001 - never die on one message
+            reply = "Error: %s" % exc
+        if reply:
+            self._send(chat_id, reply)
+
+    def _handle_album(self, members: List[Dict[str, object]]) -> None:
+        """Route a Telegram album (multiple images, one shared caption) as ONE task.
+
+        Telegram splits an album across several updates; the caption rides on
+        exactly one member. We dispatch once via the captioned member with every
+        image attached, and download only when it will actually be used (a
+        caption is present AND the sender is an admin).
+        """
+        base = next((m for m in members if _msg_text(m)), members[0])
+        chat_id = str((base.get("chat") or {}).get("id", ""))  # type: ignore[union-attr]
+        user_id = str((base.get("from") or {}).get("id", ""))  # type: ignore[union-attr]
+        images: List[str] = []
+        if _msg_text(base) and _is_admin(user_id, self.admin):
+            images = self._save_album_images(members)
+        try:
+            reply = self.handle(base, images_override=images)
+        except Exception as exc:  # noqa: BLE001
+            reply = "Error: %s" % exc
+        if reply:
+            self._send(chat_id, reply)
 
     # -- main loop --------------------------------------------------------
 
@@ -293,16 +755,29 @@ class ConductorBot:
             self.client.set_my_commands(_COMMANDS)  # populate Telegram's '/' menu
         except TelegramError as exc:
             print("[conductor] set_my_commands failed: %s" % exc, flush=True)
+        self._prune_uploads()  # clear stale pasted screenshots left over from a prior run
+        # background watcher: alerts the notify chat when an engine flips up/down
+        threading.Thread(target=self._health_watch, name="health-watch", daemon=True).start()
+        if self._notify_chat:
+            cap = self.manager.cfg.max_parallel
+            mode = "sequential" if cap <= 1 else "%d-way swarm" % cap
+            self._send(self._notify_chat, "🟢 *conductor online* — %s. /help" % mode)
 
         offset: Optional[int] = None
         import time as _time
+        poll_fails = 0
         while True:
             try:
                 updates = self.client.get_updates(offset=offset, poll_timeout=poll_timeout)
+                poll_fails = 0
             except TelegramError as exc:
+                poll_fails += 1
                 print("[conductor] poll error: %s" % exc, flush=True)
+                if poll_fails == 3 and self._notify_chat:  # alert once on a sustained outage
+                    self._send(self._notify_chat, "⚠️ *conductor poll error* — %s" % str(exc)[:150])
                 _time.sleep(5)
                 continue
+            albums: Dict[str, List[Dict[str, object]]] = {}
             for update in updates:
                 offset = int(update["update_id"]) + 1
                 callback = update.get("callback_query")
@@ -319,12 +794,19 @@ class ConductorBot:
                 if not _authorized(chat_id, self.allowed):
                     self._send(chat_id, "Unauthorized chat `%s`." % chat_id)
                     continue
+                # Buffer album members (multiple images, one send) and dispatch the
+                # whole group once after the batch — so extra members don't each
+                # trigger a spurious "add a caption" reply.
+                mgid = message.get("media_group_id")
+                if mgid:
+                    albums.setdefault(str(mgid), []).append(message)
+                    continue
+                self._handle_message(message, chat_id)
+            for members in albums.values():
                 try:
-                    reply = self.handle(message)
-                except Exception as exc:  # noqa: BLE001 - never die on one message
-                    reply = "Error: %s" % exc
-                if reply:
-                    self._send(chat_id, reply)
+                    self._handle_album(members)
+                except Exception as exc:  # noqa: BLE001 - never die on one album
+                    print("[conductor] album error: %s" % exc, flush=True)
 
 
 def _build_config(args: argparse.Namespace) -> ConductorConfig:
@@ -376,7 +858,9 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     allowed = {c.strip() for c in os.environ.get("TELEGRAM_CHAT_ID", "").split(",") if c.strip()}
     admin = os.environ.get("TELEGRAM_ADMIN_USER_ID") or None
-    bot = ConductorBot(client, manager, allowed, admin)
+    # proactive notifications (start/finish/hiccups) go here; default = the chat id
+    notify_chat = os.environ.get("WCA_CONDUCTOR_NOTIFY_CHAT") or (sorted(allowed)[0] if allowed else None)
+    bot = ConductorBot(client, manager, allowed, admin, notify_chat=notify_chat)
     try:
         bot.run(poll_timeout=args.poll_timeout)
     except KeyboardInterrupt:

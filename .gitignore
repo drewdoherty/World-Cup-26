@@ -25,3 +25,7 @@ data/*.db-wal
 data/com.wca.*.log
 data/*.db.*
 .env.bak.*
+
+# dev-conductor: pasted screenshots are debug input only — never track them
+data/conductor_uploads/
+.conductor_inbox/

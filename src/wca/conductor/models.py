@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 
 
 class Engine(str, Enum):
@@ -94,6 +94,7 @@ class TaskRecord:
     engine: str
     task: str
     chat_id: str = ""
+    images: List[str] = field(default_factory=list)  # local paths to pasted screenshots
     shortid: str = ""
     branch: Optional[str] = None
     worktree_path: Optional[str] = None
@@ -104,6 +105,8 @@ class TaskRecord:
     tokens: int = 0
     returncode: Optional[int] = None
     pr_url: Optional[str] = None
+    activity: str = ""          # live: what the agent is doing right now
+    activity_at: float = 0.0
     created_at: float = 0.0
     started_at: Optional[float] = None
     finished_at: Optional[float] = None

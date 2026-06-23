@@ -35,6 +35,14 @@ Notify = Callable[[TaskRecord], None]
 # stays parallel).
 _WORKTREE_LOCK = threading.Lock()
 
+# Pasted screenshots are copied here *inside the worktree* so the headless agent
+# can Read them by a cwd-relative path (no extra --add-dir / permission prompt).
+# Two independent guards keep them out of the PR: the directory is deleted before
+# commit (see run_task), AND `.conductor_inbox/` is added to the repo's shared
+# info/exclude (see _ensure_inbox_excluded) so `git add -A` can never stage it,
+# regardless of which base branch the worktree was forked from.
+_INBOX_DIR = ".conductor_inbox"
+
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
 _REMOTE_RE = re.compile(r"(?:git@[^:]+:|https?://[^/]+/)(?P<slug>[^/]+/[^/]+?)(?:\.git)?/?$")
 
@@ -44,16 +52,67 @@ def _run(
     cwd: Optional[str] = None,
     env: Optional[dict] = None,
     timeout: Optional[float] = None,
+    on_event: Optional[Callable[[dict], None]] = None,
 ) -> subprocess.CompletedProcess:
-    """Run *cmd*, capturing text output. The single seam tests patch."""
-    return subprocess.run(
-        cmd,
-        cwd=cwd,
-        env=env,
-        timeout=timeout,
-        capture_output=True,
-        text=True,
-    )
+    """Run *cmd*, capturing text output. The single seam tests patch.
+
+    With ``on_event`` it STREAMS: stdout is read line-by-line and every parsed
+    JSON object (e.g. a claude ``--output-format stream-json`` event) is handed
+    to ``on_event`` live, so callers can surface per-agent activity in flight.
+    Without it, it blocks like ``subprocess.run`` (git/gh).
+    """
+    if on_event is None:
+        return subprocess.run(cmd, cwd=cwd, env=env, timeout=timeout, capture_output=True, text=True)
+
+    proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, text=True, bufsize=1)
+    killer = threading.Timer(timeout, proc.kill) if timeout else None
+    if killer:
+        killer.start()
+    out: List[str] = []
+    try:
+        for line in proc.stdout or []:
+            out.append(line)
+            s = line.strip()
+            if not s.startswith("{"):
+                continue
+            try:
+                ev = json.loads(s)
+            except ValueError:
+                continue
+            try:
+                on_event(ev)
+            except Exception:  # noqa: BLE001 - a bad handler must not kill the run
+                pass
+        proc.wait()
+    finally:
+        if killer:
+            killer.cancel()
+    err = proc.stderr.read() if proc.stderr else ""
+    return subprocess.CompletedProcess(cmd, proc.returncode or 0, "".join(out), err)
+
+
+def _activity_from_event(ev: dict) -> Optional[str]:
+    """Turn one stream-json event into a short 'what the agent is doing' line."""
+    t = ev.get("type")
+    if t == "system":
+        return "🟢 starting…"
+    if t == "assistant":
+        blocks = ((ev.get("message") or {}).get("content")) or []
+        for b in reversed(blocks):
+            if not isinstance(b, dict):
+                continue
+            if b.get("type") == "tool_use":
+                inp = b.get("input") or {}
+                hint = (inp.get("file_path") or inp.get("path") or inp.get("command")
+                        or inp.get("pattern") or inp.get("description") or "")
+                hint = str(hint).splitlines()[0] if hint else ""
+                return "🔧 %s%s" % (b.get("name", "tool"), (" " + hint[:48]) if hint else "")
+            if b.get("type") == "text":
+                txt = " ".join((b.get("text") or "").split())
+                if txt:
+                    return "💬 %s" % txt[:64]
+    return None
 
 
 # -- naming ---------------------------------------------------------------
@@ -74,6 +133,36 @@ def _worktree_leaf(cfg: ConductorConfig, record: TaskRecord) -> str:
 # -- worktree -------------------------------------------------------------
 
 
+def _ensure_inbox_excluded(cfg: ConductorConfig) -> None:
+    """Add ``.conductor_inbox/`` to the repo's shared ``info/exclude``.
+
+    The branch-tracked ``.gitignore`` entry only exists once this change is on
+    the base branch; worktrees forked from an older base wouldn't ignore the
+    inbox. The per-repo ``info/exclude`` (shared by all linked worktrees) makes
+    the exclusion base-branch-independent, so even a mid-run ``git add -A`` by
+    the agent can never stage a pasted screenshot. Best-effort and idempotent.
+    """
+    try:
+        res = _run([cfg.git_bin, "-C", str(cfg.repo_root), "rev-parse", "--git-common-dir"])
+        if res.returncode != 0 or not res.stdout.strip():
+            return
+        common = Path(res.stdout.strip())
+        if not common.is_absolute():
+            common = cfg.repo_root / common
+        info = common / "info"
+        info.mkdir(parents=True, exist_ok=True)
+        excl = info / "exclude"
+        existing = excl.read_text() if excl.exists() else ""
+        if ("%s/" % _INBOX_DIR) in existing:
+            return
+        with excl.open("a") as fh:
+            if existing and not existing.endswith("\n"):
+                fh.write("\n")
+            fh.write("%s/\n" % _INBOX_DIR)
+    except OSError:
+        pass
+
+
 def create_worktree(cfg: ConductorConfig, branch: str, leaf: str) -> Path:
     """Create a fresh worktree on a NEW *branch* off ``base_branch``."""
     if branch == cfg.base_branch:
@@ -81,6 +170,7 @@ def create_worktree(cfg: ConductorConfig, branch: str, leaf: str) -> Path:
     cfg.worktrees_dir.mkdir(parents=True, exist_ok=True)
     path = cfg.worktrees_dir / leaf
     with _WORKTREE_LOCK:  # serialize the shared-.git race
+        _ensure_inbox_excluded(cfg)  # screenshots can never be staged, any base
         res = _run([
             cfg.git_bin, "-C", str(cfg.repo_root),
             "worktree", "add", "-b", branch, str(path), cfg.base_branch,
@@ -142,21 +232,75 @@ def _last_json_object(text: str) -> Optional[dict]:
     return None
 
 
-def run_agent(cfg: ConductorConfig, engine: str, task: str, cwd: Path) -> AgentResult:
-    """Invoke the headless agent for *engine* inside *cwd*."""
+def stage_images(worktree: Path, images: List[str]) -> List[str]:
+    """Copy pasted screenshots into the worktree's inbox for the agent to read.
+
+    Returns worktree-relative paths (``.conductor_inbox/NN.ext``) for the files
+    that were actually staged; missing/unreadable sources are skipped. The inbox
+    is removed before commit (:func:`run_task`) so screenshots never reach a PR.
+    """
+    rels: List[str] = []
+    inbox = worktree / _INBOX_DIR
+    for i, src in enumerate(images or [], start=1):
+        sp = Path(src)
+        if not sp.is_file():
+            continue
+        inbox.mkdir(parents=True, exist_ok=True)
+        dest = inbox / ("%02d%s" % (i, sp.suffix.lower() or ".png"))
+        try:
+            shutil.copyfile(sp, dest)
+        except OSError:
+            continue
+        rels.append("%s/%s" % (_INBOX_DIR, dest.name))
+    return rels
+
+
+def augment_task_with_images(task: str, rel_paths: List[str]) -> str:
+    """Append a 'read these screenshots first' note pointing at staged images."""
+    if not rel_paths:
+        return task
+    n = len(rel_paths)
+    bullets = "\n".join("- %s" % p for p in rel_paths)
+    note = (
+        "\n\n---\n"
+        "The user attached %d screenshot%s for visual context (a bug, UI state, "
+        "log, or error). Read %s with the Read tool BEFORE you start and let what "
+        "you see guide the work:\n%s"
+    ) % (n, "" if n == 1 else "s", "it" if n == 1 else "them", bullets)
+    return task + note
+
+
+def run_agent(cfg: ConductorConfig, engine: str, task: str, cwd: Path,
+              on_activity: Optional[Callable[[str], None]] = None) -> AgentResult:
+    """Invoke the headless agent for *engine* inside *cwd*.
+
+    ``on_activity`` (claude only) receives a short live activity string per
+    stream-json event (tool calls, edits, messages) so callers can show what the
+    agent is doing in flight.
+    """
     binary, extra = cfg.cli_for(engine)
     # Only treat a bare name as missing; an absolute path may exist off-PATH.
     if "/" not in binary and shutil.which(binary) is None:
         return AgentResult(127, error="%s CLI not found on PATH (%s)" % (engine, binary))
 
+    on_event = None
     if Engine.coerce(engine) is Engine.CLAUDE:
-        cmd = [binary, "-p", task, *extra]
+        # `--` ends option parsing so a prompt that starts with '-' (e.g. a task
+        # pasted as "- send a message ...") is taken as the positional prompt,
+        # not mis-read as an unknown CLI flag. Flags must precede it.
+        cmd = [binary, "-p", *extra, "--", task]
+        if on_activity is not None:
+            def on_event(ev: dict) -> None:  # noqa: E306 - streamed activity hook
+                act = _activity_from_event(ev)
+                if act:
+                    on_activity(act)
     else:
-        # codex: flags before the positional prompt (e.g. -s workspace-write).
-        cmd = [binary, "exec", *extra, task]
+        # codex: flags before the positional prompt (e.g. -s workspace-write),
+        # then `--` so a leading-dash prompt is parsed as the prompt, not a flag.
+        cmd = [binary, "exec", *extra, "--", task]
 
     try:
-        res = _run(cmd, cwd=str(cwd), env=cfg.agent_env(), timeout=cfg.agent_timeout)
+        res = _run(cmd, cwd=str(cwd), env=cfg.agent_env(), timeout=cfg.agent_timeout, on_event=on_event)
     except subprocess.TimeoutExpired:
         return AgentResult(124, error="agent timed out after %.0fs" % cfg.agent_timeout)
 
@@ -308,7 +452,24 @@ def run_task(cfg: ConductorConfig, record: TaskRecord, notify: Optional[Notify] 
         worktree = create_worktree(cfg, record.branch or "", _worktree_leaf(cfg, record))
         record.worktree_path = str(worktree)
 
-        agent = run_agent(cfg, record.engine, record.task, worktree)
+        # Copy any pasted screenshots into the worktree and point the prompt at
+        # them. The original record.task (used for the commit/PR) stays clean.
+        prompt = record.task
+        if record.images:
+            rels = stage_images(worktree, record.images)
+            prompt = augment_task_with_images(record.task, rels)
+
+        def _set_activity(act: str) -> None:
+            record.activity = act
+            record.activity_at = time.time()
+
+        agent = run_agent(cfg, record.engine, prompt, worktree, on_activity=_set_activity)
+
+        # Screenshots are debug INPUT, never part of the change — drop the inbox
+        # before staging so `git add -A` can't sweep them into the PR.
+        if record.images:
+            shutil.rmtree(worktree / _INBOX_DIR, ignore_errors=True)
+
         record.tokens = agent.tokens
         record.returncode = agent.returncode
         record.summary = agent.summary

@@ -22,9 +22,10 @@ _DEFAULT_OVERRIDES = {"PM_DRY_RUN": "1", "WCA_DB_PATH": "data/dev.db"}
 
 
 def _default_claude_args() -> List[str]:
-    # Headless JSON output (so we can parse the result + token usage) and
-    # auto-accept edits so the agent can actually modify files in its worktree.
-    return ["--output-format", "json", "--permission-mode", "acceptEdits"]
+    # stream-json (needs --verbose in print mode) emits live events as the agent
+    # works, so the conductor surfaces per-task activity in flight. The final
+    # event still carries the result + token usage, so parsing is unchanged.
+    return ["--output-format", "stream-json", "--verbose", "--permission-mode", "acceptEdits"]
 
 
 def _default_codex_args() -> List[str]:
@@ -41,7 +42,9 @@ class ConductorConfig:
     worktrees_dir: Optional[Path] = None  # defaults to repo_root/.claude/worktrees
     branch_prefix: str = "conductor"
 
-    max_parallel: int = 3
+    max_parallel: int = 1  # SEQUENTIAL by default — parallel runs raced on the shared
+    #                        .git worktree registry/index and produced collisions; opt
+    #                        back into the swarm with WCA_CONDUCTOR_MAX_PARALLEL>1.
     token_budget: Optional[int] = None  # None / 0 -> unlimited
     codex_auto_limit: int = 1  # max queued/running automatic Codex tasks
     disabled_engines: List[str] = field(default_factory=list)  # e.g. ["codex"] when exhausted/off
@@ -126,7 +129,7 @@ class ConductorConfig:
             repo_root=Path(repo_root),
             base_branch=os.environ.get("WCA_CONDUCTOR_BASE_BRANCH", "main"),
             branch_prefix=os.environ.get("WCA_CONDUCTOR_BRANCH_PREFIX", "conductor"),
-            max_parallel=_int("WCA_CONDUCTOR_MAX_PARALLEL", 3) or 3,
+            max_parallel=_int("WCA_CONDUCTOR_MAX_PARALLEL", 1) or 1,
             token_budget=_int("WCA_CONDUCTOR_TOKEN_BUDGET", None),
             codex_auto_limit=_int("WCA_CONDUCTOR_CODEX_AUTO_LIMIT", 1) or 0,
             disabled_engines=[e for e in os.environ.get("WCA_CONDUCTOR_DISABLED_ENGINES", "").split(",") if e.strip()],

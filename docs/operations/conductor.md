@@ -1,7 +1,7 @@
 # Dev-conductor (v0)
 
 A **dev-only** Telegram bot that fans tasks out to headless coding agents.
-One interface, both models, parallel, GitHub-handled:
+One interface, both models, **sequential by default**, GitHub-handled:
 
 ```
 /task <task>     → automatic routing, Claude-first; Codex only for small mechanical edits
@@ -13,6 +13,60 @@ One interface, both models, parallel, GitHub-handled:
 ```
 
 This is **infrastructure, not the betting bot.** It never touches live state.
+
+## Pasting screenshots (visual debugging)
+
+Attach a screenshot to a Telegram message and the agent reads it as visual
+context — for debugging a UI bug, a stack trace, a chart, etc.
+
+* **Photo + a slash command in the caption** → `/claude debug why this header
+  wraps` runs that command with the image attached.
+* **Photo + a plain caption** (no slash) → auto-routed as a `/task` so "snap a
+  screenshot, describe the bug, send" just works.
+* **Photo with no caption** → the bot asks you to add an instruction (a bare
+  image isn't actionable).
+
+Send **multiple** screenshots at once (a Telegram album) and they're grouped by
+`media_group_id` and attached to a single task; only the captioned member needs
+the instruction.
+
+How it flows: the bot downloads the image(s) (`TelegramClient.save_image`,
+highest resolution; also accepts an `image/*` document) into
+`data/conductor_uploads/`. At run time `runner.stage_images` copies them into the
+task's worktree under `.conductor_inbox/` and points the agent's prompt at them
+(so the agent's Read tool can open them cwd-relative — no extra permission
+grant). Screenshots are debug *input* and never reach a PR, guarded two ways: the
+inbox is **deleted before commit**, and `.conductor_inbox/` is added to the
+repo's `info/exclude` so `git add -A` can't stage it even on a stale base. The
+`data/conductor_uploads/` originals are gitignored and **age-pruned** (>24h) by
+the background watcher, so `/retry` can still re-attach a recent screenshot.
+
+## Getting output back (files & charts)
+
+The bot can reply with **files and images**, not just text:
+
+* **Report files auto-attach.** When a task finishes (DONE/PUSHED), any
+  report-like files it ADDED/MODIFIED — `.md`, `.csv`, `.txt`, `.png`, `.svg`,
+  `.pdf` — are sent back to the chat (images inline, the rest as documents).
+  Generated `site/` & `data/` feeds and code files are excluded; capped at 6
+  files, read straight from the task branch via git (works after the worktree is
+  reclaimed). `/report <id>` re-fetches them on demand.
+* **`/chart`** renders the conductor's token spend per task as a PNG. This needs
+  `matplotlib` in the venv (an optional extra — `pip install matplotlib`); if it
+  isn't installed, `/chart` falls back to the `/usage` text table.
+
+To get a *report* back, phrase the task to WRITE a file (e.g. "...and write the
+findings to `docs/reports/x.md`") — the conductor only commits files, so a pure
+"explain X" task produces no artifact to attach. Live MODEL charts
+(edges/CLV/exposure) belong in `@gamble1_bot`, not here.
+
+## Sequential vs parallel
+
+`max_parallel` defaults to **1 (sequential)**. An earlier 8-way "swarm" raced on
+the shared `.git` worktree registry/index and produced collisions, so the safe
+default is one task at a time. Opt back into parallelism deliberately with
+`WCA_CONDUCTOR_MAX_PARALLEL=N` (or `--max-parallel N`) once the race is fully
+ruled out.
 
 ## Architecture
 

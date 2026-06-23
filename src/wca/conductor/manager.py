@@ -72,12 +72,16 @@ class ConductorManager:
 
     # -- submission -------------------------------------------------------
 
-    def submit(self, engine: str, task: str, chat_id: str = "") -> TaskRecord:
+    def submit(self, engine: str, task: str, chat_id: str = "",
+               images: Optional[List[str]] = None) -> TaskRecord:
         """Accept an explicit-engine task, rerouting around a dead engine.
 
         If the requested engine is logged-out/unavailable, reroute to the other
         engine when it is healthy; if neither is healthy, REJECT with the real
         reason (e.g. "claude not logged in — run `claude setup-token`").
+
+        ``images`` are local paths to pasted screenshots the agent should read
+        as visual context (see :func:`runner.stage_images`).
         """
         engine = Engine.coerce(engine).value  # validate / normalise
         task = (task or "").strip()
@@ -94,15 +98,16 @@ class ConductorManager:
                 engine = other
             else:
                 with self._lock:
-                    record = self._new_record_locked(engine, task, chat_id)
+                    record = self._new_record_locked(engine, task, chat_id, images=images)
                 record.status = TaskStatus.REJECTED.value
                 record.error = primary.reason
                 return record
 
         with self._lock:
-            return self._submit_locked(engine, task, chat_id, route_reason=route_reason)
+            return self._submit_locked(engine, task, chat_id, route_reason=route_reason, images=images)
 
-    def submit_auto(self, task: str, chat_id: str = "") -> TaskRecord:
+    def submit_auto(self, task: str, chat_id: str = "",
+                    images: Optional[List[str]] = None) -> TaskRecord:
         """Accept a task after picking the engine with the health-aware router."""
         task = (task or "").strip()
         if not task:
@@ -125,7 +130,7 @@ class ConductorManager:
         if not claude_ok and not codex_ok:
             with self._lock:
                 record = self._new_record_locked(decision.engine.value, task, chat_id,
-                                                 route_reason=decision.reason)
+                                                 route_reason=decision.reason, images=images)
             record.status = TaskStatus.REJECTED.value
             record.error = "no healthy engine: claude (%s), codex (%s)" % (
                 self.engine_health(Engine.CLAUDE.value).reason,
@@ -134,12 +139,12 @@ class ConductorManager:
             return record
         with self._lock:
             return self._submit_locked(
-                decision.engine.value, task, chat_id, route_reason=decision.reason,
+                decision.engine.value, task, chat_id, route_reason=decision.reason, images=images,
             )
 
     def _submit_locked(self, engine: str, task: str, chat_id: str,
-                       route_reason: str = "") -> TaskRecord:
-        record = self._new_record_locked(engine, task, chat_id, route_reason)
+                       route_reason: str = "", images: Optional[List[str]] = None) -> TaskRecord:
+        record = self._new_record_locked(engine, task, chat_id, route_reason, images=images)
         budget = self.cfg.token_budget
         if budget is not None and self._spent_locked() >= budget:
             record.status = TaskStatus.REJECTED.value
@@ -150,7 +155,7 @@ class ConductorManager:
         return record
 
     def _new_record_locked(self, engine: str, task: str, chat_id: str,
-                           route_reason: str = "") -> TaskRecord:
+                           route_reason: str = "", images: Optional[List[str]] = None) -> TaskRecord:
         self._counter += 1
         rid = self._counter
         shortid = uuid.uuid4().hex[:6]
@@ -162,6 +167,7 @@ class ConductorManager:
             engine=engine,
             task=task,
             chat_id=str(chat_id),
+            images=list(images or []),
             shortid=shortid,
             branch=branch,
             status=TaskStatus.QUEUED.value,
@@ -184,6 +190,74 @@ class ConductorManager:
             record.status = TaskStatus.REJECTED.value
             record.error = "cancelled before start"
         return record
+
+    _RETRYABLE = {TaskStatus.FAILED.value, TaskStatus.REJECTED.value, TaskStatus.NO_CHANGES.value}
+
+    def retry(self, task_id: int) -> Optional[TaskRecord]:
+        """Re-dispatch a finished task as a NEW record (same engine + text).
+
+        Returns None if unknown; returns the original (unchanged) if it's not in
+        a retryable state so the caller can message why.
+        """
+        old = self.get(task_id)
+        if old is None:
+            return None
+        if old.status not in self._RETRYABLE:
+            return old
+        return self.submit(old.engine, old.task, chat_id=old.chat_id, images=old.images)
+
+    def merge_task(self, task_id: int) -> "tuple[bool, str]":
+        """Squash-merge a task's PR via ``gh`` — but ONLY if it's open and green.
+
+        Returns ``(ok, message)``. Refuses unless the task produced a real PR,
+        that PR is OPEN, and every status check has passed (no checks configured
+        counts as green). The admin gate is enforced by the bot before this runs;
+        this method is the safety floor (state + green-only).
+        """
+        import json as _json
+
+        r = self.get(task_id)
+        if r is None:
+            return False, "no task `#%d`" % task_id
+        if r.status != TaskStatus.DONE.value or not (r.pr_url and "/pull/" in r.pr_url):
+            return False, "`#%d` has no open PR to merge (status %s)" % (task_id, r.status)
+        if shutil.which(self.cfg.gh_bin) is None:
+            return False, "`gh` not available — can't merge (authenticate it on the host)"
+        try:
+            view = subprocess.run(
+                [self.cfg.gh_bin, "pr", "view", r.branch or "",
+                 "--json", "state,mergeStateStatus,statusCheckRollup"],
+                capture_output=True, text=True, timeout=30,
+            )
+        except (OSError, subprocess.SubprocessError) as exc:
+            return False, "gh view failed: %s" % exc
+        if view.returncode != 0:
+            return False, "gh view failed: %s" % ((view.stderr or "").strip()[:200])
+        try:
+            info = _json.loads(view.stdout or "{}")
+        except ValueError:
+            info = {}
+        if info.get("state") != "OPEN":
+            return False, "`#%d` PR is %s, not OPEN" % (task_id, info.get("state") or "?")
+        rollup = info.get("statusCheckRollup") or []
+        not_green = [
+            c for c in rollup
+            if (c.get("conclusion") or c.get("state") or "").upper()
+            not in ("SUCCESS", "NEUTRAL", "SKIPPED", "")
+        ]
+        if not_green:
+            return False, "`#%d` not green — %d check(s) failing/pending; review on GitHub" % (
+                task_id, len(not_green))
+        try:
+            res = subprocess.run(
+                [self.cfg.gh_bin, "pr", "merge", r.branch or "", "--squash", "--delete-branch"],
+                capture_output=True, text=True, timeout=90,
+            )
+        except (OSError, subprocess.SubprocessError) as exc:
+            return False, "merge failed: %s" % exc
+        if res.returncode != 0:
+            return False, "merge failed: %s" % ((res.stderr or res.stdout or "").strip()[:200])
+        return True, "merged `#%d` (squash) and deleted `%s`" % (task_id, r.branch)
 
     def shutdown(self) -> None:
         self._pool.shutdown(wait=False)
@@ -211,6 +285,84 @@ class ConductorManager:
     def get(self, task_id: int) -> Optional[TaskRecord]:
         with self._lock:
             return self._records.get(task_id)
+
+    def usage_table(self) -> str:
+        """Real-time Anthropic token spend by the conductor, per engine + limits.
+
+        Account-wide usage/limits live in the Anthropic Console (a subscription
+        OAuth token can't expose them programmatically); this shows what the
+        conductor itself has spent — what you manage the swarm against.
+        """
+        records = self.records()
+        lines = ["*Anthropic usage* — conductor spend (real-time)"]
+        total = 0
+        for e in Engine:
+            ev = e.value
+            mine = [r for r in records if r.engine == ev]
+            toks = sum(r.tokens for r in mine)
+            total += toks
+            n_run = sum(1 for r in mine if r.status == TaskStatus.RUNNING.value)
+            h = self.engine_health(ev)
+            status = "✅" if h.ok else ("🚫 " + h.reason if self.cfg.is_disabled(ev) else "❌ " + h.reason)
+            lines.append("• *%s* — %s tok · %d task(s) · %d running · %s" % (
+                ev, format(toks, ","), len(mine), n_run, status))
+        lines.append("\n*Total:* %s tokens · %d-way parallel" % (format(total, ","), self.cfg.max_parallel))
+        if self.cfg.token_budget:
+            lines.append("Budget: %s / %s" % (format(total, ","), format(self.cfg.token_budget, ",")))
+        lines.append("\n_Account-wide usage & limits: console.anthropic.com/settings/usage. "
+                     "Your subscription's rolling limit surfaces as a task error — you'll be notified._")
+        return "\n".join(lines)
+
+    def prs(self) -> str:
+        """Tasks that produced a PR / branch link — for review from the phone."""
+        recs = [r for r in self.records() if r.pr_url]
+        if not recs:
+            return "_No task PRs yet._ Dispatch one with `/claude <task>`."
+        lines = ["*Conductor — task PRs*"]
+        for r in recs:
+            label = "PR" if r.status == TaskStatus.DONE.value else "branch"
+            task = r.task if len(r.task) <= 50 else r.task[:47] + "..."
+            lines.append("`#%d` %s · [%s](%s)\n   %s" % (r.id, r.status, label, r.pr_url, task))
+        return "\n".join(lines)
+
+    def task_detail(self, task_id: int) -> str:
+        """Full detail of one task (for /log <id>)."""
+        r = self.get(task_id)
+        if r is None:
+            return "No task `#%d`." % task_id
+        lines = ["*Task #%d* — %s · %s" % (r.id, r.engine, r.status),
+                 "_%s_" % (r.task if len(r.task) <= 200 else r.task[:197] + "...")]
+        if r.route_reason:
+            lines.append("route: %s" % r.route_reason)
+        if r.branch:
+            lines.append("branch: `%s`" % r.branch)
+        if r.status == TaskStatus.RUNNING.value and r.activity:
+            lines.append("↳ now: %s" % r.activity)
+        if r.pr_url:
+            lines.append(r.pr_url)
+        if r.tokens:
+            lines.append("tokens: %d" % r.tokens)
+        if r.summary:
+            lines.append("summary: %s" % (r.summary if len(r.summary) <= 350 else r.summary[:347] + "..."))
+        if r.error:
+            lines.append("⚠️ %s" % (r.error if len(r.error) <= 350 else r.error[:347] + "..."))
+        return "\n".join(lines)
+
+    def watch(self, task_id: Optional[int] = None) -> str:
+        """Live activity: one task (`/watch <id>`) or every running task (`/watch`)."""
+        if task_id is not None:
+            r = self.get(task_id)
+            if r is None:
+                return "No task `#%d`." % task_id
+            act = r.activity or ("(no activity yet)" if r.status == TaskStatus.RUNNING.value else r.status)
+            return "🔭 *#%d* %s · %s\n↳ %s" % (r.id, r.engine, r.status, act)
+        running = [r for r in self.records() if r.status == TaskStatus.RUNNING.value]
+        if not running:
+            return "_No tasks running._"
+        lines = ["🔭 *Live activity* (%d running)" % len(running)]
+        for r in running:
+            lines.append("`#%d` %s\n   ↳ %s" % (r.id, r.engine, r.activity or "(starting…)"))
+        return "\n".join(lines)
 
     def health_table(self, force: bool = True) -> str:
         """Markdown summary of each engine's live auth/availability."""
@@ -248,6 +400,8 @@ class ConductorManager:
                 row = "   %s `#%d` %s — %s" % (icon, r.id, r.status, task)
                 if r.tokens:
                     row += " · %d tok" % r.tokens
+                if r.status == TaskStatus.RUNNING.value and r.activity:
+                    row += "\n      ↳ %s" % r.activity  # live: what the agent is doing now
                 lines.append(row)
             if not shown:
                 lines.append("   _idle_")
@@ -319,6 +473,8 @@ class ConductorManager:
             if r.tokens:
                 row += " · %d tok" % r.tokens
             row += "\n   %s" % task
+            if r.status == TaskStatus.RUNNING.value and r.activity:
+                row += "\n   ↳ %s" % r.activity  # live agent activity
             if r.pr_url:
                 label = "PR" if r.status == TaskStatus.DONE.value else "diff"
                 row += "\n   [%s](%s)" % (label, r.pr_url)

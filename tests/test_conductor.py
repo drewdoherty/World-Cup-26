@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 
 from wca.conductor import runner
+from wca.conductor import manager as mgr_mod
 from wca.conductor.config import ConductorConfig
 from wca.conductor.dispatcher import choose_engine
 from wca.conductor.manager import ConductorManager
@@ -41,7 +42,7 @@ def make_fake_run(
     """
     state = {"calls": [], "agent_env": None}
 
-    def fake(cmd, cwd=None, env=None, timeout=None):
+    def fake(cmd, cwd=None, env=None, timeout=None, on_event=None):
         state["calls"].append(list(cmd))
         if cmd[0] == "git":
             sub = cmd[3] if len(cmd) > 3 else ""
@@ -58,8 +59,13 @@ def make_fake_run(
             return _cp(cmd)
         if cmd[0] == "gh":
             return _cp(cmd, rc=pr_rc, out=pr_url if pr_rc == 0 else "", err="" if pr_rc == 0 else "not logged in")
-        # otherwise: the agent invocation
+        # otherwise: the agent invocation. If streaming, emit a couple of
+        # stream-json events so live-activity wiring is exercised.
         state["agent_env"] = env
+        if on_event is not None:
+            on_event({"type": "system", "subtype": "init"})
+            on_event({"type": "assistant", "message": {"content": [
+                {"type": "tool_use", "name": "Edit", "input": {"file_path": "src/wca/x.py"}}]}})
         return _cp(cmd, rc=agent_rc, out=agent_stdout, err="" if agent_rc == 0 else "boom")
 
     fake.state = state
@@ -559,3 +565,324 @@ def test_agents_spec_table_shows_specs_and_architecture(tmp_path):
     assert "disabled" in out          # codex marked disabled
     assert "workspace-write" in out   # codex args surfaced
     assert "PR-only" in out or "never commits" in out
+
+
+# -- /usage, /prs, /log, /retry, swarm cap ---------------------------------
+
+
+def test_max_parallel_defaults_to_sequential_revert(tmp_path):
+    # Reverted from an 8-way swarm: parallel runs raced the shared .git
+    # worktree registry/index and produced collisions. Sequential by default.
+    assert ConductorConfig(repo_root=tmp_path).max_parallel == 1
+
+
+def test_usage_table_sums_per_engine_spend(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, disabled_engines=["codex"]))
+    _stub_health(mgr, claude_ok=True, codex_ok=False)
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="t1", status=TaskStatus.DONE.value, tokens=1500)
+    mgr._records[2] = TaskRecord(id=2, engine="claude", task="t2", status=TaskStatus.RUNNING.value, tokens=300)
+    out = mgr.usage_table()
+    assert "Anthropic usage" in out and "claude" in out
+    assert "1,800" in out  # total spend, comma-grouped
+
+
+def test_prs_lists_only_linked_records(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="has pr",
+                                 status=TaskStatus.DONE.value, pr_url="https://x/pull/1")
+    mgr._records[2] = TaskRecord(id=2, engine="claude", task="no pr", status=TaskStatus.FAILED.value)
+    out = mgr.prs()
+    assert "#1" in out and "pull/1" in out and "#2" not in out
+
+
+def test_task_detail_and_retry(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="failed thing",
+                                 status=TaskStatus.FAILED.value, error="boom")
+    detail = mgr.task_detail(1)
+    assert "failed thing" in detail and "boom" in detail
+    mgr._counter = 100  # so the retry's new id doesn't collide with the seeded one
+    new = mgr.retry(1)
+    assert new.id != 1 and new.task == "failed thing"
+    # a non-retryable (DONE) task returns itself unchanged
+    mgr._records[5] = TaskRecord(id=5, engine="claude", task="done", status=TaskStatus.DONE.value)
+    assert mgr.retry(5).id == 5
+
+
+# -- live per-agent activity (streaming) -----------------------------------
+
+
+def test_activity_from_event_tool_use():
+    ev = {"type": "assistant", "message": {"content": [
+        {"type": "tool_use", "name": "Edit", "input": {"file_path": "src/a.py"}}]}}
+    act = runner._activity_from_event(ev)
+    assert act.startswith("🔧 Edit") and "src/a.py" in act
+
+
+def test_activity_from_event_text_system_result():
+    txt = runner._activity_from_event({"type": "assistant", "message": {"content": [
+        {"type": "text", "text": "Looking at the code"}]}})
+    assert txt.startswith("💬")
+    assert runner._activity_from_event({"type": "system", "subtype": "init"}) is not None
+    assert runner._activity_from_event({"type": "result"}) is None
+
+
+def test_run_task_records_live_activity(cfg, patched):
+    # the patched fake emits a tool_use event during the streamed agent run
+    rec = _record()
+    runner.run_task(cfg, rec)
+    assert "Edit" in rec.activity and rec.activity_at > 0
+
+
+def test_watch_shows_running_activity(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="t",
+                                 status=TaskStatus.RUNNING.value, activity="🔧 Edit src/x.py")
+    assert "Edit src/x.py" in mgr.watch() and "#1" in mgr.watch()
+    assert "Edit src/x.py" in mgr.watch(1)
+    assert "No task" in mgr.watch(999)
+
+
+def test_run_uses_streaming_only_with_on_event(cfg, monkeypatch):
+    # claude_args now request stream-json; the runner streams only when given a hook
+    bin_, args = cfg.cli_for("claude")
+    assert "stream-json" in args and "--verbose" in args
+
+
+# -- collision-proofing: parallel swarm stays race-free --------------------
+
+
+def test_swarm_runs_many_tasks_in_parallel_without_collision(tmp_path, monkeypatch):
+    # The worktree-add race was the historical collision; _WORKTREE_LOCK + a
+    # per-worktree index make cap>1 safe. Stress 12 tasks through a 4-wide pool
+    # and assert no id/branch collision and every task completes.
+    monkeypatch.setattr(runner, "_run", make_fake_run())
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=4))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    recs = [mgr.submit("claude", "task %d" % i) for i in range(12)]
+    for r in recs:
+        mgr._futures[r.id].result(timeout=20)
+    final = [mgr.get(r.id) for r in recs]
+    assert all(f.status == TaskStatus.DONE.value for f in final)
+    assert len({f.branch for f in final}) == 12          # unique branches
+    assert sorted(f.id for f in final) == list(range(1, 13))  # counter never raced
+
+
+# -- /merge: gated, green-only PR merge ------------------------------------
+
+
+def _done_pr_record(mgr, rid=1):
+    rec = TaskRecord(id=rid, engine="claude", task="t", status=TaskStatus.DONE.value,
+                     branch="conductor/x", pr_url="https://github.com/o/r/pull/9")
+    mgr._records[rid] = rec
+    return rec
+
+
+def test_merge_refuses_without_open_pr(tmp_path):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    mgr._records[1] = TaskRecord(id=1, engine="claude", task="t",
+                                 status=TaskStatus.PUSHED.value, pr_url=None)
+    ok, msg = mgr.merge_task(1)
+    assert ok is False and "no open PR" in msg
+
+
+def test_merge_refuses_when_not_green(tmp_path, monkeypatch):
+    import subprocess as sp
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _done_pr_record(mgr)
+    monkeypatch.setattr(mgr_mod.shutil, "which", lambda b: "/usr/bin/gh")
+
+    def fake_run(cmd, **kw):
+        if "view" in cmd:
+            return sp.CompletedProcess(cmd, 0, '{"state":"OPEN","statusCheckRollup":[{"conclusion":"FAILURE"}]}', "")
+        return sp.CompletedProcess(cmd, 0, "", "")
+    monkeypatch.setattr(mgr_mod.subprocess, "run", fake_run)
+    ok, msg = mgr.merge_task(1)
+    assert ok is False and "not green" in msg
+
+
+def test_merge_squash_merges_when_green(tmp_path, monkeypatch):
+    import subprocess as sp
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _done_pr_record(mgr)
+    monkeypatch.setattr(mgr_mod.shutil, "which", lambda b: "/usr/bin/gh")
+    calls = []
+
+    def fake_run(cmd, **kw):
+        calls.append(cmd)
+        if "view" in cmd:
+            return sp.CompletedProcess(cmd, 0, '{"state":"OPEN","statusCheckRollup":[{"conclusion":"SUCCESS"}]}', "")
+        return sp.CompletedProcess(cmd, 0, "Merged", "")
+    monkeypatch.setattr(mgr_mod.subprocess, "run", fake_run)
+    ok, msg = mgr.merge_task(1)
+    assert ok is True and "merged" in msg.lower()
+    assert any("merge" in c and "--squash" in c and "--delete-branch" in c for c in calls)
+
+
+def test_merge_refuses_without_gh(tmp_path, monkeypatch):
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _done_pr_record(mgr)
+    monkeypatch.setattr(mgr_mod.shutil, "which", lambda b: None)
+    ok, msg = mgr.merge_task(1)
+    assert ok is False and "gh" in msg.lower()
+
+
+# -- sequential default (revert: parallel raced the shared .git registry) --
+
+
+def test_max_parallel_defaults_to_sequential(tmp_path):
+    assert ConductorConfig(repo_root=tmp_path).max_parallel == 1
+
+
+def test_from_env_max_parallel_defaults_to_one(tmp_path, monkeypatch):
+    monkeypatch.delenv("WCA_CONDUCTOR_MAX_PARALLEL", raising=False)
+    assert ConductorConfig.from_env(tmp_path).max_parallel == 1
+
+
+def test_env_can_still_opt_into_a_swarm(tmp_path, monkeypatch):
+    monkeypatch.setenv("WCA_CONDUCTOR_MAX_PARALLEL", "6")
+    assert ConductorConfig.from_env(tmp_path).max_parallel == 6
+
+
+# -- leading-dash prompt safety (regression: task starting with '-') -------
+
+
+def test_claude_prompt_after_double_dash_survives_leading_dash(cfg, monkeypatch):
+    fake = make_fake_run()
+    monkeypatch.setattr(runner, "_run", fake)
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    runner.run_agent(cfg, "claude", "- send a message when done", Path("/tmp/wt"))
+    cmd = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")][0]
+    assert "--" in cmd, "option parsing must be terminated before the prompt"
+    assert cmd.index("--") < cmd.index("- send a message when done")
+    assert cmd[-1] == "- send a message when done"  # prompt is the final operand
+
+
+def test_codex_prompt_after_double_dash(cfg, monkeypatch):
+    fake = make_fake_run()
+    monkeypatch.setattr(runner, "_run", fake)
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    runner.run_agent(cfg, "codex", "-x leading dash", Path("/tmp/wt"))
+    cmd = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")][0]
+    assert "exec" in cmd and "--sandbox" in cmd
+    assert "--" in cmd and cmd[-1] == "-x leading dash"
+
+
+# -- pasted-screenshot end-to-end (image paste) ----------------------------
+
+
+def test_stage_images_copies_and_returns_relative_paths(tmp_path):
+    wt = tmp_path / "wt"
+    wt.mkdir()
+    a = tmp_path / "a.png"
+    a.write_bytes(b"PNGA")
+    b = tmp_path / "b.jpg"
+    b.write_bytes(b"JPGB")
+    rels = runner.stage_images(wt, [str(a), str(b), str(tmp_path / "missing.png")])
+    assert rels == [".conductor_inbox/01.png", ".conductor_inbox/02.jpg"]
+    assert (wt / ".conductor_inbox" / "01.png").read_bytes() == b"PNGA"
+
+
+def test_augment_task_with_images_mentions_paths():
+    out = runner.augment_task_with_images("fix the bug", [".conductor_inbox/01.png"])
+    assert "fix the bug" in out
+    assert ".conductor_inbox/01.png" in out
+    assert "Read" in out
+    # no images -> unchanged
+    assert runner.augment_task_with_images("x", []) == "x"
+
+
+def test_run_task_stages_images_into_prompt_and_cleans_up(cfg, monkeypatch, tmp_path):
+    fake = make_fake_run()
+    monkeypatch.setattr(runner, "_run", fake)
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    img = tmp_path / "shot.png"
+    img.write_bytes(b"\x89PNG\r\n\x1a\nFAKE")
+    rec = _record()
+    rec.images = [str(img)]
+    runner.run_task(cfg, rec)
+    assert rec.status == TaskStatus.DONE.value
+    # the agent's prompt pointed at the staged screenshot...
+    cmd = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")][0]
+    assert ".conductor_inbox/01.png" in cmd[-1]
+    # ...but the inbox is gone before commit, so it never reaches the PR.
+    assert not (Path(rec.worktree_path) / ".conductor_inbox").exists()
+
+
+def test_run_task_without_images_leaves_prompt_unchanged(cfg, monkeypatch):
+    fake = make_fake_run()
+    monkeypatch.setattr(runner, "_run", fake)
+    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    rec = _record(task="just do the thing")
+    runner.run_task(cfg, rec)
+    cmd = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")][0]
+    assert cmd[-1] == "just do the thing"  # no screenshot note appended
+
+
+def test_submit_threads_images_onto_record(tmp_path, monkeypatch):
+    captured = {}
+
+    def fake_run_task(cfg, record, notify=None):
+        captured["images"] = list(record.images)
+        record.status = TaskStatus.DONE.value
+        record.finished_at = 1.0
+        return record
+
+    monkeypatch.setattr(runner, "run_task", fake_run_task)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    rec = mgr.submit("claude", "debug this", images=["/tmp/shot.png"])
+    mgr._futures[rec.id].result(timeout=10)
+    assert rec.images == ["/tmp/shot.png"]
+    assert captured["images"] == ["/tmp/shot.png"]
+
+
+def test_submit_auto_threads_images_onto_record(tmp_path, monkeypatch):
+    captured = {}
+
+    def fake_run_task(cfg, record, notify=None):
+        captured["images"] = list(record.images)
+        record.status = TaskStatus.DONE.value
+        record.finished_at = 1.0
+        return record
+
+    monkeypatch.setattr(runner, "run_task", fake_run_task)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    rec = mgr.submit_auto("look at this screenshot", images=["/tmp/x.png"])
+    mgr._futures[rec.id].result(timeout=10)
+    assert captured["images"] == ["/tmp/x.png"]
+
+
+def test_ensure_inbox_excluded_writes_git_info_exclude(tmp_path):
+    # real git repo so rev-parse --git-common-dir resolves
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    cfg = ConductorConfig(repo_root=tmp_path)
+    runner._ensure_inbox_excluded(cfg)
+    excl = (tmp_path / ".git" / "info" / "exclude")
+    assert excl.exists()
+    assert ".conductor_inbox/" in excl.read_text()
+    # idempotent: a second call doesn't duplicate the entry
+    runner._ensure_inbox_excluded(cfg)
+    assert excl.read_text().count(".conductor_inbox/") == 1
+
+
+def test_retry_preserves_images(tmp_path, monkeypatch):
+    def fail_run_task(cfg, record, notify=None):
+        record.status = TaskStatus.FAILED.value
+        record.error = "boom"
+        record.finished_at = 1.0
+        return record
+
+    monkeypatch.setattr(runner, "run_task", fail_run_task)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    rec = mgr.submit("claude", "debug this", images=["/tmp/a.png"])
+    mgr._futures[rec.id].result(timeout=10)
+    retried = mgr.retry(rec.id)
+    assert retried.id != rec.id
+    assert retried.images == ["/tmp/a.png"]
+    mgr._futures[retried.id].result(timeout=10)

@@ -8,8 +8,10 @@ https://core.telegram.org/bots/api for the endpoints used.
 
 from __future__ import annotations
 
+import io
 import os
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import requests
 
@@ -53,6 +55,11 @@ class TelegramClient:
             resp = self._session.post(url, json=payload, timeout=timeout or self._timeout)
         except requests.RequestException as exc:  # network/transport failure
             raise TelegramError("telegram request failed: %s" % exc) from exc
+        return self._result(resp)
+
+    @staticmethod
+    def _result(resp: "requests.Response") -> Any:
+        """Parse a Bot API response, raising :class:`TelegramError` on failure."""
         try:
             body = resp.json()
         except ValueError as exc:
@@ -63,6 +70,18 @@ class TelegramClient:
                 % (body.get("error_code", "?"), body.get("description", "unknown"))
             )
         return body["result"]
+
+    def _upload(self, method: str, data: Dict[str, Any], files: Dict[str, Any]) -> Any:
+        """POST a multipart form (file upload). File transfers can be slow, so
+        this uses a longer floor on the timeout than JSON calls."""
+        url = API_BASE.format(token=self._token, method=method)
+        try:
+            resp = self._session.post(
+                url, data=data, files=files, timeout=max(self._timeout, 120.0)
+            )
+        except requests.RequestException as exc:
+            raise TelegramError("telegram upload failed: %s" % exc) from exc
+        return self._result(resp)
 
     # -- sending -----------------------------------------------------------
 
@@ -102,6 +121,50 @@ class TelegramClient:
                 else:
                     raise
         return last
+
+    def send_document(
+        self,
+        chat_id: int | str,
+        document: Union[str, "os.PathLike[str]", bytes, bytearray],
+        filename: Optional[str] = None,
+        caption: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Send a file as a Telegram *document* (any type, up to ~50 MB).
+
+        ``document`` may be a filesystem path or raw ``bytes`` (then ``filename``
+        is used for the displayed name). ``caption`` is sent as plain text (no
+        parse mode) so report content never trips Markdown parsing.
+        """
+        name, fileobj, opened = _as_fileobj(document, filename)
+        try:
+            data: Dict[str, Any] = {"chat_id": str(chat_id)}
+            if caption:
+                data["caption"] = caption[:1024]
+            return self._upload("sendDocument", data, {"document": (name, fileobj)})
+        finally:
+            if opened:
+                fileobj.close()
+
+    def send_photo(
+        self,
+        chat_id: int | str,
+        photo: Union[str, "os.PathLike[str]", bytes, bytearray],
+        filename: Optional[str] = None,
+        caption: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Send an image as a Telegram *photo* (rendered inline, up to ~10 MB).
+
+        For larger images or non-displayable types use :meth:`send_document`.
+        """
+        name, fileobj, opened = _as_fileobj(photo, filename)
+        try:
+            data: Dict[str, Any] = {"chat_id": str(chat_id)}
+            if caption:
+                data["caption"] = caption[:1024]
+            return self._upload("sendPhoto", data, {"photo": (name, fileobj)})
+        finally:
+            if opened:
+                fileobj.close()
 
     # -- interactive menus (inline keyboards) ------------------------------
 
@@ -167,6 +230,31 @@ class TelegramClient:
         file_info = self.get_file(file_id)
         return self.download_file(file_info["file_path"])
 
+    def save_image(
+        self, message: Dict[str, Any], dest_dir: "str | os.PathLike[str]", stem: str
+    ) -> Optional[str]:
+        """Download the image attached to *message* and write it under *dest_dir*.
+
+        Picks the highest-resolution ``photo`` (or an ``image/*`` ``document``),
+        preserves the source file extension (defaulting to ``.jpg``), and writes
+        it to ``<dest_dir>/<stem><ext>``. Creates *dest_dir* if needed.
+
+        Returns the absolute path written, or ``None`` when *message* has no
+        image. Raises :class:`TelegramError` on a transport/API failure.
+        """
+        file_id = largest_photo_file_id(message) or image_document_file_id(message)
+        if file_id is None:
+            return None
+        info = self.get_file(file_id)
+        remote_path = str(info.get("file_path") or "")
+        ext = os.path.splitext(remote_path)[1].lower() or ".jpg"
+        data = self.download_file(remote_path)
+        dest = Path(dest_dir)
+        dest.mkdir(parents=True, exist_ok=True)
+        out = dest / ("%s%s" % (stem, ext))
+        out.write_bytes(data)
+        return str(out)
+
     # -- receiving ---------------------------------------------------------
 
     def get_updates(
@@ -222,6 +310,21 @@ def image_document_file_id(message: Dict[str, Any]) -> Optional[str]:
     ):
         return None
     return doc.get("file_id")
+
+
+def _as_fileobj(
+    src: Union[str, "os.PathLike[str]", bytes, bytearray],
+    filename: Optional[str],
+) -> Tuple[str, Any, bool]:
+    """Normalise *src* (a path or raw bytes) to ``(name, fileobj, opened)``.
+
+    ``opened`` is True only when a real file was opened (so the caller closes
+    it); in-memory ``bytes`` become a ``BytesIO`` the caller may leave to GC.
+    """
+    if isinstance(src, (bytes, bytearray)):
+        return (filename or "file"), io.BytesIO(bytes(src)), False
+    p = Path(src)
+    return (filename or p.name), p.open("rb"), True
 
 
 def _split_message(text: str, limit: int = MAX_MESSAGE_LEN) -> List[str]:
