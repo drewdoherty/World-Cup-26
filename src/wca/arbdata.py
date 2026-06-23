@@ -46,6 +46,38 @@ def _index_exchange(rows, home_away):
     return out
 
 
+_EXCHANGE_KEYS = {"betfair_ex_uk", "betfair_ex_eu", "smarkets", "matchbook"}
+
+
+def _index_sportsbooks(rows, home_away):
+    """{fixture: {slot: {team, book, odds}}} — best sportsbook BACK per outcome.
+
+    Sportsbooks can't be layed, so they only ever supply 'win' (back) legs; they
+    also charge no commission but limit winners (flagged in confidence)."""
+    out: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    for r in rows or []:
+        if (r.get("market") or "") != "h2h":
+            continue
+        bk = r.get("bookmaker_key") or ""
+        if bk in _EXCHANGE_KEYS:
+            continue  # exchanges handled separately
+        home, away = canonical(r.get("home_team") or ""), canonical(r.get("away_team") or "")
+        fk = _fixture_key(home, away)
+        team = canonical(r.get("outcome_name") or "")
+        slot = "home" if team == home else ("away" if team == away else None)
+        if slot is None:
+            continue
+        try:
+            odds = float(r.get("decimal_odds"))
+        except (TypeError, ValueError):
+            continue
+        cur = out.setdefault(fk, {}).get(slot)
+        if cur is None or odds > cur["odds"]:
+            out.setdefault(fk, {})[slot] = {"team": team, "book": bk, "odds": odds}
+        home_away[fk] = (home, away)
+    return out
+
+
 def build_arb_data(
     *,
     betfair_rows: List[Dict[str, Any]],
@@ -55,6 +87,7 @@ def build_arb_data(
     now_utc: str,
     smarkets_rows: Optional[List[Dict[str, Any]]] = None,
     smarkets_grade: str = "monitoring-grade",
+    sportsbook_rows: Optional[List[Dict[str, Any]]] = None,
     history: Optional[List[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     """Pure builder (no I/O). Best risk-free lock per (fixture, outcome) across
@@ -67,9 +100,10 @@ def build_arb_data(
     home_away: Dict[str, tuple] = {}
     bf = _index_exchange(betfair_rows, home_away)
     sm = _index_exchange(smarkets_rows or [], home_away)
+    sb = _index_sportsbooks(sportsbook_rows or [], home_away)  # best back per book
 
     opps: List[Dict[str, Any]] = []
-    for fk in set(bf) | set(sm):
+    for fk in set(bf) | set(sm) | set(sb):
         q = pm_quotes.get(fk)
         if not q or q.get("settlement") != "1x2_90min":
             continue  # settlement guard: 90-min only
@@ -104,6 +138,14 @@ def build_arb_data(
                         lose_legs.append({"venue": venue, "currency": "GBP", "net": lnet,
                                           "desc": "%s lay @ %.2f" % (venue, e["lay"]),
                                           "confidence": "execution-grade"})
+            # Sportsbook: BACK only (no commission, but winner-limited) = win leg.
+            s = sb.get(fk, {}).get(slot)
+            if s:
+                snet = arbfx.exchange_back_net(s["odds"], s["book"])  # commission 0 for books
+                if snet > 1:
+                    win_legs.append({"venue": s["book"], "currency": "GBP", "net": snet,
+                                     "desc": "%s back @ %.2f" % (s["book"], s["odds"]),
+                                     "confidence": "monitoring-grade"})
             # Tag every candidate with its event so best_lock's hard guard can
             # refuse any accidental cross-team/cross-fixture pairing.
             for leg in win_legs + lose_legs:

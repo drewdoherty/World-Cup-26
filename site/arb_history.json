@@ -1,0 +1,109 @@
+{
+  "snapshots_scanned": 22,
+  "true_back_only_arbs": 0,
+  "true_arbs_by_category": {
+    "mixed (sportsbook+exchange)": 0,
+    "exchange-only": 0,
+    "sportsbook-only": 0
+  },
+  "best_leg_provider": {
+    "sportsbook": 214,
+    "exchange": 218
+  },
+  "best_leg_sportsbook_pct": 49.5,
+  "min_overround_seen": 1.0059,
+  "median_overround": 1.022,
+  "tightest_near_arbs": [
+    {
+      "event": "Qatar vs Switzerland",
+      "overround": 1.0059,
+      "best_legs": {
+        "Qatar": {
+          "book": "casumo",
+          "class": "sportsbook"
+        },
+        "Switzerland": {
+          "book": "smarkets",
+          "class": "exchange"
+        },
+        "Draw": {
+          "book": "smarkets",
+          "class": "exchange"
+        }
+      }
+    },
+    {
+      "event": "Qatar vs Switzerland",
+      "overround": 1.0059,
+      "best_legs": {
+        "Qatar": {
+          "book": "casumo",
+          "class": "sportsbook"
+        },
+        "Switzerland": {
+          "book": "smarkets",
+          "class": "exchange"
+        },
+        "Draw": {
+          "book": "smarkets",
+          "class": "exchange"
+        }
+      }
+    },
+    {
+      "event": "Germany vs Cura\u00e7ao",
+      "overround": 1.0065,
+      "best_legs": {
+        "Cura\u00e7ao": {
+          "book": "betvictor",
+          "class": "sportsbook"
+        },
+        "Germany": {
+          "book": "smarkets",
+          "class": "exchange"
+        },
+        "Draw": {
+          "book": "betfair_ex_uk",
+          "class": "exchange"
+        }
+      }
+    },
+    {
+      "event": "Germany vs Cura\u00e7ao",
+      "overround": 1.0065,
+      "best_legs": {
+        "Cura\u00e7ao": {
+          "book": "betvictor",
+          "class": "sportsbook"
+        },
+        "Germany": {
+          "book": "smarkets",
+          "class": "exchange"
+        },
+        "Draw": {
+          "book": "betfair_ex_uk",
+          "class": "exchange"
+        }
+      }
+    },
+    {
+      "event": "Brazil vs Haiti",
+      "overround": 1.0088,
+      "best_legs": {
+        "Brazil": {
+          "book": "coral",
+          "class": "sportsbook"
+        },
+        "Haiti": {
+          "book": "boylesports",
+          "class": "sportsbook"
+        },
+        "Draw": {
+          "book": "smarkets",
+          "class": "exchange"
+        }
+      }
+    }
+  ],
+  "hypothesis": "0 true back-only arbs in sample (markets efficient). MIXED: sportsbooks supply 50% of the best (arb-creating) legs vs exchanges 50% \u2014 so any lock would be sportsbook<->exchange, not exchange-vs-exchange."
+}

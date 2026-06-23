@@ -226,3 +226,20 @@ def test_renderer_has_empty_state():
     import os
     js = open(os.path.join(os.path.dirname(__file__), "..", "site", "arb.js")).read()
     assert "No risk-free opportunities" in js  # honest empty state, not samples
+
+
+def test_sportsbook_back_pairs_with_exchange_lay():
+    from wca import arbdata
+    # sportsbook (no commission) backs the team; smarkets lays it (native depth).
+    sbk = [{"home_team": "Brazil", "away_team": "Mexico", "market": "h2h",
+            "bookmaker_key": "bet365", "outcome_name": "Brazil", "decimal_odds": 3.00}]
+    sm = [{"home_team": "Brazil", "away_team": "Mexico", "market": "h2h",
+           "outcome_name": "Brazil", "decimal_odds": 2.10, "lay_odds": 2.02}]
+    # settlement present (passes the 90-min guard) but no PM price → the only
+    # cross-venue pair is sportsbook-back ↔ exchange-lay.
+    pm = {"Brazil vs Mexico": {"settlement": "1x2_90min"}}
+    out = arbdata.build_arb_data(betfair_rows=[], smarkets_rows=sm, sportsbook_rows=sbk,
+                                 pm_quotes=pm, fx_usd_per_gbp=1.33, fx_source="live", now_utc="t",
+                                 smarkets_grade="execution-grade")
+    pairs = {a["venue_pair"] for a in out["arbs"]}
+    assert any("bet365" in p for p in pairs)  # sportsbook↔exchange lock surfaced
