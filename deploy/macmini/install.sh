@@ -30,8 +30,8 @@ cmd_for() {
     snapshotd)  printf '%s\n' "$RUN1" snapshotd "$VENV_PY" scripts/wca_snapshotd.py --db data/wca.db --env .env ;;
     newsd)      printf '%s\n' "$RUN1" newsd     "$VENV_PY" scripts/wca_newsd.py     --db data/wca.db --env .env --interval 600 --max-per-cycle 2 ;;
     promosd)    printf '%s\n' "$RUN1" promosd   "$VENV_PY" scripts/wca_promosd.py   --db data/wca.db --env .env --interval 21600 --max-per-cycle 2 ;;
-    buildcard)  printf '%s\n' "$RUN1" buildcard "$VENV_PY" scripts/wca_build_card.py --db data/wca.db --env .env --hours-ahead 30 --skip-scorers ;;
-    goalscorers) printf '%s\n' "$RUN1" goalscorers "$VENV_PY" scripts/wca_build_card.py --db data/wca.db --env .env --hours-ahead 30 --goalscorers-only ;;
+    buildcard)  printf '%s\n' "$RUN1" buildcard "$VENV_PY" scripts/wca_build_card.py --db data/wca.db --env .env --hours-ahead 96 --skip-scorers ;;
+    goalscorers) printf '%s\n' "$RUN1" goalscorers "$VENV_PY" scripts/wca_build_card.py --db data/wca.db --env .env --hours-ahead 96 --goalscorers-only ;;
     autopull)   printf '%s\n' "/bin/bash" "$HERE/autopull.sh" ;;
     backup)     printf '%s\n' "/bin/bash" "$HERE/backup.sh" ;;
     pmpropose)    printf '%s\n' "$RUN1" pmpropose    "$VENV_PY" scripts/wca_pm_propose.py    --db data/wca.db --env .env ;;
