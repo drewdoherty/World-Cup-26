@@ -8,7 +8,6 @@ token-budget accounting. Submissions over budget are *rejected* (returned with
 
 from __future__ import annotations
 
-import shutil
 import subprocess
 import threading
 import time
@@ -357,16 +356,38 @@ class ConductorManager:
         if claude.ok or codex.ok:
             healthy = ", ".join(e for e, h in (("claude", claude), ("codex", codex)) if h.ok)
             warnings.append("healthy engine(s): %s" % healthy)
-        if shutil.which(self.cfg.gh_bin) is None:
-            warnings.append("`gh` CLI not found — PRs fall back to compare links")
+        gh = self.cfg.resolve_bin(self.cfg.gh_bin)
+        if gh is None:
+            warnings.append("`gh` CLI not found — PRs use the REST API fallback or a compare link")
         else:
             try:
                 auth = subprocess.run(
-                    [self.cfg.gh_bin, "auth", "status"],
+                    [gh, "auth", "status"],
                     capture_output=True, text=True, timeout=15,
+                    env=self.cfg.agent_env(),
                 )
                 if auth.returncode != 0:
-                    warnings.append("`gh` not authenticated (`gh auth login`) — PRs fall back to compare links")
+                    warnings.append("`gh` not authenticated (`gh auth login`) — PRs use the REST API fallback or a compare link")
             except (OSError, subprocess.SubprocessError):
                 warnings.append("`gh auth status` check failed — PRs may fall back to compare links")
         return warnings
+
+    # -- anti-collision ---------------------------------------------------
+
+    def find_active_duplicate(self, task: str) -> Optional[TaskRecord]:
+        """The oldest ACTIVE task whose slug matches *task*, or ``None``.
+
+        Two dispatches that slugify identically are almost always the same
+        feature requested twice (e.g. ``/accas`` launched as #4 and #7); running
+        both branches off ``main`` in parallel produces the divergent,
+        conflicting implementations this swarm hit. The bot calls this before
+        submit to warn the operator (see AGENTS.md anti-collision policy).
+        """
+        slug = runner.slugify(task)
+        active = {TaskStatus.QUEUED.value, TaskStatus.RUNNING.value, TaskStatus.PUSHED.value}
+        with self._lock:
+            for rid in sorted(self._records):
+                r = self._records[rid]
+                if r.status in active and runner.slugify(r.task) == slug:
+                    return r
+        return None

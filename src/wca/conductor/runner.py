@@ -15,11 +15,13 @@ Guardrails enforced here:
 from __future__ import annotations
 
 import json
+import os
 import re
-import shutil
 import subprocess
 import threading
 import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple
 
@@ -44,13 +46,20 @@ def _run(
     cwd: Optional[str] = None,
     env: Optional[dict] = None,
     timeout: Optional[float] = None,
+    input_text: Optional[str] = None,
 ) -> subprocess.CompletedProcess:
-    """Run *cmd*, capturing text output. The single seam tests patch."""
+    """Run *cmd*, capturing text output. The single seam tests patch.
+
+    ``input_text`` is fed to the child's stdin — used to hand the agent its
+    prompt off-argv so a prompt that starts with ``-`` can never be mis-parsed
+    as a CLI flag.
+    """
     return subprocess.run(
         cmd,
         cwd=cwd,
         env=env,
         timeout=timeout,
+        input=input_text,
         capture_output=True,
         text=True,
     )
@@ -145,18 +154,30 @@ def _last_json_object(text: str) -> Optional[dict]:
 def run_agent(cfg: ConductorConfig, engine: str, task: str, cwd: Path) -> AgentResult:
     """Invoke the headless agent for *engine* inside *cwd*."""
     binary, extra = cfg.cli_for(engine)
-    # Only treat a bare name as missing; an absolute path may exist off-PATH.
-    if "/" not in binary and shutil.which(binary) is None:
-        return AgentResult(127, error="%s CLI not found on PATH (%s)" % (engine, binary))
+    # Resolve against the AUGMENTED PATH (includes ~/.local/bin, Homebrew) so an
+    # installed CLI is found even when the conductor was launched with a minimal
+    # PATH. Only genuinely-uninstalled tools return None.
+    resolved = cfg.resolve_bin(binary)
+    if resolved is None:
+        return AgentResult(127, error="%s CLI not found (%s); install it or set %s_BIN"
+                           % (engine, binary, engine.upper()))
+    binary = resolved
 
+    # The prompt is handed to the agent OFF-ARGV (claude: stdin; codex: after a
+    # ``--`` end-of-options marker) so a task that starts with "- " or "--" can
+    # never be parsed as a flag. This was the cause of task #5's
+    # "error: unknown option '- send a message...'" failure.
+    input_text: Optional[str] = None
     if Engine.coerce(engine) is Engine.CLAUDE:
-        cmd = [binary, "-p", task, *extra]
+        cmd = [binary, "-p", *extra]
+        input_text = task  # claude -p reads the prompt from stdin
     else:
-        # codex: flags before the positional prompt (e.g. -s workspace-write).
-        cmd = [binary, "exec", *extra, task]
+        # codex: flags, then ``--``, then the positional prompt.
+        cmd = [binary, "exec", *extra, "--", task]
 
     try:
-        res = _run(cmd, cwd=str(cwd), env=cfg.agent_env(), timeout=cfg.agent_timeout)
+        res = _run(cmd, cwd=str(cwd), env=cfg.agent_env(), timeout=cfg.agent_timeout,
+                   input_text=input_text)
     except subprocess.TimeoutExpired:
         return AgentResult(124, error="agent timed out after %.0fs" % cfg.agent_timeout)
 
@@ -234,26 +255,90 @@ def _compare_url(cfg: ConductorConfig, cwd: Path, branch: str) -> Optional[str]:
 
 
 def open_pr(cfg: ConductorConfig, cwd: Path, branch: str, title: str, body: str) -> PrResult:
-    """Open a PR via ``gh``; fall back to a compare link on any failure."""
+    """Open a PR via ``gh``; fall back to the REST API, then a compare link.
+
+    Three tiers, each tried only when the prior is unavailable:
+      1. ``gh pr create`` (resolved on the augmented PATH, run under the augmented
+         env so an installed ``gh`` is always found);
+      2. the GitHub REST API with a token (``gh auth token`` / ``$GH_TOKEN`` /
+         ``$GITHUB_TOKEN``) — covers the case where ``gh`` is genuinely absent
+         but a token exists;
+      3. a compare link the user clicks once — never fails the task.
+    """
     if not cfg.create_pr:
         return PrResult(False, compare_url=_compare_url(cfg, cwd, branch), error="PR creation disabled")
 
-    if shutil.which(cfg.gh_bin) is None:
-        return PrResult(False, compare_url=_compare_url(cfg, cwd, branch), error="gh CLI not found")
+    env = cfg.agent_env()
+    gh = cfg.resolve_bin(cfg.gh_bin)
+    if gh is not None:
+        res = _run([
+            gh, "pr", "create",
+            "--base", cfg.base_branch, "--head", branch,
+            "--title", title, "--body", body,
+        ], cwd=str(cwd), env=env)
+        if res.returncode == 0:
+            url = (res.stdout or "").strip().splitlines()
+            return PrResult(True, url=url[-1].strip() if url else None)
+        gh_err = (res.stderr or "").strip()[-300:] or "gh pr create failed"
+    else:
+        gh_err = "gh CLI not found"
 
-    res = _run([
-        cfg.gh_bin, "pr", "create",
-        "--base", cfg.base_branch, "--head", branch,
-        "--title", title, "--body", body,
-    ], cwd=str(cwd))
-    if res.returncode == 0:
-        url = (res.stdout or "").strip().splitlines()
-        return PrResult(True, url=url[-1].strip() if url else None)
+    # Tier 2: REST API fallback (gh missing or it failed).
+    api = _open_pr_via_api(cfg, cwd, branch, title, body, env)
+    if api is not None and api.created:
+        return api
+
     return PrResult(
         False,
         compare_url=_compare_url(cfg, cwd, branch),
-        error=(res.stderr or "").strip()[-300:] or "gh pr create failed",
+        error=(api.error if api is not None else None) or gh_err,
     )
+
+
+def _gh_token(cfg: ConductorConfig, env: dict) -> Optional[str]:
+    """Best-effort GitHub token: env vars first, then ``gh auth token``."""
+    for key in ("GH_TOKEN", "GITHUB_TOKEN"):
+        tok = env.get(key) or os.environ.get(key)
+        if tok and tok.strip():
+            return tok.strip()
+    gh = cfg.resolve_bin(cfg.gh_bin)
+    if gh is not None:
+        res = _run([gh, "auth", "token"], cwd=str(cfg.repo_root), env=env)
+        if res.returncode == 0 and (res.stdout or "").strip():
+            return res.stdout.strip()
+    return None
+
+
+def _open_pr_via_api(
+    cfg: ConductorConfig, cwd: Path, branch: str, title: str, body: str, env: dict
+) -> Optional[PrResult]:
+    """Create the PR through the GitHub REST API. ``None`` if unattempted."""
+    slug = _remote_slug(cfg, cwd)
+    token = _gh_token(cfg, env)
+    if not slug or not token:
+        return PrResult(False, error="no gh token for REST PR fallback")
+    payload = json.dumps({
+        "title": title, "body": body, "head": branch, "base": cfg.base_branch,
+    }).encode()
+    req = urllib.request.Request(
+        "https://api.github.com/repos/%s/pulls" % slug,
+        data=payload, method="POST",
+        headers={
+            "Authorization": "Bearer %s" % token,
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "wca-conductor",
+            "Content-Type": "application/json",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = json.loads(resp.read().decode())
+        return PrResult(True, url=data.get("html_url"))
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode()[-300:] if hasattr(exc, "read") else str(exc)
+        return PrResult(False, error="REST PR failed (%s): %s" % (exc.code, detail))
+    except Exception as exc:  # noqa: BLE001 — fall through to compare link
+        return PrResult(False, error="REST PR error: %s" % exc)
 
 
 def _pr_title(record: TaskRecord) -> str:

@@ -9,6 +9,7 @@ under so they can never touch live money or the real ledger.
 from __future__ import annotations
 
 import os
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -19,6 +20,38 @@ from wca.conductor.models import Engine
 _DEFAULT_STRIP = ("POLYMARKET_PRIVATE_KEY",)
 # Overrides forced onto every spawned agent so any code it runs stays dry.
 _DEFAULT_OVERRIDES = {"PM_DRY_RUN": "1", "WCA_DB_PATH": "data/dev.db"}
+
+# User/Homebrew bin dirs that hold gh / claude / codex but are frequently
+# ABSENT from the PATH of a non-login launch context (launchd, cron, a GUI app
+# spawning the conductor). When the conductor itself is started this way, its
+# inherited PATH is the minimal "/usr/bin:/bin:/usr/sbin:/sbin" and every CLI
+# look-up (gh, claude, codex) fails with "not found" even though the binary is
+# installed — this is THE root cause of the swarm's "gh CLI not found" errors.
+# We always fold these onto PATH for both the binary look-up and the spawned
+# subprocess so an installed tool is found regardless of how we were launched.
+_EXTRA_PATH_DIRS = (
+    "~/.local/bin",
+    "~/bin",
+    "/opt/homebrew/bin",
+    "/usr/local/bin",
+)
+
+
+def _augmented_path(base: Optional[str] = None) -> str:
+    """``base`` PATH with the known user/Homebrew bin dirs guaranteed present.
+
+    Existing entries are preserved and ordered first; the extra dirs are
+    appended only if missing. Never drops anything already on PATH.
+    """
+    current = base if base is not None else os.environ.get("PATH", "")
+    parts = [p for p in current.split(os.pathsep) if p]
+    seen = set(parts)
+    for raw in _EXTRA_PATH_DIRS:
+        d = os.path.expanduser(raw)
+        if d not in seen and os.path.isdir(d):
+            parts.append(d)
+            seen.add(d)
+    return os.pathsep.join(parts)
 
 
 def _default_claude_args() -> List[str]:
@@ -91,7 +124,22 @@ class ConductorConfig:
         for key in self.strip_env_keys:
             env.pop(key, None)
         env.update(self.safe_env_overrides)
+        # Guarantee gh/claude/codex are discoverable even when the conductor was
+        # launched with a minimal PATH (launchd/cron/GUI). See _EXTRA_PATH_DIRS.
+        env["PATH"] = _augmented_path(env.get("PATH"))
         return env
+
+    def resolve_bin(self, name: str) -> Optional[str]:
+        """Absolute path to *name*, searching the augmented PATH.
+
+        Returns the input unchanged if it is already an absolute/relative path
+        that exists; otherwise looks it up on the augmented PATH so an installed
+        tool in ``~/.local/bin`` etc. is found regardless of how we were
+        launched. ``None`` only when the tool is genuinely not installed.
+        """
+        if "/" in name:
+            return name if os.path.exists(name) else None
+        return shutil.which(name, path=_augmented_path())
 
     # -- per-engine CLI ---------------------------------------------------
 

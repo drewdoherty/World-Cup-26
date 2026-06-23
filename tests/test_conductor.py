@@ -7,6 +7,7 @@ without git, the network, or the agent CLIs.
 
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 
@@ -41,9 +42,12 @@ def make_fake_run(
     """
     state = {"calls": [], "agent_env": None}
 
-    def fake(cmd, cwd=None, env=None, timeout=None):
+    def fake(cmd, cwd=None, env=None, timeout=None, input_text=None):
         state["calls"].append(list(cmd))
-        if cmd[0] == "git":
+        # Binaries are resolved to absolute paths now (e.g. /usr/bin/gh), so
+        # classify by basename, not exact match.
+        base = os.path.basename(cmd[0])
+        if base == "git":
             sub = cmd[3] if len(cmd) > 3 else ""
             if sub == "worktree":
                 return _cp(cmd)
@@ -56,7 +60,7 @@ def make_fake_run(
             if sub == "remote":
                 return _cp(cmd, out=remote)
             return _cp(cmd)
-        if cmd[0] == "gh":
+        if base == "gh":
             return _cp(cmd, rc=pr_rc, out=pr_url if pr_rc == 0 else "", err="" if pr_rc == 0 else "not logged in")
         # otherwise: the agent invocation
         state["agent_env"] = env
@@ -76,7 +80,7 @@ def patched(monkeypatch):
     """Patch the runner's subprocess seam and make all binaries 'present'."""
     fake = make_fake_run()
     monkeypatch.setattr(runner, "_run", fake)
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     return fake
 
 
@@ -179,7 +183,7 @@ def test_run_task_never_pushes_base_branch(cfg, patched):
 
 def test_run_task_agent_failure_marks_failed(cfg, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run(agent_rc=1))
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     rec = _record()
     runner.run_task(cfg, rec)
     assert rec.status == TaskStatus.FAILED.value
@@ -188,7 +192,7 @@ def test_run_task_agent_failure_marks_failed(cfg, monkeypatch):
 
 def test_run_task_no_changes(cfg, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run(has_changes=False))
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     rec = _record()
     runner.run_task(cfg, rec)
     assert rec.status == TaskStatus.NO_CHANGES.value
@@ -196,7 +200,7 @@ def test_run_task_no_changes(cfg, monkeypatch):
 
 def test_run_task_pr_fallback_to_compare_link(cfg, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run(pr_rc=1))
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     rec = _record()
     runner.run_task(cfg, rec)
     assert rec.status == TaskStatus.PUSHED.value
@@ -206,7 +210,7 @@ def test_run_task_pr_fallback_to_compare_link(cfg, monkeypatch):
 
 def test_run_task_missing_cli_fails_cleanly(cfg, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run())
-    monkeypatch.setattr(runner.shutil, "which", lambda b: None)  # nothing on PATH
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: None)  # nothing installed
     rec = _record()
     runner.run_task(cfg, rec)
     assert rec.status == TaskStatus.FAILED.value
@@ -218,8 +222,9 @@ def test_run_task_missing_cli_fails_cleanly(cfg, monkeypatch):
 
 def test_manager_submit_runs_to_done(tmp_path, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run())
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
     rec = mgr.submit("claude", "do work", chat_id="99")
     mgr._futures[rec.id].result(timeout=10)
     assert mgr.get(rec.id).status == TaskStatus.DONE.value
@@ -290,8 +295,9 @@ def test_dispatcher_overflows_codex_to_claude_when_cap_reached():
 
 def test_manager_submit_auto_routes_and_records_reason(tmp_path, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run())
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
     rec = mgr.submit_auto("build a background bot monitor")
     mgr._futures[rec.id].result(timeout=10)
     assert rec.engine == Engine.CLAUDE.value
@@ -300,9 +306,10 @@ def test_manager_submit_auto_routes_and_records_reason(tmp_path, monkeypatch):
 
 def test_manager_submit_auto_respects_codex_auto_limit_zero(tmp_path, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run())
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     cfg = ConductorConfig(repo_root=tmp_path, max_parallel=1, codex_auto_limit=0)
     mgr = ConductorManager(cfg)
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
     rec = mgr.submit_auto("fix typo in README wording")
     mgr._futures[rec.id].result(timeout=10)
     assert rec.engine == Engine.CLAUDE.value
@@ -311,8 +318,9 @@ def test_manager_submit_auto_respects_codex_auto_limit_zero(tmp_path, monkeypatc
 
 def test_status_table_empty_and_populated(tmp_path, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run())
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=1))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
     assert "No conductor tasks" in mgr.status_table()
     rec = mgr.submit("claude", "render me")
     mgr._futures[rec.id].result(timeout=10)
@@ -354,7 +362,7 @@ def test_run_agent_surfaces_stdout_error_not_logged_in(cfg, monkeypatch):
     # claude --output-format json writes the real reason to STDOUT, not stderr.
     out = '{"type":"result","is_error":true,"result":"Not logged in · Please run /login"}'
     monkeypatch.setattr(runner, "_run", make_fake_run(agent_rc=1, agent_stdout=out))
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     res = runner.run_agent(cfg, "claude", "do x", Path("/tmp/wt"))
     assert res.returncode != 0
     assert "Not logged in" in res.error
@@ -364,7 +372,7 @@ def test_run_agent_surfaces_stdout_error_not_logged_in(cfg, monkeypatch):
 def test_run_agent_treats_is_error_as_failure_on_exit_0(cfg, monkeypatch):
     out = '{"is_error":true,"result":"boom"}'
     monkeypatch.setattr(runner, "_run", make_fake_run(agent_rc=0, agent_stdout=out))
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     res = runner.run_agent(cfg, "claude", "do x", Path("/tmp/wt"))
     assert res.returncode != 0
     assert res.error == "boom"
@@ -373,7 +381,7 @@ def test_run_agent_treats_is_error_as_failure_on_exit_0(cfg, monkeypatch):
 def test_run_task_cleans_up_worktree_on_failure(cfg, monkeypatch):
     fake = make_fake_run(agent_rc=1, agent_stdout='{"is_error":true,"result":"nope"}')
     monkeypatch.setattr(runner, "_run", fake)
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     rec = _record()
     runner.run_task(cfg, rec)
     assert rec.status == TaskStatus.FAILED.value
@@ -391,12 +399,51 @@ def test_codex_args_default_to_workspace_write(tmp_path):
     assert "--sandbox" in args and "workspace-write" in args
 
 
+def test_claude_prompt_passed_off_argv_not_as_flag(cfg, monkeypatch):
+    """A prompt starting with '- ' must never reach argv (task #5 regression).
+
+    Claude's `-p` is a boolean print flag, so a leading-dash prompt as a
+    positional arg is parsed as an unknown option. We hand it via stdin instead.
+    """
+    fake = make_fake_run()
+    monkeypatch.setattr(runner, "_run", fake)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
+    task = "- send a message to this chat whenever a task is complete"
+    runner.run_agent(cfg, "claude", task, Path("/tmp/wt"))
+    cmd = [c for c in fake.state["calls"]
+           if c and os.path.basename(c[0]) not in ("git", "gh")][0]
+    assert task not in cmd, "the prompt must not appear as an argv element"
+    assert cmd == ["/usr/bin/claude", "-p", "--output-format", "json",
+                   "--permission-mode", "acceptEdits"]
+
+
+def test_codex_prompt_after_double_dash_guards_leading_dash(cfg, monkeypatch):
+    fake = make_fake_run()
+    monkeypatch.setattr(runner, "_run", fake)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
+    task = "--oops looks like a flag"
+    runner.run_agent(cfg, "codex", task, Path("/tmp/wt"))
+    cmd = [c for c in fake.state["calls"]
+           if c and os.path.basename(c[0]) not in ("git", "gh")][0]
+    assert "--" in cmd and cmd.index("--") < cmd.index(task), "task must follow a -- marker"
+
+
+def test_find_active_duplicate_flags_same_slug(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "run_task", lambda cfg, rec, notify=None: rec)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path, max_parallel=2))
+    _stub_health(mgr, claude_ok=True, codex_ok=True)
+    first = mgr.submit("claude", "design and implement /accas function")
+    dup = mgr.find_active_duplicate("design and implement /accas function")
+    assert dup is not None and dup.id == first.id
+    assert mgr.find_active_duplicate("totally different task") is None
+
+
 def test_codex_command_puts_sandbox_flag_before_prompt(cfg, monkeypatch):
     fake = make_fake_run()
     monkeypatch.setattr(runner, "_run", fake)
-    monkeypatch.setattr(runner.shutil, "which", lambda b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
     runner.run_agent(cfg, "codex", "do the thing", Path("/tmp/wt"))
-    agent_cmds = [c for c in fake.state["calls"] if c and c[0] not in ("git", "gh")]
+    agent_cmds = [c for c in fake.state["calls"] if c and os.path.basename(c[0]) not in ("git", "gh")]
     assert agent_cmds, "expected a codex invocation"
     cmd = agent_cmds[0]
     assert "exec" in cmd and "--sandbox" in cmd and "workspace-write" in cmd
