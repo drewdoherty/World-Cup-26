@@ -391,21 +391,25 @@
     }
     var byTeam = d.by_team || {};
     var teams = Object.keys(byTeam).sort();
-    var state = { mode: "stage", stage: "group", team: (byTeam.Iran ? "Iran" : teams[0]) };
+    var state = { mode: "stage", stage: "group", team: (byTeam.Iran ? "Iran" : teams[0]), selGame: null };
     var pc = function (v) { return Math.round((v || 0) * 100); };
-    var isIE = function (g) {
-      return (g.home === "Iran" && g.away === "Egypt") || (g.home === "Egypt" && g.away === "Iran");
-    };
+    var gid = function (g) { return g.home + "|" + g.away + "|" + g.date; };
     function bar(x) {
       return '<span class="sm-bar"><i class="sm-h" style="width:' + pc(x[0]) +
         '%"></i><i class="sm-d" style="width:' + pc(x[1]) + '%"></i><i class="sm-a" style="width:' +
         pc(x[2]) + '%"></i></span>';
     }
     function gameRow(g) {
-      return '<div class="sm-row' + (isIE(g) ? " sm-hl" : "") + '">' +
+      var id = gid(g);
+      var hl = state.selGame === id ? " sm-hl" : "";
+      var ftHtml = g.ft
+        ? '<div class="sm-ft">' + esc(g.ft) + '</div>'
+        : '<div class="sm-ft sm-ft-na"></div>';
+      return '<div class="sm-row' + hl + '" data-gid="' + esc(id) + '">' +
         '<div class="sm-fix"><span class="sm-tm">' + esc(g.home) + " v " + esc(g.away) +
         '</span><span class="sm-meta">' + esc(String(g.date).slice(5)) + " · Grp " + esc(g.group) +
         '</span></div>' +
+        ftHtml +
         '<div class="sm-1x2">' + bar(g.x1x2) + '<span class="sm-n">' + pc(g.x1x2[0]) + "·" +
         pc(g.x1x2[1]) + "·" + pc(g.x1x2[2]) + "</span></div>" +
         '<div class="sm-m"><b>' + esc(g.top) + "</b> " + pc(g.topp) + "%</div>" +
@@ -445,9 +449,9 @@
         chip("Win group", a.group_winner) + chip("Reach R16", a.R16) +
         chip("Reach QF", a.QF) + chip("Reach final", a.Final) + "</div>";
       var games = (t.games || []).map(gameRow).join("") ||
-        '<div class="empty">No upcoming games this stage</div>';
+        '<div class="empty">No games this stage</div>';
       return advLine + '<div class="sm-grp"><div class="sm-gh">' + esc(state.team) +
-        " — UPCOMING</div>" + games + "</div>";
+        " — GROUP STAGE</div>" + games + "</div>";
     }
     function render() {
       var modes = '<div class="sm-modes">' +
@@ -473,6 +477,13 @@
     }
     if (!el._smWired) {
       el.addEventListener("click", function (e) {
+        var row = e.target.closest && e.target.closest("[data-gid]");
+        if (row) {
+          var id = row.getAttribute("data-gid");
+          state.selGame = state.selGame === id ? null : id;
+          render();
+          return;
+        }
         var t = e.target.closest && e.target.closest("[data-mode],[data-stage],[data-team]");
         if (!t) return;
         if (t.getAttribute("data-mode")) state.mode = t.getAttribute("data-mode");
