@@ -33,6 +33,8 @@ import glob
 import logging
 import os
 import re
+import subprocess
+import sys
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
@@ -125,6 +127,7 @@ HELP_TEXT = (
     "/pm — Polymarket parked orders + trader status\n"
     "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
     "/boost — price a bookmaker price-boost vs the model (usage below)\n"
+    "/restart — restart the bot (admin; `/restart pull` redeploys first)\n"
     "/ping — liveness check\n"
     "/help — this message\n\n"
     "\U0001F4F8 Send a betslip *screenshot* and I'll parse the selections, then "
@@ -192,6 +195,98 @@ def _is_admin(user_id: str, admin: Optional[str]) -> bool:
     if not admin:
         return True
     return str(user_id) == str(admin)
+
+
+# ---------------------------------------------------------------------------
+# /restart — privileged, side-effecting. Handled in run() (not dispatch()) so
+# it can authenticate the *sender* and reply BEFORE the process exits, exactly
+# like the yes/no order confirms. See _supervised() for the restart mechanism.
+# ---------------------------------------------------------------------------
+
+RESTART_DENIED_MSG = (
+    "🔒 /restart is admin-only. Set TELEGRAM_ADMIN_USER_ID and send it from that "
+    "account (or from the single authorized chat)."
+)
+
+
+def _is_restart_command(text: str) -> bool:
+    """True for ``/restart`` (optionally ``/restart pull``), @botname tolerated."""
+    if not text or not text.strip():
+        return False
+    head = text.strip().split()[0].split("@")[0].lower()
+    return head == "/restart"
+
+
+def _supervised() -> bool:
+    """True when a supervisor will respawn us after a clean exit.
+
+    On the prod Mac mini the bot runs under **launchd with ``KeepAlive=true``**
+    (label ``com.wca.bot``, see deploy/macmini/install.sh), so a clean
+    ``sys.exit(0)`` IS the restart — launchd relaunches within ThrottleInterval
+    (~30s). When NOT supervised we must re-exec ourselves instead.
+
+    Detection order (first hit wins):
+      1. ``WCA_RESTART_MODE`` env — set it in the plist to be unambiguous:
+         ``supervised``/``exit`` ⇒ True, ``unsupervised``/``exec`` ⇒ False;
+      2. heuristic: launchd/systemd reparent a managed daemon to PID 1, so a
+         parent pid of 1 means "supervised".
+    """
+    mode = os.environ.get("WCA_RESTART_MODE", "").strip().lower()
+    if mode in ("supervised", "exit", "launchd", "keepalive", "systemd"):
+        return True
+    if mode in ("unsupervised", "exec", "none", "self"):
+        return False
+    try:
+        return os.getppid() == 1
+    except OSError:
+        return False
+
+
+def perform_restart() -> None:
+    """Restart this process; never returns on success.
+
+    Supervised → exit cleanly so the supervisor respawns us. Unsupervised →
+    re-exec in place with the original interpreter + argv. Raising ``OSError``
+    (exec failed) is left to the caller to turn into an honest reply.
+    """
+    if _supervised():
+        sys.exit(0)  # launchd KeepAlive relaunches within ThrottleInterval
+        return  # defensive: sys.exit raises in prod; guard the fall-through
+    os.execv(sys.executable, [sys.executable, *sys.argv])  # self re-exec
+
+
+def _git_pull(repo_root: str = ".") -> "tuple[bool, str]":
+    """`git pull --ff-only`; returns (ok, trimmed_output). Never raises."""
+    try:
+        res = subprocess.run(
+            ["git", "-C", repo_root, "pull", "--ff-only"],
+            capture_output=True, text=True, timeout=60,
+            env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+        )
+        out = "\n".join(p for p in ((res.stdout or "").strip(), (res.stderr or "").strip()) if p)
+        return res.returncode == 0, out[-500:]
+    except Exception as exc:  # noqa: BLE001 — a pull hiccup must not crash the bot
+        return False, str(exc)
+
+
+def handle_restart(text: str, *, is_admin: bool, repo_root: str = ".") -> "tuple[str, bool]":
+    """Authenticate + (optionally) pull. Returns ``(reply, should_restart)``.
+
+    ``should_restart`` is False for a denied caller or a failed ``/restart
+    pull`` — the caller sends the reply and only restarts when it is True.
+    """
+    if not is_admin:
+        return RESTART_DENIED_MSG, False
+    parts = text.strip().split()
+    prefix = ""
+    if len(parts) > 1 and parts[1].lower() == "pull":
+        ok, out = _git_pull(repo_root)
+        tail = ("\n%s" % out) if out else ""
+        if not ok:
+            return "⚠️ `git pull` failed — NOT restarting." + tail, False
+        prefix = "⬇️ Pulled latest." + tail + "\n"
+    how = "supervisor will respawn (~30s)" if _supervised() else "self re-exec"
+    return prefix + "♻️ Restarting… (%s)" % how, True
 
 
 # ---------------------------------------------------------------------------
@@ -2172,6 +2267,35 @@ def run(
             if "text" not in message:
                 continue
             text = message["text"]
+
+            # 1b) /restart — privileged + side-effecting, so handled here (not in
+            #     read-only dispatch()): we authenticate the sender, reply, THEN
+            #     restart, so the "♻️ Restarting…" message is delivered first.
+            if _is_restart_command(text):
+                reply, do_restart = handle_restart(
+                    text, is_admin=_is_admin(from_user, admin)
+                )
+                try:
+                    client.send_message(chat_id, reply)
+                except TelegramError as exc:
+                    print("send error: %s" % exc)
+                if do_restart:
+                    print("/restart by user %s — restarting" % from_user)
+                    try:
+                        perform_restart()  # never returns on success
+                    except SystemExit:
+                        raise  # clean exit -> launchd KeepAlive respawns us
+                    except Exception as exc:  # exec failed AND no supervisor
+                        try:
+                            client.send_message(
+                                chat_id,
+                                "⚠️ Restart failed (%s). Restart me manually on "
+                                "the mini: `launchctl kickstart -k "
+                                "gui/$(id -u)/com.wca.bot`." % exc,
+                            )
+                        except TelegramError:
+                            pass
+                continue
 
             # 2) Money-touching text (yes/no betslip confirms, Y/N BET-/PM-
             #    order confirms) is admin-gated; everything else is read-only
