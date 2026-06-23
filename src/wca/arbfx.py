@@ -220,14 +220,32 @@ def _min_conf(a, b, cross):
 
 def best_lock(*, fixture, market, outcome, win_legs, lose_legs, fx_usd_per_gbp,
               fx_haircut=DEFAULT_FX_HAIRCUT):
-    """Best cross-venue lock for one outcome: back it on venue A, oppose on B (A≠B)."""
+    """Best cross-venue lock for one outcome: back it on venue A, oppose on B (A≠B).
+
+    HARD GUARD: both legs must reference the SAME (fixture, market, outcome). Any
+    leg carrying a different ``fixture``/``outcome`` tag is refused, so two
+    different teams or fixtures can never be paired into a fake "arb".
+    """
     best = None
     for w in win_legs:
+        if not _same_event(w, fixture, market, outcome):
+            continue
         for l in lose_legs:
             if w["venue"] == l["venue"]:
+                continue
+            if not _same_event(l, fixture, market, outcome):
                 continue
             w2 = {**w, "fixture": fixture, "market": market, "outcome": outcome}
             res = evaluate_lock(w2, l, fx_usd_per_gbp=fx_usd_per_gbp, fx_haircut=fx_haircut)
             if res and (best is None or res.guaranteed_pct > best.guaranteed_pct):
                 best = res
     return best
+
+
+def _same_event(leg, fixture, market, outcome) -> bool:
+    """A leg only pairs when its (optional) event tags match exactly."""
+    for key, want in (("fixture", fixture), ("market", market), ("outcome", outcome)):
+        got = leg.get(key)
+        if got is not None and got != want:
+            return False
+    return True

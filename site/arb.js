@@ -61,11 +61,32 @@
       '</tr></thead><tbody>' + rows + '</tbody></table>';
   }
 
+  function renderHistory(hist) {
+    if (!hist) return;
+    var prov = hist.best_leg_provider || {};
+    $("hist-summary").innerHTML =
+      "<strong>" + esc(hist.hypothesis || "") + "</strong><br>" +
+      "Scanned " + (hist.snapshots_scanned || 0) + " snapshots · true risk-free arbs: <strong>" +
+      (hist.true_back_only_arbs || 0) + "</strong> · min overround " + num(hist.min_overround_seen, 4) +
+      " · best-leg providers: " + (prov.sportsbook || 0) + " sportsbook / " + (prov.exchange || 0) + " exchange.";
+    var near = hist.tightest_near_arbs || [];
+    $("hist-near").innerHTML = near.length ?
+      ('<table class="pos-table"><thead><tr><th>Tightest near-arb</th><th class="r">Overround</th><th>Best legs (venue class)</th></tr></thead><tbody>' +
+        near.map(function (n) {
+          var legs = Object.keys(n.best_legs || {}).map(function (k) {
+            return esc(k) + ": " + esc(n.best_legs[k].book) + " (" + esc(n.best_legs[k].class) + ")";
+          }).join(" · ");
+          return '<tr><td class="pos-match">' + esc(n.event) + '</td><td class="r">' + num(n.overround, 4) +
+                 '</td><td><span class="dim" style="font-size:10px">' + legs + '</span></td></tr>';
+        }).join("") + '</tbody></table>') : '<div class="dim">no near-arbs</div>';
+  }
+
   function renderHypo(data) {
     var h = data.hypothetical || {};
     var pts = h.points || [];
     $("hyp-summary").innerHTML = "Modeled cumulative guaranteed return: <strong style='color:var(--pos)'>" +
-      pct(h.cum_pct) + "</strong> over " + pts.length + " detection(s).";
+      pct(h.cum_pct) + "</strong> over " + pts.length + " detection(s). " +
+      "<span class='dim'>(0 realized — see historical analysis; markets efficient.)</span>";
     var svg = $("hyp-chart");
     if (!pts.length) { svg.innerHTML = ''; return; }
     var W = 700, H = 160, pad = 8;
@@ -92,9 +113,13 @@
   }
 
   function load() {
-    fetchJson("./arb_data.json").catch(function () { return null; }).then(function (data) {
+    Promise.all([
+      fetchJson("./arb_data.json").catch(function () { return null; }),
+      fetchJson("./arb_history.json").catch(function () { return null; })
+    ]).then(function (res) {
+      var data = res[0], hist = res[1];
       if (!data) { showNoData("ARB FEED UNAVAILABLE"); data = { arbs: [], meta: {}, hypothetical: {} }; }
-      renderArbs(data); renderHypo(data); renderFooter(data);
+      renderArbs(data); renderHistory(hist); renderHypo(data); renderFooter(data);
     });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", load);

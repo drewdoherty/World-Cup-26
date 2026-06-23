@@ -180,3 +180,66 @@ def test_smarkets_adapter_and_stub():
     assert (out["currency"] == "GBP").all() and "lay_odds" in out.columns
     with pytest.raises(NotImplementedError):
         smarkets.smarkets_execution_stub("place")
+
+
+# -- anti-fabrication guards --------------------------------------------------
+
+def test_best_lock_refuses_cross_team_pairing():
+    # A "win" leg tagged for Brazil and a "lose" leg tagged for Mexico must NOT
+    # pair, even though the raw odds would otherwise lock.
+    win = [{"venue": "betfair", "currency": "GBP", "net": 2.30, "desc": "bf",
+            "fixture": "Brazil vs Mexico", "outcome": "Brazil", "market": "h2h"}]
+    lose = [{"venue": "smarkets", "currency": "GBP", "net": 2.30, "desc": "sm lay",
+             "fixture": "Brazil vs Mexico", "outcome": "Mexico", "market": "h2h"}]
+    res = arbfx.best_lock(fixture="Brazil vs Mexico", market="h2h", outcome="Brazil",
+                          win_legs=win, lose_legs=lose, fx_usd_per_gbp=1.33)
+    assert res is None
+
+
+def test_build_arb_data_no_cross_fixture_pairing():
+    from wca import arbdata
+    # Betfair has one fixture, PM/Smarkets a DIFFERENT one — no shared market.
+    # Each fixture lives on only ONE venue → no valid cross-venue pair exists.
+    bf = [{"home_team": "Brazil", "away_team": "Mexico", "market": "h2h",
+           "outcome_name": "Brazil", "decimal_odds": 2.30}]
+    sm = [{"home_team": "England", "away_team": "Croatia", "market": "h2h",
+           "outcome_name": "England", "decimal_odds": 2.20, "lay_odds": 2.05}]
+    pm = {}  # no PM quotes at all
+    out = arbdata.build_arb_data(betfair_rows=bf, smarkets_rows=sm, pm_quotes=pm,
+                                 fx_usd_per_gbp=1.33, fx_source="live", now_utc="t")
+    # Brazil(BF-only) and England(SM-only) can never pair → empty, no fabrication.
+    assert out["arbs"] == []
+
+
+def test_no_sample_feed_committed():
+    import os
+    # The placeholder sample feed must not be a tracked artifact with rows.
+    p = os.path.join(os.path.dirname(__file__), "..", "site", "arb_data.json")
+    if os.path.exists(p):
+        import json
+        d = json.load(open(p))
+        # Only an honest EMPTY feed may sit in the repo (CI regenerates live).
+        assert d.get("arbs") == []
+
+
+def test_renderer_has_empty_state():
+    import os
+    js = open(os.path.join(os.path.dirname(__file__), "..", "site", "arb.js")).read()
+    assert "No risk-free opportunities" in js  # honest empty state, not samples
+
+
+def test_sportsbook_back_pairs_with_exchange_lay():
+    from wca import arbdata
+    # sportsbook (no commission) backs the team; smarkets lays it (native depth).
+    sbk = [{"home_team": "Brazil", "away_team": "Mexico", "market": "h2h",
+            "bookmaker_key": "bet365", "outcome_name": "Brazil", "decimal_odds": 3.00}]
+    sm = [{"home_team": "Brazil", "away_team": "Mexico", "market": "h2h",
+           "outcome_name": "Brazil", "decimal_odds": 2.10, "lay_odds": 2.02}]
+    # settlement present (passes the 90-min guard) but no PM price → the only
+    # cross-venue pair is sportsbook-back ↔ exchange-lay.
+    pm = {"Brazil vs Mexico": {"settlement": "1x2_90min"}}
+    out = arbdata.build_arb_data(betfair_rows=[], smarkets_rows=sm, sportsbook_rows=sbk,
+                                 pm_quotes=pm, fx_usd_per_gbp=1.33, fx_source="live", now_utc="t",
+                                 smarkets_grade="execution-grade")
+    pairs = {a["venue_pair"] for a in out["arbs"]}
+    assert any("bet365" in p for p in pairs)  # sportsbook↔exchange lock surfaced

@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 # Fallback used when the live fetch fails/times out. USD per 1 GBP.
-FALLBACK_USD_PER_GBP = 1.27
+FALLBACK_USD_PER_GBP = 1.33
 _TIMEOUT = 5.0
 _URL = "https://api.frankfurter.app/latest?from=GBP&to=USD"
 

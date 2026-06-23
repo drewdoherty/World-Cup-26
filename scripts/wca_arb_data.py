@@ -47,6 +47,7 @@ def main(argv=None) -> int:
 
     betfair_rows: list = []
     smarkets_rows: list = []
+    sportsbook_rows: list = []
     smarkets_grade = "monitoring-grade"
     pm_quotes: dict = {}
     fxr = fx.FxRate(fx.FALLBACK_USD_PER_GBP, "fallback")
@@ -65,14 +66,22 @@ def main(argv=None) -> int:
             smarkets_rows = sdf.to_dict("records") if sdf is not None and not sdf.empty else []
         except Exception as exc:  # noqa: BLE001
             print("smarkets fetch skipped: %s" % exc, file=sys.stderr)
+        try:
+            from wca.data import theoddsapi
+            odf, _ = theoddsapi.get_odds("soccer_fifa_world_cup", regions="uk", markets="h2h")
+            _EX = {"betfair_ex_uk", "betfair_ex_eu", "smarkets", "matchbook"}
+            if odf is not None and not odf.empty:
+                sportsbook_rows = odf[~odf["bookmaker_key"].isin(_EX)].to_dict("records")
+        except Exception as exc:  # noqa: BLE001
+            print("sportsbook fetch skipped: %s" % exc, file=sys.stderr)
         # PM quotes wiring is intentionally left to the live op (needs the PM
         # event fetch + canonical pairing); empty here keeps the feed honest.
 
     history = _load_history(args.out)
     data = arbdata.build_arb_data(
         betfair_rows=betfair_rows, smarkets_rows=smarkets_rows,
-        smarkets_grade=smarkets_grade, pm_quotes=pm_quotes,
-        fx_usd_per_gbp=fxr.usd_per_gbp, fx_source=fxr.source,
+        sportsbook_rows=sportsbook_rows, smarkets_grade=smarkets_grade,
+        pm_quotes=pm_quotes, fx_usd_per_gbp=fxr.usd_per_gbp, fx_source=fxr.source,
         now_utc=_now_utc(), history=history,
     )
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
