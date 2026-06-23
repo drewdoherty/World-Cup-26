@@ -273,6 +273,7 @@ CREATE TABLE IF NOT EXISTS pm_order_log (
     ts_utc      TEXT    NOT NULL,
     day_utc     TEXT    NOT NULL,
     token_id    TEXT    NOT NULL,
+    market      TEXT,
     side        TEXT    NOT NULL,
     price       REAL    NOT NULL,
     size        REAL    NOT NULL,
@@ -871,6 +872,12 @@ class ClobTrader:
     def _ensure_log_table(self) -> None:
         with self._connect() as conn:
             conn.execute(_DDL_PM_ORDER_LOG)
+            cols = {
+                row[1]
+                for row in conn.execute("PRAGMA table_info(pm_order_log)").fetchall()
+            }
+            if "market" not in cols:
+                conn.execute("ALTER TABLE pm_order_log ADD COLUMN market TEXT")
 
     def _daily_notional(self) -> float:
         self._ensure_log_table()
@@ -892,17 +899,19 @@ class ClobTrader:
         notional: float,
         order_id: Optional[str],
         dry_run: bool,
+        market: Optional[str] = None,
     ) -> None:
         self._ensure_log_table()
         with self._connect() as conn:
             conn.execute(
                 "INSERT INTO pm_order_log "
-                "(ts_utc, day_utc, token_id, side, price, size, notional, "
-                " order_id, dry_run) VALUES (?,?,?,?,?,?,?,?,?)",
+                "(ts_utc, day_utc, token_id, market, side, price, size, notional, "
+                " order_id, dry_run) VALUES (?,?,?,?,?,?,?,?,?,?)",
                 (
                     datetime.now(timezone.utc).isoformat(),
                     _utc_day(),
                     str(token_id),
+                    market,
                     side,
                     float(price),
                     float(size),
@@ -1011,7 +1020,14 @@ class ClobTrader:
 
         if is_dry:
             self._log_order(
-                token_id, side.upper(), price, size, notional, None, dry_run=True
+                token_id,
+                side.upper(),
+                price,
+                size,
+                notional,
+                None,
+                dry_run=True,
+                market=market_question,
             )
             return {
                 "dry_run": True,
@@ -1095,7 +1111,14 @@ class ClobTrader:
         )
         try:
             self._log_order(
-                token_id, side.upper(), price, size, notional, order_id, dry_run=False
+                token_id,
+                side.upper(),
+                price,
+                size,
+                notional,
+                order_id,
+                dry_run=False,
+                market=market_question,
             )
         except Exception as exc:
             # The server accepted the order (it is LIVE) but the pm_order_log
