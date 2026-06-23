@@ -26,6 +26,7 @@ chmod +x "$RUN1" "$HERE"/*.sh 2>/dev/null || true
 cmd_for() {
   case "$1" in
     bot)        printf '%s\n' "$RUN1" bot       "$VENV_PY" scripts/wca_bot.py       --db data/wca.db --env .env ;;
+    conductor)  printf '%s\n' "$RUN1" conductor "$VENV_PY" scripts/wca_conductor.py --env .env.conductor ;;
     snapshotd)  printf '%s\n' "$RUN1" snapshotd "$VENV_PY" scripts/wca_snapshotd.py --db data/wca.db --env .env ;;
     newsd)      printf '%s\n' "$RUN1" newsd     "$VENV_PY" scripts/wca_newsd.py     --db data/wca.db --env .env --interval 600 --max-per-cycle 2 ;;
     promosd)    printf '%s\n' "$RUN1" promosd   "$VENV_PY" scripts/wca_promosd.py   --db data/wca.db --env .env --interval 21600 --max-per-cycle 2 ;;
