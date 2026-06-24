@@ -1,94 +1,100 @@
-<!-- generated: 2026-06-24T10:59:54 -->
+<!-- generated: 2026-06-24T12:06:14 -->
 *World Cup Alpha — bet card* (11 picks)
 
-*1. Bosnia and Herzegovina vs Qatar* — Qatar @ *8.40* (betfair_ex_uk)
-    model 16.2% / mkt 11.6%  edge *+36.3%*  [elo 27% dc 22%]
-    stake: main £8.82
-*2. Switzerland vs Canada* — Switzerland @ *2.48* (matchbook)
-    model 49.7% / mkt 40.4%  edge *+23.2%*  [elo 59% dc 65%]
-    stake: main £28.19
-*3. Bosnia and Herzegovina vs Qatar* — Draw @ *5.60* (betfair_ex_uk)
-    model 21.6% / mkt 17.7%  edge *+20.7%*  [elo 28% dc 27%]
-    stake: main £8.09
-*4. Morocco vs Haiti* — Draw @ *8.00* (betfair_ex_uk)
-    model 15.0% / mkt 12.5%  edge *+20.1%*  [elo 15% dc 20%]
-    stake: main £5.15
-*5. Morocco vs Haiti* — Haiti @ *19.00* (matchbook)
-    model 6.1% / mkt 5.1%  edge *+16.0%*  [elo 8% dc 7%]
-    stake: main £1.60
-*6. South Africa vs South Korea* — South Africa @ *6.00* (casumo)
-    model 18.7% / mkt 16.6%  edge *+12.2%*  [elo 17% dc 24%]
-    stake: main £4.40
+*1. Bosnia and Herzegovina vs Qatar* — Qatar @ *8.60* (matchbook)
+    model 16.2% / mkt 11.7%  edge *+39.7%*  [elo 27% dc 22%]
+    stake: main £9.71
+*2. Bosnia and Herzegovina vs Qatar* — Draw @ *5.70* (betfair_ex_uk)
+    model 21.6% / mkt 17.8%  edge *+23.3%*  [elo 28% dc 27%]
+    stake: main £9.23
+*3. Switzerland vs Canada* — Switzerland @ *2.48* (betfair_ex_uk)
+    model 49.5% / mkt 40.2%  edge *+22.8%*  [elo 59% dc 65%]
+    stake: main £28.61
+*4. Morocco vs Haiti* — Haiti @ *19.50* (betfair_ex_uk)
+    model 6.1% / mkt 5.0%  edge *+18.1%*  [elo 8% dc 7%]
+    stake: main £1.82
+*5. Morocco vs Haiti* — Draw @ *7.80* (betfair_ex_uk)
+    model 15.1% / mkt 12.7%  edge *+17.7%*  [elo 15% dc 20%]
+    stake: main £4.83
+*6. South Africa vs South Korea* — South Africa @ *6.00* (betfair_ex_uk)
+    model 18.7% / mkt 16.6%  edge *+12.0%*  [elo 17% dc 24%]
+    stake: main £4.47
 *7. South Africa vs South Korea* — Draw @ *4.10* (betfair_ex_uk)
-    model 27.1% / mkt 24.6%  edge *+11.2%*  [elo 24% dc 33%]
-    stake: main £6.49
+    model 27.0% / mkt 24.5%  edge *+10.8%*  [elo 24% dc 33%]
+    stake: main £6.50
 *8. Scotland vs Brazil* — Draw @ *6.00* (betfair_ex_uk)
-    model 18.4% / mkt 16.8%  edge *+10.6%*  [elo 23% dc 20%]
-    stake: main £3.82
-*9. Scotland vs Brazil* — Scotland @ *11.00* (boylesports)
-    model 9.9% / mkt 9.3%  edge *+8.9%*  [elo 16% dc 9%]
-    stake: main £1.59
-*10. Czech Republic vs Mexico* — Draw @ *4.10* (betfair_ex_uk)
-    model 26.2% / mkt 24.9%  edge *+7.2%*  [elo 23% dc 30%]
-    stake: main £4.20
-*11. Czech Republic vs Mexico* — Czech Republic @ *3.95* (betfair_ex_uk)
+    model 18.2% / mkt 16.5%  edge *+9.4%*  [elo 23% dc 20%]
+    stake: main £3.50
+*9. Scotland vs Brazil* — Scotland @ *11.00* (betfair_ex_uk)
+    model 9.6% / mkt 8.7%  edge *+5.3%*  [elo 16% dc 9%]
+    stake: main £0.99
+*10. Czech Republic vs Mexico* — Czech Republic @ *3.95* (betfair_ex_uk)
     model 26.4% / mkt 25.2%  edge *+4.3%*  [elo 16% dc 32%]
-    stake: main £2.63
+    stake: main £2.74
+*11. Czech Republic vs Mexico* — Draw @ *4.00* (betfair_ex_uk)
+    model 26.1% / mkt 24.7%  edge *+4.2%*  [elo 23% dc 30%]
+    stake: main £2.61
 
 _Pool: rung 0 £1500 — 28/50 settled-with-close bets, CLV -0.0142, Kelly fraction 0.25_
 
 *World Cup Alpha — scorelines* (6 fixtures)
 
 *Bosnia and Herzegovina vs Qatar*
-    1-0  15.6%  fair 6.42  back >= 6.55
-    2-0  12.4%  fair 8.04  back >= 8.20
-    2-1  11.3%  fair 8.86  back >= 9.04
-    1-1  10.2%  fair 9.84  back >= 10.04
-    0-0  7.5%  fair 13.36  back >= 13.63
-    3-0  6.3%  fair 15.83  back >= 16.15
-    O/U 2.5: over 46.2% / under 53.8%   BTTS 45.6%
+    xG: 1.70-0.80
+    1-0  15.6%  fair 6.43  back >= 6.56
+    2-0  12.4%  fair 8.06  back >= 8.22
+    2-1  11.3%  fair 8.88  back >= 9.05
+    1-1  10.2%  fair 9.80  back >= 10.00
+    0-0  7.5%  fair 13.31  back >= 13.57
+    3-0  6.3%  fair 15.86  back >= 16.18
+    O/U 2.5: over 46.1% / under 53.9%   BTTS 45.6%
 
 *Switzerland vs Canada*
-    1-1  13.1%  fair 7.66  back >= 7.81
-    2-0  9.4%  fair 10.67  back >= 10.88
-    1-0  9.0%  fair 11.06  back >= 11.29
-    0-0  8.5%  fair 11.75  back >= 11.99
-    0-1  7.5%  fair 13.40  back >= 13.67
-    2-1  7.4%  fair 13.47  back >= 13.74
-    O/U 2.5: over 49.3% / under 50.7%   BTTS 50.1%
+    xG: 1.70-0.96
+    1-1  13.1%  fair 7.65  back >= 7.81
+    2-0  9.3%  fair 10.70  back >= 10.92
+    1-0  9.0%  fair 11.10  back >= 11.32
+    0-0  8.5%  fair 11.75  back >= 11.98
+    0-1  7.5%  fair 13.31  back >= 13.57
+    2-1  7.4%  fair 13.52  back >= 13.79
+    O/U 2.5: over 49.2% / under 50.8%   BTTS 50.2%
 
 *Scotland vs Brazil*
-    0-2  15.5%  fair 6.45  back >= 6.58
-    0-1  15.2%  fair 6.59  back >= 6.73
-    0-3  10.3%  fair 9.74  back >= 9.94
-    1-2  8.9%  fair 11.24  back >= 11.46
-    1-1  8.4%  fair 11.89  back >= 12.12
-    0-0  7.4%  fair 13.46  back >= 13.73
-    O/U 2.5: over 47.9% / under 52.1%   BTTS 37.7%
+    xG: 0.57-2.02
+    0-2  15.6%  fair 6.40  back >= 6.53
+    0-1  15.3%  fair 6.55  back >= 6.68
+    0-3  10.3%  fair 9.67  back >= 9.86
+    1-2  9.0%  fair 11.16  back >= 11.38
+    1-1  8.3%  fair 12.02  back >= 12.26
+    0-0  7.4%  fair 13.60  back >= 13.88
+    O/U 2.5: over 48.0% / under 52.0%   BTTS 37.6%
 
 *Morocco vs Haiti*
-    1-0  18.6%  fair 5.37  back >= 5.48
+    xG: 2.06-0.43
+    1-0  18.6%  fair 5.38  back >= 5.48
     2-0  18.5%  fair 5.41  back >= 5.52
-    3-0  12.0%  fair 8.36  back >= 8.52
-    2-1  8.6%  fair 11.65  back >= 11.88
-    0-0  7.1%  fair 14.13  back >= 14.41
-    1-1  6.4%  fair 15.60  back >= 15.92
+    3-0  12.0%  fair 8.36  back >= 8.53
+    2-1  8.6%  fair 11.65  back >= 11.89
+    0-0  7.1%  fair 14.06  back >= 14.34
+    1-1  6.4%  fair 15.52  back >= 15.83
     O/U 2.5: over 45.5% / under 54.5%   BTTS 30.8%
 
 *Czech Republic vs Mexico*
-    0-1  14.5%  fair 6.90  back >= 7.04
-    1-1  12.2%  fair 8.18  back >= 8.34
-    1-2  9.9%  fair 10.06  back >= 10.26
-    0-0  9.6%  fair 10.46  back >= 10.67
-    0-2  9.2%  fair 10.93  back >= 11.14
+    xG: 0.98-1.34
+    0-1  14.5%  fair 6.89  back >= 7.02
+    1-1  12.2%  fair 8.21  back >= 8.37
+    1-2  10.0%  fair 10.04  back >= 10.24
+    0-0  9.5%  fair 10.50  back >= 10.71
+    0-2  9.2%  fair 10.90  back >= 11.12
     1-0  8.5%  fair 11.76  back >= 12.00
-    O/U 2.5: over 41.1% / under 58.9%   BTTS 45.9%
+    O/U 2.5: over 41.2% / under 58.8%   BTTS 45.9%
 
 *South Africa vs South Korea*
-    0-1  21.6%  fair 4.63  back >= 4.72
-    0-0  13.9%  fair 7.18  back >= 7.32
-    0-2  12.1%  fair 8.25  back >= 8.41
-    1-1  11.0%  fair 9.12  back >= 9.30
-    1-0  8.9%  fair 11.18  back >= 11.41
-    1-2  8.7%  fair 11.45  back >= 11.68
+    xG: 0.64-1.24
+    0-1  21.7%  fair 4.62  back >= 4.71
+    0-0  13.9%  fair 7.20  back >= 7.34
+    0-2  12.2%  fair 8.23  back >= 8.39
+    1-1  10.9%  fair 9.15  back >= 9.33
+    1-0  8.9%  fair 11.20  back >= 11.43
+    1-2  8.8%  fair 11.42  back >= 11.65
     O/U 2.5: over 29.0% / under 71.0%   BTTS 33.1%

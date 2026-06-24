@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-24 11:24:47 UTC"
+    "generated": "2026-06-24 12:25:33 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -15,7 +15,7 @@
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0012,
+        "prob": 0.0011,
         "results": [
           "Bosnia and Herzegovina",
           "Switzerland",
@@ -39,7 +39,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0035,
+        "prob": 0.0033,
         "results": [
           "Bosnia and Herzegovina",
           "Switzerland",
@@ -51,7 +51,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0012,
+        "prob": 0.0011,
         "results": [
           "Bosnia and Herzegovina",
           "Switzerland",
@@ -63,7 +63,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0017,
+        "prob": 0.0016,
         "results": [
           "Bosnia and Herzegovina",
           "Switzerland",
@@ -77,7 +77,7 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0012,
+        "prob": 0.0011,
         "results": [
           "Bosnia and Herzegovina",
           "Switzerland",
@@ -101,7 +101,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0035,
+        "prob": 0.0033,
         "results": [
           "Bosnia and Herzegovina",
           "Switzerland",
@@ -121,7 +121,7 @@
       "results": [
         {
           "outcome": "Bosnia and Herzegovina",
-          "prob": 0.6222,
+          "prob": 0.6212,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -130,7 +130,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2155,
+          "prob": 0.2164,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -139,7 +139,7 @@
         },
         {
           "outcome": "Qatar",
-          "prob": 0.1623,
+          "prob": 0.1625,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -162,57 +162,25 @@
       "results": [
         {
           "outcome": "Switzerland",
-          "prob": 0.4968,
+          "prob": 0.4951,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "Switzerland",
+            "best_venue": "betfair_ex_uk",
+            "best_odds": 2.48,
+            "model_prob": 0.4951,
+            "ev_pct": 22.8,
+            "recommendation": "PLUG: +EV to back (22.8% edge) \u2014 fills the gap and adds value"
+          }
         },
         {
           "outcome": "Draw",
-          "prob": 0.2743,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Canada",
-          "prob": 0.229,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        }
-      ],
-      "events": [],
-      "summary": {
-        "max_win": 0.0,
-        "stake_at_risk": 0,
-        "best_outcome": "Switzerland",
-        "worst_outcome": "Switzerland",
-        "n_blindspots": 0
-      }
-    },
-    {
-      "fixture": "Scotland vs Brazil",
-      "kickoff": "2026-06-24T22:00:00+00:00",
-      "results": [
-        {
-          "outcome": "Scotland",
-          "prob": 0.099,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Draw",
-          "prob": 0.1844,
+          "prob": 0.2744,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -222,15 +190,83 @@
             "available": true,
             "outcome": "Draw",
             "best_venue": "smarkets",
-            "best_odds": 6.2,
-            "model_prob": 0.1844,
-            "ev_pct": 14.3,
-            "recommendation": "PLUG: +EV to back (14.3% edge) \u2014 fills the gap and adds value"
+            "best_odds": 3.2,
+            "model_prob": 0.2744,
+            "ev_pct": -12.2,
+            "recommendation": "LEAVE UNHEDGED: plugging costs 12.2% EV \u2014 take the variance"
+          }
+        },
+        {
+          "outcome": "Canada",
+          "prob": 0.2305,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "Canada",
+            "best_venue": "smarkets",
+            "best_odds": 3.45,
+            "model_prob": 0.2305,
+            "ev_pct": -20.5,
+            "recommendation": "LEAVE UNHEDGED: plugging costs 20.5% EV \u2014 take the variance"
+          }
+        }
+      ],
+      "events": [
+        {
+          "type": "pm_moneyline",
+          "selection": "Yes",
+          "stake": 30.0,
+          "potential_profit": 43.17,
+          "free": false,
+          "odds": 2.44
+        }
+      ],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Switzerland",
+        "worst_outcome": "Switzerland",
+        "n_blindspots": 3
+      }
+    },
+    {
+      "fixture": "Scotland vs Brazil",
+      "kickoff": "2026-06-24T22:00:00+00:00",
+      "results": [
+        {
+          "outcome": "Scotland",
+          "prob": 0.0957,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.1824,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "Draw",
+            "best_venue": "smarkets",
+            "best_odds": 6.0,
+            "model_prob": 0.1824,
+            "ev_pct": 9.4,
+            "recommendation": "PLUG: +EV to back (9.4% edge) \u2014 fills the gap and adds value"
           }
         },
         {
           "outcome": "Brazil",
-          "prob": 0.7167,
+          "prob": 0.7219,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -241,8 +277,8 @@
             "outcome": "Brazil",
             "best_venue": "matchbook",
             "best_odds": 1.34,
-            "model_prob": 0.7167,
-            "ev_pct": -4.0,
+            "model_prob": 0.7219,
+            "ev_pct": -3.3,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         }
@@ -287,7 +323,7 @@
       "results": [
         {
           "outcome": "Morocco",
-          "prob": 0.7889,
+          "prob": 0.7886,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -296,7 +332,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.1501,
+          "prob": 0.1509,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -305,7 +341,7 @@
         },
         {
           "outcome": "Haiti",
-          "prob": 0.0611,
+          "prob": 0.0606,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -328,7 +364,7 @@
       "results": [
         {
           "outcome": "Czech Republic",
-          "prob": 0.2641,
+          "prob": 0.2642,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -337,7 +373,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2616,
+          "prob": 0.2605,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -346,7 +382,7 @@
         },
         {
           "outcome": "Mexico",
-          "prob": 0.4743,
+          "prob": 0.4753,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -369,7 +405,7 @@
       "results": [
         {
           "outcome": "South Africa",
-          "prob": 0.1871,
+          "prob": 0.1867,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -378,7 +414,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2712,
+          "prob": 0.2703,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -387,7 +423,7 @@
         },
         {
           "outcome": "South Korea",
-          "prob": 0.5417,
+          "prob": 0.543,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -409,31 +445,76 @@
     {
       "fixture": "Scotland vs Brazil",
       "outcome": "Brazil",
-      "prob": 0.7167,
+      "prob": 0.7219,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Brazil",
         "best_venue": "matchbook",
         "best_odds": 1.34,
-        "model_prob": 0.7167,
-        "ev_pct": -4.0,
+        "model_prob": 0.7219,
+        "ev_pct": -3.3,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
     {
-      "fixture": "Scotland vs Brazil",
+      "fixture": "Switzerland vs Canada",
+      "outcome": "Switzerland",
+      "prob": 0.4951,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": true,
+        "outcome": "Switzerland",
+        "best_venue": "betfair_ex_uk",
+        "best_odds": 2.48,
+        "model_prob": 0.4951,
+        "ev_pct": 22.8,
+        "recommendation": "PLUG: +EV to back (22.8% edge) \u2014 fills the gap and adds value"
+      }
+    },
+    {
+      "fixture": "Switzerland vs Canada",
       "outcome": "Draw",
-      "prob": 0.1844,
+      "prob": 0.2744,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Draw",
         "best_venue": "smarkets",
-        "best_odds": 6.2,
-        "model_prob": 0.1844,
-        "ev_pct": 14.3,
-        "recommendation": "PLUG: +EV to back (14.3% edge) \u2014 fills the gap and adds value"
+        "best_odds": 3.2,
+        "model_prob": 0.2744,
+        "ev_pct": -12.2,
+        "recommendation": "LEAVE UNHEDGED: plugging costs 12.2% EV \u2014 take the variance"
+      }
+    },
+    {
+      "fixture": "Switzerland vs Canada",
+      "outcome": "Canada",
+      "prob": 0.2305,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": true,
+        "outcome": "Canada",
+        "best_venue": "smarkets",
+        "best_odds": 3.45,
+        "model_prob": 0.2305,
+        "ev_pct": -20.5,
+        "recommendation": "LEAVE UNHEDGED: plugging costs 20.5% EV \u2014 take the variance"
+      }
+    },
+    {
+      "fixture": "Scotland vs Brazil",
+      "outcome": "Draw",
+      "prob": 0.1824,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": true,
+        "outcome": "Draw",
+        "best_venue": "smarkets",
+        "best_odds": 6.0,
+        "model_prob": 0.1824,
+        "ev_pct": 9.4,
+        "recommendation": "PLUG: +EV to back (9.4% edge) \u2014 fills the gap and adds value"
       }
     }
   ],
@@ -667,6 +748,15 @@
       "free": true,
       "odds": 5.03,
       "match": "Switzerland v Canada | Bosnia v Qatar"
+    },
+    {
+      "type": "pm_moneyline",
+      "selection": "Yes",
+      "stake": 23.47,
+      "profit": 18.440714285714282,
+      "free": false,
+      "odds": 1.7857142857142856,
+      "match": "Croatia vs Ghana"
     }
   ]
 }
