@@ -1,11 +1,11 @@
-<!-- generated: 2026-06-24T07:41:11 -->
+<!-- generated: 2026-06-24T08:47:26 -->
 ⚽ *Next match* — Bosnia and Herzegovina vs Qatar
 Kickoff 2026-06-24 19:00:00+00:00
 
 *Winner* (model blend)
-  Bosnia and Her  61.4%  fair 1.63  best 1.41 (betfair_ex_uk) -13.5%
-  Draw            22.0%  fair 4.55  best 5.60 (betfair_ex_uk) +23.0% ✅  £18.76
-  Qatar           16.7%  fair 6.00  best 8.40 (betfair_ex_uk) +40.0% ✅  £20.26
+  Bosnia and Her  61.4%  fair 1.63  best 1.42 (betfair_ex_uk) -12.9%
+  Draw            22.0%  fair 4.55  best 5.50 (betfair_ex_uk) +20.8% ✅  £17.30
+  Qatar           16.7%  fair 5.99  best 8.40 (betfair_ex_uk) +40.2% ✅  £20.35
   _stake = ¼-Kelly @ £1500 bankroll (+EV picks)_
 
 *Corners* (model, exp 8.4)
