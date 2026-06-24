@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import json
 import os
 import sys
 from pathlib import Path
@@ -36,19 +37,23 @@ def _load_dotenv(path: str = ".env") -> None:
 # Main
 # ---------------------------------------------------------------------------
 
-def want_goalscorers_card(goalscorers_out, goalscorers_n, skip_scorers, goalscorers_only) -> bool:
+def want_goalscorers_card(goalscorers_out, goalscorers_n, skip_scorers,
+                          goalscorers_only, model_available=False) -> bool:
     """Whether this run should (re)build the /goalscorers card.
 
-    The fast ``--skip-scorers`` job must NOT — otherwise it overwrites the
-    populated card with all-"no scorer market" rows (the empty-result bug). The
-    dedicated ``--goalscorers-only`` refresh always does; a normal full build
-    (no --skip-scorers) does too.
+    Historically the fast ``--skip-scorers`` job must NOT — without scorer
+    markets it overwrote the populated card with all-"no scorer market" rows
+    (the empty-result bug). But when a built ``players.db`` is available the card
+    can be rebuilt **from the model** (free, no Odds API quota), so the fast job
+    keeps /goalscorers fresh and aligned with /next instead of letting the two
+    drift. The dedicated ``--goalscorers-only`` refresh always rebuilds; a normal
+    full build does too.
     """
     return bool(
         goalscorers_out
         and goalscorers_n
         and goalscorers_n > 0
-        and (not skip_scorers or goalscorers_only)
+        and (not skip_scorers or goalscorers_only or model_available)
     )
 
 
@@ -110,6 +115,16 @@ def main() -> None:
         "--skip-scorers",
         action="store_true",
         help="Skip the per-event anytime-scorer odds pull (saves API quota)",
+    )
+    parser.add_argument(
+        "--players-db",
+        default="data/players.db",
+        help=(
+            "Path to the player/team rate store (Phase-2 players.db). When "
+            "present, /next and /goalscorers are model-priced from it on every "
+            "run — one source of truth — even with no bookmaker market "
+            "(labelled 'model price, no market'). Pass '' to disable."
+        ),
     )
     parser.add_argument(
         "--goalscorers-only",
@@ -326,11 +341,17 @@ def main() -> None:
                     except Exception as exc:
                         print("WARN: scorer odds pull failed: %s" % exc, file=sys.stderr)
 
+            # Model scorer pricing is local + free, so attach it on EVERY run
+            # (incl. the fast --skip-scorers job) from the one source of truth
+            # (players.db). The bookmaker market is an optional overlay above.
+            _db = args.players_db if (args.players_db and os.path.exists(args.players_db)) else None
             next_card = build_next_match(
                 models, odds_df, fixtures_meta, scorer_df=scorer_df,
                 pm_lookup=not args.skip_scorers,
                 bankroll=pool_bank.bankroll,
                 kelly_fraction=pool_bank.kelly_fraction,
+                db_path=_db,
+                model_only_fallback=_db is not None,
             )
             write_card(format_next_match(next_card), path=args.next_out, ts_utc=now_str)
             print("Next-match card written: out=%s" % args.next_out)
@@ -346,8 +367,10 @@ def main() -> None:
     # --skip-scorers job must NOT run this — otherwise it overwrites a good card
     # with an all-"no scorer market" one (the /goalscorers empty-result bug). The
     # dedicated --goalscorers-only refresh job keeps the card current.
+    _gs_db = args.players_db if (args.players_db and os.path.exists(args.players_db)) else None
     want_goalscorers = want_goalscorers_card(
-        args.goalscorers_out, args.goalscorers_n, args.skip_scorers, args.goalscorers_only
+        args.goalscorers_out, args.goalscorers_n, args.skip_scorers,
+        args.goalscorers_only, model_available=_gs_db is not None,
     )
     if want_goalscorers:
         try:
@@ -381,29 +404,75 @@ def main() -> None:
                         print("WARN: scorer pull failed for %s: %s" % (eid, exc),
                               file=sys.stderr)
 
-            # Preserve the last good card unless at least one fixture actually has
-            # a scorer market. Otherwise a quiet window (no markets posted yet) or
-            # a transient API miss would clobber a populated card with empties.
-            if has_scorer_markets(scorer_by_event):
+            # Write when a real scorer market exists OR the model can price the
+            # card from players.db. The old preserve-last-good guard only applied
+            # because a market-only card went empty in quiet windows; a
+            # model-priced card is never empty, so it is safe (and aligned with
+            # /next) to refresh it every run. Only when BOTH are unavailable do
+            # we preserve the last good card.
+            if has_scorer_markets(scorer_by_event) or _gs_db is not None:
                 gcards = build_goalscorer_card(
                     models, odds_df, fixtures_meta, scorer_by_event,
                     top_k_fixtures=args.goalscorers_n,
                     bankroll=pool_bank.bankroll,
                     kelly_fraction=pool_bank.kelly_fraction,
-                    pm_lookup=True,
+                    pm_lookup=not args.skip_scorers,
+                    db_path=_gs_db,
+                    model_only_fallback=_gs_db is not None,
                 )
+                basis = ("market+model" if has_scorer_markets(scorer_by_event)
+                         else "model-only (no bookmaker market)")
                 write_card(
                     format_goalscorer_card(gcards),
                     path=args.goalscorers_out, ts_utc=now_str,
                 )
-                print("Goalscorers card written: out=%s (%d fixtures)"
-                      % (args.goalscorers_out, len(gcards)))
+                print("Goalscorers card written: out=%s (%d fixtures, %s)"
+                      % (args.goalscorers_out, len(gcards), basis))
             else:
-                print("Goalscorers card: no scorer markets available now — "
+                print("Goalscorers card: no scorer markets and no players.db — "
                       "preserving the existing card (not overwriting with empties)",
                       file=sys.stderr)
         except Exception as exc:
             print("WARN: goalscorers card failed: %s" % exc, file=sys.stderr)
+
+    # ------------------------------------------------------------------
+    # Persist the unified model-scorer source (data/model_scorers.json) for the
+    # next N fixtures. This is the ONE on-disk source /accas (and the site) read,
+    # priced from the SAME model as /next + /goalscorers — so the commands cannot
+    # drift. Pure model, no Odds API quota; written on every run when players.db
+    # exists.
+    if _gs_db is not None and not odds_df.empty:
+        try:
+            from wca.card import _iter_fixture_blends, BlendWeights
+            from wca.models.scorer_props import fixture_scorers_payload
+
+            _host = ("United States", "Mexico", "Canada", "USA")
+            _msb = sorted(
+                _iter_fixture_blends(models, odds_df, fixtures_meta, BlendWeights(), _host),
+                key=lambda fb: str(fb.fx["commence_time"]),
+            )[: args.goalscorers_n]
+            payloads = []
+            for fb in _msb:
+                try:
+                    pred = models.dc.predict(fb.home, fb.away, neutral=fb.neutral, warn=False)
+                    lh = float(getattr(pred, "lambda_home", 0.0) or 0.0)
+                    la = float(getattr(pred, "lambda_away", 0.0) or 0.0)
+                    if lh <= 0 or la <= 0:
+                        continue
+                    p = fixture_scorers_payload(fb.home, fb.away, lh, la, db_path=_gs_db)
+                    p["commence_time"] = str(fb.fx.get("commence_time"))
+                    payloads.append(p)
+                except Exception:
+                    continue
+            out_obj = {"meta": {"generated": now_str, "source": _gs_db,
+                                "basis": "model price (players.db npxg-share x DC lambda)"},
+                       "fixtures": payloads}
+            with open("data/model_scorers.json", "w", encoding="utf-8") as fh:
+                json.dump(out_obj, fh, indent=2)
+            print("Model-scorers source written: data/model_scorers.json (%d fixtures)"
+                  % len(payloads))
+        except Exception as exc:
+            print("WARN: model_scorers.json write failed: %s" % exc, file=sys.stderr)
 
     quota_str = (
         "quota remaining=%s" % quota.remaining

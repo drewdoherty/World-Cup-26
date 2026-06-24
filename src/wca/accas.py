@@ -62,6 +62,52 @@ def load_odds_df(path: str = "site/scores_data.json") -> pd.DataFrame:
     return pd.DataFrame(rows) if rows else pd.DataFrame()
 
 
+def load_model_scorer_legs(
+    path: str = "data/model_scorers.json",
+    min_leg_odds: float = 2.0,
+    max_leg_odds: float = _LONGSHOT_MAX_ODDS,
+) -> List[Dict[str, Any]]:
+    """Model-priced anytime-scorer legs from the unified players-model source.
+
+    Reads ``data/model_scorers.json`` (written by the build from the SAME model
+    that powers /next and /goalscorers — one source of truth) and returns
+    acca-ready legs whose fair odds fall in ``[min_leg_odds, max_leg_odds]``.
+    Each leg is labelled "model price, no market" so the acca card can show that
+    these legs are model-derived. Returns ``[]`` on any failure/missing file so
+    /accas degrades to 1X2-only.
+    """
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            feed = json.load(fh)
+    except (OSError, ValueError):
+        return []
+    fixtures = feed.get("fixtures") if isinstance(feed, dict) else None
+    if not fixtures:
+        return []
+    legs: List[Dict[str, Any]] = []
+    for fx in fixtures:
+        if not isinstance(fx, dict):
+            continue
+        fixture = fx.get("fixture", "")
+        for side in ("home_scorers", "away_scorers"):
+            for s in fx.get(side) or []:
+                fair = float(s.get("fair_anytime") or 0.0)
+                if not (min_leg_odds <= fair <= max_leg_odds):
+                    continue
+                legs.append({
+                    "fixture": fixture,
+                    "selection": "%s to score anytime" % s.get("player", ""),
+                    "team": s.get("team", ""),
+                    "market": "anytime_scorer",
+                    "prob": float(s.get("p_anytime") or 0.0),
+                    "fair_odds": round(fair, 4),
+                    "label": s.get("label", "model price, no market"),
+                    "source": s.get("share_source", ""),
+                })
+    legs.sort(key=lambda l: l["prob"], reverse=True)
+    return legs
+
+
 def build_accas_from_odds(
     odds_df: pd.DataFrame,
     *,

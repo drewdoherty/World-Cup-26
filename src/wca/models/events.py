@@ -41,6 +41,7 @@ SUB_TIMING = {
 BASE_FOULS_PER_MATCH = 27.734    # total fouls / match
 BASE_REDS_PER_MATCH = 0.16       # red cards (incl. 2nd-yellow) / match, WC-typical
 DEFAULT_SUBS_PER_MATCH = 7.2     # 926 / 128
+RED_SHRINK = 0.5                 # weight on observed team red rate vs the base
 
 
 # ---------------------------------------------------------------------------
@@ -202,7 +203,11 @@ def card_risk(lambda_home: float, lambda_away: float,
     if reds_home is None and reds_away is None:
         exp_reds = BASE_REDS_PER_MATCH * stakes_mult
     else:
-        exp_reds = ((reds_home or 0.0) + (reds_away or 0.0)) * stakes_mult
+        # Shrink the (often tiny-sample) observed red rate toward the tournament
+        # base so a clean WC sample can't drive red risk to a literal zero.
+        observed = (reds_home or 0.0) + (reds_away or 0.0)
+        exp_reds = (RED_SHRINK * observed
+                    + (1.0 - RED_SHRINK) * BASE_REDS_PER_MATCH) * stakes_mult
     p_red = 1.0 - math.exp(-max(exp_reds, 0.0))
 
     return CardRisk(

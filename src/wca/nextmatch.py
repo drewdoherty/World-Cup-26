@@ -263,6 +263,78 @@ def _player_rows(scorer_df: pd.DataFrame, market: str) -> Dict[str, pd.DataFrame
     return {str(p): g for p, g in rows.groupby("_player")}
 
 
+def _model_params(home_c: str, away_c: str, db_path: Optional[str],
+                  players_path: str) -> Dict[str, Dict[str, object]]:
+    """Per-team player-share index keyed by canonical team then name keys.
+
+    Sources the unified players.db npxg-shares (merged with players.json
+    overrides) when ``db_path`` is a real file; otherwise falls back to the
+    override store alone so callers without a built db behave as before.
+    """
+    out: Dict[str, Dict[str, object]] = {}
+    use_db = bool(db_path) and os.path.exists(db_path)
+    if use_db:
+        try:
+            from wca.models.scorer_props import team_scorer_params
+            for tc in (home_c, away_c):
+                idx: Dict[str, object] = {}
+                for rec in team_scorer_params(tc, db_path=db_path,
+                                              overrides_path=players_path):
+                    idx[_norm_name(rec.name)] = rec
+                    lk = _name_key(rec.name)
+                    if lk:
+                        idx.setdefault(lk, rec)
+                out[tc] = idx
+            return out
+        except Exception:
+            out = {}
+    # Override-only fallback.
+    from wca.data.teamnames import canonical as _canon
+    from wca.models.scorers import load_player_overrides
+    overrides = load_player_overrides(players_path)
+    for tname, recs in overrides.items():
+        tc = _canon(tname)
+        idx = out.setdefault(tc, {})
+        for rec in recs:
+            idx[_norm_name(rec.name)] = rec
+            lk = _name_key(rec.name)
+            if lk:
+                idx.setdefault(lk, rec)
+    return out
+
+
+def _model_only_goalscorers(
+    home: str, away: str, lambda_home: float, lambda_away: float,
+    top_n_per_team: int, db_path: Optional[str], players_path: str,
+) -> Dict[str, List[GoalscorerLine]]:
+    """Build GoalscorerLines purely from the model (no market) via scorer_props."""
+    out: Dict[str, List[GoalscorerLine]] = {"home": [], "away": []}
+    try:
+        from wca.models.scorer_props import model_scorer_lines
+    except Exception:
+        return out
+    db = db_path or "data/players.db"
+    if not os.path.exists(db):
+        return out
+    try:
+        lines = model_scorer_lines(
+            home, away, lambda_home, lambda_away, db_path=db,
+            overrides_path=players_path, top_n_per_team=top_n_per_team)
+    except Exception:
+        return out
+    for side in ("home", "away"):
+        for sl in lines.get(side, []):
+            out[side].append(GoalscorerLine(
+                player=sl.player, team=sl.team,
+                xg_per_game=sl.intensity,
+                model_p_anytime=sl.model_p_anytime,
+                model_fair_anytime=sl.model_fair_anytime,
+                model_p_first=sl.model_p_first,
+                model_fair_first=sl.model_fair_first,
+                share_source=sl.share_source))
+    return out
+
+
 def build_goalscorers(
     home: str,
     away: str,
@@ -275,6 +347,8 @@ def build_goalscorers(
     lambda_home: float = 0.0,
     lambda_away: float = 0.0,
     players_path: str = "data/players.json",
+    db_path: Optional[str] = None,
+    model_only_fallback: bool = False,
 ) -> Tuple[Dict[str, List[GoalscorerLine]], str]:
     """Top-N goalscorers per team with anytime + first odds (book + Polymarket).
 
@@ -295,12 +369,24 @@ def build_goalscorers(
 
     home_c, away_c = canonical(home), canonical(away)
     empty: Dict[str, List[GoalscorerLine]] = {"home": [], "away": []}
-    if scorer_df is None or scorer_df.empty or "market" not in scorer_df.columns:
-        return empty, "no sportsbook scorer market available for this fixture"
+    no_market = (scorer_df is None or scorer_df.empty
+                 or "market" not in scorer_df.columns)
+    anytime = {} if no_market else _player_rows(scorer_df, ANYTIME_SCORER_MARKET)
+    first = {} if no_market else _player_rows(scorer_df, FIRST_SCORER_MARKET)
 
-    anytime = _player_rows(scorer_df, ANYTIME_SCORER_MARKET)
-    first = _player_rows(scorer_df, FIRST_SCORER_MARKET)
+    # No bookmaker scorer market: fall back to the model-only source (players.db
+    # + DC lambdas) when the caller opts in — so /next, /goalscorers and /accas
+    # always show model-priced scorers, clearly labelled, instead of nothing.
     if not anytime:
+        if model_only_fallback and lambda_home > 0.0 and lambda_away > 0.0:
+            lines = _model_only_goalscorers(
+                home, away, lambda_home, lambda_away, top_n_per_team,
+                db_path, players_path)
+            if lines["home"] or lines["away"]:
+                return lines, ("no bookmaker scorer market — model price only "
+                               "(players.db npxg-share x DC lambda)")
+        if no_market:
+            return empty, "no sportsbook scorer market available for this fixture"
         return empty, "no anytime-scorer market available for this fixture"
 
     squads = load_squads(squads_path)
@@ -359,35 +445,28 @@ def build_goalscorers(
         except Exception:  # network/parse failure must not break the card
             pm_missing = ["(Polymarket lookup failed)"]
 
-    # Player-level MODEL pricing: StatsBomb npxg-share (data/players.json
-    # override store) + the DC team lambda, via ScorerPricer. Only players with
-    # a known share are priced — we never invent a share — so the rest stay
-    # market-only. The model price is what the Kelly edge/stake is taken against.
+    # Player-level MODEL pricing from the UNIFIED source: players.db StatsBomb
+    # npxg-shares merged with the data/players.json analyst overrides (override
+    # wins), via ScorerPricer. When players.db is unavailable this degrades to
+    # override-only, so behaviour is unchanged where the db isn't built. Only
+    # players with a known share are priced — a share is never invented.
     n_priced = 0
     if lambda_home > 0.0 and lambda_away > 0.0:
         try:
-            from wca.data.teamnames import canonical as _canon
-            from wca.models.scorers import ScorerPricer, load_player_overrides
+            from wca.models.scorers import ScorerPricer
 
-            overrides = load_player_overrides(players_path)
-            exact: Dict[Tuple[str, str], "object"] = {}
-            loose: Dict[Tuple[str, str], "object"] = {}
-            for tname, recs in overrides.items():
-                tc = _canon(tname)
-                for rec in recs:
-                    exact[(tc, _norm_name(rec.name))] = rec
-                    lk = _name_key(rec.name)
-                    if lk:
-                        loose.setdefault((tc, lk), rec)
+            params = _model_params(home_c, away_c, db_path, players_path)
             pricer = ScorerPricer()
             total_lambda = lambda_home + lambda_away
             for side in ("home", "away"):
                 team_lambda = lambda_home if side == "home" else lambda_away
+                tc = home_c if side == "home" else away_c
+                idx = params.get(tc, {})
                 for line in by_team[side]:
-                    rec = exact.get((line.team, _norm_name(line.player)))
+                    rec = idx.get(_norm_name(line.player))
                     if rec is None:
                         lk = _name_key(line.player)
-                        rec = loose.get((line.team, lk)) if lk else None
+                        rec = idx.get(lk) if lk else None
                     if rec is None:
                         continue
                     sl = pricer.price_player(rec, team_lambda, total_lambda)
@@ -444,6 +523,8 @@ def build_next_match(
     kelly_fraction: float = 0.25,
     kelly_cap: float = 0.05,
     players_path: str = "data/players.json",
+    db_path: Optional[str] = None,
+    model_only_fallback: bool = False,
 ) -> Optional[NextMatchCard]:
     """Build the next-match preview, or None when the slate is empty.
 
@@ -492,6 +573,8 @@ def build_next_match(
         lambda_home=lam_h,
         lambda_away=lam_a,
         players_path=players_path,
+        db_path=db_path,
+        model_only_fallback=model_only_fallback,
     )
 
     return NextMatchCard(
@@ -740,6 +823,8 @@ def build_goalscorer_card(
     kelly_cap: float = 0.05,
     pm_events: Optional[List[dict]] = None,
     pm_lookup: bool = True,
+    db_path: Optional[str] = None,
+    model_only_fallback: bool = False,
 ) -> List[GoalscorerFixture]:
     """Goalscorer blocks for the next ``top_k_fixtures`` fixtures by kickoff.
 
@@ -779,6 +864,8 @@ def build_goalscorer_card(
             lambda_home=lam_h,
             lambda_away=lam_a,
             players_path=players_path,
+            db_path=db_path,
+            model_only_fallback=model_only_fallback,
         )
         # If the squad split placed nobody but the market exists, fall back to a
         # flat top-anytime list (both teams) so the fixture still shows recs.
