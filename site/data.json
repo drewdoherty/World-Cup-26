@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-24T19:11:18"
+    "generated": "2026-06-24T19:11:47"
   },
   "totals": {
-    "wagered": 1542.1060000000004,
-    "open_stake": 753.27,
+    "wagered": 1561.1760000000004,
+    "open_stake": 772.34,
     "settled_pl": 54.99049999999998,
-    "n_bets": 127
+    "n_bets": 128
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 842.3399999999998,
-      "open_stake": 147.26,
+      "wagered": 861.4099999999997,
+      "open_stake": 166.32999999999998,
       "settled_pl": 83.12549999999999,
-      "n_bets": 93
+      "n_bets": 94
     },
     "USD": {
       "wagered": 699.7660000000001,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 842.3399999999998,
-      "open_stake": 147.26,
+      "wagered": 861.4099999999997,
+      "open_stake": 166.32999999999998,
       "settled_pl": 83.12549999999999,
-      "n_bets": 93,
+      "n_bets": 94,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 673.3399999999998,
-      "open_stake": 171.26,
+      "wagered": 692.4099999999997,
+      "open_stake": 190.32999999999998,
       "settled_pl": 128.12550000000002,
-      "n_bets": 72,
+      "n_bets": 73,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,20 @@
     }
   },
   "source_summary": {
+    "model": {
+      "GBP": {
+        "wagered": 275.84999999999997,
+        "open_stake": 80.83,
+        "settled_pl": 31.6655,
+        "n_bets": 33
+      },
+      "USD": {
+        "wagered": 686.4,
+        "open_stake": 605.01,
+        "settled_pl": -25.767999999999994,
+        "n_bets": 24
+      }
+    },
     "punt": {
       "GBP": {
         "wagered": 308.56,
@@ -74,20 +88,6 @@
         "open_stake": 1.0,
         "settled_pl": -2.367,
         "n_bets": 10
-      }
-    },
-    "model": {
-      "GBP": {
-        "wagered": 256.78,
-        "open_stake": 61.760000000000005,
-        "settled_pl": 31.6655,
-        "n_bets": 32
-      },
-      "USD": {
-        "wagered": 686.4,
-        "open_stake": 605.01,
-        "settled_pl": -25.767999999999994,
-        "n_bets": 24
       }
     },
     "offer": {
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "Smarkets": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 101.76,
+      "open_stake": 19.07,
+      "settled_pl": -11.306499999999993,
+      "n_bets": 15
+    },
     "Betfair Sportsbook": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -196,14 +204,6 @@
       "settled_pl": -10.0,
       "n_bets": 1
     },
-    "Smarkets": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 82.69000000000001,
-      "open_stake": 0.0,
-      "settled_pl": -11.306499999999993,
-      "n_bets": 14
-    },
     "Betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -214,57 +214,15 @@
     }
   },
   "platforms_by_account": {
-    "2": {
-      "Betfair Sportsbook": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 98.0,
-        "open_stake": 21.0,
-        "settled_pl": -5.0,
-        "n_bets": 13
-      },
-      "Betfair Exchange UK": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 16.0,
-        "open_stake": 0.0,
-        "settled_pl": -6.0,
-        "n_bets": 2
-      },
-      "Sky Bet": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 10.0,
-        "open_stake": 0.0,
-        "settled_pl": -10.0,
-        "n_bets": 1
-      },
-      "betfred": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 30.0,
-        "open_stake": 0.0,
-        "settled_pl": -30.0,
-        "n_bets": 3
-      },
-      "Paddy Power": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 5.0,
-        "open_stake": 0.0,
-        "settled_pl": -5.0,
-        "n_bets": 1
-      },
-      "polymarket": {
-        "venue": "polymarket",
-        "currency": "USD",
-        "wagered": 1.94,
-        "open_stake": 1.0,
-        "settled_pl": -0.94,
-        "n_bets": 2
-      }
-    },
     "1": {
+      "Smarkets": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 101.76,
+        "open_stake": 19.07,
+        "settled_pl": -11.306499999999993,
+        "n_bets": 15
+      },
       "bet365": {
         "venue": "sportsbook",
         "currency": "GBP",
@@ -345,14 +303,6 @@
         "settled_pl": -10.0,
         "n_bets": 1
       },
-      "Smarkets": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 82.69000000000001,
-        "open_stake": 0.0,
-        "settled_pl": -11.306499999999993,
-        "n_bets": 14
-      },
       "Betfair": {
         "venue": "sportsbook",
         "currency": "GBP",
@@ -360,6 +310,56 @@
         "open_stake": 0.0,
         "settled_pl": -10.0,
         "n_bets": 1
+      }
+    },
+    "2": {
+      "Betfair Sportsbook": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 98.0,
+        "open_stake": 21.0,
+        "settled_pl": -5.0,
+        "n_bets": 13
+      },
+      "Betfair Exchange UK": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 16.0,
+        "open_stake": 0.0,
+        "settled_pl": -6.0,
+        "n_bets": 2
+      },
+      "Sky Bet": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 10.0,
+        "open_stake": 0.0,
+        "settled_pl": -10.0,
+        "n_bets": 1
+      },
+      "betfred": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 30.0,
+        "open_stake": 0.0,
+        "settled_pl": -30.0,
+        "n_bets": 3
+      },
+      "Paddy Power": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 5.0,
+        "open_stake": 0.0,
+        "settled_pl": -5.0,
+        "n_bets": 1
+      },
+      "polymarket": {
+        "venue": "polymarket",
+        "currency": "USD",
+        "wagered": 1.94,
+        "open_stake": 1.0,
+        "settled_pl": -0.94,
+        "n_bets": 2
       }
     },
     "mum": {
@@ -3582,6 +3582,27 @@
       "cash_pnl": 0.13,
       "pct_pnl": 0.021667027783796398,
       "notes": "live PM position (data-API)"
+    },
+    {
+      "id": 155,
+      "ts_utc": "2026-06-24T19:11:47",
+      "match": "FIFA World Cup 2026 - Group K - Winner",
+      "match_id": "MANUAL_FIFA_WORLD_CUP_2026_GROUP_K_WINNER",
+      "market": "Outright",
+      "selection": "Portugal",
+      "platform": "Smarkets",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 1.91,
+      "stake": 19.07,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.88",
+      "manual_override": null
     },
     {
       "id": 154,
