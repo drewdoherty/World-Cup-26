@@ -7,7 +7,7 @@ name = "wca"
 version = "0.1.0"
 description = "World Cup Alpha - quantitative betting research platform for the 2026 FIFA World Cup"
 requires-python = ">=3.9"
-dependencies = ["numpy", "scipy", "pandas", "requests"]
+dependencies = ["numpy", "scipy", "pandas", "requests", "matplotlib"]
 
 [project.optional-dependencies]
 dev = ["pytest"]
