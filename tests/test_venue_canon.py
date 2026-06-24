@@ -52,10 +52,11 @@ backfill = _load_backfill()
         ("sky bet", "Sky Bet"),
         ("virginbet", "Virgin Bet"),
         ("virgin bet", "Virgin Bet"),
-        # Betfair exchange vs sportsbook stay DISTINCT
-        ("Betfair", "Betfair"),
+        # Hard rule: bare "Betfair" -> sportsbook; exchange requires explicit token.
+        ("Betfair", "Betfair Sportsbook"),
         ("betfair_ex_uk", "Betfair"),
         ("Betfair Exchange", "Betfair"),
+        ("Betfair ex", "Betfair"),
         ("Betfair Sportsbook", "Betfair Sportsbook"),
         ("betfair_sportsbook", "Betfair Sportsbook"),
         # unknown / empty / None
@@ -81,7 +82,10 @@ def test_bet365_variants_all_merge_to_one():
 
 
 def test_betfair_exchange_and_sportsbook_distinct():
-    assert canon_platform("Betfair") != canon_platform("Betfair Sportsbook")
+    # Exchange must use an explicit exchange token; bare "Betfair" is sportsbook.
+    assert canon_platform("betfair_ex_uk") != canon_platform("Betfair Sportsbook")
+    assert canon_platform("betfair_ex_uk") == "Betfair"
+    assert canon_platform("Betfair") == "Betfair Sportsbook"
 
 
 def test_canon_is_idempotent():
