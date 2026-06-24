@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-24T19:03:06"
+    "generated": "2026-06-24T19:11:18"
   },
   "totals": {
-    "wagered": 1528.6060000000004,
-    "open_stake": 739.77,
+    "wagered": 1542.1060000000004,
+    "open_stake": 753.27,
     "settled_pl": 54.99049999999998,
-    "n_bets": 124
+    "n_bets": 127
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 828.8399999999998,
-      "open_stake": 133.76,
+      "wagered": 842.3399999999998,
+      "open_stake": 147.26,
       "settled_pl": 83.12549999999999,
-      "n_bets": 90
+      "n_bets": 93
     },
     "USD": {
       "wagered": 699.7660000000001,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 828.8399999999998,
-      "open_stake": 133.76,
+      "wagered": 842.3399999999998,
+      "open_stake": 147.26,
       "settled_pl": 83.12549999999999,
-      "n_bets": 90,
+      "n_bets": 93,
       "currency": "GBP"
     },
     "polymarket": {
@@ -53,15 +53,29 @@
       "label": "Sportsbook 1"
     },
     "sportsbook_2": {
-      "wagered": 145.5,
-      "open_stake": 7.5,
+      "wagered": 159.0,
+      "open_stake": 21.0,
       "settled_pl": -56.0,
-      "n_bets": 17,
+      "n_bets": 20,
       "currency": "GBP",
       "label": "Sportsbook 2"
     }
   },
   "source_summary": {
+    "punt": {
+      "GBP": {
+        "wagered": 308.56,
+        "open_stake": 85.5,
+        "settled_pl": -17.61,
+        "n_bets": 30
+      },
+      "USD": {
+        "wagered": 13.366,
+        "open_stake": 1.0,
+        "settled_pl": -2.367,
+        "n_bets": 10
+      }
+    },
     "model": {
       "GBP": {
         "wagered": 256.78,
@@ -84,20 +98,6 @@
         "n_bets": 28
       }
     },
-    "punt": {
-      "GBP": {
-        "wagered": 295.06,
-        "open_stake": 72.0,
-        "settled_pl": -17.61,
-        "n_bets": 27
-      },
-      "USD": {
-        "wagered": 13.366,
-        "open_stake": 1.0,
-        "settled_pl": -2.367,
-        "n_bets": 10
-      }
-    },
     "hedge": {
       "GBP": {
         "wagered": 22.0,
@@ -111,10 +111,10 @@
     "Betfair Sportsbook": {
       "venue": "sportsbook",
       "currency": "GBP",
-      "wagered": 272.56,
-      "open_stake": 82.5,
+      "wagered": 286.06,
+      "open_stake": 96.0,
       "settled_pl": 104.56,
-      "n_bets": 24
+      "n_bets": 27
     },
     "bet365": {
       "venue": "sportsbook",
@@ -218,10 +218,10 @@
       "Betfair Sportsbook": {
         "venue": "sportsbook",
         "currency": "GBP",
-        "wagered": 84.5,
-        "open_stake": 7.5,
+        "wagered": 98.0,
+        "open_stake": 21.0,
         "settled_pl": -5.0,
-        "n_bets": 10
+        "n_bets": 13
       },
       "Betfair Exchange UK": {
         "venue": "sportsbook",
@@ -3058,9 +3058,9 @@
     }
   },
   "clv": {
-    "avg_clv": -0.014246881025987788,
-    "pct_beat_close": 0.5714285714285714,
-    "n_with_close": 28
+    "avg_clv": -0.015115462854604224,
+    "pct_beat_close": 0.5517241379310345,
+    "n_with_close": 29
   },
   "positions": [
     {
@@ -3211,12 +3211,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 63.13,
-      "cur_price": 0.597,
+      "cur_value": 62.87,
+      "cur_price": 0.5945,
       "avg_price": 0.6241,
       "shares": 105.7498,
-      "cash_pnl": -2.87,
-      "pct_pnl": -0.04348491437108239,
+      "cash_pnl": -3.13,
+      "pct_pnl": -0.04742431427926406,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3237,12 +3237,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 55.5,
-      "cur_price": 0.555,
+      "cur_value": 55.0,
+      "cur_price": 0.55,
       "avg_price": 0.6,
       "shares": 100.0,
-      "cash_pnl": -4.5,
-      "pct_pnl": -0.075,
+      "cash_pnl": -5.0,
+      "pct_pnl": -0.08333333333333333,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3582,6 +3582,69 @@
       "cash_pnl": 0.13,
       "pct_pnl": 0.021667027783796398,
       "notes": "live PM position (data-API)"
+    },
+    {
+      "id": 154,
+      "ts_utc": "2026-06-24T19:11:18",
+      "match": "Scotland vs Brazil",
+      "match_id": "MANUAL_SCOTLAND_VS_BRAZIL",
+      "market": "Foul Involvements",
+      "selection": "John McGinn to have 6 or more foul involvements",
+      "platform": "Betfair Sportsbook",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 4.333,
+      "stake": 1.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.90; boost",
+      "manual_override": null
+    },
+    {
+      "id": 153,
+      "ts_utc": "2026-06-24T19:11:18",
+      "match": "Scotland vs Brazil",
+      "match_id": "MANUAL_SCOTLAND_VS_BRAZIL",
+      "market": "Shots on Target / Chances Created",
+      "selection": "Scott McTominay to have 1 or more shots on target including woodwork & create 1 or more shots",
+      "platform": "Betfair Sportsbook",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 3.75,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.90; boost",
+      "manual_override": null
+    },
+    {
+      "id": 152,
+      "ts_utc": "2026-06-24T19:11:18",
+      "match": "Scotland vs Brazil",
+      "match_id": "MANUAL_SCOTLAND_VS_BRAZIL",
+      "market": "Shot on Target",
+      "selection": "Vinicius Junior & Matheus Cunha to have 1+ shots on target each (including woodwork)",
+      "platform": "Betfair Sportsbook",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 2.0,
+      "stake": 2.5,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.90; boost",
+      "manual_override": null
     },
     {
       "id": 151,
