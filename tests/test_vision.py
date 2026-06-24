@@ -175,6 +175,8 @@ def test_request_shape_and_headers() -> None:
     assert img["source"]["data"] == "YWJj"
     assert txt["type"] == "text"
     assert "JSON" in txt["text"]
+    assert "Paddy Power" in txt["text"]
+    assert "do NOT call that Betfair" in txt["text"]
 
 
 def test_multiple_bets_one_slip() -> None:

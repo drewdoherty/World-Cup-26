@@ -1296,6 +1296,31 @@ def resolve_tags(
 
 
 _SOURCE_WORD = {"model": "model", "offer": "offer", "punt": "punt"}
+_PLATFORM_OVERRIDES = {
+    "paddy": "Paddy Power",
+    "paddy power": "Paddy Power",
+    "paddypower": "Paddy Power",
+    "betfair": "Betfair",
+    "betfair sportsbook": "betfair_sportsbook",
+    "bet365": "bet365",
+    "smarkets": "Smarkets",
+    "polymarket": "polymarket",
+}
+
+
+def resolve_platform_override(text: Optional[str]) -> Optional[str]:
+    """Parse an optional bookmaker/platform override from a caption/reply.
+
+    This is intentionally separate from account/source tags so the existing
+    tag contract remains stable. It lets a human correct a vision bookmaker
+    miss with replies such as ``yes a1 offer paddy``.
+    """
+    t = " " + (text or "").lower() + " "
+    for token, platform in sorted(_PLATFORM_OVERRIDES.items(), key=lambda kv: -len(kv[0])):
+        pat = r"\b%s\b" % re.escape(token).replace(r"\ ", r"\s+")
+        if re.search(pat, t):
+            return platform
+    return None
 
 
 def _format_extracted(bets: List[Any], tags: Optional[Dict[str, str]] = None) -> str:
@@ -1338,6 +1363,8 @@ def _format_extracted(bets: List[Any], tags: Optional[Dict[str, str]] = None) ->
             "\nTags: account *%s* | source *%s*  "
             "(override in your reply, e.g. `yes a2 offer`)" % (acct, src)
         )
+        if tags.get("platform"):
+            lines[-1] += "\nPlatform override: *%s*" % tags["platform"]
     lines.append(
         "\nReply *yes* to log all to the ledger, *no* to discard. "
         "Tag the reply to set provenance, e.g. `yes 2 offer` / `yes punt` "
@@ -1389,6 +1416,10 @@ def handle_photo(
     explicit_source = bool(re.search(r"\b(model|offer|punt)\b", (caption or "").lower()))
     if free_detected and not explicit_source:
         tags = {**tags, "source": "offer"}
+    platform = resolve_platform_override(caption)
+    if platform:
+        tags = dict(tags)
+        tags["platform"] = platform
     pending[chat_id] = bets
     pending_tags[chat_id] = tags
     reply = _format_extracted(bets, tags)
@@ -1451,6 +1482,7 @@ def handle_photo_confirmation(
     )
     account = tags["account"]
     source = tags["source"]
+    platform = resolve_platform_override(text) or parked_tags.get("platform")
 
     if ts_utc is None:
         ts_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
@@ -1483,7 +1515,7 @@ def handle_photo_confirmation(
                 b.match_desc,
                 b.market or "unknown",
                 b.selection,
-                _canon_platform(b.bookmaker or "unknown"),
+                _canon_platform(platform or b.bookmaker or "unknown"),
                 float(b.decimal_odds or 0.0),
                 float(b.stake or 0.0),
                 # model_prob and ev are populated by _enrich_bets_from_card() when

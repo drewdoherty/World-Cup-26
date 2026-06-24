@@ -117,6 +117,42 @@ def test_format_extracted_breaks_out_combo_legs():
     assert "Parsed 1 bet(s)" in out
 
 
+def test_confirmation_reply_can_override_bad_bookmaker_to_paddy_power(tmp_path):
+    db = str(tmp_path / "t.db")
+    pending = {7: [_bet("England vs Ghana", "England -2.5 Goals",
+                        market="Bet Builder", decimal_odds=5.52, stake=5.0,
+                        bookmaker="Betfair")]}
+    out = app.handle_photo_confirmation(
+        "yes a1 offer paddy",
+        7,
+        db,
+        pending,
+        ts_utc="2026-06-20T10:00:00",
+    )
+    assert "Logged 1" in out
+    con = sqlite3.connect(db)
+    row = con.execute("select platform, account, source from bets").fetchone()
+    con.close()
+    assert row == ("Paddy Power", "1", "offer")
+
+
+def test_photo_caption_can_override_bad_bookmaker_to_paddy_power(monkeypatch, tmp_path):
+    parsed = [_bet("England vs Ghana", "England -2.5 Goals",
+                   bookmaker="Betfair", decimal_odds=5.52, stake=5.0)]
+    monkeypatch.setattr(vision, "extract_bets_from_image", lambda *a, **k: parsed)
+    pending, ptags = {}, {}
+    msg = app.handle_photo(b"img", 7, pending, caption="a1 offer paddypower",
+                           pending_tags=ptags)
+    assert "Platform override: *Paddy Power*" in msg
+    db = str(tmp_path / "t.db")
+    app.handle_photo_confirmation("yes", 7, db, pending, pending_tags=ptags,
+                                  ts_utc="2026-06-20T10:00:00")
+    con = sqlite3.connect(db)
+    row = con.execute("select platform, account, source from bets").fetchone()
+    con.close()
+    assert row == ("Paddy Power", "1", "offer")
+
+
 def test_confirmation_no_discards(tmp_path):
     db = str(tmp_path / "t.db")
     pending = {7: [_bet("A vs B", "A", decimal_odds=2.0, stake=1.0)]}
