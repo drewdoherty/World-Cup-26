@@ -675,18 +675,27 @@ def handle_scores(
         scores = fx.get("scores") or []
         if not scores:
             continue
-        # Top score (most likely).
+
+        # Fixture name on its own line.
+        lines.append("*%s*" % fx["fixture"])
+
+        # xG forecast from the model (home – away).
+        xg_home = fx.get("xg_home")
+        xg_away = fx.get("xg_away")
+        if xg_home is not None and xg_away is not None:
+            lines.append("xG %.2f – %.2f" % (xg_home, xg_away))
+
+        # Top score (most likely) + up to 4 runner-ups.
         top = scores[0]
         top_str = "*%s* (%s%%)" % (top["score"], _fmt_prob(top["prob"]))
-        # Up to 4 runner-ups (indices 1-4) — kept inline to satisfy existing assertions.
         runners = scores[1:5]
         runner_strs = [
             "%s %s%%" % (s["score"], _fmt_prob(s["prob"])) for s in runners
         ]
-        fixture_line = "*%s*: %s" % (fx["fixture"], top_str)
+        score_line = top_str
         if runner_strs:
-            fixture_line += "  | " + " | ".join(runner_strs)
-        lines.append(fixture_line)
+            score_line += "  | " + " | ".join(runner_strs)
+        lines.append(score_line)
 
         # O/U + BTTS dimmed line (indented).
         ou = fx.get("over_under")

@@ -24,6 +24,7 @@ _CARD_BODY = (
     "*World Cup Alpha — scorelines* (2 fixtures)\n"
     "\n"
     "*Mexico vs South Africa*\n"
+    "    xG: 1.47-0.89\n"
     "    1-0  16.9%  fair 5.91  back >= 6.03\n"
     "    2-0  15.5%  fair 6.45  back >= 6.57\n"
     "    2-1  10.2%  fair 9.84  back >= 10.03\n"
@@ -33,6 +34,7 @@ _CARD_BODY = (
     "    O/U 2.5: over 45.8% / under 54.2%   BTTS 39.0%\n"
     "\n"
     "*South Korea vs Czech Republic*\n"
+    "    xG: 1.12-1.05\n"
     "    1-1  13.8%  fair 7.24  back >= 7.39\n"
     "    1-0  13.0%  fair 7.69  back >= 7.84\n"
     "    0-0  11.5%  fair 8.66  back >= 8.83\n"
@@ -97,23 +99,33 @@ def test_runner_up_scores_shown_inline(tmp_path):
     assert "2-0" in out
     assert "2-1" in out
     assert "3-0" in out
-    # Runner-ups must appear on the same line as the fixture (pipe separator).
-    mex_line = [l for l in out.splitlines() if "*Mexico vs South Africa*:" in l]
-    assert mex_line, "expected a line with '*Mexico vs South Africa*:'"
-    line = mex_line[0]
-    assert "|" in line
-    # 2-0 and 2-1 must be on that line.
-    assert "2-0" in line
-    assert "2-1" in line
+    lines = out.splitlines()
+    # Fixture name is now on its own line; scorelines follow on the next non-xG line.
+    mex_name_idx = next(
+        i for i, l in enumerate(lines) if l.strip() == "*Mexico vs South Africa*"
+    )
+    # Skip the xG line (if present) to find the scoreline row.
+    score_line = next(
+        l for l in lines[mex_name_idx + 1:] if not l.startswith("xG")
+    )
+    assert "|" in score_line
+    assert "2-0" in score_line
+    assert "2-1" in score_line
 
 
 def test_at_most_four_runners_shown(tmp_path):
-    """The 5th runner-up (0-0 at 7.6%) must not appear on the fixture line."""
+    """The 5th runner-up (0-0 at 7.6%) must not appear on the scoreline row."""
     path = _write_card(str(tmp_path))
     out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
-    mex_line = [l for l in out.splitlines() if "*Mexico vs South Africa*:" in l][0]
+    lines = out.splitlines()
+    mex_name_idx = next(
+        i for i, l in enumerate(lines) if l.strip() == "*Mexico vs South Africa*"
+    )
+    score_line = next(
+        l for l in lines[mex_name_idx + 1:] if not l.startswith("xG")
+    )
     # 0-0 is the 6th scoreline — runner-up #5 — must be absent from the inline list.
-    assert "0-0" not in mex_line
+    assert "0-0" not in score_line
 
 
 def test_ou_and_btts_line_present(tmp_path):
@@ -140,11 +152,47 @@ def test_second_fixture_scores_present(tmp_path):
     path = _write_card(str(tmp_path))
     out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
     # 1-1 top for South Korea, plus runners.
-    sk_line = [l for l in out.splitlines() if "*South Korea vs Czech Republic*:" in l]
-    assert sk_line
-    line = sk_line[0]
-    assert "*1-1*" in line
-    assert "1-0" in line
+    lines = out.splitlines()
+    sk_name_idx = next(
+        i for i, l in enumerate(lines) if "South Korea vs Czech Republic" in l and l.startswith("*")
+    )
+    score_line = next(
+        l for l in lines[sk_name_idx + 1:] if not l.startswith("xG")
+    )
+    assert "*1-1*" in score_line
+    assert "1-0" in score_line
+
+
+def test_xg_shown_between_fixture_name_and_scorelines(tmp_path):
+    """xG line must appear after the fixture name and before the scoreline row."""
+    path = _write_card(str(tmp_path))
+    out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
+    lines = out.splitlines()
+    mex_name_idx = next(
+        i for i, l in enumerate(lines) if l.strip() == "*Mexico vs South Africa*"
+    )
+    xg_line = lines[mex_name_idx + 1]
+    assert xg_line.startswith("xG"), "xG line must follow immediately after fixture name"
+    assert "1.47" in xg_line
+    assert "0.89" in xg_line
+    # Scoreline row must come after the xG line.
+    score_line = lines[mex_name_idx + 2]
+    assert "*1-0*" in score_line
+
+
+def test_xg_absent_when_not_in_card(tmp_path):
+    """Cards without an xG line must not show xG in the Telegram output."""
+    path = os.path.join(str(tmp_path), "card.md")
+    no_xg_body = (
+        "*World Cup Alpha — scorelines* (1 fixtures)\n"
+        "\n"
+        "*A vs B*\n"
+        "    1-0  20.0%  fair 5.00  back >= 5.10\n"
+        "    O/U 2.5: over 50.0% / under 50.0%   BTTS 40.0%\n"
+    )
+    cardcache.write_card(no_xg_body, path, ts_utc="2026-06-11T12:00:00")
+    out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
+    assert "xG" not in out
 
 
 # ---------------------------------------------------------------------------

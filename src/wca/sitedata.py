@@ -72,6 +72,11 @@ _OU_RE = re.compile(
     r"\s*$"
 )
 
+# Expected-goals line: "xG: 1.47-0.89" (home - away), emitted by format_scores.
+_XG_RE = re.compile(
+    r"^xG:\s*(?P<home>\d+(?:\.\d+)?)\s*-\s*(?P<away>\d+(?:\.\d+)?)\s*$"
+)
+
 # Header of the scorelines section itself.
 _SCORELINES_HEADER_RE = re.compile(r"^\*World Cup Alpha\s*[—-]\s*scorelines\*")
 
@@ -140,6 +145,13 @@ def parse_scorelines(card_text: str) -> List[Dict[str, Any]]:
         if line.startswith("*World Cup Alpha"):
             break
 
+        # Expected-goals line: "xG: 1.47-0.89".
+        xg_match = _XG_RE.match(line)
+        if xg_match and current is not None:
+            current["xg_home"] = _to_opt_float(xg_match.group("home"))
+            current["xg_away"] = _to_opt_float(xg_match.group("away"))
+            continue
+
         # Over/under + BTTS summary (check before the generic fixture regex,
         # which would not match anyway, but order keeps intent clear).
         ou_match = _OU_RE.match(line)
@@ -171,6 +183,8 @@ def parse_scorelines(card_text: str) -> List[Dict[str, Any]]:
                 "scores": [],
                 "over_under": None,
                 "btts": None,
+                "xg_home": None,
+                "xg_away": None,
             }
             fixtures.append(current)
             continue

@@ -837,11 +837,12 @@ def format_scores(
 ) -> str:
     """Human-readable scoreline card for the terminal or Telegram (Markdown).
 
-    Per fixture: the top-6 scorelines (``"2-1  12.3%  fair 8.13  back >= 8.46"``)
-    followed by one line with over/under 2.5 and BTTS probabilities. The
-    ``back >=`` price is the minimum decimal odds at which backing that
-    scoreline clears ``min_edge`` (each card's own ``min_edge`` is used; the
-    argument is a display-only fallback for cards that predate it).
+    Per fixture: expected goals from the model, the top-6 scorelines
+    (``"2-1  12.3%  fair 8.13  back >= 8.46"``) followed by one line with
+    over/under 2.5 and BTTS probabilities.  The ``back >=`` price is the
+    minimum decimal odds at which backing that scoreline clears ``min_edge``
+    (each card's own ``min_edge`` is used; the argument is a display-only
+    fallback for cards that predate it).
     """
     if not cards:
         return "*No scoreline cards* for the current slate."
@@ -850,6 +851,12 @@ def format_scores(
         me = getattr(c, "min_edge", min_edge)
         lines.append("")
         lines.append("*%s vs %s*" % (c.home, c.away))
+        # Expected goals from the reconciled score-probability matrix.
+        rows = np.arange(c.matrix.shape[0])
+        cols = np.arange(c.matrix.shape[1])
+        eh = float((rows * c.matrix.sum(axis=1)).sum())
+        ea = float((cols * c.matrix.sum(axis=0)).sum())
+        lines.append("    xG: %.2f-%.2f" % (eh, ea))
         for h, a, p in c.top_scorelines:
             lines.append(
                 "    %d-%d  %.1f%%  fair %.2f  back >= %.2f"

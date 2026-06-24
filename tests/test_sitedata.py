@@ -82,6 +82,7 @@ _SYNTH_CARD = """<!-- generated: 2026-06-11T11:52:08 -->
 *World Cup Alpha — scorelines* (2 fixtures)
 
 *Mexico vs South Africa*
+    xG: 1.47-0.89
     1-0  16.9%  fair 5.91  back >= 6.03
     2-0  15.5%  fair 6.45  back >= 6.57
     2-1  10.2%  fair 9.84  back >= 10.03
@@ -91,6 +92,7 @@ _SYNTH_CARD = """<!-- generated: 2026-06-11T11:52:08 -->
     O/U 2.5: over 45.8% / under 54.2%   BTTS 39.0%
 
 *South Korea vs Czech Republic*
+    xG: 1.12-1.05
     1-1  13.8%  fair 7.24  back >= 7.39
     1-0  13.0%  fair 7.69  back >= 7.84
     0-0  11.5%  fair 8.66  back >= 8.83
@@ -145,6 +147,31 @@ class TestParseScorelines:
         assert mex["over_under"]["over"] == pytest.approx(45.8)
         assert mex["over_under"]["under"] == pytest.approx(54.2)
         assert mex["btts"] == pytest.approx(39.0)
+
+    def test_xg_parsed(self) -> None:
+        preds = sitedata.parse_scorelines(_SYNTH_CARD)
+        mex = preds[0]
+        assert mex["xg_home"] == pytest.approx(1.47)
+        assert mex["xg_away"] == pytest.approx(0.89)
+        sk = preds[1]
+        assert sk["xg_home"] == pytest.approx(1.12)
+        assert sk["xg_away"] == pytest.approx(1.05)
+
+    def test_xg_absent_gives_none(self) -> None:
+        text = (
+            "*World Cup Alpha — scorelines* (1 fixtures)\n\n"
+            "*A vs B*\n"
+            "    1-0  20.0%  fair 5.00  back >= 5.10\n"
+            "    O/U 2.5: over 50.0% / under 50.0%   BTTS 40.0%\n"
+        )
+        preds = sitedata.parse_scorelines(text)
+        assert preds[0]["xg_home"] is None
+        assert preds[0]["xg_away"] is None
+
+    def test_xg_does_not_count_as_scoreline(self) -> None:
+        preds = sitedata.parse_scorelines(_SYNTH_CARD)
+        # The xG line must not be included in the scores list.
+        assert len(preds[0]["scores"]) == 6
 
     def test_no_section_returns_empty(self) -> None:
         assert sitedata.parse_scorelines("just some text\nno section here") == []
