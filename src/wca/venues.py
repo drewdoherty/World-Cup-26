@@ -5,8 +5,9 @@ the single source of truth for venue-name canonicalisation, applied at every
 ledger write path so the live site never shows ``Bet365`` and ``bet365`` (or
 ``Unknown`` and ``''``) as separate books.
 
-Betfair Exchange (betfair_ex_uk, "Betfair Exchange", bare "Betfair") -> "Betfair"
-Betfair Sportsbook ("Betfair Sportsbook", betfair_sportsbook)        -> "Betfair Sportsbook"
+Betfair Exchange (betfair_ex_uk, "Betfair Exchange", "betfair ex") -> "Betfair"
+Betfair Sportsbook ("Betfair Sportsbook", bare "betfair", betfair_sportsbook) -> "Betfair Sportsbook"
+Hard rule: bare "Betfair" always maps to sportsbook. Exchange must be explicit.
 These two are genuinely different venues and are NOT merged.
 """
 from __future__ import annotations
@@ -28,13 +29,14 @@ def canon_platform(raw: str) -> str:
     # title-casing them would silently fork the currency pools.
     if pl in ("polymarket", "polymarket-auto", "kalshi"):
         return pl
-    # Exchange variants — bare "Betfair" or anything mentioning "exchange"
-    if pl in ("betfair", "betfair_ex_uk", "betfair_ex_eu", "betfair exchange", "betfair ex"):
+    # Exchange variants — ONLY explicit exchange tokens map to "Betfair" (exchange).
+    # Hard rule: bare "betfair" is treated as sportsbook, not exchange.
+    if pl in ("betfair_ex_uk", "betfair_ex_eu", "betfair exchange", "betfair ex"):
         return "Betfair"
     if "betfair" in pl and "exchange" in pl:
         return "Betfair"
-    # Sportsbook variants
-    if pl in ("betfair_sportsbook", "betfair sportsbook", "betfair sports"):
+    # Sportsbook variants — bare "betfair" defaults here (hard rule per account routing policy).
+    if pl in ("betfair", "betfair_sportsbook", "betfair sportsbook", "betfair sports"):
         return "Betfair Sportsbook"
     if "betfair" in pl and ("sports" in pl or "sb" in pl):
         return "Betfair Sportsbook"
@@ -51,7 +53,7 @@ def canon_platform(raw: str) -> str:
         "betfred": "Betfred",
         "betway": "Betway",
         "ladbrokes": "Ladbrokes",
-        "betfair": "Betfair",  # fallback bare match (already caught above but safety)
+        # Note: "betfair" is caught by the hard-rule block above; not reached here.
     }
     if pl in _MAP:
         return _MAP[pl]

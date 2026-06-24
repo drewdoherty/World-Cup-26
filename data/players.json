@@ -1,5 +1,5 @@
 {
-  "_note": "Analyst-estimated player params pending a live xG / penalty-taker feed. Teams absent from the StatsBomb WC2018/2022 dataset (e.g. Scotland 2026) are maintained here by hand. Replace `source: analyst_estimate` records as real data lands.",
+  "_note": "Analyst-estimated player params pending a live xG / penalty-taker feed. npxg_share is each player's share of team NON-penalty xG; the top 5-6 per team sum to ~0.70-0.90 (remainder to defenders, set pieces, etc.). Replace `source: analyst_estimate` records as real data lands. Canonical team names match wca.data.teamnames.canonical. Last bulk update: 2026-06-24.",
   "_schema": {
     "name": "string",
     "npxg_share": "player's share of team NON-penalty xG, 0..1",
@@ -7,12 +7,1757 @@
     "expected_minutes": "0..90",
     "source": "provenance tag"
   },
+  "Argentina": [
+    {
+      "name": "Lionel Messi",
+      "npxg_share": 0.28,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Lautaro Martinez",
+      "npxg_share": 0.22,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Julian Alvarez",
+      "npxg_share": 0.15,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Rodrigo De Paul",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Paulo Dybala",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 55,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Alejandro Garnacho",
+      "npxg_share": 0.09,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Australia": [
+    {
+      "name": "Mathew Leckie",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Tete Yengi",
+      "npxg_share": 0.20,
+      "penalty_taker": true,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Nestory Irankunda",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ajdin Hrustic",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Awer Mabil",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Cristian Volpato",
+      "npxg_share": 0.09,
+      "penalty_taker": false,
+      "expected_minutes": 60,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Austria": [
+    {
+      "name": "Marko Arnautovic",
+      "npxg_share": 0.22,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Marcel Sabitzer",
+      "npxg_share": 0.14,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Christoph Baumgartner",
+      "npxg_share": 0.13,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Michael Gregoritsch",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Florian Grillitsch",
+      "npxg_share": 0.07,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Patrick Wimmer",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Belgium": [
+    {
+      "name": "Romelu Lukaku",
+      "npxg_share": 0.26,
+      "penalty_taker": true,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Leandro Trossard",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Lois Openda",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Yannick Carrasco",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Kevin De Bruyne",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Johan Bakayoko",
+      "npxg_share": 0.09,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Bosnia and Herzegovina": [
+    {
+      "name": "Edin Dzeko",
+      "npxg_share": 0.24,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ermedin Demirovic",
+      "npxg_share": 0.20,
+      "penalty_taker": true,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Rade Krunic",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Sasa Kalajdzic",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 60,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Miralem Pjanic",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Brazil": [
+    {
+      "name": "Vinicius Junior",
+      "npxg_share": 0.22,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Rodrygo",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Gabriel Martinelli",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Endrick",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Raphinha",
+      "npxg_share": 0.13,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Lucas Paqueta",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Canada": [
+    {
+      "name": "Alphonso Davies",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Jonathan David",
+      "npxg_share": 0.28,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Cyle Larin",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Tajon Buchanan",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Stephen Eustaquio",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Liam Millar",
+      "npxg_share": 0.09,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Cape Verde": [
+    {
+      "name": "Garry Rodrigues",
+      "npxg_share": 0.20,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ryan Mendes",
+      "npxg_share": 0.18,
+      "penalty_taker": true,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Julio Tavares",
+      "npxg_share": 0.22,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Kenny Rocha Santos",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Stopira",
+      "npxg_share": 0.06,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    }
+  ],
+  "China PR": [
+    {
+      "name": "Wu Lei",
+      "npxg_share": 0.28,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Alan",
+      "npxg_share": 0.20,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Xie Pengfei",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Zhang Linpeng",
+      "npxg_share": 0.07,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Duan Liuyu",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Croatia": [
+    {
+      "name": "Andrej Kramaric",
+      "npxg_share": 0.25,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ivan Perisic",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Bruno Petkovic",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Luka Modric",
+      "npxg_share": 0.09,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Marko Livaja",
+      "npxg_share": 0.13,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Czech Republic": [
+    {
+      "name": "Patrik Schick",
+      "npxg_share": 0.30,
+      "penalty_taker": true,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Adam Hlozek",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Tomas Soucek",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ondrej Lingr",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ladislav Krejci",
+      "npxg_share": 0.09,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Curaçao": [
+    {
+      "name": "Cuco Martina",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Leandro Bacuna",
+      "npxg_share": 0.18,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Juriaan van der Wal",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Elson Hooi",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Rangelo Janga",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Ecuador": [
+    {
+      "name": "Enner Valencia",
+      "npxg_share": 0.26,
+      "penalty_taker": true,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Gonzalo Plata",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Michael Estrada",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Jeremy Sarmiento",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Romario Ibarra",
+      "npxg_share": 0.09,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Egypt": [
+    {
+      "name": "Mohamed Salah",
+      "npxg_share": 0.35,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Mostafa Mohamed",
+      "npxg_share": 0.22,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Omar Marmoush",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Trezeguet",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Amr El Sulaya",
+      "npxg_share": 0.06,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    }
+  ],
+  "England": [
+    {
+      "name": "Harry Kane",
+      "npxg_share": 0.28,
+      "penalty_taker": true,
+      "expected_minutes": 90,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Phil Foden",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Bukayo Saka",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Marcus Rashford",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Jude Bellingham",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Cole Palmer",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    }
+  ],
+  "France": [
+    {
+      "name": "Kylian Mbappe",
+      "npxg_share": 0.30,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Antoine Griezmann",
+      "npxg_share": 0.15,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ousmane Dembele",
+      "npxg_share": 0.13,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Marcus Thuram",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Randal Kolo Muani",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 60,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Bradley Barcola",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Germany": [
+    {
+      "name": "Kai Havertz",
+      "npxg_share": 0.22,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Florian Wirtz",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Leroy Sane",
+      "npxg_share": 0.13,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Jamal Musiala",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Thomas Muller",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Niclas Fullkrug",
+      "npxg_share": 0.15,
+      "penalty_taker": false,
+      "expected_minutes": 60,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Ghana": [
+    {
+      "name": "Jordan Ayew",
+      "npxg_share": 0.20,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Mohammed Kudus",
+      "npxg_share": 0.24,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Antoine Semenyo",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Inaki Williams",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Abdul Fatawu Issahaku",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Haiti": [
+    {
+      "name": "Duckens Nazon",
+      "npxg_share": 0.24,
+      "penalty_taker": true,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Frantzdy Pierrot",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Wilde-Donald Guerrier",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Derrick Etienne",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Kevin Lafrance",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Iran": [
+    {
+      "name": "Sardar Azmoun",
+      "npxg_share": 0.28,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Mehdi Taremi",
+      "npxg_share": 0.30,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Allahyar Sayyadmanesh",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ali Gholizadeh",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Karim Ansarifard",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 55,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Iraq": [
+    {
+      "name": "Aymen Hussein",
+      "npxg_share": 0.24,
+      "penalty_taker": true,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Mohanad Ali",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ali Adnan",
+      "npxg_share": 0.09,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Amjed Attwan",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Hussein Ali",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Ivory Coast": [
+    {
+      "name": "Sebastien Haller",
+      "npxg_share": 0.26,
+      "penalty_taker": true,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Nicolas Pepe",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Wilfried Zaha",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Franck Kessie",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Simon Adingra",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Japan": [
+    {
+      "name": "Ayase Ueda",
+      "npxg_share": 0.24,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Kaoru Mitoma",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ritsu Doan",
+      "npxg_share": 0.14,
+      "penalty_taker": true,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Daichi Kamada",
+      "npxg_share": 0.11,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Takefusa Kubo",
+      "npxg_share": 0.13,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Yuya Osako",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 55,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Jordan": [
+    {
+      "name": "Mousa Al-Taamari",
+      "npxg_share": 0.22,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ahmad Ibrahim",
+      "npxg_share": 0.16,
+      "penalty_taker": true,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Baha Faisal",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Amer Shafi",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Yazan Al-Naimat",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Mexico": [
+    {
+      "name": "Hirving Lozano",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Santiago Gimenez",
+      "npxg_share": 0.26,
+      "penalty_taker": true,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Henry Martin",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Alexis Vega",
+      "npxg_share": 0.11,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Uriel Antuna",
+      "npxg_share": 0.09,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Raul Jimenez",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 60,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Morocco": [
+    {
+      "name": "Youssef En-Nesyri",
+      "npxg_share": 0.28,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Hakim Ziyech",
+      "npxg_share": 0.14,
+      "penalty_taker": true,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Sofiane Boufal",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ayoub El Kaabi",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Yassine Bounou",
+      "npxg_share": 0.04,
+      "penalty_taker": false,
+      "expected_minutes": 90,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Azzedine Ounahi",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Netherlands": [
+    {
+      "name": "Memphis Depay",
+      "npxg_share": 0.20,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Cody Gakpo",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Donyell Malen",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Wout Weghorst",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Xavi Simons",
+      "npxg_share": 0.13,
+      "penalty_taker": true,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Steven Bergwijn",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Norway": [
+    {
+      "name": "Erling Haaland",
+      "npxg_share": 0.38,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Martin Odegaard",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Alexander Sorloth",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Mohamed Elyounoussi",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Joergen-Strand Larsen",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 60,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Panama": [
+    {
+      "name": "Ismael Diaz",
+      "npxg_share": 0.22,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Rolando Blackburn",
+      "npxg_share": 0.20,
+      "penalty_taker": true,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Jose Fajardo",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Edgar Barcenas",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Frederico Piovaccari",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 60,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Portugal": [
+    {
+      "name": "Cristiano Ronaldo",
+      "npxg_share": 0.28,
+      "penalty_taker": true,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Bruno Fernandes",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Rafael Leao",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Diogo Jota",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Goncalo Ramos",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Bernardo Silva",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Qatar": [
+    {
+      "name": "Akram Afif",
+      "npxg_share": 0.28,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Almoez Ali",
+      "npxg_share": 0.24,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Hassan Al-Haydos",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Yusuf Abdurisag",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ismaeel Mohammad",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Saudi Arabia": [
+    {
+      "name": "Saleh Al-Shehri",
+      "npxg_share": 0.22,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Salem Al-Dawsari",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Firas Al-Buraikan",
+      "npxg_share": 0.20,
+      "penalty_taker": true,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Sami Al-Najei",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Mohammed Al-Burayk",
+      "npxg_share": 0.07,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    }
+  ],
   "Scotland": [
     {
       "name": "Lawrence Shankland",
       "npxg_share": 0.30,
       "penalty_taker": true,
       "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Lyndon Dykes",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ryan Christie",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Stuart Armstrong",
+      "npxg_share": 0.09,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Scott McTominay",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ryan Fraser",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 60,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Senegal": [
+    {
+      "name": "Sadio Mane",
+      "npxg_share": 0.28,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ismaila Sarr",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Boulaye Dia",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Nicolas Jackson",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Krepin Diatta",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    }
+  ],
+  "South Africa": [
+    {
+      "name": "Percy Tau",
+      "npxg_share": 0.22,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Bongani Zungu",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Evidence Makgopa",
+      "npxg_share": 0.22,
+      "penalty_taker": true,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Themba Zwane",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Lyle Foster",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "South Korea": [
+    {
+      "name": "Son Heung-min",
+      "npxg_share": 0.32,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Hwang Hee-chan",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Hwang Ui-jo",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Lee Jae-sung",
+      "npxg_share": 0.09,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Cho Gue-sung",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Spain": [
+    {
+      "name": "Alvaro Morata",
+      "npxg_share": 0.22,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ferran Torres",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Dani Olmo",
+      "npxg_share": 0.13,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Lamine Yamal",
+      "npxg_share": 0.15,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Nico Williams",
+      "npxg_share": 0.13,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Pedri",
+      "npxg_share": 0.09,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Sweden": [
+    {
+      "name": "Viktor Gyokeres",
+      "npxg_share": 0.34,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Alexander Isak",
+      "npxg_share": 0.22,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Dejan Kulusevski",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Emil Forsberg",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Anthony Elanga",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Switzerland": [
+    {
+      "name": "Breel Embolo",
+      "npxg_share": 0.26,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Xherdan Shaqiri",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Haris Seferovic",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ruben Vargas",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Remo Freuler",
+      "npxg_share": 0.08,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Zeki Amdouni",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Tunisia": [
+    {
+      "name": "Youssef Msakni",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Wahbi Khazri",
+      "npxg_share": 0.16,
+      "penalty_taker": true,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Seifeddine Jaziri",
+      "npxg_share": 0.18,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Issam Jebali",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Anis Ben Slimane",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    }
+  ],
+  "United States": [
+    {
+      "name": "Christian Pulisic",
+      "npxg_share": 0.20,
+      "penalty_taker": true,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Folarin Balogun",
+      "npxg_share": 0.22,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Ricardo Pepi",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Giovanni Reyna",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Timothy Weah",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Alejandro Zendejas",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Uruguay": [
+    {
+      "name": "Darwin Nunez",
+      "npxg_share": 0.26,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Luis Suarez",
+      "npxg_share": 0.18,
+      "penalty_taker": true,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Facundo Torres",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Rodrigo Bentancur",
+      "npxg_share": 0.08,
+      "penalty_taker": false,
+      "expected_minutes": 85,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Maxi Gomez",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 65,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Uzbekistan": [
+    {
+      "name": "Eldor Shomurodov",
+      "npxg_share": 0.28,
+      "penalty_taker": true,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Otabek Shukurov",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Dostonbek Khamdamov",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Jaloliddin Masharipov",
+      "npxg_share": 0.16,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Abbosbek Fayzullaev",
+      "npxg_share": 0.12,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    }
+  ],
+  "Algeria": [
+    {
+      "name": "Riyad Mahrez",
+      "npxg_share": 0.26,
+      "penalty_taker": true,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Islam Slimani",
+      "npxg_share": 0.20,
+      "penalty_taker": false,
+      "expected_minutes": 70,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Youcef Atal",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 80,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Said Benrahma",
+      "npxg_share": 0.14,
+      "penalty_taker": false,
+      "expected_minutes": 75,
+      "source": "analyst_estimate"
+    },
+    {
+      "name": "Azzedine Ounahi",
+      "npxg_share": 0.10,
+      "penalty_taker": false,
+      "expected_minutes": 75,
       "source": "analyst_estimate"
     }
   ]

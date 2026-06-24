@@ -1477,6 +1477,10 @@ def handle_photo_confirmation(
                 _canon_platform(b.bookmaker or "unknown"),
                 float(b.decimal_odds or 0.0),
                 float(b.stake or 0.0),
+                # model_prob and ev are populated by _enrich_bets_from_card() when
+                # the card has a matching pick; None for accas/bet-builders/promos.
+                model_prob=getattr(b, "model_prob", None),
+                ev=getattr(b, "ev", None),
                 notes=note,
                 account=account,
                 source=source,
