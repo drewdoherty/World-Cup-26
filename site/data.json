@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-24 11:08:01 UTC"
+    "generated": "2026-06-24T11:21:17"
   },
   "totals": {
-    "wagered": 1407.6360000000002,
+    "wagered": 1427.6360000000002,
     "open_stake": 648.8,
     "settled_pl": 54.99049999999998,
-    "n_bets": 118
+    "n_bets": 119
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 791.3399999999998,
+      "wagered": 811.3399999999998,
       "open_stake": 126.26,
       "settled_pl": 83.12549999999999,
-      "n_bets": 87
+      "n_bets": 88
     },
     "USD": {
       "wagered": 616.2959999999999,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 791.3399999999998,
+      "wagered": 811.3399999999998,
       "open_stake": 126.26,
       "settled_pl": 83.12549999999999,
-      "n_bets": 87,
+      "n_bets": 88,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 643.3399999999999,
-      "open_stake": 141.26,
+      "wagered": 663.3399999999998,
+      "open_stake": 161.26,
       "settled_pl": 128.12550000000002,
-      "n_bets": 70,
+      "n_bets": 71,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,14 @@
     }
   },
   "source_summary": {
+    "offer": {
+      "GBP": {
+        "wagered": 245.0,
+        "open_stake": 35.0,
+        "settled_pl": 81.07,
+        "n_bets": 27
+      }
+    },
     "punt": {
       "GBP": {
         "wagered": 295.06,
@@ -90,14 +98,6 @@
         "n_bets": 21
       }
     },
-    "offer": {
-      "GBP": {
-        "wagered": 225.0,
-        "open_stake": 15.0,
-        "settled_pl": 81.07,
-        "n_bets": 26
-      }
-    },
     "hedge": {
       "GBP": {
         "wagered": 22.0,
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "Betfair Sportsbook": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 265.06,
+      "open_stake": 75.0,
+      "settled_pl": 104.56,
+      "n_bets": 23
+    },
     "bet365": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -116,13 +124,13 @@
       "settled_pl": 51.97,
       "n_bets": 4
     },
-    "Betfair": {
+    "Betfair Exchange UK": {
       "venue": "sportsbook",
       "currency": "GBP",
-      "wagered": 273.4,
-      "open_stake": 79.25999999999999,
-      "settled_pl": 13.922000000000011,
-      "n_bets": 19
+      "wagered": 158.34,
+      "open_stake": 34.26,
+      "settled_pl": -54.567999999999984,
+      "n_bets": 11
     },
     "Paddy Power": {
       "venue": "sportsbook",
@@ -164,22 +172,6 @@
       "settled_pl": -23.5,
       "n_bets": 9
     },
-    "Betfair Exchange UK": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 16.0,
-      "open_stake": 0.0,
-      "settled_pl": -6.0,
-      "n_bets": 2
-    },
-    "Betfair Sportsbook": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 124.0,
-      "open_stake": 10.0,
-      "settled_pl": 32.07,
-      "n_bets": 13
-    },
     "betfred": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -211,10 +203,26 @@
       "open_stake": 0.0,
       "settled_pl": -11.306499999999993,
       "n_bets": 14
+    },
+    "Betfair": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 10.0,
+      "open_stake": 0.0,
+      "settled_pl": -10.0,
+      "n_bets": 1
     }
   },
   "platforms_by_account": {
     "1": {
+      "Betfair Sportsbook": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 188.06,
+        "open_stake": 75.0,
+        "settled_pl": 109.56,
+        "n_bets": 14
+      },
       "bet365": {
         "venue": "sportsbook",
         "currency": "GBP",
@@ -223,13 +231,13 @@
         "settled_pl": 51.97,
         "n_bets": 4
       },
-      "Betfair": {
+      "Betfair Exchange UK": {
         "venue": "sportsbook",
         "currency": "GBP",
-        "wagered": 268.4,
-        "open_stake": 79.25999999999999,
-        "settled_pl": 18.92200000000001,
-        "n_bets": 18
+        "wagered": 142.34,
+        "open_stake": 34.26,
+        "settled_pl": -48.567999999999984,
+        "n_bets": 9
       },
       "Paddy Power": {
         "venue": "sportsbook",
@@ -271,14 +279,6 @@
         "settled_pl": -23.5,
         "n_bets": 9
       },
-      "Betfair Sportsbook": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 52.0,
-        "open_stake": 10.0,
-        "settled_pl": 32.07,
-        "n_bets": 5
-      },
       "betfred": {
         "venue": "sportsbook",
         "currency": "GBP",
@@ -302,16 +302,24 @@
         "open_stake": 0.0,
         "settled_pl": -11.306499999999993,
         "n_bets": 14
-      }
-    },
-    "2": {
+      },
       "Betfair": {
         "venue": "sportsbook",
         "currency": "GBP",
-        "wagered": 5.0,
+        "wagered": 10.0,
+        "open_stake": 0.0,
+        "settled_pl": -10.0,
+        "n_bets": 1
+      }
+    },
+    "2": {
+      "Betfair Sportsbook": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 77.0,
         "open_stake": 0.0,
         "settled_pl": -5.0,
-        "n_bets": 1
+        "n_bets": 9
       },
       "Betfair Exchange UK": {
         "venue": "sportsbook",
@@ -344,14 +352,6 @@
         "open_stake": 0.0,
         "settled_pl": -5.0,
         "n_bets": 1
-      },
-      "Betfair Sportsbook": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 72.0,
-        "open_stake": 0.0,
-        "settled_pl": 0.0,
-        "n_bets": 8
       },
       "polymarket": {
         "venue": "polymarket",
@@ -720,7 +720,7 @@
       "match_id": "MANUAL_SCOTLAND_VS_MOROCCO",
       "market": "Bet Builder",
       "selection": "Match Odds -> Morocco + Player To Have 1 Or More Shots On Target - Safe Sub -> Ayoub El Kaabi + Player To Have 1 Or More Shots On Target - Safe Sub -> Lawrence Shankland + Both Teams To Score -> Yes",
-      "platform": "Betfair",
+      "platform": "Betfair Sportsbook",
       "venue": "sportsbook",
       "account": "2",
       "source": "punt",
@@ -824,7 +824,7 @@
       "match_id": "MANUAL_SCOTLAND_V_MOROCCO",
       "market": "Match Odds",
       "selection": "Scotland",
-      "platform": "Betfair",
+      "platform": "Betfair Exchange UK",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -850,7 +850,7 @@
       "match_id": "MANUAL_T_RKIYE_V_PARAGUAY",
       "market": "Match Odds",
       "selection": "Paraguay",
-      "platform": "Betfair",
+      "platform": "Betfair Exchange UK",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -876,7 +876,7 @@
       "match_id": "MANUAL_CANADA_V_QATAR",
       "market": "Match Odds",
       "selection": "Qatar",
-      "platform": "Betfair",
+      "platform": "Betfair Exchange UK",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -928,7 +928,7 @@
       "match_id": "MANUAL_MEXICO_VS_SOUTH_KOREA",
       "market": "Match Result",
       "selection": "Mexico",
-      "platform": "Betfair",
+      "platform": "Betfair Sportsbook",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -1058,7 +1058,7 @@
       "match_id": "GHA_PAN_2026-06-17",
       "market": "Lay (Bet Against)",
       "selection": "Ghana",
-      "platform": "Betfair",
+      "platform": "Betfair Exchange UK",
       "venue": "sportsbook",
       "account": "1",
       "source": "punt",
@@ -1110,7 +1110,7 @@
       "match_id": "MANUAL_CZECHIA_VS_SOUTH_AFRICA_GHANA_VS_PANAMA_ENGLAND_",
       "market": "Accumulator",
       "selection": "England (Match Odds 90) + Ghana (Match Odds 90) + Czechia (Match Odds 90)",
-      "platform": "Betfair",
+      "platform": "Betfair Sportsbook",
       "venue": "sportsbook",
       "account": "1",
       "source": "punt",
@@ -1214,7 +1214,7 @@
       "match_id": "MANUAL_BRAZIL_V_MOROCCO",
       "market": "Correct Score",
       "selection": "2-0",
-      "platform": "Betfair",
+      "platform": "Betfair Sportsbook",
       "venue": "sportsbook",
       "account": "1",
       "source": "punt",
@@ -1812,7 +1812,7 @@
       "match_id": "MANUAL_BRAZIL_VS_MOROCCO",
       "market": "Match Odds",
       "selection": "The Draw",
-      "platform": "Betfair",
+      "platform": "Betfair Exchange UK",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -1838,7 +1838,7 @@
       "match_id": "MANUAL_AUSTRALIA_VS_TURKEY",
       "market": "Match Odds",
       "selection": "The Draw",
-      "platform": "Betfair",
+      "platform": "Betfair Exchange UK",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -1916,7 +1916,7 @@
       "match_id": "MANUAL_QATAR_VS_SWITZERLAND",
       "market": "Match Odds",
       "selection": "The Draw",
-      "platform": "Betfair",
+      "platform": "Betfair Exchange UK",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -2176,7 +2176,7 @@
       "match_id": "AUS_TUR_20260614",
       "market": "Match Winner",
       "selection": "Australia",
-      "platform": "Betfair",
+      "platform": "Betfair Sportsbook",
       "venue": "sportsbook",
       "account": "1",
       "source": "punt",
@@ -3159,12 +3159,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 63.03,
-      "cur_price": 0.596,
+      "cur_value": 62.97,
+      "cur_price": 0.5955,
       "avg_price": 0.6241,
       "shares": 105.7498,
-      "cash_pnl": -2.97,
-      "pct_pnl": -0.045000068181921496,
+      "cash_pnl": -3.03,
+      "pct_pnl": -0.04590916046842495,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3185,12 +3185,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 54.0,
-      "cur_price": 0.54,
+      "cur_value": 54.5,
+      "cur_price": 0.545,
       "avg_price": 0.6,
       "shares": 100.0,
-      "cash_pnl": -6.0,
-      "pct_pnl": -0.1,
+      "cash_pnl": -5.5,
+      "pct_pnl": -0.09166666666666666,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3237,12 +3237,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 57.72,
-      "cur_price": 0.605,
+      "cur_value": 58.2,
+      "cur_price": 0.61,
       "avg_price": 0.5699,
       "shares": 95.4035,
-      "cash_pnl": 3.34,
-      "pct_pnl": 0.061419752518853475,
+      "cash_pnl": 3.82,
+      "pct_pnl": 0.07024654330000607,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3341,12 +3341,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 70.26,
-      "cur_price": 0.9245,
+      "cur_value": 70.83,
+      "cur_price": 0.932,
       "avg_price": 0.866,
       "shares": 76.0,
-      "cash_pnl": 4.45,
-      "pct_pnl": 0.06761273854381913,
+      "cash_pnl": 5.02,
+      "pct_pnl": 0.07627324662696,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3454,6 +3454,27 @@
       "notes": "live PM position (data-API)"
     },
     {
+      "id": 146,
+      "ts_utc": "2026-06-24T11:21:17",
+      "match": "Switzerland v Canada | Bosnia v Qatar",
+      "match_id": "MANUAL_SWITZERLAND_V_CANADA_BOSNIA_V_QATAR",
+      "market": "Accumulator",
+      "selection": "Match Odds 90 -> Switzerland + Over/Under 2.5 Goals -> Over 2.5 Goals + Over/Under 2.5 Goals -> Over 2.5 Goals",
+      "platform": "Betfair Sportsbook",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 5.03,
+      "stake": 20.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.92; Accumulator; legs: Match Odds 90 -> Switzerland | Over/Under 2.5 Goals -> Over 2.5 Goals | Over/Under 2.5 Goals -> Over 2.5 Goals; SNR",
+      "manual_override": null
+    },
+    {
       "id": 145,
       "ts_utc": "2026-06-24T10:45:59",
       "match": "Scotland vs Brazil",
@@ -3502,16 +3523,16 @@
       "match_id": "MANUAL_SWITZERLAND_V_CANADA",
       "market": "Match Odds",
       "selection": "Switzerland",
-      "platform": "Betfair",
+      "platform": "Betfair Exchange UK",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
       "currency": "GBP",
       "decimal_odds": 2.46,
       "stake": 29.59,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
+      "model_prob": 0.496796,
+      "market_prob_devig": 0.404414,
+      "ev": 0.222118,
       "kelly_fraction": null,
       "notes": "screenshot ingest; currency=GBP; conf 0.97",
       "manual_override": null
@@ -3523,16 +3544,16 @@
       "match_id": "MANUAL_SOUTH_AFRICA_V_SOUTH_KOREA",
       "market": "Match Odds",
       "selection": "Draw",
-      "platform": "Betfair",
+      "platform": "Betfair Exchange UK",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
       "currency": "GBP",
       "decimal_odds": 4.0,
       "stake": 4.67,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
+      "model_prob": 0.27121,
+      "market_prob_devig": 0.245952,
+      "ev": 0.08484,
       "kelly_fraction": null,
       "notes": "screenshot ingest; currency=GBP; conf 0.97",
       "manual_override": null
@@ -3670,7 +3691,7 @@
       "match_id": "MANUAL_COLOMBIA_VS_DR_CONGO_PORTUGAL_VS_UZBEKISTAN_ENGL",
       "market": "Accumulator",
       "selection": "Match Odds -> Colombia + Over/Under 3.5 Goals -> Under 3.5 Goals + Over/Under 3.5 Goals -> Under 3.5 Goals",
-      "platform": "Betfair",
+      "platform": "Betfair Sportsbook",
       "venue": "sportsbook",
       "account": "1",
       "source": "punt",
@@ -3691,7 +3712,7 @@
       "match_id": "MANUAL_PORTUGAL_V_UZBEKISTAN_ENGLAND_V_GHANA_COLOMBIA_V",
       "market": "Accumulator",
       "selection": "Match Odds 90 -> Portugal + Match Odds 90 -> England + Match Odds 90 -> Colombia",
-      "platform": "Betfair",
+      "platform": "Betfair Sportsbook",
       "venue": "sportsbook",
       "account": "1",
       "source": "punt",
@@ -3712,7 +3733,7 @@
       "match_id": "MANUAL_FRANCE_V_IRAQ",
       "market": "Player To Score",
       "selection": "Kylian Mbappe",
-      "platform": "Betfair",
+      "platform": "Betfair Sportsbook",
       "venue": "sportsbook",
       "account": "1",
       "source": "model",
@@ -3733,7 +3754,7 @@
       "match_id": "MANUAL_ENGLAND_VS_GHANA",
       "market": "Bet Builder",
       "selection": "Home Team Minus 2.5 Goals -> England -2.5 Goals + Handicap Betting -> England (-2.0) + Correct Score Combinations -> England to win 1-0, 2-0 or 3-0",
-      "platform": "Betfair",
+      "platform": "Betfair Sportsbook",
       "venue": "sportsbook",
       "account": "1",
       "source": "offer",
