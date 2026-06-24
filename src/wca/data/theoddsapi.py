@@ -197,6 +197,61 @@ def get_event_odds(
     return df, quota
 
 
+def get_scores(
+    sport_key: str,
+    days_from: int = 1,
+) -> Tuple[List[Dict[str, Any]], QuotaInfo]:
+    """Fetch LIVE + recently-completed scores for a sport.
+
+    Reference: https://the-odds-api.com/liveapi/guides/v4/#get-scores
+    The ``/scores`` endpoint returns in-play and recently-finished matches with
+    the current score; in-play matches update roughly every ~30s. ``days_from``
+    (1..3) also pulls finished matches from that many days back — keep it small
+    to limit quota cost (live-only is cheaper).
+
+    Returns
+    -------
+    Tuple of (list of normalised event dicts, QuotaInfo). Each event::
+
+        {"event_id", "sport_key", "commence_time", "completed" (bool),
+         "home_team", "away_team",
+         "scores": [{"name": <team>, "score": <str>}, ...] or [],
+         "last_update"}
+
+    ``scores`` is ``[]`` before kickoff. The raw ``score`` values are strings as
+    the API returns them; :func:`wca.pm.cashout.orient_score` coerces to int.
+    """
+    params: Dict[str, Any] = {
+        "apiKey": _get_api_key(),
+        "daysFrom": int(days_from),
+        "dateFormat": "iso",
+    }
+    resp = requests.get(
+        f"{_BASE_URL}/sports/{sport_key}/scores",
+        params=params,
+        headers=_HEADERS,
+        timeout=_TIMEOUT,
+    )
+    resp.raise_for_status()
+    quota = _extract_quota(resp.headers)
+    events = resp.json() or []
+    out: List[Dict[str, Any]] = []
+    for ev in events:
+        out.append(
+            {
+                "event_id": ev.get("id"),
+                "sport_key": ev.get("sport_key"),
+                "commence_time": ev.get("commence_time"),
+                "completed": bool(ev.get("completed")),
+                "home_team": ev.get("home_team"),
+                "away_team": ev.get("away_team"),
+                "scores": ev.get("scores") or [],
+                "last_update": ev.get("last_update"),
+            }
+        )
+    return out, quota
+
+
 def _parse_events(events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Flatten the nested Odds API response into a list of row dicts."""
     rows: List[Dict[str, Any]] = []
