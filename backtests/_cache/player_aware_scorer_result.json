@@ -1,0 +1,22 @@
+{
+  "generated_utc": "2026-06-24T15:03:10Z",
+  "train": "WC2018",
+  "test": "WC2022",
+  "n_test_matches": 64,
+  "covered_player_matches": 623,
+  "uncovered_player_matches": 1372,
+  "coverage_pct": 31.2,
+  "lambda_team_prior": 1.5234,
+  "player_aware": {
+    "brier": 0.08622,
+    "log_loss": 0.43157
+  },
+  "baseline_equal_share": {
+    "brier": 0.09426,
+    "log_loss": 0.33724
+  },
+  "brier_improvement": 0.00804,
+  "log_loss_improvement": -0.09433,
+  "recommend_adopt": false,
+  "basis": "player-aware = DC-style team lambda x StatsBomb npxg-share (learned WC2018) x minutes; baseline = same lambda spread equally across appearing players. OOS: 2018->2022."
+}
