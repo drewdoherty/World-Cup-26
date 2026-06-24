@@ -1,18 +1,18 @@
-<!-- generated: 2026-06-23T21:39:55 -->
-⚽ *Next match* — Panama vs Croatia
-Kickoff 2026-06-23 23:00:00+00:00
+<!-- generated: 2026-06-24T02:43:01 -->
+⚽ *Next match* — Bosnia and Herzegovina vs Qatar
+Kickoff 2026-06-24 19:00:00+00:00
 
 *Winner* (model blend)
-  Panama          12.6%  fair 7.93  best 8.60 (betfair_ex_uk) +8.4% ✅  £4.16
-  Draw            21.5%  fair 4.65  best 4.80 (betfair_ex_uk) +3.2% ✅  £3.12
-  Croatia         65.9%  fair 1.52  best 1.48 (matchbook) -2.5%
+  Bosnia and Her  60.9%  fair 1.64  best 1.44 (betfair_ex_uk) -12.3%
+  Draw            22.2%  fair 4.51  best 5.50 (betfair_ex_uk) +22.0% ✅  £18.34
+  Qatar           16.9%  fair 5.91  best 8.00 (matchbook) +35.3% ✅  £18.90
   _stake = ¼-Kelly @ £1500 bankroll (+EV picks)_
 
-*Corners* (model, exp 8.5)
-  O/U 8.5: over 47.9% / under 52.1%  fair 2.09 / 1.92
+*Corners* (model, exp 8.4)
+  O/U 8.5: over 46.0% / under 54.0%  fair 2.17 / 1.85
 
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-0-1 14.0% | 0-2 13.9% | 1-1 10.0% | 0-3 9.0% | 1-2 8.9% | 0-0 8.2%
-  O/U 2.5: over 47.1% / under 52.9%   BTTS 40.9%
+1-0 15.6% | 2-0 12.2% | 2-1 11.2% | 1-1 10.4% | 0-0 7.8% | 3-0 6.0%
+  O/U 2.5: over 45.4% / under 54.6%   BTTS 45.6%
