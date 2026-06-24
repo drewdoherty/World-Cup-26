@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="dark">
-<title>WORLD CUP ALPHA // ARBITRAGE</title>
+<title>WORLD CUP ALPHA // BET RECS</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -22,7 +22,7 @@
       <a class="scores-nav-link" href="./visuals.html">Visuals</a>
       <a class="scores-nav-link" href="./tracking.html">Tracking</a>
       <a class="scores-nav-link" href="./promos.html">Promos &amp; Offers</a>
-      <span class="scores-nav-here">Arbitrage</span>
+      <span class="scores-nav-here">Bet Recs</span>
     </nav>
   </header>
 
@@ -32,21 +32,59 @@
   </div>
 
   <main>
+    <!-- NEW 01 // Model-backed best bets, both sides, fractional Kelly -->
     <section class="panel" style="margin-top:14px">
       <div class="panel-head">
-        <span class="panel-label">01 // FX-Adjusted Pure-Arb Opportunities</span>
+        <span class="panel-label">01 // Best Bets &mdash; both sides &middot; &frac12;-Kelly &middot; $250</span>
+        <span class="panel-meta" id="betrecs-meta"></span>
+      </div>
+      <div class="panel-body" style="font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--border)">
+        Every market scored on <strong>both sides</strong> (back YES vs back NO); the positive-EV side
+        is sized at <strong>&frac12;-Kelly on a $250 bankroll</strong>, hard-capped at
+        <span id="betrecs-cap">5%</span> (<span id="betrecs-max">$12.50</span>/bet). Fee-adjusted edge.
+        <strong>Monitoring only &mdash; not executed.</strong>
+        <span id="betrecs-stale" class="warn" hidden> &middot; MODEL STALE: recs gated by drift guard.</span>
+      </div>
+      <div class="panel-body panel-scroll" id="betrecs-table"></div>
+      <div class="panel-body" id="betrecs-flagged-wrap" hidden style="border-top:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--warn);margin-bottom:6px">
+          Withheld &mdash; live price has drifted from the model baseline (model hasn&rsquo;t seen the latest result). Review before staking.
+        </div>
+        <div class="panel-scroll" id="betrecs-flagged"></div>
+      </div>
+      <div class="panel-body" style="font-size:10px;color:var(--muted)" id="betrecs-cov"></div>
+    </section>
+
+    <!-- NEW 02 // Polymarket-vs-sportsbook prop arbitrage -->
+    <section class="panel" style="margin-top:14px">
+      <div class="panel-head">
+        <span class="panel-label">02 // Prop Arbs &mdash; Polymarket vs Sportsbook</span>
+        <span class="panel-meta" id="proparb-meta"></span>
+      </div>
+      <div class="panel-body" style="font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--border)">
+        Settlement-safe prop arbs: PM-internal (YES+NO &lt; 1 after fee) now; book-vs-PM scorer pairing
+        once the sportsbook prop feed is wired. Top-of-book only &mdash; liquidity-check every leg.
+      </div>
+      <div class="panel-body panel-scroll" id="proparb-table"></div>
+      <div class="panel-body" style="font-size:10px;color:var(--muted)" id="proparb-note"></div>
+    </section>
+
+    <!-- EXISTING 03 // Pure-arb (1X2 family) -->
+    <section class="panel" style="margin-top:14px">
+      <div class="panel-head">
+        <span class="panel-label">03 // FX-Adjusted Pure-Arb Opportunities (1X2 family)</span>
         <span class="panel-meta" id="arb-meta"></span>
       </div>
       <div class="panel-body" style="font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--border)">
         Monitoring only — read-only odds (The Odds API, Betfair Exchange feed) vs
-        Polymarket. Best-back prices, no live liquidity. <strong>Not executed.</strong>
+        Polymarket match-winner. Best-back prices, no live liquidity. <strong>Not executed.</strong>
       </div>
       <div class="panel-body panel-scroll" id="arb-table"></div>
     </section>
 
     <section class="panel" style="margin-top:14px">
       <div class="panel-head">
-        <span class="panel-label">02 // Historical Analysis (real, since Jun 11)</span>
+        <span class="panel-label">04 // Historical Analysis (real, since Jun 11)</span>
         <span class="panel-meta">no paid pulls — logged snapshots</span>
       </div>
       <div class="panel-body">
@@ -57,7 +95,7 @@
 
     <section class="panel" style="margin-top:14px">
       <div class="panel-head">
-        <span class="panel-label">03 // Cumulative Risk-Free Profit</span>
+        <span class="panel-label">05 // Cumulative Risk-Free Profit</span>
         <span class="panel-meta" id="hyp-tag" style="color:var(--warn)">HYPOTHETICAL — MODELED, NOT LIVE</span>
       </div>
       <div class="panel-body">

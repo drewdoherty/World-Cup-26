@@ -1,0 +1,391 @@
+{
+  "meta": {
+    "generated": "2026-06-24 16:19:02 UTC",
+    "bankroll": 250.0,
+    "currency": "USD",
+    "kelly_fraction": 0.5,
+    "per_bet_cap": 0.05,
+    "max_stake": 12.5,
+    "min_edge": 0.02,
+    "drift_guard": 0.1,
+    "model_generated": "2026-06-24 15:28:31 UTC",
+    "model_stale": false,
+    "coverage": "group_winner (live PM). Model-backed; reach-stage / anytime-scorer / exact-score families wired next.",
+    "live_fetch_secs": 22.1,
+    "live_fetch_error": null,
+    "monitoring_only": true,
+    "note": "Read-only monitoring. No execution. Both sides analysed; positive-EV side sized at fractional Kelly. Stakes hard-capped."
+  },
+  "best_bets": [
+    {
+      "market": "group_winner",
+      "team": "Belgium",
+      "group": "G",
+      "model_prob": 0.5174,
+      "live_mid": 0.245,
+      "baseline_pm": 0.245,
+      "drift": 0.0,
+      "best_side": "YES",
+      "edge": 0.2618,
+      "stake": 12.5,
+      "yes": {
+        "price": 0.25,
+        "ev": 0.2618,
+        "stake": 12.5,
+        "side": "YES",
+        "desc": "win Group G"
+      },
+      "no": {
+        "price": 0.76,
+        "ev": -0.2829,
+        "stake": 0.0,
+        "side": "NO",
+        "desc": "NOT win Group G"
+      }
+    },
+    {
+      "market": "group_winner",
+      "team": "Egypt",
+      "group": "G",
+      "model_prob": 0.3948,
+      "live_mid": 0.62,
+      "baseline_pm": 0.62,
+      "drift": 0.0,
+      "best_side": "NO",
+      "edge": 0.2081,
+      "stake": 12.5,
+      "yes": {
+        "price": 0.63,
+        "ev": -0.2422,
+        "stake": 0.0,
+        "side": "YES",
+        "desc": "win Group G"
+      },
+      "no": {
+        "price": 0.39,
+        "ev": 0.2081,
+        "stake": 12.5,
+        "side": "NO",
+        "desc": "NOT win Group G"
+      }
+    },
+    {
+      "market": "group_winner",
+      "team": "Portugal",
+      "group": "K",
+      "model_prob": 0.3296,
+      "live_mid": 0.535,
+      "baseline_pm": 0.535,
+      "drift": 0.0,
+      "best_side": "NO",
+      "edge": 0.1929,
+      "stake": 12.5,
+      "yes": {
+        "price": 0.54,
+        "ev": -0.2179,
+        "stake": 0.0,
+        "side": "YES",
+        "desc": "win Group K"
+      },
+      "no": {
+        "price": 0.47,
+        "ev": 0.1929,
+        "stake": 12.5,
+        "side": "NO",
+        "desc": "NOT win Group K"
+      }
+    },
+    {
+      "market": "group_winner",
+      "team": "Colombia",
+      "group": "K",
+      "model_prob": 0.6179,
+      "live_mid": 0.465,
+      "baseline_pm": 0.465,
+      "drift": 0.0,
+      "best_side": "YES",
+      "edge": 0.1404,
+      "stake": 12.5,
+      "yes": {
+        "price": 0.47,
+        "ev": 0.1404,
+        "stake": 12.5,
+        "side": "YES",
+        "desc": "win Group K"
+      },
+      "no": {
+        "price": 0.54,
+        "ev": -0.1654,
+        "stake": 0.0,
+        "side": "NO",
+        "desc": "NOT win Group K"
+      }
+    },
+    {
+      "market": "group_winner",
+      "team": "Morocco",
+      "group": "C",
+      "model_prob": 0.2306,
+      "live_mid": 0.325,
+      "baseline_pm": 0.335,
+      "drift": 0.01,
+      "best_side": "NO",
+      "edge": 0.0829,
+      "stake": 12.5,
+      "yes": {
+        "price": 0.33,
+        "ev": -0.106,
+        "stake": 0.0,
+        "side": "YES",
+        "desc": "win Group C"
+      },
+      "no": {
+        "price": 0.68,
+        "ev": 0.0829,
+        "stake": 12.5,
+        "side": "NO",
+        "desc": "NOT win Group C"
+      }
+    },
+    {
+      "market": "group_winner",
+      "team": "Brazil",
+      "group": "C",
+      "model_prob": 0.7409,
+      "live_mid": 0.665,
+      "baseline_pm": 0.655,
+      "drift": 0.01,
+      "best_side": "YES",
+      "edge": 0.0643,
+      "stake": 12.5,
+      "yes": {
+        "price": 0.67,
+        "ev": 0.0643,
+        "stake": 12.5,
+        "side": "YES",
+        "desc": "win Group C"
+      },
+      "no": {
+        "price": 0.34,
+        "ev": -0.0876,
+        "stake": 0.0,
+        "side": "NO",
+        "desc": "NOT win Group C"
+      }
+    },
+    {
+      "market": "group_winner",
+      "team": "Sweden",
+      "group": "F",
+      "model_prob": 0.0944,
+      "live_mid": 0.029,
+      "baseline_pm": 0.029,
+      "drift": 0.0,
+      "best_side": "YES",
+      "edge": 0.0625,
+      "stake": 8.07,
+      "yes": {
+        "price": 0.031,
+        "ev": 0.0625,
+        "stake": 8.07,
+        "side": "YES",
+        "desc": "win Group F"
+      },
+      "no": {
+        "price": 0.973,
+        "ev": -0.0682,
+        "stake": 0.0,
+        "side": "NO",
+        "desc": "NOT win Group F"
+      }
+    },
+    {
+      "market": "group_winner",
+      "team": "Croatia",
+      "group": "L",
+      "model_prob": 0.0265,
+      "live_mid": 0.0815,
+      "baseline_pm": 0.0835,
+      "drift": 0.002,
+      "best_side": "NO",
+      "edge": 0.0523,
+      "stake": 12.5,
+      "yes": {
+        "price": 0.082,
+        "ev": -0.0578,
+        "stake": 0.0,
+        "side": "YES",
+        "desc": "win Group L"
+      },
+      "no": {
+        "price": 0.919,
+        "ev": 0.0523,
+        "stake": 12.5,
+        "side": "NO",
+        "desc": "NOT win Group L"
+      }
+    },
+    {
+      "market": "group_winner",
+      "team": "Switzerland",
+      "group": "B",
+      "model_prob": 0.4687,
+      "live_mid": 0.405,
+      "baseline_pm": 0.405,
+      "drift": 0.0,
+      "best_side": "YES",
+      "edge": 0.0514,
+      "stake": 11.03,
+      "yes": {
+        "price": 0.41,
+        "ev": 0.0514,
+        "stake": 11.03,
+        "side": "YES",
+        "desc": "win Group B"
+      },
+      "no": {
+        "price": 0.6,
+        "ev": -0.0759,
+        "stake": 0.0,
+        "side": "NO",
+        "desc": "NOT win Group B"
+      }
+    },
+    {
+      "market": "group_winner",
+      "team": "Canada",
+      "group": "B",
+      "model_prob": 0.5313,
+      "live_mid": 0.595,
+      "baseline_pm": 0.595,
+      "drift": 0.0,
+      "best_side": "NO",
+      "edge": 0.0514,
+      "stake": 11.03,
+      "yes": {
+        "price": 0.6,
+        "ev": -0.0759,
+        "stake": 0.0,
+        "side": "YES",
+        "desc": "win Group B"
+      },
+      "no": {
+        "price": 0.41,
+        "ev": 0.0514,
+        "stake": 11.03,
+        "side": "NO",
+        "desc": "NOT win Group B"
+      }
+    },
+    {
+      "market": "group_winner",
+      "team": "England",
+      "group": "L",
+      "model_prob": 0.9116,
+      "live_mid": 0.865,
+      "baseline_pm": 0.865,
+      "drift": 0.0,
+      "best_side": "YES",
+      "edge": 0.0382,
+      "stake": 12.5,
+      "yes": {
+        "price": 0.87,
+        "ev": 0.0382,
+        "stake": 12.5,
+        "side": "YES",
+        "desc": "win Group L"
+      },
+      "no": {
+        "price": 0.14,
+        "ev": -0.0552,
+        "stake": 0.0,
+        "side": "NO",
+        "desc": "NOT win Group L"
+      }
+    },
+    {
+      "market": "group_winner",
+      "team": "Spain",
+      "group": "H",
+      "model_prob": 0.8284,
+      "live_mid": 0.865,
+      "baseline_pm": 0.865,
+      "drift": 0.0,
+      "best_side": "NO",
+      "edge": 0.028,
+      "stake": 4.09,
+      "yes": {
+        "price": 0.87,
+        "ev": -0.045,
+        "stake": 0.0,
+        "side": "YES",
+        "desc": "win Group H"
+      },
+      "no": {
+        "price": 0.14,
+        "ev": 0.028,
+        "stake": 4.09,
+        "side": "NO",
+        "desc": "NOT win Group H"
+      }
+    },
+    {
+      "market": "group_winner",
+      "team": "Cape Verde",
+      "group": "H",
+      "model_prob": 0.0573,
+      "live_mid": 0.0315,
+      "baseline_pm": 0.0315,
+      "drift": 0.0,
+      "best_side": "YES",
+      "edge": 0.0223,
+      "stake": 2.89,
+      "yes": {
+        "price": 0.034,
+        "ev": 0.0223,
+        "stake": 2.89,
+        "side": "YES",
+        "desc": "win Group H"
+      },
+      "no": {
+        "price": 0.971,
+        "ev": -0.0291,
+        "stake": 0.0,
+        "side": "NO",
+        "desc": "NOT win Group H"
+      }
+    },
+    {
+      "market": "group_winner",
+      "team": "Iran",
+      "group": "G",
+      "model_prob": 0.0877,
+      "live_mid": 0.1145,
+      "baseline_pm": 0.1145,
+      "drift": 0.0,
+      "best_side": "NO",
+      "edge": 0.0203,
+      "stake": 12.5,
+      "yes": {
+        "price": 0.118,
+        "ev": -0.0334,
+        "stake": 0.0,
+        "side": "YES",
+        "desc": "win Group G"
+      },
+      "no": {
+        "price": 0.889,
+        "ev": 0.0203,
+        "stake": 12.5,
+        "side": "NO",
+        "desc": "NOT win Group G"
+      }
+    }
+  ],
+  "flagged": [],
+  "prop_arbs": {
+    "pm_internal": [],
+    "pm_vs_book": [],
+    "pm_vs_book_note": "Inert until a live sportsbook scorer feed + prop settlement keys are wired in wca.arb (Arbitrage blind-spot fix)."
+  }
+}
