@@ -27,27 +27,47 @@ goal expectation **equally** across the players who appeared.
 | baseline (equal share) | 0.0943 | **0.3372** |
 | improvement | **+0.0080** | −0.0943 |
 
-**Recommendation: do NOT adopt the raw player-aware probabilities as-is.**
+**Calibration (player-aware), reliability by predicted-probability bucket:**
 
-The split is informative, not contradictory:
+| predicted P(anytime) | n | mean predicted | observed scored |
+|---|---:|---:|---:|
+| 0–20% | 526 | 4.4% | **6.8%** |
+| 20–40% | 83 | 28.8% | 27.7% |
+| 40–60% | 13 | 50.8% | 46.2% |
+| 60–80% | 1 | 60.7% | 100% (n=1, noise) |
+
+Global calibration scale (observed/predicted) = **1.22**.
+
+**Recommendation: do NOT adopt the raw probabilities as-is — but the fix is
+specific and cheap.** The earlier "over-confident" reading was too coarse; the
+reliability bins are sharper:
 - Player-aware **wins Brier** → it *ranks* scorers better (concentrates
-  probability on the genuine goal threats), which is exactly what the props
-  scanner needs to surface the right players.
-- Player-aware **loses log-loss** → its absolute probabilities are
-  **over-confident**. The equal-share baseline sits near the ~10% per-player
-  base rate, so it is well-calibrated by construction; the share model deviates
-  from that and gets punished on the many matches where a high-share striker
-  does not score.
+  probability on genuine threats) — exactly what the props scanner needs.
+- It is **well-calibrated in the 20–60% buckets** and, globally, slightly
+  *under*-confident (scale 1.22), NOT over-confident.
+- The log-loss loss comes from **one place**: the 0–20% bucket (the bulk, 526
+  player-matches) is **under-predicted** — 4.4% predicted vs 6.8% observed.
+  Pushing probability mass onto the stars starves the squad players *below* the
+  base rate, and log-loss punishes that under-prediction on the ~36 of them who
+  did score. The equal-share baseline sits at the base rate by construction, so
+  it wins log-loss on that mass.
 
-**Action.** Use the player-aware share for **selection/ranking** (it has the
-better discrimination), but **calibrate/shrink** the probabilities before
-treating them as fair prices — consistent with the `thin`-sample shrinkage flag
-already built into `players.db` (#4) and the analyst-override store. Concretely:
-shrink each share toward the team mean by sample size, and/or fit a per-90
-intensity scaler on a holdout before quoting model odds. Re-run this backtest
-after calibration; adopt only when **both** Brier and log-loss improve (the
-`recommend_adopt` gate enforces this).
+**Concrete improvements (in priority order):**
+1. **Blend each share toward uniform:** `share_i = α·npxg_share_i + (1−α)·(1/n)`.
+   This lifts the starved low end (fixes the 0–20% under-prediction → recovers
+   log-loss) while preserving the ordering (keeps the Brier win). Tune α on a
+   holdout; shrink `thin`-flagged players (<180 min, the #4 flag) harder.
+2. **Thin-squad guard for live picks:** when a team has few rated players the
+   share normalises over a tiny set and inflates the stars (the cause of the
+   absurd +100–300% live edges on 0-rated squads like South Africa/Scotland).
+   Floor the denominator at a full XI / require ≥N rated players before quoting,
+   else fall back to market-implied.
+3. **Re-fit the penalty and minutes priors** (`pen_xg`, expected minutes) rather
+   than the current constants; both feed the per-player intensity.
+
+Re-run this backtest after (1)–(2); adopt only when **both** Brier and log-loss
+improve (the `recommend_adopt` gate enforces this).
 
 Coverage caveat: only 31% of WC2022 player-matches had a WC2018 share, so the
-out-of-sample sample is modest — another reason to shrink thin players toward
-priors rather than trust raw shares.
+out-of-sample sample is modest — another reason to blend toward priors and gate
+on rated-player count.

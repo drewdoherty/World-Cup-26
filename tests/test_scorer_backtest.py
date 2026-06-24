@@ -96,6 +96,22 @@ def test_uncovered_players_are_skipped_not_scored():
     assert 0.0 < res.coverage < 1.0
 
 
+def test_reliability_bins_and_scale():
+    from wca.models.scorer_backtest import (match_scorer_observations,
+                                            reliability, team_npxg_shares)
+    train = [_xi("A", ["Striker", "Mid"]), _xi("B", ["Def"]),
+             _shot("A", "Striker", 0.9, goal=True), _shot("A", "Mid", 0.1),
+             _shot("B", "Def", 0.3)]
+    test = [_xi("A", ["Striker", "Mid"]), _xi("B", ["Def"]),
+            _shot("A", "Striker", 0.6, goal=True), _end("A")]
+    shares = team_npxg_shares({1: train})
+    obs = {2: match_scorer_observations(test)}
+    bins, scale = reliability(obs, shares, lambda_team=1.5, n_bins=5)
+    assert len(bins) == 5
+    assert sum(b.n for b in bins) >= 2
+    assert scale > 0  # observed/predicted ratio
+
+
 def test_recommend_requires_both_metrics():
     r = BacktestResult(n_covered=10, n_uncovered=0, n_matches=1, lambda_team=1.3,
                        pa_brier=0.20, pa_log_loss=0.60,

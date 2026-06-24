@@ -199,6 +199,52 @@ def evaluate(
         base_brier=base_b / n, base_log_loss=base_l / n)
 
 
+@dataclass
+class ReliabilityBin:
+    lo: float
+    hi: float
+    n: int
+    mean_pred: float
+    observed: float
+
+
+def reliability(
+    obs_by_match: Dict[int, List[PlayerMatch]],
+    shares: Dict[str, Dict[str, float]],
+    lambda_team: float,
+    n_bins: int = 5,
+) -> Tuple[List[ReliabilityBin], float]:
+    """Reliability bins for the player-aware model + the global calibration scale.
+
+    Each bin reports mean predicted P(anytime) vs the observed scoring rate; a
+    well-calibrated model has ``mean_pred ≈ observed`` in every bin. The returned
+    scale = sum(observed) / sum(predicted): <1 means the model is over-confident
+    and its probabilities should be multiplied by ~scale (a first-order
+    temperature/shrinkage correction).
+    """
+    preds: List[Tuple[float, int]] = []
+    for events_obs in obs_by_match.values():
+        for pm in events_obs:
+            share = shares.get(pm.team, {}).get(_norm(pm.player))
+            if share is None:
+                continue
+            p = _p_anytime(lambda_team, share, pm.minutes)
+            preds.append((p, 1 if pm.scored else 0))
+    bins: List[ReliabilityBin] = []
+    sum_p = sum(p for p, _ in preds) or 1e-9
+    sum_y = sum(y for _, y in preds)
+    for i in range(n_bins):
+        lo, hi = i / n_bins, (i + 1) / n_bins
+        sel = [(p, y) for p, y in preds if (lo <= p < hi or (i == n_bins - 1 and p == hi))]
+        if not sel:
+            bins.append(ReliabilityBin(lo, hi, 0, 0.0, 0.0))
+            continue
+        mp = sum(p for p, _ in sel) / len(sel)
+        ob = sum(y for _, y in sel) / len(sel)
+        bins.append(ReliabilityBin(lo, hi, len(sel), mp, ob))
+    return bins, sum_y / sum_p
+
+
 def run_backtest(
     train_events: Dict[int, list],
     test_events: Dict[int, list],

@@ -53,6 +53,12 @@ def main(argv=None) -> int:
 
     res = sb.run_backtest(train, test, lambda_team=args.lambda_team)
 
+    # Calibration / reliability for the player-aware model.
+    shares = sb.team_npxg_shares(train)
+    lam = args.lambda_team if args.lambda_team is not None else sb.tournament_team_goal_mean(train)
+    obs = {mid: sb.match_scorer_observations(evs) for mid, evs in test.items()}
+    bins, scale = sb.reliability(obs, shares, lam)
+
     ts = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     report = {
         "generated_utc": ts,
@@ -69,6 +75,11 @@ def main(argv=None) -> int:
         "brier_improvement": round(res.brier_improvement, 5),
         "log_loss_improvement": round(res.log_loss_improvement, 5),
         "recommend_adopt": res.recommend_adopt,
+        "calibration_scale": round(scale, 4),
+        "reliability_bins": [
+            {"lo": round(b.lo, 2), "hi": round(b.hi, 2), "n": b.n,
+             "mean_pred": round(b.mean_pred, 4), "observed": round(b.observed, 4)}
+            for b in bins],
         "basis": ("player-aware = DC-style team lambda x StatsBomb npxg-share "
                   "(learned WC2018) x minutes; baseline = same lambda spread "
                   "equally across appearing players. OOS: 2018->2022."),
@@ -87,6 +98,12 @@ def main(argv=None) -> int:
     print("  improvement     :   %+.5f    %+.5f"
           % (res.brier_improvement, res.log_loss_improvement))
     print("  RECOMMEND ADOPT : %s" % ("YES" if res.recommend_adopt else "NO"))
+    print("\n  calibration (player-aware): scale=%.3f (mult probs by ~this)" % scale)
+    print("    bucket        n   mean_pred   observed")
+    for b in bins:
+        if b.n:
+            print("    %.1f-%.1f   %5d    %6.1f%%    %6.1f%%"
+                  % (b.lo, b.hi, b.n, 100 * b.mean_pred, 100 * b.observed))
     print("report: %s" % args.out)
     return 0
 
