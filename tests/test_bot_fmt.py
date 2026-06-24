@@ -55,6 +55,7 @@ _CARD_BODY = (
     "*World Cup Alpha — scorelines* (2 fixtures)\n"
     "\n"
     "*Mexico vs South Africa*\n"
+    "    xG: 1.47-0.89\n"
     "    1-0  16.9%  fair 5.91  back >= 6.03\n"
     "    2-0  15.5%  fair 6.45  back >= 6.57\n"
     "    2-1  10.2%  fair 9.84  back >= 10.03\n"
@@ -64,6 +65,7 @@ _CARD_BODY = (
     "    O/U 2.5: over 45.8% / under 54.2%   BTTS 39.0%\n"
     "\n"
     "*South Korea vs Czech Republic*\n"
+    "    xG: 1.12-1.05\n"
     "    1-1  13.8%  fair 7.24  back >= 7.39\n"
     "    1-0  13.0%  fair 7.69  back >= 7.84\n"
     "    0-0  11.5%  fair 8.66  back >= 8.83\n"
@@ -243,10 +245,9 @@ class TestScoresFormat:
         path = _write_card(str(tmp_path))
         out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
         lines = out.splitlines()
-        # Find the Mexico fixture line and verify a blank line exists between
-        # its O/U line and the South Korea fixture line.
-        mex_idx = next(i for i, l in enumerate(lines) if "Mexico vs South Africa" in l and ":" in l)
-        sk_idx = next(i for i, l in enumerate(lines) if "South Korea" in l and ":" in l)
+        # Find the Mexico fixture name line and the South Korea fixture name line.
+        mex_idx = next(i for i, l in enumerate(lines) if "Mexico vs South Africa" in l)
+        sk_idx = next(i for i, l in enumerate(lines) if "South Korea" in l and l.startswith("*"))
         between = lines[mex_idx + 1: sk_idx]
         assert "" in between, "expected at least one blank line between fixtures"
 
@@ -275,12 +276,15 @@ class TestScoresFormat:
     def test_legacy_runner_ups_inline(self, tmp_path):
         path = _write_card(str(tmp_path))
         out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
-        mex_line = [l for l in out.splitlines() if "*Mexico vs South Africa*:" in l]
-        assert mex_line, "expected a line with '*Mexico vs South Africa*:'"
-        line = mex_line[0]
-        assert "|" in line
-        assert "2-0" in line
-        assert "2-1" in line
+        lines = out.splitlines()
+        # Fixture name is on its own line; score row follows (after optional xG).
+        mex_name_idx = next(
+            i for i, l in enumerate(lines) if l.strip() == "*Mexico vs South Africa*"
+        )
+        score_line = next(l for l in lines[mex_name_idx + 1:] if not l.startswith("xG"))
+        assert "|" in score_line
+        assert "2-0" in score_line
+        assert "2-1" in score_line
 
     def test_legacy_ou_and_btts(self, tmp_path):
         path = _write_card(str(tmp_path))
