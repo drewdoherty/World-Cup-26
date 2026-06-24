@@ -120,7 +120,7 @@ HELP_TEXT = (
     "/next — next match preview: winner, corners, scorers, scorelines\n"
     "/goalscorers — anytime + first-goalscorer recs, next 5 games\n"
     "/scores — predicted FT scorelines per fixture\n"
-    "/accas — 4+ leg accumulators (next 5 matches, min 2.0 odds per leg)\n"
+    "/accas [value|hedge|longshot|promo] — model +EV accas (moneyline-first, exposure-aware)\n"
     "/structure — project structure metrics\n"
     "/pm — Polymarket parked orders + trader status\n"
     "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
@@ -907,46 +907,34 @@ def handle_boost(text: str, *, scores_path: str = "site/scores_data.json") -> st
     return banner + format_boost_verdict(boost, ev)
 
 
-def handle_accas(scores_path: str = "site/scores_data.json") -> str:
-    """`/accas` — multi-leg accumulators for the next 5 matches (4+ legs, min 2.0 odds)."""
+def handle_accas(
+    mode: str = "value",
+    db_path: str = "data/wca.db",
+    scores_path: str = "site/scores_data.json",
+) -> str:
+    """`/accas [value|hedge|longshot|promo]` — model-driven, exposure-aware accas.
+
+    Reads the cached card (model probs + per-venue 1X2 prices) and the latest
+    odds snapshot; never fits the model live. Display-only. Modes:
+    ``value`` (default, moneyline +EV first), ``hedge`` (offset the held
+    cluster), ``longshot`` (allow >=4.0 legs), ``promo`` (qualify live offers).
+    """
     from wca import accas
-    from wca.boosts import load_scores_feed
 
+    mode = (mode or "value").strip().lower()
+    if mode not in ("value", "hedge", "longshot", "promo"):
+        mode = "value"
     try:
-        scores_feed = load_scores_feed(scores_path)
-        if scores_feed.empty:
-            return (
-                "*Accumulators*\n"
-                "No odds data available yet. Try again after odds are loaded."
-            )
-
-        # Load fixtures meta for context
-        try:
-            from wca.data.results import load_results
-            from wca.data.cleaning import resolve_results_path
-
-            fixtures_meta = load_results(resolve_results_path())
-        except Exception:
-            fixtures_meta = pd.DataFrame()
-
-        # Build accas from the scores feed
-        acca_list = accas.build_accas_from_odds(
-            scores_feed, fixtures_meta, max_fixtures=5, min_legs=4, min_leg_odds=2.0
-        )
-        if not acca_list:
-            return (
-                "*Accumulators*\n"
-                "No valid 4+ leg accas found with 2.0+ odds per leg in next 5 matches."
-            )
-
-        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
-        banner = _stale_banner(
-            _feed_generated(scores_path), now_utc, SCORES_FEED_MAX_AGE_HOURS,
-            label="odds feed",
-        )
-        return banner + accas.format_accas(acca_list)
+        result = accas.build_accas(scores_path=scores_path, db_path=db_path, mode=mode)
     except Exception as exc:
-        return f"*Accumulators*\nError building accas: {exc}"
+        return "*Accumulators*\nError building accas: %s" % exc
+
+    now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    banner = _stale_banner(
+        _feed_generated(scores_path), now_utc, SCORES_FEED_MAX_AGE_HOURS,
+        label="odds feed",
+    )
+    return banner + accas.format_accas(result)
 
 
 def handle_boost_photo(
@@ -2003,7 +1991,9 @@ def dispatch(text: str, db_path: str) -> str:
     if cmd == "/scores":
         return handle_scores(card_path=CARD_PATH)
     if cmd == "/accas":
-        return handle_accas()
+        parts = text.strip().split()
+        mode = parts[1].lower() if len(parts) > 1 else "value"
+        return handle_accas(mode=mode, db_path=db_path)
     if cmd == "/structure":
         return handle_structure()
     if cmd == "/pm":
