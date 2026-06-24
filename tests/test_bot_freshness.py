@@ -43,14 +43,11 @@ def test_accas_flags_stale_feed(tmp_path, monkeypatch):
                                 "fixtures": [{"fixture": "Alpha vs Bravo"}]}),
                     encoding="utf-8")
 
-    import pandas as pd
     from wca import accas
 
-    monkeypatch.setattr(accas, "load_odds_df",
-                        lambda p: pd.DataFrame([{"home_team": "Alpha", "away_team": "Bravo"}]))
-    monkeypatch.setattr(accas, "build_accas_from_odds",
-                        lambda *a, **k: [{"legs": []}])
-    monkeypatch.setattr(accas, "format_accas", lambda lst: "ACCA-BODY")
+    monkeypatch.setattr(accas, "build_accas",
+                        lambda **k: {"mode": "value", "accas": []})
+    monkeypatch.setattr(accas, "format_accas", lambda r: "ACCA-BODY")
 
     reply = app.handle_accas(scores_path=str(feed))
     assert "STALE" in reply

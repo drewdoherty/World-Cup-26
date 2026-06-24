@@ -141,7 +141,7 @@ HELP_TEXT = (
     "/next — next match preview: winner, corners, scorers, scorelines\n"
     "/goalscorers — anytime + first-goalscorer recs, next 5 games\n"
     "/scores — predicted FT scorelines per fixture\n"
-    "/accas — 4+ leg accumulators (next 5 matches, min 2.0 odds per leg)\n"
+    "/accas [value|hedge|longshot|promo] — model +EV accas (moneyline-first, exposure-aware)\n"
     "/structure — project structure metrics\n"
     "/pm — Polymarket parked orders + trader status\n"
     "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
@@ -1073,56 +1073,34 @@ def handle_boost(text: str, *, scores_path: str = "site/scores_data.json") -> st
     return banner + format_boost_verdict(boost, ev)
 
 
-def handle_accas(scores_path: str = "site/scores_data.json") -> str:
-    """`/accas` — multi-leg accumulators for the next 5 matches (4+ legs, min 2.0 odds).
+def handle_accas(
+    mode: str = "value",
+    db_path: str = "data/wca.db",
+    scores_path: str = "site/scores_data.json",
+) -> str:
+    """`/accas [value|hedge|longshot|promo]` — model-driven, exposure-aware accas.
 
-    Reads model fair odds from scores_data.json via accas.load_odds_df(), applies
-    the rung-0 longshot guard (odds > 10x excluded), and builds 4+ leg accas.
-    Odds shown are model fair values (1/model_prob), not market prices.
-
-    Rule 1 (provenance): every reply leads with source path + generation
-    timestamp.  No generation timestamp -> NO BET.
+    Reads the cached card (model probs + per-venue 1X2 prices) and the latest
+    odds snapshot; never fits the model live. Display-only. Modes:
+    ``value`` (default, moneyline +EV first), ``hedge`` (offset the held
+    cluster), ``longshot`` (allow >=4.0 legs), ``promo`` (qualify live offers).
     """
     from wca import accas
 
+    mode = (mode or "value").strip().lower()
+    if mode not in ("value", "hedge", "longshot", "promo"):
+        mode = "value"
     try:
-        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
-        generated = _feed_generated(scores_path)
-        banner = _stale_banner(generated, now_utc, SCORES_FEED_MAX_AGE_HOURS, label="odds feed")
-
-        if not generated:
-            return (
-                "*Accumulators*\n"
-                "NO BET — `%s` has no generation timestamp; "
-                "data age is unknown." % scores_path
-            )
-
-        provenance = "_Source: %s — %s — fetched %s UTC_\n\n" % (
-            scores_path, generated, now_utc
-        )
-
-        odds_df = accas.load_odds_df(scores_path)
-        if odds_df.empty:
-            return (
-                "%s%s*Accumulators*\n"
-                "NO BET — no fixture data in `%s`." % (banner, provenance, scores_path)
-            )
-
-        acca_list = accas.build_accas_from_odds(
-            odds_df, max_fixtures=5, min_legs=4, min_leg_odds=2.0
-        )
-        if not acca_list:
-            return (
-                "%s%s*Accumulators*\n"
-                "NO BET — no valid 4+ leg accas found with ≥2.0 fair-odds legs "
-                "in the next 5 fixtures. All qualifying legs may be short-price "
-                "favourites (fair odds < 2.0) or fewer than 4 fixtures have "
-                "model data." % (banner, provenance)
-            )
-
-        return banner + provenance + accas.format_accas(acca_list)
+        result = accas.build_accas(scores_path=scores_path, db_path=db_path, mode=mode)
     except Exception as exc:
         return "*Accumulators*\nError building accas: %s" % exc
+
+    now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    banner = _stale_banner(
+        _feed_generated(scores_path), now_utc, SCORES_FEED_MAX_AGE_HOURS,
+        label="odds feed",
+    )
+    return banner + accas.format_accas(result)
 
 
 def handle_boost_photo(
@@ -2420,7 +2398,9 @@ def dispatch(text: str, db_path: str) -> str:
     if cmd == "/scores":
         return handle_scores(card_path=CARD_PATH)
     if cmd == "/accas":
-        return handle_accas()
+        parts = text.strip().split()
+        mode = parts[1].lower() if len(parts) > 1 else "value"
+        return handle_accas(mode=mode, db_path=db_path)
     if cmd == "/structure":
         return handle_structure()
     if cmd == "/pm":
