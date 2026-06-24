@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-24 11:08:11 UTC"
+    "generated": "2026-06-24 11:24:47 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -221,11 +221,11 @@
           "plug": {
             "available": true,
             "outcome": "Draw",
-            "best_venue": "betfair_ex_uk",
-            "best_odds": 6.0,
+            "best_venue": "smarkets",
+            "best_odds": 6.2,
             "model_prob": 0.1844,
-            "ev_pct": 10.6,
-            "recommendation": "PLUG: +EV to back (10.6% edge) \u2014 fills the gap and adds value"
+            "ev_pct": 14.3,
+            "recommendation": "PLUG: +EV to back (14.3% edge) \u2014 fills the gap and adds value"
           }
         },
         {
@@ -239,10 +239,10 @@
           "plug": {
             "available": true,
             "outcome": "Brazil",
-            "best_venue": "betfair_ex_uk",
-            "best_odds": 1.35,
+            "best_venue": "matchbook",
+            "best_odds": 1.34,
             "model_prob": 0.7167,
-            "ev_pct": -3.2,
+            "ev_pct": -4.0,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         }
@@ -414,10 +414,10 @@
       "plug": {
         "available": true,
         "outcome": "Brazil",
-        "best_venue": "betfair_ex_uk",
-        "best_odds": 1.35,
+        "best_venue": "matchbook",
+        "best_odds": 1.34,
         "model_prob": 0.7167,
-        "ev_pct": -3.2,
+        "ev_pct": -4.0,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
@@ -429,11 +429,11 @@
       "plug": {
         "available": true,
         "outcome": "Draw",
-        "best_venue": "betfair_ex_uk",
-        "best_odds": 6.0,
+        "best_venue": "smarkets",
+        "best_odds": 6.2,
         "model_prob": 0.1844,
-        "ev_pct": 10.6,
-        "recommendation": "PLUG: +EV to back (10.6% edge) \u2014 fills the gap and adds value"
+        "ev_pct": 14.3,
+        "recommendation": "PLUG: +EV to back (14.3% edge) \u2014 fills the gap and adds value"
       }
     }
   ],
@@ -658,6 +658,15 @@
       "free": false,
       "odds": 2.0,
       "match": "Portugal v Uzbekistan"
+    },
+    {
+      "type": "Accumulator",
+      "selection": "Match Odds 90 -> Switzerland + Over/Under 2.5 Goals -> Over 2.5 Goals + Over/Under 2.5 Goals -> Over 2.5 Goals",
+      "stake": 20.0,
+      "profit": 80.60000000000001,
+      "free": true,
+      "odds": 5.03,
+      "match": "Switzerland v Canada | Bosnia v Qatar"
     }
   ]
 }
