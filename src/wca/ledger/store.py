@@ -176,6 +176,7 @@ def record_bet(
     account: str = "1",
     source: str = "model",
     token_id: Optional[str] = None,
+    sync_site: bool = False,
     db_path: str = _DEFAULT_DB,
 ) -> int:
     """Insert a new open bet into the ledger and return its row ID.
@@ -215,6 +216,13 @@ def record_bet(
         Kelly fraction used to size this bet (optional).
     notes:
         Free-text notes (optional).
+    sync_site:
+        When True, regenerate + publish the site feed after the insert so the
+        newly recorded bet shows up on the site without a separate manual step
+        (see :func:`_sync_site_after_record`). Best-effort and never raises.
+        Defaults to False so the low-level ledger write never triggers a git
+        publish on its own: the manual ``wca_cli bet add`` path opts in, while
+        the bot paths regenerate once per batch via their own ``_autosync``.
     db_path:
         Path to the SQLite database file.
 
@@ -259,7 +267,28 @@ def record_bet(
                 str(token_id) if token_id else None,
             ),
         )
-        return cur.lastrowid
+        bet_id = cur.lastrowid
+    # Fire the site-sync OUTSIDE the connection context so the row is committed
+    # before the feed is regenerated. Never let a sync failure lose the write.
+    if sync_site:
+        _sync_site_after_record(db_path, bet_id)
+    return bet_id
+
+
+def _sync_site_after_record(db_path: str, bet_id: int) -> None:
+    """Regenerate + publish the site feed after a bet is recorded (best-effort).
+
+    Kept as a module-level function (not inlined) so it is a single, clear hook
+    that callers and tests can monkeypatch. Delegates to ``wca.sync.push_site``,
+    which already self-guards under pytest and only pushes when the feed actually
+    changed; any failure here must never break the ledger write.
+    """
+    try:
+        from wca import sync
+
+        sync.push_site(reason="bet %d recorded" % bet_id, db_path=db_path)
+    except Exception:
+        pass
 
 
 def _ensure_account_source_columns(conn) -> None:
