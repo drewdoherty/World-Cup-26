@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-24 10:07:14 UTC"
+    "generated": "2026-06-24T10:45:59"
   },
   "totals": {
-    "wagered": 1397.6360000000002,
-    "open_stake": 638.8,
+    "wagered": 1407.6360000000002,
+    "open_stake": 648.8,
     "settled_pl": 54.99049999999998,
-    "n_bets": 116
+    "n_bets": 118
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 781.3399999999998,
-      "open_stake": 116.25999999999999,
+      "wagered": 791.3399999999998,
+      "open_stake": 126.26,
       "settled_pl": 83.12549999999999,
-      "n_bets": 85
+      "n_bets": 87
     },
     "USD": {
       "wagered": 616.2959999999999,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 781.3399999999998,
-      "open_stake": 116.25999999999999,
+      "wagered": 791.3399999999998,
+      "open_stake": 126.26,
       "settled_pl": 83.12549999999999,
-      "n_bets": 85,
+      "n_bets": 87,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 633.3399999999999,
-      "open_stake": 131.26,
+      "wagered": 643.3399999999999,
+      "open_stake": 141.26,
       "settled_pl": 128.12550000000002,
-      "n_bets": 68,
+      "n_bets": 70,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,20 @@
     }
   },
   "source_summary": {
+    "punt": {
+      "GBP": {
+        "wagered": 295.06,
+        "open_stake": 72.0,
+        "settled_pl": -17.61,
+        "n_bets": 27
+      },
+      "USD": {
+        "wagered": 13.366,
+        "open_stake": 1.0,
+        "settled_pl": -2.367,
+        "n_bets": 10
+      }
+    },
     "model": {
       "GBP": {
         "wagered": 249.27999999999997,
@@ -74,20 +88,6 @@
         "open_stake": 521.54,
         "settled_pl": -25.767999999999994,
         "n_bets": 21
-      }
-    },
-    "punt": {
-      "GBP": {
-        "wagered": 285.06,
-        "open_stake": 62.0,
-        "settled_pl": -17.61,
-        "n_bets": 25
-      },
-      "USD": {
-        "wagered": 13.366,
-        "open_stake": 1.0,
-        "settled_pl": -2.367,
-        "n_bets": 10
       }
     },
     "offer": {
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "bet365": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 27.0,
+      "open_stake": 10.0,
+      "settled_pl": 51.97,
+      "n_bets": 4
+    },
     "Betfair": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -203,18 +211,18 @@
       "open_stake": 0.0,
       "settled_pl": -11.306499999999993,
       "n_bets": 14
-    },
-    "bet365": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 17.0,
-      "open_stake": 0.0,
-      "settled_pl": 51.97,
-      "n_bets": 2
     }
   },
   "platforms_by_account": {
     "1": {
+      "bet365": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 27.0,
+        "open_stake": 10.0,
+        "settled_pl": 51.97,
+        "n_bets": 4
+      },
       "Betfair": {
         "venue": "sportsbook",
         "currency": "GBP",
@@ -294,14 +302,6 @@
         "open_stake": 0.0,
         "settled_pl": -11.306499999999993,
         "n_bets": 14
-      },
-      "bet365": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 17.0,
-        "open_stake": 0.0,
-        "settled_pl": 51.97,
-        "n_bets": 2
       }
     },
     "2": {
@@ -3107,12 +3107,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 28.88,
-      "cur_price": 0.225,
+      "cur_value": 28.24,
+      "cur_price": 0.22,
       "avg_price": 0.2804,
       "shares": 128.35,
-      "cash_pnl": -7.12,
-      "pct_pnl": -0.19777832716201993,
+      "cash_pnl": -7.76,
+      "pct_pnl": -0.2155561543226509,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3159,12 +3159,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 62.02,
-      "cur_price": 0.5865,
+      "cur_value": 63.03,
+      "cur_price": 0.596,
       "avg_price": 0.6241,
       "shares": 105.7498,
-      "cash_pnl": -3.98,
-      "pct_pnl": -0.060303121671396474,
+      "cash_pnl": -2.97,
+      "pct_pnl": -0.045000068181921496,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3237,12 +3237,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 57.72,
-      "cur_price": 0.605,
+      "cur_value": 58.2,
+      "cur_price": 0.61,
       "avg_price": 0.5699,
       "shares": 95.4035,
-      "cash_pnl": 3.34,
-      "pct_pnl": 0.061419752518853475,
+      "cash_pnl": 3.82,
+      "pct_pnl": 0.07024654330000607,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3341,12 +3341,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 69.88,
-      "cur_price": 0.9195,
+      "cur_value": 69.96,
+      "cur_price": 0.9205,
       "avg_price": 0.866,
       "shares": 76.0,
-      "cash_pnl": 4.07,
-      "pct_pnl": 0.06183906648839188,
+      "cash_pnl": 4.14,
+      "pct_pnl": 0.0629026376564969,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3419,12 +3419,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 6.05,
-      "cur_price": 0.665,
+      "cur_value": 5.95,
+      "cur_price": 0.655,
       "avg_price": 0.6599,
       "shares": 9.0909,
-      "cash_pnl": 0.05,
-      "pct_pnl": 0.008333472224537076,
+      "cash_pnl": -0.05,
+      "pct_pnl": -0.008333472224537076,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3452,6 +3452,48 @@
       "cash_pnl": 0.13,
       "pct_pnl": 0.021667027783796398,
       "notes": "live PM position (data-API)"
+    },
+    {
+      "id": 145,
+      "ts_utc": "2026-06-24T10:45:59",
+      "match": "Scotland vs Brazil",
+      "match_id": "MANUAL_SCOTLAND_VS_BRAZIL",
+      "market": "Bet Builder",
+      "selection": "Full Time Result -> Brazil + Player Shots on Target -> Igor Thiago: 2+ Shots on Target",
+      "platform": "bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 2.5,
+      "stake": 5.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.88; Bet Builder; legs: Full Time Result -> Brazil | Player Shots on Target -> Igor Thiago: 2+ Shots on Target",
+      "manual_override": null
+    },
+    {
+      "id": 144,
+      "ts_utc": "2026-06-24T10:45:59",
+      "match": "Scotland vs Brazil",
+      "match_id": "MANUAL_SCOTLAND_VS_BRAZIL",
+      "market": "Bet Builder",
+      "selection": "Player to Score or Assist -> Vinicius Jr. to Score or Assist + Player to Score or Assist -> Neymar Jr to Score or Assist + Both Teams to Score in 1st Half -> No",
+      "platform": "bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 2.75,
+      "stake": 5.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.85; Bet Builder; legs: Player to Score or Assist -> Vinicius Jr. to Score or Assist | Player to Score or Assist -> Neymar Jr to Score or Assist | Both Teams to Score in 1st Half -> No; SNR",
+      "manual_override": null
     },
     {
       "id": 143,
@@ -3735,38 +3777,38 @@
         {
           "score": "1-0",
           "prob": 15.8,
-          "fair": 6.32,
+          "fair": 6.31,
           "back": 6.44
         },
         {
           "score": "2-0",
           "prob": 12.4,
-          "fair": 8.1,
-          "back": 8.26
+          "fair": 8.09,
+          "back": 8.25
         },
         {
           "score": "2-1",
           "prob": 11.4,
-          "fair": 8.81,
-          "back": 8.98
+          "fair": 8.8,
+          "back": 8.97
         },
         {
           "score": "1-1",
           "prob": 10.2,
-          "fair": 9.78,
-          "back": 9.97
+          "fair": 9.81,
+          "back": 10.0
         },
         {
           "score": "0-0",
           "prob": 7.6,
-          "fair": 13.13,
-          "back": 13.4
+          "fair": 13.17,
+          "back": 13.44
         },
         {
           "score": "3-0",
           "prob": 6.1,
-          "fair": 16.33,
-          "back": 16.65
+          "fair": 16.31,
+          "back": 16.64
         }
       ],
       "over_under": {
@@ -3774,7 +3816,7 @@
         "over": 45.6,
         "under": 54.4
       },
-      "btts": 45.5
+      "btts": 45.4
     },
     {
       "fixture": "Switzerland vs Canada",
@@ -3782,8 +3824,8 @@
         {
           "score": "1-1",
           "prob": 13.1,
-          "fair": 7.64,
-          "back": 7.79
+          "fair": 7.65,
+          "back": 7.8
         },
         {
           "score": "2-0",
@@ -3800,20 +3842,20 @@
         {
           "score": "0-0",
           "prob": 8.5,
-          "fair": 11.75,
-          "back": 11.98
+          "fair": 11.76,
+          "back": 12.0
         },
         {
           "score": "2-1",
           "prob": 7.5,
           "fair": 13.29,
-          "back": 13.56
+          "back": 13.55
         },
         {
           "score": "0-1",
           "prob": 7.4,
-          "fair": 13.5,
-          "back": 13.77
+          "fair": 13.49,
+          "back": 13.76
         }
       ],
       "over_under": {
@@ -3835,32 +3877,32 @@
         {
           "score": "0-1",
           "prob": 15.0,
-          "fair": 6.68,
+          "fair": 6.67,
           "back": 6.81
         },
         {
           "score": "0-3",
           "prob": 10.3,
-          "fair": 9.72,
-          "back": 9.92
+          "fair": 9.71,
+          "back": 9.91
         },
         {
           "score": "1-2",
           "prob": 8.9,
-          "fair": 11.25,
-          "back": 11.47
+          "fair": 11.24,
+          "back": 11.46
         },
         {
           "score": "1-1",
           "prob": 8.4,
-          "fair": 11.86,
-          "back": 12.1
+          "fair": 11.89,
+          "back": 12.12
         },
         {
           "score": "0-0",
           "prob": 7.4,
-          "fair": 13.57,
-          "back": 13.84
+          "fair": 13.59,
+          "back": 13.87
         }
       ],
       "over_under": {
@@ -3875,47 +3917,47 @@
       "scores": [
         {
           "score": "1-0",
-          "prob": 18.5,
-          "fair": 5.4,
+          "prob": 18.6,
+          "fair": 5.39,
           "back": 5.5
         },
         {
           "score": "2-0",
-          "prob": 18.4,
+          "prob": 18.5,
           "fair": 5.42,
           "back": 5.53
         },
         {
           "score": "3-0",
           "prob": 11.9,
-          "fair": 8.38,
-          "back": 8.55
+          "fair": 8.37,
+          "back": 8.54
         },
         {
           "score": "2-1",
           "prob": 8.6,
-          "fair": 11.61,
-          "back": 11.85
+          "fair": 11.6,
+          "back": 11.83
         },
         {
           "score": "0-0",
-          "prob": 7.1,
-          "fair": 14.13,
-          "back": 14.42
+          "prob": 7.0,
+          "fair": 14.2,
+          "back": 14.48
         },
         {
           "score": "1-1",
           "prob": 6.4,
-          "fair": 15.51,
-          "back": 15.82
+          "fair": 15.58,
+          "back": 15.89
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 45.6,
-        "under": 54.4
+        "over": 45.7,
+        "under": 54.3
       },
-      "btts": 31.0
+      "btts": 30.9
     },
     {
       "fixture": "Czech Republic vs Mexico",
@@ -3928,21 +3970,21 @@
         },
         {
           "score": "1-1",
-          "prob": 12.2,
-          "fair": 8.17,
-          "back": 8.34
+          "prob": 12.3,
+          "fair": 8.14,
+          "back": 8.3
         },
         {
           "score": "1-2",
           "prob": 9.9,
-          "fair": 10.06,
+          "fair": 10.07,
           "back": 10.27
         },
         {
           "score": "0-0",
-          "prob": 9.4,
-          "fair": 10.61,
-          "back": 10.82
+          "prob": 9.5,
+          "fair": 10.57,
+          "back": 10.78
         },
         {
           "score": "0-2",
@@ -3953,55 +3995,55 @@
         {
           "score": "1-0",
           "prob": 8.4,
-          "fair": 11.9,
-          "back": 12.13
+          "fair": 11.94,
+          "back": 12.18
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 41.7,
-        "under": 58.3
+        "over": 41.6,
+        "under": 58.4
       },
-      "btts": 46.3
+      "btts": 46.4
     },
     {
       "fixture": "South Africa vs South Korea",
       "scores": [
         {
           "score": "0-1",
-          "prob": 21.4,
-          "fair": 4.67,
-          "back": 4.77
+          "prob": 21.5,
+          "fair": 4.66,
+          "back": 4.75
         },
         {
           "score": "0-0",
           "prob": 13.9,
-          "fair": 7.21,
+          "fair": 7.22,
           "back": 7.36
         },
         {
           "score": "0-2",
           "prob": 12.1,
-          "fair": 8.27,
-          "back": 8.44
+          "fair": 8.24,
+          "back": 8.41
         },
         {
           "score": "1-1",
           "prob": 11.0,
-          "fair": 9.08,
-          "back": 9.26
+          "fair": 9.09,
+          "back": 9.27
         },
         {
           "score": "1-0",
-          "prob": 9.0,
-          "fair": 11.14,
-          "back": 11.36
+          "prob": 8.9,
+          "fair": 11.24,
+          "back": 11.46
         },
         {
           "score": "1-2",
-          "prob": 8.7,
-          "fair": 11.45,
-          "back": 11.68
+          "prob": 8.8,
+          "fair": 11.41,
+          "back": 11.64
         }
       ],
       "over_under": {
