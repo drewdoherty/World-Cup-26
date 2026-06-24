@@ -795,6 +795,10 @@ class GoalscorerFixture:
     home: str
     away: str
     commence_time: str
+    # Dixon-Coles expected goals (same lambdas /card + scores use), shown after
+    # the team names as "Home Lh - La Away". 0.0 when unavailable.
+    lambda_home: float = 0.0
+    lambda_away: float = 0.0
     goalscorers: Dict[str, List[GoalscorerLine]] = field(default_factory=dict)
     goalscorer_note: str = ""
     # Flat top-anytime fallback (both teams, unsplit) used when the squad split
@@ -877,6 +881,8 @@ def build_goalscorer_card(
                 home=fb.home,
                 away=fb.away,
                 commence_time=str(fb.fx["commence_time"]),
+                lambda_home=lam_h,
+                lambda_away=lam_a,
                 goalscorers=goalscorers,
                 goalscorer_note=note,
                 scorers=flat,
@@ -913,9 +919,15 @@ def format_goalscorer_card(fixtures: List[GoalscorerFixture]) -> str:
         "",
     ]
     for fx in fixtures:
-        out.append(
-            "*%s vs %s*  _%s_" % (fx.home, fx.away, _fmt_kickoff(fx.commence_time))
-        )
+        # Header shows the DC expected goals between the team names, e.g.
+        # "Argentina 1.10 - 0.98 Austria"; falls back to "Home vs Away" when the
+        # lambdas are unavailable.
+        if fx.lambda_home > 0.0 and fx.lambda_away > 0.0:
+            head = "*%s %.2f - %.2f %s*" % (fx.home, fx.lambda_home,
+                                            fx.lambda_away, fx.away)
+        else:
+            head = "*%s vs %s*" % (fx.home, fx.away)
+        out.append("%s  _%s_" % (head, _fmt_kickoff(fx.commence_time)))
         gs = fx.goalscorers or {}
         if gs.get("home") or gs.get("away"):
             out.extend(_goalscorer_team_blocks(fx))

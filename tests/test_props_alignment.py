@@ -126,6 +126,23 @@ def test_accas_legs_respect_odds_band(db_path, tmp_path):
 # Orchestrator gate: model availability lets the fast job rebuild /goalscorers
 # ---------------------------------------------------------------------------
 
+def test_goalscorers_header_shows_xg():
+    from wca.nextmatch import GoalscorerFixture, format_goalscorer_card
+    fx = GoalscorerFixture(home="Argentina", away="Austria",
+                           commence_time="2026-06-25T19:00:00Z",
+                           lambda_home=1.10, lambda_away=0.98)
+    text = format_goalscorer_card([fx])
+    assert "Argentina 1.10 - 0.98 Austria" in text
+
+
+def test_goalscorers_header_falls_back_without_xg():
+    from wca.nextmatch import GoalscorerFixture, format_goalscorer_card
+    fx = GoalscorerFixture(home="Argentina", away="Austria",
+                           commence_time="2026-06-25T19:00:00Z")
+    text = format_goalscorer_card([fx])
+    assert "Argentina vs Austria" in text  # no lambdas -> old format
+
+
 _SCAN = Path(__file__).resolve().parent.parent / "scripts" / "wca_event_scan.py"
 _scan_spec = importlib.util.spec_from_file_location("wca_event_scan", _SCAN)
 scan = importlib.util.module_from_spec(_scan_spec)
