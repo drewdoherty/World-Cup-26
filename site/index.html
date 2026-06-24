@@ -49,13 +49,27 @@
 
     <!-- Positions (full-width row: dense table needs to breathe) -->
     <section class="panel panel-positions">
-      <div class="panel-head"><span class="panel-label">🎯 Positions // Open</span><span class="panel-meta" id="positions-meta"></span></div>
+      <div class="panel-head">
+        <span class="panel-label">🎯 Positions // Open</span>
+        <div class="pos-toggle" id="pos-open-toggle">
+          <button class="pos-tog active" data-panel="open" data-filter="all">All</button>
+          <button class="pos-tog" data-panel="open" data-filter="today">Today</button>
+        </div>
+        <span class="panel-meta" id="positions-meta"></span>
+      </div>
       <div class="panel-body panel-scroll" id="positions"></div>
     </section>
 
     <!-- Closed positions (full-width row, mirrors the open table + P&L) -->
     <section class="panel panel-positions panel-closed">
-      <div class="panel-head"><span class="panel-label">🏁 Positions // Closed</span><span class="panel-meta" id="positions-closed-meta"></span></div>
+      <div class="panel-head">
+        <span class="panel-label">🏁 Positions // Closed</span>
+        <div class="pos-toggle" id="pos-closed-toggle">
+          <button class="pos-tog active" data-panel="closed" data-filter="all">All</button>
+          <button class="pos-tog" data-panel="closed" data-filter="today">Today</button>
+        </div>
+        <span class="panel-meta" id="positions-closed-meta"></span>
+      </div>
       <div class="panel-body panel-scroll" id="positions-closed"></div>
     </section>
 
