@@ -32,6 +32,28 @@ from wca.models.scorers import PlayerParams, ScorerLine, ScorerPricer, players_f
 
 MODEL_ONLY_LABEL = "model price, no market"
 
+# Validated calibration (backtests/PLAYER_AWARE_BACKTEST.md): blending each
+# player's npxg-share toward uniform by this weight makes the player-aware model
+# beat the no-player baseline on BOTH Brier and log-loss out of sample
+# (WC2018->WC2022). a=1 is the raw share; a=0 is equal-share. 0.7 sits in the
+# adopt range (Brier +0.008, log-loss +0.03).
+DEFAULT_BLEND_ALPHA = 0.7
+
+
+def _blend_shares(params, alpha):
+    """Blend each PlayerParams npxg_share toward uniform 1/n by weight ``alpha``.
+
+    Mutates and returns the list. ``alpha=1`` leaves shares unchanged.
+    """
+    n = len(params)
+    if n == 0 or alpha >= 1.0:
+        return params
+    a = max(0.0, alpha)
+    uniform = 1.0 / n
+    for p in params:
+        p.npxg_share = a * p.npxg_share + (1.0 - a) * uniform
+    return params
+
 
 @dataclass
 class ScorerScanLine:
@@ -137,12 +159,17 @@ def model_scorer_lines(
     overrides_path: str = "data/players.json",
     top_n_per_team: int = 2,
     pen_xg: float = 0.18,
+    blend_alpha: float = 1.0,
 ) -> Dict[str, List[ScorerScanLine]]:
     """Top-N model-priced scorers per side — independent of any market.
 
     Returns ``{"home": [...], "away": [...]}`` of :class:`ScorerScanLine`,
     sorted by model anytime probability. Always populated when the squads carry
     StatsBomb history (or analyst overrides); never requires a bookmaker market.
+
+    ``blend_alpha`` applies the validated calibration (blend each share toward
+    uniform); pass :data:`DEFAULT_BLEND_ALPHA` for the adopt-grade calibrated
+    prices. Default 1.0 keeps the raw shares (unchanged behaviour).
     """
     home_c, away_c = canonical(home), canonical(away)
     total_lambda = lambda_home + lambda_away
@@ -162,6 +189,7 @@ def model_scorer_lines(
             params = team_scorer_params(
                 team, db_path=db_path, overrides_path=overrides_path,
                 conn=conn, players_by_team=pbt)
+            params = _blend_shares(params, blend_alpha)
             lines: List[ScorerScanLine] = []
             for pp in params:
                 sl: ScorerLine = pricer.price_player(pp, team_lambda, total_lambda)

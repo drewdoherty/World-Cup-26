@@ -163,13 +163,20 @@ def evaluate(
     obs_by_match: Dict[int, List[PlayerMatch]],
     shares: Dict[str, Dict[str, float]],
     lambda_team: float,
+    blend_alpha: float = 1.0,
 ) -> BacktestResult:
     """Score player-aware vs equal-share baseline over covered player-matches.
 
     Only player-matches whose player has an out-of-sample share are scored, and
     both models are scored on that same set for a fair head-to-head. The
     baseline spreads ``lambda_team`` equally across the team's appearing players.
+
+    ``blend_alpha`` blends each player's npxg-share toward that uniform baseline
+    before pricing: ``share' = a*share + (1-a)*(1/n_team)``. ``a=1`` is the raw
+    player-aware model; ``a=0`` collapses to the baseline. Values in between are
+    the calibration fix the reliability analysis recommends.
     """
+    a = max(0.0, min(1.0, blend_alpha))
     pa_b = pa_l = base_b = base_l = 0.0
     n_cov = n_unc = 0
     for events_obs in obs_by_match.values():
@@ -184,9 +191,11 @@ def evaluate(
                 continue
             n_cov += 1
             y = 1 if pm.scored else 0
-            p_pa = _p_anytime(lambda_team, share, pm.minutes)
             n_team = max(team_counts.get(pm.team, 1), 1)
-            p_bl = _p_anytime(lambda_team, 1.0 / n_team, pm.minutes)
+            uniform = 1.0 / n_team
+            blended = a * share + (1.0 - a) * uniform
+            p_pa = _p_anytime(lambda_team, blended, pm.minutes)
+            p_bl = _p_anytime(lambda_team, uniform, pm.minutes)
             pa_b += brier_one(p_pa, y)
             pa_l += log_loss_one(p_pa, y)
             base_b += brier_one(p_bl, y)
@@ -249,6 +258,7 @@ def run_backtest(
     train_events: Dict[int, list],
     test_events: Dict[int, list],
     lambda_team: Optional[float] = None,
+    blend_alpha: float = 1.0,
 ) -> BacktestResult:
     """End-to-end: learn shares on ``train_events``, evaluate on ``test_events``."""
     shares = team_npxg_shares(train_events)
@@ -256,4 +266,24 @@ def run_backtest(
         lambda_team = tournament_team_goal_mean(train_events)
     obs_by_match = {mid: match_scorer_observations(evs)
                     for mid, evs in test_events.items()}
-    return evaluate(obs_by_match, shares, lambda_team)
+    return evaluate(obs_by_match, shares, lambda_team, blend_alpha=blend_alpha)
+
+
+def sweep_blend(
+    train_events: Dict[int, list],
+    test_events: Dict[int, list],
+    alphas: Sequence[float] = (1.0, 0.8, 0.6, 0.5, 0.4, 0.3, 0.2, 0.0),
+    lambda_team: Optional[float] = None,
+) -> List[Tuple[float, BacktestResult]]:
+    """Evaluate the player-aware model across blend weights ``alphas``.
+
+    Returns ``[(alpha, BacktestResult), ...]``. The best alpha is the one whose
+    result both beats the baseline (``recommend_adopt``) and minimises log-loss.
+    """
+    shares = team_npxg_shares(train_events)
+    if lambda_team is None:
+        lambda_team = tournament_team_goal_mean(train_events)
+    obs_by_match = {mid: match_scorer_observations(evs)
+                    for mid, evs in test_events.items()}
+    return [(a, evaluate(obs_by_match, shares, lambda_team, blend_alpha=a))
+            for a in alphas]

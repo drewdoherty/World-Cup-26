@@ -37,6 +37,10 @@ def main(argv=None) -> int:
     ap.add_argument("--kelly-fraction", type=float, default=0.25)
     ap.add_argument("--kelly-cap", type=float, default=0.05)
     ap.add_argument("--min-edge", type=float, default=0.03, help="min edge to list (e.g. 0.03 = 3%)")
+    ap.add_argument("--blend-alpha", type=float, default=None,
+                    help="share->uniform calibration weight (default: validated DEFAULT_BLEND_ALPHA)")
+    ap.add_argument("--min-rated", type=int, default=8,
+                    help="min StatsBomb-rated squad players before a team's picks are headline-eligible")
     ap.add_argument("--db", default=str(ROOT / "data" / "players.db"))
     ap.add_argument("--players", default=str(ROOT / "data" / "players.json"))
     ap.add_argument("--no-book", action="store_true", help="skip Odds API per-event props (PM + model only)")
@@ -51,7 +55,22 @@ def main(argv=None) -> int:
     from wca.data.teamnames import canonical
     from wca.markets import kelly as kelly_mod
     from wca.models import scorer_props as sp
+    from wca.models.scorer_props import DEFAULT_BLEND_ALPHA
     from wca.nextmatch import SCORER_MARKETS
+
+    blend_alpha = args.blend_alpha if args.blend_alpha is not None else DEFAULT_BLEND_ALPHA
+
+    import sqlite3
+
+    def _rated(team):
+        try:
+            c = sqlite3.connect(args.db)
+            n = c.execute("SELECT COUNT(*) FROM squad_members WHERE team=? AND event_history=1",
+                          (canonical(team),)).fetchone()[0]
+            c.close()
+            return int(n)
+        except Exception:
+            return 0
 
     print("Fitting DC/Elo on results history ...", file=sys.stderr)
     models = fit_models(load_results(resolve_results_path()))
@@ -105,7 +124,9 @@ def main(argv=None) -> int:
             continue
 
         lines = sp.model_scorer_lines(home, away, lh, la, db_path=args.db,
-                                      overrides_path=args.players, top_n_per_team=6)
+                                      overrides_path=args.players, top_n_per_team=6,
+                                      blend_alpha=blend_alpha)
+        rated = {"home": _rated(home), "away": _rated(away)}
 
         scorer_df = None
         if not args.no_book:
@@ -144,6 +165,10 @@ def main(argv=None) -> int:
                     continue
                 stk = kelly_mod.stake(ln.model_p_anytime, best_odds, args.bankroll,
                                       fraction=args.kelly_fraction, cap=args.kelly_cap)
+                # Thin-squad guard: a team with few StatsBomb-rated players has
+                # its shares normalised over a tiny set, inflating the stars.
+                # Those picks are flagged and kept out of the headline list.
+                thin = rated[side] < args.min_rated
                 picks.append({
                     "fixture": "%s vs %s" % (hc, ac),
                     "player": ln.player, "team": ln.team,
@@ -153,6 +178,7 @@ def main(argv=None) -> int:
                     "best_odds": best_odds, "venue": venue,
                     "edge": edge, "stake": stk,
                     "share_source": ln.share_source,
+                    "rated": rated[side], "thin": thin,
                 })
 
     picks.sort(key=lambda p: p["edge"], reverse=True)
@@ -171,19 +197,32 @@ def main(argv=None) -> int:
                "over-confident on absolute probability — treat edges as "
                "optimistic and size conservatively.")
     out.append("")
+    headline = [p for p in picks if not p["thin"]]
+    flagged = [p for p in picks if p["thin"]]
+
+    def _table(rows):
+        t = ["| # | Player | Fixture | Model P | Fair | Best price | Venue | Edge | ¼-Kelly | rated |",
+             "|---|--------|---------|--------:|-----:|-----------:|-------|-----:|--------:|------:|"]
+        for i, p in enumerate(rows, 1):
+            t.append("| %d | %s | %s | %.1f%% | %.2f | %.2f | %s | **+%.1f%%** | £%.2f | %d |" % (
+                i, p["player"], p["fixture"], 100 * p["model_p"], p["fair"],
+                p["best_odds"], p["venue"], 100 * p["edge"], p["stake"], p["rated"]))
+        return t
+
     if not picks:
         out.append("**No +EV anytime-scorer selections at the current min edge "
-                   "(%.0f%%).** Either no book/PM scorer market is open yet for "
-                   "the upcoming fixtures, or the model finds no edge." % (args.min_edge * 100))
+                   "(%.0f%%).**" % (args.min_edge * 100))
     else:
-        out.append("## Anytime goalscorer (%d +EV slips)" % len(picks))
+        out.append("## HEADLINE — well-covered squads (>=%d rated, calibrated alpha=%.2f): %d slips"
+                   % (args.min_rated, blend_alpha, len(headline)))
         out.append("")
-        out.append("| # | Player | Fixture | Model P | Fair | Best price | Venue | Edge | ¼-Kelly |")
-        out.append("|---|--------|---------|--------:|-----:|-----------:|-------|-----:|--------:|")
-        for i, p in enumerate(picks, 1):
-            out.append("| %d | %s | %s | %.1f%% | %.2f | %.2f | %s | **+%.1f%%** | £%.2f |" % (
-                i, p["player"], p["fixture"], 100 * p["model_p"], p["fair"],
-                p["best_odds"], p["venue"], 100 * p["edge"], p["stake"]))
+        out += _table(headline) if headline else ["_none — no fully-covered squad cleared the edge._"]
+        out.append("")
+        out.append("## FLAGGED — thin coverage (<%d rated): %d slips — edges are likely "
+                   "ARTEFACTS of tiny rated sets / illiquid longshots, NOT alpha. Verify before betting."
+                   % (args.min_rated, len(flagged)))
+        out.append("")
+        out += _table(flagged) if flagged else ["_none._"]
     out.append("")
     out.append("## Model context — corners / cards / top scorers (no live market overlaid)")
     for c in context:
