@@ -38,6 +38,12 @@ COMMISSION = {"betfair_ex_uk": 0.06, "smarkets": 0.06, "matchbook": 0.06}
 LONGSHOT_PROB = 0.12
 LONGSHOT_ODDS = 9.0
 
+#: Low-win ("value") default: never emit a 100x+ lottery. Accas are assembled
+#: shortest-first and a candidate is dropped once its combined price exceeds
+#: this ceiling, which keeps the product in the modest ~2-8x band the punter
+#: actually wins from time to time. Legacy "edge"/"longshot" modes are uncapped.
+VALUE_MAX_COMBINED = 12.0
+
 DEFAULT_MIN_EDGE = 0.02
 DEFAULT_BANKROLL = 2500.0
 KELLY_FRACTION = 0.25
@@ -268,12 +274,25 @@ def assemble_accas(
     exposure: Optional[Exposure] = None,
     *,
     mode: str = "value",
-    min_legs: int = 3,
+    min_legs: int = 2,
+    max_legs: int = 4,
     max_accas: int = 4,
+    max_combined_odds: Optional[float] = None,
     bankroll: float = DEFAULT_BANKROLL,
     kelly_fraction: float = KELLY_FRACTION,
 ) -> List[Acca]:
-    """Combine +EV legs into accas, one selection per match, moneyline-first."""
+    """Combine +EV legs into accas, one selection per match, moneyline-first.
+
+    The default ``value`` mode is a LOW-LEVEL-WIN builder: among the +EV legs it
+    ranks by MODEL PROBABILITY (favourites / shortest fair odds first) rather
+    than by edge, assembles 2-4 legs shortest-first, and drops any combination
+    whose combined price exceeds ``max_combined_odds`` (default
+    :data:`VALUE_MAX_COMBINED`). That keeps the product in a modest ~2-8x band
+    that actually hits, instead of stacking the model's high-edge underdogs and
+    draws into a 300x+ lottery. The legacy edge-maximising behaviour lives in
+    ``edge`` mode (and ``longshot``, which additionally allows >=4.0 legs) — see
+    /card vs /longshots. ``hedge`` favours legs that offset the held cluster.
+    """
     exposure = exposure or Exposure()
     # Drop duplicates of held positions.
     legs = [L for L in legs if not _leg_held(L, exposure)]
@@ -283,13 +302,23 @@ def assemble_accas(
     if not legs:
         return []
 
+    # Low-win is the default; "edge"/"longshot" keep the legacy edge-max ranking.
+    low_win = mode not in ("edge", "longshot", "hedge")
+    if max_combined_odds is None and low_win:
+        max_combined_odds = VALUE_MAX_COMBINED
+
     def rank_key(L: Leg):
         conc = _leg_concentration(L, exposure)
         if mode == "hedge":
             # Prefer legs that REDUCE concentration; moneyline still tie-breaks.
             return (conc, not L.is_moneyline, -L.edge)
-        # value/longshot: moneyline first, then edge, then less-concentrated.
-        return (not L.is_moneyline, -L.edge, conc)
+        if not low_win:
+            # legacy edge-max: moneyline first, then edge, then less-concentrated.
+            return (not L.is_moneyline, -L.edge, conc)
+        # low-win: moneyline first, then FAVOURITES (highest model prob), then
+        # edge as a tie-break, then less-concentrated. Ranking by prob (not edge)
+        # is what stops the high-edge draw/underdog stack.
+        return (not L.is_moneyline, -L.model_prob, -L.edge, conc)
 
     legs = sorted(legs, key=rank_key)
 
@@ -304,19 +333,21 @@ def assemble_accas(
         return []
 
     accas: List[Acca] = []
-    # Acca 1: the best `min_legs` anchors (moneyline-anchored).
-    # Subsequent accas roll in additional fixtures for variety.
-    sizes = []
-    for n in range(min_legs, min(len(anchors), min_legs + max_accas) + 1):
-        sizes.append(n)
+    # Shortest-first: the 2-leg is the most likely to win, larger ones add
+    # variety. Combined odds only grow as legs are added, so once we blow the
+    # ceiling every larger size does too — stop.
     seen = set()
-    for n in sizes:
+    for n in range(min_legs, min(len(anchors), max_legs) + 1):
         chosen = anchors[:n]
+        o, p, edge = _combined(chosen)
+        if max_combined_odds and o > max_combined_odds:
+            break
+        if edge <= 0:
+            continue  # whole acca must stay +EV
         sig = tuple(_fixture_token(L.fixture) + L.selection for L in chosen)
         if sig in seen:
             continue
         seen.add(sig)
-        o, p, edge = _combined(chosen)
         stake = round(kelly_fraction * _kelly_fraction(p, o) * bankroll, 2)
         note = _exposure_note(chosen, exposure)
         accas.append(Acca(chosen, round(o, 2), p, edge, stake, note=note))
@@ -592,11 +623,15 @@ def build_accas(
     db_path: str = "data/wca.db",
     site_data: str = "site/data.json",
     mode: str = "value",
-    min_edge: float = DEFAULT_MIN_EDGE,
+    min_edge: Optional[float] = None,
     bankroll: float = DEFAULT_BANKROLL,
 ) -> Dict[str, Any]:
     fixtures, snap = load_fixtures(preds_path, scores_path, db_path)
     exposure = build_exposure(load_open_bets(db_path, site_data))
+    # Low-win accepts any genuinely +EV favourite (even a thin edge); the legacy
+    # edge-max modes keep the stiffer 2% floor so a longshot has to really pay.
+    if min_edge is None:
+        min_edge = 0.0 if mode in ("value", "low_win") else DEFAULT_MIN_EDGE
     legs = candidate_legs(fixtures, snap, min_edge=min_edge)
     if mode == "promo":
         accas = build_promo_accas(legs, exposure=exposure)
@@ -608,11 +643,18 @@ def build_accas(
 def format_accas(result: Dict[str, Any]) -> str:
     mode = result.get("mode", "value")
     accas = result.get("accas") or []
-    title = {"value": "Accas — moneyline +EV first",
+    title = {"value": "Accas — low-level win (favourites, +EV)",
+             "edge": "Accas — max edge (high-edge underdogs)",
              "hedge": "Accas — hedge the book",
              "longshot": "Accas — longshots (>=4.0 legs)",
              "promo": "Accas — promo / offer extraction"}.get(mode, "Accas")
     if not accas:
+        if mode in ("value", "low_win"):
+            return ("\U0001f3af *%s*\nNo qualifying low-win accas — no +EV favourite "
+                    "legs at modest (<=%.0fx) combined odds on the current card. The "
+                    "book is shading the favourites, so the only +EV legs are "
+                    "high-edge draws/underdogs. Try `/accas edge` for those (longshot "
+                    "lottery), or wait for a fresher card." % (title, VALUE_MAX_COMBINED))
         return ("\U0001f3af *%s*\nNo qualifying accas — no legs cleared the +EV gate "
                 "on the current card (or all overlap your book). Try `/accas longshot` "
                 "or wait for a fresher card." % title)

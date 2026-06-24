@@ -141,7 +141,7 @@ HELP_TEXT = (
     "/next — next match preview: winner, corners, scorers, scorelines\n"
     "/goalscorers — anytime + first-goalscorer recs, next 5 games\n"
     "/scores — predicted FT scorelines per fixture\n"
-    "/accas [value|hedge|longshot|promo] — model +EV accas (moneyline-first, exposure-aware)\n"
+    "/accas [value|edge|hedge|longshot|promo] — model accas; default=low-win favourites @ modest odds (edge=high-edge underdogs)\n"
     "/structure — project structure metrics\n"
     "/pm — Polymarket parked orders + trader status\n"
     "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
@@ -1078,17 +1078,18 @@ def handle_accas(
     db_path: str = "data/wca.db",
     scores_path: str = "site/scores_data.json",
 ) -> str:
-    """`/accas [value|hedge|longshot|promo]` — model-driven, exposure-aware accas.
+    """`/accas [value|edge|hedge|longshot|promo]` — model-driven, exposure-aware accas.
 
     Reads the cached card (model probs + per-venue 1X2 prices) and the latest
     odds snapshot; never fits the model live. Display-only. Modes:
-    ``value`` (default, moneyline +EV first), ``hedge`` (offset the held
-    cluster), ``longshot`` (allow >=4.0 legs), ``promo`` (qualify live offers).
+    ``value`` (default, LOW-LEVEL WIN: favourites by model prob @ modest combined
+    odds), ``edge`` (legacy edge-max, high-edge underdogs), ``hedge`` (offset the
+    held cluster), ``longshot`` (allow >=4.0 legs), ``promo`` (qualify live offers).
     """
     from wca import accas
 
     mode = (mode or "value").strip().lower()
-    if mode not in ("value", "hedge", "longshot", "promo"):
+    if mode not in ("value", "edge", "hedge", "longshot", "promo"):
         mode = "value"
     try:
         result = accas.build_accas(scores_path=scores_path, db_path=db_path, mode=mode)

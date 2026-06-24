@@ -190,7 +190,9 @@ def test_promo_lose_free_effective_risk_note():
 # --------------------------------------------------------------------------
 def test_format_empty_state():
     txt = format_accas({"mode": "value", "accas": []})
-    assert "No qualifying accas" in txt
+    assert "No qualifying low-win accas" in txt
+    # legacy edge mode keeps the original wording
+    assert "No qualifying accas" in format_accas({"mode": "edge", "accas": []})
 
 
 def test_format_non_empty():
@@ -207,3 +209,103 @@ def test_format_promo_shows_offer_note():
     out = build_promo_accas(legs, [Offer("BfSB", "betfair_sportsbook", "1", 3, 1.5, 0.0, "snr_free", 10.0)])
     txt = format_accas({"mode": "promo", "accas": out})
     assert "betfair_sportsbook" in txt
+
+
+# --------------------------------------------------------------------------
+# LOW-LEVEL-WIN (default "value") mode — favourites by model prob, sane odds
+# --------------------------------------------------------------------------
+def _lowwin_fixtures():
+    """Three fixtures where the favourite is genuinely +EV (sane short prices)
+    AND a high-edge underdog/draw is also +EV (the trap the old builder fell
+    into). Low-win must pick the favourites, not the longshots."""
+    return [
+        {  # Foxes strong fav, +EV @1.80; draw is a high-edge longshot @9.5
+            "fixture": "Foxes vs Hounds",
+            "model_1x2": {"home": 0.60, "draw": 0.22, "away": 0.18},
+            "best_1x2": {"home": (1.80, "bk"), "draw": (9.50, "bk"), "away": (6.50, "bk")},
+        },
+        {  # Lions fav, +EV @1.70; away high-edge longshot @11.0
+            "fixture": "Lions vs Mice",
+            "model_1x2": {"home": 0.65, "draw": 0.21, "away": 0.14},
+            "best_1x2": {"home": (1.70, "bk"), "draw": (5.00, "bk"), "away": (11.0, "bk")},
+        },
+        {  # Owls fav, +EV @1.90; draw +EV high-edge @8.5
+            "fixture": "Owls vs Newts",
+            "model_1x2": {"home": 0.58, "draw": 0.27, "away": 0.15},
+            "best_1x2": {"home": (1.90, "bk"), "draw": (8.50, "bk"), "away": (7.00, "bk")},
+        },
+    ]
+
+
+def test_lowwin_ranks_by_model_prob_not_edge():
+    # Foxes home: 0.60*1.80-1 = +8% edge.  Foxes draw: 0.22*9.5-1 = +109% edge.
+    # Edge-max would take the draw; low-win must take the favourite (home).
+    legs = candidate_legs(_lowwin_fixtures(), {}, min_edge=0.0, include_events=False)
+    out = assemble_accas(legs, mode="value", min_legs=2)
+    assert out, "low-win should build an acca"
+    sels = {(l.fixture, l.selection) for a in out for l in a.legs}
+    foxes = next(l for a in out for l in a.legs if l.fixture == "Foxes vs Hounds")
+    assert foxes.selection == "Foxes"        # the favourite, not the +109% draw
+    assert ("Foxes vs Hounds", "Draw") not in sels
+
+
+def test_lowwin_favours_favourites_every_leg_is_the_short_price():
+    legs = candidate_legs(_lowwin_fixtures(), {}, min_edge=0.0, include_events=False)
+    out = assemble_accas(legs, mode="value", min_legs=2)
+    for a in out:
+        for l in a.legs:
+            assert l.model_prob >= 0.50      # only genuine favourites get in
+            assert l.odds <= 2.5             # short, sane per-leg prices
+
+
+def test_lowwin_modest_combined_odds_never_a_lottery():
+    legs = candidate_legs(_lowwin_fixtures(), {}, min_edge=0.0, include_events=False)
+    out = assemble_accas(legs, mode="value", min_legs=2)
+    assert out
+    for a in out:
+        assert a.combined_odds <= accas.VALUE_MAX_COMBINED
+        assert a.combined_odds <= 8.0        # 3 favs ~1.7-1.9 each -> ~5.5x
+        assert a.model_prob >= 0.10          # decent chance of actually landing
+
+
+def test_lowwin_no_longshot_draw_stack():
+    # The pathological case: every fixture has a fat-edge draw/underdog. Low-win
+    # must NOT assemble them; the old edge-max ("edge" mode) does.
+    legs = candidate_legs(_lowwin_fixtures(), {}, min_edge=0.0, include_events=False)
+    low = assemble_accas(legs, mode="value", min_legs=2)
+    assert not any(l.selection == "Draw" or l.odds >= 5.0
+                   for a in low for l in a.legs)
+    edge = assemble_accas(legs, mode="edge", min_legs=2)
+    # legacy edge-max happily stacks the high-edge longshots
+    assert any(l.odds >= 5.0 for a in edge for l in a.legs)
+
+
+def test_lowwin_legs_still_positive_ev():
+    legs = candidate_legs(_lowwin_fixtures(), {}, min_edge=0.0, include_events=False)
+    out = assemble_accas(legs, mode="value", min_legs=2)
+    assert out
+    for a in out:
+        assert a.edge > 0
+        for l in a.legs:
+            assert l.edge > 0
+
+
+def test_lowwin_combined_odds_ceiling_blocks_big_accas():
+    legs = candidate_legs(_lowwin_fixtures(), {}, min_edge=0.0, include_events=False)
+    # A punishing ceiling forces only the shortest (2-leg) combos through.
+    out = assemble_accas(legs, mode="value", min_legs=2, max_combined_odds=3.5)
+    for a in out:
+        assert a.combined_odds <= 3.5
+
+
+def test_build_accas_low_win_is_the_default(tmp_path):
+    # /accas with no mode -> "value" -> low-win; build_accas accepts it end-to-end.
+    res = accas.build_accas(
+        preds_path=str(tmp_path / "missing.json"),
+        scores_path=str(tmp_path / "missing.json"),
+        db_path=str(tmp_path / "missing.db"),
+        site_data=str(tmp_path / "missing.json"),
+        mode="value",
+    )
+    assert res["mode"] == "value"
+    assert isinstance(res["accas"], list)
