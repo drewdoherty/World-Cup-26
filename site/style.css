@@ -215,6 +215,30 @@ body {
   letter-spacing: 1px;
   color: var(--muted);
 }
+.pos-toggle {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+  margin-right: 10px;
+}
+.pos-tog {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.15s, color 0.15s;
+}
+.pos-tog:hover { color: var(--text); border-color: var(--text-dim); }
+.pos-tog.active {
+  background: var(--border);
+  color: var(--text);
+  border-color: var(--text-dim);
+}
 .panel-body { padding: 12px; }
 .panel-scroll { max-height: 360px; overflow-y: auto; overflow-x: auto; }
 

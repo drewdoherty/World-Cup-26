@@ -13,6 +13,25 @@
 
   var $ = function (id) { return document.getElementById(id); };
 
+  // Filter state for open/closed position panels ("all" or "today").
+  var posFilter = { open: "all", closed: "all" };
+
+  // Cached data reference so toggles can re-render without a refetch.
+  var _lastData = null;
+
+  function isToday(ts) {
+    if (!ts) return false;
+    var raw = String(ts);
+    var ms = Date.parse(raw.indexOf("T") >= 0 &&
+      !/[zZ]|[+\-]\d\d:?\d\d$/.test(raw) ? raw + "Z" : raw);
+    if (isNaN(ms)) return false;
+    var d = new Date(ms);
+    var now = new Date();
+    return d.getFullYear() === now.getFullYear() &&
+           d.getMonth() === now.getMonth() &&
+           d.getDate() === now.getDate();
+  }
+
   // ---- formatting helpers -------------------------------------------------
 
   var SYM = { GBP: "£", USD: "$", EUR: "€" };
@@ -489,13 +508,16 @@
   }
 
   function renderPositions(d) {
-    var pos = d.positions || [];
+    var all = d.positions || [];
+    var pos = posFilter.open === "today" ? all.filter(function (p) { return isToday(p.ts_utc); }) : all;
     if (!pos.length) {
-      $("positions").innerHTML = '<div class="empty">No open positions</div>';
-      $("positions-meta").textContent = "0";
+      $("positions").innerHTML = '<div class="empty">' +
+        (posFilter.open === "today" ? "No open positions today" : "No open positions") + '</div>';
+      $("positions-meta").textContent = posFilter.open === "today" ? "0 today" : "0";
       return;
     }
-    $("positions-meta").textContent = String(pos.length);
+    $("positions-meta").textContent = posFilter.open === "today"
+      ? pos.length + " today" : String(pos.length);
 
     var rows = pos.map(function (p) {
       var venue = esc(p.venue || "sportsbook");
@@ -1140,6 +1162,7 @@
   }
 
   function render(d) {
+    _lastData = d;
     renderTicker(d);
     renderVenues(d);
     renderPositions(d);
@@ -1152,11 +1175,16 @@
   function renderClosedPositions(d) {
     var el = $("positions-closed");
     if (!el) return;
-    var pos = d.closed_positions || [];
+    var all = d.closed_positions || [];
+    var pos = posFilter.closed === "today"
+      ? all.filter(function (p) { return isToday(p.settled_ts || p.ts_utc); }) : all;
     var meta = $("positions-closed-meta");
     if (!pos.length) {
-      el.innerHTML = '<div class="empty">No settled bets yet — P&L appears here after results</div>';
-      if (meta) meta.textContent = "0";
+      el.innerHTML = '<div class="empty">' +
+        (posFilter.closed === "today"
+          ? "No settled bets today"
+          : "No settled bets yet — P&L appears here after results") + '</div>';
+      if (meta) meta.textContent = posFilter.closed === "today" ? "0 today" : "0";
       return;
     }
     // Per-currency realized totals for the panel meta (never summed across).
@@ -1166,7 +1194,9 @@
       tot[c] = (tot[c] || 0) + Number(p.pl || 0);
     });
     if (meta) {
-      meta.innerHTML = esc(pos.length + " settled · ") +
+      var countLabel = posFilter.closed === "today"
+        ? pos.length + " today · " : pos.length + " settled · ";
+      meta.innerHTML = esc(countLabel) +
         Object.keys(tot).map(function (c) {
           return '<span class="' + (tot[c] >= 0 ? "pos" : "neg") + '">' +
             esc(signedMoney(tot[c], c)) + '</span>';
@@ -1267,9 +1297,30 @@
       });
   }
 
+  function initPosToggles() {
+    ["pos-open-toggle", "pos-closed-toggle"].forEach(function (id) {
+      var group = $(id);
+      if (!group) return;
+      group.addEventListener("click", function (e) {
+        var btn = e.target.closest(".pos-tog");
+        if (!btn) return;
+        var panel = btn.dataset.panel;
+        var filter = btn.dataset.filter;
+        posFilter[panel] = filter;
+        group.querySelectorAll(".pos-tog").forEach(function (b) {
+          b.classList.toggle("active", b === btn);
+        });
+        if (!_lastData) return;
+        if (panel === "open") renderPositions(_lastData);
+        else renderClosedPositions(_lastData);
+      });
+    });
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", load);
+    document.addEventListener("DOMContentLoaded", function () { initPosToggles(); load(); });
   } else {
+    initPosToggles();
     load();
   }
 })();
