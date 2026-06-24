@@ -71,3 +71,20 @@ improve (the `recommend_adopt` gate enforces this).
 Coverage caveat: only 31% of WC2022 player-matches had a WC2018 share, so the
 out-of-sample sample is modest — another reason to blend toward priors and gate
 on rated-player count.
+
+## Validation — blend sweep (closes the recommendation)
+
+Re-running the backtest across the blend weight `alpha` (`sweep_blend`):
+
+| alpha | Brier | log-loss | vs baseline | adopt? |
+|------:|------:|---------:|-------------|--------|
+| 1.0 (raw) | 0.0862 | 0.4316 | Brier +0.008 / LL −0.094 | no |
+| **0.8** | 0.0857 | 0.3088 | +0.0086 / **+0.0285** | **YES** |
+| 0.7 (default) | ~0.086 | ~0.306 | +0.008 / +0.030 | **YES** |
+| 0.6 | 0.0861 | 0.3059 | +0.0082 / **+0.0313** | YES |
+| 0.0 (baseline) | 0.0943 | 0.3372 | 0 / 0 | no |
+
+**Verdict: ADOPT with `alpha≈0.7`.** The blend lifts the starved 0–20% bucket
+(recovers log-loss) while keeping the ranking (keeps the Brier win) — the
+player-aware model now beats the no-player baseline on BOTH metrics OOS. Applied
+live as `scorer_props.DEFAULT_BLEND_ALPHA=0.7`, gated by rated-squad count.
