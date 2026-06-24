@@ -132,6 +132,56 @@ def test_player_minutes_from_lineups_and_subs():
     assert by["Opp"]["minutes"] == 93
 
 
+def _shot_out(team, player, xg, outcome):
+    return {
+        "type": {"name": "Shot"},
+        "team": {"name": team},
+        "player": {"name": player},
+        "shot": {"statsbomb_xg": xg, "outcome": {"name": outcome}},
+        "minute": 55,
+    }
+
+
+def test_shots_on_target_convention_match_level():
+    # Goal + Saved + Saved To Post are on target; Blocked / Off T / Post are not.
+    events = BASE + [
+        _shot_out("HomeFC", "A", 0.3, "Goal"),
+        _shot_out("HomeFC", "A", 0.2, "Saved"),
+        _shot_out("HomeFC", "A", 0.1, "Saved To Post"),
+        _shot_out("HomeFC", "A", 0.1, "Blocked"),
+        _shot_out("HomeFC", "A", 0.1, "Off T"),
+        _shot_out("HomeFC", "A", 0.1, "Post"),
+    ]
+    props = match_props(events)
+    assert props["shots_home"] == 6
+    assert props["sot_home"] == 3  # Goal, Saved, Saved To Post
+
+
+def test_player_shares_sot_and_cards():
+    m1 = BASE + [
+        _shot_out("HomeFC", "Striker", 0.4, "Goal"),
+        _shot_out("HomeFC", "Striker", 0.2, "Saved"),
+        _shot_out("HomeFC", "Striker", 0.1, "Blocked"),
+        # Striker also picks up a yellow.
+        {"type": {"name": "Foul Committed"}, "team": {"name": "HomeFC"},
+         "player": {"name": "Striker"},
+         "foul_committed": {"card": {"name": "Yellow Card"}}, "minute": 70},
+        # A defender gets a straight red via Bad Behaviour.
+        {"type": {"name": "Bad Behaviour"}, "team": {"name": "HomeFC"},
+         "player": {"name": "Defender"},
+         "bad_behaviour": {"card": {"name": "Red Card"}}, "minute": 80},
+    ]
+    df = player_shares({1: m1})
+    by = {r["player"]: r for _, r in df.iterrows()}
+    assert by["Striker"]["shots"] == 3
+    assert by["Striker"]["sot"] == 2  # Goal + Saved
+    assert by["Striker"]["goals"] == 1
+    assert by["Striker"]["yellows"] == 1
+    assert by["Striker"]["reds"] == 0
+    assert by["Defender"]["reds"] == 1
+    assert by["Defender"]["shots"] == 0
+
+
 @pytest.mark.skipif(os.environ.get("WCA_NET") != "1",
                     reason="network test; set WCA_NET=1 to enable")
 def test_fetch_matches_live(tmp_path):

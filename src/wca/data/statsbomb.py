@@ -35,6 +35,11 @@ RAW_BASE = "https://raw.githubusercontent.com/statsbomb/open-data/master/data"
 WC_COMPETITION_ID = 43
 WC_SEASONS = {3: "WC2018", 106: "WC2022"}
 
+# Shot outcomes that count as "on target" (would be a goal but for keeper/post).
+# Blocked (by a defender), Post (woodwork, no save), Off T and Wayward are NOT
+# on target by the standard SoT convention.
+SOT_OUTCOMES = frozenset({"Goal", "Saved", "Saved To Post"})
+
 DEFAULT_CACHE_DIR = "data/raw/statsbomb"
 
 _session = None
@@ -185,7 +190,7 @@ def match_props(events, home_team=None, away_team=None):
         home_team, away_team = _home_away_teams(events)
 
     out = {}
-    for k in ("corners", "yellows", "reds", "fouls", "shots", "goals"):
+    for k in ("corners", "yellows", "reds", "fouls", "shots", "sot", "goals"):
         out[k + "_home"] = 0
         out[k + "_away"] = 0
     out["xg_home"] = 0.0
@@ -212,10 +217,13 @@ def match_props(events, home_team=None, away_team=None):
         elif etype == "Shot":
             shot = ev.get("shot") or {}
             out["shots" + sfx] += 1
+            outcome = (shot.get("outcome") or {}).get("name")
+            if outcome in SOT_OUTCOMES:
+                out["sot" + sfx] += 1
             xg = shot.get("statsbomb_xg")
             if xg is not None:
                 out["xg" + sfx] += float(xg)
-            if (shot.get("outcome") or {}).get("name") == "Goal":
+            if outcome == "Goal":
                 out["goals" + sfx] += 1
         elif etype == "Own Goal For":
             out["goals" + sfx] += 1
@@ -287,9 +295,12 @@ def player_shares(events_by_match):
     Returns
     -------
     pandas.DataFrame
-        Columns: player, team, minutes, shots, goals, xg_sum, npxg_sum,
-        matches. npxg_sum excludes penalty-shot xG. minutes is approximate
-        (from Starting XI / Substitution events) and NaN if unavailable.
+        Columns: player, team, minutes, shots, sot, goals, xg_sum, npxg_sum,
+        yellows, reds, matches. ``sot`` counts shots on target (see
+        :data:`SOT_OUTCOMES`); ``yellows``/``reds`` are cards received by the
+        player (second yellow counted as one red, per the module docstring).
+        npxg_sum excludes penalty-shot xG. minutes is approximate (from
+        Starting XI / Substitution events) and NaN if unavailable.
     """
     stats = {}  # (player, team) -> dict
 
@@ -299,9 +310,12 @@ def player_shares(events_by_match):
                 "minutes": 0.0,
                 "has_minutes": False,
                 "shots": 0,
+                "sot": 0,
                 "goals": 0,
                 "xg_sum": 0.0,
                 "npxg_sum": 0.0,
+                "yellows": 0,
+                "reds": 0,
                 "matches": set(),
             }
         return stats[key]
@@ -315,23 +329,35 @@ def player_shares(events_by_match):
             rec["matches"].add(match_id)
 
         for ev in events:
-            if (ev.get("type") or {}).get("name") != "Shot":
-                continue
+            etype = (ev.get("type") or {}).get("name")
             player = (ev.get("player") or {}).get("name")
             team = (ev.get("team") or {}).get("name")
             if not player:
                 continue
-            rec = get((player, team))
-            rec["matches"].add(match_id)
-            shot = ev.get("shot") or {}
-            rec["shots"] += 1
-            xg = float(shot.get("statsbomb_xg") or 0.0)
-            rec["xg_sum"] += xg
-            is_pen = ((shot.get("type") or {}).get("name")) == "Penalty"
-            if not is_pen:
-                rec["npxg_sum"] += xg
-            if (shot.get("outcome") or {}).get("name") == "Goal":
-                rec["goals"] += 1
+
+            if etype == "Shot":
+                rec = get((player, team))
+                rec["matches"].add(match_id)
+                shot = ev.get("shot") or {}
+                rec["shots"] += 1
+                outcome = (shot.get("outcome") or {}).get("name")
+                if outcome in SOT_OUTCOMES:
+                    rec["sot"] += 1
+                xg = float(shot.get("statsbomb_xg") or 0.0)
+                rec["xg_sum"] += xg
+                is_pen = ((shot.get("type") or {}).get("name")) == "Penalty"
+                if not is_pen:
+                    rec["npxg_sum"] += xg
+                if outcome == "Goal":
+                    rec["goals"] += 1
+
+            # Cards are attributed to the event's player (the carded player).
+            y, r = _card_counts(ev)
+            if y or r:
+                rec = get((player, team))
+                rec["matches"].add(match_id)
+                rec["yellows"] += y
+                rec["reds"] += r
 
     rows = []
     for (player, team), rec in stats.items():
@@ -340,15 +366,18 @@ def player_shares(events_by_match):
             "team": team,
             "minutes": rec["minutes"] if rec["has_minutes"] else float("nan"),
             "shots": rec["shots"],
+            "sot": rec["sot"],
             "goals": rec["goals"],
             "xg_sum": rec["xg_sum"],
             "npxg_sum": rec["npxg_sum"],
+            "yellows": rec["yellows"],
+            "reds": rec["reds"],
             "matches": len(rec["matches"]),
         })
     df = pd.DataFrame(
         rows,
-        columns=["player", "team", "minutes", "shots", "goals",
-                 "xg_sum", "npxg_sum", "matches"],
+        columns=["player", "team", "minutes", "shots", "sot", "goals",
+                 "xg_sum", "npxg_sum", "yellows", "reds", "matches"],
     )
     if len(df):
         df = df.sort_values("npxg_sum", ascending=False).reset_index(drop=True)
