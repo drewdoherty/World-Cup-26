@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-24 18:31:03 UTC"
+    "generated": "2026-06-24T19:03:06"
   },
   "totals": {
-    "wagered": 1521.1060000000004,
-    "open_stake": 732.2700000000001,
+    "wagered": 1528.6060000000004,
+    "open_stake": 739.77,
     "settled_pl": 54.99049999999998,
-    "n_bets": 123
+    "n_bets": 124
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 821.3399999999998,
-      "open_stake": 126.26,
+      "wagered": 828.8399999999998,
+      "open_stake": 133.76,
       "settled_pl": 83.12549999999999,
-      "n_bets": 89
+      "n_bets": 90
     },
     "USD": {
       "wagered": 699.7660000000001,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 821.3399999999998,
-      "open_stake": 126.26,
+      "wagered": 828.8399999999998,
+      "open_stake": 133.76,
       "settled_pl": 83.12549999999999,
-      "n_bets": 89,
+      "n_bets": 90,
       "currency": "GBP"
     },
     "polymarket": {
@@ -53,35 +53,35 @@
       "label": "Sportsbook 1"
     },
     "sportsbook_2": {
-      "wagered": 138.0,
-      "open_stake": 0.0,
+      "wagered": 145.5,
+      "open_stake": 7.5,
       "settled_pl": -56.0,
-      "n_bets": 16,
+      "n_bets": 17,
       "currency": "GBP",
       "label": "Sportsbook 2"
     }
   },
   "source_summary": {
+    "model": {
+      "GBP": {
+        "wagered": 256.78,
+        "open_stake": 61.760000000000005,
+        "settled_pl": 31.6655,
+        "n_bets": 32
+      },
+      "USD": {
+        "wagered": 686.4,
+        "open_stake": 605.01,
+        "settled_pl": -25.767999999999994,
+        "n_bets": 24
+      }
+    },
     "offer": {
       "GBP": {
         "wagered": 255.0,
         "open_stake": 45.0,
         "settled_pl": 81.07,
         "n_bets": 28
-      }
-    },
-    "model": {
-      "USD": {
-        "wagered": 686.4,
-        "open_stake": 605.01,
-        "settled_pl": -25.767999999999994,
-        "n_bets": 24
-      },
-      "GBP": {
-        "wagered": 249.27999999999997,
-        "open_stake": 54.26,
-        "settled_pl": 31.6655,
-        "n_bets": 31
       }
     },
     "punt": {
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "Betfair Sportsbook": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 272.56,
+      "open_stake": 82.5,
+      "settled_pl": 104.56,
+      "n_bets": 24
+    },
     "bet365": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -123,14 +131,6 @@
       "open_stake": 606.01,
       "settled_pl": -28.134999999999998,
       "n_bets": 34
-    },
-    "Betfair Sportsbook": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 265.06,
-      "open_stake": 75.0,
-      "settled_pl": 104.56,
-      "n_bets": 23
     },
     "Betfair Exchange UK": {
       "venue": "sportsbook",
@@ -214,6 +214,56 @@
     }
   },
   "platforms_by_account": {
+    "2": {
+      "Betfair Sportsbook": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 84.5,
+        "open_stake": 7.5,
+        "settled_pl": -5.0,
+        "n_bets": 10
+      },
+      "Betfair Exchange UK": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 16.0,
+        "open_stake": 0.0,
+        "settled_pl": -6.0,
+        "n_bets": 2
+      },
+      "Sky Bet": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 10.0,
+        "open_stake": 0.0,
+        "settled_pl": -10.0,
+        "n_bets": 1
+      },
+      "betfred": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 30.0,
+        "open_stake": 0.0,
+        "settled_pl": -30.0,
+        "n_bets": 3
+      },
+      "Paddy Power": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 5.0,
+        "open_stake": 0.0,
+        "settled_pl": -5.0,
+        "n_bets": 1
+      },
+      "polymarket": {
+        "venue": "polymarket",
+        "currency": "USD",
+        "wagered": 1.94,
+        "open_stake": 1.0,
+        "settled_pl": -0.94,
+        "n_bets": 2
+      }
+    },
     "1": {
       "bet365": {
         "venue": "sportsbook",
@@ -310,56 +360,6 @@
         "open_stake": 0.0,
         "settled_pl": -10.0,
         "n_bets": 1
-      }
-    },
-    "2": {
-      "Betfair Sportsbook": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 77.0,
-        "open_stake": 0.0,
-        "settled_pl": -5.0,
-        "n_bets": 9
-      },
-      "Betfair Exchange UK": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 16.0,
-        "open_stake": 0.0,
-        "settled_pl": -6.0,
-        "n_bets": 2
-      },
-      "Sky Bet": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 10.0,
-        "open_stake": 0.0,
-        "settled_pl": -10.0,
-        "n_bets": 1
-      },
-      "betfred": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 30.0,
-        "open_stake": 0.0,
-        "settled_pl": -30.0,
-        "n_bets": 3
-      },
-      "Paddy Power": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 5.0,
-        "open_stake": 0.0,
-        "settled_pl": -5.0,
-        "n_bets": 1
-      },
-      "polymarket": {
-        "venue": "polymarket",
-        "currency": "USD",
-        "wagered": 1.94,
-        "open_stake": 1.0,
-        "settled_pl": -0.94,
-        "n_bets": 2
       }
     },
     "mum": {
@@ -3081,12 +3081,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 30.81,
-      "cur_price": 0.1515,
+      "cur_value": 31.63,
+      "cur_price": 0.1555,
       "avg_price": 0.1179,
       "shares": 203.3898,
-      "cash_pnl": 6.81,
-      "pct_pnl": 0.28375354691933646,
+      "cash_pnl": 7.63,
+      "pct_pnl": 0.31792064067467507,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3185,12 +3185,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 66.59,
-      "cur_price": 0.605,
+      "cur_value": 66.04,
+      "cur_price": 0.6,
       "avg_price": 0.595,
       "shares": 110.0741,
-      "cash_pnl": 1.09,
-      "pct_pnl": 0.016641246780529438,
+      "cash_pnl": 0.54,
+      "pct_pnl": 0.008244287395858621,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3237,12 +3237,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 55.0,
-      "cur_price": 0.55,
+      "cur_value": 55.5,
+      "cur_price": 0.555,
       "avg_price": 0.6,
       "shares": 100.0,
-      "cash_pnl": -5.0,
-      "pct_pnl": -0.08333333333333333,
+      "cash_pnl": -4.5,
+      "pct_pnl": -0.075,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3263,12 +3263,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 61.39,
-      "cur_price": 0.635,
+      "cur_value": 62.36,
+      "cur_price": 0.645,
       "avg_price": 0.6517,
       "shares": 96.6812,
-      "cash_pnl": -1.62,
-      "pct_pnl": -0.025710286336411165,
+      "cash_pnl": -0.65,
+      "pct_pnl": -0.010315855628806948,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3315,12 +3315,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 57.72,
-      "cur_price": 0.605,
+      "cur_value": 55.81,
+      "cur_price": 0.585,
       "avg_price": 0.5699,
       "shares": 95.4035,
-      "cash_pnl": 3.34,
-      "pct_pnl": 0.061419752518853475,
+      "cash_pnl": 1.43,
+      "pct_pnl": 0.02629648086885044,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3393,12 +3393,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 81.44,
-      "cur_price": 0.945,
+      "cur_value": 80.58,
+      "cur_price": 0.935,
       "avg_price": 0.7599,
       "shares": 86.1842,
-      "cash_pnl": 15.94,
-      "pct_pnl": 0.24335915016664147,
+      "cash_pnl": 15.08,
+      "pct_pnl": 0.23022935912879258,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3419,12 +3419,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 69.96,
-      "cur_price": 0.9205,
+      "cur_value": 69.88,
+      "cur_price": 0.9195,
       "avg_price": 0.866,
       "shares": 76.0,
-      "cash_pnl": 4.14,
-      "pct_pnl": 0.0629026376564969,
+      "cash_pnl": 4.07,
+      "pct_pnl": 0.06183906648839188,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3445,12 +3445,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 28.17,
-      "cur_price": 0.385,
+      "cur_value": 27.44,
+      "cur_price": 0.375,
       "avg_price": 0.41,
       "shares": 73.17,
-      "cash_pnl": -1.83,
-      "pct_pnl": -0.06100061000610006,
+      "cash_pnl": -2.56,
+      "pct_pnl": -0.08533418667520008,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3523,12 +3523,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 12.25,
-      "cur_price": 0.245,
+      "cur_value": 12.0,
+      "cur_price": 0.24,
       "avg_price": 0.25,
       "shares": 50.0,
-      "cash_pnl": -0.25,
-      "pct_pnl": -0.02,
+      "cash_pnl": -0.5,
+      "pct_pnl": -0.04,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3582,6 +3582,27 @@
       "cash_pnl": 0.13,
       "pct_pnl": 0.021667027783796398,
       "notes": "live PM position (data-API)"
+    },
+    {
+      "id": 151,
+      "ts_utc": "2026-06-24T19:03:06",
+      "match": "Bosnia v Qatar",
+      "match_id": "MANUAL_BOSNIA_V_QATAR",
+      "market": "Match Odds",
+      "selection": "The Draw",
+      "platform": "Betfair Sportsbook",
+      "venue": "sportsbook",
+      "account": "2",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 5.8,
+      "stake": 7.5,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97",
+      "manual_override": null
     },
     {
       "id": 150,
