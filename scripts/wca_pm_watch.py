@@ -49,7 +49,7 @@ def ledger_state(con, selection):
     """Return (shares, cost) already recorded for *selection*."""
     rows = con.execute(
         "SELECT stake, decimal_odds FROM bets WHERE platform='polymarket' "
-        "AND selection=? AND status != 'void'", (selection,)
+        "AND selection=? AND status NOT IN ('void','cashed')", (selection,)
     ).fetchall()
     shares = sum(r[0] * r[1] for r in rows)
     cost = sum(r[0] for r in rows)

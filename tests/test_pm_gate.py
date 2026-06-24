@@ -41,11 +41,12 @@ class _FakeTrader:
 
     def place_order(
         self, token_id, price, size, side, *, neg_risk=False, dry_run=True,
-        market_question=None,
+        market_question=None, order_type="GTC", de_risk=False,
     ):
         self.calls.append(
             dict(token_id=token_id, price=price, size=size, side=side,
-                 neg_risk=neg_risk, dry_run=dry_run, market_question=market_question)
+                 neg_risk=neg_risk, dry_run=dry_run, market_question=market_question,
+                 order_type=order_type, de_risk=de_risk)
         )
         if dry_run:
             return {"dry_run": True, "submitted": False, "maker": PROXY,
@@ -194,6 +195,124 @@ def test_confirm_yes_forwards_market_question_with_event_slug(tmp_path):
     fwd = trader.calls[0]["market_question"]
     assert "Will Canada win on 2026-06-12?" in fwd
     assert "fifwc-can-par-2026-06-12" in fwd
+
+
+# ---------------------------------------------------------------------------
+# SELL = cash-out: closes the held position, never records a phantom long.
+# ---------------------------------------------------------------------------
+
+
+def _record_open_position(db, token_id="123456789", price=0.40, shares=10.0):
+    """Seed an open Polymarket BUY the cash-out can close."""
+    from wca.ledger.store import record_bet
+    record_bet(
+        ts_utc="2026-06-13T18:00:00", match_id="M1", match_desc="Mexico vs Canada",
+        market="Exact Score", selection="Yes", platform="polymarket",
+        decimal_odds=round(1.0 / price, 6), stake=round(price * shares, 6),
+        token_id=token_id, db_path=db,
+    )
+
+
+def test_sell_dry_run_does_not_touch_ledger(tmp_path, monkeypatch):
+    monkeypatch.setenv("PM_DRY_RUN", "1")
+    db = str(tmp_path / "t.db")
+    _record_open_position(db)  # one open row
+    app.park_order(_proposal(side="SELL", price=0.06, size=10.0))
+    trader = _FakeTrader()
+    out = app.handle_confirmation("Y PM-1", db, trader=trader)
+
+    assert "DRY-ARM" in out
+    assert trader.calls[0]["de_risk"] is True
+    assert trader.calls[0]["order_type"] == "FOK"
+    # The held position is untouched (still open) in dry-run.
+    con = sqlite3.connect(db)
+    statuses = [r[0] for r in con.execute("SELECT status FROM bets").fetchall()]
+    con.close()
+    assert statuses == ["open"]
+
+
+# execute_cashout is tested directly so the /trades reconciler can be injected
+# (the live booking reads the ACTUAL fill from the trades feed, not the response).
+
+
+def test_execute_cashout_books_actual_fill(tmp_path):
+    db = str(tmp_path / "t.db")
+    _record_open_position(db, price=0.40, shares=10.0)  # cost $4, token 123456789
+    trader = _FakeTrader()
+    res = app.execute_cashout(
+        _proposal(side="SELL", price=0.06, size=10.0), db,
+        trader=trader, dry_run=False,
+        reconcile_fn=lambda asset, size: (10.0, 0.60),  # /trades: 10 sh for $0.60
+    )
+    assert res["outcome"] == "sold" and res["settled"] is True
+    assert res["proceeds"] == pytest.approx(0.60)
+    assert trader.calls[0]["de_risk"] is True and trader.calls[0]["order_type"] == "FOK"
+    con = sqlite3.connect(db)
+    rows = con.execute("SELECT status, settled_pl FROM bets").fetchall()
+    con.close()
+    assert len(rows) == 1 and rows[0][0] == "cashed"
+    assert abs(rows[0][1] - (0.60 - 4.0)) < 1e-6  # realised P&L from the real fill
+
+
+def test_execute_cashout_partial_fill_splits_row(tmp_path):
+    db = str(tmp_path / "t.db")
+    _record_open_position(db, price=0.40, shares=10.0)  # 10 sh held
+    res = app.execute_cashout(
+        _proposal(side="SELL", price=0.06, size=10.0), db,
+        trader=_FakeTrader(), dry_run=False,
+        reconcile_fn=lambda asset, size: (4.0, 0.24),  # only 4 sh filled
+    )
+    assert res["outcome"] == "sold" and res["filled_size"] == pytest.approx(4.0)
+    con = sqlite3.connect(db)
+    statuses = sorted(r[0] for r in con.execute("SELECT status FROM bets").fetchall())
+    con.close()
+    assert statuses == ["cashed", "open"]  # 4 sh cashed, 6 sh still open
+
+
+def test_execute_cashout_no_fill_books_nothing(tmp_path):
+    db = str(tmp_path / "t.db")
+    _record_open_position(db)
+    res = app.execute_cashout(
+        _proposal(side="SELL", price=0.06, size=10.0), db,
+        trader=_FakeTrader(), dry_run=False,
+        reconcile_fn=lambda asset, size: (0.0, 0.0),  # FOK didn't fill
+    )
+    assert res["outcome"] == "no_fill" and res["settled"] is False
+    con = sqlite3.connect(db)
+    statuses = [r[0] for r in con.execute("SELECT status FROM bets").fetchall()]
+    con.close()
+    assert statuses == ["open"]  # untouched
+
+
+def test_execute_cashout_unconfirmed_books_nothing(tmp_path):
+    db = str(tmp_path / "t.db")
+    _record_open_position(db)
+    res = app.execute_cashout(
+        _proposal(side="SELL", price=0.06, size=10.0), db,
+        trader=_FakeTrader(), dry_run=False,
+        reconcile_fn=lambda asset, size: None,  # couldn't confirm the fill
+    )
+    assert res["outcome"] == "unconfirmed" and res["settled"] is False
+    con = sqlite3.connect(db)
+    statuses = [r[0] for r in con.execute("SELECT status FROM bets").fetchall()]
+    con.close()
+    assert statuses == ["open"]  # never booked an unconfirmed fill
+
+
+def test_buy_still_records_bet_and_forwards_flags(tmp_path, monkeypatch):
+    """Regression: a BUY is unchanged — records a bet, GTC, de_risk False."""
+    monkeypatch.setenv("PM_DRY_RUN", "1")
+    db = str(tmp_path / "t.db")
+    app.park_order(_proposal(side="BUY"))
+    trader = _FakeTrader()
+    out = app.handle_confirmation("Y PM-1", db, trader=trader)
+    assert "Order PM-1" in out
+    assert trader.calls[0]["de_risk"] is False
+    assert trader.calls[0]["order_type"] == "GTC"
+    con = sqlite3.connect(db)
+    status = con.execute("SELECT status FROM bets").fetchone()[0]
+    con.close()
+    assert status == "open"
 
 
 # ---------------------------------------------------------------------------

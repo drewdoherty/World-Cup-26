@@ -43,7 +43,7 @@ from typing import Dict, Any
 import numpy as np
 import pandas as pd
 
-from wca.ledger.store import all_bets, all_bankroll_events
+from wca.ledger.store import all_bets, all_bankroll_events, REALIZED_STATUSES
 
 
 def _bets_df(db_path: str) -> pd.DataFrame:
@@ -98,7 +98,8 @@ def bankroll_curve(db_path: str) -> pd.DataFrame:
         )
 
     for b in bets:
-        if b["status"] in ("won", "lost") and b["settled_pl"] is not None:
+        # ``cashed`` (a Polymarket cash-out) realises P&L just like won/lost.
+        if b["status"] in REALIZED_STATUSES and b["settled_pl"] is not None:
             records.append(
                 {
                     "ts_utc": b["ts_utc"],
@@ -559,8 +560,11 @@ def summary(db_path: str) -> Dict[str, Any]:
     won_bets = int((df["status"] == "won").sum())
     lost_bets = int((df["status"] == "lost").sum())
     void_bets = int((df["status"] == "void").sum())
+    cashed_bets = int((df["status"] == "cashed").sum())
 
-    settled = df[df["status"].isin(("won", "lost"))]
+    # Realised set includes cash-outs: a cashed row's settled_pl is realised
+    # money and its stake was real money put at risk, so both belong in P&L/ROI.
+    settled = df[df["status"].isin(REALIZED_STATUSES)]
     total_staked = float(settled["stake"].sum()) if not settled.empty else 0.0
     total_pl = float(settled["settled_pl"].sum()) if not settled.empty else 0.0
     roi = (total_pl / total_staked) if total_staked > 0 else float("nan")
@@ -602,7 +606,7 @@ def summary(db_path: str) -> Dict[str, Any]:
         )
         blk["n"] = int(len(grp))
         blk["staked"] = float(grp["stake"].sum()) if not grp.empty else 0.0
-        settled_grp = grp[grp["status"].isin(("won", "lost"))]
+        settled_grp = grp[grp["status"].isin(REALIZED_STATUSES)]
         blk["settled_pl"] = (
             float(settled_grp["settled_pl"].sum()) if not settled_grp.empty else 0.0
         )
@@ -614,6 +618,7 @@ def summary(db_path: str) -> Dict[str, Any]:
         "won_bets": won_bets,
         "lost_bets": lost_bets,
         "void_bets": void_bets,
+        "cashed_bets": cashed_bets,
         "total_staked": total_staked,
         "open_staked": open_staked,
         "total_pl": total_pl,

@@ -48,7 +48,7 @@ from wca.bot.telegram import (
     image_document_file_id,
 )
 from wca.ledger import reports
-from wca.ledger.store import record_bet
+from wca.ledger.store import record_bet, settle_cashout
 
 logger = logging.getLogger(__name__)
 
@@ -359,7 +359,8 @@ def _pool_rows(db_path: str) -> Dict[str, Dict[str, float]]:
             d["n"] += 1
             if r["status"] == "open":
                 d["open"] += float(r["stake"] or 0.0)
-            elif r["status"] in ("won", "lost"):
+            elif r["status"] in ("won", "lost", "cashed"):
+                # cashed = Polymarket cash-out; realised P&L like won/lost.
                 d["settled_pl"] += float(r["settled_pl"] or 0.0)
                 d["settled_staked"] += float(r["stake"] or 0.0)
         for e in con.execute("SELECT amount, reason FROM bankroll_events"):
@@ -1777,6 +1778,210 @@ def _verify_live_order_logged(
     return missing
 
 
+def _reconcile_sell_fill(
+    wallet: Optional[str],
+    asset: str,
+    seen_hashes: set,
+    *,
+    retries: int = 5,
+    delay: float = 1.5,
+    fetch: Optional[Any] = None,
+) -> Optional[tuple]:
+    """Poll the Data API ``/trades`` for NEW SELL fills of *asset*.
+
+    The order-POST response is an unreliable place to read the filled size from
+    (its ``makingAmount`` etc. are signed base-unit echoes, not the match). The
+    ``/trades`` feed is authoritative: ``size`` is in human share units and
+    ``price`` is per share, so ``proceeds = sum(size*price)`` over the SELL fills
+    that appeared since we snapshotted ``seen_hashes`` (just before placing).
+
+    Returns ``(filled_size, proceeds, [tx_hashes])`` — ``(0.0, 0.0, [])`` if none
+    appear within the window (FOK that didn't fill) — or ``None`` if there is no
+    wallet to query (can't confirm).
+    """
+    if not wallet:
+        return None
+    if fetch is None:
+        from wca.pm import positions as _positions
+        fetch = _positions.fetch_trades
+    import time as _time
+
+    for i in range(max(1, retries)):
+        try:
+            trades = fetch(wallet)
+        except Exception:  # noqa: BLE001
+            trades = []
+        new = [
+            t for t in trades
+            if getattr(t, "asset", None) == str(asset)
+            and getattr(t, "side", "") == "SELL"
+            and getattr(t, "tx_hash", "") and t.tx_hash not in seen_hashes
+        ]
+        if new:
+            filled = round(sum(t.size for t in new), 6)
+            proceeds = round(sum(t.size * t.price for t in new), 6)
+            return filled, proceeds, [t.tx_hash for t in new]
+        if i < retries - 1:
+            _time.sleep(delay)
+    return 0.0, 0.0, []
+
+
+def execute_cashout(
+    proposal: Dict[str, Any],
+    db_path: str,
+    *,
+    trader: Any,
+    dry_run: bool,
+    ts_utc: Optional[str] = None,
+    reconcile_fn: Optional[Any] = None,
+) -> Dict[str, Any]:
+    """Place a cash-out SELL and book ONLY what ACTUALLY filled (from /trades).
+
+    Single source of truth for both the Telegram confirm path and the autonomous
+    daemon. Returns a structured result whose ``outcome`` field tells callers
+    (esp. the watcher) exactly what happened, so a live order is never confused
+    with a dry-run and a real fill is never confused with an unconfirmed one::
+
+        outcome ∈ {no_trader, place_failed, dry_run, sold, no_fill,
+                   unconfirmed, settle_failed}
+        {submitted, settled, filled_size, proceeds, order_id, dry_run,
+         outcome, error, message}
+
+    Invariants:
+      * NEVER calls :func:`record_bet` — a SELL must not create a phantom long.
+      * Dry-run: signs (via place_order) but does NOT submit and does NOT touch
+        the ledger (outcome ``dry_run``).
+      * Live: books via :func:`settle_cashout` using the size/proceeds read back
+        from the ``/trades`` feed (``reconcile_fn`` is injectable for tests).
+        ``settled`` is True ONLY when a real fill was found AND booked. A live
+        order whose fill we cannot confirm is ``unconfirmed`` (submitted, not
+        settled — alert, never auto-retry); a FOK that didn't fill is ``no_fill``
+        (retry next tick).
+    """
+    if ts_utc is None:
+        ts_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    token_id = proposal["token_id"]
+    price = float(proposal.get("price", 0.0))
+    size = float(proposal.get("size", 0.0))
+    label = proposal.get("label") or proposal.get("market") or "market"
+    outcome = proposal.get("outcome") or proposal.get("selection") or ""
+    match_desc = proposal.get("match_desc") or ("%s %s" % (label, outcome)).strip()
+    match_id = proposal.get("match_id") or ("PM_" + _slug(match_desc))
+    order_type = str(proposal.get("order_type") or "FOK")
+    sel_label = (outcome or label)
+
+    res: Dict[str, Any] = {
+        "submitted": False, "settled": False, "filled_size": 0.0,
+        "proceeds": 0.0, "order_id": None, "dry_run": bool(dry_run),
+        "outcome": "place_failed", "error": None, "message": "",
+    }
+    if trader is None:
+        res["outcome"] = "no_trader"
+        res["error"] = "no trader"
+        res["message"] = "cash-out not placed — no trader configured"
+        return res
+
+    wallet = getattr(trader, "funder", None)
+    # Snapshot existing SELL fills for this token BEFORE placing, so the
+    # reconciler only counts fills our order produced.
+    seen: set = set()
+    if not dry_run and reconcile_fn is None and wallet:
+        try:
+            from wca.pm import positions as _positions
+            seen = {t.tx_hash for t in _positions.fetch_trades(wallet)
+                    if t.asset == str(token_id) and t.side == "SELL" and t.tx_hash}
+        except Exception:  # noqa: BLE001
+            seen = set()
+
+    try:
+        out = trader.place_order(
+            token_id, price, size, "SELL",
+            neg_risk=bool(proposal.get("neg_risk", False)),
+            dry_run=dry_run, order_type=order_type, de_risk=True,
+            market_question=(
+                "%s %s" % (proposal.get("market_question") or proposal.get("label") or "",
+                           proposal.get("event_slug") or "")
+            ).strip(),
+        )
+    except Exception as exc:  # noqa: BLE001
+        res["error"] = str(exc)
+        res["message"] = "cash-out FAILED to place — %s" % exc
+        return res
+
+    order_id = (out or {}).get("orderID") or (out or {}).get("orderId")
+    res["order_id"] = order_id or ("dry-run" if dry_run else None)
+
+    if dry_run:
+        res["outcome"] = "dry_run"
+        res["message"] = (
+            "cash-out DRY-ARM (signed, not submitted): $%.2f SELL %s @ %.2f | "
+            "ledger untouched" % (price * size, sel_label, price)
+        )
+        return res
+
+    res["submitted"] = True
+    # Confirm the actual fill from the trades feed.
+    if reconcile_fn is not None:
+        rec = reconcile_fn(token_id, size)            # tests: (filled, proceeds) | None
+        rec = None if rec is None else (rec[0], rec[1])
+    else:
+        r = _reconcile_sell_fill(wallet, token_id, seen)
+        rec = None if r is None else (r[0], r[1])
+
+    if rec is None:
+        res["outcome"] = "unconfirmed"
+        res["error"] = "fill unconfirmed (no wallet/trades)"
+        res["message"] = (
+            "⚠️ cash-out SELL placed (order %s) but FILL UNCONFIRMED — NOT booked; "
+            "reconcile manually." % order_id
+        )
+        return res
+    filled, proceeds_actual = rec
+    if filled <= 0:
+        res["outcome"] = "no_fill"
+        res["message"] = "cash-out SELL not filled (FOK killed); nothing sold"
+        return res
+
+    proceeds = round(float(proceeds_actual), 6)
+    try:
+        info = settle_cashout(
+            proceeds,
+            token_id=token_id,
+            selection=proposal.get("selection") or outcome,
+            shares_sold=filled,
+            template={
+                "match_id": match_id, "match_desc": match_desc,
+                "market": proposal.get("market") or "polymarket",
+                "selection": proposal.get("selection") or outcome,
+                "account": str(proposal.get("account") or "1"),
+                "source": str(proposal.get("source") or "model"),
+            },
+            db_path=db_path,
+        )
+    except Exception as exc:  # noqa: BLE001
+        res["outcome"] = "settle_failed"
+        res["error"] = "settle failed: %s" % exc
+        res["filled_size"] = filled
+        res["message"] = (
+            "⚠️ cash-out SELL filled (order %s, %.2f sh = $%.2f) but BOOKING "
+            "FAILED — %s. Reconcile manually." % (order_id, filled, proceeds, exc)
+        )
+        return res
+
+    _autosync(db_path, "polymarket cash-out")
+    res["outcome"] = "sold"
+    res["settled"] = True
+    res["filled_size"] = filled
+    res["proceeds"] = info["proceeds"]
+    partial = (" (PARTIAL %.0f/%.0f sh)" % (filled, size)) if filled < size - 1e-6 else ""
+    res["message"] = (
+        "cash-out LIVE — sold %.2f sh = $%.2f, P&L $%+.2f over %d row(s)%s | order %s"
+        % (filled, info["proceeds"], info["pl"],
+           info["rows_cashed"] + info["rows_split"], partial, order_id)
+    )
+    return res
+
+
 def _execute_parked_order(
     n: int,
     proposal: Dict[str, Any],
@@ -1828,6 +2033,17 @@ def _execute_parked_order(
     price = float(proposal.get("price", 0.0))
     size = float(proposal.get("size", 0.0))
     side = str(proposal.get("side", "BUY")).upper()
+
+    # SELL = cash-out: place + book through the single execute_cashout path. It
+    # reads the ACTUAL fill and books only what filled — never a phantom open
+    # long, never overstated proceeds — so it must NOT fall through to record_bet.
+    if side == "SELL":
+        res = execute_cashout(
+            proposal, db_path, trader=trader, dry_run=dry_run, ts_utc=ts_utc
+        )
+        return "PM-%d %s." % (n, res.get("message") or "cash-out processed")
+
+    # --- BUY entry: place a (resting) GTC order and record the new position. ---
     try:
         from wca.pm.trader import LiveOrderUnconfirmed
     except Exception:  # pragma: no cover - trader import validated above
@@ -1840,6 +2056,7 @@ def _execute_parked_order(
             side,
             neg_risk=bool(proposal.get("neg_risk", False)),
             dry_run=dry_run,
+            order_type=str(proposal.get("order_type") or "GTC"),
             # Forward the resolved market question (plus the WC event slug, which
             # carries the "fifwc" provenance keyword) so the trader's WC-keyword
             # allowlist actually gates the live path. Single-match questions like
@@ -1889,6 +2106,7 @@ def _execute_parked_order(
     outcome = proposal.get("outcome") or proposal.get("selection") or ""
     match_desc = proposal.get("match_desc") or ("%s %s" % (label, outcome)).strip()
     match_id = proposal.get("match_id") or ("PM_" + _slug(match_desc))
+
     decimal_odds = (1.0 / price) if price > 0 else 0.0
     notes = "polymarket order; token=%s; side=%s; %s; order_id=%s" % (
         proposal["token_id"],

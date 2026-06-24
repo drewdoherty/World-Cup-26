@@ -444,7 +444,7 @@ def build_site_data(
         venue = dashboard.venue_for_platform(b.get("platform"))
         ccy = VENUE_CURRENCY.get(venue, "GBP")
         is_open = status == "open"
-        pl = float(b.get("settled_pl") or 0.0) if status in ("won", "lost") else 0.0
+        pl = float(b.get("settled_pl") or 0.0) if status in ("won", "lost", "cashed") else 0.0
 
         if venue == "sportsbook":
             acct = str(b.get("account") or "1")
@@ -544,7 +544,7 @@ def build_site_data(
     closed_positions: List[Dict[str, Any]] = []
     for b in stats.get("bets") or []:
         status = (b.get("status") or "").strip().lower()
-        if status not in ("won", "lost", "void"):
+        if status not in ("won", "lost", "void", "cashed"):
             continue
         venue = dashboard.venue_for_platform(b.get("platform"))
         closed_positions.append({
@@ -622,7 +622,7 @@ def build_site_data(
         venue = dashboard.venue_for_platform(plat)
         stake = float(b.get("stake") or 0.0)
         status = (b.get("status") or "").lower()
-        pl = float(b.get("settled_pl") or 0.0) if status in ("won", "lost") else 0.0
+        pl = float(b.get("settled_pl") or 0.0) if status in ("won", "lost", "cashed") else 0.0
         acct = str(b.get("account") or "1")
 
         for blk in (

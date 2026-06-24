@@ -251,6 +251,12 @@ class TradeConfig:
     signature_type: Optional[int] = None
     exchange_version: int = EXCHANGE_V2
     db_path: str = "data/wca.db"
+    # Per-order notional ceiling for a *de-risking* SELL (cash-out). Selling
+    # shares we already hold reduces risk, so it is governed by its own (looser)
+    # cap rather than the risk-on per-buy cap, and is exempt from the daily BUY
+    # budget. Still a hard ceiling so a fat-fingered size can't dump an
+    # arbitrarily large position.
+    max_cashout_usd_per_order: float = 100.0
 
 
 @dataclass
@@ -935,6 +941,7 @@ class ClobTrader:
         market_question: Optional[str] = None,
         tick_size: str = "0.01",
         order_type: str = "GTC",
+        de_risk: bool = False,
     ) -> Dict[str, Any]:
         """Validate guardrails, sign, and (unless dry-run) POST one order.
 
@@ -945,12 +952,21 @@ class ClobTrader:
         ``dry_run`` overrides ``config.dry_run`` when given (the bot passes the
         ``PM_DRY_RUN`` env flag per call).  Guardrails enforced *before* any
         network POST:
-          1. per-order cap (notional <= ``config.max_order_usd``);
+          1. per-order cap (notional <= ``config.max_order_usd``, or
+             ``config.max_cashout_usd_per_order`` for a ``de_risk`` sell);
           2. keyword allowlist (``market_question`` must match) — skipped when
              no ``market_question`` is supplied AND the allowlist is the only
              gate the caller relies on; the bot supplies pre-vetted markets;
           3. daily cap (today's live notional + this order
              <= ``config.max_daily_usd``), live orders only.
+
+        ``de_risk`` marks a *cash-out SELL* of shares we already hold. Such an
+        order REDUCES risk, so it is exempt from the risk-on entry guards that
+        would otherwise wrongly block it: the daily BUY budget (check 3) and the
+        World-Cup keyword allowlist (check 2 — an exit shouldn't be gated on the
+        market title carrying a WC keyword). It is still funder-checked, still
+        per-order capped (by the looser cash-out cap), and still logged. It is a
+        hard error to pass ``de_risk=True`` for a BUY.
 
         Returns a status dict.  In dry-run: ``{"dry_run": True, "submitted":
         False, "request": {...}, maker/signer/signature_type/side/makerAmount/
@@ -960,6 +976,9 @@ class ClobTrader:
         """
         is_dry = self.config.dry_run if dry_run is None else bool(dry_run)
         notional = float(price) * float(size)
+
+        if de_risk and str(side).strip().upper() != "SELL":
+            raise TradeError("de_risk is only valid for a SELL (cash-out) order")
 
         # Resolve account class so maker/signer are correct before signing.
         self.detect_account_class()
@@ -980,21 +999,26 @@ class ClobTrader:
                 % self.address
             )
 
-        # (1) per-order cap
-        if notional > self.config.max_order_usd + 1e-9:
+        # (1) per-order cap — looser cash-out cap for a de-risking sell.
+        per_order_cap = (
+            self.config.max_cashout_usd_per_order if de_risk
+            else self.config.max_order_usd
+        )
+        if notional > per_order_cap + 1e-9:
             raise TradeError(
                 "order notional %.2f exceeds per-order cap %.2f"
-                % (notional, self.config.max_order_usd)
+                % (notional, per_order_cap)
             )
 
-        # (2) keyword allowlist — only enforced when a question is supplied.
-        # The bot vets markets before parking; an explicit question still gets
-        # checked so the producer/probe path stays safe.
-        if market_question is not None:
+        # (2) keyword allowlist — only enforced when a question is supplied, and
+        # never for a de-risk exit (selling something we hold is not gated on the
+        # market title carrying a World-Cup keyword).
+        if market_question is not None and not de_risk:
             self._check_keyword_allowed(market_question)
 
-        # (3) daily cap (live orders only)
-        if not is_dry:
+        # (3) daily cap (live BUY budget; de-risk sells reduce risk -> exempt,
+        # but still logged below for audit / the runaway backstop).
+        if not is_dry and not de_risk:
             spent = self._daily_notional()
             if spent + notional > self.config.max_daily_usd + 1e-9:
                 raise TradeError(

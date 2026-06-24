@@ -37,8 +37,22 @@ Markets* (Hausch, Lo & Ziemba eds).
 
 from __future__ import annotations
 
+import logging
 import sqlite3
-from typing import Optional
+from typing import List, Optional
+
+logger = logging.getLogger(__name__)
+
+# Statuses whose ``settled_pl`` is a *realised* profit/loss that belongs in the
+# bankroll curve, P&L totals and per-pool P&L.  ``cashed`` (a mid-match
+# Polymarket cash-out, see :func:`settle_cashout`) joins ``won``/``lost`` here:
+# a cash-out realises P&L = sale proceeds − cost basis.  ``cashed`` is
+# deliberately *excluded* from CLV / calibration (it carries no closing line and
+# no clean binary outcome) — those reports gate on ``clv``/``model_prob`` being
+# present, which a cash-out never sets.
+REALIZED_STATUSES = ("won", "lost", "cashed")
+# Statuses that are no longer "open" (money no longer at risk on that row).
+CLOSED_STATUSES = ("won", "lost", "void", "cashed")
 
 from wca.venues import canon_platform
 
@@ -137,6 +151,7 @@ def init_db(db_path: str = _DEFAULT_DB) -> None:
         _ensure_account_source_columns(conn)
         _ensure_settled_ts_column(conn)
         _ensure_manual_override_column(conn)
+        _ensure_cashout_columns(conn)
 
 
 # ---------------------------------------------------------------------------
@@ -160,6 +175,7 @@ def record_bet(
     notes: Optional[str] = None,
     account: str = "1",
     source: str = "model",
+    token_id: Optional[str] = None,
     db_path: str = _DEFAULT_DB,
 ) -> int:
     """Insert a new open bet into the ledger and return its row ID.
@@ -215,12 +231,13 @@ def record_bet(
         INSERT INTO bets
             (ts_utc, match_id, match_desc, market, selection, platform,
              decimal_odds, stake, model_prob, market_prob_devig, ev,
-             kelly_fraction, status, notes, account, source)
+             kelly_fraction, status, notes, account, source, token_id)
         VALUES
-            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', ?, ?, ?)
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', ?, ?, ?, ?)
     """
     with _connect(db_path) as conn:
         _ensure_account_source_columns(conn)
+        _ensure_cashout_columns(conn)
         cur = conn.execute(
             sql,
             (
@@ -239,6 +256,7 @@ def record_bet(
                 notes,
                 str(account or "1"),
                 str(source or "model"),
+                str(token_id) if token_id else None,
             ),
         )
         return cur.lastrowid
@@ -273,6 +291,25 @@ def _ensure_manual_override_column(conn) -> None:
         conn.execute("ALTER TABLE bets ADD COLUMN manual_override TEXT")
     except Exception:
         pass  # already present
+
+
+def _ensure_cashout_columns(conn) -> None:
+    """Add cash-out columns to pre-existing databases (idempotent).
+
+    ``token_id``       the Polymarket ERC-1155 outcome-token id this row backs,
+                       so a held position can be matched to its ledger rows
+                       without parsing free-text. Populated on new Polymarket
+                       rows; older rows may be NULL (matched by selection then).
+    ``cashout_proceeds`` USDC actually received when the row was cashed out
+                       (sale price × shares for this row's slice). ``settled_pl``
+                       still holds the realised P&L (proceeds − cost basis) so
+                       all the existing P&L aggregations work unchanged.
+    """
+    for col in ("token_id TEXT", "cashout_proceeds REAL"):
+        try:
+            conn.execute("ALTER TABLE bets ADD COLUMN %s" % col)
+        except Exception:
+            pass  # already present
 
 
 def settle_bet(
@@ -388,6 +425,327 @@ def void_bet(bet_id: int, db_path: str = _DEFAULT_DB) -> None:
             "UPDATE bets SET status = 'void', settled_pl = 0.0, settled_ts = ? WHERE id = ?",
             (_dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"), bet_id),
         )
+
+
+# ---------------------------------------------------------------------------
+# Cash-out: close a Polymarket position (or part of it) at a sale price.
+# ---------------------------------------------------------------------------
+
+
+def _row_shares(stake: float, decimal_odds: float) -> float:
+    """Outcome shares a Polymarket BUY row represents.
+
+    Polymarket buys are recorded with ``stake = shares × fill_price`` and
+    ``decimal_odds = 1 / fill_price`` (see ``wca_pm_watch.py`` and the bot's
+    ``_execute_parked_order``), so ``shares = stake × decimal_odds``.
+    """
+    s, o = float(stake), float(decimal_odds)
+    if s <= 0 or o <= 0:
+        return 0.0
+    return s * o
+
+
+def open_position_rows(
+    *,
+    token_id: Optional[str] = None,
+    selection: Optional[str] = None,
+    platform: str = "polymarket",
+    db_path: str = _DEFAULT_DB,
+) -> List[sqlite3.Row]:
+    """Return the OPEN ledger rows for one Polymarket position, FIFO by id.
+
+    Matched by ``token_id`` when supplied *and* present on the row; otherwise by
+    exact ``selection`` string (the legacy match key — ``pm_watch`` rows carry no
+    token id). At least one of ``token_id`` / ``selection`` is required.
+    """
+    if not token_id and not selection:
+        raise ValueError("open_position_rows requires token_id or selection")
+    init_db(db_path)
+    with _connect(db_path) as conn:
+        _ensure_account_source_columns(conn)
+        _ensure_cashout_columns(conn)
+        if token_id:
+            rows = conn.execute(
+                "SELECT * FROM bets WHERE platform=? AND status='open' "
+                "AND token_id=? ORDER BY id",
+                (platform, str(token_id)),
+            ).fetchall()
+            if rows:
+                return rows
+            # No token-tagged rows (older fills predate the token_id column);
+            # fall back to selection if we were given one.
+            if not selection:
+                return []
+        return conn.execute(
+            "SELECT * FROM bets WHERE platform=? AND status='open' "
+            "AND selection=? ORDER BY id",
+            (platform, selection),
+        ).fetchall()
+
+
+def settle_cashout(
+    proceeds: float,
+    *,
+    token_id: Optional[str] = None,
+    selection: Optional[str] = None,
+    shares_sold: Optional[float] = None,
+    platform: str = "polymarket",
+    template: Optional[dict] = None,
+    settled_ts_utc: Optional[str] = None,
+    db_path: str = _DEFAULT_DB,
+) -> dict:
+    """Close a Polymarket position (or part of it) at a cash-out sale.
+
+    Marks the matched OPEN buy row(s) ``'cashed'`` with
+    ``settled_pl = proceeds_slice − cost_basis`` — so a cash-out flows through
+    every existing realised-P&L aggregation (bankroll curve, ``/summary``, per-
+    pool P&L) unchanged, while staying out of CLV/calibration (it sets no
+    closing line). It never calls :func:`record_bet`, so no phantom *open* row
+    is created.
+
+    Sizing. The sale is allocated FIFO across the open rows by share count
+    (uniform sale price). When ``shares_sold`` is less than the position, the
+    boundary row is *split*: the sold slice becomes a new ``'cashed'`` row and
+    the unsold remainder stays ``'open'`` (its stake scaled down, odds kept, so
+    its implied share count is exactly the remainder). When ``shares_sold``
+    exceeds what the ledger knows we hold (an untracked fill), the excess
+    proceeds are booked as one extra ``'cashed'`` row with zero cost basis so no
+    realised money is silently dropped.
+
+    Parameters
+    ----------
+    proceeds:
+        Total USDC received for ``shares_sold`` (sale price × shares). ``>= 0``.
+    token_id / selection:
+        How to find the position's open rows; ``token_id`` wins. One required.
+    shares_sold:
+        Shares actually sold. ``None`` => sell the entire known open position.
+    template:
+        Descriptive fields (``match_id``, ``match_desc``, ``market``,
+        ``selection``, ``account``, ``source``) used only when a row must be
+        created from scratch (untracked excess). Falls back to the first matched
+        row, then to safe defaults.
+    settled_ts_utc:
+        Settlement timestamp; defaults to now (UTC).
+
+    Returns
+    -------
+    dict
+        ``{"bet_ids": [...], "shares_sold", "proceeds", "cost_basis", "pl",
+        "rows_cashed", "rows_split", "untracked_shares"}``.
+
+    Raises
+    ------
+    ValueError
+        If neither token_id nor selection is given, ``proceeds`` is negative,
+        or ``shares_sold`` is non-positive.
+    KeyError
+        If no open rows match AND we cannot size the sale (``shares_sold`` is
+        ``None`` so there is nothing to close).
+    """
+    proceeds = float(proceeds)
+    if proceeds < 0:
+        raise ValueError("proceeds must be >= 0, got %r" % proceeds)
+    if shares_sold is not None and float(shares_sold) <= 0:
+        raise ValueError("shares_sold must be positive, got %r" % shares_sold)
+
+    if settled_ts_utc is None:
+        import datetime as _dt
+
+        settled_ts_utc = _dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+
+    rows = open_position_rows(
+        token_id=token_id, selection=selection, platform=platform, db_path=db_path
+    )
+    total_held = sum(_row_shares(r["stake"], r["decimal_odds"]) for r in rows)
+
+    if shares_sold is None:
+        if not rows or total_held <= 0:
+            raise KeyError(
+                "no open position to cash out (token_id=%r selection=%r): "
+                "%d open row(s), %.4f sellable shares"
+                % (token_id, selection, len(rows), total_held)
+            )
+        shares_sold = total_held
+    shares_sold = float(shares_sold)
+
+    # Relative tolerance: position-API sizes and ledger-implied shares can differ
+    # by rounding dust; treat a sale within tol of the held amount as "all".
+    tol = max(1e-6, 1e-4 * max(total_held, shares_sold))
+    sale_price = proceeds / shares_sold if shares_sold > 0 else 0.0
+
+    summary = {
+        "bet_ids": [],
+        "shares_sold": round(shares_sold, 6),
+        "proceeds": round(proceeds, 6),
+        "cost_basis": 0.0,
+        "pl": 0.0,
+        "rows_cashed": 0,
+        "rows_split": 0,
+        "untracked_shares": 0.0,
+    }
+    cost_basis = 0.0
+
+    with _connect(db_path) as conn:
+        _ensure_account_source_columns(conn)
+        _ensure_cashout_columns(conn)
+        _ensure_settled_ts_column(conn)
+
+        remaining = shares_sold
+        for r in rows:
+            if remaining <= tol:
+                break
+            shares_i = _row_shares(r["stake"], r["decimal_odds"])
+            if shares_i <= 0:
+                # A zero-share open row (stake or odds <= 0) can't be cashed out;
+                # it would otherwise sit 'open' forever. Surface it.
+                logger.warning(
+                    "settle_cashout: skipping open bet id=%s with zero sellable "
+                    "shares (stake=%s odds=%s)", r["id"], r["stake"], r["decimal_odds"]
+                )
+                continue
+            stake_i = float(r["stake"])
+            odds_i = float(r["decimal_odds"])
+            consume = min(shares_i, remaining)
+            proceeds_i = round(consume * sale_price, 6)
+
+            if consume >= shares_i - tol:
+                # Whole row sold.
+                pl_i = round(proceeds_i - stake_i, 6)
+                conn.execute(
+                    "UPDATE bets SET status='cashed', settled_pl=?, "
+                    "cashout_proceeds=?, settled_ts=?, notes=? WHERE id=?",
+                    (
+                        pl_i,
+                        proceeds_i,
+                        settled_ts_utc,
+                        _append_note(r["notes"], "cashed %.4f sh @ %.4f" % (shares_i, sale_price)),
+                        r["id"],
+                    ),
+                )
+                summary["bet_ids"].append(int(r["id"]))
+                summary["rows_cashed"] += 1
+                cost_basis += stake_i
+            else:
+                # Partial row: split. Remainder stays open; sold slice -> new row.
+                cost_i = round(stake_i * (consume / shares_i), 6)
+                remainder_stake = round(stake_i - cost_i, 6)
+                pl_i = round(proceeds_i - cost_i, 6)
+                conn.execute(
+                    "UPDATE bets SET stake=? WHERE id=?",
+                    (remainder_stake, r["id"]),
+                )
+                new_id = _insert_cashed_slice(
+                    conn,
+                    template_row=r,
+                    stake=cost_i,
+                    decimal_odds=odds_i,
+                    settled_pl=pl_i,
+                    cashout_proceeds=proceeds_i,
+                    settled_ts=settled_ts_utc,
+                    note="cashout slice %.4f sh @ %.4f" % (consume, sale_price),
+                )
+                summary["bet_ids"].append(new_id)
+                summary["rows_split"] += 1
+                cost_basis += cost_i
+            remaining -= consume
+
+        # Sold more than the ledger knew we held -> book the excess proceeds so
+        # realised P&L stays faithful (zero cost basis: we never recorded buying
+        # these shares).
+        if remaining > tol:
+            excess_proceeds = round(remaining * sale_price, 6)
+            tmpl = template or (dict(rows[0]) if rows else None)
+            new_id = _insert_cashed_slice(
+                conn,
+                template_row=tmpl,
+                stake=0.0,
+                decimal_odds=(1.0 / sale_price) if sale_price > 0 else 0.0,
+                settled_pl=excess_proceeds,
+                cashout_proceeds=excess_proceeds,
+                settled_ts=settled_ts_utc,
+                note="untracked %.4f sh cashed @ %.4f (no recorded cost basis)"
+                % (remaining, sale_price),
+                token_id=token_id,
+                selection=selection,
+                platform=platform,
+            )
+            summary["bet_ids"].append(new_id)
+            summary["rows_cashed"] += 1
+            summary["untracked_shares"] = round(remaining, 6)
+
+    summary["cost_basis"] = round(cost_basis, 6)
+    summary["pl"] = round(proceeds - cost_basis, 6)
+    return summary
+
+
+def _append_note(existing: Optional[str], add: str) -> str:
+    existing = (existing or "").strip()
+    return (existing + " | " + add) if existing else add
+
+
+def _insert_cashed_slice(
+    conn,
+    *,
+    template_row,
+    stake: float,
+    decimal_odds: float,
+    settled_pl: float,
+    cashout_proceeds: float,
+    settled_ts: str,
+    note: str,
+    token_id: Optional[str] = None,
+    selection: Optional[str] = None,
+    platform: str = "polymarket",
+) -> int:
+    """Insert one ``'cashed'`` row (a sold slice / untracked excess).
+
+    Descriptive fields come from ``template_row`` (a matched open row or a
+    caller-supplied dict); explicit overrides win. This is NOT an open row, so
+    it is not a phantom — it records realised cash-out money.
+    """
+    def _g(key, default=None):
+        if template_row is None:
+            return default
+        try:
+            return template_row[key]
+        except (KeyError, IndexError, TypeError):
+            try:
+                return template_row.get(key, default)  # dict
+            except AttributeError:
+                return default
+
+    import datetime as _dt
+
+    ts_utc = _g("ts_utc") or _dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+    cur = conn.execute(
+        """
+        INSERT INTO bets
+            (ts_utc, match_id, match_desc, market, selection, platform,
+             decimal_odds, stake, model_prob, status, settled_pl,
+             cashout_proceeds, settled_ts, notes, account, source, token_id)
+        VALUES (?,?,?,?,?,?,?,?,?, 'cashed', ?,?,?,?,?,?,?)
+        """,
+        (
+            ts_utc,
+            _g("match_id", "PM_CASHOUT"),
+            _g("match_desc", ""),
+            _g("market", "polymarket"),
+            selection if selection is not None else _g("selection", ""),
+            _g("platform", platform),
+            float(decimal_odds),
+            float(stake),
+            _g("model_prob"),
+            float(settled_pl),
+            float(cashout_proceeds),
+            settled_ts,
+            note,
+            str(_g("account", "1") or "1"),
+            str(_g("source", "model") or "model"),
+            str(token_id) if token_id else _g("token_id"),
+        ),
+    )
+    return int(cur.lastrowid)
 
 
 def set_closing_odds(

@@ -193,7 +193,7 @@ def gather_stats(db_path: str) -> Dict[str, Any]:
             block["open_stake"] += exposed
             totals["open_stake"] += exposed
 
-        if status in ("won", "lost"):
+        if status in ("won", "lost", "cashed"):
             pl = _to_float(bet.get("settled_pl"))
             block["settled_pl"] += pl
             totals["settled_pl"] += pl
