@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Keep the Mac mini awake 24/7 so the hourly buildcard/scores cron and the
+  Telegram bot are never blocked by system sleep.
+
+  Non-sudo user LaunchAgent. Install:
+      cp scripts/ops/com.wca.caffeinate.plist ~/Library/LaunchAgents/
+      launchctl load -w ~/Library/LaunchAgents/com.wca.caffeinate.plist
+  Verify:
+      launchctl list | grep com.wca.caffeinate
+  Remove (reversible):
+      launchctl unload -w ~/Library/LaunchAgents/com.wca.caffeinate.plist
+      rm ~/Library/LaunchAgents/com.wca.caffeinate.plist
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.wca.caffeinate</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/caffeinate</string>
+        <string>-dimsu</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/tmp/wca-caffeinate.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/wca-caffeinate.err</string>
+</dict>
+</plist>

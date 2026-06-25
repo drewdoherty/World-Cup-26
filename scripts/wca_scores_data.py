@@ -33,7 +33,7 @@ if _SRC not in sys.path:
     sys.path.insert(0, _SRC)
 
 from wca import scorespage  # noqa: E402
-from wca.data import polymarket, teamnames, theoddsapi  # noqa: E402
+from wca.data import odds_source, polymarket, teamnames  # noqa: E402
 
 
 _SPORT_KEY = "soccer_fifa_world_cup"
@@ -330,8 +330,10 @@ def main(argv=None) -> int:
 
     _load_dotenv(args.env)
 
-    # --- Odds pull (fatal on failure: nothing to compare without it) --------
-    odds_df, quota = theoddsapi.get_odds(
+    # --- Odds pull (Betfair -> Odds API -> Polymarket; never fatal) ---------
+    # An empty frame degrades the scores feed to "data-pending" fixtures rather
+    # than crashing when the upstream odds source is down.
+    odds_df, quota = odds_source.get_odds(
         _SPORT_KEY, regions="uk", markets="h2h"
     )
     odds_df = _filter_next_hours(odds_df, args.hours_ahead)
