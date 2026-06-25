@@ -83,7 +83,10 @@ def get_odds(
     an empty (correctly-shaped) frame and ``None`` quota — the caller must treat
     an empty frame as "data-pending", not an error.
     """
+    merge = os.environ.get("WCA_ODDS_MERGE", "").strip().lower() in ("1", "true", "yes")
     last_quota: object = None
+    kept_quota: object = None
+    frames: List[pd.DataFrame] = []
     for name in _order():
         try:
             if name == "betfair":
@@ -108,15 +111,51 @@ def get_odds(
             logger.warning("odds source %s failed: %s", name, _scrub(exc))
             continue
         if df is not None and not df.empty:
-            logger.info("odds source %s -> %d rows", name, len(df))
-            return df, q
+            if not merge:
+                logger.info("odds source %s -> %d rows", name, len(df))
+                return df, q
+            # Gap-fill: keep earlier (sharper) source's fixtures; only add a
+            # later source's rows for fixtures not already covered. Avoids two
+            # books on one fixture (which would let the card cherry-pick the
+            # softer line) while still maximising fixture coverage.
+            added = _gap_fill(frames, df)
+            frames.append(added)
+            if kept_quota is None:
+                kept_quota = q
+            logger.info("odds merge: %s added %d rows for new fixtures",
+                        name, len(added))
         if q is not None:
             last_quota = q
+    if merge and frames:
+        combined = pd.concat(frames, ignore_index=True)
+        logger.info("odds merge -> %d rows across %d sources", len(combined), len(frames))
+        return combined, kept_quota
     logger.warning(
         "all odds sources empty/unavailable (%s); returning empty frame "
         "(card will be data-pending)", ",".join(_order()),
     )
     return _empty_frame(), last_quota
+
+
+def _fixture_key(home: object, away: object) -> frozenset:
+    """Order-independent fixture key, tolerant of cross-source name spellings."""
+    from wca.data.teamnames import canonical
+
+    return frozenset({canonical(str(home or "")), canonical(str(away or ""))})
+
+
+def _gap_fill(existing: List[pd.DataFrame], new: pd.DataFrame) -> pd.DataFrame:
+    """Return the subset of *new* whose fixtures are absent from *existing*."""
+    seen = set()
+    for f in existing:
+        for _, r in f[["home_team", "away_team"]].drop_duplicates().iterrows():
+            seen.add(_fixture_key(r["home_team"], r["away_team"]))
+    if not seen:
+        return new
+    mask = new.apply(
+        lambda r: _fixture_key(r["home_team"], r["away_team"]) not in seen, axis=1
+    )
+    return new[mask].copy()
 
 
 def get_event_odds(

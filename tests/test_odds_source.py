@@ -67,7 +67,40 @@ def test_all_empty_returns_empty_frame_never_raises(monkeypatch):
     assert quota is None
 
 
+def _fix_rows(book, home, away, n=1):
+    out = []
+    for i in range(n):
+        r = {c: None for c in _COLS}
+        r.update({"bookmaker_key": book, "home_team": home, "away_team": away,
+                  "market": "h2h", "outcome_name": f"{home}|{i}", "decimal_odds": 2.0})
+        out.append(r)
+    return out
+
+
+def test_merge_gap_fills_without_duplicating_fixtures(monkeypatch):
+    """WCA_ODDS_MERGE: keep Betfair's fixture, add Polymarket-only fixtures."""
+    monkeypatch.delenv("WCA_ODDS_SOURCES", raising=False)
+    monkeypatch.setenv("WCA_ODDS_MERGE", "1")
+    # Betfair covers Ivory Coast v Curacao (sharp).
+    monkeypatch.setattr(betfair_exchange, "get_odds",
+                        lambda *a, **k: (_frame(_fix_rows("betfair_ex", "Ivory Coast", "Curacao")), None))
+    monkeypatch.setattr(odds_source.theoddsapi, "get_odds",
+                        lambda *a, **k: (_frame([]), None))
+    # Polymarket re-covers the same fixture (diff spelling) + a NEW one.
+    pm = _fix_rows("polymarket", "Cote d'Ivoire", "Curacao") + _fix_rows("polymarket", "Spain", "Uruguay")
+    monkeypatch.setattr(polymarket_odds, "get_odds", lambda *a, **k: (_frame(pm), None))
+
+    df, _ = odds_source.get_odds("soccer_fifa_world_cup")
+    books_by_fixture = df.groupby(["home_team"])["bookmaker_key"].agg(set).to_dict()
+    # The dual-covered fixture keeps ONLY Betfair (no Polymarket dup).
+    assert books_by_fixture.get("Ivory Coast") == {"betfair_ex"}
+    assert "Cote d'Ivoire" not in books_by_fixture  # Polymarket dup dropped
+    # The Polymarket-only fixture is gap-filled in.
+    assert books_by_fixture.get("Spain") == {"polymarket"}
+
+
 def test_first_source_with_rows_wins(monkeypatch):
+    monkeypatch.delenv("WCA_ODDS_MERGE", raising=False)
     monkeypatch.delenv("WCA_ODDS_SOURCES", raising=False)
     bf_row = {c: None for c in _COLS}
     bf_row.update({"bookmaker_key": "betfair_ex", "decimal_odds": 1.5,

@@ -65,13 +65,19 @@ def _empty_frame() -> pd.DataFrame:
 
 
 def _app_key() -> str:
-    """Application key: prefer the LIVE key, fall back to DELAYED, then legacy.
+    """Resolve the application key from the environment (never hardcoded).
 
-    LIVE gives real-time prices; DELAYED (~1-180s) is a valid fallback. Values
-    are read from the environment only — never hardcoded.
+    Order: an explicit ``BETFAIR_APP_KEY`` always wins; otherwise the LIVE key
+    (real-time prices) is preferred, with the DELAYED key (~1-180s) as fallback.
+    Set ``BETFAIR_APP_KEY_PREFER=delayed`` to flip the preference — needed while
+    the LIVE subscription is inactive and only the delayed key authenticates.
     """
-    for var in ("BETFAIR_APP_KEY_LIVE", "BETFAIR_APP_KEY_DELAYED", "BETFAIR_APP_KEY"):
-        val = os.environ.get(var, "").strip()
+    legacy = os.environ.get("BETFAIR_APP_KEY", "").strip()
+    live = os.environ.get("BETFAIR_APP_KEY_LIVE", "").strip()
+    delayed = os.environ.get("BETFAIR_APP_KEY_DELAYED", "").strip()
+    prefer = os.environ.get("BETFAIR_APP_KEY_PREFER", "live").strip().lower()
+    ranked = [delayed, live] if prefer == "delayed" else [live, delayed]
+    for val in [legacy, *ranked]:
         if val:
             return val
     return ""
