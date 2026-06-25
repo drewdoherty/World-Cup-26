@@ -37,6 +37,7 @@ jobs:
       - name: Refresh scores feed
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          PYTHONPATH: src
         run: |
           mkdir -p logs
           # Run with explicit exit-code check so failures appear red in CI.
@@ -76,6 +77,7 @@ PY
         continue-on-error: true  # a transient API failure must not block the scores commit
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          PYTHONPATH: src
         run: |
           python scripts/wca_snapshot_odds.py >> logs/odds.log 2>&1
 

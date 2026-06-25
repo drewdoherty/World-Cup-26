@@ -45,11 +45,15 @@ jobs:
       - name: Generate matchday card
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          PYTHONPATH: src
         run: |
           mkdir -p logs
-          python scripts/wca_build_card.py --hours-ahead 96 >> logs/card.log 2>&1
+          python scripts/wca_build_card.py --hours-ahead 96 >> logs/card.log 2>&1 \
+            || { echo "card build failed; tail:"; tail -30 logs/card.log; exit 1; }
 
       - name: Regenerate site data
+        env:
+          PYTHONPATH: src
         # The CI runner has no ledger DB (data/wca.db is gitignored), so
         # build_site_data returns empty GBP positions and would clobber the
         # mini's canonical site/data.json that holds the real sportsbook book.
@@ -65,6 +69,7 @@ jobs:
       - name: Regenerate scores feed
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          PYTHONPATH: src
         run: |
           python scripts/wca_scores_data.py --hours-ahead 96 >> logs/scores.log 2>&1 || true
 
@@ -77,7 +82,8 @@ jobs:
         run: |
           git config user.email "bot@world-cup-alpha.local"
           git config user.name "World Cup Alpha Bot"
-          git add data/card_latest.md data/model_predictions.json data/model_predictions_log.jsonl \
+          git add data/card_latest.md data/next_latest.md data/goalscorers_latest.md \
+                  data/model_predictions.json data/model_predictions_log.jsonl \
                   data/raw/martj42_cleaned.csv \
                   data/corrections.json data/corrections_review.json data/audit.json \
                   site/data.json site/linemove.json site/scores_data.json
