@@ -51,6 +51,17 @@ def _empty_frame() -> pd.DataFrame:
     return pd.DataFrame(columns=list(_COLUMNS))
 
 
+def _scrub(exc: object) -> str:
+    """Render an exception for logs with any ``apiKey=...`` secret redacted.
+
+    A requests HTTPError stringifies the full URL, which for The Odds API
+    includes the live key. Never let that reach a log file.
+    """
+    import re
+
+    return re.sub(r"(apiKey=)[^&\s]+", r"\1<redacted>", str(exc))
+
+
 def _order() -> List[str]:
     raw = os.environ.get("WCA_ODDS_SOURCES", "").strip()
     if not raw:
@@ -94,7 +105,7 @@ def get_odds(
                 logger.warning("unknown odds source %r (skipping)", name)
                 continue
         except Exception as exc:  # noqa: BLE001 — degrade, never crash the build.
-            logger.warning("odds source %s failed: %s", name, exc)
+            logger.warning("odds source %s failed: %s", name, _scrub(exc))
             continue
         if df is not None and not df.empty:
             logger.info("odds source %s -> %d rows", name, len(df))
@@ -136,7 +147,7 @@ def get_event_odds(
             else:
                 continue
         except Exception as exc:  # noqa: BLE001
-            logger.warning("event-odds source %s failed: %s", name, exc)
+            logger.warning("event-odds source %s failed: %s", name, _scrub(exc))
             continue
         if df is not None and not df.empty:
             return df, q
