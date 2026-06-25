@@ -1,0 +1,31 @@
+name: pytest
+
+# Pytest gate: runs the full suite on every PR into main and on pushes to main.
+# Added after a reconciliation found that #41/#42/#43 merged with ONLY a Vercel
+# check — so red tests (predledger 'no such table: bets', closecapture
+# 'duplicate column settled_ts') landed on main unnoticed. This surfaces them.
+# NOTE: until those pre-existing failures are fixed, this check will be red.
+# Make it a required status check (branch protection) once main is green.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - name: Set up Python
+        uses: actions/setup-python@v5.2.0
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e ".[dev]"
+      - name: Run pytest
+        run: pytest -q
