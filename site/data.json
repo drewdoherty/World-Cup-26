@@ -1,18 +1,18 @@
 {
   "meta": {
-    "generated": "2026-06-25 05:40:31 UTC"
+    "generated": "2026-06-25 06:06:56 UTC"
   },
   "totals": {
     "wagered": 1561.1760000000004,
-    "open_stake": 772.34,
-    "settled_pl": 54.99049999999998,
+    "open_stake": 700.75,
+    "settled_pl": 51.19049999999997,
     "n_bets": 128
   },
   "totals_by_currency": {
     "GBP": {
       "wagered": 861.4099999999997,
-      "open_stake": 166.32999999999998,
-      "settled_pl": 83.12549999999999,
+      "open_stake": 94.74000000000001,
+      "settled_pl": 79.32549999999998,
       "n_bets": 94
     },
     "USD": {
@@ -25,8 +25,8 @@
   "venues": {
     "sportsbook": {
       "wagered": 861.4099999999997,
-      "open_stake": 166.32999999999998,
-      "settled_pl": 83.12549999999999,
+      "open_stake": 94.74000000000001,
+      "settled_pl": 79.32549999999998,
       "n_bets": 94,
       "currency": "GBP"
     },
@@ -46,8 +46,8 @@
     },
     "sportsbook_1": {
       "wagered": 692.4099999999997,
-      "open_stake": 190.32999999999998,
-      "settled_pl": 128.12550000000002,
+      "open_stake": 113.74000000000001,
+      "settled_pl": 124.3255,
       "n_bets": 73,
       "currency": "GBP",
       "label": "Sportsbook 1"
@@ -65,8 +65,8 @@
     "model": {
       "GBP": {
         "wagered": 275.84999999999997,
-        "open_stake": 80.83,
-        "settled_pl": 31.6655,
+        "open_stake": 51.24,
+        "settled_pl": 74.86549999999997,
         "n_bets": 33
       },
       "USD": {
@@ -79,8 +79,8 @@
     "punt": {
       "GBP": {
         "wagered": 308.56,
-        "open_stake": 85.5,
-        "settled_pl": -17.61,
+        "open_stake": 43.5,
+        "settled_pl": -59.61,
         "n_bets": 30
       },
       "USD": {
@@ -93,8 +93,8 @@
     "offer": {
       "GBP": {
         "wagered": 255.0,
-        "open_stake": 45.0,
-        "settled_pl": 81.07,
+        "open_stake": 40.0,
+        "settled_pl": 76.07,
         "n_bets": 28
       }
     },
@@ -120,8 +120,8 @@
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 286.06,
-      "open_stake": 96.0,
-      "settled_pl": 104.56,
+      "open_stake": 71.0,
+      "settled_pl": 79.56,
       "n_bets": 27
     },
     "bet365": {
@@ -144,8 +144,8 @@
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 158.34,
-      "open_stake": 34.26,
-      "settled_pl": -54.567999999999984,
+      "open_stake": 4.67,
+      "settled_pl": -11.367999999999988,
       "n_bets": 11
     },
     "Paddy Power": {
@@ -160,8 +160,8 @@
       "venue": "sportsbook",
       "currency": "GBP",
       "wagered": 107.0,
-      "open_stake": 37.0,
-      "settled_pl": 54.97,
+      "open_stake": 15.0,
+      "settled_pl": 32.97,
       "n_bets": 11
     },
     "Unknown": {
@@ -243,16 +243,16 @@
         "venue": "sportsbook",
         "currency": "GBP",
         "wagered": 188.06,
-        "open_stake": 75.0,
-        "settled_pl": 109.56,
+        "open_stake": 50.0,
+        "settled_pl": 84.56,
         "n_bets": 14
       },
       "Betfair Exchange UK": {
         "venue": "sportsbook",
         "currency": "GBP",
         "wagered": 142.34,
-        "open_stake": 34.26,
-        "settled_pl": -48.567999999999984,
+        "open_stake": 4.67,
+        "settled_pl": -5.367999999999988,
         "n_bets": 9
       },
       "Paddy Power": {
@@ -267,8 +267,8 @@
         "venue": "sportsbook",
         "currency": "GBP",
         "wagered": 107.0,
-        "open_stake": 37.0,
-        "settled_pl": 54.97,
+        "open_stake": 15.0,
+        "settled_pl": 32.97,
         "n_bets": 11
       },
       "Unknown": {
@@ -375,6 +375,32 @@
   },
   "closed_positions": [
     {
+      "id": 143,
+      "ts_utc": "2026-06-24T07:59:01",
+      "settled_ts": "2026-06-25T06:06:38Z",
+      "match": "Switzerland v Canada",
+      "match_id": "MANUAL_SWITZERLAND_V_CANADA",
+      "market": "Match Odds",
+      "selection": "Switzerland",
+      "platform": "Betfair Exchange UK",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 2.46,
+      "stake": 29.59,
+      "model_prob": 0.496796,
+      "market_prob_devig": 0.404414,
+      "ev": 0.222118,
+      "kelly_fraction": null,
+      "status": "won",
+      "pl": 43.2,
+      "closing_odds": 2.560994759472932,
+      "clv": -0.039436,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97",
+      "manual_override": null
+    },
+    {
       "id": 138,
       "ts_utc": "2026-06-23T19:12:31",
       "settled_ts": "2026-06-23T19:12:31",
@@ -398,6 +424,136 @@
       "closing_odds": null,
       "clv": null,
       "notes": null,
+      "manual_override": null
+    },
+    {
+      "id": 135,
+      "ts_utc": "2026-06-23T11:23:48",
+      "settled_ts": "2026-06-25T06:06:38Z",
+      "match": "England vs Ghana",
+      "match_id": "MANUAL_ENGLAND_VS_GHANA",
+      "market": "Bet Builder",
+      "selection": "Half Time Result -> England + 2nd Half Result -> England + Player's shots on target -> Harry Kane - Over 1.5 + Player's shots on target -> Jude Bellingham - Over 1.5",
+      "platform": "Unknown",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 7.9,
+      "stake": 0.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "lost",
+      "pl": 0.0,
+      "closing_odds": null,
+      "clv": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.75; Bet Builder; legs: Half Time Result -> England | 2nd Half Result -> England | Player's shots on target -> Harry Kane - Over 1.5 | Player's shots on target -> Jude Bellingham - Over 1.5",
+      "manual_override": null
+    },
+    {
+      "id": 133,
+      "ts_utc": "2026-06-23T08:19:52",
+      "settled_ts": "2026-06-25T06:06:38Z",
+      "match": "Panama vs Croatia",
+      "match_id": "MANUAL_PANAMA_VS_CROATIA",
+      "market": "Bet Builder",
+      "selection": "Full Time Result -> Croatia + Both Teams to Score -> Yes + Total Goals Range -> 1-4 Goals",
+      "platform": "Bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 4.75,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "lost",
+      "pl": -10.0,
+      "closing_odds": null,
+      "clv": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; Bet Builder; legs: Full Time Result -> Croatia | Both Teams to Score -> Yes | Total Goals Range -> 1-4 Goals",
+      "manual_override": null
+    },
+    {
+      "id": 132,
+      "ts_utc": "2026-06-23T08:19:40",
+      "settled_ts": "2026-06-25T06:06:38Z",
+      "match": "Colombia vs DR Congo",
+      "match_id": "MANUAL_COLOMBIA_VS_DR_CONGO",
+      "market": "Bet Builder",
+      "selection": "Full Time Result -> Colombia + Both Teams to Score -> Yes + Match Goals Range -> 1-4 Goals + Anytime Goalscorer -> Luis Diaz",
+      "platform": "Bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 11.0,
+      "stake": 12.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "lost",
+      "pl": -12.0,
+      "closing_odds": null,
+      "clv": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; Bet Builder; legs: Full Time Result -> Colombia | Both Teams to Score -> Yes | Match Goals Range -> 1-4 Goals | Anytime Goalscorer -> Luis Diaz",
+      "manual_override": null
+    },
+    {
+      "id": 131,
+      "ts_utc": "2026-06-23T08:18:25",
+      "settled_ts": "2026-06-25T06:06:38Z",
+      "match": "Colombia vs DR Congo | Portugal vs Uzbekistan | England vs Ghana",
+      "match_id": "MANUAL_COLOMBIA_VS_DR_CONGO_PORTUGAL_VS_UZBEKISTAN_ENGL",
+      "market": "Accumulator",
+      "selection": "Match Odds -> Colombia + Over/Under 3.5 Goals -> Under 3.5 Goals + Over/Under 3.5 Goals -> Under 3.5 Goals",
+      "platform": "Betfair Sportsbook",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 3.96,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "lost",
+      "pl": -10.0,
+      "closing_odds": null,
+      "clv": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; Accumulator; legs: Match Odds -> Colombia | Over/Under 3.5 Goals -> Under 3.5 Goals | Over/Under 3.5 Goals -> Under 3.5 Goals",
+      "manual_override": null
+    },
+    {
+      "id": 130,
+      "ts_utc": "2026-06-23T08:17:58",
+      "settled_ts": "2026-06-25T06:06:38Z",
+      "match": "Portugal v Uzbekistan | England v Ghana | Colombia v DR Congo",
+      "match_id": "MANUAL_PORTUGAL_V_UZBEKISTAN_ENGLAND_V_GHANA_COLOMBIA_V",
+      "market": "Accumulator",
+      "selection": "Match Odds 90 -> Portugal + Match Odds 90 -> England + Match Odds 90 -> Colombia",
+      "platform": "Betfair Sportsbook",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 1.86,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "lost",
+      "pl": -10.0,
+      "closing_odds": null,
+      "clv": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; Accumulator; legs: Match Odds 90 -> Portugal | Match Odds 90 -> England | Match Odds 90 -> Colombia",
       "manual_override": null
     },
     {
@@ -606,6 +762,32 @@
       "closing_odds": null,
       "clv": null,
       "notes": "polymarket order; token=110881534500357968934646596900153818247967390745149544995654778360419076918150; side=BUY; LIVE; order_id=0xbb4f34ad2f204501d118778114b5cf0dda45c633650aa333675370bed7657d5a",
+      "manual_override": null
+    },
+    {
+      "id": 108,
+      "ts_utc": "2026-06-20T09:26:45",
+      "settled_ts": "2026-06-25T06:06:38Z",
+      "match": "England vs Ghana",
+      "match_id": "MANUAL_ENGLAND_VS_GHANA",
+      "market": "Bet Builder",
+      "selection": "Home Team Minus 2.5 Goals -> England -2.5 Goals + Handicap Betting -> England (-2.0) + Correct Score Combinations -> England to win 1-0, 2-0 or 3-0",
+      "platform": "Betfair Sportsbook",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 5.52,
+      "stake": 5.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "status": "lost",
+      "pl": -5.0,
+      "closing_odds": null,
+      "clv": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.92; Bet Builder; legs: Home Team Minus 2.5 Goals -> England -2.5 Goals | Handicap Betting -> England (-2.0) | Correct Score Combinations -> England to win 1-0, 2-0 or 3-0; SNR",
       "manual_override": null
     },
     {
@@ -2980,6 +3162,34 @@
         [
           "2026-06-23T19:12:31",
           83.13
+        ],
+        [
+          "2026-06-25T06:06:38Z",
+          126.33
+        ],
+        [
+          "2026-06-25T06:06:38Z",
+          126.33
+        ],
+        [
+          "2026-06-25T06:06:38Z",
+          116.33
+        ],
+        [
+          "2026-06-25T06:06:38Z",
+          104.33
+        ],
+        [
+          "2026-06-25T06:06:38Z",
+          94.33
+        ],
+        [
+          "2026-06-25T06:06:38Z",
+          84.33
+        ],
+        [
+          "2026-06-25T06:06:38Z",
+          79.33
         ]
       ]
     },
@@ -3058,7 +3268,7 @@
     }
   },
   "clv": {
-    "avg_clv": -0.015457032726088426,
+    "avg_clv": -0.01545704092422628,
     "pct_beat_close": 0.5333333333333333,
     "n_with_close": 30
   },
@@ -3081,12 +3291,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 31.02,
-      "cur_price": 0.1525,
+      "cur_value": 30.61,
+      "cur_price": 0.1505,
       "avg_price": 0.1179,
       "shares": 203.3898,
-      "cash_pnl": 7.02,
-      "pct_pnl": 0.2925036562957037,
+      "cash_pnl": 6.61,
+      "pct_pnl": 0.2754201094180344,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3107,12 +3317,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 62.98,
-      "cur_price": 0.47,
+      "cur_value": 63.65,
+      "cur_price": 0.475,
       "avg_price": 0.5,
       "shares": 134.0,
-      "cash_pnl": -4.02,
-      "pct_pnl": -0.05999999999999999,
+      "cash_pnl": -3.35,
+      "pct_pnl": -0.05,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3159,12 +3369,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 27.6,
-      "cur_price": 0.215,
+      "cur_value": 26.31,
+      "cur_price": 0.205,
       "avg_price": 0.2804,
       "shares": 128.35,
-      "cash_pnl": -8.4,
-      "pct_pnl": -0.23333398148328194,
+      "cash_pnl": -9.69,
+      "pct_pnl": -0.26916741435392877,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3211,12 +3421,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 61.39,
-      "cur_price": 0.5805,
+      "cur_value": 60.44,
+      "cur_price": 0.5715,
       "avg_price": 0.6241,
       "shares": 105.7498,
-      "cash_pnl": -4.61,
-      "pct_pnl": -0.06984859067968285,
+      "cash_pnl": -5.56,
+      "pct_pnl": -0.08424255188265437,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3315,12 +3525,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 52.95,
-      "cur_price": 0.555,
+      "cur_value": 53.43,
+      "cur_price": 0.56,
       "avg_price": 0.5699,
       "shares": 95.4035,
-      "cash_pnl": -1.43,
-      "pct_pnl": -0.02629648086885044,
+      "cash_pnl": -0.95,
+      "pct_pnl": -0.017469690087697845,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3419,12 +3629,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 69.62,
-      "cur_price": 0.916,
+      "cur_value": 69.46,
+      "cur_price": 0.914,
       "avg_price": 0.866,
       "shares": 76.0,
-      "cash_pnl": 3.8,
-      "pct_pnl": 0.057736720554272515,
+      "cash_pnl": 3.65,
+      "pct_pnl": 0.055457639479761754,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3721,27 +3931,6 @@
       "manual_override": null
     },
     {
-      "id": 143,
-      "ts_utc": "2026-06-24T07:59:01",
-      "match": "Switzerland v Canada",
-      "match_id": "MANUAL_SWITZERLAND_V_CANADA",
-      "market": "Match Odds",
-      "selection": "Switzerland",
-      "platform": "Betfair Exchange UK",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "model",
-      "currency": "GBP",
-      "decimal_odds": 2.46,
-      "stake": 29.59,
-      "model_prob": 0.496796,
-      "market_prob_devig": 0.404414,
-      "ev": 0.222118,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97",
-      "manual_override": null
-    },
-    {
       "id": 142,
       "ts_utc": "2026-06-24T07:59:01",
       "match": "South Africa v South Korea",
@@ -3826,111 +4015,6 @@
       "manual_override": null
     },
     {
-      "id": 135,
-      "ts_utc": "2026-06-23T11:23:48",
-      "match": "England vs Ghana",
-      "match_id": "MANUAL_ENGLAND_VS_GHANA",
-      "market": "Bet Builder",
-      "selection": "Half Time Result -> England + 2nd Half Result -> England + Player's shots on target -> Harry Kane - Over 1.5 + Player's shots on target -> Jude Bellingham - Over 1.5",
-      "platform": "Unknown",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 7.9,
-      "stake": 0.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.75; Bet Builder; legs: Half Time Result -> England | 2nd Half Result -> England | Player's shots on target -> Harry Kane - Over 1.5 | Player's shots on target -> Jude Bellingham - Over 1.5",
-      "manual_override": null
-    },
-    {
-      "id": 133,
-      "ts_utc": "2026-06-23T08:19:52",
-      "match": "Panama vs Croatia",
-      "match_id": "MANUAL_PANAMA_VS_CROATIA",
-      "market": "Bet Builder",
-      "selection": "Full Time Result -> Croatia + Both Teams to Score -> Yes + Total Goals Range -> 1-4 Goals",
-      "platform": "Bet365",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 4.75,
-      "stake": 10.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97; Bet Builder; legs: Full Time Result -> Croatia | Both Teams to Score -> Yes | Total Goals Range -> 1-4 Goals",
-      "manual_override": null
-    },
-    {
-      "id": 132,
-      "ts_utc": "2026-06-23T08:19:40",
-      "match": "Colombia vs DR Congo",
-      "match_id": "MANUAL_COLOMBIA_VS_DR_CONGO",
-      "market": "Bet Builder",
-      "selection": "Full Time Result -> Colombia + Both Teams to Score -> Yes + Match Goals Range -> 1-4 Goals + Anytime Goalscorer -> Luis Diaz",
-      "platform": "Bet365",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 11.0,
-      "stake": 12.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97; Bet Builder; legs: Full Time Result -> Colombia | Both Teams to Score -> Yes | Match Goals Range -> 1-4 Goals | Anytime Goalscorer -> Luis Diaz",
-      "manual_override": null
-    },
-    {
-      "id": 131,
-      "ts_utc": "2026-06-23T08:18:25",
-      "match": "Colombia vs DR Congo | Portugal vs Uzbekistan | England vs Ghana",
-      "match_id": "MANUAL_COLOMBIA_VS_DR_CONGO_PORTUGAL_VS_UZBEKISTAN_ENGL",
-      "market": "Accumulator",
-      "selection": "Match Odds -> Colombia + Over/Under 3.5 Goals -> Under 3.5 Goals + Over/Under 3.5 Goals -> Under 3.5 Goals",
-      "platform": "Betfair Sportsbook",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 3.96,
-      "stake": 10.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97; Accumulator; legs: Match Odds -> Colombia | Over/Under 3.5 Goals -> Under 3.5 Goals | Over/Under 3.5 Goals -> Under 3.5 Goals",
-      "manual_override": null
-    },
-    {
-      "id": 130,
-      "ts_utc": "2026-06-23T08:17:58",
-      "match": "Portugal v Uzbekistan | England v Ghana | Colombia v DR Congo",
-      "match_id": "MANUAL_PORTUGAL_V_UZBEKISTAN_ENGLAND_V_GHANA_COLOMBIA_V",
-      "market": "Accumulator",
-      "selection": "Match Odds 90 -> Portugal + Match Odds 90 -> England + Match Odds 90 -> Colombia",
-      "platform": "Betfair Sportsbook",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "punt",
-      "currency": "GBP",
-      "decimal_odds": 1.86,
-      "stake": 10.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.97; Accumulator; legs: Match Odds 90 -> Portugal | Match Odds 90 -> England | Match Odds 90 -> Colombia",
-      "manual_override": null
-    },
-    {
       "id": 129,
       "ts_utc": "2026-06-22T15:23:07",
       "match": "France v Iraq",
@@ -3949,27 +4033,6 @@
       "ev": null,
       "kelly_fraction": null,
       "notes": "screenshot ingest; currency=GBP; conf 0.97",
-      "manual_override": null
-    },
-    {
-      "id": 108,
-      "ts_utc": "2026-06-20T09:26:45",
-      "match": "England vs Ghana",
-      "match_id": "MANUAL_ENGLAND_VS_GHANA",
-      "market": "Bet Builder",
-      "selection": "Home Team Minus 2.5 Goals -> England -2.5 Goals + Handicap Betting -> England (-2.0) + Correct Score Combinations -> England to win 1-0, 2-0 or 3-0",
-      "platform": "Betfair Sportsbook",
-      "venue": "sportsbook",
-      "account": "1",
-      "source": "offer",
-      "currency": "GBP",
-      "decimal_odds": 5.52,
-      "stake": 5.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "screenshot ingest; currency=GBP; conf 0.92; Bet Builder; legs: Home Team Minus 2.5 Goals -> England -2.5 Goals | Handicap Betting -> England (-2.0) | Correct Score Combinations -> England to win 1-0, 2-0 or 3-0; SNR",
       "manual_override": null
     },
     {

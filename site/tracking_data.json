@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-25 05:40:35 UTC"
+    "generated": "2026-06-25 06:07:01 UTC"
   },
   "summary": {
     "fixtures_complete": 31,
@@ -12,10 +12,10 @@
     "market_logloss": 0.7838,
     "top6_hits": 15,
     "bets": {
-      "settled": 89,
-      "won": 24,
-      "lost": 65,
-      "pl": 54.99,
+      "settled": 96,
+      "won": 25,
+      "lost": 71,
+      "pl": 51.19,
       "avg_clv": -0.0155,
       "clv_count": 30
     }
@@ -4641,6 +4641,21 @@
       "ts": "2026-06-21T12:32:24"
     },
     {
+      "id": 108,
+      "match": "England vs Ghana",
+      "market": "Bet Builder",
+      "selection": "Home Team Minus 2.5 Goals -> England -2.5 Goals + Handicap Betting -> England (-2.0) + Correct Score Combinations -> England to win 1-0, 2-0 or 3-0",
+      "odds": 5.52,
+      "stake": 5.0,
+      "status": "lost",
+      "pl": -5.0,
+      "clv": null,
+      "source": "offer",
+      "ev": null,
+      "ccy": "\u00a3",
+      "ts": "2026-06-25T06:06:38Z"
+    },
+    {
       "id": 109,
       "match": "Germany vs Ivory Coast",
       "market": "polymarket",
@@ -4761,6 +4776,81 @@
       "ts": "2026-06-23T19:11:45"
     },
     {
+      "id": 130,
+      "match": "Portugal v Uzbekistan | England v Ghana | Colombia v DR Congo",
+      "market": "Accumulator",
+      "selection": "Match Odds 90 -> Portugal + Match Odds 90 -> England + Match Odds 90 -> Colombia",
+      "odds": 1.86,
+      "stake": 10.0,
+      "status": "lost",
+      "pl": -10.0,
+      "clv": null,
+      "source": "punt",
+      "ev": null,
+      "ccy": "\u00a3",
+      "ts": "2026-06-25T06:06:38Z"
+    },
+    {
+      "id": 131,
+      "match": "Colombia vs DR Congo | Portugal vs Uzbekistan | England vs Ghana",
+      "market": "Accumulator",
+      "selection": "Match Odds -> Colombia + Over/Under 3.5 Goals -> Under 3.5 Goals + Over/Under 3.5 Goals -> Under 3.5 Goals",
+      "odds": 3.96,
+      "stake": 10.0,
+      "status": "lost",
+      "pl": -10.0,
+      "clv": null,
+      "source": "punt",
+      "ev": null,
+      "ccy": "\u00a3",
+      "ts": "2026-06-25T06:06:38Z"
+    },
+    {
+      "id": 132,
+      "match": "Colombia vs DR Congo",
+      "market": "Bet Builder",
+      "selection": "Full Time Result -> Colombia + Both Teams to Score -> Yes + Match Goals Range -> 1-4 Goals + Anytime Goalscorer -> Luis Diaz",
+      "odds": 11.0,
+      "stake": 12.0,
+      "status": "lost",
+      "pl": -12.0,
+      "clv": null,
+      "source": "punt",
+      "ev": null,
+      "ccy": "\u00a3",
+      "ts": "2026-06-25T06:06:38Z"
+    },
+    {
+      "id": 133,
+      "match": "Panama vs Croatia",
+      "market": "Bet Builder",
+      "selection": "Full Time Result -> Croatia + Both Teams to Score -> Yes + Total Goals Range -> 1-4 Goals",
+      "odds": 4.75,
+      "stake": 10.0,
+      "status": "lost",
+      "pl": -10.0,
+      "clv": null,
+      "source": "punt",
+      "ev": null,
+      "ccy": "\u00a3",
+      "ts": "2026-06-25T06:06:38Z"
+    },
+    {
+      "id": 135,
+      "match": "England vs Ghana",
+      "market": "Bet Builder",
+      "selection": "Half Time Result -> England + 2nd Half Result -> England + Player's shots on target -> Harry Kane - Over 1.5 + Player's shots on target -> Jude Bellingham - Over 1.5",
+      "odds": 7.9,
+      "stake": 0.0,
+      "status": "lost",
+      "pl": 0.0,
+      "clv": null,
+      "source": "punt",
+      "ev": null,
+      "ccy": "\u00a3",
+      "ts": "2026-06-25T06:06:38Z"
+    },
+    {
       "id": 138,
       "match": "Jordan vs Algeria",
       "market": "Player to Score or Assist",
@@ -4774,6 +4864,21 @@
       "ev": null,
       "ccy": "\u00a3",
       "ts": "2026-06-23T19:12:31"
+    },
+    {
+      "id": 143,
+      "match": "Switzerland v Canada",
+      "market": "Match Odds",
+      "selection": "Switzerland",
+      "odds": 2.46,
+      "stake": 29.59,
+      "status": "won",
+      "pl": 43.2,
+      "clv": -0.039436,
+      "source": "model",
+      "ev": 0.222118,
+      "ccy": "\u00a3",
+      "ts": "2026-06-25T06:06:38Z"
     }
   ]
 }
