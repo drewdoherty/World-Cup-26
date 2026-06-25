@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark">
+<title>WORLD CUP ALPHA // ANALYTICS</title>
+<link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="./analytics.css">
+</head>
+<body>
+<div id="app">
+  <!-- Ticker / brand bar -->
+  <header class="ticker" id="ticker">
+    <div class="brand">
+      <span class="brand-mark">WCA</span>
+      <span class="brand-sub">WORLD CUP ALPHA &middot; ANALYTICS</span>
+    </div>
+    <nav class="scores-nav">
+      <a class="scores-nav-link" href="#verdict">Verdict</a>
+      <a class="scores-nav-link" href="#risk">Risk &amp; P&amp;L</a>
+      <a class="scores-nav-link" href="#winrate">Win-rate</a>
+      <a class="scores-nav-link" href="#clv">Model CLV</a>
+      <a class="scores-nav-link" href="#ledger">Paper Ledger</a>
+    </nav>
+  </header>
+
+  <!-- Connection / no-data banner -->
+  <div class="nodata" id="nodata" hidden>
+    <span class="nodata-dot"></span>
+    <span id="nodata-msg">NO DATA FEED</span>
+  </div>
+
+  <main>
+    <!-- Intro -->
+    <section class="panel intro">
+      <div class="panel-head">
+        <span class="panel-label">Analytics Dashboard // The Full Paper Book, Not Just The Bets</span>
+        <span class="panel-meta" id="intro-meta"></span>
+      </div>
+      <div class="intro-body">
+        Every priced model selection is treated as a <b>paper bet</b> &mdash; persisted, settled, and CLV-stamped
+        whether or not money moved. This kills prediction-selection bias: the realized book is a strict subset of the
+        paper book. CLV is the lower-variance leading edge signal; ROI is the lagging confirmation; calibration is the
+        mechanism check. Honesty about sample size is a first-class feature &mdash; the default verdict is
+        <span class="dim">INSUFFICIENT SAMPLE</span> until power gates clear.
+      </div>
+    </section>
+
+    <!-- Top KPI strip -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">Book Headline // Live Aggregates</span>
+        <span class="panel-meta" id="kpi-meta"></span>
+      </div>
+      <div class="kpi-grid" id="kpi"></div>
+    </section>
+
+    <!-- D · VERDICT -->
+    <section class="panel" id="verdict">
+      <div class="panel-head">
+        <span class="panel-label">D // Repeatable-Edge Verdict</span>
+        <span class="panel-meta">Is the edge real <i>yet</i>? &middot; green needs CLV <b>and</b> (skill or calibration) <b>and</b> stability</span>
+      </div>
+      <div class="panel-body" id="verdict-body"></div>
+      <div class="panel-body" id="verdict-gates"></div>
+      <div class="panel-body" id="verdict-samples"></div>
+    </section>
+
+    <!-- A · RISK & P&L -->
+    <section class="panel" id="risk">
+      <div class="panel-head">
+        <span class="panel-label">A // Portfolio Risk &amp; P&amp;L Distribution</span>
+        <span class="panel-meta" id="risk-meta">Monte-Carlo valuation of the open book across simulated tournaments</span>
+      </div>
+      <div class="panel-body" id="risk-dist"></div>
+      <div class="two-col">
+        <div class="sub-panel">
+          <div class="sub-head">Per-team P&amp;L contribution</div>
+          <div id="risk-teams"></div>
+        </div>
+        <div class="sub-panel">
+          <div class="sub-head">Open-book exposure (faceted by currency)</div>
+          <div id="risk-exposure"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- A · Futures forest -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">A // Futures &mdash; Model vs Market Forest</span>
+        <span class="panel-meta" id="forest-meta">per-team reach probability &middot; model vs market price</span>
+      </div>
+      <div id="forest-nav" class="chip-row"></div>
+      <div class="panel-body" id="forest"></div>
+    </section>
+
+    <!-- B · WIN-RATE -->
+    <section class="panel" id="winrate">
+      <div class="panel-head">
+        <span class="panel-label">B // Rolling Win-rate &mdash; Model vs Realized Book</span>
+        <span class="panel-meta" id="winrate-meta">Is the model right (no selection bias)? Did we make money?</span>
+      </div>
+      <div class="kpi-grid" id="winrate-head"></div>
+      <div class="panel-body" id="winrate-rolling"></div>
+      <div class="two-col">
+        <div class="sub-panel">
+          <div class="sub-head">Segment win-rate (Wilson whiskers)</div>
+          <div id="winrate-segments"></div>
+        </div>
+        <div class="sub-panel">
+          <div class="sub-head">Acca autopsy &mdash; leg cross-section</div>
+          <div id="winrate-acca"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- C · MODEL CLV -->
+    <section class="panel" id="clv">
+      <div class="panel-head">
+        <span class="panel-label">C // Model CLV &mdash; Full Book</span>
+        <span class="panel-meta" id="clv-meta">consensus-vs-consensus, fair-vs-fair &middot; beat-rate vs a label-shuffle placebo, not 0.50</span>
+      </div>
+      <div class="kpi-grid" id="clv-head"></div>
+      <div class="two-col">
+        <div class="sub-panel">
+          <div class="sub-head">CLV by edge bucket (+ placebo slope)</div>
+          <div id="clv-edge"></div>
+        </div>
+        <div class="sub-panel">
+          <div class="sub-head">CLV by market leg (never pooled)</div>
+          <div id="clv-market"></div>
+        </div>
+      </div>
+      <div class="panel-body" id="clv-coverage"></div>
+    </section>
+
+    <!-- Paper ledger -->
+    <section class="panel" id="ledger">
+      <div class="panel-head">
+        <span class="panel-label">P0 // Prediction Ledger &mdash; Paper Book Coverage</span>
+        <span class="panel-meta" id="ledger-meta">every priced selection, settled regardless of money &middot; CLV coverage by market</span>
+      </div>
+      <div class="panel-body" id="ledger-body"></div>
+    </section>
+
+    <div class="track-note" id="footnote">
+      Monitoring, not betting advice. Statistics are descriptive. Aggregates at current sample size are fat-tailed:
+      Wilson intervals are shown everywhere, the match / acca / tournament is the clustering unit, and the verdict
+      defaults to <span class="dim">INSUFFICIENT SAMPLE</span>. CLV is computed fair-vs-fair (both sides de-vigged)
+      and is structurally unavailable where no liquid close exists &mdash; coverage is reported beside every aggregate.
+      Currencies (&pound;/$) are never summed except in the explicitly FX-disclosed distribution view.
+    </div>
+  </main>
+
+  <footer class="foot">
+    <span class="foot-gen" id="foot-gen"></span>
+    <span class="foot-mark">WORLD CUP ALPHA &middot; ANALYTICS</span>
+  </footer>
+</div>
+<script src="./analytics.js"></script>
+</body>
+</html>

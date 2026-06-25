@@ -1,0 +1,651 @@
+{
+  "by_market": [
+    {
+      "lost": 550,
+      "market": "1X2",
+      "model_brier": 0.1503,
+      "n": 870,
+      "push": 0,
+      "settled": 825,
+      "win_hi": 0.3662,
+      "win_lo": 0.302,
+      "win_rate": 0.3333,
+      "won": 275
+    },
+    {
+      "lost": 0,
+      "market": "scoreline",
+      "model_brier": null,
+      "n": 0,
+      "push": 0,
+      "settled": 0,
+      "win_hi": null,
+      "win_lo": null,
+      "win_rate": null,
+      "won": 0
+    },
+    {
+      "lost": 0,
+      "market": "ou",
+      "model_brier": null,
+      "n": 0,
+      "push": 0,
+      "settled": 0,
+      "win_hi": null,
+      "win_lo": null,
+      "win_rate": null,
+      "won": 0
+    },
+    {
+      "lost": 0,
+      "market": "btts",
+      "model_brier": null,
+      "n": 0,
+      "push": 0,
+      "settled": 0,
+      "win_hi": null,
+      "win_lo": null,
+      "win_rate": null,
+      "won": 0
+    },
+    {
+      "lost": 0,
+      "market": "advancement",
+      "model_brier": null,
+      "n": 0,
+      "push": 0,
+      "settled": 0,
+      "win_hi": null,
+      "win_lo": null,
+      "win_rate": null,
+      "won": 0
+    }
+  ],
+  "coverage": {
+    "1X2": {
+      "clv_n": 870,
+      "coverage_pct": 100.0,
+      "n": 870
+    },
+    "advancement": {
+      "clv_n": 0,
+      "coverage_pct": 0.0,
+      "n": 0
+    },
+    "btts": {
+      "clv_n": 0,
+      "coverage_pct": 0.0,
+      "n": 0
+    },
+    "ou": {
+      "clv_n": 0,
+      "coverage_pct": 0.0,
+      "n": 0
+    },
+    "scoreline": {
+      "clv_n": 0,
+      "coverage_pct": 0.0,
+      "n": 0
+    }
+  },
+  "headline": {
+    "clv_coverage_pct": 100.0,
+    "n_with_clv": 870,
+    "paper_win_rate": {
+      "hi": 0.3662,
+      "lo": 0.302,
+      "n": 825,
+      "p": 0.3333
+    }
+  },
+  "meta": {
+    "db": "dev.db",
+    "generated": "2026-06-25T08:03:38Z",
+    "n_paper": 870,
+    "n_predictions": 870,
+    "n_realized": 0,
+    "n_with_clv": 870
+  },
+  "recent": [
+    {
+      "build_id": "bf_20260623065231",
+      "clv": 0.214,
+      "fixture": "Colombia vs DR Congo",
+      "market": "1X2",
+      "model_prob": 0.1192,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260623065231",
+      "clv": 0.0669,
+      "fixture": "Colombia vs DR Congo",
+      "market": "1X2",
+      "model_prob": 0.2263,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260623065231",
+      "clv": -0.0621,
+      "fixture": "Colombia vs DR Congo",
+      "market": "1X2",
+      "model_prob": 0.6544,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260623065231",
+      "clv": -0.0124,
+      "fixture": "Panama vs Croatia",
+      "market": "1X2",
+      "model_prob": 0.6387,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260623065231",
+      "clv": 0.0081,
+      "fixture": "Panama vs Croatia",
+      "market": "1X2",
+      "model_prob": 0.2235,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260623065231",
+      "clv": 0.0442,
+      "fixture": "Panama vs Croatia",
+      "market": "1X2",
+      "model_prob": 0.1378,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260623065231",
+      "clv": -0.0301,
+      "fixture": "England vs Ghana",
+      "market": "1X2",
+      "model_prob": 0.0619,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260623065231",
+      "clv": -0.0708,
+      "fixture": "England vs Ghana",
+      "market": "1X2",
+      "model_prob": 0.1494,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260623065231",
+      "clv": 0.0158,
+      "fixture": "England vs Ghana",
+      "market": "1X2",
+      "model_prob": 0.7887,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260623065231",
+      "clv": -0.2231,
+      "fixture": "Portugal vs Uzbekistan",
+      "market": "1X2",
+      "model_prob": 0.0653,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260623065231",
+      "clv": -0.1808,
+      "fixture": "Portugal vs Uzbekistan",
+      "market": "1X2",
+      "model_prob": 0.144,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260623065231",
+      "clv": 0.0513,
+      "fixture": "Portugal vs Uzbekistan",
+      "market": "1X2",
+      "model_prob": 0.7907,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": -0.0203,
+      "fixture": "Netherlands vs Sweden",
+      "market": "1X2",
+      "model_prob": 0.2031,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": -0.0313,
+      "fixture": "Netherlands vs Sweden",
+      "market": "1X2",
+      "model_prob": 0.2501,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": 0.0218,
+      "fixture": "Netherlands vs Sweden",
+      "market": "1X2",
+      "model_prob": 0.5468,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": -0.1034,
+      "fixture": "Turkey vs Paraguay",
+      "market": "1X2",
+      "model_prob": 0.2708,
+      "selection": "Away",
+      "status": "won"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": -0.0096,
+      "fixture": "Turkey vs Paraguay",
+      "market": "1X2",
+      "model_prob": 0.2882,
+      "selection": "Draw",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": 0.0698,
+      "fixture": "Turkey vs Paraguay",
+      "market": "1X2",
+      "model_prob": 0.441,
+      "selection": "Home",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": 0.5674,
+      "fixture": "Brazil vs Haiti",
+      "market": "1X2",
+      "model_prob": 0.0283,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": 0.2701,
+      "fixture": "Brazil vs Haiti",
+      "market": "1X2",
+      "model_prob": 0.0745,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": -0.0403,
+      "fixture": "Brazil vs Haiti",
+      "market": "1X2",
+      "model_prob": 0.8972,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": 0.0657,
+      "fixture": "Scotland vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.5206,
+      "selection": "Away",
+      "status": "won"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": -0.0705,
+      "fixture": "Scotland vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.2858,
+      "selection": "Draw",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": -0.0726,
+      "fixture": "Scotland vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.1936,
+      "selection": "Home",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": -0.1866,
+      "fixture": "United States vs Australia",
+      "market": "1X2",
+      "model_prob": 0.22,
+      "selection": "Away",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": -0.0592,
+      "fixture": "United States vs Australia",
+      "market": "1X2",
+      "model_prob": 0.2445,
+      "selection": "Draw",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619123008",
+      "clv": 0.1037,
+      "fixture": "United States vs Australia",
+      "market": "1X2",
+      "model_prob": 0.5354,
+      "selection": "Home",
+      "status": "won"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": -0.0203,
+      "fixture": "Netherlands vs Sweden",
+      "market": "1X2",
+      "model_prob": 0.2031,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": -0.0313,
+      "fixture": "Netherlands vs Sweden",
+      "market": "1X2",
+      "model_prob": 0.2501,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": 0.0218,
+      "fixture": "Netherlands vs Sweden",
+      "market": "1X2",
+      "model_prob": 0.5468,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": -0.1068,
+      "fixture": "Turkey vs Paraguay",
+      "market": "1X2",
+      "model_prob": 0.2718,
+      "selection": "Away",
+      "status": "won"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": -0.0137,
+      "fixture": "Turkey vs Paraguay",
+      "market": "1X2",
+      "model_prob": 0.2894,
+      "selection": "Draw",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": 0.0752,
+      "fixture": "Turkey vs Paraguay",
+      "market": "1X2",
+      "model_prob": 0.4388,
+      "selection": "Home",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": 0.5678,
+      "fixture": "Brazil vs Haiti",
+      "market": "1X2",
+      "model_prob": 0.0283,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": 0.2703,
+      "fixture": "Brazil vs Haiti",
+      "market": "1X2",
+      "model_prob": 0.0745,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": -0.0403,
+      "fixture": "Brazil vs Haiti",
+      "market": "1X2",
+      "model_prob": 0.8972,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": 0.0683,
+      "fixture": "Scotland vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.5193,
+      "selection": "Away",
+      "status": "won"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": -0.0749,
+      "fixture": "Scotland vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.2872,
+      "selection": "Draw",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": -0.0723,
+      "fixture": "Scotland vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.1935,
+      "selection": "Home",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": -0.1841,
+      "fixture": "United States vs Australia",
+      "market": "1X2",
+      "model_prob": 0.2194,
+      "selection": "Away",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": -0.0602,
+      "fixture": "United States vs Australia",
+      "market": "1X2",
+      "model_prob": 0.2448,
+      "selection": "Draw",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619113827",
+      "clv": 0.1029,
+      "fixture": "United States vs Australia",
+      "market": "1X2",
+      "model_prob": 0.5358,
+      "selection": "Home",
+      "status": "won"
+    },
+    {
+      "build_id": "bf_20260619104046",
+      "clv": -0.1015,
+      "fixture": "Turkey vs Paraguay",
+      "market": "1X2",
+      "model_prob": 0.2702,
+      "selection": "Away",
+      "status": "won"
+    },
+    {
+      "build_id": "bf_20260619104046",
+      "clv": -0.0093,
+      "fixture": "Turkey vs Paraguay",
+      "market": "1X2",
+      "model_prob": 0.2881,
+      "selection": "Draw",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619104046",
+      "clv": 0.0681,
+      "fixture": "Turkey vs Paraguay",
+      "market": "1X2",
+      "model_prob": 0.4417,
+      "selection": "Home",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619104046",
+      "clv": 0.5357,
+      "fixture": "Brazil vs Haiti",
+      "market": "1X2",
+      "model_prob": 0.0289,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619104046",
+      "clv": 0.2715,
+      "fixture": "Brazil vs Haiti",
+      "market": "1X2",
+      "model_prob": 0.0744,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619104046",
+      "clv": -0.0398,
+      "fixture": "Brazil vs Haiti",
+      "market": "1X2",
+      "model_prob": 0.8967,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619104046",
+      "clv": 0.0703,
+      "fixture": "Scotland vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.5184,
+      "selection": "Away",
+      "status": "won"
+    },
+    {
+      "build_id": "bf_20260619104046",
+      "clv": -0.0765,
+      "fixture": "Scotland vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.2876,
+      "selection": "Draw",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619104046",
+      "clv": -0.0745,
+      "fixture": "Scotland vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.194,
+      "selection": "Home",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619104046",
+      "clv": -0.1731,
+      "fixture": "United States vs Australia",
+      "market": "1X2",
+      "model_prob": 0.2164,
+      "selection": "Away",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619104046",
+      "clv": -0.0651,
+      "fixture": "United States vs Australia",
+      "market": "1X2",
+      "model_prob": 0.2461,
+      "selection": "Draw",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619104046",
+      "clv": 0.0995,
+      "fixture": "United States vs Australia",
+      "market": "1X2",
+      "model_prob": 0.5375,
+      "selection": "Home",
+      "status": "won"
+    },
+    {
+      "build_id": "bf_20260619103409",
+      "clv": -0.1066,
+      "fixture": "Turkey vs Paraguay",
+      "market": "1X2",
+      "model_prob": 0.2717,
+      "selection": "Away",
+      "status": "won"
+    },
+    {
+      "build_id": "bf_20260619103409",
+      "clv": -0.0089,
+      "fixture": "Turkey vs Paraguay",
+      "market": "1X2",
+      "model_prob": 0.288,
+      "selection": "Draw",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619103409",
+      "clv": 0.0716,
+      "fixture": "Turkey vs Paraguay",
+      "market": "1X2",
+      "model_prob": 0.4403,
+      "selection": "Home",
+      "status": "lost"
+    },
+    {
+      "build_id": "bf_20260619103409",
+      "clv": 0.4973,
+      "fixture": "Brazil vs Haiti",
+      "market": "1X2",
+      "model_prob": 0.0296,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619103409",
+      "clv": 0.2686,
+      "fixture": "Brazil vs Haiti",
+      "market": "1X2",
+      "model_prob": 0.0746,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260619103409",
+      "clv": -0.0388,
+      "fixture": "Brazil vs Haiti",
+      "market": "1X2",
+      "model_prob": 0.8958,
+      "selection": "Home",
+      "status": "open"
+    }
+  ]
+}
