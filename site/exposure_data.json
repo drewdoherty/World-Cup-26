@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-25 00:37:59 UTC"
+    "generated": "2026-06-25 01:38:33 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -9,16 +9,14 @@
     "p_profit": 0,
     "p_loss": 0,
     "p_big_win": 0,
-    "n_scenarios": 729
+    "n_scenarios": 81
   },
   "correlation": {
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0001,
+        "prob": 0.0007,
         "results": [
-          "Scotland",
-          "Morocco",
           "Czech Republic",
           "South Africa",
           "Cura\u00e7ao",
@@ -27,10 +25,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0001,
+        "prob": 0.0007,
         "results": [
-          "Scotland",
-          "Morocco",
           "Czech Republic",
           "South Africa",
           "Cura\u00e7ao",
@@ -39,10 +35,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0001,
+        "prob": 0.0014,
         "results": [
-          "Scotland",
-          "Morocco",
           "Czech Republic",
           "South Africa",
           "Cura\u00e7ao",
@@ -51,10 +45,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0001,
+        "prob": 0.0015,
         "results": [
-          "Scotland",
-          "Morocco",
           "Czech Republic",
           "South Africa",
           "Draw",
@@ -63,10 +55,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0001,
+        "prob": 0.0016,
         "results": [
-          "Scotland",
-          "Morocco",
           "Czech Republic",
           "South Africa",
           "Draw",
@@ -77,10 +67,8 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0001,
+        "prob": 0.0007,
         "results": [
-          "Scotland",
-          "Morocco",
           "Czech Republic",
           "South Africa",
           "Cura\u00e7ao",
@@ -89,10 +77,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0001,
+        "prob": 0.0007,
         "results": [
-          "Scotland",
-          "Morocco",
           "Czech Republic",
           "South Africa",
           "Cura\u00e7ao",
@@ -101,10 +87,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0001,
+        "prob": 0.0014,
         "results": [
-          "Scotland",
-          "Morocco",
           "Czech Republic",
           "South Africa",
           "Cura\u00e7ao",
@@ -115,155 +99,6 @@
     "narrative": "Upside is concentrated: the biggest payouts (\u00a30 best case) need the favourites to land together, while 0% of result-states leave the book down. Downside is driven by the real-money singles, not the free accas."
   },
   "fixtures": [
-    {
-      "fixture": "Scotland vs Brazil",
-      "kickoff": "2026-06-24T22:00:00+00:00",
-      "results": [
-        {
-          "outcome": "Scotland",
-          "prob": 0.0956,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Draw",
-          "prob": 0.1844,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": true,
-          "live": [],
-          "plug": {
-            "available": true,
-            "outcome": "Draw",
-            "best_venue": "smarkets",
-            "best_odds": 6.0,
-            "model_prob": 0.1844,
-            "ev_pct": 10.6,
-            "recommendation": "PLUG: +EV to back (10.6% edge) \u2014 fills the gap and adds value"
-          }
-        },
-        {
-          "outcome": "Brazil",
-          "prob": 0.72,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": true,
-          "live": [],
-          "plug": {
-            "available": true,
-            "outcome": "Brazil",
-            "best_venue": "matchbook",
-            "best_odds": 1.35,
-            "model_prob": 0.72,
-            "ev_pct": -2.8,
-            "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
-          }
-        }
-      ],
-      "events": [
-        {
-          "type": "Player Shots",
-          "selection": "Vinicius Junior & Matheus Cunha to have 1+ shots on target each (including woodwork)",
-          "stake": 5.0,
-          "potential_profit": 5.0,
-          "free": false,
-          "odds": 2.0
-        },
-        {
-          "type": "Bet Builder",
-          "selection": "Player to Score or Assist -> Vinicius Jr. to Score or Assist + Player to Score or Assist -> Neymar Jr to Score or Assist + Both Teams to Score in 1st Half -> No",
-          "stake": 5.0,
-          "potential_profit": 8.75,
-          "free": false,
-          "odds": 2.75
-        },
-        {
-          "type": "Bet Builder",
-          "selection": "Full Time Result -> Brazil + Player Shots on Target -> Igor Thiago: 2+ Shots on Target",
-          "stake": 5.0,
-          "potential_profit": 7.5,
-          "free": false,
-          "odds": 2.5
-        },
-        {
-          "type": "Shot on Target",
-          "selection": "Vinicius Junior & Matheus Cunha to have 1+ shots on target each (including woodwork)",
-          "stake": 2.5,
-          "potential_profit": 2.5,
-          "free": false,
-          "odds": 2.0
-        },
-        {
-          "type": "Shots on Target / Chances Created",
-          "selection": "Scott McTominay to have 1 or more shots on target including woodwork & create 1 or more shots",
-          "stake": 10.0,
-          "potential_profit": 27.5,
-          "free": false,
-          "odds": 3.75
-        },
-        {
-          "type": "Foul Involvements",
-          "selection": "John McGinn to have 6 or more foul involvements",
-          "stake": 1.0,
-          "potential_profit": 3.33,
-          "free": false,
-          "odds": 4.33
-        }
-      ],
-      "summary": {
-        "max_win": 0.0,
-        "stake_at_risk": 0,
-        "best_outcome": "Scotland",
-        "worst_outcome": "Scotland",
-        "n_blindspots": 2
-      }
-    },
-    {
-      "fixture": "Morocco vs Haiti",
-      "kickoff": "2026-06-24T22:00:00+00:00",
-      "results": [
-        {
-          "outcome": "Morocco",
-          "prob": 0.797,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Draw",
-          "prob": 0.1469,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Haiti",
-          "prob": 0.0561,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        }
-      ],
-      "events": [],
-      "summary": {
-        "max_win": 0.0,
-        "stake_at_risk": 0,
-        "best_outcome": "Morocco",
-        "worst_outcome": "Morocco",
-        "n_blindspots": 0
-      }
-    },
     {
       "fixture": "Czech Republic vs Mexico",
       "kickoff": "2026-06-25T01:00:00+00:00",
@@ -429,38 +264,7 @@
       }
     }
   ],
-  "blindspots": [
-    {
-      "fixture": "Scotland vs Brazil",
-      "outcome": "Brazil",
-      "prob": 0.72,
-      "net_pnl": 0.0,
-      "plug": {
-        "available": true,
-        "outcome": "Brazil",
-        "best_venue": "matchbook",
-        "best_odds": 1.35,
-        "model_prob": 0.72,
-        "ev_pct": -2.8,
-        "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
-      }
-    },
-    {
-      "fixture": "Scotland vs Brazil",
-      "outcome": "Draw",
-      "prob": 0.1844,
-      "net_pnl": 0.0,
-      "plug": {
-        "available": true,
-        "outcome": "Draw",
-        "best_venue": "smarkets",
-        "best_odds": 6.0,
-        "model_prob": 0.1844,
-        "ev_pct": 10.6,
-        "recommendation": "PLUG: +EV to back (10.6% edge) \u2014 fills the gap and adds value"
-      }
-    }
-  ],
+  "blindspots": [],
   "unmapped": [
     "South Africa v South Korea / Draw",
     "Switzerland v Canada / Switzerland",
@@ -685,6 +489,33 @@
       "match": "Portugal v Uzbekistan"
     },
     {
+      "type": "Player Shots",
+      "selection": "Vinicius Junior & Matheus Cunha to have 1+ shots on target each (including woodwork)",
+      "stake": 5.0,
+      "profit": 5.0,
+      "free": false,
+      "odds": 2.0,
+      "match": "Scotland vs Brazil"
+    },
+    {
+      "type": "Bet Builder",
+      "selection": "Player to Score or Assist -> Vinicius Jr. to Score or Assist + Player to Score or Assist -> Neymar Jr to Score or Assist + Both Teams to Score in 1st Half -> No",
+      "stake": 5.0,
+      "profit": 8.75,
+      "free": false,
+      "odds": 2.75,
+      "match": "Scotland vs Brazil"
+    },
+    {
+      "type": "Bet Builder",
+      "selection": "Full Time Result -> Brazil + Player Shots on Target -> Igor Thiago: 2+ Shots on Target",
+      "stake": 5.0,
+      "profit": 7.5,
+      "free": false,
+      "odds": 2.5,
+      "match": "Scotland vs Brazil"
+    },
+    {
       "type": "Accumulator",
       "selection": "Match Odds 90 -> Switzerland + Over/Under 2.5 Goals -> Over 2.5 Goals + Over/Under 2.5 Goals -> Over 2.5 Goals",
       "stake": 20.0,
@@ -728,6 +559,33 @@
       "free": true,
       "odds": 3.75,
       "match": "Scotland v Brazil"
+    },
+    {
+      "type": "Shot on Target",
+      "selection": "Vinicius Junior & Matheus Cunha to have 1+ shots on target each (including woodwork)",
+      "stake": 2.5,
+      "profit": 2.5,
+      "free": false,
+      "odds": 2.0,
+      "match": "Scotland vs Brazil"
+    },
+    {
+      "type": "Shots on Target / Chances Created",
+      "selection": "Scott McTominay to have 1 or more shots on target including woodwork & create 1 or more shots",
+      "stake": 10.0,
+      "profit": 27.5,
+      "free": false,
+      "odds": 3.75,
+      "match": "Scotland vs Brazil"
+    },
+    {
+      "type": "Foul Involvements",
+      "selection": "John McGinn to have 6 or more foul involvements",
+      "stake": 1.0,
+      "profit": 3.333,
+      "free": false,
+      "odds": 4.333,
+      "match": "Scotland vs Brazil"
     },
     {
       "type": "Outright",
