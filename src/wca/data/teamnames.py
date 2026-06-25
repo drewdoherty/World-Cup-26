@@ -21,6 +21,8 @@ ALIASES = {
     "Bosnia & Herzegovina": "Bosnia and Herzegovina",
     # Common alternates kept for robustness across feeds:
     "Bosnia-Herzegovina": "Bosnia and Herzegovina",
+    # Betfair Exchange uses short national-team spellings:
+    "Bosnia": "Bosnia and Herzegovina",
     "South Korea": "South Korea",
     "Korea Republic": "South Korea",
     "IR Iran": "Iran",
