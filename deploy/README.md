@@ -77,6 +77,13 @@ Only **Telegram** needs unblocking.
 | `com.wca.pmpropose` | every 12 h | park PM proposals + notify | needs PM **and** Telegram reachable |
 | `com.wca.publish` | hourly | refresh scores → regen site → **auto-commit & push** | keeps the public site live with no manual push; rebases to absorb cloud-Action commits |
 | `com.wca.sync` | every 5 min | `git pull --rebase origin/main` → restart daemons on code change | the auto-deploy puller; see §0. Logs to `data/com.wca.sync.run.log` |
+| `com.wca.watchdog` | every 5 min | check every KeepAlive daemon is alive + not crash-looping | **pings Telegram if one is down/flapping/never-bootstrapped** — KeepAlive respawns silently, so this is the only thing that tells you a bot died. Read-only |
+
+> ⚠️ **Adding a job to `services.env` does not start it.** launchd only learns
+> about a new job when `install.sh` runs on the mini (`launchctl load`). A merge
+> alone leaves a new daemon dormant — and `autopull`/`sync` only kickstart jobs
+> that already exist, they don't register new ones. After any service change,
+> SSH to the mini and re-run `bash deploy/macmini/install.sh`.
 
 Free-bet accas and Double-Delight bets still need **manual settlement** (the
 auto-settler uses the wrong convention for SNR free bets / boosts) — keep doing
