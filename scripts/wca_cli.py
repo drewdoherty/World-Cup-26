@@ -97,6 +97,9 @@ def cmd_bet_add(args: argparse.Namespace) -> None:
         ev=args.ev,
         kelly_fraction=args.kelly,
         notes=args.notes,
+        # Manual single-bet entry: regenerate + publish the site so the bet
+        # shows up without a separate sync step.
+        sync_site=True,
         db_path=args.db,
     )
     print("Recorded bet id=%d" % bet_id)

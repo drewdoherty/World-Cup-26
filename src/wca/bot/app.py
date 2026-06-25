@@ -1204,16 +1204,22 @@ def _enrich_bets_from_card(
                     "selection": m.group(2).strip(),
                     "odds": float(m.group(3)),
                     "model_prob": None,
+                    "market_prob_devig": None,
                     "ev": None,
                 }
                 continue
 
-            # Model/edge line
+            # Model/edge line: "model X% / mkt Y%  edge *+Z%*" — "mkt" is the
+            # Shin de-vigged market consensus (see wca.card), so it maps directly
+            # to market_prob_devig. Parsed only when present; left None otherwise.
             if current_match and "model" in line.lower():
                 model_m = re.search(r"model\s+([0-9.]+)%", line)
+                mkt_m = re.search(r"mkt\s+([0-9.]+)%", line)
                 edge_m = re.search(r"edge\s*\*?([+-]?[0-9.]+)", line)
                 if model_m:
                     current_match["model_prob"] = float(model_m.group(1)) / 100.0
+                if mkt_m:
+                    current_match["market_prob_devig"] = float(mkt_m.group(1)) / 100.0
                 if edge_m:
                     try:
                         current_match["ev"] = float(edge_m.group(1)) / 100.0
@@ -1238,6 +1244,7 @@ def _enrich_bets_from_card(
                    (ps_lower in bet_sel or bet_sel in ps_lower) and \
                    abs(bet_odds - po) < 0.05:
                     bet.model_prob = pick["model_prob"]
+                    bet.market_prob_devig = pick["market_prob_devig"]
                     bet.ev = pick["ev"]
                     break
     except Exception:
@@ -1487,13 +1494,18 @@ def handle_photo_confirmation(
                 _canon_platform(b.bookmaker or "unknown"),
                 float(b.decimal_odds or 0.0),
                 float(b.stake or 0.0),
-                # model_prob and ev are populated by _enrich_bets_from_card() when
-                # the card has a matching pick; None for accas/bet-builders/promos.
+                # model_prob, market_prob_devig and ev are populated by
+                # _enrich_bets_from_card() when the card has a matching pick
+                # ("model X% / mkt Y%  edge *+Z%*"); None for accas / bet-builders
+                # / promos with no model price (never fabricated).
                 model_prob=getattr(b, "model_prob", None),
+                market_prob_devig=getattr(b, "market_prob_devig", None),
                 ev=getattr(b, "ev", None),
                 notes=note,
                 account=account,
                 source=source,
+                # record_bet does not publish on its own (sync_site defaults
+                # False); the single _autosync below publishes the whole batch.
                 db_path=db_path,
             )
             logged.append("#%d %s @ %s" % (bid, b.selection, b.decimal_odds or "?"))
@@ -2134,6 +2146,7 @@ def _execute_parked_order(
             notes=notes,
             account="1",
             source="model",
+            # _autosync below handles the publish for this order.
             db_path=db_path,
         )
     except Exception as exc:
