@@ -6,6 +6,13 @@
 #
 # Daemons get KeepAlive (auto-restart + start at login). Interval jobs run on a timer.
 # Nothing here touches application Python — it only schedules the existing scripts.
+#
+# ACTIVATION IS A HUMAN STEP. Merging a new job into services.env does NOT start
+# it — launchd only learns about a job when this script runs on the mini and
+# calls `launchctl load`. After any change here, SSH to the mini and re-run:
+#     bash deploy/macmini/install.sh
+# `autopull` pulls code but does NOT register new jobs; it only kickstarts
+# daemons that already exist. A brand-new daemon stays dormant until install.sh.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -38,6 +45,7 @@ cmd_for() {
     pmredeem)     printf '%s\n' "$RUN1" pmredeem     "$VENV_PY" scripts/wca_pm_redeem.py     --db data/wca.db --env .env --notify ;;
     closecapture) printf '%s\n' "$RUN1" closecapture "$VENV_PY" scripts/wca_close_capture.py --db data/wca.db ;;
     publish)      printf '%s\n' "/bin/bash" "$REPO_ROOT/deploy/publish_site.sh" ;;
+    watchdog)     printf '%s\n' "/bin/bash" "$HERE/watchdog.sh" ;;
     *) echo "unknown service $1" >&2; return 1 ;;
   esac
 }
