@@ -182,7 +182,7 @@ def main() -> None:
             resolve_pool_bankroll,
             PoolConfig,
         )
-        from wca.data import theoddsapi
+        from wca.data import odds_source
     except ImportError as exc:
         print("ERROR: could not import wca pipeline modules: %s" % exc, file=sys.stderr)
         sys.exit(1)
@@ -199,10 +199,12 @@ def main() -> None:
         sys.exit(1)
 
     # ------------------------------------------------------------------
-    # Pull live odds.
+    # Pull live odds via the source orchestrator (Betfair -> Odds API ->
+    # Polymarket). It never raises: an empty frame here means "data-pending"
+    # rather than a hard failure, so the card timestamp still advances.
     # ------------------------------------------------------------------
     try:
-        odds_df, quota = theoddsapi.get_odds(
+        odds_df, quota = odds_source.get_odds(
             "soccer_fifa_world_cup",
             regions=args.regions,
             markets="h2h",
@@ -317,7 +319,7 @@ def main() -> None:
                     try:
                         # Both anytime + first-goalscorer player-prop markets
                         # (each costs extra Odds API credits per region/market).
-                        scorer_df, quota = theoddsapi.get_event_odds(
+                        scorer_df, quota = odds_source.get_event_odds(
                             "soccer_fifa_world_cup",
                             str(nxt.fx["event_id"]),
                             regions=args.regions,
@@ -372,7 +374,7 @@ def main() -> None:
                     if not eid or eid == "None" or eid in scorer_by_event:
                         continue
                     try:
-                        df, _q = theoddsapi.get_event_odds(
+                        df, _q = odds_source.get_event_odds(
                             "soccer_fifa_world_cup", eid,
                             regions=args.regions, markets=SCORER_MARKETS,
                         )
