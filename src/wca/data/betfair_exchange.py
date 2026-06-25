@@ -65,7 +65,16 @@ def _empty_frame() -> pd.DataFrame:
 
 
 def _app_key() -> str:
-    return os.environ.get("BETFAIR_APP_KEY", "").strip()
+    """Application key: prefer the LIVE key, fall back to DELAYED, then legacy.
+
+    LIVE gives real-time prices; DELAYED (~1-180s) is a valid fallback. Values
+    are read from the environment only — never hardcoded.
+    """
+    for var in ("BETFAIR_APP_KEY_LIVE", "BETFAIR_APP_KEY_DELAYED", "BETFAIR_APP_KEY"):
+        val = os.environ.get(var, "").strip()
+        if val:
+            return val
+    return ""
 
 
 def _resolve_session_token() -> Optional[str]:

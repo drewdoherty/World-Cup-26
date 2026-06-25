@@ -142,9 +142,15 @@ def test_polymarket_get_odds_injected_events_no_network():
 # Betfair Exchange — creds gate + parser
 # ---------------------------------------------------------------------------
 
+_ALL_BF_VARS = (
+    "BETFAIR_APP_KEY", "BETFAIR_APP_KEY_LIVE", "BETFAIR_APP_KEY_DELAYED",
+    "BETFAIR_SESSION_TOKEN", "BETFAIR_USERNAME", "BETFAIR_PASSWORD",
+    "BETFAIR_CERT_PATH", "BETFAIR_CERT_KEY_PATH",
+)
+
+
 def test_betfair_missing_creds_when_env_unset(monkeypatch):
-    for var in ("BETFAIR_APP_KEY", "BETFAIR_SESSION_TOKEN", "BETFAIR_USERNAME",
-                "BETFAIR_PASSWORD", "BETFAIR_CERT_PATH", "BETFAIR_CERT_KEY_PATH"):
+    for var in _ALL_BF_VARS:
         monkeypatch.delenv(var, raising=False)
     assert betfair_exchange.creds_available() is False
     missing = betfair_exchange.missing_creds()
@@ -153,7 +159,7 @@ def test_betfair_missing_creds_when_env_unset(monkeypatch):
 
 
 def test_betfair_get_odds_empty_without_creds(monkeypatch):
-    for var in ("BETFAIR_APP_KEY", "BETFAIR_SESSION_TOKEN"):
+    for var in _ALL_BF_VARS:
         monkeypatch.delenv(var, raising=False)
     df, quota = betfair_exchange.get_odds("soccer_fifa_world_cup")
     assert df.empty
