@@ -100,12 +100,11 @@ def _insert_bet(con, match_desc, market, selection, odds,
 @pytest.fixture()
 def db(tmp_path):
     path = str(tmp_path / "wca.db")
+    # init_db now provisions settled_ts via the ledger's idempotent migration
+    # (added in #42), so the column is already present here. The settle CLI
+    # writes it unconditionally; nothing extra to ALTER.
     store.init_db(path)
     con = sqlite3.connect(path)
-    # The live ledger gained settled_ts via store's lazy migration; the
-    # settle CLI writes it unconditionally.
-    con.execute("ALTER TABLE bets ADD COLUMN settled_ts TEXT")
-    con.commit()
     yield con, path
     con.close()
 

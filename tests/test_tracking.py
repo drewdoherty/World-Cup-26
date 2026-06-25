@@ -473,11 +473,20 @@ class TestBuildTrackingData:
 
 
 class TestSiteAssets:
-    def test_tracking_html_wired_up(self):
-        html = open(os.path.join(_SITE_DIR, "tracking.html"), encoding="utf-8").read()
-        assert "tracking.js" in html
+    def test_tracking_wired_into_terminal(self):
+        # Tracking moved into the Terminal: index.html loads tracking.js, which
+        # reads ./tracking_data.json. (tracking.html is now a redirect stub.)
+        index = open(os.path.join(_SITE_DIR, "index.html"), encoding="utf-8").read()
+        assert "tracking.js" in index
         js = open(os.path.join(_SITE_DIR, "tracking.js"), encoding="utf-8").read()
         assert "./tracking_data.json" in js
+
+    def test_tracking_html_redirects_to_terminal(self):
+        # The old standalone page now redirects to the Terminal so existing
+        # bookmarks keep working.
+        html = open(os.path.join(_SITE_DIR, "tracking.html"), encoding="utf-8").read()
+        assert "./index.html" in html
+        assert "tracking.js" not in html
 
     def test_no_external_assets(self):
         for name in ("tracking.html", "tracking.js"):
@@ -487,8 +496,10 @@ class TestSiteAssets:
             assert "http://" not in text
             assert "https://" not in text
 
-    def test_nav_links_on_every_page(self):
+    def test_no_dead_tracking_nav_links(self):
+        # Tracking moved into the Terminal; no page should still link to the
+        # standalone ./tracking.html in its nav (it is only a redirect stub now).
         for name in ("index.html", "scores.html", "visuals.html",
                      "architecture.html"):
             html = open(os.path.join(_SITE_DIR, name), encoding="utf-8").read()
-            assert "./tracking.html" in html, name
+            assert 'href="./tracking.html"' not in html, name
