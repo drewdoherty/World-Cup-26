@@ -174,7 +174,32 @@ def missing_creds() -> List[str]:
     return missing
 
 
-def _rpc(method: str, params: Dict[str, Any], session_token: str) -> Any:
+class _InvalidAppKey(RuntimeError):
+    """Raised when Betfair rejects the X-Application key (try the next one)."""
+
+
+def _candidate_app_keys() -> List[str]:
+    """Ordered, de-duplicated list of app keys to try for data calls.
+
+    Honours ``BETFAIR_APP_KEY_PREFER`` (LIVE gives real-time, DELAYED ~1-180s).
+    A LIVE key whose subscription is inactive returns INVALID_APP_KEY, so we
+    fall through to the next candidate rather than failing the whole fetch.
+    """
+    legacy = os.environ.get("BETFAIR_APP_KEY", "").strip()
+    live = os.environ.get("BETFAIR_APP_KEY_LIVE", "").strip()
+    delayed = (os.environ.get("BETFAIR_APP_KEY_DELAYED", "").strip()
+               or os.environ.get("BETFAIR_APP_KEY_DELAY", "").strip())
+    prefer = os.environ.get("BETFAIR_APP_KEY_PREFER", "live").strip().lower()
+    ranked = [delayed, live] if prefer == "delayed" else [live, delayed]
+    out: List[str] = []
+    for k in [legacy, *ranked]:
+        if k and k not in out:
+            out.append(k)
+    return out
+
+
+def _rpc(method: str, params: Dict[str, Any], session_token: str,
+         app_key: Optional[str] = None) -> Any:
     """Call a Betting-API JSON-RPC method and return its ``result``."""
     payload = [{
         "jsonrpc": "2.0",
@@ -183,7 +208,7 @@ def _rpc(method: str, params: Dict[str, Any], session_token: str) -> Any:
         "id": 1,
     }]
     headers = {
-        "X-Application": _app_key(),
+        "X-Application": app_key or _app_key(),
         "X-Authentication": session_token,
         "Content-Type": "application/json",
         "Accept": "application/json",
@@ -194,6 +219,9 @@ def _rpc(method: str, params: Dict[str, Any], session_token: str) -> Any:
     if isinstance(body, list):
         body = body[0] if body else {}
     if "error" in body:
+        code = ((body["error"].get("data") or {}).get("APINGException") or {}).get("errorCode")
+        if code == "INVALID_APP_KEY":
+            raise _InvalidAppKey(code)
         raise RuntimeError("Betfair RPC error: %s" % body["error"])
     return body.get("result")
 
@@ -275,7 +303,8 @@ def get_odds(
     """
     global _WARNED_NO_CREDS
     token = _resolve_session_token()
-    if not _app_key() or not token:
+    candidates = _candidate_app_keys()
+    if not candidates or not token:
         if not _WARNED_NO_CREDS:
             logger.warning(
                 "Betfair Exchange disabled — missing creds: %s",
@@ -284,36 +313,45 @@ def get_odds(
             _WARNED_NO_CREDS = True
         return _empty_frame(), None
 
-    try:
-        market_filter = {
-            "eventTypeIds": [_SOCCER_EVENT_TYPE_ID],
-            "textQuery": competition_keyword,
-            "marketTypeCodes": ["MATCH_ODDS"],
-        }
-        catalogue = _rpc(
-            "listMarketCatalogue",
-            {
-                "filter": market_filter,
-                "maxResults": "200",
-                "marketProjection": ["EVENT", "RUNNER_DESCRIPTION", "MARKET_START_TIME"],
-            },
-            token,
-        ) or []
-        market_ids = [c.get("marketId") for c in catalogue if c.get("marketId")]
-        if not market_ids:
+    market_filter = {
+        "eventTypeIds": [_SOCCER_EVENT_TYPE_ID],
+        "textQuery": competition_keyword,
+        "marketTypeCodes": ["MATCH_ODDS"],
+    }
+    # Try each app key in preference order; an inactive LIVE key raises
+    # INVALID_APP_KEY, so fall through to DELAYED rather than failing the fetch.
+    for i, app_key in enumerate(candidates):
+        try:
+            catalogue = _rpc(
+                "listMarketCatalogue",
+                {
+                    "filter": market_filter,
+                    "maxResults": "200",
+                    "marketProjection": ["EVENT", "RUNNER_DESCRIPTION", "MARKET_START_TIME"],
+                },
+                token, app_key=app_key,
+            ) or []
+            market_ids = [c.get("marketId") for c in catalogue if c.get("marketId")]
+            if not market_ids:
+                return _empty_frame(), None
+            books = _rpc(
+                "listMarketBook",
+                {
+                    "marketIds": market_ids,
+                    "priceProjection": {"priceData": ["EX_BEST_OFFERS"]},
+                },
+                token, app_key=app_key,
+            ) or []
+            logger.info("Betfair Exchange: %d markets via app key #%d", len(catalogue), i + 1)
+            return parse_market_book(catalogue, books), None
+        except _InvalidAppKey:
+            logger.info("Betfair app key #%d rejected (INVALID_APP_KEY); trying next", i + 1)
+            continue
+        except Exception as exc:  # noqa: BLE001 — never crash the build.
+            logger.warning("Betfair Exchange fetch failed: %s", exc)
             return _empty_frame(), None
-        books = _rpc(
-            "listMarketBook",
-            {
-                "marketIds": market_ids,
-                "priceProjection": {"priceData": ["EX_BEST_OFFERS"]},
-            },
-            token,
-        ) or []
-        return parse_market_book(catalogue, books), None
-    except Exception as exc:  # noqa: BLE001 — never crash the build.
-        logger.warning("Betfair Exchange fetch failed: %s", exc)
-        return _empty_frame(), None
+    logger.warning("Betfair Exchange: no app key authorized for data; degrading")
+    return _empty_frame(), None
 
 
 def get_event_odds(
