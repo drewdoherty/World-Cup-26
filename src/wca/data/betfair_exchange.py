@@ -36,7 +36,8 @@ import requests
 logger = logging.getLogger(__name__)
 
 _BETTING_URL = "https://api.betfair.com/exchange/betting/json-rpc/v1"
-_LOGIN_URL = "https://identitysso-cert.betfair.com/api/certlogin"
+_CERT_LOGIN_URL = "https://identitysso-cert.betfair.com/api/certlogin"
+_INTERACTIVE_LOGIN_URL = "https://identitysso.betfair.com/api/login"
 _TIMEOUT = 20
 _SOCCER_EVENT_TYPE_ID = "1"  # Betfair event-type id for Association Football.
 
@@ -58,6 +59,9 @@ _COLUMNS: Tuple[str, ...] = (
 
 # Module-level flag so the "creds missing" warning is logged once, not per call.
 _WARNED_NO_CREDS = False
+# In-process cache of a freshly-minted session token so a single build does not
+# re-login per call (Betfair's interactive login endpoint is rate-limited).
+_CACHED_TOKEN: Optional[str] = None
 
 
 def _empty_frame() -> pd.DataFrame:
@@ -86,35 +90,70 @@ def _app_key() -> str:
 def _resolve_session_token() -> Optional[str]:
     """Return a usable session token, or ``None`` if creds are unavailable.
 
-    Prefers an explicit ``BETFAIR_SESSION_TOKEN``; otherwise attempts a
-    non-interactive cert login when username/password/cert paths are all set.
-    Any failure returns ``None`` (never raises).
+    Resolution order (first that works wins; any failure returns ``None``,
+    never raises):
+
+    1. an explicit ``BETFAIR_SESSION_TOKEN`` (manual / short-lived);
+    2. a cached token minted earlier in this process;
+    3. **cert login** when ``BETFAIR_CERT_PATH``/``BETFAIR_CERT_KEY_PATH`` are
+       set alongside username/password (the 24/7 non-interactive path);
+    4. **interactive login** with just ``BETFAIR_USERNAME``/``BETFAIR_PASSWORD``
+       (no cert) — Betfair's rate-limited identity endpoint, fine for an hourly
+       build but cert login is preferred for high-frequency use.
     """
+    global _CACHED_TOKEN
     token = os.environ.get("BETFAIR_SESSION_TOKEN", "").strip()
     if token:
         return token
+    if _CACHED_TOKEN:
+        return _CACHED_TOKEN
 
     user = os.environ.get("BETFAIR_USERNAME", "").strip()
     pwd = os.environ.get("BETFAIR_PASSWORD", "").strip()
+    if not (user and pwd and _app_key()):
+        return None
     cert = os.environ.get("BETFAIR_CERT_PATH", "").strip()
     key = os.environ.get("BETFAIR_CERT_KEY_PATH", "").strip()
-    if not (user and pwd and cert and key and _app_key()):
-        return None
+
     try:
+        if cert and key:
+            resp = requests.post(
+                _CERT_LOGIN_URL,
+                data={"username": user, "password": pwd},
+                cert=(cert, key),
+                headers={"X-Application": _app_key(), "Accept": "application/json"},
+                timeout=_TIMEOUT,
+            )
+            resp.raise_for_status()
+            body = resp.json()
+            if body.get("loginStatus") == "SUCCESS":
+                _CACHED_TOKEN = body.get("sessionToken")
+                return _CACHED_TOKEN
+            logger.warning("Betfair cert login failed: %s", body.get("loginStatus"))
+            return None
+
+        # No cert configured — interactive username/password login.
         resp = requests.post(
-            _LOGIN_URL,
+            _INTERACTIVE_LOGIN_URL,
             data={"username": user, "password": pwd},
-            cert=(cert, key),
-            headers={"X-Application": _app_key(), "Accept": "application/json"},
+            headers={
+                "X-Application": _app_key(),
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Accept": "application/json",
+            },
             timeout=_TIMEOUT,
         )
         resp.raise_for_status()
         body = resp.json()
-        if body.get("loginStatus") == "SUCCESS":
-            return body.get("sessionToken")
-        logger.warning("Betfair cert login failed: %s", body.get("loginStatus"))
+        if body.get("status") == "SUCCESS":
+            _CACHED_TOKEN = body.get("token")
+            return _CACHED_TOKEN
+        logger.warning(
+            "Betfair interactive login failed: status=%s error=%s",
+            body.get("status"), body.get("error"),
+        )
     except Exception as exc:  # noqa: BLE001 — login is best-effort.
-        logger.warning("Betfair cert login error: %s", exc)
+        logger.warning("Betfair login error: %s", exc)
     return None
 
 
@@ -129,8 +168,9 @@ def missing_creds() -> List[str]:
     if not _app_key():
         missing.append("BETFAIR_APP_KEY")
     if not _resolve_session_token():
-        missing.append("BETFAIR_SESSION_TOKEN (or BETFAIR_USERNAME/PASSWORD + "
-                       "BETFAIR_CERT_PATH/BETFAIR_CERT_KEY_PATH)")
+        missing.append("BETFAIR_SESSION_TOKEN, or BETFAIR_USERNAME+BETFAIR_PASSWORD "
+                       "(optionally + BETFAIR_CERT_PATH/BETFAIR_CERT_KEY_PATH for "
+                       "24/7 cert login)")
     return missing
 
 

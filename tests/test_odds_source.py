@@ -182,7 +182,19 @@ _ALL_BF_VARS = (
 )
 
 
+class _FakeResp:
+    def __init__(self, payload):
+        self._payload = payload
+
+    def raise_for_status(self):
+        return None
+
+    def json(self):
+        return self._payload
+
+
 def test_betfair_missing_creds_when_env_unset(monkeypatch):
+    monkeypatch.setattr(betfair_exchange, "_CACHED_TOKEN", None)
     for var in _ALL_BF_VARS:
         monkeypatch.delenv(var, raising=False)
     assert betfair_exchange.creds_available() is False
@@ -191,7 +203,30 @@ def test_betfair_missing_creds_when_env_unset(monkeypatch):
     assert any("SESSION_TOKEN" in m for m in missing)
 
 
+def test_betfair_interactive_login_with_username_password(monkeypatch):
+    """Username+password (no cert) mints a token via the interactive endpoint."""
+    monkeypatch.setattr(betfair_exchange, "_CACHED_TOKEN", None)
+    for var in _ALL_BF_VARS:
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setenv("BETFAIR_APP_KEY_DELAYED", "appkey123")
+    monkeypatch.setenv("BETFAIR_APP_KEY_PREFER", "delayed")
+    monkeypatch.setenv("BETFAIR_USERNAME", "user")
+    monkeypatch.setenv("BETFAIR_PASSWORD", "pass")
+
+    calls = {}
+
+    def _fake_post(url, **kwargs):
+        calls["url"] = url
+        return _FakeResp({"status": "SUCCESS", "token": "TKN-XYZ", "error": ""})
+
+    monkeypatch.setattr(betfair_exchange.requests, "post", _fake_post)
+    assert betfair_exchange._resolve_session_token() == "TKN-XYZ"
+    assert calls["url"] == betfair_exchange._INTERACTIVE_LOGIN_URL
+    assert betfair_exchange.creds_available() is True
+
+
 def test_betfair_get_odds_empty_without_creds(monkeypatch):
+    monkeypatch.setattr(betfair_exchange, "_CACHED_TOKEN", None)
     for var in _ALL_BF_VARS:
         monkeypatch.delenv(var, raising=False)
     df, quota = betfair_exchange.get_odds("soccer_fifa_world_cup")
