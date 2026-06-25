@@ -1,0 +1,1404 @@
+/* World Cup Alpha — trading-terminal static site.
+   Pure static, no external fonts/CDNs. System monospace stack only. */
+
+:root {
+  --bg: #0a0b0d;
+  --bg-2: #0d0f12;
+  --panel: #0e1014;
+  --panel-2: #111419;
+  --border: #1e2126;
+  --border-2: #262a31;
+  --text: #d4dae0;
+  --text-dim: #6b7480;
+  --muted: #4a525c;
+  --accent: #3fe08a;
+  --pos: #3fe08a;
+  --neg: #ff5c6c;
+  --warn: #f2c14e;
+  --sportsbook: #4ade80;
+  --polymarket: #60a5fa;
+  --kalshi: #a855f7;
+  --track: #15181d;
+  --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, #10151c 0%, rgba(16,21,28,0) 60%),
+    var(--bg);
+  min-height: 100vh;
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 14px 28px;
+}
+
+.num { font-variant-numeric: tabular-nums; }
+.pos { color: var(--pos); }
+.neg { color: var(--neg); }
+.dim { color: var(--text-dim); }
+
+/* ----------------------------------------------------------------- Ticker */
+
+.ticker {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--bg-2), var(--bg));
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 12px 18px 12px 4px;
+  border-right: 1px solid var(--border);
+  white-space: nowrap;
+}
+.brand-mark {
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--accent);
+  font-size: 15px;
+}
+.brand-sub {
+  color: var(--text-dim);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.ticker-stats {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  overflow: hidden;
+}
+
+.tick {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 9px 18px;
+  border-right: 1px solid var(--border);
+  min-width: 0;
+}
+.tick-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.tick-value {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- No data */
+
+.nodata {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  border: 1px solid var(--border-2);
+  border-left: 2px solid var(--warn);
+  background: var(--panel);
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.nodata-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--warn);
+  box-shadow: 0 0 8px var(--warn);
+}
+
+/* ------------------------------------------------------------------- Grid */
+
+.grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "venues      predictions"
+    "positions   positions"
+    "closed      closed"
+    "charts      charts";
+}
+.panel-venues { grid-area: venues; }
+.panel-positions { grid-area: positions; }
+.panel-closed { grid-area: closed; }
+.panel-predictions { grid-area: predictions; }
+.panel-charts { grid-area: charts; }
+
+.panel {
+  background:
+    linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.panel-meta {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+.panel-body { padding: 12px; }
+.panel-scroll { max-height: 360px; overflow-y: auto; overflow-x: auto; }
+
+.empty {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 14px 2px;
+}
+
+/* ----------------------------------------------------------------- Venues */
+
+.venue-row { margin-bottom: 13px; }
+.venue-row:last-child { margin-bottom: 0; }
+.venue-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+.venue-name {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.venue-amt { font-size: 13px; font-weight: 600; }
+.venue-sub { font-size: 10px; color: var(--muted); }
+.venue-track {
+  height: 8px;
+  background: var(--track);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.venue-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  min-width: 1px;
+}
+.venue-fill.sportsbook { background: var(--sportsbook); }
+.venue-fill.polymarket { background: var(--polymarket); }
+.venue-fill.kalshi { background: var(--kalshi); }
+
+/* -------------------------------------------------------------- Positions */
+
+/* The positions panel spans the full grid width, so the table itself never
+   needs to scroll on desktop — a horizontal scroller only kicks in on very
+   narrow viewports (see the <520px rule near the foot of this file). */
+.pos-table { width: 100%; border-collapse: collapse; table-layout: auto; }
+.pos-table th, .pos-table td {
+  text-align: left;
+  padding: 5px 7px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.pos-table th {
+  position: sticky;
+  top: 0;
+  background: var(--panel-2);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+  z-index: 1;
+}
+.pos-table td { font-size: 11px; }
+.pos-table td.r, .pos-table th.r { text-align: right; }
+.pos-table tr:last-child td { border-bottom: none; }
+/* A thin per-book accent rail sits on the first cell of each row; the colour
+   is supplied inline by app.js so unknown books degrade to the fallback. */
+.pos-table td.pos-time { border-left: 2px solid var(--border-2); }
+/* Match/Selection are the prose columns — let them take the slack the
+   full-width row provides instead of being clipped at a fixed width. */
+.pos-match {
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pos-sel {
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.pos-sel .leg { display: block; }
+.pos-sel .leg + .leg { margin-top: 1px; }
+/* Date-over-time first cell of both positions tables. */
+.pos-when .wd { display: block; font-size: 10px; line-height: 1.3; color: var(--muted); }
+.pos-when .wt { display: block; font-size: 11px; line-height: 1.3; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+/* The expanded-metadata tables carry more columns; keep the prose columns
+   narrower so Odds/Stake/Model/Mkt/EV/Kelly all fit, and let the panel scroll
+   horizontally on narrow viewports rather than crushing the numeric cells. */
+.pos-table-wide { min-width: 760px; }
+.pos-table-wide .pos-match { max-width: 180px; }
+/* Wrap long Bet Builder legs rather than letting one wide leg push the table
+   past the panel and force a horizontal scroller. */
+.pos-table-wide .pos-sel { max-width: 200px; white-space: normal; }
+.pos-table-wide .pos-sel .leg { white-space: normal; }
+/* Market is a short tag (see marketShort()); cap + ellipsis so an un-mapped
+   long market never widens the table — the full text stays on hover (title). */
+.pos-mkt {
+  color: var(--text-dim);
+  white-space: nowrap;
+  font-size: 11px;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pill {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid var(--border-2);
+  color: var(--text-dim);
+}
+.pill.sportsbook { color: var(--sportsbook); border-color: #1d3a2a; }
+.pill.polymarket { color: var(--polymarket); border-color: #1e3a5f; }
+.pill.kalshi { color: var(--kalshi); border-color: #3b2a52; }
+
+/* ------------------------------------------------------------ Predictions */
+
+.pred-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.pred-card {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--panel);
+  padding: 11px 12px;
+}
+.pred-title {
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 9px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--border);
+}
+.score-row {
+  display: grid;
+  grid-template-columns: 42px 1fr 48px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.score-label {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.score-bar {
+  height: 7px;
+  background: var(--track);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.score-fill {
+  display: block; /* spans ignore height while inline — bars rendered 0-tall */
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  min-width: 1px;
+}
+.score-prob {
+  text-align: right;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.pred-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+.pred-foot b { color: var(--text-dim); font-weight: 600; }
+
+/* --------------------------------------------------------------- Footer */
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.foot-mark { color: var(--text-dim); letter-spacing: 2.5px; }
+
+/* ------------------------------------------------------------ Responsive */
+
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "venues"
+      "predictions"
+      "positions"
+      "closed"
+      "charts";
+  }
+  .brand { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+  .tick { flex: 1 1 33%; padding: 8px 12px; }
+  #app { padding: 0 8px 24px; }
+}
+
+/* On a phone the dense multi-column positions tables would need a horizontal
+   scroller; instead collapse each row into a labelled card (field label left,
+   value right) so everything reads top-to-bottom with no sideways scroll. */
+@media (max-width: 560px) {
+  .panel-positions .panel-scroll,
+  .panel-closed .panel-scroll { overflow-x: visible; }
+  .pos-table, .pos-table tbody, .pos-table tr, .pos-table td { display: block; }
+  .pos-table { min-width: 0; width: 100%; }
+  .pos-table thead { display: none; }
+  .pos-table tr {
+    border: 1px solid var(--border);
+    border-left-width: 2px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background: var(--panel-2);
+  }
+  .pos-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 14px;
+    text-align: right;
+    white-space: normal;
+    max-width: none;
+    overflow: visible;
+    text-overflow: clip;
+    border-bottom: 1px solid var(--border);
+    padding: 6px 11px;
+  }
+  .pos-table td.pos-time { border-left: none; }
+  .pos-table tr td:last-child { border-bottom: none; }
+  .pos-table td::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    text-align: left;
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  /* Date + time sit inline on the card row (label left, "19 Jun 15:00" right). */
+  .pos-table td.pos-when .wd, .pos-table td.pos-when .wt { display: inline; }
+  /* Selection (Bet Builder legs) stacks under its label, full width. */
+  .pos-table td.pos-sel { display: block; text-align: left; }
+  .pos-table td.pos-sel::before { display: block; margin-bottom: 3px; }
+  .pos-table td.pos-sel .leg { display: block; white-space: normal; }
+  /* Two ticker stats per row instead of cramming all five. */
+  .tick { flex: 1 1 50%; }
+}
+
+/* ============================================================ Scores page */
+/* Appended for site/scores.html — does not alter any rule above. */
+
+/* --- top nav (back to terminal) --- */
+.scores-nav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1 1 auto;
+  padding: 9px 18px;
+  min-width: 0;
+}
+.scores-nav-link {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.scores-nav-link:hover { text-decoration: underline; }
+.scores-nav-here {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* This page links here from the terminal header. */
+.terminal-nav-link {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+  align-self: center;
+  padding: 0 18px;
+}
+.terminal-nav-link:hover { text-decoration: underline; }
+
+/* --- fixture card --- */
+.sc-card {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--panel);
+  margin-bottom: 12px;
+}
+.sc-card:last-child { margin-bottom: 0; }
+.sc-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sc-title {
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.sc-kick { font-size: 11px; color: var(--text-dim); }
+.sc-body {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.4fr);
+  padding: 12px;
+}
+.sc-ladder { min-width: 0; }
+.sc-venues { min-width: 0; }
+
+/* Scoreline ladder rows carry an extra fair-odds column on this page. */
+.sc-ladder .score-row {
+  grid-template-columns: 42px 1fr 52px 44px;
+}
+.score-fair { text-align: right; font-size: 11px; }
+/* Scoreline ladder bars: model (green) stacked over Polymarket exact-score
+   (blue). One thin track each so both lengths are visible per scoreline. */
+.sl-bars { display: flex; flex-direction: column; gap: 2px; justify-content: center; }
+.sl-track { height: 5px; background: var(--track); border-radius: 2px; overflow: hidden; }
+.sl-fill { display: block; height: 100%; border-radius: 2px; min-width: 1px; }
+.sl-fill.sl-model { background: var(--accent); }
+.sl-fill.sl-pm { background: var(--polymarket); }
+
+/* --- venue comparison table --- */
+.venue-table { width: 100%; border-collapse: collapse; }
+.venue-table th, .venue-table td {
+  text-align: right;
+  padding: 5px 7px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  font-size: 11px;
+}
+.venue-table th {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+.venue-table td.vt-venue, .venue-table th.vt-venue {
+  text-align: left;
+  color: var(--text-dim);
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.venue-table tr:last-child td { border-bottom: none; }
+
+.vt-model-row td { border-bottom: 1px solid var(--border-2); }
+.vt-model-row .vt-venue { color: var(--text); text-transform: uppercase; letter-spacing: 1px; font-size: 10px; }
+.vt-fair { color: var(--text); font-weight: 600; }
+
+.vt-cell { position: relative; }
+.vt-imp, .vt-edge {
+  display: block;
+  font-size: 9px;
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* Edge tinting: green when the venue price beats the model fair value,
+   red-dim when it misses, flat otherwise. */
+.edge-up { color: var(--pos); }
+.edge-up .vt-edge { color: var(--pos); opacity: 0.85; }
+.edge-down { color: var(--neg); opacity: 0.7; }
+.edge-down .vt-edge { color: var(--neg); }
+.edge-flat { color: var(--text); }
+
+.vt-note {
+  margin-top: 7px;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  font-style: italic;
+}
+.venue-empty {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 10px 2px;
+}
+
+/* --- three-column fixture card: scorelines · exposure · best price --- */
+.sc-body3 { grid-template-columns: minmax(190px, 1fr) minmax(230px, 1.1fr) minmax(150px, 0.8fr); }
+.sc-col { min-width: 0; }
+.sc-coltag {
+  font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 7px; padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* exposure rows */
+.exp-row {
+  display: grid;
+  grid-template-columns: 1fr 36px 60px 56px;
+  align-items: center; gap: 6px; padding: 3px 0; font-size: 11px;
+}
+.exp-out { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.exp-p { font-size: 10px; text-align: right; }
+.exp-track {
+  position: relative; height: 6px; border-radius: 3px;
+  background: var(--track); overflow: hidden;
+}
+.exp-fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 3px; }
+.exp-pos { background: var(--pos); opacity: 0.8; }
+.exp-neg { background: var(--neg); opacity: 0.75; }
+.exp-net { text-align: right; font-size: 11px; }
+.exp-blind {
+  display: inline-block; margin-left: 5px; padding: 0 4px;
+  font-size: 8px; letter-spacing: 1px; font-weight: 700;
+  color: var(--bg); background: var(--warn); border-radius: 2px; vertical-align: middle;
+}
+.exp-plug {
+  font-size: 10px; color: var(--warn); margin: 1px 0 5px 2px;
+  padding-left: 8px; border-left: 2px solid var(--warn); line-height: 1.4;
+}
+.exp-events { margin-top: 8px; font-size: 10px; line-height: 1.9; }
+.exp-evlabel { color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-right: 5px; font-size: 9px; }
+.exp-chip {
+  display: inline-block; margin: 0 4px 2px 0; padding: 1px 6px;
+  font-size: 10px; color: var(--text-dim);
+  background: var(--panel-2); border: 1px solid var(--border); border-radius: 2px;
+}
+.exp-summ { margin-top: 7px; font-size: 10px; }
+
+/* best-price column */
+.bp-leg {
+  display: grid; grid-template-columns: 38px 1fr auto; align-items: baseline;
+  gap: 6px; padding: 4px 0; font-size: 11px; border-bottom: 1px solid var(--border);
+}
+.bp-leg:last-child { border-bottom: none; }
+.bp-k { color: var(--text-dim); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+.bp-fair { color: var(--muted); font-size: 10px; }
+.bp-px { text-align: right; font-weight: 600; }
+.bp-edge { font-size: 9px; font-weight: 400; }
+.bp-venue { display: block; font-size: 9px; text-align: right; }
+
+/* risk & blind-spots panel */
+.rk-strip { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.rk-stat {
+  flex: 1 1 90px; display: flex; flex-direction: column; gap: 2px;
+  padding: 8px 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 3px;
+}
+.rk-stat-v { font-size: 16px; font-weight: 600; font-family: var(--mono); }
+.rk-stat-l { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.rk-narr { font-size: 12px; color: var(--text-dim); line-height: 1.5; margin-bottom: 12px; border-left: 2px solid var(--accent); padding-left: 10px; }
+.rk-cols { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
+.rk-h { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.rk-bs { padding: 6px 0; border-bottom: 1px solid var(--border); }
+.rk-bs:last-child { border-bottom: none; }
+.rk-bs-head { font-size: 12px; color: var(--text); }
+.rk-plug { font-size: 10px; color: var(--warn); margin-top: 3px; padding-left: 8px; border-left: 2px solid var(--warn); line-height: 1.4; }
+.rk-state { font-size: 11px; padding: 2px 0; }
+.rk-ok { font-size: 12px; color: var(--pos); padding: 4px 0; }
+
+@media (max-width: 860px) {
+  .sc-body, .sc-body3 { grid-template-columns: 1fr; }
+  .rk-cols { grid-template-columns: 1fr; }
+  .scores-nav { width: 100%; border-top: 1px solid var(--border); }
+}
+
+/* ====================================================== Architecture page */
+/* Appended for site/architecture.html — does not alter any rule above.    */
+
+.arch-intro { margin-top: 14px; }
+.panel + .panel,
+#stages .panel,
+#stages + #money-section,
+#money-section,
+#improve-section { margin-top: 12px; }
+
+.arch-lead {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.arch-mental {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.arch-mental-lbl {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.arch-mental-code {
+  font-size: 11px;
+  color: var(--accent);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 4px 8px;
+}
+
+/* ------------------------------------------------------- Pipeline (SVG) */
+
+.arch-pipe-wrap { overflow-x: auto; }
+.pipe-svg {
+  width: 100%;
+  min-width: 520px;
+  height: auto;
+  display: block;
+}
+.pipe-box {
+  fill: var(--panel);
+  stroke: var(--border-2);
+  stroke-width: 1.2;
+  transition: fill 0.15s ease, stroke 0.15s ease;
+}
+.pipe-stage { cursor: pointer; outline: none; }
+.pipe-stage:hover .pipe-box,
+.pipe-stage:focus .pipe-box {
+  fill: var(--panel-2);
+  stroke: var(--accent);
+}
+.pipe-stage:hover .pipe-title,
+.pipe-stage:focus .pipe-title { fill: var(--accent); }
+.pipe-n {
+  fill: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+.pipe-title {
+  fill: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+}
+.pipe-tag {
+  fill: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.5px;
+}
+
+/* ------------------------------------------------------- Stage sections */
+
+.arch-stage-n {
+  color: var(--accent);
+  font-weight: 700;
+  margin-right: 2px;
+}
+.arch-top {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+}
+.arch-top:hover { color: var(--accent); }
+.arch-blurb {
+  margin: 0 0 12px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.arch-card-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.arch-card {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--panel);
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+}
+.arch-card-name {
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+.arch-card-role {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.arch-params {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+  padding: 8px 9px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+.arch-param {
+  display: grid;
+  grid-template-columns: minmax(70px, auto) 1fr;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 10.5px;
+}
+.arch-pk {
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.arch-pv {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  word-break: break-word;
+}
+
+.arch-io {
+  margin-bottom: 10px;
+}
+.arch-io-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+.arch-io-lbl {
+  font-size: 8.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 2px;
+}
+.arch-io-arrow {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+  margin: 3px 0 3px 18px;
+}
+.arch-chip {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 2px;
+  font-size: 9.5px;
+  letter-spacing: 0.3px;
+  border: 1px solid var(--border-2);
+  color: var(--text-dim);
+}
+.chip-in { border-color: #243650; color: var(--sportsbook); }
+.chip-out { border-color: #1f4030; color: var(--accent); }
+
+.arch-file {
+  margin-top: auto;
+  font-size: 10px;
+  color: var(--text-dim);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 4px 7px;
+  word-break: break-all;
+}
+
+/* ------------------------------------------------------------ Money flow */
+
+.money-pools {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 14px;
+}
+.money-pool {
+  border: 1px solid var(--border);
+  border-left-width: 2px;
+  border-radius: 3px;
+  background: var(--panel);
+  padding: 10px 11px;
+}
+.money-sportsbook { border-left-color: var(--sportsbook); }
+.money-polymarket { border-left-color: var(--polymarket); }
+.money-kalshi { border-left-color: var(--kalshi); }
+.money-pool-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.money-pool-name {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.money-pool-amt { font-size: 15px; font-weight: 700; }
+.money-sportsbook .money-pool-amt { color: var(--sportsbook); }
+.money-polymarket .money-pool-amt { color: var(--polymarket); }
+.money-kalshi .money-pool-amt { color: var(--kalshi); }
+.money-pool-sub {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 2px 0 7px;
+}
+.money-pool-notes {
+  margin: 0;
+  padding-left: 14px;
+  list-style: none;
+}
+.money-pool-notes li {
+  position: relative;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin-bottom: 2px;
+}
+.money-pool-notes li::before {
+  content: "›";
+  position: absolute;
+  left: -12px;
+  color: var(--muted);
+}
+
+.money-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.money-step {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 140px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--bg-2);
+}
+.money-step-h {
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.money-step-d {
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+.money-arrow {
+  align-self: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.money-kill {
+  border: 1px solid var(--border-2);
+  border-left: 2px solid var(--neg);
+  border-radius: 2px;
+  background: var(--panel);
+  padding: 9px 12px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.kpi-block {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.kpi-head {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.kpi-row {
+  display: grid;
+  grid-template-columns: 20px minmax(120px, auto) 1fr;
+  align-items: baseline;
+  gap: 10px;
+  padding: 4px 0;
+}
+.kpi-rank {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 12px;
+}
+.kpi-name {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.kpi-desc { font-size: 10.5px; color: var(--text-dim); }
+
+/* ------------------------------------------------------- Improvement map */
+
+.imp-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+.imp-group {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--panel);
+  padding: 10px 12px;
+}
+.imp-stage {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.imp-list {
+  margin: 0;
+  padding-left: 14px;
+  list-style: none;
+}
+.imp-list li {
+  position: relative;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.imp-list li:last-child { margin-bottom: 0; }
+.imp-list li::before {
+  content: "+";
+  position: absolute;
+  left: -13px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .kpi-row { grid-template-columns: 18px 1fr; }
+  .kpi-desc { grid-column: 2; }
+  .money-flow { flex-direction: column; }
+  .money-arrow { align-self: flex-start; transform: rotate(90deg); }
+}
+
+/* ================================================================= Polish */
+/* Per-book colour map, charts panel and small terminal refinements.        */
+/* Appended — does not alter any rule above.                                */
+
+/* --- per-book pills (positions venue column) ---
+   The pill text/border colour is supplied INLINE by app.js (BOOK_COLOR map)
+   so an unknown book degrades to the fallback grey without a CSS rule per
+   book. These rules only carry the shared chrome. */
+.pill.book {
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* --- charts panel --- */
+.panel-charts .panel-body { padding: 12px; }
+.chart-block { margin-bottom: 16px; }
+.chart-block:last-child { margin-bottom: 0; }
+.chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.chart-title {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.chart-select {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--text);
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 2px;
+  padding: 3px 6px;
+  max-width: 60%;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.chart-select:focus { outline: none; border-color: var(--accent); }
+.chart-select[hidden] { display: none; }
+.chart-canvas { width: 100%; }
+.chart-canvas svg { width: 100%; height: auto; display: block; }
+
+/* SVG chart primitives (classes referenced by app.js-built markup). */
+.cx-grid { stroke: var(--border); stroke-width: 1; }
+.cx-axis { stroke: var(--border-2); stroke-width: 1; }
+.cx-tick {
+  fill: var(--muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.5px;
+}
+/* Match-No. edge bars (tracking chart 01). */
+.tr-barsvg { width: 100%; height: auto; }
+/* The calibration + CLV scatter SVGs (svgOpen) carry only a viewBox, so without
+   an explicit width they render at their intrinsic 460px and sit left-aligned
+   inside their (wider) panels — making the side-by-side pair look misaligned.
+   Match the chart-canvas/tr-barsvg treatment so both fill their panel equally. */
+#calibration svg,
+#clv-pl svg { width: 100%; height: auto; display: block; }
+.tr-bar-pos { fill: var(--pos, #4ade80); opacity: 0.85; }
+.tr-bar-neg { fill: var(--neg, #f87171); opacity: 0.85; }
+.tr-bar-pos:hover, .tr-bar-neg:hover { opacity: 1; }
+/* Source dropdown on the P&L-by-bet panel. */
+.tr-select {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border-2);
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 6px;
+  margin: 0 4px;
+}
+.tr-select:focus { outline: none; border-color: var(--accent); }
+.tr-axis-title {
+  fill: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+}
+.cx-kick { stroke: var(--warn); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.8; }
+.cx-kick-lbl { fill: var(--warn); font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.5px; }
+.cx-series { fill: none; stroke-width: 1.6; }
+.cx-legend { fill: var(--text-dim); font-family: var(--mono); font-size: 9px; letter-spacing: 0.5px; }
+.cx-final { font-family: var(--mono); font-size: 9.5px; font-weight: 600; letter-spacing: 0.3px; }
+.chart-empty {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 20px 2px;
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  .chart-select { max-width: 50%; }
+}
+
+/* hidden attribute must win over the flex display above */
+.nodata[hidden] { display: none !important; }
+
+/* ------------------------------------------------- Venue book breakdown */
+.venue-books { margin: 6px 0 2px; display: flex; flex-direction: column; gap: 3px; }
+.venue-book-row { display: flex; align-items: center; gap: 7px; font-size: 11px; }
+.book-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
+.book-name { color: var(--text-dim, #9ca3af); min-width: 110px; }
+.book-bar { flex: 1 1 auto; height: 5px; background: rgba(255,255,255,.04); border-radius: 2px; overflow: hidden; }
+.book-amt { white-space: nowrap; }
+
+/* ----------------------------------------- bet source / account dimensions */
+/* Small muted terminal chips for the bet source (model/offer/punt) shown in
+   the positions tables and the venues "SOURCE // P&L" footer. */
+.src-chip {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 2px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid var(--border-2);
+  color: var(--text-dim);
+  line-height: 14px;
+}
+.src-chip.src-model { color: #4ade80; border-color: #1d3a2a; }   /* green-ish */
+.src-chip.src-offer { color: #f5b454; border-color: #4a3a1d; }   /* amber */
+.src-chip.src-punt  { color: #60a5fa; border-color: #1d2a45; }   /* blue */
+.pos-table td.pos-src { white-space: nowrap; }
+
+/* "A2" suffix chip on the venue pill — only emitted for account-2 rows. */
+.acct-chip {
+  display: inline-block;
+  margin-left: 3px;
+  padding: 0 3px;
+  border-radius: 2px;
+  font-size: 8px;
+  letter-spacing: .5px;
+  border: 1px solid #3a3550;
+  color: #b59be0;
+}
+
+/* "SOURCE // P&L" footer line inside the venues panel. */
+.venue-source-pl {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-2);
+  font-size: 10px;
+  letter-spacing: .5px;
+}
+.venue-source-pl .src-pl-item { white-space: nowrap; }
+
+/* ========================================================== Tracking page */
+/* Appended for site/tracking.html — does not alter any rule above.         */
+
+main > .panel + .panel,
+main > .track-grid,
+main > .track-grid + .panel { margin-top: 12px; }
+
+/* Headline stat tiles (reuse the ticker's label/value type scale). */
+.track-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+.track-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 14px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+.track-stat-sub {
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+
+/* Tick / cross marks on the scoreboard. */
+.tr-hit { color: var(--pos); font-weight: 700; }
+.tr-miss { color: var(--neg); font-weight: 700; }
+
+/* Chart 1 — paired model/market bars on the realised outcome. */
+.tr-pair { margin-bottom: 14px; }
+.tr-pair:last-of-type { margin-bottom: 0; }
+.tr-pair-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+.tr-pair-title {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.tr-pair-actual {
+  font-size: 10px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.tr-bar-row {
+  display: grid;
+  grid-template-columns: 52px 1fr 52px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.tr-bar-lbl {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.tr-bar-track {
+  height: 8px;
+  background: var(--track);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.tr-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  min-width: 1px;
+}
+.tr-fill-model-up { background: var(--pos); }
+.tr-fill-model-down { background: var(--neg); }
+.tr-fill-market { background: var(--polymarket); opacity: 0.75; }
+.tr-bar-val {
+  text-align: right;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* Chart 1, bar A — FT scoreline as a home-vs-away goal split. */
+.tr-ft-track {
+  display: flex;
+  height: 12px;
+}
+.tr-ft-seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-width: 0;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--bg);
+  overflow: hidden;
+}
+.tr-ft-home { background: var(--polymarket); opacity: 0.55; }
+.tr-ft-away { background: var(--warn); opacity: 0.55; }
+.tr-ft-home-win { background: var(--polymarket); }
+.tr-ft-away-win { background: var(--warn); }
+.tr-ft-draw { background: var(--text-dim); }
+
+/* Chart 1, bar B — diverging model-vs-market result-correctness bar. */
+.tr-div-track {
+  position: relative;
+  height: 12px;
+}
+.tr-div-fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 2px;
+}
+.tr-div-pos { background: var(--pos); }
+.tr-div-neg { background: var(--neg); }
+.tr-div-mid {
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  bottom: -2px;
+  width: 1px;
+  background: var(--border-2);
+  transform: translateX(-0.5px);
+}
+.tr-bar-val.pos { color: var(--pos); }
+.tr-bar-val.neg { color: var(--neg); }
+
+/* Charts 3 + 4 sit side by side on desktop. */
+.track-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* SVG scatter primitives. */
+.tr-diag {
+  stroke: var(--border-2);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 4;
+}
+.tr-quad { stroke: var(--border-2); stroke-width: 1; stroke-dasharray: 2 3; }
+.tr-dot-model { fill: var(--accent); opacity: 0.9; }
+.tr-dot-market { fill: var(--polymarket); opacity: 0.75; }
+.tr-dot-win { fill: var(--pos); opacity: 0.9; }
+.tr-dot-loss { fill: var(--neg); opacity: 0.85; }
+
+/* Footnote under the panels. */
+.track-note {
+  margin-top: 12px;
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+@media (max-width: 760px) {
+  .track-grid { grid-template-columns: 1fr; }
+}
