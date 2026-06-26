@@ -3,7 +3,8 @@
 ``wca.card.resolve_pool_bankroll`` reads the ledger's settled-with-close CLV
 statistics (``wca.ledger.reports.staking_stats``), runs the pre-registered
 ``wca.markets.kelly.KellyPolicy`` ladder to find the earned rung, and maps the
-rung index onto the governance bankroll ladder £1500 / £2500 / £5000.
+rung index onto the governance bankroll ladder £2000 / £3000 / £3000 (flat
+quarter-Kelly at every rung; the rung scales the bankroll, not the fraction).
 
 These tests drive the wiring two ways:
 
@@ -22,6 +23,7 @@ import tempfile
 import pytest
 
 from wca.card import (
+    FLAT_KELLY_FRACTION,
     LADDER_BANKROLLS,
     PoolBankroll,
     resolve_pool_bankroll,
@@ -127,42 +129,31 @@ def test_rung_boundaries(monkeypatch, n_settled, clv, rolling, expected_rung):
     res = resolve_pool_bankroll("ignored.db")
     assert res.rung == expected_rung
     assert res.bankroll == LADDER_BANKROLLS[expected_rung]
-    assert res.kelly_fraction == kelly_mod.KellyPolicy().rungs[expected_rung].fraction
+    # Flat quarter-Kelly at every rung (the ladder scales the bankroll, not the
+    # Kelly fraction), so this is 0.25 regardless of rung.
+    assert res.kelly_fraction == FLAT_KELLY_FRACTION
     assert not res.constrained
 
 
 @pytest.mark.parametrize("n_settled,clv,rolling", [(50, -0.05, -0.05), (100, -0.01, -0.01)])
-def test_rung0_negative_clv_constrains_sizing(monkeypatch, n_settled, clv, rolling):
-    """Operating rule 1: rung 0 + negative CLV is the minimal-stakes regime.
+def test_rung0_negative_clv_no_shrink(monkeypatch, n_settled, clv, rolling):
+    """Rung 0 + negative CLV: NO shrink (user, 2026-06-26).
 
-    The rung stays 0 (negative CLV can never promote), but the *sizing base* is
-    clamped to a floor off actual capital and the Kelly fraction is shrunk —
-    deliberately, so real money keeps accruing CLV at minimal size rather than
-    sizing off the £1,500 notional pool the ledger has not yet earned the right
-    to deploy.
+    Negative CLV holds the rung at 0 (it can never promote), but staking stays a
+    flat quarter-Kelly off the full rung-0 bankroll (£2,000) — the old
+    minimal-stakes 1/8-Kelly / £750 floor was removed. ``constrained`` is always
+    False under the flat-Kelly policy. (Pausing real money is a separate desk
+    call, not a silent fractional shrink.)
     """
-    from wca.card import (
-        RUNG0_NEGATIVE_CLV_BASE_FRACTION,
-        RUNG0_NEGATIVE_CLV_KELLY_FLOOR,
-        DEFAULT_ACTUAL_CAPITAL_GBP,
-    )
+    from wca.card import DEFAULT_ACTUAL_CAPITAL_GBP
 
     _patch_stats(monkeypatch, n_settled, clv, rolling)
     res = resolve_pool_bankroll("ignored.db")
     assert res.rung == 0
-    assert res.constrained is True
-    # Base clamped to the floor (£750 = 25% of £3,000), well below the £1,500 pool.
-    expected_base = min(
-        LADDER_BANKROLLS[0],
-        RUNG0_NEGATIVE_CLV_BASE_FRACTION * DEFAULT_ACTUAL_CAPITAL_GBP,
-    )
-    assert res.bankroll == expected_base
-    assert res.bankroll < LADDER_BANKROLLS[0]
-    # Kelly fraction shrunk below the rung-0 (quarter-Kelly) fraction.
-    base_fraction = kelly_mod.KellyPolicy().rungs[0].fraction
-    assert res.kelly_fraction == base_fraction * RUNG0_NEGATIVE_CLV_KELLY_FLOOR
-    assert res.kelly_fraction < base_fraction
-    assert "NEGATIVE CLV" in res.constraint_note
+    assert res.constrained is False
+    assert res.bankroll == LADDER_BANKROLLS[0] == 2000.0
+    assert res.kelly_fraction == FLAT_KELLY_FRACTION == 0.25
+    assert res.constraint_note == ""
     assert res.actual_capital == DEFAULT_ACTUAL_CAPITAL_GBP
 
 
@@ -171,9 +162,10 @@ def test_demotion_rolling50_negative(monkeypatch):
     _patch_stats(monkeypatch, n_settled=120, clv_to_date=0.02, rolling50_clv=-0.01)
     res = resolve_pool_bankroll("ignored.db")
     assert res.rung == 1
-    assert res.bankroll == 2500.0
-    # Demoted from the rung-2 fraction down to the rung-1 fraction.
-    assert res.kelly_fraction == kelly_mod.KellyPolicy().rungs[1].fraction
+    assert res.bankroll == 3000.0
+    # Demotion changes the rung (and so the bankroll); the Kelly fraction is a
+    # flat 1/4 at every rung.
+    assert res.kelly_fraction == FLAT_KELLY_FRACTION
 
 
 def test_reason_mentions_rung_and_counts(monkeypatch):
@@ -181,7 +173,7 @@ def test_reason_mentions_rung_and_counts(monkeypatch):
     res = resolve_pool_bankroll("ignored.db")
     assert "rung 0" in res.reason
     assert "0/50" in res.reason          # progress toward the next rung
-    assert "1500" in res.reason
+    assert "2000" in res.reason
     assert "n/a" in res.reason           # CLV not yet available
 
 
@@ -192,7 +184,8 @@ def test_override_uses_manual_but_reports_earned_rung(monkeypatch):
     assert res.bankroll == 750.0           # manual figure wins
     assert res.rung == 1                   # but the earned rung is still reported
     assert "override" in res.reason.lower()
-    assert "2500" in res.reason            # the ladder figure it would have set
+    assert "3000" in res.reason            # the ladder figure it would have set
+    assert res.kelly_fraction == FLAT_KELLY_FRACTION  # flat 1/4 even with override
 
 
 def test_misaligned_bankrolls_raise(monkeypatch):
@@ -219,7 +212,7 @@ def test_e2e_empty_ledger_rung0() -> None:
     store.init_db(db)
     res = resolve_pool_bankroll(db)
     assert res.rung == 0
-    assert res.bankroll == 1500.0
+    assert res.bankroll == 2000.0
     assert res.n_settled == 0
 
 
@@ -231,7 +224,7 @@ def test_e2e_50_positive_clv_rung1() -> None:
     assert res.n_settled == 50
     assert res.clv_to_date is not None and res.clv_to_date > 0
     assert res.rung == 1
-    assert res.bankroll == 2500.0
+    assert res.bankroll == 3000.0
 
 
 def test_e2e_100_positive_clv_rung2() -> None:
@@ -241,21 +234,16 @@ def test_e2e_100_positive_clv_rung2() -> None:
     res = resolve_pool_bankroll(db)
     assert res.n_settled == 100
     assert res.rung == 2
-    assert res.bankroll == 5000.0
+    assert res.bankroll == 3000.0
 
 
 def test_e2e_50_negative_clv_stays_rung0() -> None:
-    """50 settled but losing CLV is the minimal-stakes regime: hold rung 0.
+    """50 settled but losing CLV holds rung 0 — flat 1/4-Kelly, no shrink.
 
-    Operating rule 1: the rung stays 0, but the sizing base is clamped to the
-    rung-0 negative-CLV floor (£750, off £3,000 actual capital) rather than the
-    £1,500 notional pool, and ``constrained`` is flagged.
+    Negative CLV can never promote, so the rung stays 0 and the bankroll is the
+    full rung-0 £2,000 at a flat quarter-Kelly (the old 1/8-Kelly / £750 floor
+    was removed by user instruction 2026-06-26). ``constrained`` stays False.
     """
-    from wca.card import (
-        RUNG0_NEGATIVE_CLV_BASE_FRACTION,
-        DEFAULT_ACTUAL_CAPITAL_GBP,
-    )
-
     db = _tmp_db()
     store.init_db(db)
     _add_settled_with_clv(db, 50, id_tag="N", **_NEG)
@@ -263,10 +251,9 @@ def test_e2e_50_negative_clv_stays_rung0() -> None:
     assert res.n_settled == 50
     assert res.clv_to_date is not None and res.clv_to_date < 0
     assert res.rung == 0
-    assert res.constrained is True
-    assert res.bankroll == min(
-        1500.0, RUNG0_NEGATIVE_CLV_BASE_FRACTION * DEFAULT_ACTUAL_CAPITAL_GBP
-    )
+    assert res.constrained is False
+    assert res.bankroll == 2000.0
+    assert res.kelly_fraction == FLAT_KELLY_FRACTION
 
 
 def test_e2e_demotion_recent_losses() -> None:
@@ -295,7 +282,7 @@ def test_e2e_demotion_recent_losses() -> None:
     assert stats["rolling50_clv"] < 0         # recent window negative
     res = resolve_pool_bankroll(db)
     assert res.rung == 1                       # demoted from 2 to 1
-    assert res.bankroll == 2500.0
+    assert res.bankroll == 3000.0
 
 
 def test_e2e_override_flag() -> None:

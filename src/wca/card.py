@@ -138,24 +138,30 @@ class PoolConfig:
 # CLV-gated bankroll ladder (governance wiring for the sportsbook pool).
 # ---------------------------------------------------------------------------
 
-# Notional sportsbook-pool bankroll for each rung of the pre-registered Kelly
+# Deployable sportsbook-pool bankroll for each rung of the pre-registered Kelly
 # ladder (``wca.markets.kelly.KellyPolicy``). The ladder's rung *index* —
 # earned by settled-with-close bet count AND positive to-date CLV — selects
-# which notional pool the desk is cleared to deploy. This is the bankroll
-# governance agreed with the user:
+# which pool the desk is cleared to deploy. Bankroll governance (user, 2026-06-26):
 #
-#   rung 0  ->  £1,500   (base; raised from £1,000 by user instruction
-#                         2026-06-12 after funding sportsbook balances to
-#                         ~£1,500 — base reflects deployable cash, while
-#                         PROMOTION beyond it stays CLV-gated)
-#   rung 1  ->  £2,500   (50+ settled-with-close AND to-date CLV > 0)
-#   rung 2  ->  £5,000   (100+ settled AND to-date CLV > 0; ceiling)
+#   rung 0  ->  £2,000   (base; raised from £1,500 by user instruction
+#                         2026-06-26 — deploy more now while the edge is being
+#                         proven; PROMOTION beyond it stays CLV-gated)
+#   rung 1  ->  £3,000   (50+ settled-with-close AND to-date CLV > 0 — once the
+#                         CLV evidence backs it, deploy the FULL £3,000 capital)
+#   rung 2  ->  £3,000   (100+ settled AND CLV > 0; capped at actual capital —
+#                         we never size off more cash than the desk holds)
 #
-# Demotion (rolling-50 CLV < 0) steps the index back down and so the bankroll
-# down with it. The *kill rule* (pause real money if avg CLV < 0 after ~50
-# bets) is the desk's jurisdiction, not encoded here — it is a pause, not a
-# resize, and the ladder simply holds rung 0 in that regime.
-LADDER_BANKROLLS: Tuple[float, ...] = (1500.0, 2500.0, 5000.0)
+# Kelly is a flat 1/4 at EVERY rung (no rung-0 shrink): the rung scales the
+# bankroll, not the Kelly fraction. Demotion (rolling-50 CLV < 0) steps the index
+# back down and the bankroll with it. The *kill rule* (pause real money if avg
+# CLV < 0 after ~50 bets) is the desk's jurisdiction, not encoded here.
+LADDER_BANKROLLS: Tuple[float, ...] = (2000.0, 3000.0, 3000.0)
+
+# Flat fractional-Kelly multiplier applied at EVERY rung (user, 2026-06-26). The
+# rung scales the deployable bankroll, NOT the Kelly fraction, so we deliberately
+# override the KellyPolicy ladder's escalating 0.25/0.35/0.50 with a constant
+# quarter-Kelly. (The ladder is still used to pick the rung -> bankroll.)
+FLAT_KELLY_FRACTION: float = 0.25
 
 # ---------------------------------------------------------------------------
 # Operating-rules constants (encoded card governance — 2026-06-26).
@@ -169,20 +175,11 @@ LADDER_BANKROLLS: Tuple[float, ...] = (1500.0, 2500.0, 5000.0)
 # INPUT to the resolver (default here is the documented figure, never sized off).
 DEFAULT_ACTUAL_CAPITAL_GBP: float = 3000.0
 
-# rung-0 / negative-CLV staking constraint. The Kelly ladder holds rung 0 while
-# the desk has < 50 settled-with-close bets OR negative to-date CLV (today:
-# 27/50 settled, CLV -0.018 — NEGATIVE). At rung 0 with negative CLV the model
-# has NOT earned the right to size off the notional pool: we are still proving
-# the edge is real, not harvesting it. So we additionally shrink the rung-0
-# Kelly fraction by this floor multiplier and clamp the deployable base to a
-# small fraction of actual capital. This is a deliberate "minimal-stakes,
-# prove-CLV-first" regime, not a pause (the kill rule is a separate desk call).
-RUNG0_NEGATIVE_CLV_KELLY_FLOOR: float = 0.5
-# Fraction of ACTUAL capital the desk may deploy as the sizing base while in the
-# rung-0 negative-CLV regime (£3,000 -> £750 deployable base). Keeps real money
-# on the table at minimal size so CLV keeps accruing, without betting the bank
-# on an edge the ledger has not yet confirmed.
-RUNG0_NEGATIVE_CLV_BASE_FRACTION: float = 0.25
+# Staking is a flat QUARTER-KELLY at every rung (user, 2026-06-26): there is no
+# rung-0 shrink. The rung scales the deployable bankroll (£2,000 -> £3,000), not
+# the Kelly fraction — the CLV ladder governs HOW MUCH capital is in play, while
+# the 1/4 multiplier stays constant. (The kill rule — pause real money if avg CLV
+# < 0 after ~50 bets — remains a separate desk call, not encoded here.)
 
 # Selection-rule thresholds (memory: feedback-likely-pnl-no-minnows). HIT
 # PROBABILITY is the primary sort; EV stays a gate, not the ranker.
@@ -212,11 +209,9 @@ class PoolBankroll:
     """Resolved sizing base and the evidence that earned it.
 
     ``bankroll`` is the *sizing base* the desk is cleared to deploy off — the
-    notional pool the CLV ladder clears, further constrained to a minimal floor
-    while on rung 0 with negative CLV (see :func:`resolve_pool_bankroll`).
-    ``kelly_fraction`` is the rung's fractional-Kelly multiplier (additionally
-    floored in the rung-0 negative-CLV regime). ``reason`` is a one-line
-    human-readable explanation suitable for the card footer.
+    pool the CLV ladder clears (£2,000 at rung 0, £3,000 once CLV is proven; see
+    :func:`resolve_pool_bankroll`). ``kelly_fraction`` is a flat 1/4 at every
+    rung. ``reason`` is a one-line human-readable explanation for the card footer.
 
     The new fields make the bankroll model explicit and unpartitioned:
 
@@ -225,8 +220,9 @@ class PoolBankroll:
     * ``venue_balances`` — per-venue available £/$ (Smarkets £, Betfair £,
       Polymarket $), also an INPUT — used to split the recommended deployment,
       not to size it.
-    * ``constrained`` — True when the rung-0 negative-CLV floor is biting.
-    * ``constraint_note`` — one line documenting how staking is constrained.
+    * ``constrained`` — retained for the footer/feed schema; always ``False``
+      now that staking is a flat 1/4-Kelly with no rung-0 shrink.
+    * ``constraint_note`` — empty under the flat-Kelly policy.
     """
 
     bankroll: float
@@ -256,7 +252,7 @@ def resolve_pool_bankroll(
     (``wca.ledger.reports.staking_stats``), runs the pre-registered
     :class:`~wca.markets.kelly.KellyPolicy` ladder to find the earned rung, and
     maps that rung index onto the governance bankroll ladder
-    (:data:`LADDER_BANKROLLS`: £1500 / £2500 / £5000).
+    (:data:`LADDER_BANKROLLS`: £2000 / £3000 / £3000).
 
     The rung is *earned* by evidence, never by time or a hot streak: rung 1
     needs 50+ settled-with-close bets and positive to-date CLV; rung 2 needs
@@ -269,20 +265,14 @@ def resolve_pool_bankroll(
     (£3,000, unpartitioned, held as £/$ across Smarkets/Betfair/Polymarket) and
     ``venue_balances`` are *inputs* reported in the footer, never the sizing base.
 
-    **Rung-0 negative-CLV regime.** When the ladder is on rung 0 *and* to-date
-    CLV is negative (today: 27/50 settled, CLV -0.018), the desk has not earned
-    the right to size off even the rung-0 notional pool. Staking is constrained
-    two ways, both explicit on the card:
-
-    * the rung-0 Kelly fraction is shrunk by
-      :data:`RUNG0_NEGATIVE_CLV_KELLY_FLOOR` (0.5 → eighth-Kelly), and
-    * the deployable *base* is clamped to ``min(rung-0 pool,
-      RUNG0_NEGATIVE_CLV_BASE_FRACTION × actual_capital)`` (£3,000 → £750).
-
-    This is a deliberate **minimal-stakes, prove-CLV-first** regime — keep real
-    money on the table at small size so CLV keeps accruing — not a pause (the
-    kill rule is a separate desk call). A manual ``override`` bypasses the clamp
-    but the constraint that *would* apply is still reported.
+    **Flat quarter-Kelly (user, 2026-06-26).** Staking is 1/4-Kelly at EVERY
+    rung — there is no rung-0 shrink. The CLV ladder governs the deployable
+    bankroll (rung 0 = £2,000 now; rung 1 = £3,000 once 50+ settled with
+    positive CLV — the full capital), while the Kelly fraction stays 1/4. The
+    kill rule (pause real money if avg CLV < 0 after ~50 bets) is a separate
+    desk call, not a silent fractional shrink. ``actual_capital`` (£3,000) and
+    ``venue_balances`` remain footer *inputs*, and a manual ``override`` still
+    sets the base verbatim while the ladder rung is reported alongside.
 
     Parameters
     ----------
@@ -293,7 +283,7 @@ def resolve_pool_bankroll(
         :class:`~wca.markets.kelly.KellyPolicy` (the pre-registered ladder).
     bankrolls:
         Notional pool per rung, index-aligned with ``policy.rungs``. Defaults
-        to the governance ladder £1500 / £2500 / £5000.
+        to the governance ladder £2000 / £3000 / £3000.
     override:
         If not ``None``, use this bankroll verbatim (the ``--bankroll`` CLI
         override). The ledger is still read so the card can report the rung the
@@ -337,30 +327,14 @@ def resolve_pool_bankroll(
 
     ladder_bankroll = float(bankrolls[rung])
 
-    # rung-0 / negative-CLV staking constraint (operating rule 1). The ledger has
-    # not yet proven the edge, so shrink the Kelly fraction and clamp the
-    # deployable base to a minimal floor off ACTUAL capital.
+    # Flat quarter-Kelly at every rung (user, 2026-06-26): NO rung-0 shrink. The
+    # CLV ladder scales the deployable bankroll (£2,000 -> £3,000); the Kelly
+    # fraction stays 1/4 throughout. The kill rule (pause if avg CLV < 0 after
+    # ~50 bets) is a separate desk call, not a silent fractional shrink here.
     constrained = False
     constraint_note = ""
     constrained_base = ladder_bankroll
-    constrained_fraction = fraction
-    if rung == 0 and clv_to_date is not None and clv_to_date < 0.0:
-        constrained = True
-        constrained_fraction = fraction * RUNG0_NEGATIVE_CLV_KELLY_FLOOR
-        floor_base = RUNG0_NEGATIVE_CLV_BASE_FRACTION * float(actual_capital)
-        constrained_base = min(ladder_bankroll, floor_base)
-        constraint_note = (
-            "rung-0 + NEGATIVE CLV (%+.4f over %d settled): minimal-stakes "
-            "regime — Kelly shrunk %.2f→%.2f and sizing base clamped to "
-            "%s%.0f (%.0f%% of %s%.0f actual capital). Prove CLV before sizing "
-            "off the notional pool; this is a floor, not a pause."
-            % (
-                clv_to_date, n_settled, fraction, constrained_fraction,
-                currency_symbol, constrained_base,
-                RUNG0_NEGATIVE_CLV_BASE_FRACTION * 100,
-                currency_symbol, float(actual_capital),
-            )
-        )
+    constrained_fraction = FLAT_KELLY_FRACTION  # flat 1/4 at every rung
 
     # Threshold of the *next* rung, for the "X/Y settled" progress hint.
     if rung + 1 < len(policy.rungs):
@@ -372,7 +346,7 @@ def resolve_pool_bankroll(
 
     if override is not None:
         bankroll = float(override)
-        out_fraction = fraction
+        out_fraction = FLAT_KELLY_FRACTION
         reason = (
             "%s%.0f (manual override) — ladder would set rung %d "
             "(%s%.0f) from %d/%d settled-with-close bets, CLV %s%s"
