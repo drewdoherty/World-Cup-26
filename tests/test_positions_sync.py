@@ -148,15 +148,26 @@ def test_live_inserts_and_closes_idempotent(tmp_path, monkeypatch):
     db = _db(tmp_path)
     gone_id = _seed_open_bet(db, platform="smarkets", selection="Draw",
                              match_desc="A vs B", market="1X2")
+    # A second seeded Smarkets bet that the venue STILL reports open — this is
+    # what makes the Smarkets fetch confirmable (VENUE_OK), so the matcher-safety
+    # gate permits auto-closing the genuinely-gone Draw above.
+    _seed_open_bet(db, platform="smarkets", selection="Other",
+                   match_desc="C vs D", market="1X2")
     monkeypatch.setattr(positions_sync, "refresh_site_projection", lambda: 0)
 
-    # Venue shows a NEW Betfair England position; the seeded Smarkets Draw is gone.
-    fetchers = {"betfair": lambda: [_venue_pos()]}
+    # Venue shows a NEW Betfair England position; Smarkets still has "Other"
+    # (matched) but NOT the Draw (gone).
+    fetchers = {
+        "betfair": lambda: [_venue_pos()],
+        "smarkets": lambda: [_venue_pos(venue="smarkets", selection="Other",
+                                        market="1X2", fixture_or_event="C vs D",
+                                        external_id="smk-other")],
+    }
 
     r1 = positions_sync.run_sync(db, live=True, fetchers=fetchers)
     assert r1["mode"] == "LIVE"
-    assert len(r1["applied"]["inserted"]) == 1
-    assert gone_id in r1["applied"]["closed"]
+    assert len(r1["applied"]["inserted"]) == 1   # only the new Betfair England
+    assert gone_id in r1["applied"]["closed"]     # the gone Draw is auto-closed
 
     # gone bet is marked 'closed' pending settlement, NOT settled (no P&L).
     conn = sqlite3.connect(db)
@@ -178,7 +189,7 @@ def test_live_inserts_and_closes_idempotent(tmp_path, monkeypatch):
     assert r2["applied"]["inserted"] == []
     assert r2["applied"]["closed"] == []
     assert _row_count(db) == count_after_first  # idempotent
-    assert r2["reconciliation"]["counts"]["matched"] == 1
+    assert r2["reconciliation"]["counts"]["matched"] == 2  # England + Other
 
 
 # ---------------------------------------------------------------------------
@@ -564,3 +575,340 @@ def test_apply_snapshot_shadow_does_not_write(tmp_path, monkeypatch):
     row = conn.execute("SELECT status FROM bets WHERE id=?", (bet_id,)).fetchone()
     assert row["status"] == "open"
     conn.close()
+
+
+# ===========================================================================
+# HARDENING: matcher-safety gate — an unconfirmable venue NEVER auto-closes its
+# open ledger bets (the false-close bug fix). THIS IS THE KEY TEST.
+# ===========================================================================
+
+
+def test_unconfirmable_venue_never_gone_from_venue():
+    """A ledger bet whose venue is auth_failed / empty / error stays OPEN and is
+    routed to review — NEVER gone_from_venue. This is what kills the 30 false
+    closes seen in the SHADOW dry-run.
+    """
+    from wca.venues import canon_platform
+
+    ledger = [
+        {"id": 1, "platform": "smarkets", "selection": "Draw",
+         "market": "1X2", "match_desc": "A vs B"},
+        {"id": 2, "platform": "Betfair", "selection": "England",
+         "market": "1X2", "match_desc": "Eng v Spa"},
+        {"id": 3, "platform": "polymarket", "selection": "Brazil",
+         "market": "Winner", "match_desc": "World Cup"},
+    ]
+    venue_status = {
+        canon_platform("smarkets"): positions_sync.VENUE_AUTH_FAILED,  # 401 login
+        canon_platform("Betfair"): positions_sync.VENUE_ERROR,         # net down / throttled
+        canon_platform("polymarket"): positions_sync.VENUE_EMPTY,      # authed but 0 positions
+    }
+    # No open venue positions came back for ANY venue (all unconfirmable).
+    rec = positions_sync.reconcile([], ledger, [], venue_status)
+    c = rec.as_dict()["counts"]
+    assert c["gone_from_venue"] == 0          # <-- the safety property
+    assert c["review"] == 3                    # all three routed to review
+    assert {r["reason"] for r in rec.review} == {"venue_unavailable"}
+    # Bets are untouched (still in review payload, not gone).
+    review_ids = {r["ledger_bets"][0]["id"] for r in rec.review}
+    assert review_ids == {1, 2, 3}
+
+
+def test_canon_venue_status_keyed_correctly():
+    """The safety gate keys venue status by CANON venue, so a ledger
+    ``platform`` of 'Betfair' resolves to the same status as 'betfair_ex'."""
+    from wca.venues import canon_platform
+
+    ledger = [{"id": 9, "platform": "Betfair", "selection": "Draw",
+               "market": "1X2", "match_desc": "A vs B"}]
+    venue_status = {canon_platform("Betfair"): positions_sync.VENUE_ERROR}
+    rec = positions_sync.reconcile([], ledger, [], venue_status)
+    assert rec.as_dict()["counts"]["gone_from_venue"] == 0
+    assert rec.as_dict()["counts"]["review"] == 1
+
+
+def test_gone_from_venue_only_when_ok_and_truly_absent():
+    """gone_from_venue is permitted ONLY for a VENUE_OK venue that genuinely
+    lacks the position; a confirmed-present position matches instead."""
+    from wca.venues import canon_platform
+
+    ledger = [
+        {"id": 1, "platform": "Betfair", "selection": "England",
+         "market": "1X2", "match_desc": "Eng v Spa"},   # gone (venue ok, absent)
+        {"id": 2, "platform": "Betfair", "selection": "Spain",
+         "market": "1X2", "match_desc": "Eng v Spa"},    # present at venue
+    ]
+    venue = [_venue_pos(selection="Spain", fixture_or_event="Eng v Spa")]
+    venue_status = {canon_platform("Betfair"): positions_sync.VENUE_OK}
+    rec = positions_sync.reconcile(venue, ledger, [], venue_status)
+    c = rec.as_dict()["counts"]
+    assert c["matched"] == 1                       # Spain matched
+    assert c["gone_from_venue"] == 1               # England safely gone
+    assert rec.gone_from_venue[0]["selection"] == "England"
+    assert c["review"] == 0
+
+
+def test_empty_injected_fetcher_is_unconfirmable(tmp_path, monkeypatch):
+    """An injected fetcher returning [] yields VENUE_EMPTY (authed-but-empty) and
+    therefore its bets are NOT auto-closed — empty alone is never confirmable."""
+    from wca.venues import canon_platform
+
+    db = _db(tmp_path)
+    bet_id = _seed_open_bet(db)
+    monkeypatch.setattr(positions_sync, "refresh_site_projection", lambda: 0)
+
+    report = positions_sync.run_sync(db, live=True, fetchers={"betfair": lambda: []})
+    assert report["venue_status"][canon_platform("betfair")] == positions_sync.VENUE_EMPTY
+    assert report["applied"]["closed"] == []
+    conn = sqlite3.connect(db)
+    conn.row_factory = sqlite3.Row
+    row = conn.execute("SELECT status FROM bets WHERE id=?", (bet_id,)).fetchone()
+    assert row["status"] == "open"
+    conn.close()
+
+
+def test_venue_status_in_snapshot_and_report():
+    """fetch_snapshot stamps a venue_status map and apply/report surfaces it."""
+    from wca.venues import canon_platform
+
+    snap = positions_sync.fetch_snapshot(
+        fetchers={"betfair": lambda: [_venue_pos()], "smarkets": lambda: []},
+    )
+    assert snap["venue_status"][canon_platform("betfair")] == positions_sync.VENUE_OK
+    assert snap["venue_status"][canon_platform("smarkets")] == positions_sync.VENUE_EMPTY
+
+
+def test_classify_fetch_statuses():
+    """_classify_fetch maps each outcome to the right VENUE_* status."""
+    cf = positions_sync._classify_fetch
+    # auth probe says not authed -> auth_failed (fetcher not even called).
+    assert cf("v", lambda: [_venue_pos()], lambda: False)[0] == positions_sync.VENUE_AUTH_FAILED
+    # raises -> error.
+    def boom():
+        raise ConnectionError("down")
+    assert cf("v", boom, lambda: True)[0] == positions_sync.VENUE_ERROR
+    # authed + empty -> empty.
+    assert cf("v", lambda: [], lambda: True)[0] == positions_sync.VENUE_EMPTY
+    # authed + rows -> ok.
+    st, rows = cf("v", lambda: [_venue_pos()], lambda: True)
+    assert st == positions_sync.VENUE_OK and len(rows) == 1
+
+
+# ===========================================================================
+# HARDENING: Smarkets create-session payload (documented fields).
+# ===========================================================================
+
+
+def test_smarkets_session_payload_includes_documented_fields(monkeypatch):
+    from wca.data import smarkets
+
+    smarkets._CACHED_SESSION = None
+    monkeypatch.delenv("SMARKETS_API_TOKEN", raising=False)
+    monkeypatch.setenv("SMARKETS_USERNAME", "u")
+    monkeypatch.setenv("SMARKETS_PASSWORD", "p")
+
+    captured = {}
+
+    class _Resp:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"token": "sess-tok"}
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        captured["url"] = url
+        captured["json"] = json
+        return _Resp()
+
+    import requests as _rq
+    monkeypatch.setattr(_rq, "post", fake_post, raising=False)
+
+    tok = smarkets.session_login()
+    assert tok == "sess-tok"
+    body = captured["json"]
+    assert body["username"] == "u"
+    assert body["password"] == "p"
+    assert body["remember"] is True
+    assert body["reopen_account"] is False
+    assert body["use_auth_v2"] is False
+    smarkets._CACHED_SESSION = None  # don't leak the cached token to other tests.
+
+
+# ===========================================================================
+# HARDENING: Betfair session-token persistence (env + disk cache, no re-login).
+# ===========================================================================
+
+
+def test_betfair_token_from_env_no_login(monkeypatch):
+    from wca.data import betfair_exchange
+
+    betfair_exchange._CACHED_TOKEN = None
+    monkeypatch.setenv("BETFAIR_SESSION_TOKEN", "env-tok")
+
+    def boom(*a, **k):
+        raise AssertionError("must not hit the login endpoint when env token set")
+
+    monkeypatch.setattr(betfair_exchange.requests, "post", boom, raising=False)
+    assert betfair_exchange._resolve_session_token() == "env-tok"
+
+
+def test_betfair_token_reused_from_disk_cache(tmp_path, monkeypatch):
+    from wca.data import betfair_exchange
+
+    betfair_exchange._CACHED_TOKEN = None
+    monkeypatch.delenv("BETFAIR_SESSION_TOKEN", raising=False)
+    cache = tmp_path / ".betfair_session.json"
+    monkeypatch.setattr(betfair_exchange, "_SESSION_CACHE_PATH", str(cache))
+    monkeypatch.setattr(betfair_exchange, "_SESSION_CACHE_TTL_SECONDS", 3600)
+
+    # Mint once (interactive login) -> writes the cache.
+    monkeypatch.setenv("BETFAIR_USERNAME", "u")
+    monkeypatch.setenv("BETFAIR_PASSWORD", "p")
+    monkeypatch.setenv("BETFAIR_APP_KEY", "ak")
+
+    class _LoginResp:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"status": "SUCCESS", "token": "minted-tok"}
+
+    calls = {"n": 0}
+
+    def fake_post(*a, **k):
+        calls["n"] += 1
+        return _LoginResp()
+
+    monkeypatch.setattr(betfair_exchange.requests, "post", fake_post, raising=False)
+    assert betfair_exchange._resolve_session_token() == "minted-tok"
+    assert calls["n"] == 1
+    assert cache.exists()
+
+    # New "process": clear the in-process cache; the disk cache must be reused
+    # WITHOUT another login call.
+    betfair_exchange._CACHED_TOKEN = None
+
+    def boom(*a, **k):
+        raise AssertionError("must not re-login when a fresh disk cache exists")
+
+    monkeypatch.setattr(betfair_exchange.requests, "post", boom, raising=False)
+    assert betfair_exchange._resolve_session_token() == "minted-tok"
+    betfair_exchange._CACHED_TOKEN = None
+
+
+def test_betfair_disk_cache_expires_by_mtime(tmp_path, monkeypatch):
+    from wca.data import betfair_exchange
+    import json as _json
+    import os as _os
+    import time as _time
+
+    betfair_exchange._CACHED_TOKEN = None
+    monkeypatch.delenv("BETFAIR_SESSION_TOKEN", raising=False)
+    cache = tmp_path / ".betfair_session.json"
+    cache.write_text(_json.dumps({"session_token": "stale-tok"}))
+    # Age the file well past the TTL.
+    old = _time.time() - 10_000
+    _os.utime(cache, (old, old))
+    monkeypatch.setattr(betfair_exchange, "_SESSION_CACHE_PATH", str(cache))
+    monkeypatch.setattr(betfair_exchange, "_SESSION_CACHE_TTL_SECONDS", 100)
+    assert betfair_exchange._read_cached_token() is None  # expired -> re-mint
+
+
+def test_betfair_cache_write_chmod_0600(tmp_path, monkeypatch):
+    from wca.data import betfair_exchange
+    import os as _os
+    import stat as _stat
+
+    cache = tmp_path / "sub" / ".betfair_session.json"
+    monkeypatch.setattr(betfair_exchange, "_SESSION_CACHE_PATH", str(cache))
+    betfair_exchange._write_cached_token("secret-tok")
+    assert cache.exists()
+    mode = _stat.S_IMODE(_os.stat(cache).st_mode)
+    assert mode == 0o600  # owner-only — never world-readable.
+
+
+# ===========================================================================
+# HARDENING: Betfair open-position name resolution (marketId/selectionId -> name).
+# ===========================================================================
+
+
+def test_betfair_build_name_maps_from_catalogue():
+    from wca.data import betfair_exchange
+
+    catalogue = [{
+        "marketId": "1.234",
+        "event": {"id": "ev1", "name": "England v Spain"},
+        "runners": [
+            {"selectionId": 47973, "runnerName": "England"},
+            {"selectionId": 47974, "runnerName": "Spain"},
+            {"selectionId": 58805, "runnerName": "The Draw"},
+        ],
+    }]
+    ev, runners = betfair_exchange.build_name_maps(catalogue)
+    assert ev["1.234"] == "England v Spain"
+    assert runners[("1.234", 47973)] == "England"
+    assert runners[("1.234", 58805)] == "Draw"  # "The Draw" normalised
+
+
+def test_betfair_resolve_order_names_backfills(monkeypatch):
+    from wca.data import betfair_exchange
+
+    # An open position with only raw IDs (no itemDescription was returned).
+    positions = [{
+        "venue": "Betfair", "market": "1.234", "selection": "47973",
+        "fixture_or_event": "", "market_id": "1.234", "selection_id": 47973,
+    }]
+
+    def fake_rpc(method, params, token, app_key=None):
+        assert method == "listMarketCatalogue"
+        assert params["filter"]["marketIds"] == ["1.234"]
+        assert "EVENT" in params["marketProjection"]
+        assert "RUNNER_DESCRIPTION" in params["marketProjection"]
+        return [{
+            "marketId": "1.234",
+            "event": {"name": "England v Spain"},
+            "runners": [{"selectionId": 47973, "runnerName": "England"}],
+        }]
+
+    monkeypatch.setattr(betfair_exchange, "_rpc", fake_rpc)
+    out = betfair_exchange.resolve_order_names(positions, "tok", app_key="ak")
+    assert out[0]["fixture_or_event"] == "England v Spain"
+    assert out[0]["selection"] == "England"
+
+
+def test_betfair_resolve_order_names_degrades_on_failure(monkeypatch):
+    from wca.data import betfair_exchange
+
+    positions = [{
+        "venue": "Betfair", "market": "1.234", "selection": "47973",
+        "fixture_or_event": "", "market_id": "1.234", "selection_id": 47973,
+    }]
+
+    def boom(*a, **k):
+        raise ConnectionError("catalogue down")
+
+    monkeypatch.setattr(betfair_exchange, "_rpc", boom)
+    out = betfair_exchange.resolve_order_names(positions, "tok")
+    # Raw IDs are LEFT IN PLACE (never raises) when the catalogue call fails.
+    assert out[0]["selection"] == "47973"
+    assert out[0]["fixture_or_event"] == ""
+
+
+def test_betfair_resolve_order_names_skips_already_named(monkeypatch):
+    from wca.data import betfair_exchange
+
+    # A position that already carries a runner name (itemDescription was present)
+    # must NOT be rewritten, and no catalogue call is made.
+    positions = [{
+        "venue": "Betfair", "market": "Match Odds", "selection": "England",
+        "fixture_or_event": "England v Spain", "market_id": "1.234",
+        "selection_id": 47973,
+    }]
+
+    def must_not_call(*a, **k):
+        raise AssertionError("no catalogue call when names already present")
+
+    monkeypatch.setattr(betfair_exchange, "_rpc", must_not_call)
+    out = betfair_exchange.resolve_order_names(positions, "tok")
+    assert out[0]["selection"] == "England"

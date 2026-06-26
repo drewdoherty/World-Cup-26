@@ -60,7 +60,10 @@ from wca.venues import canon_platform
 logger = logging.getLogger(__name__)
 
 # Snapshot schema version (bumped if the snapshot shape changes incompatibly).
-SNAPSHOT_VERSION = 2
+# v3 adds the per-venue ``venue_status`` map (matcher-safety gate). A v2 snapshot
+# (no venue_status) still applies — an absent map is treated as "untracked", i.e.
+# legacy-confirmable — see :func:`apply_snapshot`.
+SNAPSHOT_VERSION = 3
 
 # Default settled-position lookback window (hours). Open positions are all
 # all-current regardless of window; the window only scopes SETTLED fetches so the
@@ -71,6 +74,20 @@ DEFAULT_SETTLED_LOOKBACK_HOURS = 24
 # 'settled'/'void'/'cashed' — it means "no longer live at the venue, awaiting
 # the settler to attach the real result + P&L". It is NOT a realised status.
 CLOSED_PENDING_STATUS = "closed"
+
+# Per-venue fetch outcome. ONLY ``VENUE_OK`` (authenticated AND returned a
+# complete, non-empty position list) lets a ledger bet be classified
+# gone_from_venue/auto-closed. Every other status means "we cannot confirm the
+# venue's open positions" -> bets route to review and stay OPEN. This is the
+# safety property that kills the false-close bug (a failed/empty fetch wrongly
+# making every open ledger bet look 'gone').
+VENUE_OK = "ok"            # authenticated + returned a complete position list.
+VENUE_AUTH_FAILED = "auth_failed"  # no creds / login rejected — cannot confirm.
+VENUE_EMPTY = "empty"      # authed but zero positions — can't tell empty vs silent fail.
+VENUE_ERROR = "error"      # fetch raised / network down — cannot confirm.
+
+# The only status under which gone_from_venue/auto-close is permitted.
+_CONFIRMABLE_STATUSES = frozenset({VENUE_OK})
 
 
 def live_env() -> bool:
@@ -161,20 +178,138 @@ def fetch_all_positions(
 
     ``fetchers`` is injectable for tests (maps venue -> callable).
     """
+    out: List[Dict[str, Any]] = []
+    for rows in fetch_all_positions_with_status(fetchers)[0].values():
+        out.extend(rows)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Auth probes — distinguish "authenticated" from "no creds / login rejected".
+# Used by the status-aware fetch so an empty list from an UN-authenticated venue
+# is never mistaken for "the account genuinely has no open positions".
+# ---------------------------------------------------------------------------
+
+
+def _betfair_authed() -> bool:
+    try:
+        from wca.data import betfair_exchange
+
+        return bool(betfair_exchange.creds_available())
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Betfair auth probe errored: %s", exc)
+        return False
+
+
+def _smarkets_authed() -> bool:
+    try:
+        from wca.data import smarkets
+
+        return bool(smarkets.session_login())
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Smarkets auth probe errored: %s", exc)
+        return False
+
+
+def _polymarket_authed() -> bool:
+    # Polymarket positions come from a public data-api read (no account auth);
+    # if the wrapper itself imports/works we treat it as authenticated. A failure
+    # to fetch is caught below as VENUE_ERROR.
+    try:
+        from wca import sitedata  # noqa: F401
+
+        return True
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Polymarket auth probe errored: %s", exc)
+        return False
+
+
+# venue name -> (fetcher, auth-probe). Auth probes are skipped for injected
+# test fetchers (those are assumed authenticated unless they raise/return empty).
+_DEFAULT_AUTH_PROBES: Dict[str, Callable[[], bool]] = {
+    "betfair": _betfair_authed,
+    "smarkets": _smarkets_authed,
+    "polymarket": _polymarket_authed,
+}
+
+
+def _classify_fetch(
+    name: str,
+    fn: Callable[[], List[Dict[str, Any]]],
+    auth_probe: Optional[Callable[[], bool]],
+) -> "tuple[str, List[Dict[str, Any]]]":
+    """Run one venue fetch and classify the outcome into a VENUE_* status.
+
+    - auth probe says NOT authenticated -> ``auth_failed`` (cannot confirm).
+    - fetch raises                       -> ``error``       (cannot confirm).
+    - fetch returns []                   -> ``empty``       (cannot confirm).
+    - fetch returns rows                 -> ``ok``          (confirmable).
+    """
+    if auth_probe is not None:
+        try:
+            if not auth_probe():
+                logger.info("%s fetch: auth_failed (no creds / login rejected)", name)
+                return VENUE_AUTH_FAILED, []
+        except Exception as exc:  # noqa: BLE001 — a broken probe is not-confirmable.
+            logger.warning("%s auth probe raised (auth_failed): %s", name, exc)
+            return VENUE_AUTH_FAILED, []
+    try:
+        rows = fn() or []
+    except Exception as exc:  # noqa: BLE001 — belt-and-braces.
+        logger.warning("%s fetcher raised (status=error): %s", name, exc)
+        return VENUE_ERROR, []
+    if not rows:
+        logger.info("%s fetch: empty (authed but zero positions — not confirmable)", name)
+        return VENUE_EMPTY, []
+    return VENUE_OK, rows
+
+
+def fetch_all_positions_with_status(
+    fetchers: Optional[Dict[str, Callable[[], List[Dict[str, Any]]]]] = None,
+    auth_probes: Optional[Dict[str, Callable[[], bool]]] = None,
+) -> "tuple[Dict[str, List[Dict[str, Any]]], Dict[str, str]]":
+    """Pull every venue's open positions AND record a per-venue fetch status.
+
+    Returns ``(rows_by_venue, venue_status)`` where ``venue_status`` maps the
+    canonical venue name to a ``VENUE_*`` status. The status is what makes the
+    reconcile safe: only ``VENUE_OK`` venues can have their ledger bets marked
+    gone_from_venue.
+
+    When ``fetchers`` is supplied (tests), the matching default auth probe is
+    used unless ``auth_probes`` overrides it; an injected fetcher with no probe
+    is assumed authenticated (so an empty injected list is still ``empty``, and
+    a non-empty one is ``ok``).
+    """
+    use_default = fetchers is None
     fetchers = fetchers or {
         "betfair": fetch_betfair_positions,
         "smarkets": fetch_smarkets_positions,
         "polymarket": fetch_polymarket_positions,
     }
-    out: List[Dict[str, Any]] = []
+    probes = dict(_DEFAULT_AUTH_PROBES) if use_default else {}
+    if auth_probes:
+        probes.update(auth_probes)
+
+    rows_by_venue: Dict[str, List[Dict[str, Any]]] = {}
+    venue_status: Dict[str, str] = {}
     for name, fn in fetchers.items():
-        try:
-            rows = fn() or []
-        except Exception as exc:  # noqa: BLE001 — belt-and-braces.
-            logger.warning("%s fetcher raised (degrading to empty): %s", name, exc)
-            rows = []
-        out.extend(rows)
-    return out
+        status, rows = _classify_fetch(name, fn, probes.get(name))
+        canon = canon_platform(name)
+        rows_by_venue[canon] = rows_by_venue.get(canon, []) + rows
+        # If two raw names map to one canon venue, keep the most-confident status.
+        prev = venue_status.get(canon)
+        venue_status[canon] = _merge_status(prev, status)
+    return rows_by_venue, venue_status
+
+
+def _merge_status(prev: Optional[str], new: str) -> str:
+    """Combine two statuses for the same canonical venue, keeping the MOST
+    confident (ok beats empty beats auth_failed/error). Used only when two raw
+    fetcher names collapse to one canon venue (rare)."""
+    order = {VENUE_OK: 3, VENUE_EMPTY: 2, VENUE_AUTH_FAILED: 1, VENUE_ERROR: 1}
+    if prev is None:
+        return new
+    return prev if order.get(prev, 0) >= order.get(new, 0) else new
 
 
 # ---------------------------------------------------------------------------
@@ -318,24 +453,34 @@ def reconcile(
     venue_positions: List[Dict[str, Any]],
     ledger_bets: List[Dict[str, Any]],
     settled_positions: Optional[List[Dict[str, Any]]] = None,
+    venue_status: Optional[Dict[str, str]] = None,
 ) -> Reconciliation:
     """Classify OPEN venue positions vs open ledger bets, and (new in v2) match
     SETTLED venue positions to open ledger bets for venue-truth settlement.
 
-    Open-position classification (unchanged from v1):
+    Open-position classification:
     - ``matched``       one open venue position <-> exactly one ledger bet.
     - ``new_at_venue``  open at a venue, no ledger bet (would INSERT).
-    - ``gone_from_venue`` open in ledger, not at the venue (would mark CLOSED
-                        pending settlement — never auto-compute P&L).
+    - ``gone_from_venue`` open in ledger, not at the venue, **AND the venue's
+                        fetch was confirmable (``VENUE_OK``)** -> would mark
+                        CLOSED pending settlement (never auto-compute P&L).
+
+    SAFETY (the critical fix): a ledger bet whose venue fetch was NOT confirmable
+    — ``auth_failed`` / ``empty`` / ``error`` (or a venue absent from
+    ``venue_status``) — is NEVER classified gone_from_venue. It stays OPEN and is
+    routed to ``review`` with reason ``"venue_unavailable"`` ("venue unavailable
+    — cannot confirm"). This is what stops a failed/empty venue fetch from
+    wrongly auto-closing every open ledger bet at that venue.
+
+    ``venue_status`` maps a canon venue name -> a ``VENUE_*`` status. When it is
+    ``None`` (legacy callers / all-in-one tests with no status tracking) every
+    venue is treated as confirmable so existing behaviour is preserved.
 
     Settle classification (v2): a SETTLED venue position with an unambiguous
     WON/LOST result + realised P&L that matches EXACTLY ONE open ledger bet ->
-    ``settle`` (would settle that bet with the venue's own P&L + result). Any
-    ambiguity (>1 venue settle or >1 ledger bet on a key, or a settle whose key
-    is itself still open at the venue) routes to ``review`` and is NEVER
-    auto-settled.
+    ``settle``. Any ambiguity routes to ``review`` and is NEVER auto-settled.
 
-    ``review`` collects every ambiguous case (open OR settle side).
+    ``review`` collects every ambiguous OR unconfirmable case.
     """
     settled_positions = settled_positions or []
 
@@ -400,8 +545,45 @@ def reconcile(
         elif vs and not ls:
             rec.new_at_venue.append(vs[0])
         elif ls and not vs:
-            rec.gone_from_venue.append(ls[0])
+            # CRITICAL SAFETY GATE: only mark a ledger bet gone_from_venue when
+            # its venue's fetch was confirmable (VENUE_OK). An auth_failed /
+            # empty / errored / unknown venue CANNOT confirm the bet is gone, so
+            # the bet stays OPEN and goes to review instead of being auto-closed.
+            bet = ls[0]
+            status = _venue_status_for_bet(bet, venue_status)
+            if _is_confirmable(status, venue_status):
+                rec.gone_from_venue.append(bet)
+            else:
+                rec.review.append({
+                    "key": k,
+                    "reason": "venue_unavailable",
+                    "detail": "venue unavailable — cannot confirm position is gone",
+                    "venue_status": status,
+                    "ledger_bets": ls,
+                })
     return rec
+
+
+def _venue_status_for_bet(
+    bet: Dict[str, Any], venue_status: Optional[Dict[str, str]]
+) -> Optional[str]:
+    """Return the VENUE_* status for a ledger bet's venue (None if unknown)."""
+    if not venue_status:
+        return None
+    return venue_status.get(canon_platform(bet.get("platform")))
+
+
+def _is_confirmable(status: Optional[str], venue_status: Optional[Dict[str, str]]) -> bool:
+    """True when a gone_from_venue/auto-close is SAFE for this venue.
+
+    Legacy behaviour: when ``venue_status`` is ``None`` (caller did not track
+    status), every venue is treated as confirmable so the existing all-in-one
+    tests/dev path is unchanged. Once status IS tracked, ONLY ``VENUE_OK``
+    confirms — an unknown / auth_failed / empty / errored venue never does.
+    """
+    if venue_status is None:
+        return True
+    return status in _CONFIRMABLE_STATUSES
 
 
 # ---------------------------------------------------------------------------
@@ -555,14 +737,15 @@ def run_sync(
     """
     if live is None:
         live = live_env()
-    venue_positions = fetch_all_positions(fetchers)
+    rows_by_venue, venue_status = fetch_all_positions_with_status(fetchers)
+    venue_positions = [r for rows in rows_by_venue.values() for r in rows]
     settled_positions = fetch_all_settled(settled_lookback_hours, settled_fetchers)
     ledger_bets = load_open_ledger_bets(db_path)
-    rec = reconcile(venue_positions, ledger_bets, settled_positions)
+    rec = reconcile(venue_positions, ledger_bets, settled_positions, venue_status)
 
     report = _build_report(rec, len(venue_positions), len(settled_positions),
                            len(ledger_bets), live, db_path,
-                           settled_lookback_hours)
+                           settled_lookback_hours, venue_status)
     return report
 
 
@@ -574,6 +757,7 @@ def _build_report(
     live: bool,
     db_path: str,
     settled_lookback_hours: int,
+    venue_status: Optional[Dict[str, str]] = None,
 ) -> Dict[str, Any]:
     """Assemble the JSON-able report + (in LIVE) apply the reconciliation."""
     mode = "LIVE" if live else "SHADOW"
@@ -585,6 +769,9 @@ def _build_report(
         "venue_position_count": venue_count,
         "venue_settled_count": settled_count,
         "open_ledger_count": ledger_count,
+        # Per-venue fetch status so the operator can SEE which venues were live
+        # this run (only VENUE_OK venues can have bets auto-closed).
+        "venue_status": dict(venue_status or {}),
         "reconciliation": rec.as_dict(),
         "applied": None,
     }
@@ -624,12 +811,16 @@ def fetch_snapshot(
     The snapshot round-trips through JSON and is applied on the mini via
     :func:`apply_snapshot`.
     """
-    open_positions = fetch_all_positions(fetchers)
+    rows_by_venue, venue_status = fetch_all_positions_with_status(fetchers)
+    open_positions = [r for rows in rows_by_venue.values() for r in rows]
     settled_positions = fetch_all_settled(settled_lookback_hours, settled_fetchers)
     return {
         "snapshot_version": SNAPSHOT_VERSION,
         "fetched_at": _now(),
         "settled_lookback_hours": settled_lookback_hours,
+        # Per-venue fetch status travels WITH the snapshot so the mini's apply
+        # step knows which venues were confirmable when the MacBook fetched.
+        "venue_status": venue_status,
         "open_positions": open_positions,
         "settled_positions": settled_positions,
         "counts": {
@@ -662,12 +853,17 @@ def apply_snapshot(
     open_positions = list(snapshot.get("open_positions") or [])
     settled_positions = list(snapshot.get("settled_positions") or [])
     lookback = int(snapshot.get("settled_lookback_hours") or DEFAULT_SETTLED_LOOKBACK_HOURS)
+    # v3+ snapshots carry the per-venue fetch status; a pre-v3 (v2) snapshot has
+    # none, in which case we pass None -> legacy "all confirmable" behaviour
+    # (only affects snapshots created before this hardening shipped).
+    raw_status = snapshot.get("venue_status")
+    venue_status = dict(raw_status) if isinstance(raw_status, dict) else None
 
     ledger_bets = load_open_ledger_bets(db_path)
-    rec = reconcile(open_positions, ledger_bets, settled_positions)
+    rec = reconcile(open_positions, ledger_bets, settled_positions, venue_status)
 
     report = _build_report(rec, len(open_positions), len(settled_positions),
-                           len(ledger_bets), live, db_path, lookback)
+                           len(ledger_bets), live, db_path, lookback, venue_status)
     report["snapshot_fetched_at"] = snapshot.get("fetched_at")
     report["source"] = "snapshot"
     return report

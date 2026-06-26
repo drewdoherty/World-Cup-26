@@ -65,9 +65,18 @@ def session_login() -> Optional[str]:
     try:
         import requests
 
+        # Documented /v3/sessions/ create-session body (docs.smarkets.com).
+        # A persistent 401 AFTER these fields is an account-level issue (API
+        # access / 2FA / password), not a payload bug.
         resp = requests.post(
             _SESSIONS_URL,
-            json={"username": user, "password": pwd},
+            json={
+                "username": user,
+                "password": pwd,
+                "remember": True,
+                "reopen_account": False,
+                "use_auth_v2": False,
+            },
             headers={"Content-Type": "application/json", "Accept": "application/json"},
             timeout=_TIMEOUT,
         )

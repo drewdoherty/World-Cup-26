@@ -193,8 +193,12 @@ class _FakeResp:
         return self._payload
 
 
-def test_betfair_missing_creds_when_env_unset(monkeypatch):
+def test_betfair_missing_creds_when_env_unset(monkeypatch, tmp_path):
     monkeypatch.setattr(betfair_exchange, "_CACHED_TOKEN", None)
+    # Point the disk session cache at an empty tmp dir so a real cached token
+    # (if one exists on this machine) cannot mask the "no creds" condition.
+    monkeypatch.setattr(betfair_exchange, "_SESSION_CACHE_PATH",
+                        str(tmp_path / ".betfair_session.json"))
     for var in _ALL_BF_VARS:
         monkeypatch.delenv(var, raising=False)
     assert betfair_exchange.creds_available() is False
@@ -203,9 +207,13 @@ def test_betfair_missing_creds_when_env_unset(monkeypatch):
     assert any("SESSION_TOKEN" in m for m in missing)
 
 
-def test_betfair_interactive_login_with_username_password(monkeypatch):
+def test_betfair_interactive_login_with_username_password(monkeypatch, tmp_path):
     """Username+password (no cert) mints a token via the interactive endpoint."""
     monkeypatch.setattr(betfair_exchange, "_CACHED_TOKEN", None)
+    # Isolate the on-disk session cache so the mint path is exercised (and we
+    # never write a token into the real data/ dir).
+    monkeypatch.setattr(betfair_exchange, "_SESSION_CACHE_PATH",
+                        str(tmp_path / ".betfair_session.json"))
     for var in _ALL_BF_VARS:
         monkeypatch.delenv(var, raising=False)
     monkeypatch.setenv("BETFAIR_APP_KEY_DELAYED", "appkey123")
