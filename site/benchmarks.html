@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark">
+<title>WORLD CUP ALPHA // BENCHMARKS</title>
+<link rel="stylesheet" href="./style.css">
+<style>
+/* ---- Benchmarks-specific styles ---- */
+
+.bench-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  grid-template-columns: 1fr 1fr;
+}
+.bench-full { grid-column: 1 / -1; }
+
+.kpi-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+}
+.kpi {
+  flex: 1 1 120px;
+  min-width: 110px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 10px 14px;
+}
+.kpi-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.kpi-val {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.kpi-sub {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* Calibration chart */
+.cal-wrap {
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.cal-canvas {
+  width: 100%;
+  height: 220px;
+  display: block;
+}
+
+/* Match table */
+.match-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.match-table th {
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: right;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.match-table th:first-child { text-align: left; }
+.match-table td {
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+  white-space: nowrap;
+  color: var(--text);
+}
+.match-table td:first-child { text-align: left; color: var(--text-dim); max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+.match-table tr:last-child td { border-bottom: none; }
+.match-table .correct { color: var(--pos); font-weight: 600; }
+.match-table .wrong { color: var(--neg); }
+.match-table .brier-good { color: var(--pos); }
+.match-table .brier-bad { color: var(--neg); }
+.match-table .brier-neutral { color: var(--text-dim); }
+
+/* Suggestions */
+.suggestion {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.suggestion:last-child { border-bottom: none; }
+.sug-badge {
+  flex: 0 0 auto;
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 2px;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+.sug-badge.high { background: rgba(255,92,108,0.15); color: var(--neg); border: 1px solid rgba(255,92,108,0.3); }
+.sug-badge.medium { background: rgba(242,193,78,0.10); color: var(--warn); border: 1px solid rgba(242,193,78,0.25); }
+.sug-badge.low { background: rgba(107,116,128,0.12); color: var(--text-dim); border: 1px solid var(--border); }
+.sug-body { flex: 1 1 0; min-width: 0; }
+.sug-title { font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.sug-cat { font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.sug-stat { font-size: 10px; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
+.sug-detail { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+
+/* Goals dist chart */
+.dist-canvas { width: 100%; height: 160px; display: block; }
+
+/* Goals inflation spotlight */
+.spotlight {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.spot-item {
+  padding: 12px 16px;
+  border-right: 1px solid var(--border);
+}
+.spot-item:last-child { border-right: none; }
+.spot-label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.spot-val { font-size: 18px; font-weight: 700; }
+.spot-delta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+/* Comparison bar */
+.comp-bar-row { padding: 6px 16px; display: flex; align-items: center; gap: 10px; }
+.comp-bar-label { width: 80px; font-size: 10px; color: var(--text-dim); text-align: right; flex: 0 0 80px; }
+.comp-bar-track { flex: 1; height: 14px; background: var(--track); border-radius: 2px; overflow: hidden; }
+.comp-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+.comp-bar-val { width: 46px; font-size: 11px; font-weight: 600; text-align: left; flex: 0 0 46px; }
+
+/* Norway spotlight */
+.norway-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+}
+.norway-cell {
+  padding: 10px 16px;
+  border-right: 1px solid var(--border);
+}
+.norway-cell:last-child { border-right: none; }
+.norway-label { font-size: 9px; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.norway-val { font-size: 16px; font-weight: 700; }
+.norway-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.norway-note { padding: 10px 16px; font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+.norway-val.alert { color: var(--neg); }
+
+/* Empty state */
+.bench-loading {
+  padding: 32px;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="ticker" id="ticker">
+    <div class="brand">
+      <span class="brand-mark">WCA</span>
+      <span class="brand-sub">WORLD CUP ALPHA</span>
+    </div>
+    <nav class="scores-nav">
+      <a class="scores-nav-link" href="./index.html">Terminal</a>
+      <a class="scores-nav-link" href="./scores.html">Scores &amp; Markets</a>
+      <a class="scores-nav-link" href="./architecture.html">Under The Hood</a>
+      <a class="scores-nav-link" href="./promos.html">Promos &amp; Offers</a>
+      <a class="scores-nav-link" href="./arb.html">Bet Recs</a>
+      <span class="scores-nav-here">Benchmarks</span>
+    </nav>
+  </header>
+
+  <main>
+    <div id="bench-root">
+      <div class="bench-loading">Loading benchmark data&hellip;</div>
+    </div>
+  </main>
+</div>
+<script src="./benchmarks.js"></script>
+</body>
+</html>
