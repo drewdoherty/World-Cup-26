@@ -1,4 +1,4 @@
-<!-- generated: 2026-06-26T06:39:00 -->
+<!-- generated: 2026-06-26T07:20:13 -->
 ⚽ *Next match* — Norway vs France
 Kickoff 2026-06-26 19:00:00+00:00
 
