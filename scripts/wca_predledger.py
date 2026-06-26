@@ -1,100 +1,123 @@
-"""Prediction-ledger CLI.
+#!/usr/bin/env python3
+"""CLI for the prediction ledger.
 
-Usage examples
---------------
-Ensure schema exists (safe to call repeatedly)::
+Subcommands
+-----------
+ensure    create the schema (tables / indexes / views) in --db
+backfill  replay model_predictions_log.jsonl into the paper book, settle and
+          (with --now) stamp CLV from wca.db read-only odds snapshots
+settle    settle open predictions against wc2026_results.json + advancement
+close     stamp 1X2 CLV from wca.db read-only odds snapshots (needs --now)
+publish   project --db to site-analytics/data/predledger.json
 
-    python scripts/wca_predledger.py schema --db data/dev.db
+The default ``--db`` is ``data/dev.db``.  Writing ``data/wca.db`` is refused
+unless ``WCA_ALLOW_PROD_DB`` is set (the store guard).
 
-Show the model book (all predictions)::
-
-    python scripts/wca_predledger.py show --db data/dev.db
-
-Show settled predictions with realized/paper labels::
-
-    python scripts/wca_predledger.py realized --db data/dev.db
+Timestamps (``--now`` / publish ``generated``) are caller-supplied so library
+code never reads the wall clock; the CLI fills them from ``datetime.now(UTC)``
+when omitted, which is the only place a clock is read.
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import sys
+from datetime import datetime, timezone
 
-from wca.predledger import store
+# Allow running as a plain script (scripts/ is not a package).
+import os
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
+
+from wca.predledger import backfill as pl_backfill  # noqa: E402
+from wca.predledger import close as pl_close  # noqa: E402
+from wca.predledger import publish as pl_publish  # noqa: E402
+from wca.predledger import settle as pl_settle  # noqa: E402
+from wca.predledger import store  # noqa: E402
+
+_DEFAULT_DB = "data/dev.db"
+_RESULTS = "data/processed/wc2026_results.json"
+_ADV = "data/advancement_played_results.json"
 
 
-def cmd_schema(args: argparse.Namespace) -> None:
+def _now_utc() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _cmd_ensure(args: argparse.Namespace) -> int:
     store.ensure_schema(args.db)
-    print("Schema ensured: %s" % args.db)
+    print(json.dumps({"ensured": args.db}))
+    return 0
 
 
-def cmd_show(args: argparse.Namespace) -> None:
-    rows = store.model_book(db_path=args.db)
-    if not rows:
-        print("No predictions found.")
-        return
-    print("%-8s  %-12s  %-6s  %-12s  %-8s  %s" % (
-        "placed", "match_id", "market", "selection", "offered", "prediction_id"
-    ))
-    print("-" * 72)
-    for r in rows:
-        print("%-8s  %-12s  %-6s  %-12s  %-8s  %s" % (
-            "yes" if r["placed"] else "paper",
-            (r["match_id"] or r["stage"] or "")[:12],
-            str(r["market"])[:6],
-            str(r["selection"])[:12],
-            ("%.3f" % r["offered_odds"]) if r["offered_odds"] else "-",
-            r["prediction_id"],
-        ))
-    print("\n%d row(s)" % len(rows))
-
-
-def cmd_realized(args: argparse.Namespace) -> None:
-    rows = store.realized_book(db_path=args.db)
-    settled = [r for r in rows if r["outcome"] is not None]
-    if not settled:
-        print("No settled predictions found.")
-        return
-    print("%-10s  %-6s  %-8s  %-8s  %s" % (
-        "book_type", "outcome", "clv", "offered", "prediction_id"
-    ))
-    print("-" * 60)
-    for r in settled:
-        clv_str = ("%.4f" % r["clv"]) if r["clv"] is not None else "NULL"
-        print("%-10s  %-6s  %-8s  %-8s  %s" % (
-            r["book_type"],
-            r["outcome"] or "-",
-            clv_str,
-            ("%.3f" % r["offered_odds"]) if r["offered_odds"] else "-",
-            r["prediction_id"],
-        ))
-    print("\n%d settled row(s)" % len(settled))
-
-
-def main(argv=None) -> None:
-    parser = argparse.ArgumentParser(
-        description="Prediction-ledger CLI",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+def _cmd_backfill(args: argparse.Namespace) -> int:
+    now = args.now or _now_utc()
+    summary = pl_backfill.run_backfill(
+        db=args.db,
+        now=now,
+        do_settle=not args.no_settle,
+        do_close=not args.no_close,
     )
-    parser.add_argument("--db", default="data/wca.db", help="SQLite database path")
-    sub = parser.add_subparsers(dest="cmd", metavar="COMMAND")
+    print(json.dumps(summary, indent=2))
+    return 0
 
-    sub.add_parser("schema", help="Ensure predledger schema exists in the database")
-    sub.add_parser("show", help="Print the model book (all predictions)")
-    sub.add_parser("realized", help="Print settled predictions with paper/realized labels")
+
+def _cmd_settle(args: argparse.Namespace) -> int:
+    store.ensure_schema(args.db)
+    tally = pl_settle.settle_open(args.results, args.adv, args.db)
+    print(json.dumps(tally, indent=2))
+    return 0
+
+
+def _cmd_close(args: argparse.Namespace) -> int:
+    store.ensure_schema(args.db)
+    now = args.now or _now_utc()
+    stats = pl_close.stamp_closes(now, args.db)
+    print(json.dumps(stats, indent=2))
+    return 0
+
+
+def _cmd_publish(args: argparse.Namespace) -> int:
+    store.ensure_schema(args.db)
+    generated = args.generated or _now_utc()
+    path = pl_publish.write_feed(generated, args.db, args.out)
+    payload = pl_publish.build_feed(generated, args.db)
+    print(json.dumps({"written": path, "meta": payload["meta"]}, indent=2))
+    return 0
+
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description="WCA prediction-ledger CLI")
+    parser.add_argument("--db", default=_DEFAULT_DB, help="SQLite path (default dev.db)")
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    p_ensure = sub.add_parser("ensure", help="create schema")
+    p_ensure.set_defaults(func=_cmd_ensure)
+
+    p_bf = sub.add_parser("backfill", help="replay log -> paper book + settle + close")
+    p_bf.add_argument("--now", default=None, help="ISO-8601 UTC gate for close")
+    p_bf.add_argument("--no-settle", action="store_true")
+    p_bf.add_argument("--no-close", action="store_true")
+    p_bf.set_defaults(func=_cmd_backfill)
+
+    p_settle = sub.add_parser("settle", help="settle open predictions vs results")
+    p_settle.add_argument("--results", default=_RESULTS)
+    p_settle.add_argument("--adv", default=_ADV)
+    p_settle.set_defaults(func=_cmd_settle)
+
+    p_close = sub.add_parser("close", help="stamp 1X2 CLV from wca.db RO")
+    p_close.add_argument("--now", default=None, help="ISO-8601 UTC kickoff gate")
+    p_close.set_defaults(func=_cmd_close)
+
+    p_pub = sub.add_parser("publish", help="write site-analytics/data/predledger.json")
+    p_pub.add_argument("--out", default=pl_publish._FEED_PATH)
+    p_pub.add_argument("--generated", default=None, help="ISO-8601 UTC feed stamp")
+    p_pub.set_defaults(func=_cmd_publish)
 
     args = parser.parse_args(argv)
-
-    if args.cmd == "schema":
-        cmd_schema(args)
-    elif args.cmd == "show":
-        cmd_show(args)
-    elif args.cmd == "realized":
-        cmd_realized(args)
-    else:
-        parser.print_help()
-        sys.exit(1)
+    return args.func(args)
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
