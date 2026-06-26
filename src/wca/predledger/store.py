@@ -44,6 +44,7 @@ import os
 import sqlite3
 from typing import Any, Dict, List, Optional
 
+from wca.ledger import store as _ledger_store
 from wca.ledger.store import _connect as _base_connect
 
 
@@ -188,6 +189,7 @@ SELECT
     p.placed,
     p.bet_id,
     CASE WHEN p.placed = 1 THEN 'realized' ELSE 'paper' END AS book_type,
+    p.ts_utc,
     p.result_ts_utc,
     p.close_ts_utc
 FROM predictions p
@@ -203,9 +205,18 @@ def _init_schema(db_path: str) -> None:
     """Create all predledger tables, indexes, and views if absent (no prod guard).
 
     Purely additive — uses ``CREATE TABLE/INDEX/VIEW IF NOT EXISTS`` only.
-    Does **not** touch the ``bets`` or ``odds_snapshots`` tables.
     Called by both :func:`ensure_schema` (public, guarded) and write functions.
+
+    ``predictions.bet_id`` carries a foreign key to ``bets(id)``.  Because the
+    base ``_connect`` enables ``PRAGMA foreign_keys=ON``, every INSERT into
+    ``predictions`` checks that the ``bets`` table exists — so on a fresh
+    database (e.g. an isolated test DB that only the predledger touches) we
+    must ensure the base ledger schema is present first, otherwise the very
+    first insert fails with ``no such table: bets``.  ``init_db`` is itself
+    idempotent (``CREATE TABLE IF NOT EXISTS``), so this is a no-op when the
+    ledger schema already exists.
     """
+    _ledger_store.init_db(db_path)
     with _connect(db_path) as conn:
         conn.execute(_DDL_PREDICTIONS)
         conn.execute(_DDL_ACCAS)

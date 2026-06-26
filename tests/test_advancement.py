@@ -7,10 +7,17 @@ matching logic is fed hand-built event fixtures (including name variants).
 from __future__ import annotations
 
 import math
+import os
 from typing import Dict, List
 
 import pandas as pd
 import pytest
+
+# Canonical committed results dataset (the un-cleaned ``results.csv`` is a
+# download artifact and is not checked into the repo). Anchored to the repo
+# root so the test is independent of the working directory.
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_RESULTS_CSV = os.path.join(_REPO_ROOT, "data", "raw", "martj42_cleaned.csv")
 
 from wca.advancement import (
     HOST_NATIONS,
@@ -51,7 +58,7 @@ def test_all_48_teams_appear_in_scheduled_fixtures():
     every scheduled World-Cup fixture is intra-group and each group has exactly
     6 fixtures (a single round robin).
     """
-    df = load_results("data/raw/results.csv")
+    df = load_results(_RESULTS_CSV)
     # Use the FULL 2026 group-stage schedule (played + unplayed). Once the
     # tournament is under way, completed fixtures have scores, so the old
     # NA-score filter would undercount each group's round-robin (no longer 6

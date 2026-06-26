@@ -10,7 +10,16 @@ requires-python = ">=3.9"
 dependencies = ["numpy", "scipy", "pandas", "requests"]
 
 [project.optional-dependencies]
-dev = ["pytest"]
+# Test-time dependencies beyond the runtime set in `dependencies` /
+# requirements.txt. eth-account is needed by the Polymarket signing tests
+# (tests/test_pm_*); matplotlib by the Telegram usage-chart test
+# (tests/test_telegram_photo.py). Kept here so CI installs exactly what the
+# suite imports. Pinned to the last versions that support Python 3.9.
+dev = [
+    "pytest==8.4.2",
+    "eth-account==0.13.7",
+    "matplotlib==3.9.4",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
