@@ -231,7 +231,11 @@ def pass_closes(con, db_path, lut, apply, log):
 def main(argv: Optional[List[str]] = None) -> int:
     p = argparse.ArgumentParser(description="One-time ledger audit & repair (dry-run by default)")
     p.add_argument("--db", default="data/wca.db", help="canonical ledger (run on the mini)")
-    p.add_argument("--results", default="data/raw/results.csv", help="concluded-match results CSV")
+    p.add_argument("--results", default="data/raw/martj42_cleaned.csv",
+                   help="concluded-match results CSV. Defaults to the cleaned martj42 "
+                        "file (verified-corrections overlay) which tracks the live "
+                        "schedule; the legacy data/raw/results.csv lags ~2-3 days and "
+                        "left recently-concluded games silently unsettled.")
     p.add_argument("--apply", action="store_true", help="write changes (backs up the DB first)")
     p.add_argument("--backup-dir", default="data/backups", help="where to write the pre-apply backup")
     p.add_argument("--skip-closes", action="store_true", help="skip the closing_odds/clv backfill pass")
