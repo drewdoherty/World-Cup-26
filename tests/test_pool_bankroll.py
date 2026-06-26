@@ -109,21 +109,61 @@ def _patch_stats(monkeypatch, n_settled, clv_to_date, rolling50_clv=None):
 @pytest.mark.parametrize(
     "n_settled,clv,rolling,expected_rung",
     [
-        (0, None, None, 0),        # no evidence -> rung 0
+        (0, None, None, 0),        # no evidence -> rung 0 (CLV not yet negative)
         (49, 0.05, None, 0),       # one short of the rung-1 threshold
         (50, 0.05, 0.05, 1),       # exactly 50 + positive CLV -> rung 1
         (99, 0.05, 0.05, 1),       # one short of the rung-2 threshold
         (100, 0.05, 0.05, 2),      # exactly 100 + positive CLV -> rung 2
-        (50, -0.05, -0.05, 0),     # 50 but negative CLV -> kill regime, rung 0
-        (100, -0.01, -0.01, 0),    # 100 but negative CLV -> rung 0
     ],
 )
 def test_rung_boundaries(monkeypatch, n_settled, clv, rolling, expected_rung):
+    """Unconstrained rungs size off the full notional ladder pool.
+
+    These rows are all either rung 1+ (earned, positive CLV) or rung 0 with CLV
+    not-yet-negative (no evidence / positive), so the rung-0 negative-CLV floor
+    does NOT bite and the sizing base equals the notional ladder pool.
+    """
     _patch_stats(monkeypatch, n_settled, clv, rolling)
     res = resolve_pool_bankroll("ignored.db")
     assert res.rung == expected_rung
     assert res.bankroll == LADDER_BANKROLLS[expected_rung]
     assert res.kelly_fraction == kelly_mod.KellyPolicy().rungs[expected_rung].fraction
+    assert not res.constrained
+
+
+@pytest.mark.parametrize("n_settled,clv,rolling", [(50, -0.05, -0.05), (100, -0.01, -0.01)])
+def test_rung0_negative_clv_constrains_sizing(monkeypatch, n_settled, clv, rolling):
+    """Operating rule 1: rung 0 + negative CLV is the minimal-stakes regime.
+
+    The rung stays 0 (negative CLV can never promote), but the *sizing base* is
+    clamped to a floor off actual capital and the Kelly fraction is shrunk —
+    deliberately, so real money keeps accruing CLV at minimal size rather than
+    sizing off the £1,500 notional pool the ledger has not yet earned the right
+    to deploy.
+    """
+    from wca.card import (
+        RUNG0_NEGATIVE_CLV_BASE_FRACTION,
+        RUNG0_NEGATIVE_CLV_KELLY_FLOOR,
+        DEFAULT_ACTUAL_CAPITAL_GBP,
+    )
+
+    _patch_stats(monkeypatch, n_settled, clv, rolling)
+    res = resolve_pool_bankroll("ignored.db")
+    assert res.rung == 0
+    assert res.constrained is True
+    # Base clamped to the floor (£750 = 25% of £3,000), well below the £1,500 pool.
+    expected_base = min(
+        LADDER_BANKROLLS[0],
+        RUNG0_NEGATIVE_CLV_BASE_FRACTION * DEFAULT_ACTUAL_CAPITAL_GBP,
+    )
+    assert res.bankroll == expected_base
+    assert res.bankroll < LADDER_BANKROLLS[0]
+    # Kelly fraction shrunk below the rung-0 (quarter-Kelly) fraction.
+    base_fraction = kelly_mod.KellyPolicy().rungs[0].fraction
+    assert res.kelly_fraction == base_fraction * RUNG0_NEGATIVE_CLV_KELLY_FLOOR
+    assert res.kelly_fraction < base_fraction
+    assert "NEGATIVE CLV" in res.constraint_note
+    assert res.actual_capital == DEFAULT_ACTUAL_CAPITAL_GBP
 
 
 def test_demotion_rolling50_negative(monkeypatch):
@@ -205,7 +245,17 @@ def test_e2e_100_positive_clv_rung2() -> None:
 
 
 def test_e2e_50_negative_clv_stays_rung0() -> None:
-    """50 settled but losing CLV is the kill-rule regime: hold rung 0."""
+    """50 settled but losing CLV is the minimal-stakes regime: hold rung 0.
+
+    Operating rule 1: the rung stays 0, but the sizing base is clamped to the
+    rung-0 negative-CLV floor (£750, off £3,000 actual capital) rather than the
+    £1,500 notional pool, and ``constrained`` is flagged.
+    """
+    from wca.card import (
+        RUNG0_NEGATIVE_CLV_BASE_FRACTION,
+        DEFAULT_ACTUAL_CAPITAL_GBP,
+    )
+
     db = _tmp_db()
     store.init_db(db)
     _add_settled_with_clv(db, 50, id_tag="N", **_NEG)
@@ -213,7 +263,10 @@ def test_e2e_50_negative_clv_stays_rung0() -> None:
     assert res.n_settled == 50
     assert res.clv_to_date is not None and res.clv_to_date < 0
     assert res.rung == 0
-    assert res.bankroll == 1500.0
+    assert res.constrained is True
+    assert res.bankroll == min(
+        1500.0, RUNG0_NEGATIVE_CLV_BASE_FRACTION * DEFAULT_ACTUAL_CAPITAL_GBP
+    )
 
 
 def test_e2e_demotion_recent_losses() -> None:

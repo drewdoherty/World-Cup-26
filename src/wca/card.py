@@ -157,16 +157,76 @@ class PoolConfig:
 # resize, and the ladder simply holds rung 0 in that regime.
 LADDER_BANKROLLS: Tuple[float, ...] = (1500.0, 2500.0, 5000.0)
 
+# ---------------------------------------------------------------------------
+# Operating-rules constants (encoded card governance — 2026-06-26).
+# ---------------------------------------------------------------------------
+
+# Total actual capital, UNPARTITIONED, held as £/$ across Smarkets (£),
+# Betfair (£) and Polymarket ($/USDC). This is the real cash the desk holds; the
+# *sizing base* is the CLV-earned ladder RUNG (above), NOT cash-on-hand. The two
+# are reported side-by-side in the card footer so the gap between "what we hold"
+# and "what the evidence clears us to deploy" is always explicit. Passed as an
+# INPUT to the resolver (default here is the documented figure, never sized off).
+DEFAULT_ACTUAL_CAPITAL_GBP: float = 3000.0
+
+# rung-0 / negative-CLV staking constraint. The Kelly ladder holds rung 0 while
+# the desk has < 50 settled-with-close bets OR negative to-date CLV (today:
+# 27/50 settled, CLV -0.018 — NEGATIVE). At rung 0 with negative CLV the model
+# has NOT earned the right to size off the notional pool: we are still proving
+# the edge is real, not harvesting it. So we additionally shrink the rung-0
+# Kelly fraction by this floor multiplier and clamp the deployable base to a
+# small fraction of actual capital. This is a deliberate "minimal-stakes,
+# prove-CLV-first" regime, not a pause (the kill rule is a separate desk call).
+RUNG0_NEGATIVE_CLV_KELLY_FLOOR: float = 0.5
+# Fraction of ACTUAL capital the desk may deploy as the sizing base while in the
+# rung-0 negative-CLV regime (£3,000 -> £750 deployable base). Keeps real money
+# on the table at minimal size so CLV keeps accruing, without betting the bank
+# on an edge the ledger has not yet confirmed.
+RUNG0_NEGATIVE_CLV_BASE_FRACTION: float = 0.25
+
+# Selection-rule thresholds (memory: feedback-likely-pnl-no-minnows). HIT
+# PROBABILITY is the primary sort; EV stays a gate, not the ranker.
+SELECTION_MIN_PROB: float = 0.20          # hard floor: below this we never STAKE
+LONGSHOT_PROB: float = 0.25               # below this an outright-underdog is a
+#                                           "mispriced minnow" longshot — cut even
+#                                           when +EV (they lose ~90% of the time).
+STRUCTURAL_DRAW_BAND: Tuple[float, float] = (0.25, 0.32)  # draws we *want*.
+
+# Further-out tilt. Markets are softest furthest from kickoff; large edges on
+# imminent fixtures are more likely model error than true mispricing.
+IMMINENT_HOURS: float = 6.0               # < this to kickoff = "imminent".
+IMMINENT_EDGE_DISCOUNT: float = 0.5       # halve the modelled edge on imminent
+#                                           fixtures before sizing (flag, don't
+#                                           size the full gap).
+FURTHER_OUT_HOURS: float = 24.0           # >= this = "further out" → prioritised.
+
+# Cross-venue. The odds-source orchestrator tags every price with a
+# ``bookmaker_key``; these are the three venues the desk actually deploys into.
+VENUE_SMARKETS = "smarkets"
+VENUE_BETFAIR = "betfair"
+VENUE_POLYMARKET = "polymarket"
+
 
 @dataclass
 class PoolBankroll:
-    """Resolved sportsbook-pool bankroll and the evidence that earned it.
+    """Resolved sizing base and the evidence that earned it.
 
-    ``bankroll`` is the notional pool the ladder clears; ``kelly_fraction`` is
-    the rung's fractional-Kelly multiplier (so callers can size with the *same*
-    fraction the ladder authorises). ``reason`` is a one-line human-readable
-    explanation suitable for the card header, e.g.
-    ``"rung £1000 — 0/50 settled-with-close bets (CLV n/a)"``.
+    ``bankroll`` is the *sizing base* the desk is cleared to deploy off — the
+    notional pool the CLV ladder clears, further constrained to a minimal floor
+    while on rung 0 with negative CLV (see :func:`resolve_pool_bankroll`).
+    ``kelly_fraction`` is the rung's fractional-Kelly multiplier (additionally
+    floored in the rung-0 negative-CLV regime). ``reason`` is a one-line
+    human-readable explanation suitable for the card footer.
+
+    The new fields make the bankroll model explicit and unpartitioned:
+
+    * ``actual_capital`` — the real cash the desk holds (£3,000), held as £/$
+      across venues; an INPUT, never the sizing base.
+    * ``venue_balances`` — per-venue available £/$ (Smarkets £, Betfair £,
+      Polymarket $), also an INPUT — used to split the recommended deployment,
+      not to size it.
+    * ``constrained`` — True when the rung-0 negative-CLV floor is biting.
+    * ``constraint_note`` — one line documenting how staking is constrained.
     """
 
     bankroll: float
@@ -175,6 +235,10 @@ class PoolBankroll:
     reason: str
     n_settled: int
     clv_to_date: Optional[float]
+    actual_capital: float = DEFAULT_ACTUAL_CAPITAL_GBP
+    venue_balances: Dict[str, float] = field(default_factory=dict)
+    constrained: bool = False
+    constraint_note: str = ""
 
 
 def resolve_pool_bankroll(
@@ -183,8 +247,10 @@ def resolve_pool_bankroll(
     bankrolls: Sequence[float] = LADDER_BANKROLLS,
     override: Optional[float] = None,
     currency_symbol: str = "£",
+    actual_capital: float = DEFAULT_ACTUAL_CAPITAL_GBP,
+    venue_balances: Optional[Dict[str, float]] = None,
 ) -> PoolBankroll:
-    """Resolve the sportsbook-pool bankroll from ledger CLV via the Kelly ladder.
+    """Resolve the *sizing base* from ledger CLV via the Kelly ladder.
 
     Reads the settled-with-close CLV statistics from the ledger
     (``wca.ledger.reports.staking_stats``), runs the pre-registered
@@ -196,6 +262,27 @@ def resolve_pool_bankroll(
     needs 50+ settled-with-close bets and positive to-date CLV; rung 2 needs
     100+ and positive CLV; a negative rolling-50 CLV demotes one rung. See the
     policy's docstring for the full rules.
+
+    Bankroll model (operating rule 1)
+    ---------------------------------
+    The sizing base is the **CLV-earned rung, NOT cash-on-hand**. ``actual_capital``
+    (£3,000, unpartitioned, held as £/$ across Smarkets/Betfair/Polymarket) and
+    ``venue_balances`` are *inputs* reported in the footer, never the sizing base.
+
+    **Rung-0 negative-CLV regime.** When the ladder is on rung 0 *and* to-date
+    CLV is negative (today: 27/50 settled, CLV -0.018), the desk has not earned
+    the right to size off even the rung-0 notional pool. Staking is constrained
+    two ways, both explicit on the card:
+
+    * the rung-0 Kelly fraction is shrunk by
+      :data:`RUNG0_NEGATIVE_CLV_KELLY_FLOOR` (0.5 → eighth-Kelly), and
+    * the deployable *base* is clamped to ``min(rung-0 pool,
+      RUNG0_NEGATIVE_CLV_BASE_FRACTION × actual_capital)`` (£3,000 → £750).
+
+    This is a deliberate **minimal-stakes, prove-CLV-first** regime — keep real
+    money on the table at small size so CLV keeps accruing — not a pause (the
+    kill rule is a separate desk call). A manual ``override`` bypasses the clamp
+    but the constraint that *would* apply is still reported.
 
     Parameters
     ----------
@@ -213,12 +300,16 @@ def resolve_pool_bankroll(
         evidence *would* have earned alongside the manual figure.
     currency_symbol:
         Symbol used in the ``reason`` string (display only).
+    actual_capital:
+        Real unpartitioned capital the desk holds (INPUT, default £3,000).
+    venue_balances:
+        Per-venue available £/$ (INPUT) used to split deployment, not to size.
 
     Returns
     -------
     PoolBankroll
-        The resolved bankroll plus the rung, Kelly fraction and a one-line
-        reason for the card header.
+        The resolved sizing base plus the rung, Kelly fraction, constraint flag
+        and one-line reasons for the card footer.
     """
     from wca.ledger.reports import staking_stats
 
@@ -230,6 +321,8 @@ def resolve_pool_bankroll(
             "bankrolls (%d) must align one-to-one with policy.rungs (%d)"
             % (len(bankrolls), len(policy.rungs))
         )
+
+    venue_balances = dict(venue_balances or {})
 
     stats = staking_stats(db_path)
     n_settled = int(stats["n_settled"])
@@ -244,6 +337,31 @@ def resolve_pool_bankroll(
 
     ladder_bankroll = float(bankrolls[rung])
 
+    # rung-0 / negative-CLV staking constraint (operating rule 1). The ledger has
+    # not yet proven the edge, so shrink the Kelly fraction and clamp the
+    # deployable base to a minimal floor off ACTUAL capital.
+    constrained = False
+    constraint_note = ""
+    constrained_base = ladder_bankroll
+    constrained_fraction = fraction
+    if rung == 0 and clv_to_date is not None and clv_to_date < 0.0:
+        constrained = True
+        constrained_fraction = fraction * RUNG0_NEGATIVE_CLV_KELLY_FLOOR
+        floor_base = RUNG0_NEGATIVE_CLV_BASE_FRACTION * float(actual_capital)
+        constrained_base = min(ladder_bankroll, floor_base)
+        constraint_note = (
+            "rung-0 + NEGATIVE CLV (%+.4f over %d settled): minimal-stakes "
+            "regime — Kelly shrunk %.2f→%.2f and sizing base clamped to "
+            "%s%.0f (%.0f%% of %s%.0f actual capital). Prove CLV before sizing "
+            "off the notional pool; this is a floor, not a pause."
+            % (
+                clv_to_date, n_settled, fraction, constrained_fraction,
+                currency_symbol, constrained_base,
+                RUNG0_NEGATIVE_CLV_BASE_FRACTION * 100,
+                currency_symbol, float(actual_capital),
+            )
+        )
+
     # Threshold of the *next* rung, for the "X/Y settled" progress hint.
     if rung + 1 < len(policy.rungs):
         next_threshold = policy.rungs[rung + 1].min_settled
@@ -254,30 +372,38 @@ def resolve_pool_bankroll(
 
     if override is not None:
         bankroll = float(override)
+        out_fraction = fraction
         reason = (
             "%s%.0f (manual override) — ladder would set rung %d "
-            "(%s%.0f) from %d/%d settled-with-close bets, CLV %s"
+            "(%s%.0f) from %d/%d settled-with-close bets, CLV %s%s"
             % (
                 currency_symbol, bankroll, rung, currency_symbol,
                 ladder_bankroll, n_settled, next_threshold, clv_str,
+                ("; %s" % constraint_note) if constrained else "",
             )
         )
     else:
-        bankroll = ladder_bankroll
+        bankroll = constrained_base
+        out_fraction = constrained_fraction
         reason = (
-            "rung %d %s%.0f — %d/%d settled-with-close bets, CLV %s, "
-            "Kelly fraction %.2f"
+            "rung %d sizing-base %s%.0f (notional pool %s%.0f) — %d/%d "
+            "settled-with-close bets, CLV %s, Kelly fraction %.2f"
             % (
-                rung, currency_symbol, bankroll, n_settled, next_threshold,
-                clv_str, fraction,
+                rung, currency_symbol, bankroll, currency_symbol,
+                ladder_bankroll, n_settled, next_threshold, clv_str,
+                out_fraction,
             )
         )
 
     return PoolBankroll(
         bankroll=bankroll,
         rung=rung,
-        kelly_fraction=fraction,
+        kelly_fraction=out_fraction,
         reason=reason,
+        actual_capital=float(actual_capital),
+        venue_balances=venue_balances,
+        constrained=constrained,
+        constraint_note=constraint_note,
         n_settled=n_settled,
         clv_to_date=clv_to_date,
     )
@@ -299,6 +425,15 @@ class Recommendation:
     edge: float
     ev_per_unit: float
     stakes: Dict[str, float] = field(default_factory=dict)  # pool name -> stake
+    # --- operating-rules fields (rules 2/3/4) -----------------------------
+    venue: str = ""                       # cross-venue tag (best price's source)
+    raw_edge: Optional[float] = None      # pre-time-tilt edge (rule 3 audit)
+    hours_to_kickoff: Optional[float] = None
+    imminent: bool = False                # < IMMINENT_HOURS to kickoff (rule 3)
+    category: str = ""                    # favourite / second_favourite /
+    #                                       structural_draw / longshot (rule 2)
+    cut: bool = False                     # excluded from STAKED picks (rule 2)
+    cut_reason: str = ""
 
 
 @dataclass
@@ -662,6 +797,89 @@ def fixture_blends(
     )
 
 
+# ---------------------------------------------------------------------------
+# Operating-rules helpers (rules 2/3/4) — selection floor, time tilt, venue.
+# ---------------------------------------------------------------------------
+
+
+def _parse_kickoff(value: object) -> Optional["pd.Timestamp"]:
+    """Parse an ISO-ish kickoff string to an aware-UTC pandas Timestamp."""
+    if value is None:
+        return None
+    ts = pd.to_datetime(str(value), errors="coerce", utc=True)
+    return None if pd.isna(ts) else ts
+
+
+def hours_to_kickoff(
+    commence_time: object, now: Optional[object] = None
+) -> Optional[float]:
+    """Hours from ``now`` (default: real UTC) until ``commence_time``.
+
+    Returns ``None`` when the kickoff is unparseable. Negative values mean the
+    fixture has already started (treated as imminent by the tilt logic).
+    """
+    ko = _parse_kickoff(commence_time)
+    if ko is None:
+        return None
+    if now is None:
+        now_ts = pd.Timestamp.utcnow()
+    else:
+        now_ts = pd.to_datetime(str(now), errors="coerce", utc=True)
+        if pd.isna(now_ts):
+            now_ts = pd.Timestamp.utcnow()
+    return float((ko - now_ts).total_seconds()) / 3600.0
+
+
+def venue_of(book: str) -> str:
+    """Normalise a ``bookmaker_key`` to one of the three deployment venues.
+
+    The odds-source orchestrator tags Betfair/Polymarket rows with those source
+    names and TheOddsAPI rows with the individual book key (e.g. ``smarkets``,
+    ``betfair_ex_uk``). Anything that isn't recognisably Betfair or Polymarket
+    is routed to Smarkets — the desk's default exchange — so every staked pick
+    carries a concrete venue tag.
+    """
+    b = (book or "").strip().lower()
+    if "polymarket" in b or b == "pm":
+        return VENUE_POLYMARKET
+    if "betfair" in b:
+        return VENUE_BETFAIR
+    return VENUE_SMARKETS
+
+
+def classify_outcome(
+    selection: str, model_prob: float, market_map: Dict[str, float]
+) -> str:
+    """Bucket an outcome for the selection rule (rule 2).
+
+    * ``structural_draw`` — a draw whose model probability sits in the
+      :data:`STRUCTURAL_DRAW_BAND` (~25-32%): the kind of draw the desk *wants*.
+    * ``favourite`` — the market favourite of the three 1X2 outcomes.
+    * ``second_favourite`` — the second-shortest of the three.
+    * ``longshot`` — the outright underdog (market outsider). These are the
+      "mispriced minnows" the feedback rule de-prioritises even when +EV.
+    """
+    if selection == "draw" and STRUCTURAL_DRAW_BAND[0] <= model_prob <= STRUCTURAL_DRAW_BAND[1]:
+        return "structural_draw"
+    # Rank outcomes by *market* probability (highest = favourite).
+    ranked = sorted(OUTCOMES, key=lambda o: market_map.get(o, 0.0), reverse=True)
+    if selection == ranked[0]:
+        return "favourite"
+    if selection == ranked[1]:
+        return "second_favourite"
+    return "longshot"
+
+
+# Category sort priority: HIT PROBABILITY first, EV only as a gate (rule 2).
+# Lower number = ranked higher.
+_CATEGORY_PRIORITY = {
+    "favourite": 0,
+    "structural_draw": 1,
+    "second_favourite": 2,
+    "longshot": 3,
+}
+
+
 def build_card(
     models: FittedModels,
     odds_df: pd.DataFrame,
@@ -671,29 +889,26 @@ def build_card(
     min_edge: float = 0.02,
     host_nations: Sequence[str] = ("United States", "Mexico", "Canada", "USA"),
     neutral_host_factor: float = DEFAULT_NEUTRAL_HOST_FACTOR,
+    now: Optional[object] = None,
 ) -> List[Recommendation]:
-    """Generate ranked recommendations for every +EV outcome in the slate.
+    """Generate +EV recommendations for every outcome in the slate.
+
+    This is the **gating** layer: it emits one :class:`Recommendation` per
+    outcome whose time-tilted edge clears ``min_edge``, with the operating-rules
+    metadata populated (venue tag, raw vs tilted edge, hours-to-kickoff,
+    selection category). It is edge-sorted for backward compatibility; the
+    *operating-rules ranking and longshot cut* are applied separately by
+    :func:`rank_card` (rule 2/3), which the card CLI calls.
 
     Parameters
     ----------
-    models:
-        Fitted Elo + DC models.
-    odds_df:
-        Flat odds frame from ``theoddsapi.get_odds`` (needs h2h rows).
-    pools:
-        Bankroll pools to size stakes for.
-    fixtures_meta:
-        Results-schedule rows for the upcoming fixtures, used for the
-        ``neutral`` flag and host nation (columns: home_team, away_team,
-        neutral, optionally country).
-    weights:
-        Blend weights (Elo, DC, market).
-    min_edge:
-        Minimum edge (EV per unit) to include a recommendation.
-    host_nations:
-        Nations that receive host advantage on a neutral venue.
+    models, odds_df, pools, fixtures_meta, weights, min_edge, host_nations,
     neutral_host_factor:
-        Multiplier for a co-host's host bonus on neutral-flagged fixtures.
+        As before.
+    now:
+        Reference time (ISO-8601 or Timestamp) for the further-out tilt (rule 3).
+        ``None`` uses real UTC. When kickoff is unparseable the tilt is skipped
+        (edge unchanged) so the function never crashes on a bad timestamp.
     """
     blends = _iter_fixture_blends(
         models, odds_df, fixtures_meta, weights, host_nations, neutral_host_factor
@@ -703,13 +918,21 @@ def build_card(
     for fb in blends:
         home, away = fb.home, fb.away
         team_map = {"home": home, "draw": "Draw", "away": away}
+        commence = str(fb.fx["commence_time"])
+        h2k = hours_to_kickoff(commence, now=now)
+        imminent = h2k is not None and h2k < IMMINENT_HOURS
 
         for outcome in OUTCOMES:
             book, odds = best_price(fb.books, outcome)
             if book is None or odds <= 1.0:
                 continue
             p = fb.blended[outcome]
-            e = kelly_mod.edge(p, odds)
+            raw_e = kelly_mod.edge(p, odds)
+            # Further-out tilt (rule 3): markets are softest furthest from
+            # kickoff. A large model-vs-market edge on an IMMINENT fixture is
+            # more likely model error than true mispricing, so DISCOUNT the edge
+            # before it gates / sizes (flag, don't size the full gap).
+            e = raw_e * IMMINENT_EDGE_DISCOUNT if (imminent and raw_e > 0) else raw_e
             if e < min_edge:
                 continue
             stakes: Dict[str, float] = {}
@@ -722,7 +945,7 @@ def build_card(
                 Recommendation(
                     match_id=str(fb.fx["event_id"]),
                     match_desc="%s vs %s" % (home, away),
-                    commence_time=str(fb.fx["commence_time"]),
+                    commence_time=commence,
                     selection=outcome,
                     selection_team=team_map[outcome],
                     best_book=book,
@@ -734,6 +957,11 @@ def build_card(
                     edge=e,
                     ev_per_unit=e,
                     stakes=stakes,
+                    venue=venue_of(book),
+                    raw_edge=raw_e,
+                    hours_to_kickoff=h2k,
+                    imminent=imminent,
+                    category=classify_outcome(outcome, p, fb.mkt_map),
                 )
             )
 
@@ -810,6 +1038,150 @@ def apply_daily_exposure_caps(
     return recs
 
 
+# ---------------------------------------------------------------------------
+# Operating-rules ranking + cut (rule 2/3) and cross-venue split (rule 4).
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class RankedCard:
+    """The operating-rules card: ranked STAKED picks + the CUT longshot list.
+
+    ``picks`` are sorted by HIT PROBABILITY first (favourites, structural draws,
+    second-favourites, then any surviving short longshots), with EV as a gate
+    only — never the ranker. ``cut`` holds the excluded outright-underdog
+    longshots with their EV and the reason they were cut, so nothing is hidden.
+    """
+
+    picks: List[Recommendation]
+    cut: List[Recommendation]
+
+
+def _cut_reason(rec: Recommendation) -> Optional[str]:
+    """Why a +EV rec should be CUT from the STAKED picks (rule 2), or ``None``.
+
+    Selection rule (memory: feedback-likely-pnl-no-minnows): keep EV as a gate
+    but make hit-probability primary. Two cuts:
+
+    * below the hard probability floor — too unlikely to return PnL; and
+    * an outright-underdog "mispriced-minnow" longshot below
+      :data:`LONGSHOT_PROB` — these lose ~90% of the time even when +EV.
+    """
+    if rec.model_prob < SELECTION_MIN_PROB:
+        return (
+            "below %.0f%% hit-probability floor (model %.1f%%) — too unlikely "
+            "to return PnL even at +%.1f%% EV"
+            % (SELECTION_MIN_PROB * 100, rec.model_prob * 100, rec.edge * 100)
+        )
+    if rec.category == "longshot" and rec.model_prob < LONGSHOT_PROB:
+        return (
+            "mispriced-minnow longshot (outright underdog, model %.1f%% < "
+            "%.0f%%) — +%.1f%% EV but loses ~90%% of the time; de-prioritised"
+            % (rec.model_prob * 100, LONGSHOT_PROB * 100, rec.edge * 100)
+        )
+    return None
+
+
+def rank_card(recs: Sequence[Recommendation]) -> RankedCard:
+    """Apply the selection rule (rule 2) to gated recs: rank and cut.
+
+    HIT PROBABILITY is the primary sort key, then model probability, then edge:
+    favourites and structural draws rank first, second-favourites next, and
+    only short, high-probability longshots survive at all — outright-underdog
+    mispriced minnows are CUT (kept visible with their EV + reason). Stakes on
+    cut recs are zeroed so a downstream sizer can't accidentally deploy them.
+    """
+    picks: List[Recommendation] = []
+    cut: List[Recommendation] = []
+    for r in recs:
+        reason = _cut_reason(r)
+        if reason is None:
+            picks.append(r)
+        else:
+            r.cut = True
+            r.cut_reason = reason
+            r.stakes = {k: 0.0 for k in r.stakes}
+            cut.append(r)
+
+    picks.sort(
+        key=lambda r: (
+            _CATEGORY_PRIORITY.get(r.category, 9),  # hit-probability bucket
+            -r.model_prob,                          # then higher prob first
+            -r.edge,                                # EV breaks ties only
+        )
+    )
+    cut.sort(key=lambda r: -r.edge)  # show the most-tempting (highest EV) first
+    return RankedCard(picks=picks, cut=cut)
+
+
+def venue_deployment(
+    picks: Sequence[Recommendation], pool_name: str
+) -> Dict[str, float]:
+    """Per-venue £/$ deployment split across the staked picks (rule 4).
+
+    Sums each pick's stake (for ``pool_name``) into its best-price venue, so the
+    card can show how much capital lands on Smarkets / Betfair / Polymarket.
+    """
+    split: Dict[str, float] = {}
+    for r in picks:
+        if r.cut:
+            continue
+        stake = float(r.stakes.get(pool_name, 0.0))
+        if stake <= 0.0:
+            continue
+        split[r.venue] = split.get(r.venue, 0.0) + stake
+    return {v: round(s, 2) for v, s in sorted(split.items())}
+
+
+def whole_book_exposure(
+    picks: Sequence[Recommendation],
+    bankroll: float,
+    cap_fraction: float = 0.05,
+) -> List[Dict[str, object]]:
+    """Whole-book exposure ACROSS venues, combined per match (rule 4).
+
+    For every fixture carrying staked picks, sum the real-money stake at risk
+    across ALL its outcomes and venues (the hard cash floor: if every outcome
+    on the match lost we'd be down their combined stake) and flag it against a
+    ``cap_fraction``-of-bankroll cap. Each outcome is sized individually
+    upstream; this is the cross-venue whole-book check on top.
+
+    This intentionally uses the conservative independent-stake floor; the
+    correlation-aware joint distribution (when scoreline lambdas are persisted)
+    lives in :mod:`wca.exposure_corr` and is wired into the exposure feed —
+    reused here only when the caller passes lambdas in via that module.
+    """
+    by_match: Dict[str, Dict[str, object]] = {}
+    for r in picks:
+        if r.cut:
+            continue
+        stake = sum(float(s) for s in r.stakes.values())
+        if stake <= 0.0:
+            continue
+        m = by_match.setdefault(
+            r.match_desc,
+            {"match": r.match_desc, "stake_at_risk": 0.0, "venues": set(), "n_legs": 0},
+        )
+        m["stake_at_risk"] = float(m["stake_at_risk"]) + stake  # type: ignore[arg-type]
+        m["venues"].add(r.venue)  # type: ignore[union-attr]
+        m["n_legs"] = int(m["n_legs"]) + 1  # type: ignore[arg-type]
+
+    cap = cap_fraction * float(bankroll)
+    out: List[Dict[str, object]] = []
+    for m in by_match.values():
+        risk = round(float(m["stake_at_risk"]), 2)  # type: ignore[arg-type]
+        out.append({
+            "match": m["match"],
+            "stake_at_risk": risk,
+            "venues": sorted(m["venues"]),  # type: ignore[arg-type]
+            "n_legs": m["n_legs"],
+            "cap": round(cap, 2),
+            "over_cap": risk > cap,
+        })
+    out.sort(key=lambda d: -float(d["stake_at_risk"]))  # type: ignore[arg-type]
+    return out
+
+
 def format_card(recs: Sequence[Recommendation], pools: Sequence[PoolConfig]) -> str:
     """Human-readable card for the terminal or Telegram (Markdown)."""
     if not recs:
@@ -829,6 +1201,112 @@ def format_card(recs: Sequence[Recommendation], pools: Sequence[PoolConfig]) -> 
                 r.elo_prob * 100, r.dc_prob * 100, stake_str,
             )
         )
+    return "\n".join(lines)
+
+
+_CATEGORY_LABEL = {
+    "favourite": "FAV",
+    "second_favourite": "2ND-FAV",
+    "structural_draw": "DRAW",
+    "longshot": "LONGSHOT",
+}
+
+
+def format_ranked_card(
+    ranked: RankedCard,
+    pool: PoolConfig,
+    bank: Optional["PoolBankroll"] = None,
+) -> str:
+    """Operating-rules card (Markdown): ranked picks, CUT list, footer.
+
+    Renders rule 2 (hit-probability ranking + CUT longshots), rule 3 (the
+    further-out tilt — imminent fixtures flagged and edge-discounted), rule 4
+    (venue tag + per-venue deployment split + cross-venue whole-book exposure)
+    and rule 1 (the bankroll/rung/Kelly footer with the rung-0 negative-CLV
+    constraint). Reference-only markets (scorelines etc.) are appended by the
+    caller, clearly flagged "REFERENCE, NOT SIZED".
+    """
+    lines: List[str] = []
+    n = len(ranked.picks)
+    lines.append("*World Cup Alpha — bet card* (%d staked picks, hit-prob ranked)" % n)
+    lines.append("")
+    if not ranked.picks:
+        lines.append("_No +EV bets clear the selection rule on the current slate._")
+    for i, r in enumerate(ranked.picks, 1):
+        stake = r.stakes.get(pool.name, 0.0)
+        tilt = ""
+        if r.imminent and r.raw_edge is not None:
+            tilt = "  IMMINENT: edge discounted %+.1f%%->%+.1f%% (likely model error)" % (
+                r.raw_edge * 100, r.edge * 100
+            )
+        elif r.hours_to_kickoff is not None and r.hours_to_kickoff >= FURTHER_OUT_HOURS:
+            tilt = "  further-out (%.0fh) — soft market, prioritised" % r.hours_to_kickoff
+        lines.append(
+            "*%d. [%s] %s* — %s @ *%.2f* via *%s*\n"
+            "    model %.1f%% / mkt %.1f%%  edge *%+.1f%%*  [elo %.0f%% dc %.0f%%]\n"
+            "    stake: %s £%.2f%s"
+            % (
+                i, _CATEGORY_LABEL.get(r.category, r.category.upper()),
+                r.match_desc, r.selection_team, r.best_odds, r.venue,
+                r.model_prob * 100, r.market_prob * 100, r.edge * 100,
+                r.elo_prob * 100, r.dc_prob * 100, pool.name, stake, tilt,
+            )
+        )
+
+    # CUT list (rule 2): excluded longshots, kept visible with EV + reason.
+    if ranked.cut:
+        lines.append("")
+        lines.append("*— CUT (excluded from staking, %d) —*" % len(ranked.cut))
+        for r in ranked.cut:
+            lines.append(
+                "  x %s — %s @ %.2f (model %.1f%%, +%.1f%% EV): %s"
+                % (
+                    r.match_desc, r.selection_team, r.best_odds,
+                    r.model_prob * 100, r.edge * 100, r.cut_reason,
+                )
+            )
+
+    # Cross-venue deployment split + whole-book exposure (rule 4).
+    if ranked.picks:
+        split = venue_deployment(ranked.picks, pool.name)
+        if split:
+            lines.append("")
+            lines.append(
+                "*Venue split:* "
+                + "  ".join("%s £%.2f" % (v, s) for v, s in split.items())
+            )
+        bankroll = bank.bankroll if bank is not None else pool.bankroll
+        book = whole_book_exposure(ranked.picks, bankroll)
+        flagged = [b for b in book if b["over_cap"]]
+        if flagged:
+            lines.append(
+                "*Whole-book exposure (cross-venue):* %d match(es) over the "
+                "5%%-of-base cap:" % len(flagged)
+            )
+            for b in flagged:
+                lines.append(
+                    "  ! %s — £%.2f at risk across %s (cap £%.2f)"
+                    % (b["match"], b["stake_at_risk"], ", ".join(b["venues"]), b["cap"])
+                )
+
+    # Bankroll / rung / Kelly footer (rule 1).
+    if bank is not None:
+        lines.append("")
+        lines.append("*Bankroll model (sizing base = CLV-earned rung, not cash):*")
+        lines.append("  - %s" % bank.reason)
+        lines.append(
+            "  - actual capital (unpartitioned): £%.0f" % bank.actual_capital
+        )
+        if bank.venue_balances:
+            lines.append(
+                "  - per-venue available: "
+                + "  ".join(
+                    "%s %s%.0f" % (v, "$" if v == VENUE_POLYMARKET else "£", bal)
+                    for v, bal in sorted(bank.venue_balances.items())
+                )
+            )
+        if bank.constrained:
+            lines.append("  - CONSTRAINED: %s" % bank.constraint_note)
     return "\n".join(lines)
 
 
