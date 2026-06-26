@@ -118,11 +118,20 @@ def build_slate(
             continue
         home, away = fixture.split(" vs ", 1)
         m = f.get("model") or {}
+        # Goal-expectation lambdas (Part 1: persisted at card build) drive the
+        # correlation-aware exposure. Absent on older entries -> None (the
+        # correlated model then falls back to legacy 1X2-only for that fixture).
+        lam_h = f.get("lambda_home")
+        lam_a = f.get("lambda_away")
+        lambdas = None
+        if isinstance(lam_h, (int, float)) and isinstance(lam_a, (int, float)):
+            lambdas = (float(lam_h), float(lam_a))
         slate[fixture] = {
             "home": home,
             "away": away,
             "kickoff": f.get("kickoff"),
             "p": {home: m.get("home"), "Draw": m.get("draw"), away: m.get("away")},
+            "lambdas": lambdas,
         }
     return slate
 
@@ -166,6 +175,7 @@ def build_exposure_data(
     model_fixtures: List[Dict[str, Any]],
     odds_index: Optional[Dict[str, Dict[str, Dict[str, float]]]] = None,
     now_utc: Optional[str] = None,
+    bankroll: float = 3000.0,
 ) -> Dict[str, Any]:
     """Compute the full exposure feed.
 
@@ -175,11 +185,17 @@ def build_exposure_data(
         Open bets (ledger rows as dicts): match_desc, market, selection,
         decimal_odds, stake, source, account, status.
     model_fixtures:
-        ``data/model_predictions.json`` ``fixtures`` list.
+        ``data/model_predictions.json`` ``fixtures`` list. After Phase-2 Wave-1
+        each entry may also carry ``lambda_home`` / ``lambda_away`` goal means;
+        when present they drive the correlation-aware exposure section.
     odds_index:
         ``{fixture: {outcome: {venue: decimal_odds}}}`` for plug suggestions.
     now_utc:
         Display timestamp for the feed header.
+    bankroll:
+        Effective combined bankroll (£) for the 5%-per-correlated-underlying cap
+        in the ``correlated_exposure`` section. Defaults to £3000 (≈ £1,500
+        sportsbook + ~$1,995 on-chain).
     """
     # Restrict the risk slate to future / in-play games (drop finished ones), so
     # blind spots and per-fixture exposure never cover games already played.
@@ -255,17 +271,82 @@ def build_exposure_data(
     ]
     portfolio, correlation = _portfolio_scenarios(slate, result_bets, acca_bets)
     blindspots = _collect_blindspots(fixtures_out)
+    correlated = _correlated_exposure(slate, result_bets, event_bets, bankroll)
 
     return {
         "meta": {"generated": now_utc},
         "portfolio": portfolio,
         "correlation": correlation,
+        "correlated_exposure": correlated,
         "fixtures": fixtures_out,
         "blindspots": blindspots,
         "unmapped": unmapped,
         "off_slate_accas": [a["label"] for a in acca_bets if a["off"]],
         "off_slate_events": event_bets.get("(off-slate)", []),
     }
+
+
+def _correlated_exposure(slate, result_bets, event_bets, bankroll):
+    """Build the correlation-aware exposure section (Phase-2 Wave-1).
+
+    All SAME-FIXTURE bets — result singles plus O/U / BTTS / correct-score /
+    team-total event bets — are settled from one shared scoreline so their joint
+    P&L is exact, then a 5%-of-bankroll net-downside cap is applied per fixture
+    (all same-fixture outcomes treated as ONE correlated exposure). Accas span
+    fixtures and stay with the existing cross-fixture acca logic, so they are not
+    folded in here.
+
+    Fixtures without persisted lambdas fall back cleanly (flagged
+    ``has_lambdas=False``); the legacy per-outcome ``results`` / blindspots /
+    acca outputs are untouched.
+    """
+    # Lazy import keeps the heavy numpy dependency off the hot path for callers
+    # that only want the legacy 1X2 view (and mirrors the module's IO-free,
+    # deterministic contract — the matrix is rebuilt from passed-in lambdas).
+    from . import exposure_corr
+
+    fixture_bets: Dict[str, List[Dict[str, Any]]] = {}
+    lambdas: Dict[str, Tuple[float, float]] = {}
+    home_away: Dict[str, Tuple[str, str]] = {}
+
+    for fx, d in slate.items():
+        home_away[fx] = (d["home"], d["away"])
+        if d.get("lambdas") is not None:
+            lambdas[fx] = d["lambdas"]
+
+    # Result singles -> a 1X2 bet keyed on the winning selection.
+    for rb in result_bets:
+        fx = rb["fx"]
+        sel = rb["sel"]
+        # Map the internal "Draw" sentinel and team selection back to a label
+        # settle_on_scoreline understands (team name or "Draw").
+        fixture_bets.setdefault(fx, []).append({
+            "type": "Full-time result",
+            "selection": sel,
+            "stake": rb["stake"],
+            "profit": rb["profit"],
+            "free": rb["free"],
+            "odds": rb["odds"],
+        })
+
+    # Event bets (O/U, BTTS, correct score, team totals, props) on a fixture.
+    for fx, evs in event_bets.items():
+        if fx == "(off-slate)":
+            continue
+        for e in evs:
+            fixture_bets.setdefault(fx, []).append({
+                "type": e.get("type"),
+                "selection": e.get("selection"),
+                "stake": e.get("stake"),
+                "profit": e.get("profit"),
+                "free": e.get("free"),
+                "odds": e.get("odds"),
+            })
+
+    bank = float(bankroll) if bankroll else exposure_corr.DEFAULT_BANKROLL
+    return exposure_corr.build_correlated_exposure(
+        fixture_bets, lambdas, home_away, bankroll=bank
+    )
 
 
 def _fixture_exposure(fx, slate, result_bets, acca_bets, events, fx_odds,

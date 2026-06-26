@@ -287,7 +287,11 @@ def main() -> None:
             from wca.modelpreds import build_predictions, write_predictions
 
             blends = fixture_blends(models, odds_df, fixtures_meta)
-            write_predictions(build_predictions(blends, now_str))
+            # Pass the fitted DC model so each row also carries the per-fixture
+            # goal-expectation lambdas (same lagged fit as the DC 1X2). They are
+            # the compact sufficient statistic the correlated-exposure model
+            # reconstructs the scoreline matrix from.
+            write_predictions(build_predictions(blends, now_str, dc_model=models.dc))
             print("Model predictions persisted: %d fixtures" % len(blends))
         except Exception as exc:
             print("WARNING: model prediction dump failed: %s" % exc, file=sys.stderr)
