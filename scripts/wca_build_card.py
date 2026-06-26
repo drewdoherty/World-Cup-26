@@ -373,19 +373,20 @@ def main() -> None:
                 SCORER_MARKETS,
                 build_next_match,
                 format_next_match,
-                select_next_blend,
+                select_next_blends,
             )
             from wca.card import _iter_fixture_blends, BlendWeights
 
-            scorer_df = None
+            scorer_by_event = {}
             if not args.skip_scorers and not odds_df.empty:
-                # Per-event endpoint needs the event id of the next fixture.
+                # Pull scorer odds for every fixture at the earliest kickoff
+                # (there may be multiple simultaneous games).
                 blends = _iter_fixture_blends(
                     models, odds_df, fixtures_meta, BlendWeights(),
                     ("United States", "Mexico", "Canada", "USA"),
                 )
-                nxt = select_next_blend(blends)
-                if nxt is not None:
+                nxts = select_next_blends(blends)
+                for nxt in nxts:
                     try:
                         # Both anytime + first-goalscorer player-prop markets
                         # (each costs extra Odds API credits per region/market).
@@ -395,16 +396,21 @@ def main() -> None:
                             regions=args.regions,
                             markets=SCORER_MARKETS,
                         )
+                        scorer_by_event[str(nxt.fx["event_id"])] = scorer_df
                     except Exception as exc:
-                        print("WARN: scorer odds pull failed: %s" % exc, file=sys.stderr)
+                        print(
+                            "WARN: scorer odds pull failed for %s vs %s: %s"
+                            % (nxt.home, nxt.away, exc),
+                            file=sys.stderr,
+                        )
 
-            next_card = build_next_match(
-                models, odds_df, fixtures_meta, scorer_df=scorer_df,
+            next_cards = build_next_match(
+                models, odds_df, fixtures_meta, scorer_by_event=scorer_by_event,
                 pm_lookup=not args.skip_scorers,
                 bankroll=pool_bank.bankroll,
                 kelly_fraction=pool_bank.kelly_fraction,
             )
-            write_card(format_next_match(next_card), path=args.next_out, ts_utc=now_str)
+            write_card(format_next_match(next_cards), path=args.next_out, ts_utc=now_str)
             print("Next-match card written: out=%s" % args.next_out)
         except Exception as exc:
             print("WARN: next-match card failed: %s" % exc, file=sys.stderr)

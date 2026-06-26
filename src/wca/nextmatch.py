@@ -129,11 +129,18 @@ class NextMatchCard:
     kelly_cap: float = 0.05
 
 
+def select_next_blends(blends: Sequence[_FixtureBlend]) -> List[_FixtureBlend]:
+    """All fixtures sharing the earliest kickoff time, or [] if empty."""
+    if not blends:
+        return []
+    earliest = min(str(fb.fx["commence_time"]) for fb in blends)
+    return [fb for fb in blends if str(fb.fx["commence_time"]) == earliest]
+
+
 def select_next_blend(blends: Sequence[_FixtureBlend]) -> Optional[_FixtureBlend]:
     """The fixture kicking off first (min commence_time), or None if empty."""
-    if not blends:
-        return None
-    return min(blends, key=lambda fb: str(fb.fx["commence_time"]))
+    result = select_next_blends(blends)
+    return result[0] if result else None
 
 
 def top_scorers_from_odds(
@@ -432,6 +439,7 @@ def build_next_match(
     odds_df: pd.DataFrame,
     fixtures_meta: pd.DataFrame,
     weights: BlendWeights = BlendWeights(),
+    scorer_by_event: Optional[Dict[str, Optional[pd.DataFrame]]] = None,
     scorer_df: Optional[pd.DataFrame] = None,
     corners_line: float = DEFAULT_CORNERS_LINE,
     corners_model: Optional[CornersModel] = None,
@@ -446,76 +454,96 @@ def build_next_match(
     kelly_fraction: float = 0.25,
     kelly_cap: float = 0.05,
     players_path: str = "data/players.json",
-) -> Optional[NextMatchCard]:
-    """Build the next-match preview, or None when the slate is empty.
+) -> List[NextMatchCard]:
+    """Build next-match preview cards for all fixtures sharing the earliest kickoff.
 
-    ``odds_df`` should already be filtered to the look-ahead window by the
-    caller (same frame the main card build uses); the earliest kickoff among
-    fixtures with a usable market wins. ``scorer_df`` is the optional per-event
-    anytime + first-goalscorer pull for that fixture; ``pm_lookup`` resolves the
-    Polymarket "1+ goals" price per selected player (set False to skip network).
+    Returns a list — usually one card, but multiple when games kick off
+    simultaneously. Returns [] when the slate is empty.
+
+    ``scorer_by_event`` maps event_id -> scorer DataFrame for per-fixture player
+    props. ``scorer_df`` is the legacy single-fixture fallback (used when there
+    is only one simultaneous fixture and ``scorer_by_event`` is not provided).
     """
-    blends = _iter_fixture_blends(models, odds_df, fixtures_meta, weights, host_nations)
-    fb = select_next_blend(blends)
-    if fb is None:
-        return None
+    blends_iter = _iter_fixture_blends(models, odds_df, fixtures_meta, weights, host_nations)
+    fbs = select_next_blends(blends_iter)
+    if not fbs:
+        return []
 
-    winner: Dict[str, Tuple[float, Optional[str], float, float]] = {}
-    for outcome in OUTCOMES:
-        p = fb.blended[outcome]
-        book, odds = best_price(fb.books, outcome)
-        # Fee-adjusted edge off the chosen venue's net price; display the gross
-        # price + a clean venue label (Betfair / Polymarket).
-        edge = (kelly_mod.edge(p, net_odds(book, odds))
-                if book is not None and odds > 1.0 else float("nan"))
-        winner[outcome] = (p, venue_label(book), odds, edge)
-
-    pred = models.dc.predict(fb.home, fb.away, neutral=fb.neutral, warn=False)
-    scores = scoreline_card(
-        pred,
-        (fb.blended["home"], fb.blended["draw"], fb.blended["away"]),
-        home=fb.home,
-        away=fb.away,
-        top_k=top_k_scores,
-        min_edge=min_edge,
-    )
+    # Resolve Polymarket events once and share across simultaneous fixtures.
+    resolved_pm = pm_events
+    if pm_lookup and resolved_pm is None and len(fbs) > 1:
+        try:
+            from wca.data import polymarket as pm
+            resolved_pm = pm.find_world_cup_markets(include_closed=False)
+        except Exception:
+            resolved_pm = []
 
     cm = corners_model or CornersModel()
-    lam_h = float(getattr(pred, "lambda_home", 0.0) or 0.0)
-    lam_a = float(getattr(pred, "lambda_away", 0.0) or 0.0)
-    p_over = cm.prob_over(corners_line, lam_h, lam_a)
-    mu = cm.mean_total(lam_h, lam_a)
+    cards: List[NextMatchCard] = []
+    for fb in fbs:
+        event_id = str(fb.fx.get("event_id", ""))
+        if scorer_by_event is not None:
+            event_scorer_df = scorer_by_event.get(event_id)
+        elif scorer_df is not None and len(fbs) == 1:
+            event_scorer_df = scorer_df
+        else:
+            event_scorer_df = None
 
-    goalscorers, gs_note = build_goalscorers(
-        fb.home,
-        fb.away,
-        scorer_df,
-        top_n_per_team=top_scorers_per_team,
-        squads_path=squads_path,
-        pm_events=pm_events,
-        pm_lookup=pm_lookup,
-        lambda_home=lam_h,
-        lambda_away=lam_a,
-        players_path=players_path,
-    )
+        winner: Dict[str, Tuple[float, Optional[str], float, float]] = {}
+        for outcome in OUTCOMES:
+            p = fb.blended[outcome]
+            book, odds = best_price(fb.books, outcome)
+            edge = (kelly_mod.edge(p, net_odds(book, odds))
+                    if book is not None and odds > 1.0 else float("nan"))
+            winner[outcome] = (p, venue_label(book), odds, edge)
 
-    return NextMatchCard(
-        home=fb.home,
-        away=fb.away,
-        commence_time=str(fb.fx["commence_time"]),
-        winner=winner,
-        corners_line=corners_line,
-        corners_p_over=p_over,
-        corners_mu=mu,
-        scores=scores,
-        scorers=top_scorers_from_odds(scorer_df),
-        goalscorers=goalscorers,
-        goalscorer_note=gs_note,
-        min_edge=min_edge,
-        bankroll=bankroll,
-        kelly_fraction=kelly_fraction,
-        kelly_cap=kelly_cap,
-    )
+        pred = models.dc.predict(fb.home, fb.away, neutral=fb.neutral, warn=False)
+        scores = scoreline_card(
+            pred,
+            (fb.blended["home"], fb.blended["draw"], fb.blended["away"]),
+            home=fb.home,
+            away=fb.away,
+            top_k=top_k_scores,
+            min_edge=min_edge,
+        )
+
+        lam_h = float(getattr(pred, "lambda_home", 0.0) or 0.0)
+        lam_a = float(getattr(pred, "lambda_away", 0.0) or 0.0)
+        p_over = cm.prob_over(corners_line, lam_h, lam_a)
+        mu = cm.mean_total(lam_h, lam_a)
+
+        goalscorers, gs_note = build_goalscorers(
+            fb.home,
+            fb.away,
+            event_scorer_df,
+            top_n_per_team=top_scorers_per_team,
+            squads_path=squads_path,
+            pm_events=resolved_pm,
+            pm_lookup=pm_lookup,
+            lambda_home=lam_h,
+            lambda_away=lam_a,
+            players_path=players_path,
+        )
+
+        cards.append(NextMatchCard(
+            home=fb.home,
+            away=fb.away,
+            commence_time=str(fb.fx["commence_time"]),
+            winner=winner,
+            corners_line=corners_line,
+            corners_p_over=p_over,
+            corners_mu=mu,
+            scores=scores,
+            scorers=top_scorers_from_odds(event_scorer_df),
+            goalscorers=goalscorers,
+            goalscorer_note=gs_note,
+            min_edge=min_edge,
+            bankroll=bankroll,
+            kelly_fraction=kelly_fraction,
+            kelly_cap=kelly_cap,
+        ))
+
+    return cards
 
 
 def _fmt_odds(o: Optional[float]) -> str:
@@ -637,11 +665,8 @@ def _format_goalscorers(card: NextMatchCard) -> List[str]:
     return out
 
 
-def format_next_match(card: Optional[NextMatchCard]) -> str:
-    """Telegram Markdown for the next-match card (phone-width friendly)."""
-    if card is None:
-        return "*Next match*\nNo upcoming fixture with a usable market in the current window."
-
+def _format_single_next_match(card: NextMatchCard) -> str:
+    """Telegram Markdown for one next-match card (phone-width friendly)."""
     lines: List[str] = [
         "⚽ *Next match* — %s vs %s" % (card.home, card.away),
         "Kickoff %s" % card.commence_time,
@@ -699,6 +724,21 @@ def format_next_match(card: Optional[NextMatchCard]) -> str:
             % (ou25[0] * 100, ou25[1] * 100, c.btts * 100)
         )
     return "\n".join(lines)
+
+
+def format_next_match(cards: Optional[List[NextMatchCard]]) -> str:
+    """Telegram Markdown for the next-match card(s) (phone-width friendly).
+
+    When multiple fixtures kick off simultaneously, all are rendered back-to-back
+    separated by a divider line.
+    """
+    if not cards:
+        return "*Next match*\nNo upcoming fixture with a usable market in the current window."
+    if len(cards) == 1:
+        return _format_single_next_match(cards[0])
+    return ("\n\n" + "─" * 20 + "\n\n").join(
+        _format_single_next_match(card) for card in cards
+    )
 
 
 # ---------------------------------------------------------------------------
