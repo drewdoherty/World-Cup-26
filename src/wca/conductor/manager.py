@@ -24,13 +24,31 @@ from wca.conductor.models import Engine, TaskRecord, TaskStatus
 
 _HEALTH_TTL = 300.0  # seconds an engine-health probe stays cached
 
+# Conversational-mode tuning. History is trimmed to the last N turns when
+# building a prompt so context stays bounded (and the prompt stays cheap).
+_CHAT_HISTORY_TURNS = 16
+
+_CHAT_PREAMBLE = (
+    "You are the WCA dev-conductor's conversational assistant, replying inside a "
+    "Telegram chat. You can read the project repo (you are running in its root) to "
+    "answer questions about the code, architecture, data, and ongoing work, and to "
+    "discuss ideas. Keep replies concise and Telegram-friendly (short paragraphs, "
+    "Markdown ok). You are READ-ONLY here: do NOT modify files, run destructive or "
+    "repo-writing commands, place bets, or touch live data. If the user wants an "
+    "actual code change, propose the approach and tell them to dispatch it with "
+    "`/task <description>` (which spawns a worktree + PR). Default to answering and "
+    "proposing."
+)
+
 Notify = Callable[[TaskRecord], None]
 
 
 class ConductorManager:
-    def __init__(self, cfg: ConductorConfig, notify: Optional[Notify] = None) -> None:
+    def __init__(self, cfg: ConductorConfig, notify: Optional[Notify] = None,
+                 store: Optional[object] = None) -> None:
         self.cfg = cfg
         self.notify = notify
+        self._store = store  # ConductorStore | None — durable task + chat state
         self._records: Dict[int, TaskRecord] = {}
         self._futures: Dict[int, Future] = {}
         self._lock = threading.Lock()
@@ -40,6 +58,77 @@ class ConductorManager:
         )
         self._health: Dict[str, EngineHealth] = {}
         self._health_lock = threading.Lock()  # separate: probing runs subprocesses
+        # Conversational history per chat (in-memory cache; mirrored to the store).
+        self._chat_history: Dict[str, List[Dict[str, str]]] = {}
+        self._chat_locks: Dict[str, threading.Lock] = {}
+        self._interrupted: List[TaskRecord] = []  # in-flight tasks lost to a restart
+        if self._store is not None:
+            self._reattach()
+
+    # -- durability: persistence + restart reattach -----------------------
+
+    def _persist(self, record: TaskRecord) -> None:
+        """Best-effort: write a record to the store. Never raises (a persistence
+        glitch must never kill a task or a reply)."""
+        if self._store is None:
+            return
+        try:
+            self._store.upsert_task(record)
+        except Exception as exc:  # noqa: BLE001
+            print("[conductor] persist failed for #%s: %s" % (record.id, exc), flush=True)
+
+    def _reattach(self) -> None:
+        """Reload persisted state on startup; flag tasks lost mid-flight.
+
+        Any task that was QUEUED/RUNNING/PUSHED when the process died can't be
+        resumed (its worktree/agent are gone), so it is marked INTERRUPTED and
+        surfaced to :meth:`take_interrupted` so the bot can tell the user instead
+        of failing silently. The id counter is advanced past every loaded id so a
+        new submission can never collide with a persisted one.
+        """
+        try:
+            records = self._store.load_tasks()  # type: ignore[union-attr]
+        except Exception as exc:  # noqa: BLE001
+            print("[conductor] reattach failed: %s" % exc, flush=True)
+            return
+        in_flight = {TaskStatus.QUEUED.value, TaskStatus.RUNNING.value, TaskStatus.PUSHED.value}
+        for rec in records:
+            if rec.status in in_flight:
+                rec.status = TaskStatus.INTERRUPTED.value
+                if not rec.error:
+                    rec.error = "interrupted by a conductor restart"
+                self._interrupted.append(rec)
+                self._persist(rec)
+            self._records[rec.id] = rec
+        self._counter = max([self._store.max_task_id(), *self._records.keys(), 0])  # type: ignore[union-attr]
+        try:
+            self._chat_history = {
+                cid: [{"role": r, "content": c} for r, c in turns]
+                for cid, turns in self._store.load_chat().items()  # type: ignore[union-attr]
+            }
+        except Exception as exc:  # noqa: BLE001
+            print("[conductor] chat reattach failed: %s" % exc, flush=True)
+
+    def take_interrupted(self) -> List[TaskRecord]:
+        """Return (and clear) the tasks that a restart interrupted, for notifying."""
+        with self._lock:
+            out = list(self._interrupted)
+            self._interrupted = []
+        return out
+
+    def _on_transition(self, record: TaskRecord) -> None:
+        """Single notify seam handed to the runner: persist, then notify the bot.
+
+        Persisting here captures every lifecycle transition the runner emits
+        (RUNNING, PUSHED, and the terminal state in its ``finally``), so a
+        restart at any point finds an up-to-date record on disk.
+        """
+        self._persist(record)
+        if self.notify is not None:
+            try:
+                self.notify(record)
+            except Exception:  # noqa: BLE001 - a broken notifier must not kill the task
+                pass
 
     # -- engine health ----------------------------------------------------
 
@@ -93,6 +182,7 @@ class ConductorManager:
                 record = self._new_record_locked(engine, task, chat_id, images=images)
             record.status = TaskStatus.REJECTED.value
             record.error = primary.reason
+            self._persist(record)
             return record
 
         with self._lock:
@@ -115,6 +205,7 @@ class ConductorManager:
             record.error = "no healthy engine: claude (%s)" % (
                 self.engine_health(Engine.CLAUDE.value).reason,
             )
+            self._persist(record)
             return record
         with self._lock:
             return self._submit_locked(
@@ -124,14 +215,39 @@ class ConductorManager:
     def _submit_locked(self, engine: str, task: str, chat_id: str,
                        route_reason: str = "", images: Optional[List[str]] = None) -> TaskRecord:
         record = self._new_record_locked(engine, task, chat_id, route_reason, images=images)
+        # Idempotency: an identical task already in flight is almost always a
+        # double-tap or a resubmit after a restart. Reject the new one as a
+        # duplicate (don't dispatch a second worktree/agent) and point at the
+        # original — the audit's #1 collision root cause.
+        dup = self._active_duplicate_locked(record.dedupe_key, exclude_id=record.id)
+        if dup is not None:
+            record.status = TaskStatus.REJECTED.value
+            record.duplicate_of = dup.id
+            record.error = "duplicate of #%d (already %s)" % (dup.id, dup.status)
+            self._persist(record)
+            return record
         budget = self.cfg.token_budget
         if budget is not None and self._spent_locked() >= budget:
             record.status = TaskStatus.REJECTED.value
             record.error = "token budget %d exhausted (spent %d)" % (budget, self._spent_locked())
+            self._persist(record)
             return record
-        future = self._pool.submit(runner.run_task, self.cfg, record, self.notify)
+        future = self._pool.submit(runner.run_task, self.cfg, record, self._on_transition)
         self._futures[record.id] = future
         return record
+
+    def _active_duplicate_locked(self, dedupe_key: str, exclude_id: int) -> Optional[TaskRecord]:
+        """Oldest ACTIVE (queued/running/pushed) record sharing *dedupe_key*."""
+        if not dedupe_key:
+            return None
+        active = {TaskStatus.QUEUED.value, TaskStatus.RUNNING.value, TaskStatus.PUSHED.value}
+        for rid in sorted(self._records):
+            if rid == exclude_id:
+                continue
+            r = self._records[rid]
+            if r.status in active and r.dedupe_key == dedupe_key:
+                return r
+        return None
 
     def _new_record_locked(self, engine: str, task: str, chat_id: str,
                            route_reason: str = "", images: Optional[List[str]] = None) -> TaskRecord:
@@ -152,8 +268,10 @@ class ConductorManager:
             status=TaskStatus.QUEUED.value,
             route_reason=route_reason,
             created_at=time.time(),
+            dedupe_key=runner.slugify(task),
         )
         self._records[rid] = record
+        self._persist(record)
         return record
 
     # -- control ----------------------------------------------------------
@@ -168,9 +286,15 @@ class ConductorManager:
         if future is not None and future.cancel():
             record.status = TaskStatus.REJECTED.value
             record.error = "cancelled before start"
+            self._persist(record)
         return record
 
-    _RETRYABLE = {TaskStatus.FAILED.value, TaskStatus.REJECTED.value, TaskStatus.NO_CHANGES.value}
+    _RETRYABLE = {
+        TaskStatus.FAILED.value,
+        TaskStatus.REJECTED.value,
+        TaskStatus.NO_CHANGES.value,
+        TaskStatus.INTERRUPTED.value,
+    }
 
     def retry(self, task_id: int) -> Optional[TaskRecord]:
         """Re-dispatch a finished task as a NEW record (same engine + text).
@@ -242,6 +366,74 @@ class ConductorManager:
 
     def shutdown(self) -> None:
         self._pool.shutdown(wait=False)
+        if self._store is not None:
+            try:
+                self._store.close()  # type: ignore[union-attr]
+            except Exception:  # noqa: BLE001
+                pass
+
+    # -- conversational chat ----------------------------------------------
+
+    def _chat_lock_for(self, chat_id: str) -> threading.Lock:
+        with self._lock:
+            lk = self._chat_locks.get(chat_id)
+            if lk is None:
+                lk = threading.Lock()
+                self._chat_locks[chat_id] = lk
+            return lk
+
+    def _record_chat(self, chat_id: str, role: str, content: str) -> None:
+        hist = self._chat_history.setdefault(chat_id, [])
+        hist.append({"role": role, "content": content})
+        # keep the in-memory cache bounded (the store keeps the full record)
+        if len(hist) > _CHAT_HISTORY_TURNS * 2:
+            del hist[: len(hist) - _CHAT_HISTORY_TURNS * 2]
+        if self._store is not None:
+            try:
+                self._store.append_chat(chat_id, role, content, time.time())  # type: ignore[union-attr]
+            except Exception as exc:  # noqa: BLE001
+                print("[conductor] chat persist failed: %s" % exc, flush=True)
+
+    def _build_chat_prompt(self, chat_id: str, user_text: str) -> str:
+        hist = self._chat_history.get(chat_id, [])[-_CHAT_HISTORY_TURNS:]
+        lines = [_CHAT_PREAMBLE, ""]
+        if hist:
+            lines.append("Conversation so far:")
+            for turn in hist:
+                who = "User" if turn.get("role") == "user" else "Assistant"
+                lines.append("%s: %s" % (who, turn.get("content", "")))
+            lines.append("")
+        lines.append("User: %s" % user_text)
+        lines.append("")
+        lines.append("Reply as the assistant (do not modify the repo):")
+        return "\n".join(lines)
+
+    def chat(self, chat_id: str, user_text: str) -> str:
+        """Generate one conversational reply for *user_text*, keeping per-chat
+        context. Persists both the user message and the reply (so context
+        survives a restart). Bounded by ``cfg.chat_timeout``; never raises.
+        """
+        chat_id = str(chat_id)
+        user_text = (user_text or "").strip()
+        if not user_text:
+            return ""
+        with self._chat_lock_for(chat_id):  # serialize a chat's own turns
+            health = self.engine_health(Engine.CLAUDE.value)
+            if not health.ok:
+                return "⚠️ Chat unavailable — claude engine: %s" % health.reason
+            # Build the prompt from prior turns, THEN record this user message, so
+            # the current turn isn't duplicated in the transcript.
+            prompt = self._build_chat_prompt(chat_id, user_text)
+            self._record_chat(chat_id, "user", user_text)
+            try:
+                result = runner.run_chat(self.cfg, prompt, timeout=self.cfg.chat_timeout)
+            except Exception as exc:  # noqa: BLE001 - never let a reply crash the bot
+                return "⚠️ chat error: %s" % exc
+            if not result.ok:
+                return "⚠️ %s" % (result.error or "chat failed")
+            reply = result.summary or "(no reply)"
+            self._record_chat(chat_id, "assistant", reply)
+            return reply
 
     # -- accounting -------------------------------------------------------
 
@@ -431,6 +623,7 @@ class ConductorManager:
         TaskStatus.NO_CHANGES.value: "∅",
         TaskStatus.FAILED.value: "❌",
         TaskStatus.REJECTED.value: "🚫",
+        TaskStatus.INTERRUPTED.value: "♻️",
     }
 
     def status_table(self) -> str:

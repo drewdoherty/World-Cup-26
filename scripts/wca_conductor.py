@@ -123,6 +123,9 @@ def _help_text(manager: ConductorManager) -> str:
         "`/retry <id>` — re-run a failed task",
         "`/cancel <id>` — cancel a not-yet-started task",
         "",
+        "💬 *Just type a message* (no slash) to chat with the assistant — it "
+        "reads the repo to answer questions & discuss; it won't change code "
+        "(use `/task` for that).",
         "📎 *Paste a screenshot* with a caption (or just a description) and the "
         "agent reads it as visual context to debug.",
         "📄 Report files a task writes are *sent back to you* automatically; "
@@ -678,7 +681,34 @@ class ConductorBot:
             return "Can't cancel `#%d` (already %s)." % (tid, record.status)
         if cmd.startswith("/"):
             return "Unknown command. `/help` for usage."
+        # Plain, non-slash text (and replies in a chat thread) → conversational
+        # agent. This was previously dropped silently; now it's an interactive
+        # assistant. /task and /claude remain the PR-spawning paths.
+        return self._chat(text, chat_id, user_id)
+
+    # -- conversational chat ----------------------------------------------
+
+    def _chat(self, text: str, chat_id: str, user_id: str) -> Optional[str]:
+        """Kick off a bounded conversational reply in the background.
+
+        Returns None: the reply is sent from the worker thread so a slow agent
+        turn never blocks the poll loop. Admin-gated (chat spends tokens).
+        """
+        if not _is_admin(user_id, self.admin):
+            return "🚫 Chat is restricted to the admin."
+        threading.Thread(
+            target=self._chat_worker, args=(text, chat_id),
+            name="conductor-chat", daemon=True,
+        ).start()
         return None
+
+    def _chat_worker(self, text: str, chat_id: str) -> None:
+        try:
+            reply = self.manager.chat(chat_id, text)
+        except Exception as exc:  # noqa: BLE001 - never die on one reply
+            reply = "⚠️ chat error: %s" % exc
+        if reply:
+            self._send(chat_id, reply)
 
     def handle_callback(self, cb: Dict[str, object]) -> None:
         """Render the view for a tapped inline-keyboard button."""
@@ -738,6 +768,21 @@ class ConductorBot:
         if reply:
             self._send(chat_id, reply)
 
+    def _announce_interrupted(self) -> None:
+        """Message the user about each task a restart interrupted (re-run hint)."""
+        try:
+            interrupted = self.manager.take_interrupted()
+        except Exception as exc:  # noqa: BLE001
+            print("[conductor] take_interrupted failed: %s" % exc, flush=True)
+            return
+        for r in interrupted:
+            chat = r.chat_id or self._notify_chat
+            if not chat:
+                continue
+            task = r.task if len(r.task) <= 70 else r.task[:67] + "..."
+            self._send(chat, "♻️ `#%d` was interrupted by a restart — re-run with "
+                       "`/retry %d`?\n_%s_" % (r.id, r.id, task))
+
     # -- main loop --------------------------------------------------------
 
     def run(self, poll_timeout: int = 25) -> None:
@@ -757,6 +802,9 @@ class ConductorBot:
             cap = self.manager.cfg.max_parallel
             mode = "sequential" if cap <= 1 else "%d-way swarm" % cap
             self._send(self._notify_chat, "🟢 *conductor online* — %s. /help" % mode)
+        # Tell the user about any task that was in flight when we last died, so a
+        # restart never loses work silently.
+        self._announce_interrupted()
 
         offset: Optional[int] = None
         import time as _time
@@ -844,7 +892,18 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 2
 
     cfg = _build_config(args)
-    manager = ConductorManager(cfg)
+    # Durable task + chat state survives KeepAlive/sleep restarts. Disable by
+    # setting WCA_CONDUCTOR_STATE_DB="off"; override the path otherwise.
+    store = None
+    state_db = os.environ.get("WCA_CONDUCTOR_STATE_DB") or str(_REPO_ROOT / "data" / "conductor_state.db")
+    if state_db.lower() not in ("off", "none", "0"):
+        try:
+            from wca.conductor.store import ConductorStore  # noqa: WPS433 - optional dep-free store
+            store = ConductorStore(state_db)
+            print("[conductor] state store: %s" % state_db, flush=True)
+        except Exception as exc:  # noqa: BLE001 - run without persistence rather than fail to start
+            print("[conductor] state store disabled (%s)" % exc, flush=True)
+    manager = ConductorManager(cfg, store=store)
     try:
         client = TelegramClient()
     except TelegramError as exc:
