@@ -26,6 +26,7 @@ This module produces *recommendations only*; nothing here places a bet.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple
 
@@ -597,33 +598,64 @@ def _index_odds(odds_df: pd.DataFrame) -> Dict[str, Dict[str, object]]:
 
     Returns fixture_key -> {meta, books: {book: {home/draw/away: odds}}}.
     The Odds API h2h outcome names are the team names plus 'Draw'.
+
+    Fixtures are keyed by the **canonical, order-independent team pair**, not the
+    source ``event_id``: in best-price (union) mode the same real fixture arrives
+    from several venues (Betfair, TheOddsAPI books, Polymarket) each with its own
+    event_id and possibly opposite home/away orientation. Grouping by canonical
+    pair merges every venue's book into ONE fixture so :func:`best_price` can
+    line-shop across venues per outcome (instead of emitting a duplicate pick per
+    venue). Each book's outcomes are re-slotted into the fixture's chosen
+    home/away orientation by matching the canonical team name.
     """
     fixtures: Dict[str, Dict[str, object]] = {}
     h2h = odds_df[odds_df["market"] == "h2h"]
+    # Stable per-pair grouping: the first time we see a pair fixes its display
+    # orientation (home/away) and a representative event_id/commence.
+    def _pair_key(home: object, away: object) -> str:
+        a, b = sorted((canonical(str(home or "")), canonical(str(away or ""))))
+        return "%s|%s" % (a, b)
+
     for (eid, home, away, commence), grp in h2h.groupby(
         ["event_id", "home_team", "away_team", "commence_time"], sort=False
     ):
-        books: Dict[str, Dict[str, float]] = {}
+        key = _pair_key(home, away)
+        fx = fixtures.get(key)
+        if fx is None:
+            fx = {
+                "event_id": str(eid),
+                "home": str(home),
+                "away": str(away),
+                "commence_time": str(commence),
+                "books": {},
+            }
+            fixtures[key] = fx
+        # Re-slot this source's outcomes into the fixture's display orientation.
+        canon_home = canonical(str(fx["home"]))
+        canon_away = canonical(str(fx["away"]))
+        books: Dict[str, Dict[str, float]] = fx["books"]  # type: ignore[assignment]
         for book, bgrp in grp.groupby("bookmaker_key"):
-            prices: Dict[str, float] = {}
+            prices = books.setdefault(str(book), {})
             for _, r in bgrp.iterrows():
                 name = str(r["outcome_name"])
-                odd = float(r["decimal_odds"])
-                if name == home:
-                    prices["home"] = odd
-                elif name == away:
-                    prices["away"] = odd
-                elif name.lower() == "draw":
-                    prices["draw"] = odd
-            if prices:
-                books[str(book)] = prices
-        fixtures[str(eid)] = {
-            "event_id": str(eid),
-            "home": str(home),
-            "away": str(away),
-            "commence_time": str(commence),
-            "books": books,
-        }
+                try:
+                    odd = float(r["decimal_odds"])
+                except (TypeError, ValueError):
+                    continue
+                if name.lower() == "draw":
+                    slot = "draw"
+                elif canonical(name) == canon_home:
+                    slot = "home"
+                elif canonical(name) == canon_away:
+                    slot = "away"
+                else:
+                    continue
+                # Same book seen twice for an outcome (shouldn't happen across
+                # one source) — keep the better price.
+                if odd > prices.get(slot, 0.0):
+                    prices[slot] = odd
+            if not prices:
+                books.pop(str(book), None)
     return fixtures
 
 
