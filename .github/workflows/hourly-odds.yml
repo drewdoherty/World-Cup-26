@@ -37,6 +37,13 @@ jobs:
       - name: Refresh scores feed
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          BETFAIR_USERNAME: ${{ secrets.BETFAIR_USERNAME }}
+          BETFAIR_PASSWORD: ${{ secrets.BETFAIR_PASSWORD }}
+          BETFAIR_APP_KEY: ${{ secrets.BETFAIR_APP_KEY }}
+          BETFAIR_APP_KEY_LIVE: ${{ secrets.BETFAIR_APP_KEY_LIVE }}
+          BETFAIR_APP_KEY_DELAYED: ${{ secrets.BETFAIR_APP_KEY_DELAYED }}
+          BETFAIR_APP_KEY_PREFER: delayed
+          WCA_ODDS_MERGE: bestprice
           PYTHONPATH: src
         run: |
           mkdir -p logs
@@ -49,21 +56,9 @@ jobs:
             echo "WARN: wca_scores_data.py failed (see logs) — touching file to stamp the run" | tee -a logs/scores.log
             # Always update the generation timestamp so there is a diff to commit,
             # making the staleness visible on the site rather than silently serving
-            # a file from hours ago.
-            python - <<'PY'
-import json, datetime, os, sys
-path = "site/scores_data.json"
-try:
-    with open(path) as fh:
-        data = json.load(fh)
-except Exception:
-    data = {"fixtures": []}
-data.setdefault("meta", {})["generated"] = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-data["meta"]["error"] = "wca_scores_data.py failed — no new fixtures fetched"
-with open(path, "w") as fh:
-    json.dump(data, fh, indent=2)
-print("Stamped %s with error metadata." % path)
-PY
+            # a file from hours ago. (One-line -c: a column-0 heredoc body breaks
+            # the YAML block scalar and fails the whole workflow at startup.)
+            python -c "import json,datetime,os; p='site/scores_data.json'; d=(json.load(open(p)) if os.path.exists(p) else {'fixtures':[]}); m=d.setdefault('meta',{}); m['generated']=datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC'); m['error']='wca_scores_data.py failed - no new fixtures fetched'; json.dump(d,open(p,'w'),indent=2); print('Stamped',p)"
           fi
           # Enhanced Scores & Markets panel: model scorelines for every upcoming
           # current+next-stage game, pivotable by stage/team. Reuses the committed
