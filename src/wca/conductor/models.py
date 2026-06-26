@@ -39,6 +39,7 @@ class TaskStatus(str, Enum):
     NO_CHANGES = "no-changes"  # agent ran but produced no diff
     FAILED = "failed"        # agent / git / push error (see .error)
     REJECTED = "rejected"    # never ran: cap, budget, or cancel-before-start
+    INTERRUPTED = "interrupted"  # was in-flight when the conductor restarted
 
     @property
     def terminal(self) -> bool:
@@ -47,6 +48,7 @@ class TaskStatus(str, Enum):
             TaskStatus.NO_CHANGES,
             TaskStatus.FAILED,
             TaskStatus.REJECTED,
+            TaskStatus.INTERRUPTED,
         }
 
 
@@ -109,6 +111,8 @@ class TaskRecord:
     created_at: float = 0.0
     started_at: Optional[float] = None
     finished_at: Optional[float] = None
+    dedupe_key: str = ""        # stable slug used to dedupe resubmits/restarts
+    duplicate_of: Optional[int] = None  # set when rejected as a duplicate of #N
 
     def short(self) -> str:
         """One-line human summary for a Telegram status row."""

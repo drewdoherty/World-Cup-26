@@ -78,6 +78,12 @@ class ConductorConfig:
     claude_args: List[str] = field(default_factory=_default_claude_args)
     agent_timeout: float = 1800.0  # 30 min hard cap per agent run
 
+    # Conversational chat mode: a SEPARATE, read-only-by-default claude call (no
+    # ``acceptEdits`` -> the agent can read the repo to answer but won't autonomously
+    # write), with its own shorter timeout. See ConductorManager.chat.
+    chat_args: List[str] = field(default_factory=lambda: ["--output-format", "json"])
+    chat_timeout: float = 180.0  # 3 min hard cap per conversational reply
+
     create_pr: bool = True   # attempt `gh pr create`; falls back to compare link
     push: bool = True        # push the branch (False -> local-only dry run)
 
@@ -165,5 +171,8 @@ class ConductorConfig:
             gh_bin=os.environ.get("GH_BIN", "gh"),
             claude_bin=os.environ.get("CLAUDE_BIN", "claude"),
         )
+        chat_timeout = _int("WCA_CONDUCTOR_CHAT_TIMEOUT", None)
+        if chat_timeout:
+            kwargs["chat_timeout"] = float(chat_timeout)
         kwargs.update(overrides)
         return cls(**kwargs)  # type: ignore[arg-type]

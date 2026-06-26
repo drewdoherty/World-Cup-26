@@ -324,6 +324,49 @@ def run_agent(cfg: ConductorConfig, engine: str, task: str, cwd: Path,
     return AgentResult(res.returncode, summary, tokens, res.stdout, res.stderr, "")
 
 
+# -- conversational chat (no worktree, read-only by default) --------------
+
+
+def run_chat(cfg: ConductorConfig, prompt: str, cwd: Optional[Path] = None,
+             timeout: Optional[float] = None) -> AgentResult:
+    """Run one bounded, non-committing claude turn and return its text reply.
+
+    Unlike :func:`run_agent` this does NOT create a worktree, commit, or push —
+    it is the engine behind the conductor's conversational mode. It runs in the
+    repo root (so the agent can Read project files to answer questions) under the
+    same dry-run/no-secrets env, with ``cfg.chat_args`` (no ``acceptEdits``, so
+    the agent won't autonomously write). The reply text lands in ``.summary``.
+    """
+    binary, _ = cfg.cli_for("claude")
+    resolved = cfg.resolve_bin(binary)
+    if resolved is None:
+        return AgentResult(127, error="claude CLI not found (%s); set CLAUDE_BIN" % binary)
+    cmd = [resolved, "-p", *cfg.chat_args, "--", prompt]
+    run_cwd = str(cwd or cfg.repo_root)
+    try:
+        res = _run(cmd, cwd=run_cwd, env=cfg.agent_env(),
+                   timeout=timeout if timeout is not None else cfg.chat_timeout)
+    except subprocess.TimeoutExpired:
+        return AgentResult(124, error="chat reply timed out after %.0fs"
+                           % (timeout if timeout is not None else cfg.chat_timeout))
+    obj = _last_json_object(res.stdout)
+    is_error = bool(obj.get("is_error")) if obj else False
+    if res.returncode != 0 or is_error:
+        detail = ""
+        if obj:
+            detail = str(obj.get("result") or obj.get("error") or "").strip()
+        if not detail:
+            detail = (res.stderr or "").strip()[-500:] or "chat exited %d" % res.returncode
+        return AgentResult(res.returncode or 1, error=detail, stdout=res.stdout, stderr=res.stderr)
+    reply = ""
+    if obj is not None:
+        reply = str(obj.get("result") or "").strip()
+    if not reply:
+        # Fallback for a non-JSON output-format: use the raw stdout text.
+        reply = (res.stdout or "").strip()
+    return AgentResult(0, summary=reply, stdout=res.stdout, stderr=res.stderr)
+
+
 # -- git: commit / push ---------------------------------------------------
 
 
