@@ -31,3 +31,8 @@ data/*.db.*
 # dev-conductor: pasted screenshots are debug input only — never track them
 data/conductor_uploads/
 .conductor_inbox/
+
+# data-archival pipeline output (parquet archive + ledger DB snapshots) — this
+# is durable runtime data, mirrored to cloud object storage; never tracked here.
+data/archive/
+

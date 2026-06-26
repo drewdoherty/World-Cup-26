@@ -22,6 +22,12 @@ from typing import Any, Dict, List, Optional
 LATEST_PATH = "data/model_predictions.json"
 LOG_PATH = "data/model_predictions_log.jsonl"
 
+# Optional archival TEE: additive, never changes behavior (guarded).
+try:
+    from wca.archive import tee as _archive_tee
+except Exception:  # pragma: no cover - archive is optional
+    _archive_tee = None
+
 _LEGS = ("home", "draw", "away")
 
 
@@ -118,6 +124,10 @@ def write_predictions(
         with log.open("a", encoding="utf-8") as fh:
             for row in payload["fixtures"]:
                 fh.write(json.dumps(row, sort_keys=True) + "\n")
+
+    # Point-in-time copy of this build into the parquet archive (best-effort).
+    if _archive_tee is not None and payload["fixtures"]:
+        _archive_tee.model_payload(payload)
 
 
 def _has_fixtures(path: Path) -> bool:

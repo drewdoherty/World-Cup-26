@@ -21,6 +21,14 @@ _HEADERS = {
 
 logger = logging.getLogger(__name__)
 
+# Optional archival TEE: additive, never changes betting behavior. The tee
+# functions are themselves crash-proof; the import is guarded so a missing
+# archive package can never break ingestion.
+try:
+    from wca.archive import tee as _archive_tee
+except Exception:  # pragma: no cover - archive is optional
+    _archive_tee = None
+
 
 class QuotaInfo:
     """Holds API quota information surfaced from response headers."""
@@ -136,6 +144,8 @@ def get_odds(
     resp.raise_for_status()
     quota = _extract_quota(resp.headers)
     events = resp.json()
+    if _archive_tee is not None:
+        _archive_tee.raw("theoddsapi", "odds", events, kind=markets)
     rows = _parse_events(events)
     df = pd.DataFrame(rows)
     if df.empty:
@@ -189,7 +199,10 @@ def get_event_odds(
     )
     resp.raise_for_status()
     quota = _extract_quota(resp.headers)
-    rows = _parse_events([resp.json()])
+    _event = resp.json()
+    if _archive_tee is not None:
+        _archive_tee.raw("theoddsapi", "event_odds", _event, kind=markets)
+    rows = _parse_events([_event])
     df = pd.DataFrame(rows)
     if not df.empty:
         df["commence_time"] = pd.to_datetime(df["commence_time"], utc=True, errors="coerce")
@@ -235,6 +248,8 @@ def get_scores(
     resp.raise_for_status()
     quota = _extract_quota(resp.headers)
     events = resp.json() or []
+    if _archive_tee is not None:
+        _archive_tee.raw("theoddsapi", "scores", events, kind="scores")
     out: List[Dict[str, Any]] = []
     for ev in events:
         out.append(

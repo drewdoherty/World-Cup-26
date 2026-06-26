@@ -20,6 +20,12 @@ _HEADERS = {
 
 logger = logging.getLogger(__name__)
 
+# Optional archival TEE: additive, never changes betting behavior (guarded).
+try:
+    from wca.archive import tee as _archive_tee
+except Exception:  # pragma: no cover - archive is optional
+    _archive_tee = None
+
 
 def _get(path: str, params: Optional[Dict[str, Any]] = None) -> Any:
     """Internal helper: GET *path* with query *params*.
@@ -29,7 +35,10 @@ def _get(path: str, params: Optional[Dict[str, Any]] = None) -> Any:
     url = _BASE_URL.rstrip("/") + "/" + path.lstrip("/")
     resp = requests.get(url, params=params, headers=_HEADERS, timeout=_TIMEOUT)
     resp.raise_for_status()
-    return resp.json()
+    data = resp.json()
+    if _archive_tee is not None:
+        _archive_tee.raw("polymarket", path.strip("/").split("/")[0] or "gamma", data, kind=path)
+    return data
 
 
 def _parse_market_prices(market: Dict[str, Any]) -> Dict[str, Any]:
