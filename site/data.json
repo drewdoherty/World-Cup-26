@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-06-26T12:32:28"
+    "generated": "2026-06-26T12:32:54"
   },
   "totals": {
-    "wagered": 1884.8999999999999,
-    "open_stake": 866.73,
+    "wagered": 1926.0499999999997,
+    "open_stake": 907.88,
     "settled_pl": 66.24749999999997,
-    "n_bets": 144
+    "n_bets": 147
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 971.0299999999997,
-      "open_stake": 124.69,
+      "wagered": 1012.1799999999997,
+      "open_stake": 165.84,
       "settled_pl": 172.45550000000003,
-      "n_bets": 106
+      "n_bets": 109
     },
     "USD": {
       "wagered": 913.87,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 971.0299999999997,
-      "open_stake": 124.69,
+      "wagered": 1012.1799999999997,
+      "open_stake": 165.84,
       "settled_pl": 172.45550000000003,
-      "n_bets": 106,
+      "n_bets": 109,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 802.0299999999997,
-      "open_stake": 158.69,
+      "wagered": 843.1799999999997,
+      "open_stake": 199.83999999999997,
       "settled_pl": 222.45550000000003,
-      "n_bets": 85,
+      "n_bets": 88,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -64,10 +64,10 @@
   "source_summary": {
     "model": {
       "GBP": {
-        "wagered": 319.47,
-        "open_stake": 62.69,
+        "wagered": 360.6200000000001,
+        "open_stake": 103.84,
         "settled_pl": 74.89549999999997,
-        "n_bets": 37
+        "n_bets": 40
       },
       "USD": {
         "wagered": 856.04,
@@ -111,10 +111,10 @@
     "Betfair Sportsbook": {
       "venue": "sportsbook",
       "currency": "GBP",
-      "wagered": 339.68,
-      "open_stake": 74.62,
+      "wagered": 380.83,
+      "open_stake": 115.77,
       "settled_pl": 167.36,
-      "n_bets": 32
+      "n_bets": 35
     },
     "polymarket": {
       "venue": "polymarket",
@@ -226,10 +226,10 @@
       "Betfair Sportsbook": {
         "venue": "sportsbook",
         "currency": "GBP",
-        "wagered": 241.68,
-        "open_stake": 63.62,
+        "wagered": 282.83,
+        "open_stake": 104.77,
         "settled_pl": 177.36,
-        "n_bets": 19
+        "n_bets": 22
       },
       "polymarket": {
         "venue": "polymarket",
@@ -4060,6 +4060,69 @@
       "cash_pnl": 0.18,
       "pct_pnl": 0.03000050000833347,
       "notes": "live PM position (data-API)"
+    },
+    {
+      "id": 204,
+      "ts_utc": "2026-06-26T12:32:54",
+      "match": "Croatia v Ghana",
+      "match_id": "MANUAL_CROATIA_V_GHANA",
+      "market": "Match Odds",
+      "selection": "Croatia",
+      "platform": "Betfair Sportsbook",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 1.83,
+      "stake": 3.42,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.95",
+      "manual_override": null
+    },
+    {
+      "id": 203,
+      "ts_utc": "2026-06-26T12:32:54",
+      "match": "DR Congo v Uzbekistan",
+      "match_id": "MANUAL_DR_CONGO_V_UZBEKISTAN",
+      "market": "Match Odds",
+      "selection": "Uzbekistan",
+      "platform": "Betfair Sportsbook",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 4.6,
+      "stake": 4.73,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.95",
+      "manual_override": null
+    },
+    {
+      "id": 202,
+      "ts_utc": "2026-06-26T12:32:54",
+      "match": "Brazil v Japan",
+      "match_id": "MANUAL_BRAZIL_V_JAPAN",
+      "market": "Match Odds",
+      "selection": "Brazil",
+      "platform": "Betfair Sportsbook",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 1.8,
+      "stake": 33.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.95",
+      "manual_override": null
     },
     {
       "id": 201,
