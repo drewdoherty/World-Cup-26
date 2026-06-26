@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-26 10:47:21 UTC"
+    "generated": "2026-06-26 11:48:02 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -9,66 +9,96 @@
     "p_profit": 0,
     "p_loss": 0,
     "p_big_win": 0,
-    "n_scenarios": 729
+    "n_scenarios": 531441
   },
   "correlation": {
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0002,
+        "prob": 0.0,
         "results": [
           "Norway",
           "Senegal",
           "Cape Verde",
           "Uruguay",
           "New Zealand",
-          "Egypt"
+          "Egypt",
+          "Croatia",
+          "Panama",
+          "Colombia",
+          "DR Congo",
+          "Algeria",
+          "Jordan"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0002,
+        "prob": 0.0,
         "results": [
           "Norway",
           "Senegal",
           "Cape Verde",
           "Uruguay",
           "New Zealand",
+          "Egypt",
+          "Croatia",
+          "Panama",
+          "Colombia",
+          "DR Congo",
+          "Algeria",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0002,
+        "prob": 0.0,
         "results": [
           "Norway",
           "Senegal",
           "Cape Verde",
           "Uruguay",
           "New Zealand",
-          "Iran"
+          "Egypt",
+          "Croatia",
+          "Panama",
+          "Colombia",
+          "DR Congo",
+          "Algeria",
+          "Argentina"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0004,
+        "prob": 0.0,
         "results": [
           "Norway",
           "Senegal",
           "Cape Verde",
           "Uruguay",
+          "New Zealand",
+          "Egypt",
+          "Croatia",
+          "Panama",
+          "Colombia",
+          "DR Congo",
           "Draw",
-          "Egypt"
+          "Jordan"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0004,
+        "prob": 0.0,
         "results": [
           "Norway",
           "Senegal",
           "Cape Verde",
           "Uruguay",
+          "New Zealand",
+          "Egypt",
+          "Croatia",
+          "Panama",
+          "Colombia",
+          "DR Congo",
           "Draw",
           "Draw"
         ]
@@ -77,42 +107,88 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0002,
+        "prob": 0.0,
         "results": [
           "Norway",
           "Senegal",
           "Cape Verde",
           "Uruguay",
           "New Zealand",
-          "Egypt"
+          "Egypt",
+          "Croatia",
+          "Panama",
+          "Colombia",
+          "DR Congo",
+          "Algeria",
+          "Jordan"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0002,
+        "prob": 0.0,
         "results": [
           "Norway",
           "Senegal",
           "Cape Verde",
           "Uruguay",
           "New Zealand",
+          "Egypt",
+          "Croatia",
+          "Panama",
+          "Colombia",
+          "DR Congo",
+          "Algeria",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0002,
+        "prob": 0.0,
         "results": [
           "Norway",
           "Senegal",
           "Cape Verde",
           "Uruguay",
           "New Zealand",
-          "Iran"
+          "Egypt",
+          "Croatia",
+          "Panama",
+          "Colombia",
+          "DR Congo",
+          "Algeria",
+          "Argentina"
         ]
       }
     ],
     "narrative": "Upside is concentrated: the biggest payouts (\u00a30 best case) need the favourites to land together, while 0% of result-states leave the book down. Downside is driven by the real-money singles, not the free accas."
+  },
+  "correlated_exposure": {
+    "bankroll": 3000.0,
+    "cap_fraction": 0.05,
+    "cap_abs": 150.0,
+    "n_over_exposed": 0,
+    "fixtures": [
+      {
+        "fixture": "Croatia vs Ghana",
+        "has_lambdas": false,
+        "n_bets": 1,
+        "note": "no lambdas persisted \u2014 legacy 1X2-only exposure used"
+      },
+      {
+        "fixture": "Panama vs England",
+        "has_lambdas": false,
+        "n_bets": 1,
+        "note": "no lambdas persisted \u2014 legacy 1X2-only exposure used"
+      }
+    ],
+    "slate": {
+      "ev": 0.0,
+      "best": 0.0,
+      "worst": 0.0,
+      "p_loss": 0,
+      "p_profit": 0,
+      "n_states": 1
+    }
   },
   "fixtures": [
     {
@@ -121,7 +197,7 @@
       "results": [
         {
           "outcome": "Norway",
-          "prob": 0.1987,
+          "prob": 0.2006,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -130,7 +206,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2305,
+          "prob": 0.2306,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -139,7 +215,7 @@
         },
         {
           "outcome": "France",
-          "prob": 0.5708,
+          "prob": 0.5688,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -162,7 +238,7 @@
       "results": [
         {
           "outcome": "Senegal",
-          "prob": 0.6962,
+          "prob": 0.6954,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -171,7 +247,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.1935,
+          "prob": 0.1937,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -180,7 +256,7 @@
         },
         {
           "outcome": "Iraq",
-          "prob": 0.1103,
+          "prob": 0.1108,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -203,7 +279,7 @@
       "results": [
         {
           "outcome": "Cape Verde",
-          "prob": 0.3518,
+          "prob": 0.3527,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -212,7 +288,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.3054,
+          "prob": 0.3044,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -221,7 +297,7 @@
         },
         {
           "outcome": "Saudi Arabia",
-          "prob": 0.3428,
+          "prob": 0.3429,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -244,7 +320,7 @@
       "results": [
         {
           "outcome": "Uruguay",
-          "prob": 0.161,
+          "prob": 0.1627,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -253,7 +329,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2578,
+          "prob": 0.2592,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -262,7 +338,7 @@
         },
         {
           "outcome": "Spain",
-          "prob": 0.5812,
+          "prob": 0.5781,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -285,7 +361,7 @@
       "results": [
         {
           "outcome": "New Zealand",
-          "prob": 0.0685,
+          "prob": 0.0692,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -294,7 +370,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.1378,
+          "prob": 0.1374,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -303,7 +379,7 @@
         },
         {
           "outcome": "Belgium",
-          "prob": 0.7937,
+          "prob": 0.7934,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -326,7 +402,7 @@
       "results": [
         {
           "outcome": "Egypt",
-          "prob": 0.3575,
+          "prob": 0.3573,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -335,7 +411,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.3478,
+          "prob": 0.3483,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -344,7 +420,7 @@
         },
         {
           "outcome": "Iran",
-          "prob": 0.2947,
+          "prob": 0.2944,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -360,9 +436,346 @@
         "worst_outcome": "Egypt",
         "n_blindspots": 0
       }
+    },
+    {
+      "fixture": "Croatia vs Ghana",
+      "kickoff": "2026-06-27T21:00:00+00:00",
+      "results": [
+        {
+          "outcome": "Croatia",
+          "prob": 0.569,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "Croatia",
+            "best_venue": "betfair_ex_uk",
+            "best_odds": 1.83,
+            "model_prob": 0.569,
+            "ev_pct": 4.1,
+            "recommendation": "PLUG: +EV to back (4.1% edge) \u2014 fills the gap and adds value"
+          }
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.2756,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "Draw",
+            "best_venue": "unibet_uk",
+            "best_odds": 3.4,
+            "model_prob": 0.2756,
+            "ev_pct": -6.3,
+            "recommendation": "LEAVE UNHEDGED: plugging costs 6.3% EV \u2014 take the variance"
+          }
+        },
+        {
+          "outcome": "Ghana",
+          "prob": 0.1554,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [
+        {
+          "type": "pm_moneyline",
+          "selection": "Yes",
+          "stake": 25.85,
+          "potential_profit": 21.15,
+          "free": false,
+          "odds": 1.82
+        }
+      ],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Croatia",
+        "worst_outcome": "Croatia",
+        "n_blindspots": 2
+      }
+    },
+    {
+      "fixture": "Panama vs England",
+      "kickoff": "2026-06-27T21:00:00+00:00",
+      "results": [
+        {
+          "outcome": "Panama",
+          "prob": 0.0578,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.1352,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "England",
+          "prob": 0.8071,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": true,
+            "outcome": "England",
+            "best_venue": "smarkets",
+            "best_odds": 1.18,
+            "model_prob": 0.8071,
+            "ev_pct": -4.8,
+            "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
+          }
+        }
+      ],
+      "events": [
+        {
+          "type": "Bet Builder",
+          "selection": "Match Odds -> England + Both Teams to Score? -> No + To Score Or Assist -> Harry Kane + Over/Under 4.5 Goals -> Under 4.5 Goals",
+          "stake": 15.0,
+          "potential_profit": 26.55,
+          "free": true,
+          "odds": 2.77
+        }
+      ],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Panama",
+        "worst_outcome": "Panama",
+        "n_blindspots": 1
+      }
+    },
+    {
+      "fixture": "Colombia vs Portugal",
+      "kickoff": "2026-06-27T23:30:00+00:00",
+      "results": [
+        {
+          "outcome": "Colombia",
+          "prob": 0.273,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.2777,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Portugal",
+          "prob": 0.4493,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Colombia",
+        "worst_outcome": "Colombia",
+        "n_blindspots": 0
+      }
+    },
+    {
+      "fixture": "DR Congo vs Uzbekistan",
+      "kickoff": "2026-06-27T23:30:00+00:00",
+      "results": [
+        {
+          "outcome": "DR Congo",
+          "prob": 0.4623,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.269,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Uzbekistan",
+          "prob": 0.2687,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "DR Congo",
+        "worst_outcome": "DR Congo",
+        "n_blindspots": 0
+      }
+    },
+    {
+      "fixture": "Algeria vs Austria",
+      "kickoff": "2026-06-28T02:00:00+00:00",
+      "results": [
+        {
+          "outcome": "Algeria",
+          "prob": 0.2704,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.3765,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Austria",
+          "prob": 0.3531,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Algeria",
+        "worst_outcome": "Algeria",
+        "n_blindspots": 0
+      }
+    },
+    {
+      "fixture": "Jordan vs Argentina",
+      "kickoff": "2026-06-28T02:00:00+00:00",
+      "results": [
+        {
+          "outcome": "Jordan",
+          "prob": 0.0465,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.1191,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Argentina",
+          "prob": 0.8344,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Jordan",
+        "worst_outcome": "Jordan",
+        "n_blindspots": 0
+      }
     }
   ],
-  "blindspots": [],
+  "blindspots": [
+    {
+      "fixture": "Panama vs England",
+      "outcome": "England",
+      "prob": 0.8071,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": true,
+        "outcome": "England",
+        "best_venue": "smarkets",
+        "best_odds": 1.18,
+        "model_prob": 0.8071,
+        "ev_pct": -4.8,
+        "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
+      }
+    },
+    {
+      "fixture": "Croatia vs Ghana",
+      "outcome": "Croatia",
+      "prob": 0.569,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": true,
+        "outcome": "Croatia",
+        "best_venue": "betfair_ex_uk",
+        "best_odds": 1.83,
+        "model_prob": 0.569,
+        "ev_pct": 4.1,
+        "recommendation": "PLUG: +EV to back (4.1% edge) \u2014 fills the gap and adds value"
+      }
+    },
+    {
+      "fixture": "Croatia vs Ghana",
+      "outcome": "Draw",
+      "prob": 0.2756,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": true,
+        "outcome": "Draw",
+        "best_venue": "unibet_uk",
+        "best_odds": 3.4,
+        "model_prob": 0.2756,
+        "ev_pct": -6.3,
+        "recommendation": "LEAVE UNHEDGED: plugging costs 6.3% EV \u2014 take the variance"
+      }
+    }
+  ],
   "unmapped": [],
   "off_slate_accas": [],
   "off_slate_events": [
@@ -437,15 +850,6 @@
       "free": false,
       "odds": 0.0,
       "match": "Ecuador vs Germany | Curacao vs Ivory Coast | Tunisia vs Netherlands | Japan vs Sweden"
-    },
-    {
-      "type": "Bet Builder",
-      "selection": "Match Odds -> England + Both Teams to Score? -> No + To Score Or Assist -> Harry Kane + Over/Under 4.5 Goals -> Under 4.5 Goals",
-      "stake": 15.0,
-      "profit": 26.55,
-      "free": true,
-      "odds": 2.77,
-      "match": "Panama vs England"
     },
     {
       "type": "Accumulator",
