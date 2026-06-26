@@ -28,6 +28,7 @@ SERVICES=(
   "com.wca.build_card|3600|$WCA_PY|scripts/wca_build_card.py"         # refresh card hourly (models + odds) so bot /card is always fresh
   "com.wca.publish|3600|/bin/bash|deploy/publish_site.sh"            # hourly: refresh scores + regen site + AUTO-COMMIT & push
   "com.wca.sync|300|/bin/bash|deploy/sync.sh"                        # every 5 min: git pull --rebase origin/main + restart daemons on code change
+  "com.wca.positions|3600|$WCA_PY|scripts/wca_positions_sync.py"     # hourly: reconcile open venue positions vs ledger (SHADOW until WCA_POSITIONS_LIVE=1)
 )
 
 for entry in "${SERVICES[@]}"; do

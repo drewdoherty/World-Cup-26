@@ -354,6 +354,78 @@ def get_odds(
     return _empty_frame(), None
 
 
+def _normalise_order(o: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Map one Betfair ``listCurrentOrders`` order into a normalised position.
+
+    Only MATCHED size is treated as an open position (unmatched size is a
+    resting limit order, not money at risk on an outcome). Returns ``None`` for
+    orders with no matched size. Pure (no I/O) so it is unit-testable.
+    """
+    size_matched = float(o.get("sizeMatched") or 0.0)
+    if size_matched <= 0:
+        return None
+    price = o.get("averagePriceMatched") or o.get("priceSize", {}).get("price")
+    item = o.get("itemDescription") or {}
+    market_desc = item.get("marketDesc") or o.get("marketId")
+    sel_desc = item.get("runnerDesc") or str(o.get("selectionId") or "")
+    event_desc = item.get("eventDesc") or ""
+    side = (o.get("side") or "").upper()
+    return {
+        "venue": "Betfair",
+        "market": market_desc,
+        "selection": "Draw" if str(sel_desc).strip().lower() == "the draw" else sel_desc,
+        "fixture_or_event": event_desc,
+        "stake": size_matched,
+        "size": size_matched,
+        "avg_price": float(price) if price else None,
+        "odds": float(price) if price else None,
+        "current_value": None,
+        "current_price": None,
+        "external_id": str(o.get("betId") or ""),
+        "account": "1",
+        "side": side,
+    }
+
+
+def list_current_orders(*, account: str = "1") -> List[Dict[str, Any]]:
+    """Return open (matched) Betfair Exchange positions, normalised.
+
+    READ-ONLY: calls the Betting API ``listCurrentOrders``. DEGRADES GRACEFULLY
+    — returns ``[]`` and logs (never raises) when creds are missing or any call
+    fails (the mini currently gets connection errors reaching Betfair).
+    """
+    token = _resolve_session_token()
+    candidates = _candidate_app_keys()
+    if not candidates or not token:
+        logger.info("Betfair positions disabled — missing creds: %s",
+                    ", ".join(missing_creds()))
+        return []
+    for i, app_key in enumerate(candidates):
+        try:
+            result = _rpc(
+                "listCurrentOrders",
+                {"orderProjection": "ALL", "includeItemDescription": True},
+                token, app_key=app_key,
+            ) or {}
+            orders = result.get("currentOrders") or []
+            out: List[Dict[str, Any]] = []
+            for o in orders:
+                norm = _normalise_order(o)
+                if norm is not None:
+                    norm["account"] = account
+                    out.append(norm)
+            logger.info("Betfair positions: %d matched of %d orders", len(out), len(orders))
+            return out
+        except _InvalidAppKey:
+            logger.info("Betfair app key #%d rejected for orders; trying next", i + 1)
+            continue
+        except Exception as exc:  # noqa: BLE001 — never crash the sync.
+            logger.warning("Betfair listCurrentOrders failed (degrading to empty): %s", exc)
+            return []
+    logger.warning("Betfair positions: no app key authorized; degrading to empty")
+    return []
+
+
 def get_event_odds(
     sport_key: str,
     event_id: str,

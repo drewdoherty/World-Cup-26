@@ -16,6 +16,7 @@ READ-ONLY: no order placement. The boundary is explicit in
 """
 from __future__ import annotations
 
+import logging
 import os
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -23,14 +24,147 @@ import pandas as pd
 
 from wca.data import theoddsapi
 
+logger = logging.getLogger(__name__)
+
 GBP = "GBP"
 SMARKETS_API = "https://api.smarkets.com/v3"
 ODDSAPI_SMARKETS_KEY = "smarkets"
+_SESSIONS_URL = SMARKETS_API + "/sessions/"
+_TIMEOUT = 20
+
+# In-process cache of a session token minted from username/password so we do
+# not re-login per call within a single sync run.
+_CACHED_SESSION: Optional[str] = None
 
 
 def have_native_session() -> bool:
     """True when a native Smarkets token is configured (back+lay+depth)."""
     return bool(os.environ.get("SMARKETS_API_TOKEN", "").strip())
+
+
+def session_login() -> Optional[str]:
+    """Return a Smarkets API session token, or ``None`` if unavailable.
+
+    Resolution order (first that works wins; failures return ``None``, never
+    raise):
+      1. an explicit ``SMARKETS_API_TOKEN`` (long-lived token);
+      2. a token cached earlier in this process;
+      3. POST ``SMARKETS_USERNAME``/``SMARKETS_PASSWORD`` to
+         ``/v3/sessions/`` to mint a fresh token.
+    """
+    global _CACHED_SESSION
+    token = os.environ.get("SMARKETS_API_TOKEN", "").strip()
+    if token:
+        return token
+    if _CACHED_SESSION:
+        return _CACHED_SESSION
+    user = os.environ.get("SMARKETS_USERNAME", "").strip()
+    pwd = os.environ.get("SMARKETS_PASSWORD", "").strip()
+    if not (user and pwd):
+        return None
+    try:
+        import requests
+
+        resp = requests.post(
+            _SESSIONS_URL,
+            json={"username": user, "password": pwd},
+            headers={"Content-Type": "application/json", "Accept": "application/json"},
+            timeout=_TIMEOUT,
+        )
+        resp.raise_for_status()
+        body = resp.json() or {}
+        # Smarkets returns the session token under "token" (alias "session").
+        tok = body.get("token") or body.get("session")
+        if tok:
+            _CACHED_SESSION = tok
+            return tok
+        logger.warning("Smarkets session login: no token in response")
+    except Exception as exc:  # noqa: BLE001 — login is best-effort.
+        logger.warning("Smarkets session login failed: %s", exc)
+    return None
+
+
+def _auth_headers(token: str) -> Dict[str, str]:
+    return {
+        "Authorization": "Session-Token " + token,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+
+
+def _normalise_smk_position(p: Dict[str, Any], account: str = "1") -> Optional[Dict[str, Any]]:
+    """Map one Smarkets open contract/order into a normalised position.
+
+    Smarkets quotes prices in percent (e.g. 25.0 -> implied 0.25 -> decimal 4.0).
+    Pure (no I/O) so it is unit-testable against sample payloads. Returns
+    ``None`` when there is no matched/open quantity.
+    """
+    qty = float(p.get("quantity") or p.get("matched_quantity") or 0.0)
+    if qty <= 0:
+        return None
+    price_pct = p.get("avg_price") or p.get("price")
+    decimal_odds = None
+    try:
+        if price_pct:
+            implied = float(price_pct) / 100.0
+            decimal_odds = (1.0 / implied) if implied > 0 else None
+    except (TypeError, ValueError):
+        decimal_odds = None
+    return {
+        "venue": "smarkets",
+        "market": p.get("market_name") or str(p.get("market_id") or ""),
+        "selection": p.get("contract_name") or p.get("name") or str(p.get("contract_id") or ""),
+        "fixture_or_event": p.get("event_name") or "",
+        "stake": qty,
+        "size": qty,
+        "avg_price": decimal_odds,
+        "odds": decimal_odds,
+        "current_value": None,
+        "current_price": None,
+        "external_id": str(p.get("id") or p.get("contract_id") or ""),
+        "account": account,
+        "side": (p.get("side") or "").lower(),
+    }
+
+
+def list_open_positions(*, account: str = "1") -> List[Dict[str, Any]]:
+    """Return the account's open Smarkets positions, normalised.
+
+    READ-ONLY. Logs in (session_login) then queries the account's open
+    contracts. DEGRADES GRACEFULLY — returns ``[]`` and logs (never raises) on
+    auth/network failure.
+
+    NOTE: the exact Smarkets positions endpoint shape is INFERRED here
+    (``GET /v3/positions/`` returning ``{"positions": [...]}`` with percent
+    prices). If the live API differs, only ``_normalise_smk_position`` and the
+    URL/JSON-key below need adjusting — the reconcile engine is unaffected.
+    """
+    token = session_login()
+    if not token:
+        logger.info("Smarkets positions disabled — no SMARKETS_API_TOKEN or "
+                    "SMARKETS_USERNAME/PASSWORD configured")
+        return []
+    try:
+        import requests
+
+        resp = requests.get(
+            SMARKETS_API + "/positions/",
+            headers=_auth_headers(token),
+            timeout=_TIMEOUT,
+        )
+        resp.raise_for_status()
+        body = resp.json() or {}
+        raw = body.get("positions") or body.get("data") or []
+        out: List[Dict[str, Any]] = []
+        for p in raw:
+            norm = _normalise_smk_position(p, account=account)
+            if norm is not None:
+                out.append(norm)
+        logger.info("Smarkets positions: %d open of %d", len(out), len(raw))
+        return out
+    except Exception as exc:  # noqa: BLE001 — never crash the sync.
+        logger.warning("Smarkets list_open_positions failed (degrading to empty): %s", exc)
+        return []
 
 
 def smarkets_odds(
