@@ -238,7 +238,8 @@ class ConductorBot:
             self._announced_done.add(record.id)
             self._send(chat, self._completion_text(record))
             # Summarise the change + attach report files the task produced.
-            if record.status in (TaskStatus.DONE.value, TaskStatus.PUSHED.value):
+            if record.status in (TaskStatus.DONE.value, TaskStatus.PUSHED.value,
+                                 TaskStatus.COMMITTED_PR_FAILED.value):
                 try:
                     dig = self._diff_digest(record)
                     if dig and dig[0]:
@@ -273,6 +274,11 @@ class ConductorBot:
     def _completion_text(r: TaskRecord) -> str:
         if r.status == TaskStatus.DONE.value:
             head = "✅ `#%d` %s done — PR opened" % (r.id, r.engine)
+        elif r.status == TaskStatus.COMMITTED_PR_FAILED.value:
+            # The work is committed + pushed; only the PR step failed. This MUST
+            # be loud and explicit — never a silent "stranded on a local branch".
+            head = "⚠️ `#%d` %s committed but the *PR step FAILED* — your work is SAFE on the branch" % (
+                r.id, r.engine)
         elif r.status == TaskStatus.PUSHED.value:
             head = "⬆️ `#%d` %s pushed (open the PR manually)" % (r.id, r.engine)
         elif r.status == TaskStatus.NO_CHANGES.value:
@@ -280,14 +286,20 @@ class ConductorBot:
         else:
             head = "❌ `#%d` %s failed" % (r.id, r.engine)
         lines = [head, "_%s_" % (r.task if len(r.task) <= 70 else r.task[:67] + "...")]
+        if r.status == TaskStatus.COMMITTED_PR_FAILED.value and r.branch:
+            lines.append("branch: `%s`" % r.branch)
         if r.pr_url:
             lines.append(r.pr_url)
         if r.tokens:
             lines.append("Tokens: %d" % r.tokens)
-        if r.error and r.status in {TaskStatus.FAILED.value, TaskStatus.PUSHED.value}:
+        if r.error and r.status in {TaskStatus.FAILED.value, TaskStatus.PUSHED.value,
+                                    TaskStatus.COMMITTED_PR_FAILED.value}:
             lines.append("⚠️ %s" % (r.error if len(r.error) <= 200 else r.error[:197] + "..."))
         if r.status in {TaskStatus.FAILED.value, TaskStatus.NO_CHANGES.value}:
             lines.append("→ `/retry %d` · `/log %d`" % (r.id, r.id))
+        if r.status == TaskStatus.COMMITTED_PR_FAILED.value:
+            lines.append("→ retrying the PR automatically; `/retry %d` to retry now · `/log %d`"
+                         % (r.id, r.id))
         return "\n".join(lines)
 
     # -- inbound ----------------------------------------------------------
@@ -659,9 +671,18 @@ class ConductorBot:
             rec = self.manager.retry(tid)
             if rec is None:
                 return "No task `#%d`." % tid
-            if rec.id == tid:
-                return "Can't retry `#%d` (status %s — only failed / no-change tasks)." % (tid, rec.status)
-            return "🔁 retrying as `#%d` on *%s* (`%s`)." % (rec.id, rec.engine, rec.branch)
+            if rec.id != tid:
+                # re-dispatched as a fresh task (failed / no-change / interrupted)
+                return "🔁 retrying as `#%d` on *%s* (`%s`)." % (rec.id, rec.engine, rec.branch)
+            # same record returned → an in-place PR retry, or nothing to retry.
+            if rec.status == TaskStatus.DONE.value:
+                return "✅ `#%d` PR opened on retry.\n%s" % (tid, rec.pr_url or "")
+            if rec.status == TaskStatus.COMMITTED_PR_FAILED.value:
+                err = rec.error if len(rec.error or "") <= 200 else rec.error[:197] + "..."
+                return ("⚠️ `#%d` PR retry still failing — your commit is SAFE on `%s`.\n⚠️ %s\n"
+                        "Try `/retry %d` again once `gh` auth/network is healthy."
+                        % (tid, rec.branch, err, tid))
+            return "Can't retry `#%d` (status %s — only failed / no-change / PR-failed tasks)." % (tid, rec.status)
         if cmd == "/task":
             return self._dispatch_auto(arg, chat_id, user_id, images=images) + warn
         if cmd == "/claude":
@@ -783,6 +804,35 @@ class ConductorBot:
             self._send(chat, "♻️ `#%d` was interrupted by a restart — re-run with "
                        "`/retry %d`?\n_%s_" % (r.id, r.id, task))
 
+    def _retry_pending_prs(self) -> None:
+        """On startup, recover every committed-but-PR-failed task: tell the user
+        the work is safe, retry the PR now that auth may be healthy, and report
+        the outcome. Runs in a background thread (gh can be slow)."""
+        try:
+            pending = self.manager.take_pr_retry_pending()
+        except Exception as exc:  # noqa: BLE001
+            print("[conductor] take_pr_retry_pending failed: %s" % exc, flush=True)
+            return
+        for r in pending:
+            chat = r.chat_id or self._notify_chat
+            task = r.task if len(r.task) <= 70 else r.task[:67] + "..."
+            if chat:
+                self._send(chat, "⚠️ `#%d` committed but its PR didn't complete — your work is "
+                           "SAFE on `%s`. Retrying the PR now…\n_%s_" % (r.id, r.branch, task))
+            try:
+                updated = self.manager.retry_pr(r.id)
+            except Exception as exc:  # noqa: BLE001 - never die on one retry
+                print("[conductor] PR retry failed for #%d: %s" % (r.id, exc), flush=True)
+                continue
+            if chat and updated is not None:
+                if updated.status == TaskStatus.DONE.value:
+                    self._send(chat, "✅ `#%d` PR opened on retry.\n%s" % (r.id, updated.pr_url or ""))
+                else:
+                    err = updated.error if len((updated.error or "")) <= 200 else updated.error[:197] + "..."
+                    self._send(chat, "⚠️ `#%d` PR still failing — commit SAFE on `%s`.\n⚠️ %s\n"
+                               "`/retry %d` once `gh` auth/network is healthy."
+                               % (r.id, updated.branch, err, r.id))
+
     # -- main loop --------------------------------------------------------
 
     def run(self, poll_timeout: int = 25) -> None:
@@ -805,6 +855,10 @@ class ConductorBot:
         # Tell the user about any task that was in flight when we last died, so a
         # restart never loses work silently.
         self._announce_interrupted()
+        # Recover any task that committed but whose PR step failed/didn't finish:
+        # surface it + retry the PR now that auth may be healthy (background so a
+        # slow gh never delays the poll loop).
+        threading.Thread(target=self._retry_pending_prs, name="pr-retry", daemon=True).start()
 
         offset: Optional[int] = None
         import time as _time

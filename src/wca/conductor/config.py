@@ -87,6 +87,13 @@ class ConductorConfig:
     create_pr: bool = True   # attempt `gh pr create`; falls back to compare link
     push: bool = True        # push the branch (False -> local-only dry run)
 
+    # Bounded backoff for the PR step when it fails on a committed+pushed branch
+    # (gh auth/network/rate-limit). These are the waits BETWEEN attempts, so
+    # ``len(pr_retry_delays) + 1`` attempts total. Kept short so a stuck PR never
+    # ties up a worker slot for long; the durable state + startup retry + /retry
+    # cover failures that outlast the backoff.
+    pr_retry_delays: List[float] = field(default_factory=lambda: [3.0, 8.0])
+
     strip_env_keys: List[str] = field(default_factory=lambda: list(_DEFAULT_STRIP))
     safe_env_overrides: Dict[str, str] = field(default_factory=lambda: dict(_DEFAULT_OVERRIDES))
 

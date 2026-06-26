@@ -205,10 +205,13 @@ def test_run_task_no_changes(cfg, monkeypatch):
 def test_run_task_pr_fallback_to_compare_link(cfg, monkeypatch):
     monkeypatch.setattr(runner, "_run", make_fake_run(pr_rc=1))
     monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(runner.time, "sleep", lambda s: None)  # don't wait out the backoff
     rec = _record()
     runner.run_task(cfg, rec)
-    assert rec.status == TaskStatus.PUSHED.value
-    assert "compare/main..." in rec.pr_url
+    # A committed+pushed branch whose PR step failed is now a DISTINCT, retryable
+    # state (not a quiet PUSHED) so it can be surfaced + auto-retried.
+    assert rec.status == TaskStatus.COMMITTED_PR_FAILED.value
+    assert "compare/main..." in rec.pr_url  # compare link still offered
     assert rec.error  # carries the gh failure reason
 
 
