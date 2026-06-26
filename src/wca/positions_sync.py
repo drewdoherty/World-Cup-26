@@ -1,29 +1,50 @@
 """Hourly venue-position reconciliation engine (SHADOW -> LIVE safety ladder).
 
 The user places bets MANUALLY at each venue; this job pulls the OPEN POSITIONS
-from the three venue APIs once an hour and reconciles them against the SQLite
-ledger so the canonical ledger stays in sync with what is actually live.
+*and the SETTLED positions from the last 24h* from the three venue APIs once an
+hour and reconciles them against the SQLite ledger so the canonical ledger stays
+in sync with what is actually live AND so resolved bets get settled with VENUE
+TRUTH (the venue's own realised P&L + result).
+
+CROSS-MACHINE SPLIT (v2)
+------------------------
+Betfair's API is reachable from the user's MacBook (the VPN lives there) but NOT
+from the Mac mini (the connection is blocked). The canonical ledger
+(``data/wca.db``) and the site publish live on the mini. So FETCH and APPLY are
+split:
+
+  * FETCH (MacBook, VPN on): :func:`fetch_snapshot` pulls every venue's open +
+    settled-24h positions and writes a self-describing JSON snapshot. NO DB
+    access.
+  * APPLY (mini, canonical ledger): :func:`apply_snapshot` reconciles that
+    snapshot against the ledger and — in LIVE — applies the writes.
+
+The classic all-in-one :func:`run_sync` (fetch+apply locally) is kept for
+tests/dev.
 
 READ-ONLY on the venues — it NEVER places or cancels orders. The venue fetches
 each DEGRADE GRACEFULLY to an empty list (never raise) so one unreachable venue
-(currently Betfair on the mini) does not abort the run.
+does not abort the run.
 
 Safety ladder (mirrors the cash-out watcher):
 
   default            SHADOW  — fetch + reconcile + LOG the proposed ledger
-                              changes + refresh the read-only site positions
-                              projection. ZERO ledger writes.
+                              changes (inserts, closes AND settles) + refresh the
+                              read-only site positions projection. ZERO writes.
   WCA_POSITIONS_LIVE=1  LIVE — apply CONSERVATIVE writes: INSERT new open bets
-                              seen at a venue, mark gone-from-venue ledger bets
-                              to a 'closed' status pending settlement. Idempotent
-                              (re-run is a no-op). NEVER auto-settles P&L and
-                              NEVER places/cancels orders — settlement with the
-                              real result stays the settler's job.
+                              seen at a venue, mark gone-from-venue open ledger
+                              bets to a 'closed' status pending settlement, and
+                              SETTLE a matched open ledger bet with the venue's
+                              own realised P&L + result when the venue reports an
+                              unambiguous settle. Idempotent (re-run is a no-op).
+                              NEVER places/cancels orders.
 
 Matching is deliberately CONSERVATIVE: a venue position matches a ledger bet
 only on (canon venue + normalised selection + normalised market/fixture). Any
 position that matches more than one open ledger bet (or vice-versa) goes to a
-``review`` list and is NEVER auto-applied.
+``review`` list and is NEVER auto-applied. A settle is applied ONLY when the
+venue reports an unambiguous WON/LOST result AND it matches exactly one open
+ledger bet; ambiguity always routes to review, never to an auto-settle.
 """
 from __future__ import annotations
 
@@ -37,6 +58,14 @@ from typing import Any, Callable, Dict, List, Optional
 from wca.venues import canon_platform
 
 logger = logging.getLogger(__name__)
+
+# Snapshot schema version (bumped if the snapshot shape changes incompatibly).
+SNAPSHOT_VERSION = 2
+
+# Default settled-position lookback window (hours). Open positions are all
+# all-current regardless of window; the window only scopes SETTLED fetches so the
+# first run can capture a full day of settles.
+DEFAULT_SETTLED_LOOKBACK_HOURS = 24
 
 # Status used for a ledger bet no longer seen open at its venue. Distinct from
 # 'settled'/'void'/'cashed' — it means "no longer live at the venue, awaiting
@@ -149,6 +178,76 @@ def fetch_all_positions(
 
 
 # ---------------------------------------------------------------------------
+# Venue SETTLED fetch (24h lookback, read-only, each degrades to []).
+# ---------------------------------------------------------------------------
+
+
+def fetch_betfair_settled(since_hours: int = DEFAULT_SETTLED_LOOKBACK_HOURS
+                          ) -> List[Dict[str, Any]]:
+    """Settled Betfair Exchange positions over ``since_hours`` (never raises)."""
+    try:
+        from wca.data import betfair_exchange
+
+        return betfair_exchange.list_cleared_orders(since_hours=since_hours) or []
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Betfair settled fetch errored (degrading): %s", exc)
+        return []
+
+
+def fetch_smarkets_settled(since_hours: int = DEFAULT_SETTLED_LOOKBACK_HOURS
+                           ) -> List[Dict[str, Any]]:
+    """Settled Smarkets positions over ``since_hours`` (never raises)."""
+    try:
+        from wca.data import smarkets
+
+        return smarkets.list_settled_positions(since_hours=since_hours) or []
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Smarkets settled fetch errored (degrading): %s", exc)
+        return []
+
+
+def fetch_polymarket_settled(since_hours: int = DEFAULT_SETTLED_LOOKBACK_HOURS
+                             ) -> List[Dict[str, Any]]:
+    """Settled (resolved) Polymarket positions over ``since_hours`` (never raises).
+
+    Thin wrapper over :func:`wca.sitedata.settled_pm_positions`; already returns
+    the normalised settled shape.
+    """
+    try:
+        from wca import sitedata
+
+        return sitedata.settled_pm_positions(since_hours=since_hours) or []
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Polymarket settled fetch errored (degrading): %s", exc)
+        return []
+
+
+def fetch_all_settled(
+    since_hours: int = DEFAULT_SETTLED_LOOKBACK_HOURS,
+    fetchers: Optional[Dict[str, Callable[[int], List[Dict[str, Any]]]]] = None,
+) -> List[Dict[str, Any]]:
+    """Pull + concatenate all venues' SETTLED positions over ``since_hours``.
+
+    Each fetcher degrades to ``[]`` independently. ``fetchers`` is injectable for
+    tests (maps venue -> callable taking ``since_hours``).
+    """
+    fetchers = fetchers or {
+        "betfair": fetch_betfair_settled,
+        "smarkets": fetch_smarkets_settled,
+        "polymarket": fetch_polymarket_settled,
+    }
+    out: List[Dict[str, Any]] = []
+    for name, fn in fetchers.items():
+        try:
+            rows = fn(since_hours) or []
+        except Exception as exc:  # noqa: BLE001 — belt-and-braces.
+            logger.warning("%s settled fetcher raised (degrading to empty): %s", name, exc)
+            rows = []
+        out.extend(rows)
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Ledger read (strictly read-only).
 # ---------------------------------------------------------------------------
 
@@ -179,6 +278,7 @@ class Reconciliation:
     new_at_venue: List[Dict[str, Any]] = field(default_factory=list)
     gone_from_venue: List[Dict[str, Any]] = field(default_factory=list)
     matched: List[Dict[str, Any]] = field(default_factory=list)
+    settle: List[Dict[str, Any]] = field(default_factory=list)
     review: List[Dict[str, Any]] = field(default_factory=list)
 
     def as_dict(self) -> Dict[str, Any]:
@@ -186,30 +286,60 @@ class Reconciliation:
             "new_at_venue": self.new_at_venue,
             "gone_from_venue": self.gone_from_venue,
             "matched": self.matched,
+            "settle": self.settle,
             "review": self.review,
             "counts": {
                 "new_at_venue": len(self.new_at_venue),
                 "gone_from_venue": len(self.gone_from_venue),
                 "matched": len(self.matched),
+                "settle": len(self.settle),
                 "review": len(self.review),
             },
         }
 
 
+def _is_unambiguous_settle(s: Dict[str, Any]) -> bool:
+    """True only when a settled-venue row carries an unambiguous WON/LOST result
+    AND a numeric realised P&L. Anything else is NOT safe to auto-settle."""
+    result = _norm(s.get("result"))
+    if result not in ("won", "lost"):
+        return False
+    pnl = s.get("settled_pnl")
+    if pnl is None:
+        return False
+    try:
+        float(pnl)
+    except (TypeError, ValueError):
+        return False
+    return True
+
+
 def reconcile(
     venue_positions: List[Dict[str, Any]],
     ledger_bets: List[Dict[str, Any]],
+    settled_positions: Optional[List[Dict[str, Any]]] = None,
 ) -> Reconciliation:
-    """Classify venue positions vs open ledger bets.
+    """Classify OPEN venue positions vs open ledger bets, and (new in v2) match
+    SETTLED venue positions to open ledger bets for venue-truth settlement.
 
-    - ``matched``       one venue position <-> exactly one ledger bet by key.
+    Open-position classification (unchanged from v1):
+    - ``matched``       one open venue position <-> exactly one ledger bet.
     - ``new_at_venue``  open at a venue, no ledger bet (would INSERT).
     - ``gone_from_venue`` open in ledger, not at the venue (would mark CLOSED
                         pending settlement — never auto-compute P&L).
-    - ``review``        ambiguous: a key with >1 venue position or >1 ledger bet
-                        on either side. NEVER auto-applied.
+
+    Settle classification (v2): a SETTLED venue position with an unambiguous
+    WON/LOST result + realised P&L that matches EXACTLY ONE open ledger bet ->
+    ``settle`` (would settle that bet with the venue's own P&L + result). Any
+    ambiguity (>1 venue settle or >1 ledger bet on a key, or a settle whose key
+    is itself still open at the venue) routes to ``review`` and is NEVER
+    auto-settled.
+
+    ``review`` collects every ambiguous case (open OR settle side).
     """
-    # Group by conservative key.
+    settled_positions = settled_positions or []
+
+    # Group OPEN venue positions + ledger bets by conservative key.
     v_by_key: Dict[str, List[Dict[str, Any]]] = {}
     for v in venue_positions:
         k = _match_key(v.get("venue"), v.get("selection"), v.get("market"),
@@ -222,8 +352,43 @@ def reconcile(
                        b.get("match_desc"))
         l_by_key.setdefault(k, []).append(b)
 
+    # Group SETTLED venue positions by the same conservative key.
+    s_by_key: Dict[str, List[Dict[str, Any]]] = {}
+    for s in settled_positions:
+        k = _match_key(s.get("venue"), s.get("selection"), s.get("market"),
+                       s.get("fixture_or_event"))
+        s_by_key.setdefault(k, []).append(s)
+
     rec = Reconciliation()
-    seen_keys = set(v_by_key) | set(l_by_key)
+
+    # --- Settle pass first: claim ledger bets that a venue reports settled. ---
+    # A claimed ledger bet is removed from the open-classification below so a
+    # just-settled bet is not ALSO flagged gone_from_venue.
+    claimed_keys: set = set()
+    for k in sorted(s_by_key):
+        ss = s_by_key[k]
+        ls = l_by_key.get(k, [])
+        vs_open = v_by_key.get(k, [])
+        confident = (
+            len(ss) == 1
+            and len(ls) == 1
+            and not vs_open  # still open at the venue ⇒ contradictory ⇒ review.
+            and _is_unambiguous_settle(ss[0])
+        )
+        if confident:
+            rec.settle.append({"key": k, "venue": ss[0], "ledger": ls[0]})
+        else:
+            rec.review.append({
+                "key": k, "reason": "ambiguous_settle",
+                "venue_settled": ss, "ledger_bets": ls, "venue_open": vs_open,
+            })
+        # Either way the key is CLAIMED: a confident settle handles it, and an
+        # ambiguous settle is already in review — neither should be re-classified
+        # (and re-reported) by the open-position pass below.
+        claimed_keys.add(k)
+
+    # --- Open-position classification over keys NOT claimed by a settle. ---
+    seen_keys = (set(v_by_key) | set(l_by_key)) - claimed_keys
     for k in sorted(seen_keys):
         vs = v_by_key.get(k, [])
         ls = l_by_key.get(k, [])
@@ -248,23 +413,31 @@ def _now() -> str:
     return _dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
 
 
+def _settle_status(result: str) -> str:
+    """Map a normalised venue result to the ledger status."""
+    return "won" if _norm(result) == "won" else "lost"
+
+
 def apply_reconciliation(
     rec: Reconciliation, db_path: str
 ) -> Dict[str, Any]:
     """Apply conservative ledger writes for a reconciliation (LIVE path).
 
     - INSERT each ``new_at_venue`` position as an OPEN bet (source='manual').
+    - SETTLE each ``settle`` ledger bet with the venue's OWN realised P&L +
+      result (venue truth — no recomputation). Only OPEN bets are settled, so a
+      re-run is a no-op (the bet is no longer open).
     - Mark each ``gone_from_venue`` ledger bet ``CLOSED_PENDING_STATUS``.
     - ``matched`` and ``review`` are left untouched.
 
-    Idempotent: a re-run inserts nothing new (the inserted bets now match) and
-    re-marking an already-closed bet is a no-op. NEVER settles P&L, NEVER
-    places/cancels orders.
+    Idempotent: a re-run inserts nothing new (the inserted bets now match), a
+    re-settle of an already-settled bet is a no-op (status guard), and
+    re-marking an already-closed bet is a no-op. NEVER places/cancels orders.
     """
     from wca.ledger import store
 
     store.init_db(db_path)
-    result = {"inserted": [], "closed": []}
+    result = {"inserted": [], "closed": [], "settled": []}
 
     for v in rec.new_at_venue:
         odds = v.get("odds") or v.get("avg_price")
@@ -292,6 +465,33 @@ def apply_reconciliation(
 
     conn = sqlite3.connect(db_path)
     try:
+        # Ensure the settled_ts column exists on pre-existing DBs (store helper).
+        store._ensure_settled_ts_column(conn)  # noqa: SLF001 — same package.
+
+        # --- Venue-truth settles: write the venue's realised P&L directly. ---
+        for item in rec.settle:
+            ledger = item.get("ledger") or {}
+            venue = item.get("venue") or {}
+            bet_id = ledger.get("id")
+            if bet_id is None:
+                continue
+            status = _settle_status(venue.get("result"))
+            try:
+                pnl = float(venue.get("settled_pnl"))
+            except (TypeError, ValueError):
+                logger.warning("positions_sync settle skipped (bad P&L) for bet %s", bet_id)
+                continue
+            settled_ts = venue.get("settled_ts") or _now()
+            cur = conn.execute(
+                "UPDATE bets SET status=?, settled_pl=?, settled_ts=? "
+                "WHERE id=? AND status='open'",
+                (status, pnl, settled_ts, bet_id),
+            )
+            if cur.rowcount:
+                result["settled"].append({
+                    "bet_id": int(bet_id), "result": status, "settled_pl": pnl,
+                })
+
         for b in rec.gone_from_venue:
             bet_id = b.get("id")
             if bet_id is None:
@@ -341,43 +541,133 @@ def run_sync(
     *,
     live: Optional[bool] = None,
     fetchers: Optional[Dict[str, Callable[[], List[Dict[str, Any]]]]] = None,
+    settled_fetchers: Optional[Dict[str, Callable[[int], List[Dict[str, Any]]]]] = None,
+    settled_lookback_hours: int = DEFAULT_SETTLED_LOOKBACK_HOURS,
 ) -> Dict[str, Any]:
-    """Run one reconciliation pass and return a JSON-able report.
+    """Run one ALL-IN-ONE reconciliation pass (fetch + apply locally).
+
+    Kept for tests/dev; production splits FETCH (MacBook) from APPLY (mini) via
+    :func:`fetch_snapshot` / :func:`apply_snapshot`.
 
     ``live`` defaults to :func:`live_env` (``WCA_POSITIONS_LIVE=1``). In SHADOW
     (default) NO ledger writes occur — only the report + site projection
-    refresh. In LIVE, conservative writes are applied.
+    refresh. In LIVE, conservative writes are applied (insert / settle / close).
     """
     if live is None:
         live = live_env()
     venue_positions = fetch_all_positions(fetchers)
+    settled_positions = fetch_all_settled(settled_lookback_hours, settled_fetchers)
     ledger_bets = load_open_ledger_bets(db_path)
-    rec = reconcile(venue_positions, ledger_bets)
+    rec = reconcile(venue_positions, ledger_bets, settled_positions)
 
+    report = _build_report(rec, len(venue_positions), len(settled_positions),
+                           len(ledger_bets), live, db_path,
+                           settled_lookback_hours)
+    return report
+
+
+def _build_report(
+    rec: Reconciliation,
+    venue_count: int,
+    settled_count: int,
+    ledger_count: int,
+    live: bool,
+    db_path: str,
+    settled_lookback_hours: int,
+) -> Dict[str, Any]:
+    """Assemble the JSON-able report + (in LIVE) apply the reconciliation."""
     mode = "LIVE" if live else "SHADOW"
+    counts = rec.as_dict()["counts"]
     report: Dict[str, Any] = {
         "mode": mode,
         "ts_utc": _now(),
-        "venue_position_count": len(venue_positions),
-        "open_ledger_count": len(ledger_bets),
+        "settled_lookback_hours": settled_lookback_hours,
+        "venue_position_count": venue_count,
+        "venue_settled_count": settled_count,
+        "open_ledger_count": ledger_count,
         "reconciliation": rec.as_dict(),
         "applied": None,
     }
-
-    # Site projection is read-only; refresh in both modes.
     report["site_projection_pm_rows"] = refresh_site_projection()
 
     if live:
         report["applied"] = apply_reconciliation(rec, db_path)
-        logger.info("positions_sync LIVE: inserted=%s closed=%s",
-                    report["applied"]["inserted"], report["applied"]["closed"])
+        logger.info(
+            "positions_sync LIVE: inserted=%s settled=%s closed=%s",
+            report["applied"]["inserted"], report["applied"]["settled"],
+            report["applied"]["closed"],
+        )
     else:
         logger.info(
-            "positions_sync SHADOW: would insert %d, close %d, matched %d, review %d "
-            "(NO ledger writes)",
-            rec.as_dict()["counts"]["new_at_venue"],
-            rec.as_dict()["counts"]["gone_from_venue"],
-            rec.as_dict()["counts"]["matched"],
-            rec.as_dict()["counts"]["review"],
+            "positions_sync SHADOW: would insert %d, settle %d, close %d, "
+            "matched %d, review %d (NO ledger writes)",
+            counts["new_at_venue"], counts["settle"], counts["gone_from_venue"],
+            counts["matched"], counts["review"],
         )
+    return report
+
+
+# ---------------------------------------------------------------------------
+# FETCH / APPLY split (cross-machine: fetch on the MacBook, apply on the mini).
+# ---------------------------------------------------------------------------
+
+
+def fetch_snapshot(
+    *,
+    settled_lookback_hours: int = DEFAULT_SETTLED_LOOKBACK_HOURS,
+    fetchers: Optional[Dict[str, Callable[[], List[Dict[str, Any]]]]] = None,
+    settled_fetchers: Optional[Dict[str, Callable[[int], List[Dict[str, Any]]]]] = None,
+) -> Dict[str, Any]:
+    """FETCH-ONLY: pull every venue's open + settled-24h positions into a
+    self-describing snapshot. NO DB ACCESS — this runs on the MacBook (VPN on).
+
+    The snapshot round-trips through JSON and is applied on the mini via
+    :func:`apply_snapshot`.
+    """
+    open_positions = fetch_all_positions(fetchers)
+    settled_positions = fetch_all_settled(settled_lookback_hours, settled_fetchers)
+    return {
+        "snapshot_version": SNAPSHOT_VERSION,
+        "fetched_at": _now(),
+        "settled_lookback_hours": settled_lookback_hours,
+        "open_positions": open_positions,
+        "settled_positions": settled_positions,
+        "counts": {
+            "open": len(open_positions),
+            "settled": len(settled_positions),
+        },
+    }
+
+
+def apply_snapshot(
+    snapshot: Dict[str, Any],
+    db_path: str,
+    *,
+    live: Optional[bool] = None,
+) -> Dict[str, Any]:
+    """APPLY a fetched snapshot against the canonical ledger. Runs on the mini.
+
+    Reconciles the snapshot's open + settled positions against the open ledger
+    bets and (in LIVE) applies the conservative writes. SHADOW (default) reports
+    only. Validates the snapshot shape and degrades safely on a malformed one.
+    """
+    if live is None:
+        live = live_env()
+    if not isinstance(snapshot, dict):
+        raise ValueError("snapshot must be a dict")
+    ver = snapshot.get("snapshot_version")
+    if ver is not None and ver > SNAPSHOT_VERSION:
+        logger.warning("snapshot version %s newer than supported %s; proceeding",
+                       ver, SNAPSHOT_VERSION)
+    open_positions = list(snapshot.get("open_positions") or [])
+    settled_positions = list(snapshot.get("settled_positions") or [])
+    lookback = int(snapshot.get("settled_lookback_hours") or DEFAULT_SETTLED_LOOKBACK_HOURS)
+
+    ledger_bets = load_open_ledger_bets(db_path)
+    rec = reconcile(open_positions, ledger_bets, settled_positions)
+
+    report = _build_report(rec, len(open_positions), len(settled_positions),
+                           len(ledger_bets), live, db_path, lookback)
+    report["snapshot_fetched_at"] = snapshot.get("fetched_at")
+    report["source"] = "snapshot"
     return report

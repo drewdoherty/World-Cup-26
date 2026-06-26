@@ -167,6 +167,137 @@ def list_open_positions(*, account: str = "1") -> List[Dict[str, Any]]:
         return []
 
 
+def _normalise_smk_settled(p: Dict[str, Any], account: str = "1") -> Optional[Dict[str, Any]]:
+    """Map one Smarkets SETTLED position into the normalised settled shape.
+
+    INFERRED SHAPE CAVEAT: the live Smarkets v3 settled-positions payload is not
+    available in this environment, so the field names below are best-effort
+    guesses (``realised_profit``/``settled_profit`` for P&L in GBP minor units,
+    ``settled_at`` for the timestamp, ``settled``/``state`` to confirm the bet is
+    actually settled). The conservatism guard is deliberate: we ONLY treat a
+    position as an unambiguous settle when (a) it is flagged settled AND (b) a
+    numeric realised P&L is present. Anything else returns ``None`` so the
+    reconcile engine routes it to ``review`` rather than auto-settling. If the
+    live API differs, ONLY this normaliser + the URL/JSON-keys in
+    :func:`list_settled_positions` need adjusting — the reconcile engine is
+    unaffected. Pure (no I/O) so it is unit-testable.
+
+    Smarkets quotes monetary amounts in pennies (minor units); we convert P&L to
+    major units (GBP) here.
+    """
+    state = str(p.get("state") or p.get("status") or "").strip().lower()
+    is_settled = bool(p.get("settled")) or state in ("settled", "closed", "resolved")
+    if not is_settled:
+        return None
+    raw_pnl = p.get("realised_profit")
+    if raw_pnl is None:
+        raw_pnl = p.get("settled_profit")
+    if raw_pnl is None:
+        raw_pnl = p.get("profit")
+    try:
+        # Smarkets monetary fields are integer pennies → convert to GBP.
+        pnl = float(raw_pnl) / 100.0
+    except (TypeError, ValueError):
+        return None  # no usable realised P&L -> not an unambiguous settle.
+    # Result is taken from an explicit outcome when present; otherwise inferred
+    # from the sign of the realised P&L (a settle with +pnl won, <=0 lost).
+    outcome = str(p.get("outcome") or p.get("result") or "").strip().lower()
+    if outcome in ("won", "win", "winner"):
+        result = "won"
+    elif outcome in ("lost", "lose", "loser"):
+        result = "lost"
+    else:
+        result = "won" if pnl > 0 else "lost"
+    return {
+        "venue": "smarkets",
+        "market": p.get("market_name") or str(p.get("market_id") or ""),
+        "selection": p.get("contract_name") or p.get("name") or str(p.get("contract_id") or ""),
+        "fixture_or_event": p.get("event_name") or "",
+        "stake": None,
+        "size": None,
+        "avg_price": None,
+        "odds": None,
+        "settled_pnl": pnl,
+        "result": result,
+        "settled_ts": p.get("settled_at") or p.get("settled_date"),
+        "external_id": str(p.get("id") or p.get("contract_id") or ""),
+        "account": account,
+        "side": (p.get("side") or "").lower(),
+    }
+
+
+def list_settled_positions(*, since_hours: int = 24, account: str = "1") -> List[Dict[str, Any]]:
+    """Return the account's SETTLED Smarkets positions over the last
+    ``since_hours``, normalised. READ-ONLY; degrades to ``[]`` (never raises).
+
+    INFERRED ENDPOINT CAVEAT: the exact Smarkets settled-positions endpoint is
+    not exercised here. We query ``GET /v3/positions/?state=settled`` with a
+    ``settled_since`` cutoff and read ``{"positions": [...]}`` (falling back to
+    ``data``). The window is applied client-side from ``settled_at`` too, in case
+    the server ignores ``settled_since``. If the live API differs, only the URL /
+    JSON-keys here and :func:`_normalise_smk_settled` need adjusting.
+    """
+    token = session_login()
+    if not token:
+        logger.info("Smarkets settled positions disabled — no SMARKETS_API_TOKEN or "
+                    "SMARKETS_USERNAME/PASSWORD configured")
+        return []
+    import datetime as _dt
+
+    cutoff = _dt.datetime.utcnow() - _dt.timedelta(hours=max(1, int(since_hours)))
+    cutoff_iso = cutoff.strftime("%Y-%m-%dT%H:%M:%SZ")
+    try:
+        import requests
+
+        resp = requests.get(
+            SMARKETS_API + "/positions/",
+            params={"state": "settled", "settled_since": cutoff_iso},
+            headers=_auth_headers(token),
+            timeout=_TIMEOUT,
+        )
+        resp.raise_for_status()
+        body = resp.json() or {}
+        raw = body.get("positions") or body.get("data") or []
+        out: List[Dict[str, Any]] = []
+        for p in raw:
+            norm = _normalise_smk_settled(p, account=account)
+            if norm is None:
+                continue
+            if not _within_window(norm.get("settled_ts"), cutoff):
+                continue  # belt-and-braces client-side window filter.
+            out.append(norm)
+        logger.info("Smarkets settled: %d of %d (since %s)", len(out), len(raw), cutoff_iso)
+        return out
+    except Exception as exc:  # noqa: BLE001 — never crash the sync.
+        logger.warning("Smarkets list_settled_positions failed (degrading to empty): %s", exc)
+        return []
+
+
+def _within_window(settled_ts: Any, cutoff: "Any") -> bool:
+    """True when ``settled_ts`` is at/after ``cutoff`` (or unparseable → keep).
+
+    Unparseable timestamps are kept (the server-side filter already scoped the
+    query); only a parseable timestamp strictly older than the cutoff is dropped.
+    """
+    if not settled_ts:
+        return True
+    import datetime as _dt
+
+    s = str(settled_ts).strip().replace("Z", "+00:00")
+    for parse in (
+        lambda v: _dt.datetime.fromisoformat(v),
+        lambda v: _dt.datetime.strptime(v[:19], "%Y-%m-%dT%H:%M:%S"),
+    ):
+        try:
+            ts = parse(s)
+            if ts.tzinfo is not None:
+                ts = ts.replace(tzinfo=None)
+            return ts >= cutoff
+        except (ValueError, TypeError):
+            continue
+    return True
+
+
 def smarkets_odds(
     sport_key: str = "soccer_fifa_world_cup",
     *,
