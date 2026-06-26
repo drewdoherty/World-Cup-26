@@ -1,40 +1,40 @@
 {
   "meta": {
-    "generated": "2026-06-26T23:22:23"
+    "generated": "2026-06-26T23:45:13"
   },
   "totals": {
-    "wagered": 1984.6499999999999,
+    "wagered": 1994.6499999999999,
     "open_stake": 966.48,
     "settled_pl": 66.24749999999997,
-    "n_bets": 153
+    "n_bets": 155
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 1070.7799999999997,
+      "wagered": 1080.7799999999997,
       "open_stake": 224.44,
       "settled_pl": 172.45550000000003,
-      "n_bets": 115
+      "n_bets": 117
     },
     "USD": {
       "wagered": 913.87,
-      "open_stake": 759.5091000000002,
+      "open_stake": 849.6689000000001,
       "settled_pl": -106.20799999999997,
-      "n_bets": 17
+      "n_bets": 20
     }
   },
   "venues": {
     "sportsbook": {
-      "wagered": 1070.7799999999997,
+      "wagered": 1080.7799999999997,
       "open_stake": 224.44,
       "settled_pl": 172.45550000000003,
-      "n_bets": 115,
+      "n_bets": 117,
       "currency": "GBP"
     },
     "polymarket": {
       "wagered": 913.87,
-      "open_stake": 759.5091000000002,
+      "open_stake": 849.6689000000001,
       "settled_pl": -106.20799999999997,
-      "n_bets": 17,
+      "n_bets": 20,
       "currency": "USD"
     },
     "kalshi": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 901.7799999999997,
-      "open_stake": 258.44,
+      "wagered": 911.7799999999999,
+      "open_stake": 268.44000000000005,
       "settled_pl": 222.45550000000003,
-      "n_bets": 94,
+      "n_bets": 96,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,14 @@
     }
   },
   "source_summary": {
+    "offer": {
+      "GBP": {
+        "wagered": 290.0,
+        "open_stake": 55.0,
+        "settled_pl": 156.67,
+        "n_bets": 32
+      }
+    },
     "model": {
       "GBP": {
         "wagered": 414.22000000000014,
@@ -90,14 +98,6 @@
         "n_bets": 12
       }
     },
-    "offer": {
-      "GBP": {
-        "wagered": 280.0,
-        "open_stake": 45.0,
-        "settled_pl": 156.67,
-        "n_bets": 30
-      }
-    },
     "hedge": {
       "GBP": {
         "wagered": 22.0,
@@ -111,10 +111,10 @@
     "bet365": {
       "venue": "sportsbook",
       "currency": "GBP",
-      "wagered": 73.0,
-      "open_stake": 51.0,
+      "wagered": 83.0,
+      "open_stake": 61.0,
       "settled_pl": 46.97,
-      "n_bets": 8
+      "n_bets": 10
     },
     "Paddy Power": {
       "venue": "sportsbook",
@@ -234,10 +234,10 @@
       "bet365": {
         "venue": "sportsbook",
         "currency": "GBP",
-        "wagered": 73.0,
-        "open_stake": 51.0,
+        "wagered": 83.0,
+        "open_stake": 61.0,
         "settled_pl": 46.97,
-        "n_bets": 8
+        "n_bets": 10
       },
       "Paddy Power": {
         "venue": "sportsbook",
@@ -3714,6 +3714,32 @@
       "notes": "live PM position (data-API)"
     },
     {
+      "id": "pm-0x57dac5b633",
+      "ts_utc": "",
+      "match": "Will DR Congo vs. Uzbekistan end in a draw?",
+      "match_id": "0x57dac5b6332f3d53233950105e7768575e511d90338f3f7be5ce993f424675a7",
+      "market": "Will DR Congo vs. Uzbekistan end in a draw?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 4.166666666666667,
+      "stake": 31.92,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 31.25,
+      "cur_price": 0.235,
+      "avg_price": 0.24,
+      "shares": 133.0,
+      "cash_pnl": -0.67,
+      "pct_pnl": -0.020989974937343357,
+      "notes": "live PM position (data-API)"
+    },
+    {
       "id": "pm-0x14dc2b2815",
       "ts_utc": "",
       "match": "Will Portugal reach the Quarterfinals at the 2026 FIFA World Cup?",
@@ -3766,6 +3792,58 @@
       "notes": "live PM position (data-API)"
     },
     {
+      "id": "pm-0xfbcdae2466",
+      "ts_utc": "",
+      "match": "Will Colombia win on 2026-06-27?",
+      "match_id": "0xfbcdae24669153e811b86329a4adb56689b590845b02fd0c16e7b1826c863034",
+      "market": "Will Colombia win on 2026-06-27?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 4.168403501458942,
+      "stake": 28.8298,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 30.64,
+      "cur_price": 0.255,
+      "avg_price": 0.2399,
+      "shares": 120.1504,
+      "cash_pnl": 1.81,
+      "pct_pnl": 0.0627822600226155,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x8765cc2b3c",
+      "ts_utc": "",
+      "match": "Will Colombia vs. Portugal end in a draw?",
+      "match_id": "0x8765cc2b3c75089a9c5de8d12d52274857a2e573a9726bc023faa2a046340fac",
+      "market": "Will Colombia vs. Portugal end in a draw?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 4.0,
+      "stake": 29.26,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 28.67,
+      "cur_price": 0.245,
+      "avg_price": 0.25,
+      "shares": 117.04,
+      "cash_pnl": -0.59,
+      "pct_pnl": -0.02016404647983595,
+      "notes": "live PM position (data-API)"
+    },
+    {
       "id": "pm-0xe8904439c2",
       "ts_utc": "",
       "match": "Will Colombia reach the Round of 16 at the 2026 FIFA World Cup?",
@@ -3809,12 +3887,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 55.68,
-      "cur_price": 0.5265,
+      "cur_value": 54.09,
+      "cur_price": 0.5115,
       "avg_price": 0.6241,
       "shares": 105.7498,
-      "cash_pnl": -10.32,
-      "pct_pnl": -0.15636387327859588,
+      "cash_pnl": -11.91,
+      "pct_pnl": -0.1804548188709377,
       "notes": "live PM position (data-API)"
     },
     {
@@ -3974,29 +4052,29 @@
       "notes": "live PM position (data-API)"
     },
     {
-      "id": "pm-0xfbcdae2466",
+      "id": "pm-0x187651dbb6",
       "ts_utc": "",
-      "match": "Will Colombia win on 2026-06-27?",
-      "match_id": "0xfbcdae24669153e811b86329a4adb56689b590845b02fd0c16e7b1826c863034",
-      "market": "Will Colombia win on 2026-06-27?",
+      "match": "Will Cabo Verde vs. Saudi Arabia end in a draw?",
+      "match_id": "0x187651dbb617ad61b8c3342a4a61996273a6a206ff36405c37c5cf029c2f96bb",
+      "market": "Will Cabo Verde vs. Saudi Arabia end in a draw?",
       "selection": "Yes",
       "platform": "polymarket",
       "venue": "polymarket",
       "account": "1",
       "source": "manual",
       "currency": "USD",
-      "decimal_odds": 4.349717268377556,
-      "stake": 18.4699,
+      "decimal_odds": 3.334444814938313,
+      "stake": 18.6199,
       "model_prob": null,
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 20.48,
-      "cur_price": 0.255,
-      "avg_price": 0.2299,
-      "shares": 80.3043,
-      "cash_pnl": 2.01,
-      "pct_pnl": 0.10882571102171641,
+      "cur_value": 17.68,
+      "cur_price": 0.2849,
+      "avg_price": 0.2999,
+      "shares": 62.0666,
+      "cash_pnl": -0.94,
+      "pct_pnl": -0.05048362236102234,
       "notes": "live PM position (data-API)"
     },
     {
@@ -4076,6 +4154,48 @@
       "cash_pnl": 0.18,
       "pct_pnl": 0.03000050000833347,
       "notes": "live PM position (data-API)"
+    },
+    {
+      "id": 212,
+      "ts_utc": "2026-06-26T23:45:13",
+      "match": "Panama v England",
+      "match_id": "MANUAL_PANAMA_V_ENGLAND",
+      "market": "Both Teams to Score",
+      "selection": "No",
+      "platform": "bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 1.66,
+      "stake": 5.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.92; SNR",
+      "manual_override": null
+    },
+    {
+      "id": 211,
+      "ts_utc": "2026-06-26T23:45:13",
+      "match": "Panama v England",
+      "match_id": "MANUAL_PANAMA_V_ENGLAND",
+      "market": "Bet Builder",
+      "selection": "Full Time Result -> England + Total Goals 3-Way -> Under 3 Goals",
+      "platform": "bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 3.75,
+      "stake": 5.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.92; Bet Builder; legs: Full Time Result -> England | Total Goals 3-Way -> Under 3 Goals; SNR",
+      "manual_override": null
     },
     {
       "id": 210,
@@ -4672,40 +4792,40 @@
       "fixture": "Cape Verde vs Saudi Arabia",
       "scores": [
         {
-          "score": "0-1",
-          "prob": 15.0,
-          "fair": 6.66,
-          "back": 6.79
-        },
-        {
           "score": "0-0",
           "prob": 14.8,
-          "fair": 6.76,
-          "back": 6.9
+          "fair": 6.74,
+          "back": 6.87
         },
         {
           "score": "1-0",
-          "prob": 14.1,
-          "fair": 7.07,
-          "back": 7.21
+          "prob": 14.8,
+          "fair": 6.78,
+          "back": 6.91
+        },
+        {
+          "score": "0-1",
+          "prob": 14.4,
+          "fair": 6.96,
+          "back": 7.1
         },
         {
           "score": "1-1",
-          "prob": 12.7,
-          "fair": 7.86,
-          "back": 8.02
+          "prob": 12.8,
+          "fair": 7.83,
+          "back": 7.98
         },
         {
           "score": "0-2",
-          "prob": 7.5,
-          "fair": 13.38,
-          "back": 13.65
+          "prob": 7.1,
+          "fair": 13.99,
+          "back": 14.27
         },
         {
-          "score": "1-2",
-          "prob": 6.7,
-          "fair": 14.9,
-          "back": 15.2
+          "score": "2-0",
+          "prob": 6.9,
+          "fair": 14.4,
+          "back": 14.68
         }
       ],
       "over_under": {
@@ -4713,58 +4833,58 @@
         "over": 29.2,
         "under": 70.8
       },
-      "btts": 36.3,
-      "xg_home": 0.91,
-      "xg_away": 0.97
+      "btts": 36.4,
+      "xg_home": 0.93,
+      "xg_away": 0.94
     },
     {
       "fixture": "Uruguay vs Spain",
       "scores": [
         {
           "score": "0-1",
-          "prob": 16.1,
-          "fair": 6.2,
-          "back": 6.33
+          "prob": 16.0,
+          "fair": 6.26,
+          "back": 6.39
         },
         {
           "score": "0-2",
-          "prob": 12.2,
-          "fair": 8.17,
-          "back": 8.33
+          "prob": 12.1,
+          "fair": 8.24,
+          "back": 8.41
         },
         {
           "score": "1-1",
-          "prob": 11.9,
-          "fair": 8.38,
-          "back": 8.55
+          "prob": 12.0,
+          "fair": 8.33,
+          "back": 8.49
         },
         {
           "score": "0-0",
-          "prob": 10.3,
-          "fair": 9.7,
-          "back": 9.9
+          "prob": 10.4,
+          "fair": 9.64,
+          "back": 9.83
         },
         {
           "score": "1-2",
-          "prob": 9.8,
-          "fair": 10.22,
-          "back": 10.43
+          "prob": 9.7,
+          "fair": 10.32,
+          "back": 10.52
         },
         {
           "score": "1-0",
-          "prob": 6.4,
-          "fair": 15.51,
-          "back": 15.82
+          "prob": 6.6,
+          "fair": 15.18,
+          "back": 15.48
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 40.2,
-        "under": 59.8
+        "over": 40.1,
+        "under": 59.9
       },
-      "btts": 42.2,
-      "xg_home": 0.74,
-      "xg_away": 1.55
+      "btts": 42.3,
+      "xg_home": 0.75,
+      "xg_away": 1.54
     },
     {
       "fixture": "New Zealand vs Belgium",
@@ -4779,7 +4899,7 @@
           "score": "0-1",
           "prob": 12.8,
           "fair": 7.83,
-          "back": 7.98
+          "back": 7.99
         },
         {
           "score": "0-3",
@@ -4790,20 +4910,20 @@
         {
           "score": "1-2",
           "prob": 8.0,
-          "fair": 12.49,
-          "back": 12.74
+          "fair": 12.5,
+          "back": 12.75
         },
         {
           "score": "0-4",
-          "prob": 7.6,
-          "fair": 13.24,
+          "prob": 7.5,
+          "fair": 13.25,
           "back": 13.51
         },
         {
           "score": "1-3",
           "prob": 6.4,
-          "fair": 15.61,
-          "back": 15.92
+          "fair": 15.62,
+          "back": 15.93
         }
       ],
       "over_under": {
@@ -4820,39 +4940,39 @@
       "scores": [
         {
           "score": "0-0",
-          "prob": 17.1,
-          "fair": 5.86,
-          "back": 5.98
+          "prob": 17.2,
+          "fair": 5.83,
+          "back": 5.94
         },
         {
           "score": "1-0",
-          "prob": 14.9,
-          "fair": 6.71,
-          "back": 6.85
+          "prob": 14.8,
+          "fair": 6.77,
+          "back": 6.91
         },
         {
           "score": "1-1",
-          "prob": 14.6,
-          "fair": 6.83,
-          "back": 6.97
+          "prob": 14.7,
+          "fair": 6.79,
+          "back": 6.92
         },
         {
           "score": "0-1",
-          "prob": 12.4,
-          "fair": 8.04,
-          "back": 8.2
+          "prob": 12.5,
+          "fair": 8.02,
+          "back": 8.18
         },
         {
           "score": "2-0",
-          "prob": 6.8,
-          "fair": 14.77,
-          "back": 15.07
+          "prob": 6.7,
+          "fair": 14.9,
+          "back": 15.2
         },
         {
           "score": "2-1",
-          "prob": 6.7,
-          "fair": 15.01,
-          "back": 15.31
+          "prob": 6.6,
+          "fair": 15.14,
+          "back": 15.44
         }
       ],
       "over_under": {
@@ -4870,38 +4990,38 @@
         {
           "score": "1-0",
           "prob": 15.3,
-          "fair": 6.54,
-          "back": 6.67
+          "fair": 6.55,
+          "back": 6.68
         },
         {
           "score": "2-0",
           "prob": 12.5,
-          "fair": 8.01,
-          "back": 8.17
+          "fair": 8.03,
+          "back": 8.19
         },
         {
           "score": "1-1",
           "prob": 12.4,
-          "fair": 8.04,
-          "back": 8.2
+          "fair": 8.06,
+          "back": 8.22
         },
         {
           "score": "0-0",
           "prob": 11.3,
-          "fair": 8.82,
-          "back": 9.0
+          "fair": 8.85,
+          "back": 9.02
         },
         {
           "score": "2-1",
           "prob": 8.7,
-          "fair": 11.46,
-          "back": 11.69
+          "fair": 11.48,
+          "back": 11.71
         },
         {
           "score": "0-1",
           "prob": 6.7,
-          "fair": 15.03,
-          "back": 15.33
+          "fair": 14.87,
+          "back": 15.17
         }
       ],
       "over_under": {
@@ -4910,8 +5030,8 @@
         "under": 60.7
       },
       "btts": 40.8,
-      "xg_home": 1.56,
-      "xg_away": 0.7
+      "xg_home": 1.55,
+      "xg_away": 0.71
     },
     {
       "fixture": "Panama vs England",
@@ -5065,39 +5185,39 @@
       "scores": [
         {
           "score": "1-1",
-          "prob": 17.9,
-          "fair": 5.6,
-          "back": 5.71
+          "prob": 17.8,
+          "fair": 5.61,
+          "back": 5.72
         },
         {
           "score": "0-0",
           "prob": 12.3,
-          "fair": 8.15,
-          "back": 8.31
+          "fair": 8.16,
+          "back": 8.32
         },
         {
           "score": "0-1",
           "prob": 9.5,
-          "fair": 10.54,
-          "back": 10.75
+          "fair": 10.56,
+          "back": 10.77
         },
         {
           "score": "1-0",
           "prob": 7.9,
-          "fair": 12.68,
-          "back": 12.93
+          "fair": 12.6,
+          "back": 12.86
         },
         {
           "score": "1-2",
           "prob": 7.5,
-          "fair": 13.38,
-          "back": 13.65
+          "fair": 13.42,
+          "back": 13.68
         },
         {
           "score": "0-2",
           "prob": 6.6,
-          "fair": 15.2,
-          "back": 15.5
+          "fair": 15.23,
+          "back": 15.54
         }
       ],
       "over_under": {
@@ -5120,7 +5240,7 @@
         },
         {
           "score": "0-3",
-          "prob": 14.4,
+          "prob": 14.5,
           "fair": 6.92,
           "back": 7.06
         },
@@ -5128,25 +5248,25 @@
           "score": "0-1",
           "prob": 12.7,
           "fair": 7.86,
-          "back": 8.02
+          "back": 8.01
         },
         {
           "score": "0-4",
           "prob": 9.3,
           "fair": 10.71,
-          "back": 10.93
+          "back": 10.92
         },
         {
           "score": "1-2",
           "prob": 6.8,
-          "fair": 14.77,
-          "back": 15.06
+          "fair": 14.76,
+          "back": 15.05
         },
         {
           "score": "1-3",
           "prob": 5.8,
-          "fair": 17.14,
-          "back": 17.48
+          "fair": 17.13,
+          "back": 17.47
         }
       ],
       "over_under": {
