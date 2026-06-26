@@ -251,18 +251,33 @@ SELECT * FROM v_model_book WHERE book = 'realized'
 
 
 def ensure_schema(db_path: str = _DEFAULT_DB) -> None:
-    """Create tables, indexes and views (idempotent, safe to re-run)."""
+    """Create tables, indexes and views (idempotent, safe to re-run).
+
+    Ordering matters for in-place upgrades: ``CREATE TABLE IF NOT EXISTS`` is a
+    no-op against an existing old-#41-schema ``predictions`` table, so the new
+    columns (e.g. ``build_id``) only appear after ``_migrate_predictions_schema``
+    runs. The indexes/views reference those new columns, so the migration MUST
+    run *before* them — otherwise ``CREATE INDEX ix_pred_build`` raises
+    ``no such column: build_id`` on an existing DB before the migration can fix
+    it. On a fresh DB the migration is a harmless no-op (the CREATE TABLE already
+    built the full column set).
+    """
+    # 1. Base tables (no-op if they already exist with an older column set).
     with _connect_write(db_path) as conn:
         conn.execute(_DDL_BETS_STUB)
         conn.execute(_DDL_PREDICTIONS)
         conn.execute(_DDL_ACCA_LEGS)
+        conn.commit()
+    # 2. Upgrade an existing predictions table to the current column set BEFORE
+    #    any index/view references the new columns.
+    _migrate_predictions_schema(db_path)
+    # 3. Indexes + views (now guaranteed the referenced columns exist).
+    with _connect_write(db_path) as conn:
         for ddl in _INDEXES:
             conn.execute(ddl)
         conn.execute(_DDL_V_MODEL_BOOK)
         conn.execute(_DDL_V_REALIZED_BOOK)
         conn.commit()
-    # Run migration after schema is created (safe to call even if no old data).
-    _migrate_predictions_schema(db_path)
 
 
 def _migrate_predictions_schema(db_path: str = _DEFAULT_DB) -> None:
@@ -316,46 +331,35 @@ def _migrate_predictions_schema(db_path: str = _DEFAULT_DB) -> None:
         ).fetchall()
         existing_cols = {row[1] for row in existing_cols_raw}  # row[1] is the column name.
 
-        # Define columns to add (column_name, SQL_definition).
-        # Only add columns that don't already exist.
-        cols_to_add = [
-            ("build_id", "TEXT"),
-            ("fixture", "TEXT"),
-            ("kickoff_utc", "TEXT"),
-            ("elo_prob", "REAL"),
-            ("dc_prob", "REAL"),
-            ("market_devig_prob", "REAL"),
-            ("market_best_odds", "REAL"),
-            ("market_book", "TEXT"),
-            ("edge", "REAL"),
-            ("ev_per_unit", "REAL"),
-            ("closing_devig_prob", "REAL"),
-            ("close_lag_seconds", "INTEGER"),
-            ("n_books_at_close", "INTEGER"),
-            ("close_is_prematch", "INTEGER"),
-            ("settle_source", "TEXT"),
-            ("model_source", "TEXT"),
-            ("model_fair_odds", "REAL"),
-        ]
+        # Bring the table up to the FULL current column set without drift: build
+        # the canonical schema under a throwaway name, read its columns, and
+        # ALTER-add any the (older) live table is missing. This covers EVERY
+        # column the new code + indexes/views reference — build_id, bet_id,
+        # status, market, match_id, the model_* / market_* / close_* set — not a
+        # hand-maintained subset that can fall out of sync with _DDL_PREDICTIONS
+        # (the original cause of the `no such column: bet_id` crash).
+        conn.executescript(
+            "DROP TABLE IF EXISTS _pred_schema_probe;\n"
+            + _DDL_PREDICTIONS.replace("predictions", "_pred_schema_probe", 1)
+        )
+        target_cols = conn.execute(
+            "PRAGMA table_info(_pred_schema_probe)"
+        ).fetchall()
+        conn.execute("DROP TABLE _pred_schema_probe")
 
-        for col_name, col_type in cols_to_add:
-            if col_name not in existing_cols:
+        for row in target_cols:
+            name, col_type = row[1], (row[2] or "TEXT")
+            if name not in existing_cols:
+                # ALTER ADD COLUMN drops NOT NULL/PK/DEFAULT constraints (added
+                # columns are nullable), which is exactly right for back-filling
+                # existing rows.
                 conn.execute(
-                    f"ALTER TABLE predictions ADD COLUMN {col_name} {col_type}"
+                    f"ALTER TABLE predictions ADD COLUMN {name} {col_type}"
                 )
 
-        # Handle status column: if it doesn't exist, add it with a default.
-        # For existing rows, they'll get NULL; the DEFAULT only applies to future inserts.
-        # We'll update NULLs to 'open' explicitly.
-        if "status" not in existing_cols:
-            conn.execute(
-                "ALTER TABLE predictions ADD COLUMN status TEXT DEFAULT 'open'"
-            )
-            # Set any existing NULLs to 'open' to match the default.
-            conn.execute(
-                "UPDATE predictions SET status='open' WHERE status IS NULL"
-            )
-
+        # `status` carries a default of 'open' on fresh inserts; back-fill any
+        # rows that pre-date the column (added above as NULL).
+        conn.execute("UPDATE predictions SET status='open' WHERE status IS NULL")
         conn.commit()
 
 
