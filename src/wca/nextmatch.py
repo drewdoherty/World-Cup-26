@@ -40,6 +40,8 @@ from wca.card import (
     _FixtureBlend,
     _iter_fixture_blends,
     best_price,
+    net_odds,
+    venue_label,
 )
 from wca.markets import kelly as kelly_mod
 from wca.models.props import CornersModel
@@ -462,8 +464,11 @@ def build_next_match(
     for outcome in OUTCOMES:
         p = fb.blended[outcome]
         book, odds = best_price(fb.books, outcome)
-        edge = kelly_mod.edge(p, odds) if book is not None and odds > 1.0 else float("nan")
-        winner[outcome] = (p, book, odds, edge)
+        # Fee-adjusted edge off the chosen venue's net price; display the gross
+        # price + a clean venue label (Betfair / Polymarket).
+        edge = (kelly_mod.edge(p, net_odds(book, odds))
+                if book is not None and odds > 1.0 else float("nan"))
+        winner[outcome] = (p, venue_label(book), odds, edge)
 
     pred = models.dc.predict(fb.home, fb.away, neutral=fb.neutral, warn=False)
     scores = scoreline_card(
