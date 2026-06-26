@@ -1,11 +1,11 @@
-<!-- generated: 2026-06-26T07:54:07 -->
+<!-- generated: 2026-06-26T08:33:43 -->
 ⚽ *Next match* — Norway vs France
 Kickoff 2026-06-26 19:00:00+00:00
 
 *Winner* (model blend)
-  Norway          19.6%  fair 5.09  best 5.20 (smarkets) +2.1% ✅  £1.92
-  Draw            23.0%  fair 4.35  best 4.90 (betfair_ex_uk) +12.8% ✅  £12.28
-  France          57.3%  fair 1.74  best 1.67 (matchbook) -4.2%
+  Norway          19.7%  fair 5.09  best 5.20 (smarkets) +2.2% ✅  £1.99
+  Draw            23.0%  fair 4.34  best 4.90 (betfair_ex_uk) +12.9% ✅  £12.36
+  France          57.3%  fair 1.74  best 1.67 (betfair_ex_uk) -4.3%
   _stake = ¼-Kelly @ £1500 bankroll (+EV picks)_
 
 *Corners* (model, exp 8.4)
