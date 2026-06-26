@@ -1,13 +1,15 @@
 name: Daily Card Generation
 
 on:
-  # Automated daily card generation is now handled by the Mac Mini's
-  # com.wca.build_card service (hourly), which is more reliable and keeps
-  # the card fresher. The schedule trigger below is disabled; use workflow_dispatch
-  # manually if needed, or run: bash deploy/install_services.sh on the Mac Mini.
-  # schedule:
-  #   - cron: '17 8 * * *'
-  workflow_dispatch:  # Allow manual trigger if needed
+  # Mini-INDEPENDENT freshness: build the command caches (card/next/goalscorers/
+  # predictions/scores) in the cloud every hour so /card, /next, /goalscorers and
+  # /accas stay fresh even when the Mac Mini is asleep or its repo is wedged. The
+  # mini then just autopulls + serves. Polymarket is the always-on floor (no
+  # creds); Betfair/TheOddsAPI best-price activate automatically once their
+  # secrets are present in the repo's Actions secret store.
+  schedule:
+    - cron: '17 * * * *'   # hourly at :17 (offset from the :00 odds snapshot)
+  workflow_dispatch:  # Allow manual trigger too
 
 # Serialize with the hourly job — both commit site data to main.
 concurrency:
@@ -44,11 +46,24 @@ jobs:
 
       - name: Generate matchday card
         env:
+          # Best-price line-shop across venues. Polymarket is the always-on floor
+          # (no creds); Betfair Exchange + TheOddsAPI books join the comparison
+          # automatically when these secrets are configured (empty = degrade).
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          BETFAIR_USERNAME: ${{ secrets.BETFAIR_USERNAME }}
+          BETFAIR_PASSWORD: ${{ secrets.BETFAIR_PASSWORD }}
+          BETFAIR_APP_KEY: ${{ secrets.BETFAIR_APP_KEY }}
+          BETFAIR_APP_KEY_LIVE: ${{ secrets.BETFAIR_APP_KEY_LIVE }}
+          BETFAIR_APP_KEY_DELAYED: ${{ secrets.BETFAIR_APP_KEY_DELAYED }}
+          BETFAIR_APP_KEY_PREFER: delayed
+          WCA_ODDS_MERGE: bestprice
           PYTHONPATH: src
         run: |
           mkdir -p logs
-          python scripts/wca_build_card.py --hours-ahead 96 >> logs/card.log 2>&1 \
+          # --bankroll 2000 = the current CLV ladder rung (no ledger DB on the CI
+          # runner); the mini's build overwrites with ledger-resolved sizing when
+          # it next runs. Picks/edges/best-price are bankroll-independent.
+          python scripts/wca_build_card.py --hours-ahead 96 --bankroll 2000 >> logs/card.log 2>&1 \
             || { echo "card build failed; tail:"; tail -30 logs/card.log; exit 1; }
 
       - name: Regenerate site data
@@ -69,6 +84,13 @@ jobs:
       - name: Regenerate scores feed
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          BETFAIR_USERNAME: ${{ secrets.BETFAIR_USERNAME }}
+          BETFAIR_PASSWORD: ${{ secrets.BETFAIR_PASSWORD }}
+          BETFAIR_APP_KEY: ${{ secrets.BETFAIR_APP_KEY }}
+          BETFAIR_APP_KEY_LIVE: ${{ secrets.BETFAIR_APP_KEY_LIVE }}
+          BETFAIR_APP_KEY_DELAYED: ${{ secrets.BETFAIR_APP_KEY_DELAYED }}
+          BETFAIR_APP_KEY_PREFER: delayed
+          WCA_ODDS_MERGE: bestprice
           PYTHONPATH: src
         run: |
           python scripts/wca_scores_data.py --hours-ahead 96 >> logs/scores.log 2>&1 || true
