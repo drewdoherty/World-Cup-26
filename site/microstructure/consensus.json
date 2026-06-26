@@ -1,0 +1,215 @@
+{
+  "key": "consensus",
+  "title": "Consensus Pricing: does aggregating books beat the best single book?",
+  "updated_at": "2026-06-26T16:45:47.668551+00:00",
+  "window": {
+    "start": "2026-06-11",
+    "end": "2026-06-23",
+    "n_matches_used": 72,
+    "n_matches_with_result": 31
+  },
+  "method": {
+    "devig": "shin",
+    "stable_panel": [
+      "paddypower",
+      "skybet",
+      "grosvenor",
+      "smarkets",
+      "casumo",
+      "coral",
+      "ladbrokes_uk",
+      "sport888",
+      "williamhill",
+      "unibet_uk",
+      "livescorebet",
+      "leovegas",
+      "virginbet",
+      "boylesports",
+      "betfred_uk"
+    ],
+    "exchanges": [
+      "smarkets",
+      "betfair_ex_uk",
+      "matchbook"
+    ],
+    "trim_frac": 0.2,
+    "estimators": [
+      "median",
+      "exchange_only",
+      "trimmed_mean",
+      "betfair_alone",
+      "best_book_oos"
+    ],
+    "target_test1": "stable-panel median de-vig at last snapshot at/before kickoff (the de-vigged CLOSE)",
+    "anchor_test1": "first capture per match (the OPEN cross-section)",
+    "panel_fairness_note": "Every estimator and the best-book benchmark are restricted to the 16 books present at the first capture in all 72 matches, to neutralise the late-arrival bias of sparse books (betvictor/betway/matchbook first quote 26-59% into the window).",
+    "best_book_selection": "leave-one-out: best stable sportsbook by mean error on the OTHER matches"
+  },
+  "headline": {
+    "median_mae": 0.026381916373693193,
+    "exchange_mae": 0.02619201891487624,
+    "trimmed_mae": 0.02643751590841714,
+    "betfair_alone_mae": 0.017306305781416512,
+    "best_book_oos_mae": 0.024943128876847572,
+    "median_vs_best_book_pct": -5.8,
+    "median_vs_betfair_pct_paired": -4.7,
+    "best_estimator_test1": "betfair_alone",
+    "median_brier": 0.5782615317696099,
+    "best_book_brier": 0.5774223353083634,
+    "median_vs_best_book_brier_pct": -0.1,
+    "best_estimator_test2": "trimmed_mean"
+  },
+  "test1_predict_close": {
+    "description": "MAE (over 3 outcomes, mean over matches) of each estimator's OPEN prediction vs the de-vigged CLOSE.",
+    "metrics": {
+      "median": {
+        "mae": 0.02638,
+        "median_ae": 0.01761,
+        "n": 72
+      },
+      "exchange_only": {
+        "mae": 0.02619,
+        "median_ae": 0.01717,
+        "n": 72
+      },
+      "trimmed_mean": {
+        "mae": 0.02644,
+        "median_ae": 0.01728,
+        "n": 72
+      },
+      "betfair_alone": {
+        "mae": 0.01731,
+        "median_ae": 0.01207,
+        "n": 50
+      },
+      "best_book_oos": {
+        "mae": 0.02494,
+        "median_ae": 0.01426,
+        "n": 72,
+        "note": "leave-one-out best stable sportsbook by mean open-MAE; global pick=paddypower"
+      }
+    },
+    "ranking": [
+      {
+        "estimator": "betfair_alone",
+        "mae": 0.01731,
+        "n": 50
+      },
+      {
+        "estimator": "best_book_oos",
+        "mae": 0.02494,
+        "n": 72
+      },
+      {
+        "estimator": "exchange_only",
+        "mae": 0.02619,
+        "n": 72
+      },
+      {
+        "estimator": "median",
+        "mae": 0.02638,
+        "n": 72
+      },
+      {
+        "estimator": "trimmed_mean",
+        "mae": 0.02644,
+        "n": 72
+      }
+    ],
+    "paired_median_vs_betfair": {
+      "n": 50,
+      "median_mae_on_paired": 0.01812,
+      "betfair_mae_on_paired": 0.01731,
+      "mean_diff_median_minus_betfair": 0.00081,
+      "n_matches_median_better": 23,
+      "verdict": "within noise; median beats betfair in ~half the matches"
+    }
+  },
+  "test2_predict_result": {
+    "description": "Brier / log-loss of each estimator's CLOSE line vs the realised 1X2 outcome.",
+    "metrics": {
+      "median": {
+        "brier": 0.57826,
+        "logloss": 0.95196,
+        "n": 31
+      },
+      "exchange_only": {
+        "brier": 0.57927,
+        "logloss": 0.95699,
+        "n": 31
+      },
+      "trimmed_mean": {
+        "brier": 0.57721,
+        "logloss": 0.94944,
+        "n": 31
+      },
+      "betfair_alone": {
+        "brier": 0.57946,
+        "logloss": 0.95728,
+        "n": 31
+      },
+      "best_book_oos": {
+        "brier": 0.57742,
+        "logloss": null,
+        "n": 31,
+        "note": "leave-one-out best stable sportsbook by Brier; global pick=boylesports"
+      }
+    },
+    "ranking": [
+      {
+        "estimator": "trimmed_mean",
+        "brier": 0.57721,
+        "logloss": 0.94944,
+        "n": 31
+      },
+      {
+        "estimator": "best_book_oos",
+        "brier": 0.57742,
+        "logloss": null,
+        "n": 31
+      },
+      {
+        "estimator": "median",
+        "brier": 0.57826,
+        "logloss": 0.95196,
+        "n": 31
+      },
+      {
+        "estimator": "exchange_only",
+        "brier": 0.57927,
+        "logloss": 0.95699,
+        "n": 31
+      },
+      {
+        "estimator": "betfair_alone",
+        "brier": 0.57946,
+        "logloss": 0.95728,
+        "n": 31
+      }
+    ]
+  },
+  "diagnostics": {
+    "global_best_book_test1": "paddypower",
+    "global_best_book_mean_open_mae": 0.02494,
+    "global_best_book_test2": "boylesports",
+    "close_within_60min_of_ko": 8,
+    "close_to_ko_gap_median_min": 2278.6,
+    "stable_book_mean_open_mae": {
+      "paddypower": 0.02494,
+      "skybet": 0.02601,
+      "grosvenor": 0.02683,
+      "leovegas": 0.02696,
+      "casumo": 0.02698,
+      "livescorebet": 0.02725,
+      "virginbet": 0.02725,
+      "unibet_uk": 0.02727,
+      "boylesports": 0.02757,
+      "betfred_uk": 0.0277,
+      "williamhill": 0.02793,
+      "sport888": 0.02829,
+      "coral": 0.02906,
+      "ladbrokes_uk": 0.02926
+    }
+  },
+  "data_caveat": "Single source (theoddsapi), 72 matches over ~12 days, one-3-way-market (h2h). Estimators restricted to a fixed 16-book panel for a fair comparison. The 'close' is the last snapshot at/before kickoff, but capture cadence usually stopped early: only 8/72 matches have a snapshot within 60 min of kickoff (median gap ~38.0h), so the de-vigged close is a best-available pre-KO line, not a true settle. TEST 1 (predict close) is full-n but indicative; TEST 2 (predict result) has n=31 => indicative, not significant. No Polymarket price history exists; this is sportsbook+exchange consensus only."
+}

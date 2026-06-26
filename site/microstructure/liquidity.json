@@ -1,0 +1,462 @@
+{
+  "key": "liquidity",
+  "title": "Liquidity & Execution Cost",
+  "updated_at": "2026-06-26T16:47:23.755665+00:00",
+  "window": {
+    "spread_data_start": "2026-06-13T01:28:08.970745+00:00",
+    "spread_data_end": "2026-06-17T17:24:00.651980+00:00",
+    "spread_distinct_capture_times": 7,
+    "spread_matches": 69,
+    "source": "theoddsapi"
+  },
+  "method": {
+    "spread_definition": "lay_odds - back_odds at identical (ts,match,selection,venue); top-of-book displayed only",
+    "one_way_taker_cost": "half the displayed spread (crossing to mid)",
+    "round_trip_taker_cost": "the full displayed spread",
+    "sportsbook_cost": "inferred from 1X2 overround (sum 1/odds - 1); per-outcome ~ margin/3",
+    "devig_note": "spread is computed on raw displayed odds; no de-vig needed for a within-venue back/lay bracket"
+  },
+  "headline": {
+    "matched_back_lay_pairs": 3020,
+    "overall_median_pct_spread": 3.333,
+    "overall_median_prob_spread_bps": 81.65,
+    "overall_one_way_taker_cost_pct": 1.667,
+    "tightest_exchange": "matchbook",
+    "widest_exchange": "smarkets",
+    "mean_sportsbook_margin_pct": 7.241,
+    "mean_sportsbook_per_outcome_cost_pct": 2.414
+  },
+  "by_venue": {
+    "smarkets": {
+      "n_pairs": 1379,
+      "pct_spread": {
+        "n": 1379,
+        "mean": 9.3079,
+        "median": 5.6075,
+        "p25": 2.381,
+        "p75": 13.6364
+      },
+      "prob_spread_bps": {
+        "n": 1379,
+        "mean": 178.5327,
+        "median": 145.0677,
+        "p25": 66.1026,
+        "p75": 259.5279
+      },
+      "commission_on_winnings_pct": 0.0
+    },
+    "betfair_ex_uk": {
+      "n_pairs": 1050,
+      "pct_spread": {
+        "n": 1050,
+        "mean": 6.864,
+        "median": 3.2685,
+        "p25": 1.4085,
+        "p75": 8.3333
+      },
+      "prob_spread_bps": {
+        "n": 1050,
+        "mean": 123.9229,
+        "median": 77.6277,
+        "p25": 40.8163,
+        "p75": 188.3246
+      },
+      "commission_on_winnings_pct": 5.0
+    },
+    "matchbook": {
+      "n_pairs": 591,
+      "pct_spread": {
+        "n": 591,
+        "mean": 2.8106,
+        "median": 1.9231,
+        "p25": 0.957,
+        "p75": 3.2258
+      },
+      "prob_spread_bps": {
+        "n": 591,
+        "mean": 50.3958,
+        "median": 44.5633,
+        "p25": 32.8407,
+        "p75": 56.0507
+      },
+      "commission_on_winnings_pct": 0.0
+    }
+  },
+  "venue_ranking_by_median_pct_spread": [
+    {
+      "venue": "matchbook",
+      "median_pct_spread": 1.9231,
+      "median_prob_spread_bps": 44.5633,
+      "n_pairs": 591
+    },
+    {
+      "venue": "betfair_ex_uk",
+      "median_pct_spread": 3.2685,
+      "median_prob_spread_bps": 77.6277,
+      "n_pairs": 1050
+    },
+    {
+      "venue": "smarkets",
+      "median_pct_spread": 5.6075,
+      "median_prob_spread_bps": 145.0677,
+      "n_pairs": 1379
+    }
+  ],
+  "by_odds_bucket": [
+    {
+      "bucket": "fav_<1.5",
+      "pct_spread": {
+        "n": 389,
+        "mean": 1.69,
+        "median": 0.9174,
+        "p25": 0.7634,
+        "p75": 2.4
+      },
+      "prob_spread_bps": {
+        "n": 389,
+        "mean": 126.3877,
+        "median": 83.4028,
+        "p25": 57.8302,
+        "p75": 185.1423
+      }
+    },
+    {
+      "bucket": "1.5-2.5",
+      "pct_spread": {
+        "n": 607,
+        "mean": 2.8637,
+        "median": 1.25,
+        "p25": 0.6623,
+        "p75": 4.3717
+      },
+      "prob_spread_bps": {
+        "n": 607,
+        "mean": 144.2105,
+        "median": 75.2785,
+        "p25": 39.8057,
+        "p75": 229.8512
+      }
+    },
+    {
+      "bucket": "2.5-5",
+      "pct_spread": {
+        "n": 1008,
+        "mean": 6.4535,
+        "median": 4.1667,
+        "p25": 2.0408,
+        "p75": 9.6774
+      },
+      "prob_spread_bps": {
+        "n": 1008,
+        "mean": 152.5079,
+        "median": 90.5797,
+        "p25": 42.5986,
+        "p75": 231.9109
+      }
+    },
+    {
+      "bucket": "longshot_>=5",
+      "pct_spread": {
+        "n": 1016,
+        "mean": 12.6015,
+        "median": 6.9334,
+        "p25": 3.3333,
+        "p75": 18.8102
+      },
+      "prob_spread_bps": {
+        "n": 1016,
+        "mean": 113.8493,
+        "median": 65.7895,
+        "p25": 33.7212,
+        "p75": 171.4079
+      }
+    }
+  ],
+  "by_time_to_kickoff": [
+    {
+      "bucket": "0_post_ko",
+      "pct_spread": {
+        "n": 26,
+        "mean": 5.268,
+        "median": 2.7778,
+        "p25": 0.9196,
+        "p75": 4.4091
+      },
+      "prob_spread_bps": {
+        "n": 26,
+        "mean": 55.4765,
+        "median": 38.3766,
+        "p25": 23.8573,
+        "p75": 68.5883
+      }
+    },
+    {
+      "bucket": "1_<6h",
+      "pct_spread": {
+        "n": 61,
+        "mean": 2.0127,
+        "median": 1.4706,
+        "p25": 0.8197,
+        "p75": 3.0303
+      },
+      "prob_spread_bps": {
+        "n": 61,
+        "mean": 42.072,
+        "median": 34.9584,
+        "p25": 32.457,
+        "p75": 50.4032
+      }
+    },
+    {
+      "bucket": "2_6-24h",
+      "pct_spread": {
+        "n": 179,
+        "mean": 2.1571,
+        "median": 1.7544,
+        "p25": 0.8097,
+        "p75": 2.9412
+      },
+      "prob_spread_bps": {
+        "n": 179,
+        "mean": 43.8082,
+        "median": 39.2157,
+        "p25": 32.2788,
+        "p75": 50.5051
+      }
+    },
+    {
+      "bucket": "3_1-3d",
+      "pct_spread": {
+        "n": 513,
+        "mean": 2.5371,
+        "median": 1.6393,
+        "p25": 0.9615,
+        "p75": 2.9412
+      },
+      "prob_spread_bps": {
+        "n": 513,
+        "mean": 48.0167,
+        "median": 45.3474,
+        "p25": 32.2581,
+        "p75": 58.072
+      }
+    },
+    {
+      "bucket": "4_>3d",
+      "pct_spread": {
+        "n": 2241,
+        "mean": 8.8159,
+        "median": 4.8276,
+        "p25": 2.0408,
+        "p75": 12.5
+      },
+      "prob_spread_bps": {
+        "n": 2241,
+        "mean": 164.9337,
+        "median": 126.6464,
+        "p25": 55.371,
+        "p75": 240.8671
+      }
+    }
+  ],
+  "overround_by_venue": [
+    {
+      "venue": "matchbook",
+      "kind": "exchange",
+      "n_book_snapshots": 197,
+      "mean_overround": 1.00775,
+      "margin_pct": 0.775,
+      "per_outcome_cost_pct": 0.258
+    },
+    {
+      "venue": "betfair_ex_uk",
+      "kind": "exchange",
+      "n_book_snapshots": 350,
+      "mean_overround": 1.01859,
+      "margin_pct": 1.859,
+      "per_outcome_cost_pct": 0.62
+    },
+    {
+      "venue": "smarkets",
+      "kind": "exchange",
+      "n_book_snapshots": 461,
+      "mean_overround": 1.03047,
+      "margin_pct": 3.047,
+      "per_outcome_cost_pct": 1.016
+    },
+    {
+      "venue": "casumo",
+      "kind": "sportsbook",
+      "n_book_snapshots": 461,
+      "mean_overround": 1.04998,
+      "margin_pct": 4.998,
+      "per_outcome_cost_pct": 1.666
+    },
+    {
+      "venue": "leovegas",
+      "kind": "sportsbook",
+      "n_book_snapshots": 461,
+      "mean_overround": 1.05029,
+      "margin_pct": 5.029,
+      "per_outcome_cost_pct": 1.676
+    },
+    {
+      "venue": "coral",
+      "kind": "sportsbook",
+      "n_book_snapshots": 461,
+      "mean_overround": 1.05656,
+      "margin_pct": 5.656,
+      "per_outcome_cost_pct": 1.885
+    },
+    {
+      "venue": "ladbrokes_uk",
+      "kind": "sportsbook",
+      "n_book_snapshots": 461,
+      "mean_overround": 1.06166,
+      "margin_pct": 6.166,
+      "per_outcome_cost_pct": 2.055
+    },
+    {
+      "venue": "betfred_uk",
+      "kind": "sportsbook",
+      "n_book_snapshots": 459,
+      "mean_overround": 1.0625,
+      "margin_pct": 6.25,
+      "per_outcome_cost_pct": 2.083
+    },
+    {
+      "venue": "grosvenor",
+      "kind": "sportsbook",
+      "n_book_snapshots": 461,
+      "mean_overround": 1.06407,
+      "margin_pct": 6.407,
+      "per_outcome_cost_pct": 2.136
+    },
+    {
+      "venue": "unibet_uk",
+      "kind": "sportsbook",
+      "n_book_snapshots": 449,
+      "mean_overround": 1.0661,
+      "margin_pct": 6.61,
+      "per_outcome_cost_pct": 2.203
+    },
+    {
+      "venue": "betvictor",
+      "kind": "sportsbook",
+      "n_book_snapshots": 128,
+      "mean_overround": 1.06636,
+      "margin_pct": 6.636,
+      "per_outcome_cost_pct": 2.212
+    },
+    {
+      "venue": "livescorebet",
+      "kind": "sportsbook",
+      "n_book_snapshots": 461,
+      "mean_overround": 1.07132,
+      "margin_pct": 7.132,
+      "per_outcome_cost_pct": 2.377
+    },
+    {
+      "venue": "virginbet",
+      "kind": "sportsbook",
+      "n_book_snapshots": 461,
+      "mean_overround": 1.07132,
+      "margin_pct": 7.132,
+      "per_outcome_cost_pct": 2.377
+    },
+    {
+      "venue": "paddypower",
+      "kind": "sportsbook",
+      "n_book_snapshots": 461,
+      "mean_overround": 1.07194,
+      "margin_pct": 7.194,
+      "per_outcome_cost_pct": 2.398
+    },
+    {
+      "venue": "skybet",
+      "kind": "sportsbook",
+      "n_book_snapshots": 461,
+      "mean_overround": 1.07401,
+      "margin_pct": 7.401,
+      "per_outcome_cost_pct": 2.467
+    },
+    {
+      "venue": "williamhill",
+      "kind": "sportsbook",
+      "n_book_snapshots": 408,
+      "mean_overround": 1.07762,
+      "margin_pct": 7.762,
+      "per_outcome_cost_pct": 2.587
+    },
+    {
+      "venue": "boylesports",
+      "kind": "sportsbook",
+      "n_book_snapshots": 461,
+      "mean_overround": 1.07784,
+      "margin_pct": 7.784,
+      "per_outcome_cost_pct": 2.595
+    },
+    {
+      "venue": "betway",
+      "kind": "sportsbook",
+      "n_book_snapshots": 293,
+      "mean_overround": 1.08043,
+      "margin_pct": 8.043,
+      "per_outcome_cost_pct": 2.681
+    },
+    {
+      "venue": "sport888",
+      "kind": "sportsbook",
+      "n_book_snapshots": 461,
+      "mean_overround": 1.09195,
+      "margin_pct": 9.195,
+      "per_outcome_cost_pct": 3.065
+    },
+    {
+      "venue": "betfair_sb_uk",
+      "kind": "sportsbook",
+      "n_book_snapshots": 61,
+      "mean_overround": 1.13705,
+      "margin_pct": 13.705,
+      "per_outcome_cost_pct": 4.568
+    }
+  ],
+  "framework_not_measurable": {
+    "note": "TheOddsAPI carries NO depth, NO matched volume, NO queue. The following are FRAMEWORK ONLY and require new capture; no values are estimated from current data.",
+    "unmeasurable_today": [
+      "fillable stake / available \u00a3 at top of book",
+      "market impact (slippage as a function of order size)",
+      "matched/traded volume per selection",
+      "time-to-fill / queue position",
+      "realised (vs displayed) spread once you take liquidity"
+    ],
+    "required_capture_schema": {
+      "table": "exchange_depth",
+      "purpose": "Order-book depth + matched volume, which TheOddsAPI lacks.",
+      "source_options": [
+        "Betfair Exchange Streaming API (MarketSubscription, EX_ALL_OFFERS + EX_TRADED)",
+        "Smarkets streaming/depth endpoint"
+      ],
+      "columns": {
+        "ts_utc": "TEXT capture time",
+        "venue": "TEXT smarkets|betfair_ex_uk|matchbook",
+        "match_id": "TEXT",
+        "selection": "TEXT outcome name",
+        "side": "TEXT back|lay",
+        "level": "INTEGER 0=top of book, 1.. deeper rungs",
+        "price": "REAL decimal odds at this rung",
+        "size_gbp": "REAL available stake at this rung (the depth number we cannot get today)",
+        "traded_volume_gbp": "REAL cumulative matched \u00a3 on this selection (Betfair EX_TRADED)",
+        "last_traded_price": "REAL"
+      },
+      "derivable_once_captured": [
+        "fillable_stake_at_top",
+        "stake-weighted effective price for a \u00a3X order",
+        "market_impact_curve (slippage vs order size)",
+        "realised vs displayed spread",
+        "queue / time-to-fill proxy"
+      ]
+    }
+  },
+  "data_caveat": "Single source (theoddsapi), pre-kickoff only, ~12-day window. The back/lay spread uses market='h2h' (best back) vs market='h2h_lay' (best lay) on the SAME capture grid; this is the DISPLAYED top-of-book spread, NOT depth-aware. The lay side is sparse: only 7 distinct capture times spanning 2026-06-13..2026-06-17 across 69 matches (n=3020 matched pairs), so treat venue/time-to-kickoff spread differences as INDICATIVE. Mean spreads are inflated by longshots; medians are the robust figure. No queue depth, matched volume or market impact is observable in this dataset (see framework_not_measurable)."
+}

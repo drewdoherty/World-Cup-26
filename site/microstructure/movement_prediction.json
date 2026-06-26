@@ -1,0 +1,135 @@
+{
+  "key": "movement_prediction",
+  "title": "Odds-Movement Prediction: predicting the market, not the match",
+  "updated_at": "2026-06-26T16:54:29.041445+00:00",
+  "window": {
+    "start": "2026-06-11T13:27:30.716212+00:00",
+    "end": "2026-06-23T06:52:27.484258+00:00",
+    "source": "theoddsapi",
+    "n_deep_matches": 68,
+    "n_matches_used": 68,
+    "median_close_lead_to_ko_hrs": 39.8
+  },
+  "config": {
+    "devig_method": "shin",
+    "stable_books": [
+      "paddypower",
+      "skybet",
+      "grosvenor",
+      "smarkets",
+      "casumo",
+      "coral",
+      "ladbrokes_uk",
+      "sport888",
+      "williamhill",
+      "unibet_uk",
+      "livescorebet",
+      "leovegas",
+      "virginbet",
+      "boylesports",
+      "betfred_uk"
+    ],
+    "exchanges": [
+      "smarkets",
+      "betfair_ex_uk",
+      "matchbook"
+    ],
+    "min_deep_snaps": 200,
+    "recent_move_lag_snaps": 5,
+    "anchor_fraction_testA": 0.5,
+    "true_close_max_lead_min": 360,
+    "features": [
+      "recent_move",
+      "fav_disagreement",
+      "exch_vs_book_gap",
+      "time_to_ko_hrs",
+      "fav_prob_level"
+    ],
+    "target": "sign(consensus favourite de-vigged prob: close - T); favourite fixed at T",
+    "model": "logistic regression (numpy, L2=2.0), strict expanding walk-forward by kickoff time"
+  },
+  "headline": {
+    "verdict": "NOT tradeable",
+    "model_oos_hit_rate": 0.5814,
+    "majority_baseline_hit_rate": 0.6512,
+    "model_minus_baseline": -0.0698,
+    "oos_auc": 0.531,
+    "n_matches_walkforward": 68,
+    "n_oos_predictions": 43,
+    "true_close_subset_n": 8,
+    "true_close_up_rate": 0.5,
+    "pooled_momentum_auc": 0.4334,
+    "pooled_momentum_auc_ci95": [
+      0.3785,
+      0.4807
+    ]
+  },
+  "test_a_walkforward_per_match": {
+    "n_matches": 68,
+    "n_oos": 43,
+    "frac_up_full": 0.5882,
+    "model_oos_accuracy": 0.5814,
+    "majority_baseline_accuracy": 0.6512,
+    "model_minus_baseline": -0.0698,
+    "oos_auc": 0.531,
+    "beats_baseline": false,
+    "feature_order": [
+      "recent_move",
+      "fav_disagreement",
+      "exch_vs_book_gap",
+      "time_to_ko_hrs",
+      "fav_prob_level"
+    ]
+  },
+  "test_b_true_close_subset": {
+    "n": 8,
+    "frac_up_to_true_close": 0.5,
+    "recent_sign_predicts_close_sign_rate": 0.625,
+    "note": "true close = last snapshot within 6h of kickoff; n is tiny => framework-only"
+  },
+  "test_c_pooled_momentum": {
+    "n_anchor_pairs": 2489,
+    "n_matches": 68,
+    "recent_predicts_forward_up_auc": 0.4334,
+    "auc_block_bootstrap_ci95": [
+      0.3785,
+      0.4807
+    ],
+    "interpretation": "AUC<0.5 with CI entirely below 0.5 => recent up-moves are followed by DOWN-moves more often than chance (weak mean-reversion), not exploitable momentum"
+  },
+  "updrift_diagnostic": {
+    "all_deep": {
+      "up": 46,
+      "n": 68,
+      "up_rate": 0.6765,
+      "mean_fav_delta": 0.02238
+    },
+    "true_close_<=6h": {
+      "up": 4,
+      "n": 8,
+      "up_rate": 0.5,
+      "mean_fav_delta": 0.00231
+    },
+    "truncated_>24h": {
+      "up": 32,
+      "n": 47,
+      "up_rate": 0.6809,
+      "mean_fav_delta": 0.02366
+    },
+    "note": "up-drift on ALL deep matches is an ARTIFACT of the truncated close (capture stopped 2026-06-23, before most kickoffs); on true closes it collapses to ~50/50."
+  },
+  "tradeable": false,
+  "series_for_chart": {
+    "labels": [
+      "model OOS hit-rate",
+      "majority baseline",
+      "coin flip"
+    ],
+    "values": [
+      0.5814,
+      0.6512,
+      0.5
+    ]
+  },
+  "data_caveat": "Single odds source (theoddsapi), 1X2/h2h only, 68 deep intraday matches over ~12 days (2026-06-11..2026-06-23). The capture daemon stopped 2026-06-23, BEFORE most kickoffs, so for most matches the 'close' is the capture cutoff (median lead ~39.8h before KO), NOT a true settle; only 8 deep matches have a snapshot within 6h of kickoff. TEST A (n=68, one independent obs per match) is the honest primary test; TEST B (n=8) is framework-only; TEST C is autocorrelated within match so its AUC carries a block-bootstrap CI. The apparent open->close up-drift is a truncation artifact (it vanishes to ~50/50 on true closes). No order-book depth or matched volume; no Polymarket price history."
+}

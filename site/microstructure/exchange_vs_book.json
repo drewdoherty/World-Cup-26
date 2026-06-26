@@ -1,0 +1,248 @@
+{
+  "key": "exchange_vs_book",
+  "title": "Exchange vs Sportsbook Lead-Lag",
+  "updated_at": "2026-06-26T16:43:25.020627+00:00",
+  "window": {
+    "start": "2026-06-11T13:27:30.716212+00:00",
+    "end": "2026-06-23T06:52:27.484258+00:00",
+    "source": "theoddsapi"
+  },
+  "config": {
+    "exchanges": [
+      "smarkets",
+      "betfair_ex_uk",
+      "matchbook"
+    ],
+    "sportsbooks_considered": 17,
+    "devig_method": "shin",
+    "outcome_modelled": "home_win_fair_prob_1x2",
+    "min_snaps_deep": 250,
+    "max_gap_min_dense_run": 10.0,
+    "min_run_len": 12,
+    "lag_window_snapshots": 6,
+    "informativeness_horizon_min": 30.0
+  },
+  "sample": {
+    "deep_matches": 66,
+    "matches_used_leadlag": 66,
+    "dense_runs": 461,
+    "lag0_delta_pairs": 15609,
+    "informativeness_matches": 66,
+    "median_dense_snapshot_spacing_min": 3.18
+  },
+  "leadlag": {
+    "peak": {
+      "lag_snapshots": 0,
+      "corr": 0.3782,
+      "n": 15609
+    },
+    "lag0": {
+      "lag_snapshots": 0,
+      "corr": 0.3782,
+      "n": 15609
+    },
+    "leader": "contemporaneous",
+    "approx_lead_minutes": 0.0,
+    "xcorr_curve": [
+      {
+        "lag_snapshots": -6,
+        "corr": 0.0251,
+        "n": 12843
+      },
+      {
+        "lag_snapshots": -5,
+        "corr": 0.0183,
+        "n": 13304
+      },
+      {
+        "lag_snapshots": -4,
+        "corr": 0.0362,
+        "n": 13765
+      },
+      {
+        "lag_snapshots": -3,
+        "corr": 0.0558,
+        "n": 14226
+      },
+      {
+        "lag_snapshots": -2,
+        "corr": -0.001,
+        "n": 14687
+      },
+      {
+        "lag_snapshots": -1,
+        "corr": 0.0361,
+        "n": 15148
+      },
+      {
+        "lag_snapshots": 0,
+        "corr": 0.3782,
+        "n": 15609
+      },
+      {
+        "lag_snapshots": 1,
+        "corr": 0.0212,
+        "n": 15149
+      },
+      {
+        "lag_snapshots": 2,
+        "corr": -0.0049,
+        "n": 14689
+      },
+      {
+        "lag_snapshots": 3,
+        "corr": 0.0471,
+        "n": 14228
+      },
+      {
+        "lag_snapshots": 4,
+        "corr": 0.0199,
+        "n": 13767
+      },
+      {
+        "lag_snapshots": 5,
+        "corr": -0.0197,
+        "n": 13306
+      },
+      {
+        "lag_snapshots": 6,
+        "corr": 0.0647,
+        "n": 12845
+      }
+    ],
+    "interpretation": "lag>0 => sportsbook delta at t+lag correlates with exchange delta at t (exchange leads); lag<0 => exchange follows sportsbook; lag=0 => contemporaneous."
+  },
+  "informativeness": {
+    "horizon_min_before_close": 30.0,
+    "exchange_mean_abs_gap_to_close": 0.02412,
+    "sportsbook_mean_abs_gap_to_close": 0.0241,
+    "exchange_closer_matches": 32,
+    "sportsbook_closer_matches": 34,
+    "paired_diff_book_minus_exch_mean": -2e-05,
+    "paired_t_stat": -0.03,
+    "more_informative": "sportsbook",
+    "venue_ranking": [
+      {
+        "venue": "betfair_sb_uk",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.00931,
+        "n": 18
+      },
+      {
+        "venue": "williamhill",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.01913,
+        "n": 64
+      },
+      {
+        "venue": "betfred_uk",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.01972,
+        "n": 63
+      },
+      {
+        "venue": "paddypower",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.02361,
+        "n": 66
+      },
+      {
+        "venue": "betfair_ex_uk",
+        "kind": "exchange",
+        "mean_abs_gap_to_close": 0.02414,
+        "n": 66
+      },
+      {
+        "venue": "matchbook",
+        "kind": "exchange",
+        "mean_abs_gap_to_close": 0.02503,
+        "n": 60
+      },
+      {
+        "venue": "casumo",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.02526,
+        "n": 66
+      },
+      {
+        "venue": "leovegas",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.02533,
+        "n": 66
+      },
+      {
+        "venue": "grosvenor",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.02535,
+        "n": 66
+      },
+      {
+        "venue": "virginbet",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.02543,
+        "n": 66
+      },
+      {
+        "venue": "livescorebet",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.02568,
+        "n": 66
+      },
+      {
+        "venue": "unibet_uk",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.02576,
+        "n": 66
+      },
+      {
+        "venue": "betvictor",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.02607,
+        "n": 41
+      },
+      {
+        "venue": "skybet",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.02618,
+        "n": 66
+      },
+      {
+        "venue": "boylesports",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.02673,
+        "n": 66
+      },
+      {
+        "venue": "betway",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.02691,
+        "n": 66
+      },
+      {
+        "venue": "coral",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.02733,
+        "n": 66
+      },
+      {
+        "venue": "ladbrokes_uk",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.02789,
+        "n": 66
+      },
+      {
+        "venue": "smarkets",
+        "kind": "exchange",
+        "mean_abs_gap_to_close": 0.02795,
+        "n": 66
+      },
+      {
+        "venue": "sport888",
+        "kind": "sportsbook",
+        "mean_abs_gap_to_close": 0.02807,
+        "n": 66
+      }
+    ]
+  },
+  "data_caveat": "Single source (theoddsapi) over a ~12-day window; all prices are PRE-KICKOFF. Snapshots share one capture-grid across books, so lead-lag is measured at the API poll cadence (~3.2 min median in dense runs), NOT true tick latency: a lag of 0-1 snapshots cannot resolve sub-poll leadership. Cross-correlation pools first-differenced consensus moves across matches. Informativeness uses the last pre-kickoff snapshot as 'close'. Treat as indicative microstructure, not execution-grade latency."
+}
