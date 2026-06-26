@@ -65,6 +65,58 @@ def _row(**over):
 
 
 # ---------------------------------------------------------------------------
+# Schema migration (in-place upgrade of an old DB).
+# ---------------------------------------------------------------------------
+
+
+def test_ensure_schema_upgrades_old_db_in_place():
+    """An existing old-#41 ``predictions`` table (no ``build_id``) is migrated in
+    place by ensure_schema BEFORE the indexes that reference the new columns.
+
+    Regression for the migrate-after-index ordering bug: ``CREATE INDEX
+    ix_pred_build ON predictions(build_id)`` used to run before the migration,
+    raising ``no such column: build_id`` on any DB created under the old schema.
+    """
+    import sqlite3
+
+    db = _tmp_db()
+    # Minimal OLD-schema table (pre-a02794e: no build_id / status / market_*),
+    # mimicking a predictions DB created under PR #41, with one live row.
+    conn = sqlite3.connect(db)
+    conn.execute(
+        "CREATE TABLE predictions ("
+        " prediction_id TEXT PRIMARY KEY, match_id TEXT, market TEXT,"
+        " selection TEXT, model_odds REAL, outcome TEXT)"
+    )
+    conn.execute(
+        "INSERT INTO predictions (prediction_id, match_id, market, selection, model_odds)"
+        " VALUES ('p1', 'm1', '1X2', 'Home', 1.8)"
+    )
+    conn.commit()
+    conn.close()
+
+    # Must NOT raise (pre-fix this raised 'no such column: build_id').
+    store.ensure_schema(db)
+
+    conn = sqlite3.connect(db)
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(predictions)").fetchall()}
+    assert "build_id" in cols and "status" in cols  # migration added new columns
+    idx = {
+        r[0] for r in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='index'"
+        ).fetchall()
+    }
+    assert "ix_pred_build" in idx  # the index that used to crash now exists
+    # the pre-existing row survived the in-place upgrade
+    row = conn.execute(
+        "SELECT prediction_id, model_odds FROM predictions WHERE prediction_id='p1'"
+    ).fetchone()
+    assert row == ("p1", 1.8)
+    conn.close()
+    os.unlink(db)
+
+
+# ---------------------------------------------------------------------------
 # Idempotent upsert.
 # ---------------------------------------------------------------------------
 
