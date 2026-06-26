@@ -370,6 +370,96 @@ def live_pm_positions(
     return out or None
 
 
+def settled_pm_positions(
+    proxies: Optional[List[str]] = None,
+    *,
+    since_hours: int = 24,
+    min_value: float = 0.1,
+) -> Optional[List[Dict[str, Any]]]:
+    """Fetch RESOLVED Polymarket positions and project them into the settled
+    shape. Returns ``None`` on total failure (never raises).
+
+    A Polymarket position is treated as SETTLED when its market has resolved:
+    ``currentValue`` has collapsed to ~0 (below ``min_value``) AND the data-API
+    reports a realised P&L (``realizedPnl``) and/or a ``redeemable`` flag. We
+    require an unambiguous realised P&L; positions still carrying live value go
+    to :func:`live_pm_positions` instead.
+
+    INFERRED SHAPE CAVEAT: the data-API does not expose a settled timestamp, so
+    the 24h window CANNOT be applied server-side here. ``settled_ts`` is left
+    empty and the caller's window filter keeps PM settles in the snapshot (the
+    conservative confident-match guard, not the clock, is what gates the
+    auto-settle). If a settled timestamp becomes available, populate
+    ``settled_ts`` and the shared window filter will apply.
+    """
+    import json as _json
+    import os as _os
+    import urllib.request as _u
+
+    if proxies is None:
+        env = (
+            _os.environ.get("WCA_PM_PROXIES")
+            or _os.environ.get("POLYMARKET_FUNDER")
+            or ""
+        )
+        proxies = [p.strip() for p in env.split(",") if p.strip()] or list(
+            _PM_PROXIES_DEFAULT
+        )
+
+    out: List[Dict[str, Any]] = []
+    any_ok = False
+    for i, proxy in enumerate(proxies):
+        acct = "1" if i == 0 else "2"
+        url = (
+            "https://data-api.polymarket.com/positions?user=%s"
+            "&sizeThreshold=0.1&limit=200&redeemable=true" % proxy
+        )
+        try:
+            req = _u.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            rows = _json.load(_u.urlopen(req, timeout=20))
+            any_ok = True
+        except Exception:
+            continue
+        for p in rows or []:
+            try:
+                cv = float(p.get("currentValue") or 0.0)
+            except (TypeError, ValueError):
+                cv = 0.0
+            redeemable = bool(p.get("redeemable"))
+            realized = _opt_num(p.get("realizedPnl"))
+            # SETTLED = resolved market: value collapsed AND a realised P&L /
+            # redeemable flag is present. Anything still holding live value is an
+            # OPEN position, handled by live_pm_positions.
+            is_settled = (cv < min_value) and (redeemable or realized is not None)
+            if not is_settled:
+                continue
+            avg = _opt_num(p.get("avgPrice")) or 0.0
+            iv = _opt_num(p.get("initialValue")) or 0.0
+            if realized is None:
+                # Fall back to cash P&L = current value − cost (cv≈0 ⇒ −cost).
+                realized = round(cv - iv, 2)
+            result = "won" if (realized is not None and realized > 0) else "lost"
+            out.append({
+                "venue": "polymarket",
+                "market": p.get("title"),
+                "selection": p.get("outcome"),
+                "fixture_or_event": p.get("title"),
+                "stake": iv or None,
+                "size": _opt_num(p.get("size")),
+                "avg_price": avg or None,
+                "odds": (1.0 / avg) if avg > 0 else None,
+                "settled_pnl": round(float(realized), 2),
+                "result": result,
+                "settled_ts": "",
+                "external_id": p.get("conditionId"),
+                "account": acct,
+                "token_id": p.get("conditionId"),
+            })
+    if not any_ok:
+        return None
+    return out
+
+
 # ---------------------------------------------------------------------------
 # Public API.
 # ---------------------------------------------------------------------------

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  MacBook launchd job: cross-machine venue-position sync (hourly).
+
+  Runs ON THE MacBook because the Betfair API is only reachable here (the VPN
+  lives on this machine). It FETCHes every venue's open + settled-24h positions,
+  SCPs the snapshot to the Mac mini, and APPLIES it against the mini's canonical
+  ledger over SSH — then triggers the mini's site publish.
+
+  SHADOW-FIRST: this plist does NOT set WCA_POSITIONS_LIVE, so the mini only logs
+  the proposed inserts/settles/closes (ZERO ledger writes). Promote to LIVE by
+  adding <key>WCA_POSITIONS_LIVE</key><string>1</string> to EnvironmentVariables
+  below and re-loading the plist — ONLY after a SHADOW run looks correct.
+
+  Install:
+    cp deploy/macbook/com.wca.positions.plist ~/Library/LaunchAgents/
+    # edit WCA_REPO below to this repo's absolute path on the MacBook
+    launchctl unload ~/Library/LaunchAgents/com.wca.positions.plist 2>/dev/null || true
+    launchctl load   ~/Library/LaunchAgents/com.wca.positions.plist
+-->
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.wca.positions</string>
+  <!-- Absolute path to THIS repo on the MacBook (edit to match your checkout). -->
+  <key>WorkingDirectory</key><string>/Users/andrewdoherty/Desktop/Coding/World Cup Alpha</string>
+  <key>EnvironmentVariables</key><dict>
+    <key>WCA_REPO</key><string>/Users/andrewdoherty/Desktop/Coding/World Cup Alpha</string>
+    <key>WCA_MINI_HOST</key><string>andrewdoherty@Drews-Mac-mini.local</string>
+    <key>WCA_MINI_REPO</key><string>/Users/andrewdoherty/World-Cup-26</string>
+    <key>WCA_SETTLED_LOOKBACK_HOURS</key><string>24</string>
+    <!-- SHADOW by default. Uncomment to promote to LIVE writes on the mini: -->
+    <!-- <key>WCA_POSITIONS_LIVE</key><string>1</string> -->
+  </dict>
+  <key>ProgramArguments</key><array>
+    <string>/bin/bash</string>
+    <string>/Users/andrewdoherty/Desktop/Coding/World Cup Alpha/scripts/wca_positions_macbook.sh</string>
+  </array>
+  <!-- Hourly. -->
+  <key>StartInterval</key><integer>3600</integer>
+  <key>RunAtLoad</key><true/>
+  <key>StandardOutPath</key><string>/Users/andrewdoherty/Desktop/Coding/World Cup Alpha/data/com.wca.positions.out.log</string>
+  <key>StandardErrorPath</key><string>/Users/andrewdoherty/Desktop/Coding/World Cup Alpha/data/com.wca.positions.err.log</string>
+</dict></plist>

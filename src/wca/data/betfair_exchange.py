@@ -426,6 +426,103 @@ def list_current_orders(*, account: str = "1") -> List[Dict[str, Any]]:
     return []
 
 
+def _normalise_cleared_order(o: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Map one Betfair ``listClearedOrders`` order into a normalised SETTLED
+    position.
+
+    Betfair reports the realised ``profit`` (already net of the back/lay side)
+    and a ``betOutcome`` of ``WON``/``LOST`` per settled bet, plus a
+    ``settledDate``. We only treat an *unambiguous* WON/LOST outcome as a
+    settle — anything else (e.g. PLACED, an open/partial outcome, or a missing
+    outcome) returns ``None`` so the reconcile engine leaves it for review.
+    Pure (no I/O) so it is unit-testable against sample JSON-RPC payloads.
+    """
+    outcome = str(o.get("betOutcome") or "").strip().upper()
+    if outcome not in ("WON", "LOST"):
+        return None
+    size_settled = float(o.get("sizeSettled") or o.get("sizeMatched") or 0.0)
+    price = o.get("priceMatched") or o.get("priceRequested")
+    item = o.get("itemDescription") or {}
+    market_desc = item.get("marketDesc") or o.get("marketId")
+    sel_desc = item.get("runnerDesc") or str(o.get("selectionId") or "")
+    event_desc = item.get("eventDesc") or ""
+    try:
+        pnl = float(o.get("profit"))
+    except (TypeError, ValueError):
+        return None  # no realised P&L -> not an unambiguous settle.
+    return {
+        "venue": "Betfair",
+        "market": market_desc,
+        "selection": "Draw" if str(sel_desc).strip().lower() == "the draw" else sel_desc,
+        "fixture_or_event": event_desc,
+        "stake": size_settled,
+        "size": size_settled,
+        "avg_price": float(price) if price else None,
+        "odds": float(price) if price else None,
+        "settled_pnl": pnl,
+        "result": "won" if outcome == "WON" else "lost",
+        "settled_ts": o.get("settledDate"),
+        "external_id": str(o.get("betId") or ""),
+        "account": "1",
+        "side": (o.get("side") or "").upper(),
+    }
+
+
+def list_cleared_orders(*, since_hours: int = 24, account: str = "1") -> List[Dict[str, Any]]:
+    """Return SETTLED Betfair Exchange positions over the last ``since_hours``.
+
+    READ-ONLY: calls the Betting API ``listClearedOrders`` with
+    ``settledDateRange`` covering the lookback window and an unambiguous
+    ``betStatus='SETTLED'``. Each row carries the venue's realised ``profit`` and
+    WON/LOST outcome so the reconcile engine can settle the matched ledger bet
+    with VENUE TRUTH (no recomputation). DEGRADES GRACEFULLY — returns ``[]`` and
+    logs (never raises) when creds are missing or any call fails (the mini
+    currently cannot reach Betfair; this runs on the MacBook over the VPN).
+    """
+    token = _resolve_session_token()
+    candidates = _candidate_app_keys()
+    if not candidates or not token:
+        logger.info("Betfair cleared-orders disabled — missing creds: %s",
+                    ", ".join(missing_creds()))
+        return []
+    import datetime as _dt
+
+    since = (_dt.datetime.utcnow() - _dt.timedelta(hours=max(1, int(since_hours)))).strftime(
+        "%Y-%m-%dT%H:%M:%SZ"
+    )
+    for i, app_key in enumerate(candidates):
+        try:
+            result = _rpc(
+                "listClearedOrders",
+                {
+                    "betStatus": "SETTLED",
+                    "settledDateRange": {"from": since},
+                    "includeItemDescription": True,
+                    "groupBy": "BET",
+                    "recordCount": 1000,
+                },
+                token, app_key=app_key,
+            ) or {}
+            orders = result.get("clearedOrders") or []
+            out: List[Dict[str, Any]] = []
+            for o in orders:
+                norm = _normalise_cleared_order(o)
+                if norm is not None:
+                    norm["account"] = account
+                    out.append(norm)
+            logger.info("Betfair cleared: %d settled of %d (since %s)",
+                        len(out), len(orders), since)
+            return out
+        except _InvalidAppKey:
+            logger.info("Betfair app key #%d rejected for cleared orders; trying next", i + 1)
+            continue
+        except Exception as exc:  # noqa: BLE001 — never crash the sync.
+            logger.warning("Betfair listClearedOrders failed (degrading to empty): %s", exc)
+            return []
+    logger.warning("Betfair cleared-orders: no app key authorized; degrading to empty")
+    return []
+
+
 def get_event_odds(
     sport_key: str,
     event_id: str,
