@@ -1,0 +1,227 @@
+{
+  "generated_at": "2026-06-26 (analysis run); odds window 11–23 Jun 2026",
+  "coverage": {
+    "rows": "1,262,293",
+    "matches": 72,
+    "books": 20,
+    "exchanges": 3,
+    "capture_times": 315,
+    "window_days": 12,
+    "window": "11–23 Jun 2026 (pre-tournament)",
+    "markets": "h2h / totals / btts",
+    "clv_n": 25,
+    "sources": "TheOddsAPI",
+    "caveats": []
+  },
+  "honesty_notes": [
+    "No true closing line exists in this data: odds capture stopped 2026-06-23, before most kickoffs — median last-snapshot-to-kickoff gap ~38–42h; only 8 of 72 matches have a capture within 1h of kickoff. Every 'close'-based number is a stale pre-kickoff proxy. Fixing this (capture to kickoff) is the #1 prerequisite.",
+    "Single source (TheOddsAPI) — no Pinnacle / independent sharp reference. 'Beatable early prices' is a margin-tightness ranking, NOT line-prediction alpha (pooled early-vs-close edge is −8.94%).",
+    "Cadence ≠ latency: ~3-min capture grid, so 'staleness' and 'lead-lag' are multi-minute-relative, not tick-latency. No latency-arb claim is supported; exchange↔sportsbook lead-lag peaks at lag 0 (no harvestable edge at this granularity).",
+    "Ledger CLV→P&L is n=25 — far below significance; the −0.28 correlation is noise from a few high-odds winners on negative-CLV bets. CLV is a diagnostic here, not yet an objective.",
+    "Depth / volume / queue / market-impact are NOT in the data: every execution-sizing component (smart router, slippage curve, queue positioning, impact) is framework-only until Betfair/Smarkets depth streaming is captured. Hard-cap to small stakes until then.",
+    "No Polymarket price history (0 snapshots): combo/advancement work is one live cross-section, framework-only; the 3 ladder 'coherence violations' are sub-1% minnow quote noise, likely not lockable.",
+    "Most £/mo figures are framework estimates on a ~£3k bankroll, not backtested P&L, and are dominated by execution friction (latency, gubbing, depth). The dependable edge is cost-reduction (routing / line-shopping), not alpha.",
+    "Active timing/prediction edges all came back null or unmeasurable: disagreement→movement r=0.005 (p=0.97); movement-sign prediction OOS AUC 0.531 (loses to an honest baseline); consensus-beats-best-book within noise; synthetic BTTS 'arb' gap 0.78pp < 1.13pp between-book dispersion.",
+    "Adversarial verifier corrections folded in: price-discovery T-6h/T-1h convergence was a coverage artifact (genuinely-observed ~40%/~19%, not 100%/85%); stalest sportsbook is betfair_sb_uk, not williamhill; exchange leadership is matchbook+betfair_ex (smarkets does NOT lead). One area (price_discovery) was downgraded from 'measured' to 'indicative' on these grounds.",
+    "Confidence labels are literal: measured = full-population census or robustly reproduced; indicative = n<30 or coverage-limited; framework = no data exists yet, method spec only."
+  ],
+  "ranked_edges": [
+    {
+      "rank": 1,
+      "edge": "Venue routing / margin capture — exchange ~0.7% overround vs median sportsbook 6.78%; avoid 14% Betfair-SB and 36–52% longshot margins",
+      "confidence": "measured",
+      "ev_per_mo": "£100–300",
+      "complexity": 3,
+      "priority": "P1",
+      "validation": "Freeze each book's margin/FLB/staleness profile on matches 1..k; confirm the weakness ranking is Spearman-stable on held-out k+1..N; recompute best-available price per ledger bet for realised price improvement (needs 100+ settled; currently n=25)."
+    },
+    {
+      "rank": 2,
+      "edge": "Liquidity-aware execution-cost reduction — route to tightest exchange; median 1X2 spread 3.33% (~1.67% one-way); Matchbook 1.9% < Betfair 3.3% < Smarkets 5.6%",
+      "confidence": "measured (spreads) / framework (depth)",
+      "ev_per_mo": "£80–110",
+      "complexity": 2,
+      "priority": "P1",
+      "validation": "Capture Betfair EX_ALL_OFFERS+EX_TRADED / Smarkets depth; re-fetch each leg 2–5 min later for latency-survival; paper-fill at realistic stakes against actual depth and book realised slippage to a shadow ledger."
+    },
+    {
+      "rank": 3,
+      "edge": "Cross-book arbitrage (commission-survived) — 1.87% of pre-match 3-way snapshots, 61 episodes / 12 days (~5/day, 16/72 matches), median net 0.36%",
+      "confidence": "measured (rates) / indicative (episode count)",
+      "ev_per_mo": "£30–140 (≈£0 manual)",
+      "complexity": 3,
+      "priority": "P2",
+      "validation": "Once depth streaming exists: log exchange best-back SIZE per flagged arb, re-fetch all 3 legs 2–5 min later (latency-survival), paper-place at realistic stake split to a shadow ledger, settle vs results; confirm only if realised return is positive net of all frictions over >30 episodes."
+    },
+    {
+      "rank": 4,
+      "edge": "CLV as execution-quality diagnostic — realised mean +0.34%, 56% beat close; exchanges are the only venues where 25–40% of T-24h prices beat the de-vigged close",
+      "confidence": "measured (ranking) / indicative (ledger n=25)",
+      "ev_per_mo": "£0 incremental (as a standalone beat-the-close edge)",
+      "complexity": 3,
+      "priority": "P2",
+      "validation": "Recompute edges de-vigged against an INDEPENDENT sharp source (Pinnacle / exchange last-traded) to remove the single-source overround confound; require prospective n≥150–200 settled with a stable positive CLV→ROI 95% CI excluding zero before promoting CLV to an objective."
+    }
+  ],
+  "areas": [
+    {
+      "key": "bookmaker_profiles", "confidence": "measured", "ev_per_mo": "£100–300",
+      "title": "Bookmaker Behaviour Profiles",
+      "kpis": [
+        { "label": "Median sportsbook overround (1X2)", "value": "6.78%", "caveat": "vs exchange median 0.7%; latest clean book per match, n=72. Measured." },
+        { "label": "Widest-margin book", "value": "betfair_sb_uk 14.07%", "caveat": "Betfair sportsbook arm; n=43, indicative." },
+        { "label": "Most exploitable book", "value": "betfair_sb_uk", "caveat": "weakness = margin (0.45) + staleness (0.35) + longshot bias (0.20)." },
+        { "label": "Worst longshot proportional margin", "value": "52.0%", "caveat": "extra margin on fair-prob<10% outcomes vs ~5% on favourites (classic FLB)." },
+        { "label": "Stalest book vs consensus", "value": "betfair_sb_uk 0.27×", "caveat": "reprices ~2–4×/match vs exchange ~10–12×; cadence proxy, not true latency." },
+        { "label": "Books profiled", "value": "20", "caveat": "17 sportsbooks + 3 exchanges; TheOddsAPI only; 12-day window." }
+      ],
+      "narrative": "Across 72 World Cup matches the exchanges (Smarkets, Betfair Exchange, Matchbook) priced the 1X2 at ~0–2% overround, while the median sportsbook charged ~6.8% and the Betfair sportsbook arm ~14%. Every sportsbook shows classic favourite-longshot bias: proportional margin on true longshots (fair prob <10%) runs 18–52% versus ~3–7% on favourites (4–13×). Staleness varies widely — the Betfair sportsbook, William Hill and Boylesports reprice the Draw only ~2–4 times per match against an exchange consensus that moves ~10–12 times, so their lines lag when the market moves and almost never lead it. The exploitable-weakness ranking (margin 0.45, staleness 0.35, longshot bias 0.20) puts betfair_sb_uk, sport888 and William Hill at the top. Practical use is mostly negative: never back into the highest-margin or longest-shot lines, and route stakes to the lowest-margin venue. Caveat: cadence is the API capture clock, so staleness/leadership are relative, not millisecond, measures — this is descriptive microstructure, not a backtested P&L edge."
+    },
+    {
+      "key": "liquidity", "confidence": "measured", "ev_per_mo": "£80–110",
+      "title": "Liquidity & Execution Cost",
+      "kpis": [
+        { "label": "Median exchange spread (1X2)", "value": "3.33% (82 bps)", "caveat": "Displayed top-of-book back vs lay; one-way crossing ~1.67%. n=3020 pairs, indicative window." },
+        { "label": "Tightest → widest exchange", "value": "Matchbook 1.9% / Betfair 3.3% / Smarkets 5.6%", "caveat": "Median pct-spread; ordering holds within every odds bucket." },
+        { "label": "Spread by time-to-kickoff", "value": "4.8% (>3d) → 1.5% (<6h)", "caveat": "Tightens toward kickoff; <6h bucket only n=61, indicative." },
+        { "label": "Spread by odds", "value": "0.9% favs → 6.9% longshots", "caveat": "Longshots cost most to trade; medians." },
+        { "label": "Sportsbook vig (inferred)", "value": "7.2% (~2.4%/outcome)", "caveat": "From 1X2 overround; vs 0.8–3.0% exchange overround." },
+        { "label": "Depth / volume / impact", "value": "Not measurable", "caveat": "TheOddsAPI is top-of-book only; needs Betfair streaming / Smarkets depth capture." }
+      ],
+      "narrative": "From matched back/lay pairs on the three exchanges captured on the same grid, the displayed top-of-book 1X2 spread has a median of 3.33% of odds (82 implied-prob bps), about 1.67% one-way to cross to mid. Matchbook is consistently tightest and Smarkets widest, an ordering that holds inside every odds bucket. Spread widens sharply with longer odds (0.9% on favourites to 6.9% on longshots) and tightens toward kickoff (4.8% beyond three days out to 1.5% inside six hours). Sportsbooks carry no lay side, so their execution cost is read off the 1X2 overround: a mean 7.2% book margin (~2.4% per outcome) versus sub-3% exchange overrounds at the same moments. The practical takeaway is a cost-reduction edge: routing to a tight exchange saves roughly 1.8% of stake per bet versus an average sportsbook. What this data cannot show is depth, matched volume, queue position or market impact (top-of-book only); quantifying fill and slippage requires new capture (Betfair streaming EX_ALL_OFFERS+EX_TRADED or Smarkets depth). All figures are pre-kickoff, single-source, over a sparse lay window — indicative rather than definitive."
+    },
+    {
+      "key": "clv", "confidence": "measured", "ev_per_mo": "£20–60 (routing); £0 beat-close",
+      "title": "Closing Line Value & Early-Price Generosity",
+      "kpis": [
+        { "label": "Best early prices", "value": "Exchanges (Betfair Ex, Matchbook, Smarkets)", "caveat": "Only venues where 25–40% of T-24h prices beat the de-vigged close; driven by ~2% margin vs 7–17%, not line-prediction skill." },
+        { "label": "Pooled early-vs-close edge", "value": "−8.94%", "caveat": "Net of vig, early prices are systematically un-beatable from a single source; only 8.7% beat the close." },
+        { "label": "Tightest close", "value": "Betfair Ex / Matchbook (−1.2%)", "caveat": "Worst (loosest) is Betfair Sportsbook −17% and 888sport −12.5%. No sportsbook posts a beatable close." },
+        { "label": "Realized CLV (ledger)", "value": "+0.34% mean, 56% beat close", "caveat": "n=25 settled bets — far below significance. Indicative only." },
+        { "label": "Does CLV predict P&L?", "value": "No (corr −0.28 at n=25)", "caveat": "Negative correlation is small-sample noise, not evidence that beating the close hurts." },
+        { "label": "Recommended use", "value": "Diagnostic, not objective", "caveat": "Monitor execution + route to low-margin venues; don't optimize for it until n≥150–200 shows a stable positive CLV→ROI link out-of-sample." }
+      ],
+      "narrative": "We compared every book's price ~24h before kickoff against a Shin-devigged consensus close (last pre-kickoff capture across all 20 books) over 72 matches and 1,248 early observations. The exchanges rank top for early generosity and are the only venues where a meaningful share (25–40%) of early prices beat the de-vigged close, while every sportsbook beats it under 8% of the time. But the ranking tracks each book's margin almost one-for-one, so it measures vig tightness, not an ability to predict where the line moves: net of margin the average early price sits 8.9% below the eventual fair close. On the ledger, the 25 settled bets with closing odds show a mildly positive mean CLV (+0.34%, 56% beat the close), but CLV correlates NEGATIVELY with realized P&L (−0.28) — pure small-sample noise from a handful of high-odds winners on negative-CLV bets. Verdict: beating the close is theoretically sound and worth tracking as an execution-quality diagnostic and a reason to route to low-margin exchanges, but the current evidence does not justify making it a hard optimization objective — promotion should wait for an out-of-sample test against an independent sharp reference and a much larger settled sample."
+    },
+    {
+      "key": "arbitrage", "confidence": "measured", "ev_per_mo": "£30–140 (≈£0 manual)",
+      "title": "Cross-Venue Arbitrage & Synthetic Hedges",
+      "kpis": [
+        { "label": "Gross arb rate (no fees)", "value": "5.2% of snapshots", "caveat": "Pre-match 1X2 only; median margin a tiny 0.29%, max 5.74%." },
+        { "label": "Survives exchange commission", "value": "1.9% of snapshots", "caveat": "398/21,269; median net 0.36%, p90 1.8%, max 4.4%." },
+        { "label": "Distinct actionable episodes", "value": "61 in 12 days (~5/day)", "caveat": "Only 16 of 72 matches; consecutive snapshots collapsed — n<30 independent, indicative." },
+        { "label": "Need an exchange leg", "value": "65% of net arbs", "caveat": "Other 35% are all-sportsbook — exposed to stake limits & gubbing." },
+        { "label": "In-play 'arbs' (excluded)", "value": "70% rate, up to 798%", "caveat": "Asynchronous post-goal repricing artifacts — NOT executable." },
+        { "label": "Rough monthly EV (£3k)", "value": "~£30–140", "caveat": "After latency/gubbing haircuts; plausibly near £0 for a manual operator." }
+      ],
+      "narrative": "Scanning every matched-timestamp poll across ~20 books, naive risk-free arbs look frequent (5.2% of pre-match 1X2 snapshots) but are tiny — median gross margin 0.29%. Once exchange commission is netted out, only 1.9% of snapshots survive, and collapsing consecutive snapshots leaves just 61 genuinely distinct opportunities over 12 days, concentrated in 16 matches. The eye-catching double-digit 'arbs' are all in-play stale-quote artifacts (a book left pinned near 1.0 while others reprice after a goal) and are excluded. Two-thirds of the real arbs lean on a commission-netted exchange leg; the all-sportsbook third faces stake limits and gubbing the margin math ignores. Net: a real but thin, operationally fiddly edge worth maybe tens of pounds a month on a £3k bank — and the headline number depends entirely on order-book depth and placement latency we cannot yet measure."
+    },
+    {
+      "key": "exchange_vs_book", "confidence": "measured", "ev_per_mo": "£0",
+      "title": "Exchange vs Sportsbook Lead-Lag",
+      "kpis": [
+        { "label": "Who leads?", "value": "Neither (contemporaneous)", "caveat": "Cross-correlation peaks at lag 0; all non-zero lags are noise." },
+        { "label": "Peak cross-corr (lag 0)", "value": "0.378", "caveat": "n=15,609 paired consensus moves; off-peak |corr|≤0.065." },
+        { "label": "Approx lead time", "value": "0 min", "caveat": "No resolvable lead at the ~3.2-min poll cadence." },
+        { "label": "More informative venue", "value": "Tie", "caveat": "Exch gap-to-close 0.0241 vs book 0.0241; paired t=−0.03." },
+        { "label": "Sharpest book to close", "value": "williamhill", "caveat": "Exchanges rank mid-pack (5th/6th/19th of 20); n=64." },
+        { "label": "Sample", "value": "66 deep matches", "caveat": "461 dense runs, pre-kickoff only, single source." }
+      ],
+      "narrative": "On 1X2 deep price series, exchange and sportsbook de-vigged home-win probabilities move TOGETHER: the pooled cross-correlation of their minute-to-minute changes spikes at lag 0 (0.378) and is flat noise (|corr|≤0.065) at every lead and lag tested, so neither side measurably anticipates the other. Exchanges are also not closer to the eventual close than sportsbooks (mean gap 0.0241 vs 0.0241), and rank mid-pack on closeness-to-close behind William Hill. Bottom line: no harvestable lead-lag edge at this granularity, and the 'exchange is always sharpest' prior does not hold for this pre-match window. The hard limit is cadence — all books share one ~3-min capture grid while real cross-venue transmission is sub-second, so any true latency edge is invisible here. Confirming or killing a latency edge needs sub-second tick feeds and an out-of-sample holdout, not 3-min polls."
+    },
+    {
+      "key": "movement_prediction", "confidence": "measured", "ev_per_mo": "£0",
+      "title": "Odds-Movement Prediction (predict the market, not the match)",
+      "kpis": [
+        { "label": "Verdict", "value": "Not tradeable", "caveat": "Model loses to the trivial baseline out-of-sample." },
+        { "label": "Model OOS hit-rate", "value": "58.1%", "caveat": "vs 65.1% 'always predict the common sign' baseline; n=43 OOS." },
+        { "label": "Out-of-sample AUC", "value": "0.531", "caveat": "Barely above a coin flip (0.5); 68 matches, 1 obs each." },
+        { "label": "Up-drift into close", "value": "67.6% → 50.0%", "caveat": "67.6% on truncated closes collapses to 50/50 on real near-KO closes — an artifact." },
+        { "label": "Pooled momentum AUC", "value": "0.433", "caveat": "Block-bootstrap 95% CI [0.379, 0.481], entirely below 0.5." },
+        { "label": "Matches with a true close", "value": "8 of 68", "caveat": "Capture stopped 23 Jun before most kickoffs; rest of the 'close' is stale." }
+      ],
+      "narrative": "We asked whether, using only information available at time T (recent move, cross-book disagreement, exchange-vs-book gap, time-to-kickoff, favourite price level), the SIGN of the favourite's de-vigged move from T to the pre-kickoff close can be predicted. A strictly leakage-controlled walk-forward logistic model (trained only on earlier-kickoff matches, one independent observation per match) scores 58.1% out-of-sample — WORSE than the trivial 'always predict the more common direction' rule at 65.1% — with AUC 0.531. The one pattern that looks predictive, favourites drifting up into the close, is a measurement artifact: capture stopped before most kickoffs, so the 'close' is a stale cutoff a median ~40 hours early; on the only 8 matches with a genuine near-kickoff close, the drift vanishes to a coin flip. At snapshot level, recent moves are followed by reversals slightly more often than continuations (AUC 0.433), so there is no exploitable momentum either. Conclusion: no tradeable edge in predicting the close-move sign at this sample size. The highest-value next step is operational, not modelling — run odds capture to kickoff so a true closing line exists, then re-test with the same walk-forward, match-clustered methodology before risking any stake."
+    },
+    {
+      "key": "disagreement", "confidence": "measured", "ev_per_mo": "~£0",
+      "title": "Market Disagreement — do books disagree, and does it pay?",
+      "kpis": [
+        { "label": "Avg favourite disagreement (stdev)", "value": "0.72pp", "caveat": "Std of Shin-de-vigged favourite prob across ~15–20 books; range 0.23–1.50pp (n=72)." },
+        { "label": "Avg cross-book spread", "value": "2.44pp", "caveat": "Max-min of favourite implied prob; widest 4.58pp (Argentina v Algeria)." },
+        { "label": "Disagreement → movement", "value": "r=0.00 (p=0.97)", "caveat": "No predictive relationship; robust across de-vig methods; n=72." },
+        { "label": "Disagreement → model edge", "value": "r=−0.30 (n=10)", "caveat": "Underpowered, fuzzy-joined, promo-contaminated; framework-only." },
+        { "label": "Do books converge by close?", "value": "No", "caveat": "Close stdev 0.78pp ≥ early 0.72pp; dispersion is flat-to-wider." },
+        { "label": "Only reliable value", "value": "Line-shopping", "caveat": "Take the best of 20 prices — a separate, already-captured edge, not a disagreement-timing edge." }
+      ],
+      "narrative": "Bookmakers genuinely disagree on the favourite's fair price, but only by a hair: across ~20 books the de-vigged favourite probability has a stdev of about 0.7 percentage points and a max-min spread of ~2.4pp. We tested the two ways this could make money. First, whether early disagreement flags fixtures about to move — it does not (Pearson r=0.005, p=0.97, n=72; the sign even flips under a different de-vig method, confirming noise). Books also fail to converge toward consensus as kickoff nears. Second, whether disagreement flags larger model edge — the bet ledger does not key to the odds feed, so this rests on a 10-fixture fuzzy join with promo-inflated EVs; the weak result is negative and not significant. Conclusion: cross-book disagreement is measurable but, on this sample, carries no timing or edge signal. The only reliable value from price dispersion is plain line-shopping."
+    },
+    {
+      "key": "consensus", "confidence": "indicative", "ev_per_mo": "~£0",
+      "title": "Consensus Pricing — does aggregating books beat the best single book?",
+      "kpis": [
+        { "label": "Consensus vs best single book (predict close)", "value": "−5.8% (no edge)", "caveat": "Median MAE 0.0264 vs best book 0.0249, n=72; within noise." },
+        { "label": "Consensus vs Betfair-alone (paired)", "value": "23/50 wins", "caveat": "Essentially a coin-flip; Betfair's apparent lead is a sample artifact." },
+        { "label": "Best result-forecaster (Brier, n=31)", "value": "Trimmed mean 0.5772", "caveat": "Spread across all 5 methods is just 0.4%; not significant at n=31." },
+        { "label": "Close-line capture quality", "value": "8/72 within 60min of KO", "caveat": "Median snapshot-to-kickoff gap ~38h; 'close' is a pre-KO proxy." },
+        { "label": "Harvestable EV", "value": "~£0/month", "caveat": "Consensus is a fair-value cross-check, not a placeable bet." }
+      ],
+      "narrative": "Built three market-consensus 1X2 probabilities — a cross-book median, an exchange-only consensus and a 20%-trimmed mean — from per-book Shin-de-vigged odds, and pitted them against the single best book and Betfair-alone. A first pass appeared to show a single book beating consensus, but that was a timing artifact: sparse books only start quoting 26–59% of the way through the window, so their first snapshot sits mechanically near the close. After restricting every method to a fixed 16-book panel present from the first capture, the honest result is that aggregation neither beats nor loses to the best single book: close-line MAEs cluster within 6% and result Brier scores within 0.4% (n=31). Conclusion: consensus pricing is a sound fair-value cross-check that confirms the exchange close is already the right anchor — not a separate, harvestable edge on this dataset."
+    },
+    {
+      "key": "synthetic_pricing", "confidence": "indicative", "ev_per_mo": "£0–15",
+      "title": "Synthetic / Cross-Market Consistency (1X2 × totals × BTTS)",
+      "kpis": [
+        { "label": "Mean BTTS inconsistency", "value": "0.78 pts", "caveat": "mean |quoted BTTS − h2h+totals-implied BTTS|; n=21, indicative." },
+        { "label": "Largest inconsistency", "value": "2.3 pts (Ivory Coast v Ecuador)", "caveat": "barely above its own 1.34pt rho-modeling band — not a clean arb." },
+        { "label": "h2h+totals fit quality", "value": "0.21 pts RMSE", "caveat": "a single goal supply reproduces 1X2 + Over nearly exactly, so the BTTS gap is a true out-of-sample read." },
+        { "label": "Directional lean", "value": "BTTS-Yes +0.47 pts rich", "caveat": "15/21 matches; structural tilt visible only in aggregate." },
+        { "label": "Signal vs noise", "value": "0.78 < 1.13 pts", "caveat": "cross-market gap is smaller than between-book BTTS dispersion → no consensus-level synthetic arb." },
+        { "label": "Correct-score / AH check", "value": "Framework only", "caveat": "no correct-score or Asian-handicap data in the DB." }
+      ],
+      "narrative": "1X2, totals and both-teams-to-score are three projections of one scoreline distribution, so a single Dixon-Coles goal supply should reproduce all three. For the 21 matches quoting all three at the closing snapshot, we invert consensus de-vigged h2h (Shin) and totals to that goal supply with rho fixed to the fitted tournament value (−0.0502), then read implied BTTS out-of-sample and compare to the quote. The markets are remarkably internally consistent: the average BTTS discrepancy is 0.78 probability points and the single largest is 2.3 points, while the h2h+totals fit itself is tight to 0.21 points. Most discrepancies fall within the band created by the single rho choice, and the cross-market signal (0.78pts) is smaller than the spread between books quoting BTTS (1.13pts), so there is no consensus-level synthetic arbitrage. The one robust pattern is a small directional lean — BTTS-Yes priced ~0.47 points richer than the goal supply implies in 15 of 21 matches — a structural tilt, not a tradable per-match edge. Practical use: a price-sanity filter on a single book's BTTS/totals quote, not a standalone strategy."
+    },
+    {
+      "key": "price_discovery", "confidence": "indicative", "ev_per_mo": "£5–20 (framework)",
+      "title": "Price Discovery & Convergence (1X2)",
+      "kpis": [
+        { "label": "Median pre-kickoff consensus drift", "value": "3.3pp", "caveat": "Total-variation distance of de-vigged consensus, first to last pre-kickoff capture; n=65. Measured." },
+        { "label": "Favourite drift (median)", "value": "+1.6pp", "caveat": "Favourites firm slightly. p90 +8.9pp, max +21.9pp. n=65. Measured." },
+        { "label": "Movement done by T-24h / T-6h", "value": "~18% / ~40%", "caveat": "Verifier-corrected: genuinely-observed thresholds only (n=5–11); the earlier ~100% was a coverage artifact." },
+        { "label": "Top first-movers", "value": "paddypower & skybet (~16%)", "caveat": "~3× the 5.3% uniform baseline across 106 steps; n=106, indicative. Exchanges did NOT dominate this detector." },
+        { "label": "Closing-line coverage", "value": "5 of 65 matches", "caveat": "Capture stopped 2026-06-23 before most kickoffs; median gap 42h. Structural data gap." }
+      ],
+      "narrative": "On the 65 deep-series matches, the de-vigged 1X2 consensus moves a median of 3.3pp (total-variation distance) from first to last pre-kickoff capture, with favourites firming a median +1.6pp; tail moves reach ~22pp. What movement we can see is back-loaded into the final day, but that profile rests on the few matches with near-kickoff coverage and is indicative only — the adversarial verifier corrected an earlier 'fully converged by T-6h' claim down to ~40% genuinely-observed. When the favourite price steps, paddypower and skybet most often lead the consensus (~16% of 106 steps, ~3× the uniform baseline); the exchanges did not dominate this particular detector. The hard caveat: odds capture stopped on 2026-06-23 while most matches kick off later, so only 5 of 65 matches have a capture within 6h of kickoff — there is effectively no true closing line in this window, which caps both the convergence profile and any CLV measurement until capture runs uninterrupted to kickoff."
+    },
+    {
+      "key": "polymarket", "confidence": "framework", "ev_per_mo": "framework only",
+      "title": "Polymarket & Combo Markets — decomposing the advancement bundle",
+      "kpis": [
+        { "label": "PM price history in DB", "value": "0 snapshots", "caveat": "Only 10 parked + 6 dry-run order rows; this is framework + one live cross-section, not realised edge." },
+        { "label": "PM rung-ladder coherence", "value": "98.3% (3/181 viol.)", "caveat": "Backed-out per-tie conditionals stay valid for 178/181 adjacent rung pairs; n=40 teams, 1 snapshot." },
+        { "label": "SF→Final conditional edge", "value": "−0.184 (model−PM)", "caveat": "PM prices reaching the Final above the model conditional. n=38, indicative." },
+        { "label": "Final-itself conditional edge", "value": "+0.079 (model−PM)", "caveat": "Model thinks teams win the final more often than PM implies. n=39, indicative." },
+        { "label": "Sharpest contender gap", "value": "Brazil +0.89 log", "caveat": "Model 13.5% vs PM 5.6% to win; France is the mirror (model 9.5% vs PM 19.0%). Single snapshot." }
+      ],
+      "narrative": "Polymarket leaves no price history in our database, so combo-market work is a method spec made concrete on one live snapshot of PM advancement prices versus our Monte-Carlo model. The method treats the advancement ladder as a nested conditional combo: dividing adjacent rung prices backs out PM's implied single-tie probabilities, compared to the model's coherent joint. Two diagnostics fall out. Coherence: PM's own ladder is near arbitrage-free (98.3% of rung pairs monotone), with only 3 violations worth checking for a lock. Over-discounting: the model and market disagree most on the DEEP ties — PM prices reaching the Final above the model conditional (mean −0.184), but the model thinks teams convert the Final itself more often than PM (mean +0.079); Final ties drive the title disagreement for 32 of 40 teams. The cleanest example is Brazil (model 13.5% vs PM 5.6% to win) versus France (model 9.5% vs PM 19.0%). None of this is yet a profit claim: one cross-section, no combo P&L, and prior project results show the model is a weak longshot selector. The confirming walk-forward is daily rung snapshots plus Brier/log grading of each conditional as ties resolve, across ≥40 ties."
+    }
+  ],
+  "execution_components": [
+    { "name": "Venue selector", "purpose": "Pick the venue maximising net price after commission + favourite-longshot bias; exchange-first, never the 14%-margin / 36–52%-longshot books.", "depends_on": "venues.py, markets/devig.py, arb.py", "prereq_data": "None for ranking; per-venue commission map for best price" },
+    { "name": "Smart order router (SOR)", "purpose": "Decompose target stake across venues to maximise net fill; prefer tightest exchange (Matchbook<Betfair<Smarkets) then line-shop sportsbooks.", "depends_on": "arb.py (stake_split, effective_back), markets/kelly.py", "prereq_data": "Depth feed (fillable size per venue) — BLOCKED until captured" },
+    { "name": "Liquidity-aware stake sizer", "purpose": "Cap stake at a fraction of fillable depth, not displayed top-of-book; widen near kickoff (spreads 4.8%→1.5%) and on favourites vs longshots.", "depends_on": "markets/kelly.py (KellyPolicy), exposure_corr.py", "prereq_data": "Depth feed (else hard-cap to tiny stakes)" },
+    { "name": "Slippage model", "purpose": "Estimate price decay from top-of-book to needed size; flat spread-keyed penalty today (~1.67% one-way), depth-walk once EX_ALL_OFFERS captured.", "depends_on": "new execution/slippage.py; markets/devig.py", "prereq_data": "Depth feed for the real impact curve" },
+    { "name": "Exchange queue positioning", "purpose": "Maker (earn spread) vs taker (cross-spread) per urgency; queue position unobservable today, so default taker for time-sensitive arb legs.", "depends_on": "new execution module", "prereq_data": "Depth + EX_TRADED for queue/fill modelling" },
+    { "name": "Auto-hedge / synthetic sanity filter", "purpose": "Cross-check a leg vs goal-supply fair value (1X2↔totals↔BTTS agree to ~0.78pp); block off prices; offer exchange lay-hedge if exposure breaches the floor.", "depends_on": "exposure_corr.py, markets/devig.py", "prereq_data": "None for the sanity filter; hedge sizing wants depth" },
+    { "name": "Market-impact estimator", "purpose": "Convert intended stake → expected price move for sizing/splitting; framework-only today (no matched-volume data), starts as 'unknown → cap small'.", "depends_on": "new execution/impact.py", "prereq_data": "EX_TRADED matched-volume capture" },
+    { "name": "Execution timing", "purpose": "When CLV-neutral, place nearer kickoff (spreads tightest, liquidity deepest) once price confirmed; for arb act immediately (legs go stale within ~76s).", "depends_on": "pollsched.py, closecapture.py", "prereq_data": "To-kickoff capture" },
+    { "name": "Failure recovery / partial-fill", "purpose": "If one arb leg fills and another rejects/moves, re-price unmatched legs; if no longer +EV, lay off open exposure on exchange and book a shadow-ledger event.", "depends_on": "positions_sync.py (dry-run), matched.py, arb.py", "prereq_data": "Live venue position sync (exists, dry-run)" },
+    { "name": "Whole-book exposure guard", "purpose": "Combine every open leg across all outcomes/venues into ONE correlated exposure vs a hard cash floor — 1X2+totals+BTTS on one fixture are ONE bet, not three.", "depends_on": "exposure_corr.py (build_correlated_exposure)", "prereq_data": "None (uses the existing scoreline distribution)" }
+  ],
+  "roadmap": [
+    { "phase": "Phase 0 — Fix the measurement floor (prerequisite, no betting)", "items": ["Run odds capture uninterrupted to kickoff for every match (creates a true closing line; unblocks CLV / convergence / movement / consensus / disagreement re-tests)", "Stand up the walk-forward CLV harness (Phase-2 Wave-1) on cached + new snapshots"], "gate": "Harness runs forward-only with no look-ahead and reproduces the published microstructure numbers" },
+    { "phase": "Phase 1 — Capture the structural cost edge (high-certainty, low-effort, no new market data)", "items": ["Venue selector + line-shopping + negative-avoidance (route to lowest-margin venue; never bet 14% Betfair-SB or 36–52% longshot lines)", "Whole-book correlated exposure guard (size 1X2+totals+BTTS as ONE bucket vs the hard floor)", "Synthetic-pricing sanity filter (block prices off goal-supply fair value by more than book vig)"], "gate": "On a held-out tournament half, the book-weakness ranking (margin/FLB/staleness) is Spearman-stable across disjoint folds" },
+    { "phase": "Phase 2 — Depth capture, then liquidity-aware execution", "items": ["Build Betfair/Smarkets depth + matched-volume capture and the exchange_depth schema", "Turn on smart order router, liquidity-aware sizer, depth-walk slippage model, and partial-fill failure recovery (all blocked until depth exists)"], "gate": "Depth-aware paper-fills to a shadow ledger show realised slippage within the modelled band; latency-survival of re-fetched legs is measured, not assumed" },
+    { "phase": "Phase 3 — Arbitrage, gated on Phase 2", "items": ["Activate commission-survived cross-book arb scan with depth + latency-survival haircut baked in; shadow-ledger every flagged arb before any live stake; track gubbing on the sportsbook leg over weeks"], "gate": "Shadow-ledger realised return stays positive net of depth, latency and gubbing across >30 out-of-sample episodes" },
+    { "phase": "Phase 4 — Re-test the active edges (only if the harness shows signal)", "items": ["With a true closing line, re-run the null edges (lead-lag at finer cadence with a tick feed, disagreement→movement, movement-sign, convergence-timing, consensus, synthetic) on train/test splits; promote ONLY edges that beat an honest baseline OOS with a bootstrap CI excluding zero", "Add PM advancement daily snapshots to make the combo decomposition gradeable (≥40 resolved ties) before any PM combo capital"], "gate": "Each promoted edge clears its pre-registered OOS test; otherwise it stays a diagnostic, not an objective" }
+  ]
+}

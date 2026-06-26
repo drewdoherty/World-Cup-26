@@ -1,0 +1,178 @@
+{
+  "key": "arbitrage",
+  "title": "Cross-venue arbitrage & synthetic hedges (1X2)",
+  "updated_at": "2026-06-26T16:43:14.491558+00:00",
+  "window": {
+    "start": "2026-06-11T13:27:30.716212+00:00",
+    "end": "2026-06-23T06:52:27.484258+00:00",
+    "span_days": 11.7,
+    "source": "theoddsapi"
+  },
+  "method": "At each matched ts_utc poll, take best 1X2 price per outcome across ~20 books; arb iff sum(1/best) < 1. Guards: drop quotes<=1.05 (suspended), drop >1.6x per-outcome median (stale), pre-match only (in-play quotes reprice asynchronously). NET applies exchange commission (Smarkets/Matchbook 2%, Betfair 6%) via wca.arb.",
+  "headline": {
+    "pre_match_snapshots": 21269,
+    "gross_arb_snapshots": 1108,
+    "gross_arb_rate_pct": 5.21,
+    "gross_margin_median_pct": 0.288,
+    "gross_margin_max_pct": 5.738,
+    "net_arb_snapshots": 398,
+    "net_arb_rate_pct": 1.87,
+    "net_margin_median_pct": 0.355,
+    "net_margin_p90_pct": 1.793,
+    "net_margin_max_pct": 4.419,
+    "net_arb_episodes": 61,
+    "episodes_per_day": 5.2,
+    "matches_with_net_arb": 16,
+    "matches_scanned": 72,
+    "net_arbs_needing_exchange_leg": 257,
+    "net_arbs_all_sportsbook": 141
+  },
+  "inplay_contamination": {
+    "inplay_snapshots": 243,
+    "inplay_arb_snapshots": 171,
+    "inplay_arb_rate_pct": 70.37,
+    "inplay_margin_median_pct": 12.563,
+    "inplay_margin_max_pct": 797.833,
+    "note": "In-play 'arbs' are ~7x more frequent and far larger but are artifacts of asynchronous repricing -- NOT executable. Excluded from headline."
+  },
+  "margin_histogram": [
+    {
+      "bucket": "0-0.5%",
+      "count": 226
+    },
+    {
+      "bucket": "0.5-1%",
+      "count": 113
+    },
+    {
+      "bucket": "1-2%",
+      "count": 25
+    },
+    {
+      "bucket": "2-5%",
+      "count": 34
+    },
+    {
+      "bucket": ">5%",
+      "count": 0
+    }
+  ],
+  "daily_episodes": [
+    {
+      "date": "2026-06-11",
+      "episodes": 4
+    },
+    {
+      "date": "2026-06-12",
+      "episodes": 5
+    },
+    {
+      "date": "2026-06-13",
+      "episodes": 33
+    },
+    {
+      "date": "2026-06-14",
+      "episodes": 15
+    },
+    {
+      "date": "2026-06-20",
+      "episodes": 2
+    },
+    {
+      "date": "2026-06-23",
+      "episodes": 2
+    }
+  ],
+  "top_book_combos": [
+    {
+      "books": [
+        "coral",
+        "skybet",
+        "unibet_uk"
+      ],
+      "count": 134
+    },
+    {
+      "books": [
+        "boylesports",
+        "coral",
+        "smarkets"
+      ],
+      "count": 50
+    },
+    {
+      "books": [
+        "betfred_uk",
+        "betway",
+        "matchbook"
+      ],
+      "count": 26
+    },
+    {
+      "books": [
+        "matchbook",
+        "sport888"
+      ],
+      "count": 25
+    },
+    {
+      "books": [
+        "matchbook",
+        "skybet",
+        "smarkets"
+      ],
+      "count": 22
+    },
+    {
+      "books": [
+        "casumo",
+        "matchbook",
+        "smarkets"
+      ],
+      "count": 19
+    },
+    {
+      "books": [
+        "ladbrokes_uk",
+        "matchbook"
+      ],
+      "count": 14
+    },
+    {
+      "books": [
+        "grosvenor",
+        "smarkets"
+      ],
+      "count": 14
+    }
+  ],
+  "best_example": {
+    "match": "Czech Republic v South Africa",
+    "ts_utc": "2026-06-11T20:53:16.049626+00:00",
+    "margin_pct": 0.0441907627429845,
+    "legs": [
+      {
+        "outcome": "Czech Republic",
+        "net_odds": 1.85,
+        "book": "sport888"
+      },
+      {
+        "outcome": "South Africa",
+        "net_odds": 5.9,
+        "book": "matchbook"
+      },
+      {
+        "outcome": "Draw",
+        "net_odds": 4.038,
+        "book": "matchbook"
+      }
+    ]
+  },
+  "samples": {
+    "pre_match_snapshots": 21269,
+    "net_arb_snapshots": 398,
+    "net_arb_episodes": 61,
+    "matches": 72
+  },
+  "data_caveat": "Single source (theoddsapi), ~20 UK books, h2h only, ~12-day window (11-23 Jun 2026), 72 matches. NO order-book depth or matched volume, so we cannot confirm the best quote was actually takeable for meaningful stake. Net-of-commission only; account limits / stake factoring / gubbing on the sportsbook leg, plus the ~minutes of latency between poll and bet placement, are NOT modelled and will shrink the survivable set further. Indicative (net episodes n=61, < 30 distinct opportunities), not significant."
+}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark">
+<title>WORLD CUP ALPHA // MARKET MICROSTRUCTURE</title>
+<link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="./microstructure.css">
+</head>
+<body>
+<div id="app">
+  <header class="ticker" id="ticker">
+    <div class="brand">
+      <span class="brand-mark">WCA</span>
+      <span class="brand-sub">MARKET MICROSTRUCTURE</span>
+    </div>
+    <nav class="scores-nav">
+      <a class="scores-nav-link" href="./index.html">Terminal</a>
+      <a class="scores-nav-link" href="./scores.html">Scores &amp; Markets</a>
+      <a class="scores-nav-link" href="./architecture.html">Under The Hood</a>
+      <span class="scores-nav-here">Microstructure</span>
+    </nav>
+    <div class="ticker-stats" id="ms-cov-tiles"></div>
+  </header>
+
+  <div class="nodata" id="nodata" hidden>
+    <span class="nodata-dot"></span>
+    <span id="nodata-msg">RESEARCH FEED UNAVAILABLE</span>
+  </div>
+
+  <main class="ms-main">
+
+    <!-- Title + honesty banner -->
+    <section class="ms-hero">
+      <h1 class="ms-h1">Market Microstructure &amp; Execution Engine</h1>
+      <p class="ms-sub">Can we <em>trade</em> football markets better — independent of forecasting? Structural, repeatable edges in market behaviour, ranked by EV &times; feasibility. Every number below is computed from the project's own odds database and adversarially verified; sample sizes and limits are stated, not hidden.</p>
+      <div class="ms-honesty" id="ms-honesty"></div>
+    </section>
+
+    <!-- Coverage -->
+    <section class="panel">
+      <div class="panel-head"><span class="panel-label">📊 Data Coverage // What's Actually Measurable</span><span class="panel-meta" id="ms-cov-meta"></span></div>
+      <div class="panel-body"><div class="ms-cov-grid" id="ms-coverage"></div></div>
+    </section>
+
+    <!-- Ranked inefficiencies (the headline deliverable) -->
+    <section class="panel">
+      <div class="panel-head"><span class="panel-label">🏆 Ranked Structural Inefficiencies // EV &times; Feasibility</span><span class="panel-meta" id="ms-edges-meta"></span></div>
+      <div class="panel-body panel-scroll"><div id="ms-ranked"></div></div>
+    </section>
+
+    <!-- Per-area research findings -->
+    <section class="ms-areas-head">
+      <h2 class="ms-h2">Research Areas</h2>
+      <p class="ms-sub-sm">Each area: the headline metrics computed from the data, with a confidence badge. <span class="ms-badge ms-measured">measured</span> = solid sample · <span class="ms-badge ms-indicative">indicative</span> = n&lt;30 / noisy · <span class="ms-badge ms-framework">framework</span> = method only, not yet data-backed.</p>
+    </section>
+    <div id="ms-areas" class="ms-areas"></div>
+
+    <!-- Execution engine architecture -->
+    <section class="panel">
+      <div class="panel-head"><span class="panel-label">⚙️ Execution Engine // Architecture Spec</span><span class="panel-meta" id="ms-exec-meta"></span></div>
+      <div class="panel-body"><div id="ms-exec" class="ms-exec-grid"></div></div>
+    </section>
+
+    <!-- Roadmap -->
+    <section class="panel">
+      <div class="panel-head"><span class="panel-label">🗺️ Roadmap // Forecasting System → Market-Aware Trading Platform</span><span class="panel-meta" id="ms-roadmap-meta"></span></div>
+      <div class="panel-body"><div id="ms-roadmap" class="ms-roadmap"></div></div>
+    </section>
+
+    <div class="track-note" id="ms-foot"></div>
+  </main>
+</div>
+<script src="./microstructure.js"></script>
+</body>
+</html>

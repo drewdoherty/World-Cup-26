@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "key": "price_discovery",
+    "title": "Price Discovery & Convergence (1X2)",
+    "updated_at": "2026-06-26 16:45:41 UTC",
+    "window": {
+      "first_capture_utc": "2026-06-11T13:27:30.716212+00:00",
+      "last_capture_utc": "2026-06-23T06:52:27.484258+00:00",
+      "approx_days": 12
+    },
+    "source": "theoddsapi",
+    "n_deep_matches": 65,
+    "n_books": 20,
+    "data_caveat": "Single source (theoddsapi). Capture stopped 2026-06-23 while many matches kick off later, so for most deep matches the last in-window capture is hours/days before kickoff. Drift (a) uses the last PRE-kickoff capture as endpoint and labels this. The convergence profile (b) is restricted to the 11 matches with a final capture within 12h of kickoff -> INDICATIVE, n is small. Books share one capture timestamp per ~3.2-min pull, so first-mover (c) is detected across consecutive captures, not sub-second."
+  },
+  "drift": {
+    "metric": "total_variation_distance_of_devigged_consensus",
+    "first_to_last_prekickoff": {
+      "n": 65,
+      "min": 0.0021,
+      "p25": 0.0093,
+      "median": 0.0333,
+      "mean": 0.0407,
+      "p75": 0.0562,
+      "p90": 0.0898,
+      "max": 0.2193
+    },
+    "favourite_signed_prob_change": {
+      "n": 65,
+      "min": -0.1011,
+      "p25": -0.0048,
+      "median": 0.0158,
+      "mean": 0.0223,
+      "p75": 0.0538,
+      "p90": 0.089,
+      "max": 0.2193
+    },
+    "note": "TVD units are probability mass moved (0.01 = 1pp). Favourite is the highest-prob selection at first capture."
+  },
+  "convergence": {
+    "definition": "fraction of total first->final pre-kickoff TVD already completed by each kickoff-relative threshold",
+    "close_gate_hours": 12.0,
+    "n_qualifying_matches": 11,
+    "profile": {
+      "T-24h": {
+        "n": 11,
+        "median_frac_done": 0.181,
+        "mean_frac_done": 0.121
+      },
+      "T-6h": {
+        "n": 11,
+        "median_frac_done": 1.0,
+        "mean_frac_done": 0.709
+      },
+      "T-1h": {
+        "n": 11,
+        "median_frac_done": 1.0,
+        "mean_frac_done": 0.853
+      }
+    }
+  },
+  "first_mover": {
+    "definition": "at each >=1pp consensus-favourite step, the book most ahead-of-consensus in the move direction is credited the lead",
+    "total_steps": 106,
+    "uniform_baseline_lead_rate": 0.053,
+    "min_appearances_for_reliable_rate": 30,
+    "ranking": [
+      {
+        "book": "skybet",
+        "leads": 17,
+        "appearances": 106,
+        "lead_per_appearance": 0.16,
+        "rate_reliable": true
+      },
+      {
+        "book": "paddypower",
+        "leads": 17,
+        "appearances": 106,
+        "lead_per_appearance": 0.16,
+        "rate_reliable": true
+      },
+      {
+        "book": "boylesports",
+        "leads": 9,
+        "appearances": 105,
+        "lead_per_appearance": 0.086,
+        "rate_reliable": true
+      },
+      {
+        "book": "betway",
+        "leads": 8,
+        "appearances": 73,
+        "lead_per_appearance": 0.11,
+        "rate_reliable": true
+      },
+      {
+        "book": "unibet_uk",
+        "leads": 5,
+        "appearances": 89,
+        "lead_per_appearance": 0.056,
+        "rate_reliable": true
+      },
+      {
+        "book": "sport888",
+        "leads": 5,
+        "appearances": 106,
+        "lead_per_appearance": 0.047,
+        "rate_reliable": true
+      },
+      {
+        "book": "smarkets",
+        "leads": 4,
+        "appearances": 106,
+        "lead_per_appearance": 0.038,
+        "rate_reliable": true
+      },
+      {
+        "book": "livescorebet",
+        "leads": 3,
+        "appearances": 106,
+        "lead_per_appearance": 0.028,
+        "rate_reliable": true
+      },
+      {
+        "book": "betfair_sb_uk",
+        "leads": 3,
+        "appearances": 4,
+        "lead_per_appearance": 0.75,
+        "rate_reliable": false
+      },
+      {
+        "book": "betfair_ex_uk",
+        "leads": 2,
+        "appearances": 94,
+        "lead_per_appearance": 0.021,
+        "rate_reliable": true
+      },
+      {
+        "book": "betfred_uk",
+        "leads": 2,
+        "appearances": 106,
+        "lead_per_appearance": 0.019,
+        "rate_reliable": true
+      },
+      {
+        "book": "virginbet",
+        "leads": 1,
+        "appearances": 106,
+        "lead_per_appearance": 0.009,
+        "rate_reliable": true
+      },
+      {
+        "book": "betvictor",
+        "leads": 1,
+        "appearances": 19,
+        "lead_per_appearance": 0.053,
+        "rate_reliable": false
+      },
+      {
+        "book": "williamhill",
+        "leads": 1,
+        "appearances": 82,
+        "lead_per_appearance": 0.012,
+        "rate_reliable": true
+      }
+    ]
+  },
+  "secondary_markets_note": "Totals (70 matches) and BTTS (24 matches) exist but with far shallower intraday series (~238 capture-times total vs ~315 for h2h) and were not profiled here; h2h is the only market with a deep per-match series suitable for convergence work."
+}

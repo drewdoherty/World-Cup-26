@@ -1,0 +1,520 @@
+{
+  "updated_at": "2026-06-26T16:45:34.071869+00:00",
+  "window": {
+    "start": "2026-06-11T13:27:30.716212+00:00",
+    "end": "2026-06-23T06:52:27.484258+00:00"
+  },
+  "source": "theoddsapi",
+  "data_caveat": "1X2 favourite cross-book dispersion, Shin de-vig, theoddsapi only, 72 World Cup fixtures, 2026-06-11..2026-06-23. 'Close' = last PRE-KICKOFF captured snapshot, which for most fixtures is 1-5 days before kickoff (only ~8 fixtures captured to kickoff), so move-to-close is movement over the captured window, not a true closing line. H(b) model-edge join is team-name fuzzy (n~10, promo/boost-inflated EV) and is indicative only.",
+  "n_matches": 72,
+  "distribution": {
+    "early_std_pp": {
+      "mean": 0.719,
+      "median": 0.726,
+      "p10": 0.44,
+      "p90": 0.951,
+      "min": 0.231,
+      "max": 1.497
+    },
+    "early_spread_pp": {
+      "mean": 2.443,
+      "median": 2.443,
+      "max": 4.584
+    },
+    "close_std_pp": {
+      "mean": 0.777,
+      "median": 0.749
+    },
+    "move_to_close_pp": {
+      "mean": 3.753,
+      "median": 2.526,
+      "max": 22.549
+    },
+    "books_converge_to_close": false
+  },
+  "hypothesis_a_disagreement_predicts_movement": {
+    "n": 72,
+    "pearson_r_std": 0.005,
+    "pearson_p_std": 0.9678,
+    "spearman_rho_std": 0.054,
+    "spearman_p_std": 0.6495,
+    "pearson_r_spread": -0.009,
+    "pearson_p_spread": 0.9396,
+    "near_close_subset": {
+      "n": 41,
+      "pearson_r_std": 0.151,
+      "pearson_p_std": 0.3456
+    },
+    "verdict": "No predictive relationship (r~0, p>>0.05): early cross-book disagreement does not forecast subsequent line movement in this sample.",
+    "confidence": "measured"
+  },
+  "hypothesis_b_disagreement_predicts_model_edge": {
+    "n": 10,
+    "pearson_r": -0.301,
+    "pearson_p": 0.3978,
+    "spearman_rho": -0.297,
+    "spearman_p": 0.4047,
+    "verdict": "Insufficient sample (n~10) and EVs contaminated by promo/boosts; point estimate is weak and negative (opposite of hypothesis). Indicative only.",
+    "confidence": "indicative"
+  },
+  "top_disagreement_fixtures": [
+    {
+      "desc": "Argentina v Algeria",
+      "fav": "Argentina",
+      "early_std_pp": 1.497,
+      "early_spread_pp": 4.584,
+      "move_to_close_pp": 0.143,
+      "n_books": 18
+    },
+    {
+      "desc": "Czech Republic v Mexico",
+      "fav": "Mexico",
+      "early_std_pp": 1.487,
+      "early_spread_pp": 4.391,
+      "move_to_close_pp": 2.567,
+      "n_books": 15
+    },
+    {
+      "desc": "Qatar v Switzerland",
+      "fav": "Switzerland",
+      "early_std_pp": 1.211,
+      "early_spread_pp": 3.481,
+      "move_to_close_pp": 1.702,
+      "n_books": 20
+    },
+    {
+      "desc": "Croatia v Ghana",
+      "fav": "Croatia",
+      "early_std_pp": 1.034,
+      "early_spread_pp": 3.427,
+      "move_to_close_pp": 0.542,
+      "n_books": 15
+    },
+    {
+      "desc": "Ecuador v Germany",
+      "fav": "Germany",
+      "early_std_pp": 1.019,
+      "early_spread_pp": 2.69,
+      "move_to_close_pp": 4.963,
+      "n_books": 15
+    },
+    {
+      "desc": "Colombia v DR Congo",
+      "fav": "Colombia",
+      "early_std_pp": 0.981,
+      "early_spread_pp": 3.469,
+      "move_to_close_pp": 2.293,
+      "n_books": 16
+    },
+    {
+      "desc": "Mexico v South Africa",
+      "fav": "Mexico",
+      "early_std_pp": 0.967,
+      "early_spread_pp": 3.678,
+      "move_to_close_pp": 0.396,
+      "n_books": 20
+    },
+    {
+      "desc": "Argentina v Austria",
+      "fav": "Argentina",
+      "early_std_pp": 0.954,
+      "early_spread_pp": 3.051,
+      "move_to_close_pp": 3.292,
+      "n_books": 16
+    },
+    {
+      "desc": "Belgium v Iran",
+      "fav": "Belgium",
+      "early_std_pp": 0.919,
+      "early_spread_pp": 2.771,
+      "move_to_close_pp": 0.786,
+      "n_books": 16
+    },
+    {
+      "desc": "Brazil v Morocco",
+      "fav": "Brazil",
+      "early_std_pp": 0.91,
+      "early_spread_pp": 3.09,
+      "move_to_close_pp": 0.554,
+      "n_books": 20
+    },
+    {
+      "desc": "South Africa v South Korea",
+      "fav": "South Korea",
+      "early_std_pp": 0.907,
+      "early_spread_pp": 2.485,
+      "move_to_close_pp": 9.506,
+      "n_books": 15
+    },
+    {
+      "desc": "Scotland v Morocco",
+      "fav": "Morocco",
+      "early_std_pp": 0.899,
+      "early_spread_pp": 2.797,
+      "move_to_close_pp": 7.708,
+      "n_books": 17
+    }
+  ],
+  "scatter_std_vs_move": [
+    {
+      "x": 0.403,
+      "y": 2.276,
+      "desc": "Ivory Coast v Ecuador"
+    },
+    {
+      "x": 0.819,
+      "y": 5.288,
+      "desc": "USA v Australia"
+    },
+    {
+      "x": 1.019,
+      "y": 4.963,
+      "desc": "Ecuador v Germany"
+    },
+    {
+      "x": 0.645,
+      "y": 3.704,
+      "desc": "Japan v Sweden"
+    },
+    {
+      "x": 0.77,
+      "y": 5.692,
+      "desc": "Mexico v South Korea"
+    },
+    {
+      "x": 0.563,
+      "y": 5.809,
+      "desc": "DR Congo v Uzbekistan"
+    },
+    {
+      "x": 0.724,
+      "y": 1.07,
+      "desc": "Uzbekistan v Colombia"
+    },
+    {
+      "x": 0.851,
+      "y": 10.483,
+      "desc": "Paraguay v Australia"
+    },
+    {
+      "x": 0.714,
+      "y": 0.423,
+      "desc": "Austria v Jordan"
+    },
+    {
+      "x": 1.211,
+      "y": 1.702,
+      "desc": "Qatar v Switzerland"
+    },
+    {
+      "x": 0.82,
+      "y": 2.485,
+      "desc": "Switzerland v Bosnia & Herzegovina"
+    },
+    {
+      "x": 0.88,
+      "y": 8.755,
+      "desc": "England v Ghana"
+    },
+    {
+      "x": 0.476,
+      "y": 0.015,
+      "desc": "Netherlands v Japan"
+    },
+    {
+      "x": 0.534,
+      "y": 1.464,
+      "desc": "South Korea v Czech Republic"
+    },
+    {
+      "x": 0.472,
+      "y": 3.225,
+      "desc": "Egypt v Iran"
+    },
+    {
+      "x": 0.84,
+      "y": 1.831,
+      "desc": "Norway v Senegal"
+    },
+    {
+      "x": 0.874,
+      "y": 3.231,
+      "desc": "Panama v England"
+    },
+    {
+      "x": 0.899,
+      "y": 7.708,
+      "desc": "Scotland v Morocco"
+    },
+    {
+      "x": 0.751,
+      "y": 0.619,
+      "desc": "Iraq v Norway"
+    },
+    {
+      "x": 0.438,
+      "y": 1.746,
+      "desc": "Netherlands v Sweden"
+    },
+    {
+      "x": 0.83,
+      "y": 9.008,
+      "desc": "Bosnia & Herzegovina v Qatar"
+    },
+    {
+      "x": 1.034,
+      "y": 0.542,
+      "desc": "Croatia v Ghana"
+    },
+    {
+      "x": 0.46,
+      "y": 0.89,
+      "desc": "Jordan v Argentina"
+    },
+    {
+      "x": 0.782,
+      "y": 0.531,
+      "desc": "Australia v Turkey"
+    },
+    {
+      "x": 0.87,
+      "y": 5.411,
+      "desc": "New Zealand v Belgium"
+    },
+    {
+      "x": 1.487,
+      "y": 2.567,
+      "desc": "Czech Republic v Mexico"
+    },
+    {
+      "x": 0.571,
+      "y": 0.635,
+      "desc": "Haiti v Scotland"
+    },
+    {
+      "x": 0.919,
+      "y": 0.786,
+      "desc": "Belgium v Iran"
+    },
+    {
+      "x": 0.679,
+      "y": 0.402,
+      "desc": "Saudi Arabia v Uruguay"
+    },
+    {
+      "x": 0.479,
+      "y": 6.494,
+      "desc": "Czech Republic v South Africa"
+    },
+    {
+      "x": 0.507,
+      "y": 2.007,
+      "desc": "Colombia v Portugal"
+    },
+    {
+      "x": 0.768,
+      "y": 6.073,
+      "desc": "Ecuador v Cura\u00e7ao"
+    },
+    {
+      "x": 0.485,
+      "y": 0.95,
+      "desc": "England v Croatia"
+    },
+    {
+      "x": 0.981,
+      "y": 2.293,
+      "desc": "Colombia v DR Congo"
+    },
+    {
+      "x": 0.578,
+      "y": 0.018,
+      "desc": "Portugal v DR Congo"
+    },
+    {
+      "x": 0.616,
+      "y": 1.414,
+      "desc": "Spain v Saudi Arabia"
+    },
+    {
+      "x": 0.872,
+      "y": 0.239,
+      "desc": "France v Senegal"
+    },
+    {
+      "x": 0.397,
+      "y": 3.135,
+      "desc": "France v Iraq"
+    },
+    {
+      "x": 0.58,
+      "y": 10.357,
+      "desc": "Senegal v Iraq"
+    },
+    {
+      "x": 0.967,
+      "y": 0.396,
+      "desc": "Mexico v South Africa"
+    },
+    {
+      "x": 0.616,
+      "y": 0.646,
+      "desc": "Uruguay v Cape Verde"
+    },
+    {
+      "x": 0.603,
+      "y": 8.968,
+      "desc": "Algeria v Austria"
+    },
+    {
+      "x": 0.585,
+      "y": 3.795,
+      "desc": "Ghana v Panama"
+    },
+    {
+      "x": 0.894,
+      "y": 4.275,
+      "desc": "Scotland v Brazil"
+    },
+    {
+      "x": 0.729,
+      "y": 7.393,
+      "desc": "Portugal v Uzbekistan"
+    },
+    {
+      "x": 0.884,
+      "y": 5.527,
+      "desc": "Cura\u00e7ao v Ivory Coast"
+    },
+    {
+      "x": 0.68,
+      "y": 0.483,
+      "desc": "Sweden v Tunisia"
+    },
+    {
+      "x": 0.758,
+      "y": 4.553,
+      "desc": "Norway v France"
+    },
+    {
+      "x": 0.954,
+      "y": 3.292,
+      "desc": "Argentina v Austria"
+    },
+    {
+      "x": 0.907,
+      "y": 9.506,
+      "desc": "South Africa v South Korea"
+    },
+    {
+      "x": 0.727,
+      "y": 2.719,
+      "desc": "USA v Paraguay"
+    },
+    {
+      "x": 0.729,
+      "y": 2.119,
+      "desc": "Panama v Croatia"
+    },
+    {
+      "x": 0.848,
+      "y": 5.447,
+      "desc": "New Zealand v Egypt"
+    },
+    {
+      "x": 0.748,
+      "y": 0.01,
+      "desc": "Spain v Cape Verde"
+    },
+    {
+      "x": 0.828,
+      "y": 4.635,
+      "desc": "Switzerland v Canada"
+    },
+    {
+      "x": 0.655,
+      "y": 9.266,
+      "desc": "Morocco v Haiti"
+    },
+    {
+      "x": 0.355,
+      "y": 0.074,
+      "desc": "Canada v Bosnia & Herzegovina"
+    },
+    {
+      "x": 0.787,
+      "y": 0.528,
+      "desc": "Germany v Cura\u00e7ao"
+    },
+    {
+      "x": 0.328,
+      "y": 6.758,
+      "desc": "Uruguay v Spain"
+    },
+    {
+      "x": 0.648,
+      "y": 8.001,
+      "desc": "Tunisia v Japan"
+    },
+    {
+      "x": 0.487,
+      "y": 3.695,
+      "desc": "Cape Verde v Saudi Arabia"
+    },
+    {
+      "x": 0.567,
+      "y": 0.137,
+      "desc": "Iran v New Zealand"
+    },
+    {
+      "x": 0.633,
+      "y": 2.122,
+      "desc": "Brazil v Haiti"
+    },
+    {
+      "x": 0.612,
+      "y": 3.986,
+      "desc": "Germany v Ivory Coast"
+    },
+    {
+      "x": 1.497,
+      "y": 0.143,
+      "desc": "Argentina v Algeria"
+    },
+    {
+      "x": 0.881,
+      "y": 22.549,
+      "desc": "Tunisia v Netherlands"
+    },
+    {
+      "x": 0.357,
+      "y": 12.869,
+      "desc": "Turkey v USA"
+    },
+    {
+      "x": 0.91,
+      "y": 0.554,
+      "desc": "Brazil v Morocco"
+    },
+    {
+      "x": 0.415,
+      "y": 5.139,
+      "desc": "Turkey v Paraguay"
+    },
+    {
+      "x": 0.231,
+      "y": 1.792,
+      "desc": "Canada v Qatar"
+    },
+    {
+      "x": 0.687,
+      "y": 1.358,
+      "desc": "Belgium v Egypt"
+    },
+    {
+      "x": 0.688,
+      "y": 1.27,
+      "desc": "Jordan v Algeria"
+    }
+  ]
+}

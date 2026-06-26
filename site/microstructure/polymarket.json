@@ -1,0 +1,800 @@
+{
+  "key": "polymarket",
+  "title": "Polymarket & Combo Markets: decomposing advancement bundles",
+  "updated_at": "2026-06-26T16:47:35.002920+00:00",
+  "status": "framework-plus-live-snapshot",
+  "window": {
+    "pm_snapshot_generated": "2026-06-26 13:49:41 UTC",
+    "model_generated": "2026-06-26 06:28 UTC",
+    "n_pm_markets_in_snapshot": 235,
+    "n_teams": 48,
+    "n_teams_with_pm_chain": 40,
+    "n_teams_full_chain": 40
+  },
+  "data_caveat": "FRAMEWORK + a single live snapshot. There are NO historical Polymarket price snapshots in data/wca.db (confirmed: 0 PM rows in the price table; only 10 pm_parked + 6 pm_order_log operational rows, of which 0 are live fills). All numbers below are model-vs-market DISAGREEMENTS on one cross-section of site/advancement_data.json, not realised edges. No combo P&L, no out-of-sample test yet — treat as indicative/framework only.",
+  "method": {
+    "decomposition": "Advancement ladder = nested conditional combo. Back out PM's implied per-tie probability by dividing adjacent rung prices (pm_cond[stage]=pm[stage]/pm[prev]); compare to the model's coherent joint conditionals (model_cond=model[stage]/model[prev]).",
+    "coherence_test": "PM rung ladder must be monotone-decreasing and every backed-out conditional in (0,1]; violations are internal arbitrage.",
+    "attribution": "log(model_win/pm_win) = sum over ties of log(model_cond/pm_cond); the dominant tie is where the combo is most mispriced vs the model.",
+    "fees": "PM sports taker fee = 0.03*p*(1-p) per share (see wca.advancement.pm_taker_fee); not yet folded into these raw disagreements."
+  },
+  "db_pm_inventory": {
+    "pm_price_snapshots": 0,
+    "pm_parked_rows": 10,
+    "pm_order_log_rows": 6,
+    "pm_order_log_live_fills": 0,
+    "odds_snapshots_sources": [
+      "theoddsapi"
+    ]
+  },
+  "headline": {
+    "pm_chain_coherence": {
+      "monotonicity_violations": 3,
+      "conditional_out_of_range": 3,
+      "adjacent_pairs_checked": 181,
+      "coherent_pct": 98.3
+    },
+    "final_tie_conditional_edge": {
+      "n": 38,
+      "mean": -0.1842,
+      "median": -0.1205,
+      "stdev": 0.2693,
+      "tie_into": "Final",
+      "tie_label": "SF tie (win to reach Final)"
+    },
+    "win_tie_conditional_edge": {
+      "n": 39,
+      "mean": 0.0791,
+      "median": 0.0858,
+      "stdev": 0.1495,
+      "tie_into": "win",
+      "tie_label": "the Final itself"
+    },
+    "title_overdiscount_buckets": {
+      "longshot_lt_0.05": {
+        "n": 33,
+        "mean_model_minus_pm": 0.0005,
+        "lo": 0.0,
+        "hi": 0.05
+      },
+      "mid_0.05_0.12": {
+        "n": 4,
+        "mean_model_minus_pm": 0.008,
+        "lo": 0.05,
+        "hi": 0.12
+      },
+      "fav_ge_0.12": {
+        "n": 3,
+        "mean_model_minus_pm": -0.0181,
+        "lo": 0.12,
+        "hi": 1.01
+      }
+    },
+    "n_full_chain_teams": 40
+  },
+  "series": {
+    "conditional_edge_by_tie": [
+      {
+        "n": 19,
+        "mean": -0.0048,
+        "median": 0.0228,
+        "stdev": 0.0861,
+        "tie_into": "R16",
+        "tie_label": "R32 tie (win to reach R16)"
+      },
+      {
+        "n": 40,
+        "mean": -0.056,
+        "median": 0.001,
+        "stdev": 0.1779,
+        "tie_into": "QF",
+        "tie_label": "R16 tie (win to reach QF)"
+      },
+      {
+        "n": 40,
+        "mean": -0.0671,
+        "median": -0.0212,
+        "stdev": 0.154,
+        "tie_into": "SF",
+        "tie_label": "QF tie (win to reach SF)"
+      },
+      {
+        "n": 38,
+        "mean": -0.1842,
+        "median": -0.1205,
+        "stdev": 0.2693,
+        "tie_into": "Final",
+        "tie_label": "SF tie (win to reach Final)"
+      },
+      {
+        "n": 39,
+        "mean": 0.0791,
+        "median": 0.0858,
+        "stdev": 0.1495,
+        "tie_into": "win",
+        "tie_label": "the Final itself"
+      }
+    ],
+    "title_attribution_ranked": [
+      {
+        "team": "Cape Verde",
+        "group": "H",
+        "model_win": 0.0001,
+        "pm_win": 0.0015,
+        "log_title_gap": -2.7081,
+        "dominant_tie": "Final",
+        "dominant_tie_label": "SF tie (win to reach Final)",
+        "contrib": {
+          "R16": -0.125,
+          "QF": -0.8036,
+          "SF": -0.3205,
+          "Final": -2.2389,
+          "win": 0.7472
+        }
+      },
+      {
+        "team": "South Korea",
+        "group": "A",
+        "model_win": 0.0036,
+        "pm_win": 0.0005,
+        "log_title_gap": 1.9741,
+        "dominant_tie": "win",
+        "dominant_tie_label": "the Final itself",
+        "contrib": {
+          "R16": 0.1302,
+          "QF": 0.1602,
+          "SF": 0.1308,
+          "Final": -0.7064,
+          "win": 1.5173
+        }
+      },
+      {
+        "team": "Bosnia and Herzegovina",
+        "group": "B",
+        "model_win": 0.0003,
+        "pm_win": 0.0015,
+        "log_title_gap": -1.6094,
+        "dominant_tie": "Final",
+        "dominant_tie_label": "SF tie (win to reach Final)",
+        "contrib": {
+          "QF": -0.217,
+          "SF": -0.5576,
+          "Final": -1.626,
+          "win": 1.1239
+        }
+      },
+      {
+        "team": "Ghana",
+        "group": "L",
+        "model_win": 0.0003,
+        "pm_win": 0.0015,
+        "log_title_gap": -1.6094,
+        "dominant_tie": "Final",
+        "dominant_tie_label": "SF tie (win to reach Final)",
+        "contrib": {
+          "R16": -0.2849,
+          "QF": -0.5591,
+          "SF": -0.5634,
+          "Final": -1.3045,
+          "win": 1.0986
+        }
+      },
+      {
+        "team": "South Africa",
+        "group": "A",
+        "model_win": 0.0001,
+        "pm_win": 0.0005,
+        "log_title_gap": -1.6094,
+        "dominant_tie": "win",
+        "dominant_tie_label": "the Final itself",
+        "contrib": {
+          "QF": 0.2308,
+          "SF": -0.7164,
+          "Final": -1.5041,
+          "win": 1.5041
+        }
+      },
+      {
+        "team": "Saudi Arabia",
+        "group": "H",
+        "model_win": 0.0001,
+        "pm_win": 0.0005,
+        "log_title_gap": -1.6094,
+        "dominant_tie": "SF",
+        "dominant_tie_label": "QF tie (win to reach SF)",
+        "contrib": {
+          "R16": 0.5004,
+          "QF": -0.8275,
+          "SF": -1.2355,
+          "Final": -1.1787,
+          "win": 1.1787
+        }
+      },
+      {
+        "team": "Uzbekistan",
+        "group": "K",
+        "model_win": 0.0001,
+        "pm_win": 0.0005,
+        "log_title_gap": -1.6094,
+        "dominant_tie": "R16",
+        "dominant_tie_label": "R32 tie (win to reach R16)",
+        "contrib": {
+          "R16": -2.44,
+          "QF": 0.4487,
+          "SF": -0.9886,
+          "Final": -2.0794,
+          "win": 1.0986
+        }
+      },
+      {
+        "team": "United States",
+        "group": "D",
+        "model_win": 0.0063,
+        "pm_win": 0.0305,
+        "log_title_gap": -1.5772,
+        "dominant_tie": "win",
+        "dominant_tie_label": "the Final itself",
+        "contrib": {
+          "QF": -0.3441,
+          "SF": -0.321,
+          "Final": -0.1593,
+          "win": -0.5799
+        }
+      },
+      {
+        "team": "Uruguay",
+        "group": "H",
+        "model_win": 0.0068,
+        "pm_win": 0.0015,
+        "log_title_gap": 1.5115,
+        "dominant_tie": "win",
+        "dominant_tie_label": "the Final itself",
+        "contrib": {
+          "R16": 0.0772,
+          "QF": 0.076,
+          "SF": 0.0987,
+          "Final": -0.3378,
+          "win": 1.2907
+        }
+      },
+      {
+        "team": "Iran",
+        "group": "G",
+        "model_win": 0.0022,
+        "pm_win": 0.0005,
+        "log_title_gap": 1.4816,
+        "dominant_tie": "Final",
+        "dominant_tie_label": "SF tie (win to reach Final)",
+        "contrib": {
+          "R16": 0.3445,
+          "QF": 0.1856,
+          "SF": -0.3484,
+          "Final": 0.6491,
+          "win": 0.3719
+        }
+      },
+      {
+        "team": "Algeria",
+        "group": "J",
+        "model_win": 0.0017,
+        "pm_win": 0.0005,
+        "log_title_gap": 1.2238,
+        "dominant_tie": "Final",
+        "dominant_tie_label": "SF tie (win to reach Final)",
+        "contrib": {
+          "R16": 0.0865,
+          "QF": 0.1954,
+          "SF": -0.0894,
+          "Final": 0.8365,
+          "win": -0.0791
+        }
+      },
+      {
+        "team": "Norway",
+        "group": "I",
+        "model_win": 0.0101,
+        "pm_win": 0.0315,
+        "log_title_gap": -1.1375,
+        "dominant_tie": "QF",
+        "dominant_tie_label": "R16 tie (win to reach QF)",
+        "contrib": {
+          "QF": -0.4514,
+          "SF": -0.2288,
+          "Final": -0.0442,
+          "win": -0.3315
+        }
+      },
+      {
+        "team": "Colombia",
+        "group": "K",
+        "model_win": 0.0474,
+        "pm_win": 0.0165,
+        "log_title_gap": 1.0553,
+        "dominant_tie": "win",
+        "dominant_tie_label": "the Final itself",
+        "contrib": {
+          "QF": 0.1373,
+          "SF": 0.323,
+          "Final": 0.0217,
+          "win": 0.4511
+        }
+      },
+      {
+        "team": "Croatia",
+        "group": "L",
+        "model_win": 0.0118,
+        "pm_win": 0.0045,
+        "log_title_gap": 0.964,
+        "dominant_tie": "win",
+        "dominant_tie_label": "the Final itself",
+        "contrib": {
+          "R16": 0.095,
+          "QF": 0.1505,
+          "SF": 0.011,
+          "Final": -0.1605,
+          "win": 0.706
+        }
+      },
+      {
+        "team": "Brazil",
+        "group": "C",
+        "model_win": 0.1348,
+        "pm_win": 0.0555,
+        "log_title_gap": 0.8874,
+        "dominant_tie": "win",
+        "dominant_tie_label": "the Final itself",
+        "contrib": {
+          "QF": 0.1078,
+          "SF": 0.1779,
+          "Final": 0.0871,
+          "win": 0.4601
+        }
+      },
+      {
+        "team": "Senegal",
+        "group": "I",
+        "model_win": 0.0011,
+        "pm_win": 0.0025,
+        "log_title_gap": -0.821,
+        "dominant_tie": "Final",
+        "dominant_tie_label": "SF tie (win to reach Final)",
+        "contrib": {
+          "R16": -0.2364,
+          "QF": 0.1747,
+          "SF": -0.2262,
+          "Final": -0.3106,
+          "win": -0.1278
+        }
+      },
+      {
+        "team": "Belgium",
+        "group": "G",
+        "model_win": 0.0268,
+        "pm_win": 0.0125,
+        "log_title_gap": 0.7627,
+        "dominant_tie": "Final",
+        "dominant_tie_label": "SF tie (win to reach Final)",
+        "contrib": {
+          "R16": 0.0547,
+          "QF": 0.2685,
+          "SF": 0.1063,
+          "Final": 0.3803,
+          "win": -0.0609
+        }
+      },
+      {
+        "team": "Ecuador",
+        "group": "E",
+        "model_win": 0.0027,
+        "pm_win": 0.0055,
+        "log_title_gap": -0.7115,
+        "dominant_tie": "Final",
+        "dominant_tie_label": "SF tie (win to reach Final)",
+        "contrib": {
+          "QF": 0.2365,
+          "SF": -0.4365,
+          "Final": 0.7072,
+          "win": 0.0225
+        }
+      },
+      {
+        "team": "France",
+        "group": "I",
+        "model_win": 0.0946,
+        "pm_win": 0.1895,
+        "log_title_gap": -0.6947,
+        "dominant_tie": "Final",
+        "dominant_tie_label": "SF tie (win to reach Final)",
+        "contrib": {
+          "QF": -0.188,
+          "SF": -0.0424,
+          "Final": -0.1986,
+          "win": -0.1098
+        }
+      },
+      {
+        "team": "Ivory Coast",
+        "group": "E",
+        "model_win": 0.0018,
+        "pm_win": 0.0035,
+        "log_title_gap": -0.665,
+        "dominant_tie": "Final",
+        "dominant_tie_label": "SF tie (win to reach Final)",
+        "contrib": {
+          "QF": -0.4667,
+          "SF": -0.009,
+          "Final": -0.8424,
+          "win": 0.4836
+        }
+      }
+    ],
+    "title_attribution_contenders": [
+      {
+        "team": "United States",
+        "group": "D",
+        "model_win": 0.0063,
+        "pm_win": 0.0305,
+        "log_title_gap": -1.5772,
+        "dominant_tie": "win",
+        "dominant_tie_label": "the Final itself",
+        "contrib": {
+          "QF": -0.3441,
+          "SF": -0.321,
+          "Final": -0.1593,
+          "win": -0.5799
+        }
+      },
+      {
+        "team": "Norway",
+        "group": "I",
+        "model_win": 0.0101,
+        "pm_win": 0.0315,
+        "log_title_gap": -1.1375,
+        "dominant_tie": "QF",
+        "dominant_tie_label": "R16 tie (win to reach QF)",
+        "contrib": {
+          "QF": -0.4514,
+          "SF": -0.2288,
+          "Final": -0.0442,
+          "win": -0.3315
+        }
+      },
+      {
+        "team": "Brazil",
+        "group": "C",
+        "model_win": 0.1348,
+        "pm_win": 0.0555,
+        "log_title_gap": 0.8874,
+        "dominant_tie": "win",
+        "dominant_tie_label": "the Final itself",
+        "contrib": {
+          "QF": 0.1078,
+          "SF": 0.1779,
+          "Final": 0.0871,
+          "win": 0.4601
+        }
+      },
+      {
+        "team": "France",
+        "group": "I",
+        "model_win": 0.0946,
+        "pm_win": 0.1895,
+        "log_title_gap": -0.6947,
+        "dominant_tie": "Final",
+        "dominant_tie_label": "SF tie (win to reach Final)",
+        "contrib": {
+          "QF": -0.188,
+          "SF": -0.0424,
+          "Final": -0.1986,
+          "win": -0.1098
+        }
+      },
+      {
+        "team": "Portugal",
+        "group": "K",
+        "model_win": 0.0578,
+        "pm_win": 0.0835,
+        "log_title_gap": -0.3679,
+        "dominant_tie": "win",
+        "dominant_tie_label": "the Final itself",
+        "contrib": {
+          "R16": -0.0653,
+          "QF": -0.1009,
+          "SF": -0.0462,
+          "Final": -0.051,
+          "win": -0.1049
+        }
+      },
+      {
+        "team": "Germany",
+        "group": "E",
+        "model_win": 0.0563,
+        "pm_win": 0.0465,
+        "log_title_gap": 0.1912,
+        "dominant_tie": "win",
+        "dominant_tie_label": "the Final itself",
+        "contrib": {
+          "QF": 0.1274,
+          "SF": 0.1154,
+          "Final": -0.2157,
+          "win": 0.2539
+        }
+      },
+      {
+        "team": "England",
+        "group": "L",
+        "model_win": 0.0857,
+        "pm_win": 0.1015,
+        "log_title_gap": -0.1692,
+        "dominant_tie": "SF",
+        "dominant_tie_label": "QF tie (win to reach SF)",
+        "contrib": {
+          "R16": -0.0782,
+          "QF": -0.0619,
+          "SF": -0.09,
+          "Final": -0.0252,
+          "win": 0.0836
+        }
+      },
+      {
+        "team": "Argentina",
+        "group": "J",
+        "model_win": 0.1732,
+        "pm_win": 0.1515,
+        "log_title_gap": 0.1339,
+        "dominant_tie": "Final",
+        "dominant_tie_label": "SF tie (win to reach Final)",
+        "contrib": {
+          "QF": -0.0276,
+          "SF": 0.0141,
+          "Final": 0.08,
+          "win": 0.053
+        }
+      },
+      {
+        "team": "Spain",
+        "group": "H",
+        "model_win": 0.1563,
+        "pm_win": 0.1375,
+        "log_title_gap": 0.1282,
+        "dominant_tie": "win",
+        "dominant_tie_label": "the Final itself",
+        "contrib": {
+          "R16": -0.0734,
+          "QF": -0.0833,
+          "SF": 0.0578,
+          "Final": 0.0809,
+          "win": 0.1457
+        }
+      },
+      {
+        "team": "Netherlands",
+        "group": "F",
+        "model_win": 0.0518,
+        "pm_win": 0.0575,
+        "log_title_gap": -0.1044,
+        "dominant_tie": "Final",
+        "dominant_tie_label": "SF tie (win to reach Final)",
+        "contrib": {
+          "QF": -0.0061,
+          "SF": 0.068,
+          "Final": -0.0879,
+          "win": 0.0572
+        }
+      }
+    ],
+    "dominant_tie_tally": {
+      "R16": 1,
+      "QF": 2,
+      "SF": 2,
+      "Final": 17,
+      "win": 15
+    },
+    "title_longshot_scatter": [
+      {
+        "team": "South Korea",
+        "pm_win": 0.0005,
+        "model_win": 0.0036
+      },
+      {
+        "team": "Iran",
+        "pm_win": 0.0005,
+        "model_win": 0.0022
+      },
+      {
+        "team": "Algeria",
+        "pm_win": 0.0005,
+        "model_win": 0.0017
+      },
+      {
+        "team": "Scotland",
+        "pm_win": 0.0005,
+        "model_win": 0.0008
+      },
+      {
+        "team": "South Africa",
+        "pm_win": 0.0005,
+        "model_win": 0.0001
+      },
+      {
+        "team": "Saudi Arabia",
+        "pm_win": 0.0005,
+        "model_win": 0.0001
+      },
+      {
+        "team": "Uzbekistan",
+        "pm_win": 0.0005,
+        "model_win": 0.0001
+      },
+      {
+        "team": "New Zealand",
+        "pm_win": 0.0005,
+        "model_win": 0.0
+      },
+      {
+        "team": "Iraq",
+        "pm_win": 0.0005,
+        "model_win": 0.0
+      },
+      {
+        "team": "DR Congo",
+        "pm_win": 0.0005,
+        "model_win": 0.0
+      },
+      {
+        "team": "Uruguay",
+        "pm_win": 0.0015,
+        "model_win": 0.0068
+      },
+      {
+        "team": "Australia",
+        "pm_win": 0.0015,
+        "model_win": 0.0025
+      },
+      {
+        "team": "Paraguay",
+        "pm_win": 0.0015,
+        "model_win": 0.0018
+      },
+      {
+        "team": "Bosnia and Herzegovina",
+        "pm_win": 0.0015,
+        "model_win": 0.0003
+      },
+      {
+        "team": "Ghana",
+        "pm_win": 0.0015,
+        "model_win": 0.0003
+      },
+      {
+        "team": "Cape Verde",
+        "pm_win": 0.0015,
+        "model_win": 0.0001
+      },
+      {
+        "team": "Austria",
+        "pm_win": 0.0025,
+        "model_win": 0.0047
+      },
+      {
+        "team": "Sweden",
+        "pm_win": 0.0025,
+        "model_win": 0.003
+      },
+      {
+        "team": "Egypt",
+        "pm_win": 0.0025,
+        "model_win": 0.0026
+      },
+      {
+        "team": "Canada",
+        "pm_win": 0.0025,
+        "model_win": 0.0015
+      },
+      {
+        "team": "Senegal",
+        "pm_win": 0.0025,
+        "model_win": 0.0011
+      },
+      {
+        "team": "Ivory Coast",
+        "pm_win": 0.0035,
+        "model_win": 0.0018
+      },
+      {
+        "team": "Croatia",
+        "pm_win": 0.0045,
+        "model_win": 0.0118
+      },
+      {
+        "team": "Ecuador",
+        "pm_win": 0.0055,
+        "model_win": 0.0027
+      },
+      {
+        "team": "Switzerland",
+        "pm_win": 0.0085,
+        "model_win": 0.0129
+      },
+      {
+        "team": "Belgium",
+        "pm_win": 0.0125,
+        "model_win": 0.0268
+      },
+      {
+        "team": "Mexico",
+        "pm_win": 0.0125,
+        "model_win": 0.0108
+      },
+      {
+        "team": "Japan",
+        "pm_win": 0.0135,
+        "model_win": 0.0087
+      },
+      {
+        "team": "Morocco",
+        "pm_win": 0.0155,
+        "model_win": 0.0163
+      },
+      {
+        "team": "Colombia",
+        "pm_win": 0.0165,
+        "model_win": 0.0474
+      },
+      {
+        "team": "United States",
+        "pm_win": 0.0305,
+        "model_win": 0.0063
+      },
+      {
+        "team": "Norway",
+        "pm_win": 0.0315,
+        "model_win": 0.0101
+      },
+      {
+        "team": "Germany",
+        "pm_win": 0.0465,
+        "model_win": 0.0563
+      },
+      {
+        "team": "Brazil",
+        "pm_win": 0.0555,
+        "model_win": 0.1348
+      },
+      {
+        "team": "Netherlands",
+        "pm_win": 0.0575,
+        "model_win": 0.0518
+      },
+      {
+        "team": "Portugal",
+        "pm_win": 0.0835,
+        "model_win": 0.0578
+      },
+      {
+        "team": "England",
+        "pm_win": 0.1015,
+        "model_win": 0.0857
+      },
+      {
+        "team": "Spain",
+        "pm_win": 0.1375,
+        "model_win": 0.1563
+      },
+      {
+        "team": "Argentina",
+        "pm_win": 0.1515,
+        "model_win": 0.1732
+      },
+      {
+        "team": "France",
+        "pm_win": 0.1895,
+        "model_win": 0.0946
+      }
+    ]
+  },
+  "validation": {
+    "walk_forward": "Capture PM advancement rung prices daily (snapshot, not just the live overwrite). For each closed tie, grade the backed-out PM conditional and the model conditional with a Brier/log score; the edge is CONFIRMED only if model conditionals beat PM conditionals out-of-sample across >=40 graded ties, and the dominant-tie attribution predicts which combos actually paid.",
+    "current_sample": "1 cross-section, 40 teams with a PM chain, 40 full chains — insufficient for significance."
+  }
+}

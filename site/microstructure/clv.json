@@ -1,0 +1,292 @@
+{
+  "key": "clv",
+  "title": "Closing Line Value & Early-Price Generosity",
+  "updated_at": "2026-06-26T16:42:25.217924+00:00",
+  "window": {
+    "from": "2026-06-11T13:27:30.716212+00:00",
+    "to": "2026-06-23T06:52:27.484258+00:00",
+    "matches": 72
+  },
+  "data_caveat": "Single source (theoddsapi), ~12-day window, 72 matches. Early anchor = nearest capture to T-24h within +/-8h; consensus close = Shin-devigged mean fair prob across all books at the last pre-kickoff capture. Ledger CLV is n=25 (indicative, not significant). No out-of-sample / future-match validation yet.",
+  "early_generosity": {
+    "ranking": [
+      {
+        "book": "betfair_ex_uk",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -1.765,
+        "median_early_edge_pct": -0.446,
+        "se_pct": 0.768,
+        "pct_early_beats_close": 36.5,
+        "mean_close_vs_consensus_pct": -1.244,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "matchbook",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -1.855,
+        "median_early_edge_pct": -0.446,
+        "se_pct": 0.776,
+        "pct_early_beats_close": 39.7,
+        "mean_close_vs_consensus_pct": -1.234,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "smarkets",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -2.238,
+        "median_early_edge_pct": -0.795,
+        "se_pct": 0.8,
+        "pct_early_beats_close": 25.4,
+        "mean_close_vs_consensus_pct": -1.742,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "leovegas",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -6.793,
+        "median_early_edge_pct": -5.253,
+        "se_pct": 0.918,
+        "pct_early_beats_close": 6.3,
+        "mean_close_vs_consensus_pct": -7.022,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "casumo",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -6.793,
+        "median_early_edge_pct": -5.253,
+        "se_pct": 0.918,
+        "pct_early_beats_close": 6.3,
+        "mean_close_vs_consensus_pct": -6.732,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "grosvenor",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -8.195,
+        "median_early_edge_pct": -6.418,
+        "se_pct": 0.958,
+        "pct_early_beats_close": 6.3,
+        "mean_close_vs_consensus_pct": -8.914,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "unibet_uk",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -8.744,
+        "median_early_edge_pct": -5.412,
+        "se_pct": 1.099,
+        "pct_early_beats_close": 7.9,
+        "mean_close_vs_consensus_pct": -8.582,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "betvictor",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -9.074,
+        "median_early_edge_pct": -6.546,
+        "se_pct": 0.994,
+        "pct_early_beats_close": 1.6,
+        "mean_close_vs_consensus_pct": -8.342,
+        "n_close_obs": 204,
+        "thin": false
+      },
+      {
+        "book": "livescorebet",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -9.271,
+        "median_early_edge_pct": -7.336,
+        "se_pct": 0.958,
+        "pct_early_beats_close": 4.8,
+        "mean_close_vs_consensus_pct": -9.629,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "virginbet",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -9.271,
+        "median_early_edge_pct": -7.336,
+        "se_pct": 0.958,
+        "pct_early_beats_close": 4.8,
+        "mean_close_vs_consensus_pct": -9.633,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "coral",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -9.739,
+        "median_early_edge_pct": -5.976,
+        "se_pct": 1.349,
+        "pct_early_beats_close": 6.3,
+        "mean_close_vs_consensus_pct": -9.476,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "betway",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -10.039,
+        "median_early_edge_pct": -5.988,
+        "se_pct": 1.143,
+        "pct_early_beats_close": 6.3,
+        "mean_close_vs_consensus_pct": -10.453,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "paddypower",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -10.194,
+        "median_early_edge_pct": -7.616,
+        "se_pct": 1.17,
+        "pct_early_beats_close": 1.6,
+        "mean_close_vs_consensus_pct": -9.284,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "betfred_uk",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -10.315,
+        "median_early_edge_pct": -7.522,
+        "se_pct": 1.304,
+        "pct_early_beats_close": 1.6,
+        "mean_close_vs_consensus_pct": -9.684,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "skybet",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -10.521,
+        "median_early_edge_pct": -7.166,
+        "se_pct": 1.447,
+        "pct_early_beats_close": 0.0,
+        "mean_close_vs_consensus_pct": -9.634,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "ladbrokes_uk",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -11.046,
+        "median_early_edge_pct": -6.91,
+        "se_pct": 1.472,
+        "pct_early_beats_close": 4.8,
+        "mean_close_vs_consensus_pct": -10.33,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "boylesports",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -11.534,
+        "median_early_edge_pct": -8.563,
+        "se_pct": 1.299,
+        "pct_early_beats_close": 4.8,
+        "mean_close_vs_consensus_pct": -10.664,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "williamhill",
+        "n_early_obs": 51,
+        "mean_early_edge_pct": -11.563,
+        "median_early_edge_pct": -8.03,
+        "se_pct": 1.44,
+        "pct_early_beats_close": 5.9,
+        "mean_close_vs_consensus_pct": -11.161,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "sport888",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -12.807,
+        "median_early_edge_pct": -10.612,
+        "se_pct": 1.186,
+        "pct_early_beats_close": 1.6,
+        "mean_close_vs_consensus_pct": -12.472,
+        "n_close_obs": 216,
+        "thin": false
+      },
+      {
+        "book": "betfair_sb_uk",
+        "n_early_obs": 63,
+        "mean_early_edge_pct": -17.55,
+        "median_early_edge_pct": -18.101,
+        "se_pct": 1.251,
+        "pct_early_beats_close": 0.0,
+        "mean_close_vs_consensus_pct": -17.01,
+        "n_close_obs": 129,
+        "thin": false
+      }
+    ],
+    "total_matches": 72,
+    "matches_with_consensus_close": 72,
+    "total_early_obs": 1248,
+    "pooled_mean_early_edge_pct": -8.94,
+    "pooled_pct_early_beats_close": 8.7,
+    "early_lead_hours": 24.0,
+    "early_tol_hours": 8.0
+  },
+  "ledger_clv": {
+    "n": 25,
+    "mean_clv_pct": 0.342,
+    "median_clv_pct": 1.283,
+    "pct_beat_close": 56.0,
+    "n_pushes": 1,
+    "mean_roi_pos_clv": 11.7,
+    "n_pos_clv": 14,
+    "mean_roi_neg_clv": 118.89,
+    "n_neg_clv": 10,
+    "corr_clv_roi": -0.284,
+    "histogram": [
+      {
+        "lo_pct": -100.0,
+        "hi_pct": -10.0,
+        "count": 1
+      },
+      {
+        "lo_pct": -10.0,
+        "hi_pct": -5.0,
+        "count": 2
+      },
+      {
+        "lo_pct": -5.0,
+        "hi_pct": -1.0,
+        "count": 6
+      },
+      {
+        "lo_pct": -1.0,
+        "hi_pct": 1.0,
+        "count": 3
+      },
+      {
+        "lo_pct": 1.0,
+        "hi_pct": 5.0,
+        "count": 8
+      },
+      {
+        "lo_pct": 5.0,
+        "hi_pct": 10.0,
+        "count": 4
+      },
+      {
+        "lo_pct": 10.0,
+        "hi_pct": 100.0,
+        "count": 1
+      }
+    ],
+    "caveat": "n=25 settled bets with CLV \u2014 far below significance; directional only."
+  }
+}
