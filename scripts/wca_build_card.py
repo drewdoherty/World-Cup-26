@@ -36,6 +36,25 @@ def _load_dotenv(path: str = ".env") -> None:
 # Main
 # ---------------------------------------------------------------------------
 
+def _parse_venue_balances(spec: str) -> dict:
+    """Parse 'smarkets=1000,betfair=500,polymarket=1500' into a float dict.
+
+    Tolerant: blank -> {}, unparseable entries skipped. Keys are lower-cased so
+    they match the venue tags (smarkets/betfair/polymarket).
+    """
+    out: dict = {}
+    for part in (spec or "").split(","):
+        part = part.strip()
+        if not part or "=" not in part:
+            continue
+        key, _, val = part.partition("=")
+        try:
+            out[key.strip().lower()] = float(val.strip())
+        except ValueError:
+            continue
+    return out
+
+
 def want_goalscorers_card(goalscorers_out, goalscorers_n, skip_scorers, goalscorers_only) -> bool:
     """Whether this run should (re)build the /goalscorers card.
 
@@ -126,10 +145,30 @@ def main() -> None:
         type=float,
         default=None,
         help=(
-            "Override the sportsbook-pool bankroll in GBP. By default the "
-            "bankroll is resolved from the ledger's settled-with-close CLV via "
-            "the pre-registered Kelly ladder (rungs £1000/£2500/£5000); pass "
-            "this to force a flat figure instead."
+            "Override the sizing base in GBP. By default the sizing base is the "
+            "CLV-earned Kelly-ladder rung (NOT cash-on-hand), further floored in "
+            "the rung-0 negative-CLV regime; pass this to force a flat figure."
+        ),
+    )
+    parser.add_argument(
+        "--actual-capital",
+        type=float,
+        default=None,
+        help=(
+            "Total ACTUAL unpartitioned capital in GBP (held as £/$ across "
+            "Smarkets/Betfair/Polymarket). An INPUT reported in the footer, "
+            "never the sizing base. Defaults to the documented £3,000 (or "
+            "WCA_ACTUAL_CAPITAL env)."
+        ),
+    )
+    parser.add_argument(
+        "--venue-balances",
+        default=None,
+        help=(
+            "Per-venue available balances as 'smarkets=1000,betfair=500,"
+            "polymarket=1500' (£ for Smarkets/Betfair, $ for Polymarket). An "
+            "INPUT used to split the deployment, not to size it. Defaults to "
+            "WCA_VENUE_BALANCES env, else empty."
         ),
     )
     parser.add_argument(
@@ -177,7 +216,8 @@ def main() -> None:
             build_card,
             build_score_cards,
             apply_daily_exposure_caps,
-            format_card,
+            rank_card,
+            format_ranked_card,
             format_scores,
             resolve_pool_bankroll,
             PoolConfig,
@@ -230,13 +270,30 @@ def main() -> None:
     fixtures_meta = results
 
     # ------------------------------------------------------------------
-    # Resolve the sportsbook-pool bankroll from the ledger via the Kelly
-    # ladder (rungs £1000/£2500/£5000, earned by settled-with-close CLV).
-    # --bankroll, when supplied, overrides the figure but the rung the
-    # evidence would have earned is still reported.
+    # Resolve the SIZING BASE from the ledger via the Kelly ladder (rungs
+    # £1500/£2500/£5000, earned by settled-with-close CLV), floored in the
+    # rung-0 negative-CLV regime. Actual capital (£3,000) and per-venue
+    # balances are INPUTS reported in the footer, never the sizing base.
+    # --bankroll overrides the base but the earned rung is still reported.
     # ------------------------------------------------------------------
+    from wca.card import DEFAULT_ACTUAL_CAPITAL_GBP
+
+    actual_capital = args.actual_capital
+    if actual_capital is None:
+        env_cap = os.environ.get("WCA_ACTUAL_CAPITAL", "").strip()
+        actual_capital = float(env_cap) if env_cap else DEFAULT_ACTUAL_CAPITAL_GBP
+
+    venue_balances = _parse_venue_balances(
+        args.venue_balances or os.environ.get("WCA_VENUE_BALANCES", "")
+    )
+
     try:
-        pool_bank = resolve_pool_bankroll(args.db, override=args.bankroll)
+        pool_bank = resolve_pool_bankroll(
+            args.db,
+            override=args.bankroll,
+            actual_capital=actual_capital,
+            venue_balances=venue_balances,
+        )
     except Exception as exc:
         print("ERROR: bankroll resolution failed: %s" % exc, file=sys.stderr)
         sys.exit(1)
@@ -264,16 +321,25 @@ def main() -> None:
         pools = [pool]
 
         try:
-            recs = build_card(models, odds_df, pools, fixtures_meta=fixtures_meta)
+            # build_card gates +EV outcomes (with the further-out tilt baked in,
+            # rule 3) and tags each with venue + selection category; rank_card
+            # then applies the selection rule (rule 2): hit-probability ranking
+            # plus the mispriced-minnow longshot CUT.
+            recs = build_card(
+                models, odds_df, pools, fixtures_meta=fixtures_meta, now=now_str,
+            )
             recs = apply_daily_exposure_caps(recs, pools)
+            ranked = rank_card(recs)
             score_cards = build_score_cards(models, odds_df, fixtures_meta)
         except Exception as exc:
             print("ERROR: card generation failed: %s" % exc, file=sys.stderr)
             sys.exit(1)
 
+        # Scorelines (and any scorer/SGM markets) are REFERENCE-ONLY per the
+        # Phase-2 roadmap — shown with models + fair odds but never sized.
         card_text = (
-            format_card(recs, pools)
-            + "\n\n_Pool: %s_\n\n" % pool_bank.reason
+            format_ranked_card(ranked, pool, bank=pool_bank)
+            + "\n\n*— REFERENCE, NOT SIZED (models + fair odds only) —*\n"
             + format_scores(score_cards)
         )
 
