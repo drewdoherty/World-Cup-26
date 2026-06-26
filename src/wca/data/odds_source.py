@@ -83,7 +83,13 @@ def get_odds(
     an empty (correctly-shaped) frame and ``None`` quota — the caller must treat
     an empty frame as "data-pending", not an error.
     """
-    merge = os.environ.get("WCA_ODDS_MERGE", "").strip().lower() in ("1", "true", "yes")
+    _merge_raw = os.environ.get("WCA_ODDS_MERGE", "").strip().lower()
+    # "bestprice"/"union": keep EVERY source's rows so downstream best_price can
+    # pick the better venue per market/outcome (Betfair vs Polymarket, labelled,
+    # fee-adjusted). "1"/"gapfill": legacy gap-fill (sharper source wins a
+    # fixture; later sources only fill fixtures it lacks).
+    union = _merge_raw in ("bestprice", "union", "all", "both")
+    merge = union or _merge_raw in ("1", "true", "yes", "gapfill")
     last_quota: object = None
     kept_quota: object = None
     frames: List[pd.DataFrame] = []
@@ -114,16 +120,20 @@ def get_odds(
             if not merge:
                 logger.info("odds source %s -> %d rows", name, len(df))
                 return df, q
-            # Gap-fill: keep earlier (sharper) source's fixtures; only add a
-            # later source's rows for fixtures not already covered. Avoids two
-            # books on one fixture (which would let the card cherry-pick the
-            # softer line) while still maximising fixture coverage.
-            added = _gap_fill(frames, df)
+            if union:
+                # Best-price mode: keep ALL of this source's rows so both venues
+                # coexist on a fixture and best_price chooses the better (fee-
+                # adjusted) line per outcome, labelling its venue.
+                added = df
+            else:
+                # Gap-fill: keep earlier (sharper) source's fixtures; only add a
+                # later source's rows for fixtures not already covered.
+                added = _gap_fill(frames, df)
             frames.append(added)
             if kept_quota is None:
                 kept_quota = q
-            logger.info("odds merge: %s added %d rows for new fixtures",
-                        name, len(added))
+            logger.info("odds merge(%s): %s added %d rows",
+                        "union" if union else "gapfill", name, len(added))
         if q is not None:
             last_quota = q
     if merge and frames:

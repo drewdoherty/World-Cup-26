@@ -627,14 +627,83 @@ def _index_odds(odds_df: pd.DataFrame) -> Dict[str, Dict[str, object]]:
     return fixtures
 
 
+# Human venue labels for the bookmaker_key the odds feed carries. Unknown keys
+# (e.g. synthetic test books) fall through unchanged so existing tests are
+# unaffected and any new venue still renders *something* sensible.
+VENUE_LABELS: Dict[str, str] = {
+    "betfair_ex": "Betfair",
+    "polymarket": "Polymarket",
+    "smarkets": "Smarkets",
+}
+
+# Effective commission charged on net winnings per venue, used to fee-adjust the
+# price before BOTH best-venue selection and edge/stake. Betfair Exchange takes
+# a market-base commission on winnings (default 2%, overridable); Polymarket has
+# no per-trade fee. Unknown books default to 0.0 so synthetic-book tests (and any
+# already-net source) keep their raw odds and edges.
+_DEFAULT_COMMISSION: Dict[str, float] = {
+    "betfair_ex": 0.02,
+    "polymarket": 0.0,
+}
+
+
+def venue_label(book: Optional[str]) -> str:
+    """Map a bookmaker_key to a clean venue label for display."""
+    if not book:
+        return "—"
+    return VENUE_LABELS.get(book, book)
+
+
+def _commission(book: Optional[str]) -> float:
+    """Resolve the net-winnings commission for a venue (env override wins).
+
+    ``WCA_BETFAIR_COMMISSION`` / ``WCA_PM_FEE`` let the operator tune the real
+    figure (Betfair's base rate varies by market and discount); everything else
+    is fee-free by default.
+    """
+    if book == "betfair_ex":
+        raw = os.environ.get("WCA_BETFAIR_COMMISSION", "").strip()
+    elif book == "polymarket":
+        raw = os.environ.get("WCA_PM_FEE", "").strip()
+    else:
+        raw = ""
+    if raw:
+        try:
+            return max(0.0, min(0.5, float(raw)))
+        except ValueError:
+            pass
+    return _DEFAULT_COMMISSION.get(book or "", 0.0)
+
+
+def net_odds(book: Optional[str], gross: float) -> float:
+    """Fee-adjusted decimal odds: payout net of the venue's winnings commission.
+
+    A back at decimal ``gross`` returns ``gross-1`` profit per unit; commission
+    ``c`` is taken on that profit, so the effective decimal is
+    ``1 + (gross-1)*(1-c)``. Used for edge/stake so a nominally bigger price that
+    is worse after fees does not win the best-price comparison.
+    """
+    if gross is None or gross <= 1.0:
+        return gross
+    return 1.0 + (gross - 1.0) * (1.0 - _commission(book))
+
+
 def best_price(books: Dict[str, Dict[str, float]], outcome: str) -> Tuple[Optional[str], float]:
-    """Best (max) decimal odds for an outcome across books, with the book name."""
-    best_book, best = None, 0.0
+    """Best decimal odds for an outcome across books, with the book name.
+
+    Selection is by **fee-adjusted** odds (so a soft venue with a higher gross
+    price but worse net payout cannot win), but the returned price is the
+    **gross** decimal — the number actually shown/backed at that venue.
+    """
+    best_book, best_net, best_gross = None, 0.0, 0.0
     for book, prices in books.items():
         o = prices.get(outcome)
-        if o is not None and o > best:
-            best, best_book = o, book
-    return best_book, best
+        if o is None or o <= 1.0:
+            continue
+        net = net_odds(book, o)
+        if net > best_net:
+            best_net, best_gross, best_book = net, o, book
+    return best_book, best_gross
 
 
 @dataclass
@@ -901,7 +970,10 @@ def build_card(
             if book is None or odds <= 1.0:
                 continue
             p = fb.blended[outcome]
-            raw_e = kelly_mod.edge(p, odds)
+            # Edge and sizing use the fee-adjusted (net) price of the chosen
+            # venue; the displayed best_odds stays gross (the screen price).
+            net = net_odds(book, odds)
+            raw_e = kelly_mod.edge(p, net)
             # Further-out tilt (rule 3): markets are softest furthest from
             # kickoff. A large model-vs-market edge on an IMMINENT fixture is
             # more likely model error than true mispricing, so DISCOUNT the edge
@@ -912,7 +984,7 @@ def build_card(
             stakes: Dict[str, float] = {}
             for pool in pools:
                 stakes[pool.name] = kelly_mod.stake(
-                    p, odds, pool.bankroll,
+                    p, net, pool.bankroll,
                     fraction=pool.kelly_fraction, cap=pool.per_bet_cap,
                 )
             recs.append(
@@ -922,7 +994,7 @@ def build_card(
                     commence_time=commence,
                     selection=outcome,
                     selection_team=team_map[outcome],
-                    best_book=book,
+                    best_book=venue_label(book),
                     best_odds=odds,
                     model_prob=p,
                     market_prob=fb.mkt_map[outcome],
