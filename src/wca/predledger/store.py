@@ -1,554 +1,649 @@
-"""SQLite-backed prediction ledger for the World Cup Alpha platform.
-
-Tracks model predictions (paper and bet-linked) separately from the placed-bet
-ledger in ``wca.ledger.store``.  Predictions can exist without a corresponding
-bet (paper tracking) or be linked to a bet after placement.
+"""Schema, writers and read helpers for the prediction ledger.
 
 Tables
 ------
 predictions
-    One row per (match_id|stage, market, selection, line) tuple.
-    ``match_id`` is NULL for futures/outright markets, which are keyed on
-    ``stage`` instead.  ``line = -1`` is the sentinel for no-line markets
-    (1X2, BTTS, etc.).  ``placed = 1`` once a bet is linked via
-    :func:`link_bet`.
-accas
-    Accumulator header — one row per unique ordered set of prediction legs.
+    One row per (build, fixture, market, selection, line, stage).  The primary
+    key ``prediction_id`` is a deterministic sha1 of those identity columns, so
+    re-emitting the same prediction is an idempotent upsert (one row, never a
+    duplicate).
 acca_legs
-    Junction between accas and predictions (one row per leg).
-schema_meta
-    Key/value metadata (schema version, created timestamp).
+    Maps an accumulator id to its component prediction rows.
+
+Views
+-----
+v_model_book
+    ``predictions LEFT JOIN bets`` with a ``book`` tag of ``paper`` (no bet
+    linked) or ``realized`` (a real bet placed).  Lets one query compare the
+    paper model book against the money the model actually moved.
+v_realized_book
+    The realized subset of ``v_model_book`` (rows with a linked bet).
 
 Closing-line value (CLV)
 ------------------------
-Same return-ratio convention as ``wca.ledger.store``:
+For the prediction ledger CLV is computed *fair-vs-fair*::
 
-    CLV% = (offered_odds / closing_odds) - 1
+    clv = model_fair_odds / closing_odds - 1
 
-Positive = beat the close.  ``clv`` stays NULL when ``offered_odds`` is NULL
-(the prediction was recorded without a market price).
+``model_fair_odds`` is ``1 / model_prob`` (the price the model would have made)
+and ``closing_odds`` is the de-vigged fair consensus close — both vig-free, so
+the ratio is an honest measure of whether the model's price beat the market's
+final fair price.  CLV is ``NULL`` (never ``0``) when no close exists.
 
-Dev-box guard
--------------
-Writing to a file whose basename is ``wca.db`` raises :class:`PermissionError`
-unless the environment variable ``WCA_ALLOW_PROD_DB=1`` is set.  This prevents
-accidental mutation of the canonical production database from a dev machine.
-Read-only helpers (``get_prediction``, ``model_book``, etc.) are not guarded.
+Safety
+------
+``data/wca.db`` is the production ledger and is read-only on this box.  Every
+writer routes through :func:`_connect_write`, which refuses any database whose
+basename is ``wca.db`` unless ``WCA_ALLOW_PROD_DB`` is set in the environment.
 """
 
 from __future__ import annotations
 
-import datetime as _dt
 import hashlib
+import json
 import os
 import sqlite3
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any, Dict, Iterable, List, Optional, Sequence
 
-from wca.ledger import store as _ledger_store
-from wca.ledger.store import _connect as _base_connect
+from wca.ledger.store import _connect as _ledger_connect
+
+# Default write target on this dev box.
+_DEFAULT_DB = "data/dev.db"
+
+# Markets that price a match-winner outcome and therefore carry a market
+# de-vig / edge / closing-line (everything else gets NULL market columns).
+_X12_MARKETS = frozenset({"1x2", "h2h", "match odds", "match winner"})
+
+_LEGS = ("home", "draw", "away")
 
 
 # ---------------------------------------------------------------------------
-# Helpers.
+# Production-DB write guard.
 # ---------------------------------------------------------------------------
 
-_DEFAULT_DB = "data/wca.db"
+
+def _is_prod_db(db_path: str) -> bool:
+    """True when *db_path* points at the production ledger (basename wca.db)."""
+    return os.path.basename(str(db_path)).lower() == "wca.db"
 
 
-def _connect(db_path: str) -> sqlite3.Connection:
-    conn = _base_connect(db_path)
+def _guard_db(db_path: str) -> None:
+    """Raise unless writing *db_path* is permitted on this box.
+
+    The production ledger ``data/wca.db`` (723 MB, real money) must never be
+    mutated from the dev box.  Set ``WCA_ALLOW_PROD_DB`` to override (the prod
+    box does); the test-suite asserts the refusal without the override.
+    """
+    if _is_prod_db(db_path) and not os.environ.get("WCA_ALLOW_PROD_DB"):
+        raise PermissionError(
+            "refusing to write production ledger %r from this box; set "
+            "WCA_ALLOW_PROD_DB=1 to override" % db_path
+        )
+
+
+def _connect_write(db_path: str) -> sqlite3.Connection:
+    """Guarded write connection (reuses ledger PRAGMA setup + busy_timeout)."""
+    _guard_db(db_path)
+    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+    conn = _ledger_connect(db_path)
     conn.execute("PRAGMA busy_timeout=5000")
     return conn
 
 
-def _pred_id(
-    match_id: Optional[str],
-    stage: str,
-    market: str,
-    selection: str,
-    line: float,
-) -> str:
-    """Deterministic SHA-256 hex digest (first 32 chars) for a prediction row."""
-    key = "|".join([match_id or "", stage, market, selection, "%.6f" % line])
-    return hashlib.sha256(key.encode()).hexdigest()[:32]
-
-
-def _acca_id(prediction_ids: List[str]) -> str:
-    """Deterministic SHA-256 hex digest for an ordered set of prediction legs."""
-    key = "|".join(sorted(prediction_ids))
-    return hashlib.sha256(key.encode()).hexdigest()[:32]
-
-
-def _check_prod_guard(db_path: str) -> None:
-    """Raise PermissionError when writing to wca.db without the env-var override."""
-    if os.path.basename(db_path) == "wca.db" and not os.environ.get("WCA_ALLOW_PROD_DB"):
-        raise PermissionError(
-            "refusing to write to %r on dev-box; set WCA_ALLOW_PROD_DB=1 to override"
-            % db_path
-        )
+def _connect_read(db_path: str) -> sqlite3.Connection:
+    """Read connection (no guard — reads are always safe)."""
+    conn = _ledger_connect(db_path)
+    conn.execute("PRAGMA busy_timeout=5000")
+    return conn
 
 
 # ---------------------------------------------------------------------------
-# Schema DDL.
+# Deterministic identity hashing.
+# ---------------------------------------------------------------------------
+
+
+def _norm(value: Any) -> str:
+    """Stable string form for an identity component (``None`` -> '')."""
+    if value is None:
+        return ""
+    if isinstance(value, float):
+        # -1.0 and -1 must hash identically; render canonically.
+        if value == int(value):
+            return str(int(value))
+        return repr(value)
+    return str(value)
+
+
+def prediction_id(
+    build_id: Any,
+    match_id: Any,
+    stage: Any,
+    market: Any,
+    selection: Any,
+    line: Any,
+) -> str:
+    """sha1(build_id|match_id|stage|market|selection|line)[:16] (hex)."""
+    raw = "|".join(
+        _norm(x) for x in (build_id, match_id, stage, market, selection, line)
+    )
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def acca_id(build_id: Any, pred_ids: Sequence[str]) -> str:
+    """Deterministic id for an accumulator from its (sorted) leg ids."""
+    raw = _norm(build_id) + "||" + "|".join(sorted(str(p) for p in pred_ids))
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
+
+
+# ---------------------------------------------------------------------------
+# Schema.
 # ---------------------------------------------------------------------------
 
 _DDL_PREDICTIONS = """
 CREATE TABLE IF NOT EXISTS predictions (
-    prediction_id   TEXT    PRIMARY KEY,
-    match_id        TEXT,
-    stage           TEXT    NOT NULL DEFAULT '',
-    market          TEXT    NOT NULL,
-    selection       TEXT    NOT NULL,
-    line            REAL    NOT NULL DEFAULT -1,
-    n_outcomes      INTEGER NOT NULL DEFAULT 2,
-    model_prob      REAL,
-    model_odds      REAL,
-    offered_odds    REAL,
-    devig_method    TEXT,
-    bet_id          INTEGER REFERENCES bets(id),
-    placed          INTEGER NOT NULL DEFAULT 0,
-    close_ts_utc    TEXT,
-    closing_odds    REAL,
-    clv             REAL,
-    outcome         TEXT,
-    result_ts_utc   TEXT,
-    ts_utc          TEXT    NOT NULL,
-    notes           TEXT
-)
-"""
-
-_DDL_ACCAS = """
-CREATE TABLE IF NOT EXISTS accas (
-    acca_id         TEXT    PRIMARY KEY,
-    ts_utc          TEXT    NOT NULL,
-    n_legs          INTEGER NOT NULL,
-    combined_odds   REAL,
-    placed          INTEGER NOT NULL DEFAULT 0
+    prediction_id       TEXT PRIMARY KEY,
+    build_id            TEXT,
+    ts_utc              TEXT,
+    match_id            TEXT,
+    fixture             TEXT,
+    kickoff_utc         TEXT,
+    market              TEXT,
+    selection           TEXT,
+    line                REAL DEFAULT -1,
+    stage               TEXT DEFAULT '',
+    n_outcomes          INTEGER,
+    model_prob          REAL,
+    model_fair_odds     REAL,
+    elo_prob            REAL,
+    dc_prob             REAL,
+    market_devig_prob   REAL,
+    market_best_odds    REAL,
+    market_book         TEXT,
+    devig_method        TEXT,
+    edge                REAL,
+    ev_per_unit         REAL,
+    bet_id              INTEGER,
+    placed              INTEGER DEFAULT 0,
+    closing_devig_prob  REAL,
+    closing_odds        REAL,
+    clv                 REAL,
+    close_ts            TEXT,
+    close_lag_seconds   INTEGER,
+    n_books_at_close    INTEGER,
+    close_is_prematch   INTEGER,
+    status              TEXT DEFAULT 'open',
+    settled_ts          TEXT,
+    settle_source       TEXT,
+    model_source        TEXT,
+    notes               TEXT
 )
 """
 
 _DDL_ACCA_LEGS = """
 CREATE TABLE IF NOT EXISTS acca_legs (
-    acca_id         TEXT    NOT NULL REFERENCES accas(acca_id),
-    leg_index       INTEGER NOT NULL,
-    prediction_id   TEXT    NOT NULL REFERENCES predictions(prediction_id),
-    PRIMARY KEY (acca_id, leg_index)
+    acca_id        TEXT,
+    prediction_id  TEXT,
+    build_id       TEXT,
+    bet_id         INTEGER,
+    PRIMARY KEY (acca_id, prediction_id)
 )
 """
 
-_DDL_SCHEMA_META = """
-CREATE TABLE IF NOT EXISTS schema_meta (
-    key     TEXT    PRIMARY KEY,
-    value   TEXT    NOT NULL
+# bets is owned by the money ledger; ensure it exists so the LEFT JOIN views
+# resolve even on a fresh dev.db that has no money ledger yet.
+_DDL_BETS_STUB = """
+CREATE TABLE IF NOT EXISTS bets (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts_utc              TEXT,
+    match_id            TEXT,
+    match_desc          TEXT,
+    market              TEXT,
+    selection           TEXT,
+    platform            TEXT,
+    decimal_odds        REAL,
+    stake               REAL,
+    model_prob          REAL,
+    market_prob_devig   REAL,
+    ev                  REAL,
+    kelly_fraction      REAL,
+    status              TEXT DEFAULT 'open',
+    settled_pl          REAL,
+    closing_odds        REAL,
+    clv                 REAL,
+    notes               TEXT,
+    account             TEXT,
+    source              TEXT,
+    settled_ts          TEXT
 )
 """
 
-_DDL_INDEXES = [
-    "CREATE INDEX IF NOT EXISTS idx_predictions_match ON predictions(match_id)",
-    "CREATE INDEX IF NOT EXISTS idx_predictions_market ON predictions(market, selection)",
-    "CREATE INDEX IF NOT EXISTS idx_predictions_stage ON predictions(stage)",
-    "CREATE INDEX IF NOT EXISTS idx_predictions_placed ON predictions(placed)",
-    "CREATE INDEX IF NOT EXISTS idx_acca_legs_pred ON acca_legs(prediction_id)",
-]
+_INDEXES = (
+    "CREATE INDEX IF NOT EXISTS ix_pred_build ON predictions(build_id)",
+    "CREATE INDEX IF NOT EXISTS ix_pred_match ON predictions(match_id)",
+    "CREATE INDEX IF NOT EXISTS ix_pred_market ON predictions(market)",
+    "CREATE INDEX IF NOT EXISTS ix_pred_status ON predictions(status)",
+    "CREATE INDEX IF NOT EXISTS ix_pred_bet ON predictions(bet_id)",
+    "CREATE INDEX IF NOT EXISTS ix_acca_acca ON acca_legs(acca_id)",
+    "CREATE INDEX IF NOT EXISTS ix_acca_pred ON acca_legs(prediction_id)",
+)
 
+# A prediction is "realized" when it carries a linked bet_id (placed=1).
 _DDL_V_MODEL_BOOK = """
 CREATE VIEW IF NOT EXISTS v_model_book AS
 SELECT
-    p.prediction_id,
-    p.match_id,
-    p.stage,
-    p.market,
-    p.selection,
-    p.line,
-    p.n_outcomes,
-    p.model_prob,
-    p.model_odds,
-    p.offered_odds,
-    p.devig_method,
-    p.placed,
-    p.ts_utc
+    p.*,
+    b.id            AS b_bet_id,
+    b.stake         AS b_stake,
+    b.decimal_odds  AS b_decimal_odds,
+    b.status        AS b_status,
+    b.settled_pl    AS b_settled_pl,
+    b.clv           AS b_clv,
+    CASE WHEN p.bet_id IS NULL THEN 'paper' ELSE 'realized' END AS book
 FROM predictions p
+LEFT JOIN bets b ON b.id = p.bet_id
 """
 
 _DDL_V_REALIZED_BOOK = """
 CREATE VIEW IF NOT EXISTS v_realized_book AS
-SELECT
-    p.prediction_id,
-    p.match_id,
-    p.stage,
-    p.market,
-    p.selection,
-    p.line,
-    p.n_outcomes,
-    p.model_prob,
-    p.model_odds,
-    p.offered_odds,
-    p.closing_odds,
-    p.clv,
-    p.outcome,
-    p.placed,
-    p.bet_id,
-    CASE WHEN p.placed = 1 THEN 'realized' ELSE 'paper' END AS book_type,
-    p.ts_utc,
-    p.result_ts_utc,
-    p.close_ts_utc
-FROM predictions p
+SELECT * FROM v_model_book WHERE book = 'realized'
 """
 
 
-# ---------------------------------------------------------------------------
-# Schema management.
-# ---------------------------------------------------------------------------
-
-
-def _init_schema(db_path: str) -> None:
-    """Create all predledger tables, indexes, and views if absent (no prod guard).
-
-    Purely additive — uses ``CREATE TABLE/INDEX/VIEW IF NOT EXISTS`` only.
-    Called by both :func:`ensure_schema` (public, guarded) and write functions.
-
-    ``predictions.bet_id`` carries a foreign key to ``bets(id)``.  Because the
-    base ``_connect`` enables ``PRAGMA foreign_keys=ON``, every INSERT into
-    ``predictions`` checks that the ``bets`` table exists — so on a fresh
-    database (e.g. an isolated test DB that only the predledger touches) we
-    must ensure the base ledger schema is present first, otherwise the very
-    first insert fails with ``no such table: bets``.  ``init_db`` is itself
-    idempotent (``CREATE TABLE IF NOT EXISTS``), so this is a no-op when the
-    ledger schema already exists.
-    """
-    _ledger_store.init_db(db_path)
-    with _connect(db_path) as conn:
+def ensure_schema(db_path: str = _DEFAULT_DB) -> None:
+    """Create tables, indexes and views (idempotent, safe to re-run)."""
+    with _connect_write(db_path) as conn:
+        conn.execute(_DDL_BETS_STUB)
         conn.execute(_DDL_PREDICTIONS)
-        conn.execute(_DDL_ACCAS)
         conn.execute(_DDL_ACCA_LEGS)
-        conn.execute(_DDL_SCHEMA_META)
-        for ddl in _DDL_INDEXES:
+        for ddl in _INDEXES:
             conn.execute(ddl)
         conn.execute(_DDL_V_MODEL_BOOK)
         conn.execute(_DDL_V_REALIZED_BOOK)
-        conn.execute(
-            "INSERT INTO schema_meta (key, value) VALUES ('predledger_version', '1')"
-            " ON CONFLICT(key) DO NOTHING"
-        )
-        conn.execute(
-            "INSERT INTO schema_meta (key, value) VALUES ('created_utc', ?)"
-            " ON CONFLICT(key) DO NOTHING",
-            (_dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),),
-        )
+        conn.commit()
+    # Run migration after schema is created (safe to call even if no old data).
+    _migrate_predictions_schema(db_path)
 
 
-def ensure_schema(db_path: str = _DEFAULT_DB) -> None:
-    """Create all predledger tables, indexes, and views if they do not exist.
+def _migrate_predictions_schema(db_path: str = _DEFAULT_DB) -> None:
+    """Migrate predictions table from old #41 schema to new a02794e+ schema.
 
-    Guarded by the dev-box prod check: raises :class:`PermissionError` when
-    called with a path whose basename is ``wca.db`` and ``WCA_ALLOW_PROD_DB``
-    is not set in the environment.
+    The old schema (from PR #41) had fewer columns. This migration adds missing
+    columns via ALTER TABLE, handling the case where some columns may already
+    exist (idempotent). Columns are added with sensible defaults so existing
+    rows continue to work.
 
-    Safe to call on every startup; subsequent calls are no-ops for existing
-    tables and views.
+    New columns added (if missing):
+    - build_id (TEXT)
+    - fixture (TEXT)
+    - kickoff_utc (TEXT)
+    - elo_prob (REAL)
+    - dc_prob (REAL)
+    - market_devig_prob (REAL)
+    - market_best_odds (REAL)
+    - market_book (TEXT)
+    - edge (REAL)
+    - ev_per_unit (REAL)
+    - closing_devig_prob (REAL)
+    - close_lag_seconds (INTEGER)
+    - n_books_at_close (INTEGER)
+    - close_is_prematch (INTEGER)
+    - status (TEXT, default 'open')
+    - settle_source (TEXT)
+    - model_source (TEXT)
+    - model_fair_odds (REAL)
+
+    Column renames/replacements for old schema compatibility:
+    - model_odds -> model_fair_odds (dropped, re-created)
+    - offered_odds (dropped, never re-created)
+    - close_ts_utc -> close_ts (dropped, re-created)
+    - outcome (dropped, never re-created)
+    - result_ts_utc -> settled_ts (dropped, re-created)
     """
-    _check_prod_guard(db_path)
-    _init_schema(db_path)
+    with _connect_write(db_path) as conn:
+        # Check if the predictions table exists at all.
+        pred_table = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='predictions'"
+        ).fetchone()
 
+        if pred_table is None:
+            # No old table to migrate; schema creation already ran.
+            return
 
-# ---------------------------------------------------------------------------
-# Writers.
-# ---------------------------------------------------------------------------
+        # Check which columns already exist in the current table.
+        existing_cols_raw = conn.execute(
+            "PRAGMA table_info(predictions)"
+        ).fetchall()
+        existing_cols = {row[1] for row in existing_cols_raw}  # row[1] is the column name.
 
+        # Define columns to add (column_name, SQL_definition).
+        # Only add columns that don't already exist.
+        cols_to_add = [
+            ("build_id", "TEXT"),
+            ("fixture", "TEXT"),
+            ("kickoff_utc", "TEXT"),
+            ("elo_prob", "REAL"),
+            ("dc_prob", "REAL"),
+            ("market_devig_prob", "REAL"),
+            ("market_best_odds", "REAL"),
+            ("market_book", "TEXT"),
+            ("edge", "REAL"),
+            ("ev_per_unit", "REAL"),
+            ("closing_devig_prob", "REAL"),
+            ("close_lag_seconds", "INTEGER"),
+            ("n_books_at_close", "INTEGER"),
+            ("close_is_prematch", "INTEGER"),
+            ("settle_source", "TEXT"),
+            ("model_source", "TEXT"),
+            ("model_fair_odds", "REAL"),
+        ]
 
-def upsert_predictions(
-    rows: List[Dict[str, Any]],
-    db_path: str = _DEFAULT_DB,
-) -> List[str]:
-    """Upsert prediction rows; returns list of ``prediction_id`` strings.
+        for col_name, col_type in cols_to_add:
+            if col_name not in existing_cols:
+                conn.execute(
+                    f"ALTER TABLE predictions ADD COLUMN {col_name} {col_type}"
+                )
 
-    Each dict in ``rows`` must contain ``market``, ``selection``, and
-    ``ts_utc``.  Optional keys: ``match_id``, ``stage``, ``line``,
-    ``n_outcomes``, ``model_prob``, ``offered_odds``, ``devig_method``,
-    ``notes``.
-
-    Two upserts of the same (match_id, stage, market, selection, line)
-    tuple produce exactly one row — the second call updates the mutable
-    fields but never creates a duplicate.  Immutable state columns
-    (``placed``, ``outcome``, ``closing_odds``, ``clv``, ``bet_id``) are
-    never overwritten by an upsert.
-    """
-    _check_prod_guard(db_path)
-    _init_schema(db_path)
-
-    ids: List[str] = []
-    with _connect(db_path) as conn:
-        for row in rows:
-            match_id: Optional[str] = row.get("match_id")
-            stage: str = row.get("stage") or ""
-            market: str = row["market"]
-            selection: str = row["selection"]
-            line: float = float(row.get("line", -1))
-            n_outcomes: int = int(row.get("n_outcomes", 2))
-            model_prob: Optional[float] = row.get("model_prob")
-            model_odds: Optional[float] = (
-                row.get("model_odds")
-                or ((1.0 / model_prob) if model_prob else None)
-            )
-            offered_odds: Optional[float] = row.get("offered_odds")
-            devig_method: Optional[str] = row.get("devig_method")
-            ts_utc: str = row["ts_utc"]
-            notes: Optional[str] = row.get("notes")
-
-            pid = _pred_id(match_id, stage, market, selection, line)
-
+        # Handle status column: if it doesn't exist, add it with a default.
+        # For existing rows, they'll get NULL; the DEFAULT only applies to future inserts.
+        # We'll update NULLs to 'open' explicitly.
+        if "status" not in existing_cols:
             conn.execute(
-                """
-                INSERT INTO predictions
-                    (prediction_id, match_id, stage, market, selection, line,
-                     n_outcomes, model_prob, model_odds, offered_odds,
-                     devig_method, ts_utc, notes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT(prediction_id) DO UPDATE SET
-                    n_outcomes    = excluded.n_outcomes,
-                    model_prob    = excluded.model_prob,
-                    model_odds    = excluded.model_odds,
-                    offered_odds  = excluded.offered_odds,
-                    devig_method  = excluded.devig_method,
-                    ts_utc        = excluded.ts_utc,
-                    notes         = excluded.notes
-                """,
-                (
-                    pid, match_id, stage, market, selection, line,
-                    n_outcomes, model_prob, model_odds, offered_odds,
-                    devig_method, ts_utc, notes,
-                ),
+                "ALTER TABLE predictions ADD COLUMN status TEXT DEFAULT 'open'"
             )
-            ids.append(pid)
+            # Set any existing NULLs to 'open' to match the default.
+            conn.execute(
+                "UPDATE predictions SET status='open' WHERE status IS NULL"
+            )
 
-    return ids
+        conn.commit()
+
+
+# ---------------------------------------------------------------------------
+# Column projection for upsert.
+# ---------------------------------------------------------------------------
+
+# Columns a caller may set (prediction_id is derived, never passed raw).
+_WRITABLE_COLS = (
+    "build_id",
+    "ts_utc",
+    "match_id",
+    "fixture",
+    "kickoff_utc",
+    "market",
+    "selection",
+    "line",
+    "stage",
+    "n_outcomes",
+    "model_prob",
+    "model_fair_odds",
+    "elo_prob",
+    "dc_prob",
+    "market_devig_prob",
+    "market_best_odds",
+    "market_book",
+    "devig_method",
+    "edge",
+    "ev_per_unit",
+    "bet_id",
+    "placed",
+    "closing_devig_prob",
+    "closing_odds",
+    "clv",
+    "close_ts",
+    "close_lag_seconds",
+    "n_books_at_close",
+    "close_is_prematch",
+    "status",
+    "settled_ts",
+    "settle_source",
+    "model_source",
+    "notes",
+)
+
+# Identity columns that participate in the prediction_id hash.
+_IDENTITY = ("build_id", "match_id", "stage", "market", "selection", "line")
+
+
+def _row_prediction_id(row: Dict[str, Any]) -> str:
+    """Compute the deterministic id for a (possibly partial) row dict."""
+    line = row.get("line")
+    if line is None:
+        line = -1
+    return prediction_id(
+        row.get("build_id"),
+        row.get("match_id"),
+        row.get("stage", "") or "",
+        row.get("market"),
+        row.get("selection"),
+        line,
+    )
+
+
+def upsert_predictions(rows: Iterable[Dict[str, Any]], db_path: str = _DEFAULT_DB) -> List[str]:
+    """Insert-or-replace prediction rows; return list of prediction_id strings.
+
+    The ``prediction_id`` is always recomputed from the identity columns, so
+    the same logical prediction upserted twice collapses to one row (verified
+    by the test-suite).  ``line`` defaults to ``-1`` and ``stage`` to ``''`` to
+    match the NULL-line/stage convention used for 1X2 / scoreline / O-U / BTTS.
+
+    A re-upsert preserves columns the new row leaves unset *only* where the
+    caller omits the key entirely — explicit ``None`` overwrites.  This lets a
+    settle/close pass send a partial row (id + the few columns it stamps)
+    without nuking earlier model columns.
+    """
+    ensure_schema(db_path)
+    rows = list(rows)
+    if not rows:
+        return []
+    pred_ids: List[str] = []
+    with _connect_write(db_path) as conn:
+        for row in rows:
+            pid = _row_prediction_id(row)
+            existing = conn.execute(
+                "SELECT * FROM predictions WHERE prediction_id=?", (pid,)
+            ).fetchone()
+            merged: Dict[str, Any] = {}
+            if existing is not None:
+                merged = {k: existing[k] for k in existing.keys()}
+            for col in _WRITABLE_COLS:
+                if col in row:
+                    merged[col] = row[col]
+            # Identity columns always come from the row that defined the id.
+            merged["prediction_id"] = pid
+            if merged.get("line") is None:
+                merged["line"] = -1
+            if merged.get("stage") is None:
+                merged["stage"] = ""
+            cols = ["prediction_id"] + list(_WRITABLE_COLS)
+            placeholders = ",".join("?" for _ in cols)
+            values = [merged.get(c) for c in cols]
+            conn.execute(
+                "INSERT OR REPLACE INTO predictions (%s) VALUES (%s)"
+                % (",".join(cols), placeholders),
+                values,
+            )
+            pred_ids.append(pid)
+        conn.commit()
+    return pred_ids
 
 
 def upsert_acca(
-    prediction_ids: List[str],
-    ts_utc: str,
-    combined_odds: Optional[float] = None,
+    acca_id_value: str,
+    pred_ids: Sequence[str],
     db_path: str = _DEFAULT_DB,
-) -> str:
-    """Upsert an accumulator; returns the ``acca_id`` hash.
+    bet_id: Optional[int] = None,
+) -> int:
+    """Map an accumulator to its leg prediction ids; return legs written.
 
-    ``prediction_ids`` must reference existing predictions (FK enforced).
-    The acca_id is the SHA-256 of the sorted prediction_id list, so the
-    same set of legs always maps to the same acca_id regardless of insertion
-    order.
+    Idempotent on ``(acca_id, prediction_id)``; re-running with the same legs
+    updates ``bet_id`` in place rather than duplicating rows.  ``build_id`` is
+    taken from the first linked prediction so accas group by build.
     """
-    _check_prod_guard(db_path)
-    _init_schema(db_path)
-
-    aid = _acca_id(prediction_ids)
-    with _connect(db_path) as conn:
-        conn.execute(
-            """
-            INSERT INTO accas (acca_id, ts_utc, n_legs, combined_odds)
-            VALUES (?, ?, ?, ?)
-            ON CONFLICT(acca_id) DO UPDATE SET
-                ts_utc        = excluded.ts_utc,
-                n_legs        = excluded.n_legs,
-                combined_odds = excluded.combined_odds
-            """,
-            (aid, ts_utc, len(prediction_ids), combined_odds),
-        )
-        for idx, pid in enumerate(prediction_ids):
-            conn.execute(
-                """
-                INSERT INTO acca_legs (acca_id, leg_index, prediction_id)
-                VALUES (?, ?, ?)
-                ON CONFLICT(acca_id, leg_index) DO UPDATE SET
-                    prediction_id = excluded.prediction_id
-                """,
-                (aid, idx, pid),
-            )
-
-    return aid
-
-
-def link_bet(
-    prediction_id: str,
-    bet_id: int,
-    db_path: str = _DEFAULT_DB,
-) -> None:
-    """Link a prediction to a placed bet in the ledger; sets ``placed = 1``.
-
-    Parameters
-    ----------
-    prediction_id:
-        Hash returned by :func:`upsert_predictions`.
-    bet_id:
-        Row ``id`` from ``wca.ledger.store.record_bet``.
-
-    Raises
-    ------
-    KeyError
-        If no prediction with ``prediction_id`` exists.
-    """
-    _check_prod_guard(db_path)
-    _init_schema(db_path)
-    with _connect(db_path) as conn:
-        row = conn.execute(
-            "SELECT prediction_id FROM predictions WHERE prediction_id = ?",
-            (prediction_id,),
+    ensure_schema(db_path)
+    pred_ids = [str(p) for p in pred_ids]
+    if not pred_ids:
+        return 0
+    written = 0
+    with _connect_write(db_path) as conn:
+        build_row = conn.execute(
+            "SELECT build_id FROM predictions WHERE prediction_id=?",
+            (pred_ids[0],),
         ).fetchone()
-        if row is None:
-            raise KeyError("no prediction with id=%r" % prediction_id)
+        build_id = build_row["build_id"] if build_row else None
+        for pid in pred_ids:
+            conn.execute(
+                "INSERT OR REPLACE INTO acca_legs "
+                "(acca_id, prediction_id, build_id, bet_id) VALUES (?,?,?,?)",
+                (acca_id_value, pid, build_id, bet_id),
+            )
+            written += 1
+        conn.commit()
+    return written
+
+
+def link_bet(pred_id: str, bet_id: int, db_path: str = _DEFAULT_DB) -> None:
+    """Attach a real bet to a prediction (sets ``placed=1``)."""
+    ensure_schema(db_path)
+    with _connect_write(db_path) as conn:
         conn.execute(
-            "UPDATE predictions SET bet_id = ?, placed = 1 WHERE prediction_id = ?",
-            (bet_id, prediction_id),
+            "UPDATE predictions SET bet_id=?, placed=1 WHERE prediction_id=?",
+            (int(bet_id), pred_id),
         )
+        conn.execute(
+            "UPDATE acca_legs SET bet_id=? WHERE prediction_id=?",
+            (int(bet_id), pred_id),
+        )
+        conn.commit()
 
 
 def settle_prediction(
-    prediction_id: str,
-    outcome: str,
-    result_ts_utc: Optional[str] = None,
+    pred_id: str,
+    status: str,
+    source: str,
     db_path: str = _DEFAULT_DB,
+    settled_ts: Optional[str] = None,
 ) -> None:
-    """Record the outcome of a prediction.
-
-    Parameters
-    ----------
-    outcome:
-        ``"won"``, ``"lost"``, or ``"void"`` (case-insensitive).
-    result_ts_utc:
-        Settlement timestamp; defaults to current UTC if omitted.
-
-    Raises
-    ------
-    KeyError
-        If no prediction with ``prediction_id`` exists.
-    ValueError
-        If ``outcome`` is not one of the three valid values.
-    """
-    outcome_lower = outcome.strip().lower()
-    if outcome_lower not in ("won", "lost", "void"):
-        raise ValueError(
-            "outcome must be 'won', 'lost', or 'void', got %r" % outcome
-        )
-
-    _check_prod_guard(db_path)
-    _init_schema(db_path)
-
-    if result_ts_utc is None:
-        result_ts_utc = _dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
-
-    with _connect(db_path) as conn:
-        row = conn.execute(
-            "SELECT prediction_id FROM predictions WHERE prediction_id = ?",
-            (prediction_id,),
-        ).fetchone()
-        if row is None:
-            raise KeyError("no prediction with id=%r" % prediction_id)
+    """Stamp a prediction's settlement (``won`` / ``lost`` / ``push`` / ``void``)."""
+    ensure_schema(db_path)
+    with _connect_write(db_path) as conn:
         conn.execute(
-            "UPDATE predictions SET outcome = ?, result_ts_utc = ? WHERE prediction_id = ?",
-            (outcome_lower, result_ts_utc, prediction_id),
+            "UPDATE predictions SET status=?, settle_source=?, settled_ts=? "
+            "WHERE prediction_id=?",
+            (status, source, settled_ts, pred_id),
         )
+        conn.commit()
 
 
 def set_prediction_close(
-    prediction_id: str,
-    closing_odds: float,
-    close_ts_utc: Optional[str] = None,
+    pred_id: str,
+    closing_odds: Optional[float],
+    model_fair_odds: Optional[float] = None,
     db_path: str = _DEFAULT_DB,
-) -> None:
-    """Record closing odds for a prediction and compute CLV.
+    *,
+    closing_devig_prob: Optional[float] = None,
+    close_ts: Optional[str] = None,
+    close_lag_seconds: Optional[int] = None,
+    n_books_at_close: Optional[int] = None,
+    close_is_prematch: Optional[int] = None,
+) -> Optional[float]:
+    """Stamp a prediction's de-vigged close + fair-vs-fair CLV; return CLV.
 
-    CLV formula (return-ratio, same convention as ``wca.ledger.store``)
-    -------------------------------------------------------------------
-    CLV% = (offered_odds / closing_odds) - 1
-
-    Positive = beat the close.  ``clv`` is set to NULL when the prediction
-    has no ``offered_odds`` (paper predictions recorded without a market price).
-
-    Parameters
-    ----------
-    closing_odds:
-        De-vigged fair consensus price at last capture before kick-off.
-        Must be strictly greater than 1.0.
-
-    Raises
-    ------
-    KeyError
-        If no prediction with ``prediction_id`` exists.
-    ValueError
-        If ``closing_odds`` is not strictly greater than 1.0.
+    ``clv = model_fair_odds / closing_odds - 1`` (both vig-free).  When
+    ``model_fair_odds`` is not supplied it is read from the row (falling back
+    to ``1/model_prob``).  CLV is ``NULL`` whenever no usable close exists
+    (``closing_odds`` falsy or ``<= 1``) — never silently ``0``.
     """
-    c_odds = float(closing_odds)
-    if c_odds <= 1.0:
-        raise ValueError("closing_odds must be > 1.0, got %r" % c_odds)
-
-    _check_prod_guard(db_path)
-    _init_schema(db_path)
-
-    if close_ts_utc is None:
-        close_ts_utc = _dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
-
-    with _connect(db_path) as conn:
+    ensure_schema(db_path)
+    with _connect_write(db_path) as conn:
         row = conn.execute(
-            "SELECT offered_odds FROM predictions WHERE prediction_id = ?",
-            (prediction_id,),
+            "SELECT model_prob, model_fair_odds FROM predictions "
+            "WHERE prediction_id=?",
+            (pred_id,),
         ).fetchone()
         if row is None:
-            raise KeyError("no prediction with id=%r" % prediction_id)
-
-        offered = row["offered_odds"]
-        clv: Optional[float] = (
-            (float(offered) / c_odds) - 1.0 if offered is not None else None
-        )
-
+            return None
+        if model_fair_odds is None:
+            model_fair_odds = row["model_fair_odds"]
+            if model_fair_odds is None and row["model_prob"]:
+                try:
+                    mp = float(row["model_prob"])
+                    if mp > 0:
+                        model_fair_odds = 1.0 / mp
+                except (TypeError, ValueError):
+                    model_fair_odds = None
+        clv: Optional[float] = None
+        c_odds = None
+        if closing_odds is not None:
+            try:
+                c_odds = float(closing_odds)
+            except (TypeError, ValueError):
+                c_odds = None
+        if c_odds is not None and c_odds > 1.0 and model_fair_odds:
+            clv = float(model_fair_odds) / c_odds - 1.0
         conn.execute(
-            "UPDATE predictions"
-            " SET closing_odds = ?, clv = ?, close_ts_utc = ?"
-            " WHERE prediction_id = ?",
-            (c_odds, clv, close_ts_utc, prediction_id),
+            "UPDATE predictions SET closing_odds=?, model_fair_odds=?, clv=?, "
+            "closing_devig_prob=?, close_ts=?, close_lag_seconds=?, "
+            "n_books_at_close=?, close_is_prematch=? WHERE prediction_id=?",
+            (
+                c_odds,
+                model_fair_odds,
+                clv,
+                closing_devig_prob,
+                close_ts,
+                close_lag_seconds,
+                n_books_at_close,
+                close_is_prematch,
+                pred_id,
+            ),
         )
+        conn.commit()
+        return clv
 
 
 # ---------------------------------------------------------------------------
-# Query helpers.
+# Read helpers.
 # ---------------------------------------------------------------------------
-# Callers must call ensure_schema (or any write function) on the db first.
-# These helpers are not guarded so reads from wca.db are always allowed.
 
 
-def get_prediction(
-    prediction_id: str,
-    db_path: str = _DEFAULT_DB,
-) -> Optional[sqlite3.Row]:
-    """Return the row for a single prediction, or ``None`` if not found."""
-    with _connect(db_path) as conn:
+def get_prediction(pred_id: str, db_path: str = _DEFAULT_DB) -> Optional[sqlite3.Row]:
+    with _connect_read(db_path) as conn:
         return conn.execute(
-            "SELECT * FROM predictions WHERE prediction_id = ?",
-            (prediction_id,),
+            "SELECT * FROM predictions WHERE prediction_id=?", (pred_id,)
         ).fetchone()
 
 
-def predictions_for_match(
-    match_id: str,
-    db_path: str = _DEFAULT_DB,
-) -> list:
-    """Return all predictions for a given ``match_id``, ordered by ``ts_utc``."""
-    with _connect(db_path) as conn:
+def all_predictions(db_path: str = _DEFAULT_DB) -> List[sqlite3.Row]:
+    with _connect_read(db_path) as conn:
         return conn.execute(
-            "SELECT * FROM predictions WHERE match_id = ? ORDER BY ts_utc",
-            (match_id,),
+            "SELECT * FROM predictions ORDER BY kickoff_utc, fixture, market, "
+            "selection"
         ).fetchall()
 
 
-def model_book(db_path: str = _DEFAULT_DB) -> list:
-    """Return all rows from ``v_model_book`` ordered by ``ts_utc``."""
-    with _connect(db_path) as conn:
-        return conn.execute(
-            "SELECT * FROM v_model_book ORDER BY ts_utc"
-        ).fetchall()
+def open_predictions(
+    db_path: str = _DEFAULT_DB, market: Optional[str] = None
+) -> List[sqlite3.Row]:
+    """Open (unsettled) predictions, optionally filtered to one market."""
+    sql = "SELECT * FROM predictions WHERE status='open'"
+    params: List[Any] = []
+    if market is not None:
+        sql += " AND market=?"
+        params.append(market)
+    with _connect_read(db_path) as conn:
+        return conn.execute(sql, params).fetchall()
 
 
-def realized_book(db_path: str = _DEFAULT_DB) -> list:
-    """Return all rows from ``v_realized_book`` ordered by ``ts_utc``."""
-    with _connect(db_path) as conn:
-        return conn.execute(
-            "SELECT * FROM v_realized_book ORDER BY ts_utc"
-        ).fetchall()
+def model_book(db_path: str = _DEFAULT_DB) -> List[sqlite3.Row]:
+    with _connect_read(db_path) as conn:
+        return conn.execute("SELECT * FROM v_model_book").fetchall()
+
+
+def realized_book(db_path: str = _DEFAULT_DB) -> List[sqlite3.Row]:
+    with _connect_read(db_path) as conn:
+        return conn.execute("SELECT * FROM v_realized_book").fetchall()
+
+
+def is_x12_market(market: Any) -> bool:
+    return isinstance(market, str) and market.strip().casefold() in _X12_MARKETS
