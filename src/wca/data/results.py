@@ -107,6 +107,15 @@ def load_results(path: Union[str, Path]) -> pd.DataFrame:
             "neutral": "object",  # parse manually below
         },
     )
+    # ``parse_dates`` silently leaves the column as object *strings* if ANY
+    # value fails to parse — e.g. the cleaned dataset carries future fixtures
+    # with blank/placeholder dates. That later breaks every ``date >=`` filter
+    # downstream with "'>=' not supported between str and Timestamp", which
+    # silently stalled settlement of in-window games. Coerce explicitly so the
+    # documented datetime64 contract always holds; unparseable rows become NaT
+    # and are dropped by the usual ``.notna()`` / ``>=`` guards.
+    if "date" in df.columns:
+        df["date"] = pd.to_datetime(df["date"], errors="coerce")
     # Normalise boolean column (stored as True/False strings in CSV)
     if "neutral" in df.columns:
         df["neutral"] = df["neutral"].map(
