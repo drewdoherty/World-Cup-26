@@ -1,4 +1,4 @@
-<!-- generated: 2026-06-27T16:34:51 -->
+<!-- generated: 2026-06-27T18:37:33 -->
 ⚽ *Next match* — Panama vs England
 Kickoff 2026-06-27 21:00:00+00:00
 
@@ -23,9 +23,9 @@ Kickoff 2026-06-27 21:00:00+00:00
 Kickoff 2026-06-27 21:00:00+00:00
 
 *Winner* (model blend)
-  Croatia         50.4%  fair 1.98  best 2.82 (Polymarket) +42.1% ✅  £100.00
-  Draw            32.2%  fair 3.10  best 3.28 (Polymarket) +5.7% ✅  £12.44
-  Ghana           17.3%  fair 5.77  best 6.45 (Polymarket) +11.9% ✅  £10.89
+  Croatia         51.6%  fair 1.94  best 2.67 (Polymarket) +37.5% ✅  £100.00
+  Draw            32.0%  fair 3.13  best 3.28 (Polymarket) +4.8% ✅  £10.49
+  Ghana           16.5%  fair 6.07  best 6.90 (Polymarket) +13.6% ✅  £11.55
   _stake = ¼-Kelly @ £2000 bankroll (+EV picks)_
 
 *Corners* (model, exp 8.3)
@@ -34,5 +34,5 @@ Kickoff 2026-06-27 21:00:00+00:00
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-1-1 14.6% | 1-0 13.5% | 0-0 13.2% | 2-0 11.1% | 2-1 7.8% | 0-1 7.2%
-  O/U 2.5: over 37.6% / under 62.4%   BTTS 42.3%
+1-1 14.5% | 1-0 13.8% | 0-0 13.1% | 2-0 11.3% | 2-1 8.0% | 0-1 6.8%
+  O/U 2.5: over 37.8% / under 62.2%   BTTS 42.2%
