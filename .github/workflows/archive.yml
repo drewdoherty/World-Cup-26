@@ -1,0 +1,62 @@
+name: Data Archival
+
+# Optional cloud-side archival path. The PRIMARY archive runs on the Mac mini
+# (deploy/macmini, `archive` interval job) where the live wca.db and the raw
+# odds/PM/Betfair TEE all live. This workflow is the OFF-SITE option: it
+# captures the repo-committed model outputs (card/predictions/advancement) into
+# the parquet archive and, if cloud creds are configured as repo secrets,
+# mirrors them to object storage. It cannot touch wca.db (not in the repo), so
+# it runs files-only (--no-ledger).
+
+on:
+  schedule:
+    # Daily at 04:17 UTC (off the top-of-hour to avoid the busy crons).
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: data-archival
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.2.0
+        with:
+          python-version: '3.9'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+          # Cloud mirror is optional; install boto3 only if a bucket is set.
+          if [ -n "${WCA_ARCHIVE_S3_BUCKET}" ]; then pip install 'boto3>=1.34'; fi
+        env:
+          WCA_ARCHIVE_S3_BUCKET: ${{ secrets.WCA_ARCHIVE_S3_BUCKET }}
+
+      - name: Archive model outputs (+ cloud mirror if configured)
+        run: |
+          python scripts/wca_archive.py snapshot --no-ledger --env /dev/null
+          python scripts/wca_archive.py info --env /dev/null
+        env:
+          WCA_ARCHIVE_DIR: data/archive
+          WCA_ARCHIVE_S3_BUCKET: ${{ secrets.WCA_ARCHIVE_S3_BUCKET }}
+          WCA_ARCHIVE_S3_ENDPOINT: ${{ secrets.WCA_ARCHIVE_S3_ENDPOINT }}
+          WCA_ARCHIVE_S3_ACCESS_KEY_ID: ${{ secrets.WCA_ARCHIVE_S3_ACCESS_KEY_ID }}
+          WCA_ARCHIVE_S3_SECRET_ACCESS_KEY: ${{ secrets.WCA_ARCHIVE_S3_SECRET_ACCESS_KEY }}
+          WCA_ARCHIVE_S3_REGION: ${{ secrets.WCA_ARCHIVE_S3_REGION }}
+          WCA_ARCHIVE_S3_PREFIX: ${{ secrets.WCA_ARCHIVE_S3_PREFIX }}
+
+      - name: Upload archive as a workflow artifact (retention fallback)
+        uses: actions/upload-artifact@v4.4.0
+        with:
+          name: wca-archive-${{ github.run_id }}
+          path: data/archive
+          if-no-files-found: ignore
+          retention-days: 14

@@ -37,6 +37,12 @@ import requests
 
 logger = logging.getLogger(__name__)
 
+# Optional archival TEE: additive, never changes betting behavior (guarded).
+try:
+    from wca.archive import tee as _archive_tee
+except Exception:  # pragma: no cover - archive is optional
+    _archive_tee = None
+
 _BETTING_URL = "https://api.betfair.com/exchange/betting/json-rpc/v1"
 _CERT_LOGIN_URL = "https://identitysso-cert.betfair.com/api/certlogin"
 _INTERACTIVE_LOGIN_URL = "https://identitysso.betfair.com/api/login"
@@ -293,6 +299,8 @@ def _rpc(method: str, params: Dict[str, Any], session_token: str,
     resp = requests.post(_BETTING_URL, json=payload, headers=headers, timeout=_TIMEOUT)
     resp.raise_for_status()
     body = resp.json()
+    if _archive_tee is not None:
+        _archive_tee.raw("betfair", method, body, kind=method)
     if isinstance(body, list):
         body = body[0] if body else {}
     if "error" in body:

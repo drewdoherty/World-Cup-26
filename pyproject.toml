@@ -7,9 +7,15 @@ name = "wca"
 version = "0.1.0"
 description = "World Cup Alpha - quantitative betting research platform for the 2026 FIFA World Cup"
 requires-python = ">=3.9"
-dependencies = ["numpy", "scipy", "pandas", "requests"]
+# pyarrow powers the data-archival parquet pipeline (src/wca/archive). The
+# archive degrades to a no-op if it is somehow absent, but it ships as a
+# runtime dep so the TEE hooks actually persist on the mini + in CI.
+dependencies = ["numpy", "scipy", "pandas", "requests", "pyarrow>=14"]
 
 [project.optional-dependencies]
+# Optional cloud mirror for the archive (Cloudflare R2 / Backblaze B2 / S3).
+# Only needed when WCA_ARCHIVE_S3_* creds are configured; absent => local-only.
+cloud = ["boto3>=1.34"]
 # Test-time dependencies beyond the runtime set in `dependencies` /
 # requirements.txt. eth-account is needed by the Polymarket signing tests
 # (tests/test_pm_*); matplotlib by the Telegram usage-chart test
