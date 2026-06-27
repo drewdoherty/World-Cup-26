@@ -4,117 +4,292 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta name="color-scheme" content="dark">
-<title>WORLD CUP ALPHA // BET RECS</title>
-<link rel="stylesheet" href="./style.css">
+<meta name="color-scheme" content="light">
+<title>WCA // ACTION DESK</title>
+<link rel="stylesheet" href="./arb-theme.css">
 </head>
 <body>
-<div id="app">
-  <header class="ticker" id="ticker">
-    <div class="brand">
-      <span class="brand-mark">WCA</span>
-      <span class="brand-sub">WORLD CUP ALPHA</span>
+<div id="arb-app">
+
+  <!-- ------------------------------------------------------------------ HEADER -->
+  <header class="arb-header" id="arb-header">
+    <!-- Monitoring banner -->
+    <div class="arb-monitor-banner">MONITORING ONLY &mdash; READ-ONLY ANALYSIS, NO EXECUTION</div>
+
+    <!-- Brand + KPI strip -->
+    <div class="arb-header-top">
+      <div class="arb-brand">
+        <span class="arb-brand-mark">WCA</span>
+        <span class="arb-brand-sub">ACTION DESK</span>
+      </div>
+
+      <div class="arb-kpis" id="arb-kpis">
+        <div class="arb-kpi">
+          <span class="arb-kpi-label">Freshness</span>
+          <span class="arb-kpi-value dim" id="kpi-freshness">&mdash;</span>
+        </div>
+        <div class="arb-kpi">
+          <span class="arb-kpi-label">SB Pool (£)</span>
+          <span class="arb-kpi-value" id="kpi-bankroll">&mdash;</span>
+        </div>
+        <div class="arb-kpi">
+          <span class="arb-kpi-label">PM Pool ($)</span>
+          <span class="arb-kpi-value" id="kpi-pm-bankroll">&mdash;</span>
+        </div>
+        <div class="arb-kpi">
+          <span class="arb-kpi-label">Open Exposure</span>
+          <span class="arb-kpi-value" id="kpi-exposure">&mdash;</span>
+        </div>
+        <div class="arb-kpi">
+          <span class="arb-kpi-label">Actionable</span>
+          <span class="arb-kpi-value pos bold" id="kpi-actionable">0</span>
+        </div>
+        <div class="arb-kpi">
+          <span class="arb-kpi-label">Withheld</span>
+          <span class="arb-kpi-value warn" id="kpi-withheld">0</span>
+        </div>
+        <div class="arb-kpi">
+          <span class="arb-kpi-label">Rung / CLV</span>
+          <span class="arb-kpi-value dim" id="kpi-rung">&mdash;</span>
+        </div>
+      </div>
+
+      <!-- Nav -->
+      <nav class="arb-nav">
+        <a class="arb-nav-link" href="./index.html">&larr;&nbsp;Bets</a>
+        <a class="arb-nav-link" href="./scores.html">Scores</a>
+        <a class="arb-nav-link" href="./promos.html">Promos</a>
+        <a class="arb-nav-link" href="./tracking.html">Tracking</a>
+        <span class="arb-nav-here">Action Desk</span>
+        <a class="arb-nav-link" href="./benchmarks.html">Benchmarks</a>
+      </nav>
     </div>
-    <nav class="scores-nav">
-      <a class="scores-nav-link" href="./index.html">&larr; Bets</a>
-      <a class="scores-nav-link" href="./scores.html">Scores &amp; Markets</a>
-      <a class="scores-nav-link" href="./architecture.html">Under The Hood</a>
-      <a class="scores-nav-link" href="./visuals.html">Visuals</a>
-      <a class="scores-nav-link" href="./tracking.html">Tracking</a>
-      <a class="scores-nav-link" href="./promos.html">Promos &amp; Offers</a>
-      <span class="scores-nav-here">Bet Recs</span>
-      <a class="scores-nav-link" href="./benchmarks.html">Benchmarks</a>
-    </nav>
+
+    <!-- Filter toolbar -->
+    <div class="arb-toolbar" id="arb-toolbar">
+      <span class="arb-toolbar-label">Filter</span>
+
+      <div class="arb-filter">
+        <input type="text" id="f-fixture" placeholder="Fixture / team&hellip;" style="min-width:130px" aria-label="Filter by fixture or team">
+      </div>
+
+      <div class="arb-filter">
+        <select id="f-market" aria-label="Market">
+          <option value="">All markets</option>
+          <option value="1X2">1X2</option>
+          <option value="advancement">Advancement</option>
+          <option value="btts">BTTS</option>
+          <option value="totals">Totals</option>
+          <option value="arb">Arbs</option>
+        </select>
+      </div>
+
+      <div class="arb-filter">
+        <select id="f-venue" aria-label="Venue">
+          <option value="">All venues</option>
+          <option value="smarkets">Smarkets</option>
+          <option value="betfair">Betfair</option>
+          <option value="polymarket">Polymarket</option>
+          <option value="kalshi">Kalshi</option>
+        </select>
+      </div>
+
+      <div class="arb-filter">
+        <select id="f-currency" aria-label="Currency">
+          <option value="">All currencies</option>
+          <option value="GBP">GBP (£)</option>
+          <option value="USD">USD ($)</option>
+        </select>
+      </div>
+
+      <button class="arb-filter-chip" id="f-chip-add" data-filter="action" data-val="ADD" data-active="false" type="button">
+        ADD
+      </button>
+      <button class="arb-filter-chip" id="f-chip-hedge" data-filter="action" data-val="HEDGE" data-active="false" type="button">
+        HEDGE
+      </button>
+      <button class="arb-filter-chip" id="f-chip-posev" data-filter="posev" data-val="true" data-active="false" type="button">
+        +EV only
+      </button>
+      <button class="arb-filter-chip" id="f-chip-stale" data-filter="stale" data-val="true" data-active="false" type="button">
+        Show stale
+      </button>
+
+      <button class="arb-density-btn" id="density-btn" type="button">Compact</button>
+    </div>
   </header>
 
-  <div class="nodata" id="nodata" hidden>
-    <span class="nodata-dot"></span>
-    <span id="nodata-msg">NO DATA FEED</span>
+  <!-- ------------------------------------------------------------------ NO DATA -->
+  <div class="arb-nodata" id="arb-nodata" hidden>
+    <span class="arb-nodata-dot"></span>
+    <span id="arb-nodata-msg">BET RECS FEED UNAVAILABLE</span>
   </div>
 
-  <main>
-    <!-- NEW 01 // Model-backed best bets, both sides, fractional Kelly -->
-    <section class="panel" style="margin-top:14px">
-      <div class="panel-head">
-        <span class="panel-label">01 // Best Bets &mdash; both sides &middot; &frac12;-Kelly &middot; $250</span>
-        <span class="panel-meta" id="betrecs-meta"></span>
-      </div>
-      <div class="panel-body" style="font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--border)">
-        Every market scored on <strong>both sides</strong> (back YES vs back NO); the positive-EV side
-        is sized at <strong>&frac12;-Kelly on a $250 bankroll</strong>, hard-capped at
-        <span id="betrecs-cap">5%</span> (<span id="betrecs-max">$12.50</span>/bet). Fee-adjusted edge.
-        <strong>Monitoring only &mdash; not executed.</strong>
-        <span id="betrecs-stale" class="warn" hidden> &middot; MODEL STALE: recs gated by drift guard.</span>
-      </div>
-      <div class="panel-body panel-scroll" id="betrecs-table"></div>
-      <div class="panel-body" id="betrecs-flagged-wrap" hidden style="border-top:1px solid var(--border)">
-        <div style="font-size:11px;color:var(--warn);margin-bottom:6px">
-          Withheld &mdash; live price has drifted from the model baseline (model hasn&rsquo;t seen the latest result). Review before staking.
-        </div>
-        <div class="panel-scroll" id="betrecs-flagged"></div>
-      </div>
-      <div class="panel-body" style="font-size:10px;color:var(--muted)" id="betrecs-cov"></div>
-    </section>
+  <main id="arb-main">
 
-    <!-- NEW 02 // Polymarket-vs-sportsbook prop arbitrage -->
-    <section class="panel" style="margin-top:14px">
-      <div class="panel-head">
-        <span class="panel-label">02 // Prop Arbs &mdash; Polymarket vs Sportsbook</span>
-        <span class="panel-meta" id="proparb-meta"></span>
+    <!-- ---------------------------------------------------------------- MATCH SINGLES -->
+    <section class="arb-section" id="sec-singles">
+      <div class="arb-section-head">
+        <span class="arb-section-title">01 // Match Singles</span>
+        <span class="arb-section-count" id="cnt-singles">0 recs</span>
+        <span class="arb-section-freshness" id="age-singles"></span>
       </div>
-      <div class="panel-body" style="font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--border)">
-        Settlement-safe prop arbs: PM-internal (YES+NO &lt; 1 after fee) now; book-vs-PM scorer pairing
-        once the sportsbook prop feed is wired. Top-of-book only &mdash; liquidity-check every leg.
-      </div>
-      <div class="panel-body panel-scroll" id="proparb-table"></div>
-      <div class="panel-body" style="font-size:10px;color:var(--muted)" id="proparb-note"></div>
-    </section>
-
-    <!-- EXISTING 03 // Pure-arb (1X2 family) -->
-    <section class="panel" style="margin-top:14px">
-      <div class="panel-head">
-        <span class="panel-label">03 // FX-Adjusted Pure-Arb Opportunities (1X2 family)</span>
-        <span class="panel-meta" id="arb-meta"></span>
-      </div>
-      <div class="panel-body" style="font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--border)">
-        Monitoring only — read-only odds (The Odds API, Betfair Exchange feed) vs
-        Polymarket match-winner. Best-back prices, no live liquidity. <strong>Not executed.</strong>
-      </div>
-      <div class="panel-body panel-scroll" id="arb-table"></div>
-    </section>
-
-    <section class="panel" style="margin-top:14px">
-      <div class="panel-head">
-        <span class="panel-label">04 // Historical Analysis (real, since Jun 11)</span>
-        <span class="panel-meta">no paid pulls — logged snapshots</span>
-      </div>
-      <div class="panel-body">
-        <div id="hist-summary" style="font-size:12px;color:var(--text-dim)"></div>
-        <div id="hist-near" class="panel-scroll" style="margin-top:10px"></div>
-      </div>
-    </section>
-
-    <section class="panel" style="margin-top:14px">
-      <div class="panel-head">
-        <span class="panel-label">05 // Cumulative Risk-Free Profit</span>
-        <span class="panel-meta" id="hyp-tag" style="color:var(--warn)">HYPOTHETICAL — MODELED, NOT LIVE</span>
-      </div>
-      <div class="panel-body">
-        <div id="hyp-summary" style="font-size:12px;color:var(--text-dim)"></div>
-        <svg id="hyp-chart" viewBox="0 0 700 160" preserveAspectRatio="none"
-             style="width:100%;height:160px;margin-top:8px"></svg>
-        <div style="font-size:10px;color:var(--muted);margin-top:6px">
-          Illustration of what automating BOTH legs <em>could</em> compound to if every
-          detected opportunity were filled at the quoted price. No fills occur; ignores
-          liquidity, slippage, and FX execution. Not a forecast, not realised P&amp;L.
+      <div class="arb-table-wrap" id="tbl-singles-wrap">
+        <table class="arb-table" id="tbl-singles">
+          <thead>
+            <tr>
+              <th>Fixture</th>
+              <th>Market</th>
+              <th>Selection</th>
+              <th class="r">Model %</th>
+              <th class="r">Price</th>
+              <th class="r">Edge</th>
+              <th class="r">Net EV</th>
+              <th class="r">Stake</th>
+              <th>Action</th>
+              <th>Promo</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody id="body-singles"></tbody>
+        </table>
+        <div class="arb-empty" id="empty-singles" hidden>
+          <strong>NO ACTIONABLE SINGLES</strong>
+          No 1X2 selections currently clear the edge gate. Model may be awaiting refresh or
+          all signals are consensus-priced.
         </div>
       </div>
     </section>
+
+    <!-- ---------------------------------------------------------------- EVENT / PLAYER PROPS -->
+    <section class="arb-section" id="sec-props">
+      <div class="arb-section-head">
+        <span class="arb-section-title">02 // Event &amp; Player Props</span>
+        <span class="arb-section-count" id="cnt-props">0 recs</span>
+        <span class="arb-section-freshness" id="age-props"></span>
+      </div>
+      <div class="arb-table-wrap" id="tbl-props-wrap">
+        <table class="arb-table" id="tbl-props">
+          <thead>
+            <tr>
+              <th>Fixture</th>
+              <th>Market</th>
+              <th>Selection</th>
+              <th class="r">Model %</th>
+              <th class="r">Price</th>
+              <th class="r">Net EV</th>
+              <th class="r">Stake</th>
+              <th>Action</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody id="body-props"></tbody>
+        </table>
+        <div class="arb-empty" id="empty-props" hidden>
+          <strong>NO ACTIONABLE PROPS</strong>
+          Corners/cards withheld — no live book price snapshot.
+          Player scorer models withheld — player xG inputs not yet wired.
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------- ADVANCEMENT / FUTURES -->
+    <section class="arb-section" id="sec-adv">
+      <div class="arb-section-head">
+        <span class="arb-section-title">03 // Advancement &amp; Futures</span>
+        <span class="arb-section-count" id="cnt-adv">0 recs</span>
+        <span class="arb-section-freshness" id="age-adv"></span>
+      </div>
+      <div class="arb-table-wrap" id="tbl-adv-wrap">
+        <table class="arb-table" id="tbl-adv">
+          <thead>
+            <tr>
+              <th>Team</th>
+              <th>Stage</th>
+              <th class="r">Model %</th>
+              <th class="r">PM Price</th>
+              <th class="r">PM Fee</th>
+              <th class="r">Net EV</th>
+              <th class="r">Stake ($)</th>
+              <th>Action</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody id="body-adv"></tbody>
+        </table>
+        <div class="arb-empty" id="empty-adv" hidden>
+          <strong>NO ACTIONABLE FUTURES</strong>
+          No advancement markets currently show model &gt; PM price after fee adjustment.
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------- GUARANTEED ARBS -->
+    <section class="arb-section" id="sec-arbs">
+      <div class="arb-section-head">
+        <span class="arb-section-title">04 // Guaranteed Arbs</span>
+        <span class="arb-section-count" id="cnt-arbs">0 arbs</span>
+        <span class="arb-section-freshness" id="age-arbs"></span>
+      </div>
+      <div class="arb-table-wrap" id="tbl-arbs-wrap">
+        <table class="arb-table" id="tbl-arbs">
+          <thead>
+            <tr>
+              <th>Fixture / Market</th>
+              <th>Legs (settlement-safe)</th>
+              <th class="r">Fee-adj edge</th>
+              <th class="r">Guaranteed %</th>
+              <th>Liquidity</th>
+            </tr>
+          </thead>
+          <tbody id="body-arbs"></tbody>
+        </table>
+        <div class="arb-empty" id="empty-arbs" hidden>
+          <strong>NO GUARANTEED ARBS</strong>
+          No settlement-safe cross-venue arbs detected in current snapshot.
+          Prices may be too efficient or cross-venue depth insufficient.
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------- WITHHELD / REVIEW -->
+    <section class="arb-section" id="sec-withheld">
+      <div class="arb-section-head">
+        <span class="arb-section-title">05 // Withheld &amp; Review</span>
+        <span class="arb-section-count" id="cnt-withheld">0 rows</span>
+        <span class="arb-section-freshness">rows gated by staleness, caps, or missing inputs</span>
+      </div>
+      <details id="withheld-details">
+        <summary style="padding:8px 10px; cursor:pointer; color:var(--ll-warn); font-size:11px; list-style:none;">
+          &#x25B6; Show withheld rows
+        </summary>
+        <div class="arb-table-wrap arb-withheld-table" id="tbl-withheld-wrap">
+          <table class="arb-table" id="tbl-withheld">
+            <thead>
+              <tr>
+                <th>Fixture / Market</th>
+                <th>Selection</th>
+                <th class="r">Model %</th>
+                <th class="r">Edge</th>
+                <th>Why withheld</th>
+                <th>Stale</th>
+              </tr>
+            </thead>
+            <tbody id="body-withheld"></tbody>
+          </table>
+          <div class="arb-empty" id="empty-withheld" hidden>
+            <strong>NO WITHHELD ROWS</strong>
+          </div>
+        </div>
+      </details>
+    </section>
+
   </main>
 
-  <footer class="foot">
-    <span class="foot-gen" id="foot-gen"></span>
-    <span class="foot-mark">WORLD CUP ALPHA</span>
+  <!-- ------------------------------------------------------------------ FOOTER -->
+  <footer class="arb-foot">
+    <span id="foot-gen"></span>
+    <span class="arb-foot-mark">WCA // ACTION DESK</span>
   </footer>
 </div>
 <script src="./arb.js"></script>

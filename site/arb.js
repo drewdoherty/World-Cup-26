@@ -1,245 +1,487 @@
 (function () {
   "use strict";
+
+  // --------------------------------------------------------------------------
+  // DOM helpers
+  // --------------------------------------------------------------------------
+
   var $ = function (id) { return document.getElementById(id); };
 
   function esc(v) {
     if (v === null || v === undefined) return "";
-    return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    return String(v)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
       .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
+
   function pct(v, dp) {
-    if (v === null || v === undefined || isNaN(v)) return "—";
-    return (Number(v) * 100).toFixed(dp === undefined ? 2 : dp) + "%";
+    if (v === null || v === undefined || isNaN(+v)) return "—";
+    return (Number(v) * 100).toFixed(dp === undefined ? 1 : dp) + "%";
   }
+
   function signPct(v, dp) {
-    if (v === null || v === undefined || isNaN(v)) return "—";
-    var s = (Number(v) * 100).toFixed(dp === undefined ? 1 : dp);
-    return (Number(v) > 0 ? "+" : "") + s + "%";
+    if (v === null || v === undefined || isNaN(+v)) return "—";
+    var n = (Number(v) * 100).toFixed(dp === undefined ? 1 : dp);
+    return (Number(v) > 0 ? "+" : "") + n + "%";
   }
-  function usd(v) { return v == null || isNaN(v) ? "—" : "$" + Number(v).toFixed(2); }
-  function gbp(v) { return v == null || isNaN(v) ? "—" : "£" + Number(v).toFixed(2); }
-  function num(v, dp) { return v == null || isNaN(v) ? "—" : Number(v).toFixed(dp || 2); }
-  function price(v) { return v == null || isNaN(v) ? "—" : Number(v).toFixed(3); }
+
+  function gbp(v) { return v == null || isNaN(+v) ? "—" : "£" + Number(v).toFixed(2); }
+  function usd(v) { return v == null || isNaN(+v) ? "—" : "$" + Number(v).toFixed(2); }
+  function currency(v, cur) {
+    if (v == null || isNaN(+v)) return "—";
+    return cur === "USD" ? usd(v) : gbp(v);
+  }
+  function priceStr(v) { return v == null || isNaN(+v) ? "—" : Number(v).toFixed(3); }
+  function num(v, dp) { return v == null || isNaN(+v) ? "—" : Number(v).toFixed(dp === undefined ? 2 : dp); }
+
+  function ageFmt(secs) {
+    if (secs === null || secs === undefined || isNaN(+secs)) return null;
+    var s = +secs;
+    if (s < 60) return s + "s";
+    if (s < 3600) return Math.round(s / 60) + "m";
+    return Math.round(s / 3600) + "h";
+  }
+
+  function ageTag(secs, staleThreshSecs) {
+    var label = ageFmt(secs);
+    if (!label) return "";
+    var isStale = staleThreshSecs != null && secs > staleThreshSecs;
+    return '<span class="age-tag' + (isStale ? " stale" : "") + '" title="data age">' + esc(label) + " ago</span>";
+  }
+
+  function venueBadge(v) {
+    if (!v) return "";
+    var lv = v.toLowerCase();
+    if (lv.indexOf("poly") >= 0) return '<span class="arb-badge badge-pm">PM</span>';
+    if (lv.indexOf("kalshi") >= 0) return '<span class="arb-badge badge-kal">KAL</span>';
+    if (lv.indexOf("smarket") >= 0) return '<span class="arb-badge badge-sb">SMK</span>';
+    if (lv.indexOf("betfair") >= 0) return '<span class="arb-badge badge-sb">BFX</span>';
+    return '<span class="arb-badge badge-mod">' + esc(v.toUpperCase().slice(0, 4)) + "</span>";
+  }
+
+  function actionBadge(label) {
+    if (!label) return "";
+    var lbl = label.toUpperCase();
+    if (lbl === "ADD") return '<span class="arb-badge badge-add">ADD</span>';
+    if (lbl === "DIVERSIFY") return '<span class="arb-badge badge-div">DIV</span>';
+    if (lbl === "HEDGE") return '<span class="arb-badge badge-hedge">HED</span>';
+    return '<span class="arb-badge badge-mod">' + esc(lbl) + "</span>";
+  }
+
+  function promoBadge(status, name) {
+    if (!status || status === "none") return "";
+    if (status === "PROMO CHECK REQUIRED") {
+      return '<span class="arb-badge badge-pc-req" title="' + esc(name || "") + '">PROMO?</span>';
+    }
+    if (status === "applied") {
+      return '<span class="arb-badge badge-promo" title="' + esc(name || "") + '">PROMO</span>';
+    }
+    return "";
+  }
+
+  function staleBadge(stale) {
+    return stale ? '<span class="arb-badge badge-stale">STALE</span>' : "";
+  }
+
+  function evClass(v) {
+    if (v === null || v === undefined || isNaN(+v)) return "";
+    return Number(v) > 0 ? "pos bold" : (Number(v) < 0 ? "neg" : "dim");
+  }
+
+  // --------------------------------------------------------------------------
+  // Fetch
+  // --------------------------------------------------------------------------
 
   function fetchJson(url) {
     return fetch(url + "?t=" + Date.now(), { cache: "no-store" })
       .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); });
   }
 
-  // -------------------------------------------------------------------------
-  // NEW 01 // Best Bets — both sides, fractional Kelly
-  // -------------------------------------------------------------------------
-  function sideCell(s, isBest) {
-    if (!s) return "—";
-    var cls = (s.ev != null && s.ev > 0) ? "pos" : "neg";
-    var tag = isBest ? "<strong>" + esc(s.side) + "</strong>" : '<span class="dim">' + esc(s.side) + "</span>";
-    return tag + ' @ ' + price(s.price) + ' <span class="' + cls + '">' + signPct(s.ev) + "</span>";
+  // --------------------------------------------------------------------------
+  // Filter state
+  // --------------------------------------------------------------------------
+
+  var filters = {
+    fixture: "",
+    market: "",
+    venue: "",
+    currency: "",
+    action: null,        // "ADD" | "HEDGE" | null
+    posev: false,        // only +EV
+    stale: false,        // show stale (default: hide)
+  };
+
+  function filterRow(r) {
+    if (!r) return false;
+
+    // Text fixture/team filter
+    if (filters.fixture) {
+      var q = filters.fixture.toLowerCase();
+      var fix = (r.fixture || r.team || "").toLowerCase();
+      var team = (r.team || "").toLowerCase();
+      if (fix.indexOf(q) < 0 && team.indexOf(q) < 0) return false;
+    }
+
+    // Market
+    if (filters.market) {
+      var mkt = (r.market || "").toLowerCase();
+      var filterMkt = filters.market.toLowerCase();
+      if (filterMkt === "arb") {
+        if (!r.guaranteed_pct) return false;
+      } else if (filterMkt === "advancement") {
+        if (mkt !== "advancement") return false;
+      } else {
+        if (mkt.indexOf(filterMkt) < 0) return false;
+      }
+    }
+
+    // Venue
+    if (filters.venue) {
+      var ven = (r.venue || "").toLowerCase();
+      if (ven.indexOf(filters.venue.toLowerCase()) < 0) return false;
+    }
+
+    // Currency
+    if (filters.currency) {
+      if ((r.currency || "") !== filters.currency) return false;
+    }
+
+    // Action label
+    if (filters.action) {
+      if ((r.action_label || "").toUpperCase() !== filters.action) return false;
+    }
+
+    // +EV only
+    if (filters.posev) {
+      if (!r.ev_net || r.ev_net <= 0) return false;
+    }
+
+    // Stale filter: by default hide stale rows; if stale chip active, show all
+    if (!filters.stale && r.stale) return false;
+
+    return true;
   }
 
-  function recRows(list, opts) {
-    opts = opts || {};
-    return (list || []).map(function (r) {
-      var stakeCell = opts.flagged
-        ? '<span class="dim">' + usd(r.stake) + "</span>"
-        : '<strong>' + usd(r.stake) + "</strong>";
-      var note = opts.flagged
-        ? '<td class="neg" style="font-size:10px">' + esc(r.flag || "") + "</td>"
-        : '<td class="r pos">' + signPct(r.edge) + "</td>";
-      var driftCls = (r.drift != null && r.drift > 0.1) ? "neg" : "dim";
-      return '<tr>' +
-        '<td class="pos-match">' + esc(r.team) +
-          '<span class="dim"> · ' + esc(r.best_side === "YES" ? r.yes.desc : r.no.desc) + "</span></td>" +
-        '<td class="r">' + num(r.model_prob * 100, 1) + "%</td>" +
-        '<td class="r">' + price(r.live_mid) +
-          ' <span class="' + driftCls + '" style="font-size:10px">Δ' + signPct(r.live_mid - r.baseline_pm) + "</span></td>" +
-        '<td>' + sideCell(r.yes, r.best_side === "YES") + '<br>' + sideCell(r.no, r.best_side === "NO") + "</td>" +
-        '<td class="r">' + stakeCell + "</td>" +
-        note +
-      "</tr>";
-    }).join("");
-  }
+  // --------------------------------------------------------------------------
+  // Renderers
+  // --------------------------------------------------------------------------
 
-  function renderBestBets(data) {
-    if (!data) { $("betrecs-table").innerHTML = '<div class="empty" style="padding:18px;color:var(--text-dim)">BET RECS FEED UNAVAILABLE</div>'; return; }
-    var m = data.meta || {};
-    var best = data.best_bets || [];
-    var flagged = data.flagged || [];
-    $("betrecs-meta").textContent =
-      (best.length ? best.length + " rec" + (best.length === 1 ? "" : "s") : "none") +
-      (flagged.length ? " · " + flagged.length + " withheld" : "") +
-      (m.generated ? " · " + esc(m.generated) : "");
-    if (m.per_bet_cap != null) $("betrecs-cap").textContent = pct(m.per_bet_cap, 0);
-    if (m.max_stake != null) $("betrecs-max").textContent = usd(m.max_stake);
-    $("betrecs-stale").hidden = !m.model_stale;
-    if ($("betrecs-cov")) {
-      $("betrecs-cov").innerHTML = "Coverage: " + esc(m.coverage || "") +
-        (m.model_generated ? " · model feed " + esc(m.model_generated) : "") +
-        (m.live_fetch_error ? ' · <span class="neg">live fetch error: ' + esc(m.live_fetch_error) + "</span>" : "");
-    }
+  function renderSingles(rows) {
+    var visible = (rows || []).filter(filterRow);
+    $("cnt-singles").textContent = visible.length + " rec" + (visible.length === 1 ? "" : "s");
+    var tbody = $("body-singles");
+    var empty = $("empty-singles");
 
-    var head = '<table class="pos-table"><thead><tr>' +
-      '<th>Best bet</th><th class="r">Model</th><th class="r">PM (Δ vs model)</th>' +
-      '<th>Both sides (back@ · fee-adj EV)</th><th class="r">½-Kelly</th><th class="r">Edge</th>' +
-      '</tr></thead><tbody>';
-    if (!best.length) {
-      $("betrecs-table").innerHTML = '<div class="empty" style="padding:18px;color:var(--text-dim)">No positive-edge model-backed bets right now.</div>';
-    } else {
-      $("betrecs-table").innerHTML = head + recRows(best) + "</tbody></table>";
-    }
-
-    if (flagged.length) {
-      $("betrecs-flagged-wrap").hidden = false;
-      $("betrecs-flagged").innerHTML =
-        '<table class="pos-table"><thead><tr>' +
-        '<th>Withheld bet</th><th class="r">Model</th><th class="r">PM (Δ vs model)</th>' +
-        '<th>Both sides</th><th class="r">½-Kelly</th><th>Why withheld</th>' +
-        '</tr></thead><tbody>' + recRows(flagged, { flagged: true }) + "</tbody></table>";
-    } else {
-      $("betrecs-flagged-wrap").hidden = true;
-    }
-  }
-
-  // -------------------------------------------------------------------------
-  // NEW 02 // Prop Arbs — Polymarket vs Sportsbook
-  // -------------------------------------------------------------------------
-  function renderPropArbs(data) {
-    var pa = (data && data.prop_arbs) || {};
-    var internal = pa.pm_internal || [];
-    var book = pa.pm_vs_book || [];
-    var all = internal.concat(book);
-    $("proparb-meta").textContent = all.length ? all.length + " opp" + (all.length === 1 ? "" : "s") : "none";
-    if ($("proparb-note")) {
-      $("proparb-note").textContent = pa.pm_vs_book_note || "";
-    }
-    if (!all.length) {
-      $("proparb-table").innerHTML = '<div class="empty" style="padding:18px;color:var(--text-dim)">No settlement-safe prop arbs right now.</div>';
+    if (!visible.length) {
+      tbody.innerHTML = "";
+      empty.hidden = false;
       return;
     }
-    var rows = all.map(function (a) {
+    empty.hidden = true;
+
+    var html = visible.map(function (r) {
+      var ages = r.ages || {};
+      var priceAgeTag = ageTag(ages.price_secs, 7200);
+      var modelAgeTag = ageTag(ages.model_secs, 86400);
+      return "<tr>" +
+        '<td data-label="Fixture">' + esc(r.fixture || "") + ' <span class="dim">' + esc(r.kickoff ? r.kickoff.slice(0, 10) : "") + "</span></td>" +
+        '<td data-label="Market"><span class="arb-badge badge-market">' + esc(r.market || "") + "</span></td>" +
+        '<td data-label="Selection"><strong>' + esc(r.team || r.selection || "") + "</strong></td>" +
+        '<td data-label="Model %" class="r">' + pct(r.model_prob) + "</td>" +
+        '<td data-label="Price" class="r num">' + priceStr(r.price) + ' <span class="dim" style="font-size:9px">' + esc(r.price_source === "devig_consensus" ? "devig" : "") + "</span>" + priceAgeTag + "</td>" +
+        '<td data-label="Edge" class="r ' + evClass(r.edge) + '">' + signPct(r.edge) + "</td>" +
+        '<td data-label="Net EV" class="r ' + evClass(r.ev_net) + '">' + signPct(r.ev_net) + "</td>" +
+        '<td data-label="Stake" class="r">' + gbp(r.stake) + "</td>" +
+        '<td data-label="Action">' + actionBadge(r.action_label) + "</td>" +
+        '<td data-label="Promo">' + promoBadge(r.promo_status, r.promo && r.promo.name) + "</td>" +
+        '<td data-label="Source">' + venueBadge(r.venue) + " " + staleBadge(r.stale) + " " + modelAgeTag + "</td>" +
+        "</tr>";
+    }).join("");
+    tbody.innerHTML = html;
+  }
+
+  function renderProps(rows) {
+    var visible = (rows || []).filter(filterRow);
+    $("cnt-props").textContent = visible.length + " rec" + (visible.length === 1 ? "" : "s");
+    var tbody = $("body-props");
+    var empty = $("empty-props");
+
+    if (!visible.length) {
+      tbody.innerHTML = "";
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
+
+    var html = visible.map(function (r) {
+      return "<tr>" +
+        '<td data-label="Fixture">' + esc(r.fixture || "") + "</td>" +
+        '<td data-label="Market"><span class="arb-badge badge-market">' + esc(r.market || "") + "</span></td>" +
+        '<td data-label="Selection">' + esc(r.selection || "") + "</td>" +
+        '<td data-label="Model %" class="r">' + pct(r.model_prob) + "</td>" +
+        '<td data-label="Price" class="r num">' + priceStr(r.price) + "</td>" +
+        '<td data-label="Net EV" class="r ' + evClass(r.ev_net) + '">' + signPct(r.ev_net) + "</td>" +
+        '<td data-label="Stake" class="r">' + currency(r.stake, r.currency) + "</td>" +
+        '<td data-label="Action">' + actionBadge(r.action_label) + "</td>" +
+        '<td data-label="Source">' + venueBadge(r.venue) + " " + staleBadge(r.stale) + "</td>" +
+        "</tr>";
+    }).join("");
+    tbody.innerHTML = html;
+  }
+
+  function renderAdv(rows) {
+    var visible = (rows || []).filter(filterRow);
+    $("cnt-adv").textContent = visible.length + " rec" + (visible.length === 1 ? "" : "s");
+    var tbody = $("body-adv");
+    var empty = $("empty-adv");
+
+    if (!visible.length) {
+      tbody.innerHTML = "";
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
+
+    var html = visible.map(function (r) {
+      var ages = r.ages || {};
+      var modelAge = ageTag(ages.model_secs, 86400);
+      return "<tr>" +
+        '<td data-label="Team"><strong>' + esc(r.team || "") + '</strong> <span class="dim">' + esc(r.group || "") + "</span></td>" +
+        '<td data-label="Stage"><span class="arb-badge badge-market">' + esc(r.stage || "") + "</span></td>" +
+        '<td data-label="Model %" class="r">' + pct(r.model_prob) + "</td>" +
+        '<td data-label="PM Price" class="r num">' + priceStr(r.pm_price) + "</td>" +
+        '<td data-label="PM Fee" class="r dim">' + pct(r.pm_fee, 2) + "</td>" +
+        '<td data-label="Net EV" class="r ' + evClass(r.ev_net) + '">' + signPct(r.ev_net) + "</td>" +
+        '<td data-label="Stake ($)" class="r">' + usd(r.stake) + "</td>" +
+        '<td data-label="Action">' + actionBadge(r.action_label) + "</td>" +
+        '<td data-label="Source"><span class="arb-badge badge-pm">PM</span> ' + staleBadge(r.stale) + " " + modelAge + "</td>" +
+        "</tr>";
+    }).join("");
+    tbody.innerHTML = html;
+  }
+
+  function renderArbs(rows) {
+    var visible = (rows || []).filter(filterRow);
+    $("cnt-arbs").textContent = visible.length + " arb" + (visible.length === 1 ? "" : "s");
+    var tbody = $("body-arbs");
+    var empty = $("empty-arbs");
+
+    if (!visible.length) {
+      tbody.innerHTML = "";
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
+
+    var html = visible.map(function (a) {
       var legs = (a.legs || []).map(function (l) {
-        return esc(l.venue) + " " + esc(l.side) + " @ " + price(l.price) + " (" + usd(l.stake) + ")";
-      }).join("  ·  ");
-      return '<tr>' +
-        '<td class="pos-match">' + esc(a.team || "") + '<span class="dim"> · ' + esc(a.market || a.kind) + "</span></td>" +
-        '<td><span class="dim" style="font-size:10px">' + legs + "</span></td>" +
-        '<td class="r pos">' + pct(a.guaranteed_pct) + "</td>" +
-      "</tr>";
+        return venueBadge(l.venue) + " " + esc(l.side || "") + " @ " + priceStr(l.price) + " (" + currency(l.stake, l.currency) + ")";
+      }).join(" &middot; ");
+      return "<tr>" +
+        '<td data-label="Fixture">' + esc(a.fixture || a.market || "") + ' <span class="dim">' + esc(a.selection || "") + "</span></td>" +
+        '<td data-label="Legs" style="font-size:11px">' + legs + "</td>" +
+        '<td data-label="Fee-adj edge" class="r ' + evClass(a.fee_adj_edge) + '">' + signPct(a.fee_adj_edge) + "</td>" +
+        '<td data-label="Guaranteed %" class="r pos bold">' + pct(a.guaranteed_pct) + "</td>" +
+        '<td data-label="Liquidity"><span class="dim" style="font-size:10px">' + esc(a.liquidity_note || "quoted") + "</span></td>" +
+        "</tr>";
     }).join("");
-    $("proparb-table").innerHTML =
-      '<table class="pos-table"><thead><tr><th>Market</th><th>Legs (settlement-safe)</th><th class="r">Guaranteed %</th></tr></thead><tbody>' +
-      rows + "</tbody></table>";
+    tbody.innerHTML = html;
   }
 
-  // -------------------------------------------------------------------------
-  // EXISTING 03/04/05 // pure-arb monitor (1X2 family)
-  // -------------------------------------------------------------------------
-  function renderArbs(data) {
-    var arbs = data.arbs || [];
-    var fx = (data.meta || {}).fx_usd_per_gbp;
-    $("arb-meta").textContent = (arbs.length ? arbs.length + " opp" + (arbs.length === 1 ? "" : "s") : "none") +
-      (fx ? " · GBP/USD " + num(fx, 4) + " (" + esc((data.meta || {}).fx_source || "") + ")" : "");
-    if (!arbs.length) {
-      $("arb-table").innerHTML = '<div class="empty" style="padding:18px;color:var(--text-dim)">No risk-free opportunities right now.</div>';
+  function renderWithheld(rows) {
+    var all = (rows || []);
+    $("cnt-withheld").textContent = all.length + " row" + (all.length === 1 ? "" : "s");
+    var tbody = $("body-withheld");
+    var empty = $("empty-withheld");
+
+    if (!all.length) {
+      tbody.innerHTML = "";
+      empty.hidden = false;
       return;
     }
-    function stakeStr(legs) {
-      return (legs || []).map(function (l) {
-        var amt = l.currency === "USD" ? usd(l.stake) : gbp(l.stake);
-        return amt + " " + esc(l.venue);
-      }).join(" / ");
-    }
-    function legStr(legs) {
-      return (legs || []).map(function (l) {
-        return esc(l.side === "win" ? "back" : "oppose") + " " + esc(l.desc);
-      }).join("  ·  ");
-    }
-    function confClass(c) {
-      return c === "execution-grade" ? "pos" : (c === "low" ? "neg" : "dim");
-    }
-    var rows = arbs.map(function (a) {
-      return '<tr>' +
-        '<td class="pos-time pos-match">' + esc(a.fixture) + '<span class="dim"> · ' + esc(a.selection) + '</span></td>' +
-        '<td><strong>' + esc(a.venue_pair) + '</strong><br><span class="dim" style="font-size:10px">' + legStr(a.legs) + '</span></td>' +
-        '<td class="r ' + (a.fee_adj_edge > 0 ? 'pos' : 'neg') + '">' + pct(a.fee_adj_edge) + '</td>' +
-        '<td class="r">' + stakeStr(a.legs) + '</td>' +
-        '<td class="r pos">' + pct(a.guaranteed_pct) + '</td>' +
-        '<td class="' + confClass(a.confidence) + '">' + esc(a.confidence || "") + '</td>' +
-      '</tr>';
+    empty.hidden = true;
+
+    var html = all.map(function (r) {
+      return "<tr>" +
+        '<td data-label="Fixture">' + esc(r.fixture || r.team || "") + ' <span class="dim">' + esc(r.market || "") + "</span></td>" +
+        '<td data-label="Selection">' + esc(r.selection || r.team || "") + "</td>" +
+        '<td data-label="Model %" class="r dim">' + pct(r.model_prob) + "</td>" +
+        '<td data-label="Edge" class="r dim">' + signPct(r.edge) + "</td>" +
+        '<td data-label="Why withheld" class="warn" style="font-size:10px">' + esc(r.withheld_reason || "") + "</td>" +
+        '<td data-label="Stale">' + staleBadge(r.stale) + "</td>" +
+        "</tr>";
     }).join("");
-    $("arb-table").innerHTML =
-      '<table class="pos-table"><thead><tr>' +
-        '<th>Market</th><th>Venue pair / legs</th>' +
-        '<th class="r">Fee-adj edge</th>' +
-        '<th class="r">Stake split</th><th class="r">Guaranteed %</th><th>Confidence</th>' +
-      '</tr></thead><tbody>' + rows + '</tbody></table>';
+    tbody.innerHTML = html;
   }
 
-  function renderHistory(hist) {
-    if (!hist) { if ($("hist-summary")) $("hist-summary").innerHTML = '<span class="dim">no historical feed</span>'; return; }
-    var prov = hist.best_leg_provider || {};
-    $("hist-summary").innerHTML =
-      "<strong>" + esc(hist.hypothesis || "") + "</strong><br>" +
-      "Scanned " + (hist.snapshots_scanned || 0) + " snapshots · true risk-free arbs: <strong>" +
-      (hist.true_back_only_arbs || 0) + "</strong> · min overround " + num(hist.min_overround_seen, 4) +
-      " · best-leg providers: " + (prov.sportsbook || 0) + " sportsbook / " + (prov.exchange || 0) + " exchange.";
-    var near = hist.tightest_near_arbs || [];
-    $("hist-near").innerHTML = near.length ?
-      ('<table class="pos-table"><thead><tr><th>Tightest near-arb</th><th class="r">Overround</th><th>Best legs (venue class)</th></tr></thead><tbody>' +
-        near.map(function (n) {
-          var legs = Object.keys(n.best_legs || {}).map(function (k) {
-            return esc(k) + ": " + esc(n.best_legs[k].book) + " (" + esc(n.best_legs[k].class) + ")";
-          }).join(" · ");
-          return '<tr><td class="pos-match">' + esc(n.event) + '</td><td class="r">' + num(n.overround, 4) +
-                 '</td><td><span class="dim" style="font-size:10px">' + legs + '</span></td></tr>';
-        }).join("") + '</tbody></table>') : '<div class="dim">no near-arbs</div>';
-  }
+  // --------------------------------------------------------------------------
+  // KPI strip
+  // --------------------------------------------------------------------------
 
-  function renderHypo(data) {
-    var h = data.hypothetical || {};
-    var pts = h.points || [];
-    $("hyp-summary").innerHTML = "Modeled cumulative guaranteed return: <strong style='color:var(--pos)'>" +
-      pct(h.cum_pct) + "</strong> over " + pts.length + " detection(s). " +
-      "<span class='dim'>(0 realized — see historical analysis; markets efficient.)</span>";
-    var svg = $("hyp-chart");
-    if (!pts.length) { svg.innerHTML = ''; return; }
-    var W = 700, H = 160, pad = 8;
-    var ys = pts.map(function (p) { return p.cum_pct || 0; });
-    var maxY = Math.max.apply(null, ys.concat([0.0001]));
-    var step = pts.length > 1 ? (W - 2 * pad) / (pts.length - 1) : 0;
-    var d = pts.map(function (p, i) {
-      var x = pad + i * step;
-      var y = H - pad - ((p.cum_pct || 0) / maxY) * (H - 2 * pad);
-      return (i === 0 ? "M" : "L") + x.toFixed(1) + " " + y.toFixed(1);
-    }).join(" ");
-    svg.innerHTML =
-      '<path d="' + d + '" fill="none" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="4 3"/>' +
-      '<text x="' + pad + '" y="14" fill="var(--muted)" font-size="9">HYPOTHETICAL</text>';
+  function renderKpis(data) {
+    var meta = data.meta || {};
+    var sb = meta.sportsbook_pool || {};
+    var pm = meta.pm_pool || {};
+    var exp = meta.open_exposure || {};
+    var ages = meta.ages || {};
+
+    // Freshness
+    var modelAge = ageFmt(ages.model_secs);
+    $("kpi-freshness").textContent = modelAge ? modelAge + " old" : "—";
+    if (ages.model_secs > 86400) $("kpi-freshness").classList.add("warn");
+
+    // Bankrolls
+    $("kpi-bankroll").textContent = sb.bankroll ? "£" + Number(sb.bankroll).toLocaleString() : "—";
+    $("kpi-pm-bankroll").textContent = pm.bankroll ? "$" + Number(pm.bankroll).toLocaleString() : "—";
+
+    // Open exposure
+    var wc = exp.worst_case;
+    $("kpi-exposure").textContent = wc != null ? "£" + Number(wc).toFixed(0) : "—";
+    if (wc != null && wc < -200) $("kpi-exposure").className = "arb-kpi-value neg";
+
+    // Counts
+    $("kpi-actionable").textContent = meta.actionable_count || 0;
+    $("kpi-withheld").textContent = meta.withheld_count || 0;
+
+    // Rung / CLV
+    var rungStr = "Rung " + (sb.rung !== undefined ? sb.rung : "—");
+    if (sb.clv_to_date != null) rungStr += " / CLV " + (Number(sb.clv_to_date) >= 0 ? "+" : "") + (Number(sb.clv_to_date) * 100).toFixed(1) + "%";
+    $("kpi-rung").textContent = rungStr;
+
+    // Section freshness hints
+    var mAge = ages.model_secs;
+    var aAge = ages.advancement_secs;
+    if ($("age-singles") && mAge) $("age-singles").textContent = "model " + ageFmt(mAge) + " ago";
+    if ($("age-adv") && aAge) $("age-adv").textContent = "adv " + ageFmt(aAge) + " ago";
   }
 
   function renderFooter(data) {
-    var m = (data && data.meta) || {};
-    if ($("foot-gen") && m.generated) $("foot-gen").textContent = "bet recs generated " + esc(m.generated);
+    var gen = (data.meta || {}).generated;
+    if ($("foot-gen") && gen) $("foot-gen").textContent = "generated " + gen;
   }
+
+  // --------------------------------------------------------------------------
+  // Filter wiring
+  // --------------------------------------------------------------------------
+
+  var _recs = null;
+
+  function applyFilters() {
+    if (!_recs) return;
+    renderSingles(_recs.match_singles || []);
+    renderProps(_recs.event_props || []);
+    renderAdv(_recs.advancement_futures || []);
+    renderArbs(_recs.guaranteed_arbs || []);
+    // Withheld is not filtered by most controls but respects text search
+    renderWithheld(_recs.withheld || []);
+  }
+
+  function wireFilters() {
+    $("f-fixture").addEventListener("input", function () {
+      filters.fixture = this.value.trim();
+      applyFilters();
+    });
+    $("f-market").addEventListener("change", function () {
+      filters.market = this.value;
+      applyFilters();
+    });
+    $("f-venue").addEventListener("change", function () {
+      filters.venue = this.value;
+      applyFilters();
+    });
+    $("f-currency").addEventListener("change", function () {
+      filters.currency = this.value;
+      applyFilters();
+    });
+
+    // Chip toggles
+    ["f-chip-add", "f-chip-hedge", "f-chip-posev", "f-chip-stale"].forEach(function (id) {
+      var btn = $(id);
+      if (!btn) return;
+      btn.addEventListener("click", function () {
+        var active = this.getAttribute("data-active") === "true";
+        this.setAttribute("data-active", active ? "false" : "true");
+        var filterType = this.getAttribute("data-filter");
+        var val = this.getAttribute("data-val");
+        if (filterType === "action") {
+          filters.action = active ? null : val;
+          // Deactivate sibling chips in action group
+          if (!active) {
+            ["f-chip-add", "f-chip-hedge"].forEach(function (otherId) {
+              if (otherId !== id) {
+                $(otherId) && $(otherId).setAttribute("data-active", "false");
+              }
+            });
+          }
+        } else if (filterType === "posev") {
+          filters.posev = !active;
+        } else if (filterType === "stale") {
+          filters.stale = !active;
+        }
+        applyFilters();
+      });
+    });
+
+    // Keyboard: Enter on fixture input
+    $("f-fixture").addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        this.value = "";
+        filters.fixture = "";
+        applyFilters();
+      }
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // Density toggle
+  // --------------------------------------------------------------------------
+
+  var _compact = false;
+  function wireDensity() {
+    var btn = $("density-btn");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      _compact = !_compact;
+      document.body.classList.toggle("density-compact", _compact);
+      btn.textContent = _compact ? "Comfort" : "Compact";
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // Main load
+  // --------------------------------------------------------------------------
+
   function showNoData(msg) {
-    var el = $("nodata"); if (!el) return;
-    el.hidden = false; if ($("nodata-msg")) $("nodata-msg").textContent = msg || "NO DATA";
+    var el = $("arb-nodata");
+    if (!el) return;
+    el.hidden = false;
+    var msgEl = $("arb-nodata-msg");
+    if (msgEl) msgEl.textContent = msg || "BET RECS FEED UNAVAILABLE";
   }
 
   function load() {
-    Promise.all([
-      fetchJson("./bet_recs.json").catch(function () { return null; }),
-      fetchJson("./arb_data.json").catch(function () { return null; }),
-      fetchJson("./arb_history.json").catch(function () { return null; })
-    ]).then(function (res) {
-      var recs = res[0], arbData = res[1], hist = res[2];
-      if (!recs) showNoData("BET RECS FEED UNAVAILABLE");
-      renderBestBets(recs);
-      renderPropArbs(recs || {});
-      if (!arbData) arbData = { arbs: [], meta: {}, hypothetical: {} };
-      renderArbs(arbData); renderHistory(hist); renderHypo(arbData);
-      renderFooter(recs || arbData);
-    });
+    fetchJson("./bet_recs.json")
+      .then(function (data) {
+        _recs = data;
+        renderKpis(data);
+        renderSingles(data.match_singles || []);
+        renderProps(data.event_props || []);
+        renderAdv(data.advancement_futures || []);
+        renderArbs(data.guaranteed_arbs || []);
+        renderWithheld(data.withheld || []);
+        renderFooter(data);
+      })
+      .catch(function () {
+        showNoData("BET RECS FEED UNAVAILABLE — run wca_betrecs.py to regenerate");
+      });
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", load);
-  else load();
+
+  wireFilters();
+  wireDensity();
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", load);
+  } else {
+    load();
+  }
 })();
