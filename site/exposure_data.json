@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-27 03:04:23 UTC"
+    "generated": "2026-06-27 04:04:58 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -9,16 +9,14 @@
     "p_profit": 0,
     "p_loss": 0,
     "p_big_win": 0,
-    "n_scenarios": 6561
+    "n_scenarios": 729
   },
   "correlation": {
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0,
+        "prob": 0.0001,
         "results": [
-          "New Zealand",
-          "Egypt",
           "Croatia",
           "Panama",
           "Colombia",
@@ -29,10 +27,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0,
+        "prob": 0.0001,
         "results": [
-          "New Zealand",
-          "Egypt",
           "Croatia",
           "Panama",
           "Colombia",
@@ -43,10 +39,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0,
+        "prob": 0.001,
         "results": [
-          "New Zealand",
-          "Egypt",
           "Croatia",
           "Panama",
           "Colombia",
@@ -57,10 +51,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0,
+        "prob": 0.0001,
         "results": [
-          "New Zealand",
-          "Egypt",
           "Croatia",
           "Panama",
           "Colombia",
@@ -71,10 +63,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0,
+        "prob": 0.0002,
         "results": [
-          "New Zealand",
-          "Egypt",
           "Croatia",
           "Panama",
           "Colombia",
@@ -87,10 +77,8 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0,
+        "prob": 0.0001,
         "results": [
-          "New Zealand",
-          "Egypt",
           "Croatia",
           "Panama",
           "Colombia",
@@ -101,10 +89,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0,
+        "prob": 0.0001,
         "results": [
-          "New Zealand",
-          "Egypt",
           "Croatia",
           "Panama",
           "Colombia",
@@ -115,10 +101,8 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0,
+        "prob": 0.001,
         "results": [
-          "New Zealand",
-          "Egypt",
           "Croatia",
           "Panama",
           "Colombia",
@@ -160,94 +144,12 @@
   },
   "fixtures": [
     {
-      "fixture": "New Zealand vs Belgium",
-      "kickoff": null,
-      "results": [
-        {
-          "outcome": "New Zealand",
-          "prob": 0.0705,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Draw",
-          "prob": 0.1346,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Belgium",
-          "prob": 0.7949,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        }
-      ],
-      "events": [],
-      "summary": {
-        "max_win": 0.0,
-        "stake_at_risk": 0,
-        "best_outcome": "New Zealand",
-        "worst_outcome": "New Zealand",
-        "n_blindspots": 0
-      }
-    },
-    {
-      "fixture": "Egypt vs Iran",
-      "kickoff": null,
-      "results": [
-        {
-          "outcome": "Egypt",
-          "prob": 0.3456,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Draw",
-          "prob": 0.3466,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Iran",
-          "prob": 0.3078,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        }
-      ],
-      "events": [],
-      "summary": {
-        "max_win": 0.0,
-        "stake_at_risk": 0,
-        "best_outcome": "Egypt",
-        "worst_outcome": "Egypt",
-        "n_blindspots": 0
-      }
-    },
-    {
       "fixture": "Croatia vs Ghana",
       "kickoff": "2026-06-27T21:00:00+00:00",
       "results": [
         {
           "outcome": "Croatia",
-          "prob": 0.5641,
+          "prob": 0.5626,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -256,16 +158,16 @@
           "plug": {
             "available": true,
             "outcome": "Croatia",
-            "best_venue": "smarkets",
+            "best_venue": "polymarket",
             "best_odds": 1.87,
-            "model_prob": 0.5641,
-            "ev_pct": 5.5,
-            "recommendation": "PLUG: +EV to back (5.5% edge) \u2014 fills the gap and adds value"
+            "model_prob": 0.5626,
+            "ev_pct": 5.2,
+            "recommendation": "PLUG: +EV to back (5.2% edge) \u2014 fills the gap and adds value"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.2751,
+          "prob": 0.2762,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -274,16 +176,16 @@
           "plug": {
             "available": true,
             "outcome": "Draw",
-            "best_venue": "unibet_uk",
-            "best_odds": 3.4,
-            "model_prob": 0.2751,
-            "ev_pct": -6.5,
-            "recommendation": "LEAVE UNHEDGED: plugging costs 6.5% EV \u2014 take the variance"
+            "best_venue": "polymarket",
+            "best_odds": 3.39,
+            "model_prob": 0.2762,
+            "ev_pct": -6.4,
+            "recommendation": "LEAVE UNHEDGED: plugging costs 6.4% EV \u2014 take the variance"
           }
         },
         {
           "outcome": "Ghana",
-          "prob": 0.1608,
+          "prob": 0.1612,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -315,7 +217,7 @@
       "results": [
         {
           "outcome": "Panama",
-          "prob": 0.0609,
+          "prob": 0.0618,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -324,7 +226,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.1401,
+          "prob": 0.1399,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -333,7 +235,7 @@
         },
         {
           "outcome": "England",
-          "prob": 0.799,
+          "prob": 0.7984,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -344,7 +246,7 @@
             "outcome": "England",
             "best_venue": "polymarket",
             "best_odds": 1.21,
-            "model_prob": 0.799,
+            "model_prob": 0.7984,
             "ev_pct": -3.2,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
@@ -374,7 +276,7 @@
       "results": [
         {
           "outcome": "Colombia",
-          "prob": 0.2815,
+          "prob": 0.2806,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -383,7 +285,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2755,
+          "prob": 0.275,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -392,7 +294,7 @@
         },
         {
           "outcome": "Portugal",
-          "prob": 0.443,
+          "prob": 0.4445,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -415,7 +317,7 @@
       "results": [
         {
           "outcome": "DR Congo",
-          "prob": 0.471,
+          "prob": 0.4735,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -424,7 +326,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2684,
+          "prob": 0.2681,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -433,7 +335,7 @@
         },
         {
           "outcome": "Uzbekistan",
-          "prob": 0.2606,
+          "prob": 0.2584,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -456,7 +358,7 @@
       "results": [
         {
           "outcome": "Algeria",
-          "prob": 0.2666,
+          "prob": 0.2665,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -465,7 +367,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.3802,
+          "prob": 0.3805,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -474,7 +376,7 @@
         },
         {
           "outcome": "Austria",
-          "prob": 0.3532,
+          "prob": 0.3531,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -497,7 +399,7 @@
       "results": [
         {
           "outcome": "Jordan",
-          "prob": 0.0461,
+          "prob": 0.0451,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -506,7 +408,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.115,
+          "prob": 0.1131,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -515,7 +417,7 @@
         },
         {
           "outcome": "Argentina",
-          "prob": 0.8388,
+          "prob": 0.8418,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -537,14 +439,14 @@
     {
       "fixture": "Panama vs England",
       "outcome": "England",
-      "prob": 0.799,
+      "prob": 0.7984,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "England",
         "best_venue": "polymarket",
         "best_odds": 1.21,
-        "model_prob": 0.799,
+        "model_prob": 0.7984,
         "ev_pct": -3.2,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
@@ -552,31 +454,31 @@
     {
       "fixture": "Croatia vs Ghana",
       "outcome": "Croatia",
-      "prob": 0.5641,
+      "prob": 0.5626,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Croatia",
-        "best_venue": "smarkets",
+        "best_venue": "polymarket",
         "best_odds": 1.87,
-        "model_prob": 0.5641,
-        "ev_pct": 5.5,
-        "recommendation": "PLUG: +EV to back (5.5% edge) \u2014 fills the gap and adds value"
+        "model_prob": 0.5626,
+        "ev_pct": 5.2,
+        "recommendation": "PLUG: +EV to back (5.2% edge) \u2014 fills the gap and adds value"
       }
     },
     {
       "fixture": "Croatia vs Ghana",
       "outcome": "Draw",
-      "prob": 0.2751,
+      "prob": 0.2762,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Draw",
-        "best_venue": "unibet_uk",
-        "best_odds": 3.4,
-        "model_prob": 0.2751,
-        "ev_pct": -6.5,
-        "recommendation": "LEAVE UNHEDGED: plugging costs 6.5% EV \u2014 take the variance"
+        "best_venue": "polymarket",
+        "best_odds": 3.39,
+        "model_prob": 0.2762,
+        "ev_pct": -6.4,
+        "recommendation": "LEAVE UNHEDGED: plugging costs 6.4% EV \u2014 take the variance"
       }
     }
   ],
