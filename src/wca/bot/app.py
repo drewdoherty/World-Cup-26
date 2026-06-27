@@ -55,6 +55,7 @@ logger = logging.getLogger(__name__)
 CARD_PATH = "data/card_latest.md"
 NEXT_PATH = "data/next_latest.md"
 GOALSCORERS_PATH = "data/goalscorers_latest.md"
+BETBUILDER_PATH = "data/betbuilder_latest.md"
 SCORES_FEED_PATH = "site/scores_data.json"
 CARD_MAX_AGE_HOURS = 6.0
 # The odds feed behind /accas and /boost should refresh frequently; warn beyond
@@ -123,6 +124,7 @@ _TELEGRAM_COMMANDS = [
     {"command": "card",        "description": "Today's recommended bet card"},
     {"command": "next",        "description": "Next match preview: winner, corners, scorers"},
     {"command": "goalscorers", "description": "Anytime + first-goalscorer recs, next 5 games"},
+    {"command": "betbuilder",  "description": "Team totals + player SoT/cards/fouls model fair odds"},
     {"command": "scores",      "description": "Predicted FT scorelines per fixture"},
     {"command": "accas",       "description": "4+ leg accumulators, next 5 matches"},
     {"command": "pm",          "description": "Polymarket parked orders + trader status"},
@@ -140,6 +142,7 @@ HELP_TEXT = (
     "/card — today's recommended bet card\n"
     "/next — next match preview: winner, corners, scorers, scorelines\n"
     "/goalscorers — anytime + first-goalscorer recs, next 5 games\n"
+    "/betbuilder — team totals + player SoT/cards/fouls model fair odds (model-only; sportsbook markets)\n"
     "/scores — predicted FT scorelines per fixture\n"
     "/accas [value|edge|hedge|longshot|promo] — model accas; default=low-win favourites @ modest odds (edge=high-edge underdogs)\n"
     "/structure — project structure metrics\n"
@@ -792,6 +795,45 @@ def handle_goalscorers(
     body = cached.get("text") or "(empty card)"
     banner = _stale_banner(generated, now_utc, CARD_MAX_AGE_HOURS, label="card")
     provenance = "_Source: %s — generated %s UTC_\n\n" % (goalscorers_path, generated)
+    return banner + provenance + body
+
+
+def handle_betbuilder(
+    betbuilder_path: str = BETBUILDER_PATH,
+    now_utc: Optional[str] = None,
+) -> str:
+    """Serve the cached /betbuilder card written by ``scripts/wca_betbuilder.py``.
+
+    Team totals (goals/shots/SoT/fouls/corners) and player props (SoT, fouls,
+    to-be-booked) priced from the team/player model. These are *model fair
+    odds*: SoT/cards/corners/fouls are sportsbook-only and the project has no
+    sportsbook odds feed beyond TheOddsAPI player props, so no live overlay is
+    available for most legs — they are decision support, not a priced edge.
+
+    Rule 1 (provenance): every reply leads with source path + generation
+    timestamp.  No generation timestamp -> NO BET.
+    """
+    if now_utc is None:
+        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    cached = cardcache.read_card(
+        betbuilder_path, now_utc=now_utc, max_age_hours=CARD_MAX_AGE_HOURS
+    )
+    if cached is None:
+        return (
+            "*Bet builder*\n"
+            "No card cached yet. The cron build (`scripts/wca_betbuilder.py`) "
+            "writes it alongside the main card — try again after the next build."
+        )
+    generated = cached.get("generated")
+    if not generated:
+        return (
+            "*Bet builder*\n"
+            "NO BET — `%s` has no generation timestamp; "
+            "data age is unknown." % betbuilder_path
+        )
+    body = cached.get("text") or "(empty card)"
+    banner = _stale_banner(generated, now_utc, CARD_MAX_AGE_HOURS, label="card")
+    provenance = "_Source: %s — generated %s UTC_\n\n" % (betbuilder_path, generated)
     return banner + provenance + body
 
 
@@ -2396,6 +2438,8 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_next(next_path=NEXT_PATH)
     if cmd == "/goalscorers":
         return handle_goalscorers(goalscorers_path=GOALSCORERS_PATH)
+    if cmd == "/betbuilder":
+        return handle_betbuilder(betbuilder_path=BETBUILDER_PATH)
     if cmd == "/scores":
         return handle_scores(card_path=CARD_PATH)
     if cmd == "/accas":
