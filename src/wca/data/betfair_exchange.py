@@ -26,8 +26,10 @@ orchestrator degrades to the next source rather than crashing the build.
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
+import time
 from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
@@ -40,6 +42,19 @@ _CERT_LOGIN_URL = "https://identitysso-cert.betfair.com/api/certlogin"
 _INTERACTIVE_LOGIN_URL = "https://identitysso.betfair.com/api/login"
 _TIMEOUT = 20
 _SOCCER_EVENT_TYPE_ID = "1"  # Betfair event-type id for Association Football.
+
+# Where a freshly-minted session token is cached ACROSS processes so an hourly
+# build does not re-login each run (Betfair's interactive login is rate-limited
+# / throttled). Path is overridable; file is gitignored and chmod 0600. The
+# token itself is NEVER logged.
+_SESSION_CACHE_PATH = os.environ.get(
+    "BETFAIR_SESSION_CACHE", "data/.betfair_session.json"
+)
+# Cached session token is considered fresh for this long (Betfair tokens live
+# far longer, but we re-mint well inside the window to stay safe).
+_SESSION_CACHE_TTL_SECONDS = int(
+    os.environ.get("BETFAIR_SESSION_TTL_SECONDS", str(3 * 60 * 60))  # ~3 hours
+)
 
 # Column shape shared with theoddsapi.get_odds so downstream code is unchanged.
 _COLUMNS: Tuple[str, ...] = (
@@ -87,19 +102,75 @@ def _app_key() -> str:
     return ""
 
 
+def _read_cached_token() -> Optional[str]:
+    """Return a non-expired session token cached to disk, or ``None``.
+
+    Freshness is mtime-based: a cache file older than ``_SESSION_CACHE_TTL_SECONDS``
+    is treated as expired so a new token is minted. Any read/parse error degrades
+    to ``None`` (re-mint). The token is NEVER logged.
+    """
+    try:
+        path = _SESSION_CACHE_PATH
+        if not os.path.exists(path):
+            return None
+        age = time.time() - os.path.getmtime(path)
+        if age > _SESSION_CACHE_TTL_SECONDS:
+            return None
+        with open(path, "r", encoding="utf-8") as fh:
+            data = json.load(fh) or {}
+        tok = str(data.get("session_token") or "").strip()
+        return tok or None
+    except Exception as exc:  # noqa: BLE001 — cache is best-effort.
+        logger.warning("Betfair session cache read failed (re-minting): %s", exc)
+        return None
+
+
+def _write_cached_token(token: str) -> None:
+    """Persist a freshly-minted token to the gitignored cache file (chmod 0600).
+
+    Best-effort: any failure is logged WITHOUT the token and otherwise ignored.
+    """
+    if not token:
+        return
+    try:
+        path = _SESSION_CACHE_PATH
+        parent = os.path.dirname(path)
+        if parent:
+            os.makedirs(parent, exist_ok=True)
+        with open(path, "w", encoding="utf-8") as fh:
+            json.dump({"session_token": token, "minted_at": _now_iso()}, fh)
+        try:
+            os.chmod(path, 0o600)  # owner-only — never world-readable.
+        except OSError:
+            pass
+    except Exception as exc:  # noqa: BLE001 — cache write is best-effort.
+        logger.warning("Betfair session cache write failed (continuing): %s", exc)
+
+
+def _now_iso() -> str:
+    import datetime as _dt
+
+    return _dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def _resolve_session_token() -> Optional[str]:
     """Return a usable session token, or ``None`` if creds are unavailable.
 
     Resolution order (first that works wins; any failure returns ``None``,
-    never raises):
+    never raises) — the disk cache exists to STOP the interactive-login throttle:
 
     1. an explicit ``BETFAIR_SESSION_TOKEN`` (manual / short-lived);
     2. a cached token minted earlier in this process;
-    3. **cert login** when ``BETFAIR_CERT_PATH``/``BETFAIR_CERT_KEY_PATH`` are
+    3. a non-expired token cached to disk by an earlier process (mtime TTL);
+    4. **cert login** when ``BETFAIR_CERT_PATH``/``BETFAIR_CERT_KEY_PATH`` are
        set alongside username/password (the 24/7 non-interactive path);
-    4. **interactive login** with just ``BETFAIR_USERNAME``/``BETFAIR_PASSWORD``
+    5. **interactive login** with just ``BETFAIR_USERNAME``/``BETFAIR_PASSWORD``
        (no cert) — Betfair's rate-limited identity endpoint, fine for an hourly
        build but cert login is preferred for high-frequency use.
+
+    A token freshly minted via (4) or (5) is written back to the disk cache so
+    the NEXT process reuses it (steps 1-3) instead of hitting the login endpoint
+    again. The token is NEVER logged.
     """
     global _CACHED_TOKEN
     token = os.environ.get("BETFAIR_SESSION_TOKEN", "").strip()
@@ -107,6 +178,10 @@ def _resolve_session_token() -> Optional[str]:
         return token
     if _CACHED_TOKEN:
         return _CACHED_TOKEN
+    disk = _read_cached_token()
+    if disk:
+        _CACHED_TOKEN = disk  # keep it for the rest of this process too.
+        return disk
 
     user = os.environ.get("BETFAIR_USERNAME", "").strip()
     pwd = os.environ.get("BETFAIR_PASSWORD", "").strip()
@@ -128,6 +203,7 @@ def _resolve_session_token() -> Optional[str]:
             body = resp.json()
             if body.get("loginStatus") == "SUCCESS":
                 _CACHED_TOKEN = body.get("sessionToken")
+                _write_cached_token(_CACHED_TOKEN)
                 return _CACHED_TOKEN
             logger.warning("Betfair cert login failed: %s", body.get("loginStatus"))
             return None
@@ -147,6 +223,7 @@ def _resolve_session_token() -> Optional[str]:
         body = resp.json()
         if body.get("status") == "SUCCESS":
             _CACHED_TOKEN = body.get("token")
+            _write_cached_token(_CACHED_TOKEN)
             return _CACHED_TOKEN
         logger.warning(
             "Betfair interactive login failed: status=%s error=%s",
@@ -366,8 +443,10 @@ def _normalise_order(o: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         return None
     price = o.get("averagePriceMatched") or o.get("priceSize", {}).get("price")
     item = o.get("itemDescription") or {}
-    market_desc = item.get("marketDesc") or o.get("marketId")
-    sel_desc = item.get("runnerDesc") or str(o.get("selectionId") or "")
+    market_id = o.get("marketId")
+    selection_id = o.get("selectionId")
+    market_desc = item.get("marketDesc") or market_id
+    sel_desc = item.get("runnerDesc") or str(selection_id or "")
     event_desc = item.get("eventDesc") or ""
     side = (o.get("side") or "").upper()
     return {
@@ -384,7 +463,104 @@ def _normalise_order(o: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         "external_id": str(o.get("betId") or ""),
         "account": "1",
         "side": side,
+        # Raw Betfair IDs kept so resolve_order_names can backfill names later.
+        "market_id": str(market_id) if market_id is not None else None,
+        "selection_id": selection_id,
     }
+
+
+def build_name_maps(catalogue: List[Dict[str, Any]]):
+    """Build (marketId -> event name) and ((marketId, selectionId) -> runner
+    name) maps from a ``listMarketCatalogue`` result.
+
+    Pure (no I/O) so it is unit-testable against a sample catalogue. The runner
+    name for the Betfair draw runner ("The Draw") is normalised to "Draw" to
+    match the ledger convention used elsewhere in this module.
+    """
+    event_by_market: Dict[str, str] = {}
+    runner_by_market_sel: Dict[Tuple[str, Any], str] = {}
+    for cat in catalogue or []:
+        market_id = cat.get("marketId")
+        if market_id is None:
+            continue
+        market_id = str(market_id)
+        event = cat.get("event") or {}
+        event_name = (event.get("name") or "").strip()
+        if event_name:
+            event_by_market[market_id] = event_name
+        for runner in cat.get("runners") or []:
+            sel_id = runner.get("selectionId")
+            name = (runner.get("runnerName") or "").strip()
+            if not name:
+                continue
+            if name.lower() == "the draw":
+                name = "Draw"
+            runner_by_market_sel[(market_id, sel_id)] = name
+    return event_by_market, runner_by_market_sel
+
+
+def resolve_order_names(
+    positions: List[Dict[str, Any]],
+    token: str,
+    app_key: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    """Backfill ``fixture_or_event`` + ``selection`` on open positions whose names
+    are still raw Betfair IDs.
+
+    ``listCurrentOrders`` returns ``marketId`` + ``selectionId`` but no names, so
+    a position can't match the ledger by name. Given the set of market IDs, this
+    calls ``listMarketCatalogue`` (marketProjection EVENT + RUNNER_DESCRIPTION)
+    and maps ``marketId -> event name`` and ``(marketId, selectionId) -> runner
+    name``. Only positions whose ``selection`` still equals its raw selection ID
+    (i.e. no ``itemDescription`` was returned) are rewritten; positions that
+    already carry names are left untouched.
+
+    Degrades GRACEFULLY: if the catalogue call fails or returns nothing, the raw
+    IDs are left in place (never raises). Reuses :func:`_rpc`.
+    """
+    if not positions:
+        return positions
+    need = [
+        p for p in positions
+        if p.get("market_id") and _name_is_raw_id(p)
+    ]
+    if not need:
+        return positions
+    market_ids = sorted({p["market_id"] for p in need})
+    try:
+        catalogue = _rpc(
+            "listMarketCatalogue",
+            {
+                "filter": {"marketIds": market_ids},
+                "maxResults": str(max(1, len(market_ids))),
+                "marketProjection": ["EVENT", "RUNNER_DESCRIPTION"],
+            },
+            token, app_key=app_key,
+        ) or []
+    except Exception as exc:  # noqa: BLE001 — leave IDs in place on failure.
+        logger.warning("Betfair name resolution failed (leaving IDs): %s", exc)
+        return positions
+    event_by_market, runner_by_market_sel = build_name_maps(catalogue)
+    for p in need:
+        mid = p.get("market_id")
+        sid = p.get("selection_id")
+        event_name = event_by_market.get(mid)
+        if event_name:
+            p["fixture_or_event"] = event_name
+            if not p.get("market") or str(p.get("market")) == mid:
+                p["market"] = event_name
+        runner_name = runner_by_market_sel.get((mid, sid))
+        if runner_name:
+            p["selection"] = runner_name
+    return positions
+
+
+def _name_is_raw_id(p: Dict[str, Any]) -> bool:
+    """True when a position's ``selection`` is still the raw selection ID (i.e.
+    ``listCurrentOrders`` returned no ``itemDescription`` to name it)."""
+    sel = p.get("selection")
+    sid = p.get("selection_id")
+    return sid is not None and str(sel).strip() == str(sid).strip()
 
 
 def list_current_orders(*, account: str = "1") -> List[Dict[str, Any]]:
@@ -414,6 +590,10 @@ def list_current_orders(*, account: str = "1") -> List[Dict[str, Any]]:
                 if norm is not None:
                     norm["account"] = account
                     out.append(norm)
+            # listCurrentOrders has no names; backfill event + runner names from
+            # the market catalogue so positions can match the ledger. Degrades
+            # to leaving raw IDs if the catalogue call fails.
+            out = resolve_order_names(out, token, app_key=app_key)
             logger.info("Betfair positions: %d matched of %d orders", len(out), len(orders))
             return out
         except _InvalidAppKey:

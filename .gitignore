@@ -23,6 +23,9 @@ data/*.db
 data/*.db-shm
 data/*.db-wal
 
+# Betfair session-token cache (secret — never track)
+data/.betfair_session.json
+
 # runtime logs + DB backups (never track)
 data/com.wca.*.log
 data/*.db.*
