@@ -16,6 +16,7 @@ from wca.nextmatch import (
     build_next_match,
     format_goalscorer_card,
     format_next_match,
+    select_next_blends,
     top_scorers_from_odds,
 )
 
@@ -78,6 +79,39 @@ def _synthetic_odds():
         },
     )
     return pd.DataFrame(rows)
+
+
+def _synthetic_odds_simultaneous():
+    """Three fixtures: two kick off simultaneously (earliest), one later."""
+    rows = _odds_rows(
+        "evt_alpha", "Alpha", "Bravo", "2026-06-11T18:00:00Z",
+        {"book_a": {"Alpha": 2.10, "Draw": 3.40, "Bravo": 3.60}},
+    )
+    rows += _odds_rows(
+        "evt_charlie", "Charlie", "Delta", "2026-06-11T18:00:00Z",
+        {"book_a": {"Charlie": 2.2, "Draw": 3.3, "Delta": 3.4}},
+    )
+    rows += _odds_rows(
+        "evt_late", "Echo", "Alpha", "2026-06-12T18:00:00Z",
+        {"book_a": {"Echo": 3.0, "Draw": 3.2, "Alpha": 2.4}},
+    )
+    return pd.DataFrame(rows)
+
+
+def _synthetic_fixtures_meta_simultaneous():
+    return pd.DataFrame(
+        [
+            {
+                "home_team": h,
+                "away_team": a,
+                "neutral": False,
+                "country": "",
+                "home_score": __import__("numpy").nan,
+                "away_score": __import__("numpy").nan,
+            }
+            for h, a in (("Alpha", "Bravo"), ("Charlie", "Delta"), ("Echo", "Alpha"))
+        ]
+    )
 
 
 def _synthetic_fixtures_meta():
@@ -238,20 +272,34 @@ class TestBuildNextMatch:
         return fit_models(_synthetic_results(rng), half_life_years=8.0)
 
     def test_picks_earliest_kickoff(self):
-        card = build_next_match(
+        cards = build_next_match(
             self._models(), _synthetic_odds(), _synthetic_fixtures_meta()
         )
-        assert card is not None
-        assert (card.home, card.away) == ("Alpha", "Bravo")
-        assert card.commence_time == "2026-06-11T18:00:00Z"
+        assert len(cards) == 1
+        assert (cards[0].home, cards[0].away) == ("Alpha", "Bravo")
+        assert cards[0].commence_time == "2026-06-11T18:00:00Z"
+
+    def test_simultaneous_kickoffs_returns_all(self):
+        cards = build_next_match(
+            self._models(),
+            _synthetic_odds_simultaneous(),
+            _synthetic_fixtures_meta_simultaneous(),
+        )
+        assert len(cards) == 2
+        names = {(c.home, c.away) for c in cards}
+        assert ("Alpha", "Bravo") in names
+        assert ("Charlie", "Delta") in names
+        # The late fixture must not be included.
+        assert not any(c.home == "Echo" for c in cards)
 
     def test_sections_populated_and_consistent(self):
-        card = build_next_match(
+        cards = build_next_match(
             self._models(),
             _synthetic_odds(),
             _synthetic_fixtures_meta(),
             scorer_df=_scorer_df(),
         )
+        card = cards[0]
         # Winner: probs sum to 1, best prices line-shopped across books.
         probs = [card.winner[o][0] for o in ("home", "draw", "away")]
         assert sum(probs) == pytest.approx(1.0, abs=1e-9)
@@ -268,14 +316,29 @@ class TestBuildNextMatch:
         assert [s.player for s in card.scorers][:2] == ["Striker One", "Mid Two"]
         assert card.scorers[0].best_odds == 2.6 and card.scorers[0].best_book == "Book B"
 
-    def test_empty_slate_returns_none(self):
+    def test_empty_slate_returns_empty_list(self):
         empty = pd.DataFrame(
             columns=[
                 "event_id", "home_team", "away_team", "commence_time",
                 "market", "bookmaker_key", "outcome_name", "decimal_odds",
             ]
         )
-        assert build_next_match(self._models(), empty, _synthetic_fixtures_meta()) is None
+        assert build_next_match(self._models(), empty, _synthetic_fixtures_meta()) == []
+
+    def test_scorer_by_event_routes_per_fixture(self):
+        scorer_by_event = {"evt_alpha": _scorer_df()}
+        cards = build_next_match(
+            self._models(),
+            _synthetic_odds_simultaneous(),
+            _synthetic_fixtures_meta_simultaneous(),
+            scorer_by_event=scorer_by_event,
+            pm_lookup=False,
+        )
+        alpha_card = next(c for c in cards if c.home == "Alpha")
+        charlie_card = next(c for c in cards if c.home == "Charlie")
+        # Alpha fixture has scorer data; Charlie fixture has none.
+        assert len(alpha_card.scorers) > 0
+        assert len(charlie_card.scorers) == 0
 
 
 class TestTopScorers:
@@ -304,32 +367,51 @@ class TestFormatAndBot:
     def test_format_none(self):
         assert "No upcoming fixture" in format_next_match(None)
 
+    def test_format_empty_list(self):
+        assert "No upcoming fixture" in format_next_match([])
+
     def test_format_full_card(self):
         from wca.card import fit_models
 
         rng = np.random.default_rng(42)
         models = fit_models(_synthetic_results(rng), half_life_years=8.0)
-        card = build_next_match(
+        cards = build_next_match(
             models, _synthetic_odds(), _synthetic_fixtures_meta(), scorer_df=_scorer_df()
         )
-        text = format_next_match(card)
+        text = format_next_match(cards)
         assert "Next match" in text and "Alpha vs Bravo" in text
         assert "*Winner*" in text
         assert "O/U 8.5" in text
         assert "Striker One" in text
         assert "*Scorelines*" in text and "BTTS" in text
 
+    def test_format_simultaneous_includes_divider(self):
+        from wca.card import fit_models
+
+        rng = np.random.default_rng(42)
+        models = fit_models(_synthetic_results(rng), half_life_years=8.0)
+        cards = build_next_match(
+            models,
+            _synthetic_odds_simultaneous(),
+            _synthetic_fixtures_meta_simultaneous(),
+        )
+        assert len(cards) == 2
+        text = format_next_match(cards)
+        assert "Alpha vs Bravo" in text
+        assert "Charlie vs Delta" in text
+        assert "─" in text  # divider between simultaneous fixtures
+
     def test_format_includes_goalscorer_block(self, tmp_path):
         from wca.card import fit_models
 
         rng = np.random.default_rng(42)
         models = fit_models(_synthetic_results(rng), half_life_years=8.0)
-        card = build_next_match(
+        cards = build_next_match(
             models, _synthetic_odds(), _synthetic_fixtures_meta(),
             scorer_df=_gs_scorer_df(), squads_path=_write_squads(tmp_path),
             pm_lookup=False,
         )
-        text = format_next_match(card)
+        text = format_next_match(cards)
         assert "*Top goalscorers*" in text
         assert "Alpha Striker" in text and "Bravo Striker" in text
         assert "g/g" in text                 # market-implied goals/game basis
