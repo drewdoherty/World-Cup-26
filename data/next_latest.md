@@ -1,4 +1,4 @@
-<!-- generated: 2026-06-27T11:05:55 -->
+<!-- generated: 2026-06-27T12:45:29 -->
 ⚽ *Next match* — Panama vs England
 Kickoff 2026-06-27 21:00:00+00:00
 
