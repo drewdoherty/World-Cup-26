@@ -34,6 +34,14 @@ from pathlib import Path
 # wca.pm.trader.resolve_funder_from_env so the producer and the bot agree.
 _DEFAULT_POOL_USD = 2500.0
 
+# Minimum hours between game (1X2 result) proposal pushes.  Props and exposure
+# always send on every run; game picks only refresh when stale enough.
+_DEFAULT_GAME_INTERVAL_HOURS = 2.0
+
+# Look-ahead window (hours) for anytime-scorer prop fetches.  Props only make
+# sense close to kick-off — no need to pull scorer markets for games 2 weeks out.
+_DEFAULT_PROPS_HOURS_AHEAD = 48.0
+
 
 def _load_dotenv(path: str = ".env") -> None:
     """Tiny .env loader (same pattern as the other scripts); never echoes values."""
@@ -426,6 +434,169 @@ def _unfilled_orders_section(proposals: list, db_path: str) -> str:
         return ""
 
 
+def _game_push_gate(db_path: str, interval_hours: float):
+    """Return ``(should_push, hours_since_last)`` for game (1X2) proposals.
+
+    Reads a timestamp file adjacent to the DB.  If the file is absent or
+    interval_hours is 0, games are always pushed (returns ``(True, inf)``).
+    """
+    if interval_hours <= 0:
+        return True, float("inf")
+    gate_file = Path(db_path).parent / ".pm_game_last_push"
+    now_ts = datetime.datetime.utcnow().timestamp()
+    if gate_file.exists():
+        try:
+            last_ts = float(gate_file.read_text().strip())
+            elapsed = (now_ts - last_ts) / 3600.0
+            if elapsed < interval_hours:
+                return False, elapsed
+        except (ValueError, OSError):
+            pass
+    return True, float("inf")
+
+
+def _mark_game_pushed(db_path: str) -> None:
+    """Write the current UTC epoch to the game-push gate file."""
+    gate_file = Path(db_path).parent / ".pm_game_last_push"
+    try:
+        gate_file.write_text("%.6f" % datetime.datetime.utcnow().timestamp())
+    except OSError:
+        pass
+
+
+def _build_scorer_proposals(
+    models,
+    odds_df,
+    pool_usd: float,
+    min_edge: float,
+    max_order_usd: float,
+    *,
+    fraction: float = 0.25,
+    cap: float = 0.05,
+    hours_ahead: float = _DEFAULT_PROPS_HOURS_AHEAD,
+    pm_events=None,
+) -> list:
+    """Build player anytime-scorer proposals from Polymarket "1+ goals" markets.
+
+    For each upcoming fixture in ``odds_df`` within ``hours_ahead``:
+    1. Pulls anytime-scorer odds via the Odds API per-event endpoint.
+    2. Fetches DC expected-goals lambdas (``models.dc.predict``).
+    3. Prices each player via :func:`wca.nextmatch.build_goalscorers` (which
+       uses the StatsBomb npxg-share model via :class:`wca.models.scorers.ScorerPricer`).
+    4. Resolves the Polymarket "1+ goals" YES token.
+    5. Returns quarter-Kelly proposals for every player whose model edge
+       against the Polymarket price exceeds ``min_edge``.
+
+    Players without a model share in ``data/players.json`` are skipped — the
+    market-implied probability is not reliable enough to stake against.
+    """
+    import pandas as pd
+    from wca.nextmatch import build_goalscorers
+    from wca.data.polymarket import resolve_player_anytime_token
+    from wca.data import theoddsapi
+    from wca.markets import kelly as kelly_mod
+
+    if odds_df is None or odds_df.empty:
+        return []
+
+    now_dt = datetime.datetime.utcnow()
+    cutoff = now_dt + datetime.timedelta(hours=hours_ahead)
+
+    df = odds_df.copy()
+    if "commence_time" in df.columns:
+        ct = pd.to_datetime(df["commence_time"], errors="coerce", utc=True)
+        ct_naive = ct.dt.tz_localize(None) if ct.dt.tz is None else ct.dt.tz_convert(None)
+        df = df[(ct_naive >= now_dt) & (ct_naive <= cutoff)]
+
+    if df.empty or "event_id" not in df.columns:
+        return []
+
+    seen_ids: set = set()
+    fixtures = []
+    for _, r in df.iterrows():
+        eid = str(r.get("event_id") or "")
+        if not eid or eid in seen_ids:
+            continue
+        seen_ids.add(eid)
+        home = str(r.get("home_team") or "").strip()
+        away = str(r.get("away_team") or "").strip()
+        if home and away:
+            fixtures.append((home, away, eid))
+
+    hard_cap = min(float(max_order_usd), float(cap) * float(pool_usd))
+    proposals: list = []
+
+    for home, away, event_id in fixtures:
+        try:
+            scorer_df, _ = theoddsapi.get_event_odds(
+                "soccer_fifa_world_cup",
+                event_id,
+                markets="player_goal_scorer_anytime",
+            )
+        except Exception:
+            continue
+
+        try:
+            pred = models.dc.predict(home, away, neutral=True, warn=False)
+            lam_h = float(getattr(pred, "lambda_home", 0.0) or 0.0)
+            lam_a = float(getattr(pred, "lambda_away", 0.0) or 0.0)
+        except Exception:
+            lam_h = lam_a = 0.0
+
+        by_team, _ = build_goalscorers(
+            home, away, scorer_df,
+            top_n_per_team=15,
+            pm_events=pm_events,
+            pm_lookup=True,
+            lambda_home=lam_h,
+            lambda_away=lam_a,
+        )
+
+        for side in ("home", "away"):
+            for line in by_team[side]:
+                if not line.anytime_pm_price or not line.model_p_anytime:
+                    continue
+                model_p = float(line.model_p_anytime)
+                # Resolve token to get canonical price + token_id.
+                token_info = resolve_player_anytime_token(
+                    home, away, line.player, events=pm_events
+                )
+                if token_info is None:
+                    continue
+                pm_price = float(token_info["price"])
+                if not (0.0 < pm_price < 1.0):
+                    continue
+                ev = kelly_mod.edge(model_p, 1.0 / pm_price)
+                if ev < min_edge:
+                    continue
+                size_usd = kelly_mod.stake(
+                    model_p, 1.0 / pm_price, pool_usd, fraction=fraction, cap=cap
+                )
+                size_usd = min(size_usd, hard_cap)
+                if size_usd < 1.0:
+                    continue
+                proposals.append(
+                    {
+                        "token_id": token_info["token_id"],
+                        "side": "BUY",
+                        "price": pm_price,
+                        "size_usd": size_usd,
+                        "shares": size_usd / pm_price,
+                        "market_question": token_info["market_question"],
+                        "event_slug": token_info.get("event_slug", ""),
+                        "outcome": token_info["outcome"],
+                        "match_desc": "%s vs %s" % (home, away),
+                        "model_prob": model_p,
+                        "ev": ev,
+                        "neg_risk": bool(token_info["neg_risk"]),
+                        "prop_type": "anytime_scorer",
+                        "player": line.player,
+                    }
+                )
+
+    return proposals
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Produce Polymarket parked-order proposals from the card."
@@ -461,6 +632,18 @@ def main() -> int:
         type=float,
         default=30.0,
         help="Absolute per-order USD ceiling (default 30)",
+    )
+    parser.add_argument(
+        "--game-interval-hours",
+        type=float,
+        default=_DEFAULT_GAME_INTERVAL_HOURS,
+        help="Minimum hours between game (1X2) proposal pushes (default 2; 0 = always)",
+    )
+    parser.add_argument(
+        "--props-hours-ahead",
+        type=float,
+        default=_DEFAULT_PROPS_HOURS_AHEAD,
+        help="Fetch anytime-scorer props for fixtures within this many hours (default 48)",
     )
     parser.add_argument(
         "--dry-print",
@@ -513,31 +696,70 @@ def main() -> int:
         mask = (ct_naive >= now_dt) & (ct_naive <= cutoff_dt)
         odds_df = odds_df[mask].copy()
 
-    # -- proposals --------------------------------------------------------
-    try:
-        proposals = build_pm_proposals(
-            models,
-            odds_df,
-            fixtures_meta=results,
-            pool_usd=args.pool_usd,
-            min_edge=args.min_edge,
-            max_order_usd=args.max_order_usd,
-        )
-    except Exception as exc:
-        print("ERROR: proposal build failed: %s" % exc, file=sys.stderr)
-        return 1
-
-    total_size = sum(p["size_usd"] for p in proposals)
-    print(
-        "Funder (maker): %s | pool $%.0f | %d proposal(s), total $%.2f"
-        % (funder, args.pool_usd, len(proposals), total_size)
-    )
     quota_str = (
         "quota remaining=%s" % quota.remaining
         if quota is not None and getattr(quota, "remaining", None) is not None
         else "quota=unknown"
     )
     print("Odds %s" % quota_str)
+
+    # -- Fetch PM events once (shared by game + scorer proposal builders) -----
+    try:
+        from wca.data.polymarket import find_world_cup_markets
+        pm_events = find_world_cup_markets(include_closed=False)
+    except Exception:
+        pm_events = None
+
+    # -- Scorer (prop) proposals — always built on every run -----------------
+    try:
+        scorer_proposals = _build_scorer_proposals(
+            models,
+            odds_df,
+            pool_usd=args.pool_usd,
+            min_edge=args.min_edge,
+            max_order_usd=args.max_order_usd,
+            hours_ahead=args.props_hours_ahead,
+            pm_events=pm_events,
+        )
+    except Exception as exc:
+        print("WARNING: scorer proposal build failed: %s" % exc, file=sys.stderr)
+        scorer_proposals = []
+
+    # -- Game (1X2 result) proposals — gated by frequency --------------------
+    push_games, hours_since_games = _game_push_gate(args.db, args.game_interval_hours)
+    if push_games:
+        try:
+            game_proposals = build_pm_proposals(
+                models,
+                odds_df,
+                fixtures_meta=results,
+                pool_usd=args.pool_usd,
+                min_edge=args.min_edge,
+                max_order_usd=args.max_order_usd,
+                events=pm_events,
+            )
+        except Exception as exc:
+            print("ERROR: proposal build failed: %s" % exc, file=sys.stderr)
+            return 1
+    else:
+        game_proposals = []
+        print(
+            "Game proposals held — last pushed %.1fh ago "
+            "(interval=%.1fh; --game-interval-hours 0 to force)."
+            % (hours_since_games, args.game_interval_hours)
+        )
+
+    # Props first, then games (sorted by EV within each group).
+    scorer_proposals.sort(key=lambda p: -float(p.get("ev", 0.0)))
+    game_proposals.sort(key=lambda p: -float(p.get("ev", 0.0)))
+    proposals = scorer_proposals + game_proposals
+
+    total_size = sum(p["size_usd"] for p in proposals)
+    print(
+        "Funder (maker): %s | pool $%.0f | %d proposal(s) (%d props, %d game), total $%.2f"
+        % (funder, args.pool_usd, len(proposals),
+           len(scorer_proposals), len(game_proposals), total_size)
+    )
 
     if not proposals:
         print("No proposals to park (no +EV pick resolved to a live token).")
@@ -549,9 +771,19 @@ def main() -> int:
         )
         if exposure_section:
             print("\n" + exposure_section)
-        print("-- proposals (dry-print; nothing parked or sent) --")
-        for i, p in enumerate(proposals, 1):
-            print(_format_proposal_line(i, p))
+        if scorer_proposals:
+            print("-- props (anytime scorer) --")
+            for i, p in enumerate(scorer_proposals, 1):
+                print(_format_proposal_line(i, p))
+        if game_proposals:
+            print("-- game picks (1X2) --")
+            for i, p in enumerate(game_proposals, len(scorer_proposals) + 1):
+                print(_format_proposal_line(i, p))
+        elif not push_games:
+            print(
+                "-- game picks held (%.1fh since last push, interval=%.1fh) --"
+                % (hours_since_games, args.game_interval_hours)
+            )
         return 0
 
     # -- park + notify (single message) -----------------------------------
@@ -584,21 +816,43 @@ def main() -> int:
             % (n_cleared, "reset to 1" if did_reset else "continues (in-flight order)")
         )
 
-    # Park all proposals first
+    # Park all proposals
     parked_texts = []
     for p in proposals:
         parked_texts.append(push_parked_order(_augment_for_gate(p)))
 
-    # Build single message with exposure + all proposals
+    # Build a single message: exposure section + props section + game section.
     exposure_section = _build_exposure_section(proposals, odds_df, args.db, now_dt)
 
-    message_body = "🎯 *Polymarket Trade Ideas* — %d picks\n\n" % len(proposals)
+    n_props = len(scorer_proposals)
+    n_games = len(game_proposals)
+    parts_label = []
+    if n_props:
+        parts_label.append("%d prop%s" % (n_props, "s" if n_props != 1 else ""))
+    if n_games:
+        parts_label.append("%d game%s" % (n_games, "s" if n_games != 1 else ""))
+    label = ", ".join(parts_label) if parts_label else "%d picks" % len(proposals)
+    message_body = "🎯 *Polymarket Trade Ideas* — %s\n\n" % label
+
     if exposure_section:
         message_body += exposure_section + "\n"
 
-    message_body += "*Proposals:*\n"
-    for i, text in enumerate(parked_texts, 1):
-        message_body += "\n" + text
+    if n_props:
+        message_body += "*Props (anytime scorer):*\n"
+        for i in range(n_props):
+            message_body += "\n" + parked_texts[i]
+        message_body += "\n"
+
+    if n_games:
+        message_body += "*Game picks (1X2):*\n"
+        for i in range(n_props, n_props + n_games):
+            message_body += "\n" + parked_texts[i]
+    elif not push_games and args.game_interval_hours > 0:
+        next_in = max(0.0, args.game_interval_hours - hours_since_games)
+        message_body += (
+            "_Game picks paused — last sent %.1fh ago (next in ~%.1fh)._"
+            % (hours_since_games, next_in)
+        )
 
     # Resting orders from earlier batches that are still unfilled — shown with
     # %-off-market + age so the user can let them ride or redeem instantly.
@@ -611,8 +865,7 @@ def main() -> int:
         "Unfilled orders auto-redeem after 24h; `REDEEM ALL` / `REDEEM <id>` to cancel now._"
     )
 
-    # Send — split on paragraph boundaries if over Telegram's 4096-char limit
-    # (proposing ALL moneyline opportunities can exceed a single message).
+    # Send — split on paragraph boundaries if over Telegram's 4096-char limit.
     try:
         for part in _split_for_telegram(message_body):
             client.send_message(admin, part)
@@ -623,6 +876,10 @@ def main() -> int:
     except TelegramError as exc:
         print("send error: %s" % exc, file=sys.stderr)
         return 1
+
+    # Mark game push time only after a successful send.
+    if push_games and game_proposals:
+        _mark_game_pushed(args.db)
 
     return 0
 
