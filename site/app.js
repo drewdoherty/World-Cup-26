@@ -531,6 +531,8 @@
       var edge = (p.model_prob != null && p.market_prob_devig != null)
         ? (p.model_prob - p.market_prob_devig) : null;
       return '<tr title="' + esc(metaTitle(p)) + '" style="border-left:2px solid ' + col + '">' +
+        '<td class="r num dim pos-id" data-label="ID">' +
+          (p.id != null ? '#' + esc(p.id) : '—') + '</td>' +
         '<td class="num pos-when" data-label="Date">' +
           whenCell(p.ts_utc) + '</td>' +
         '<td class="pos-match" data-label="Match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
@@ -555,6 +557,7 @@
     $("positions").innerHTML =
       '<table class="pos-table pos-table-wide">' +
         '<thead><tr>' +
+          '<th class="r dim">#</th>' +
           '<th>Date</th><th>Match</th><th>Market</th><th>Selection</th>' +
           '<th class="r">Odds</th><th class="r">Stake</th>' +
           '<th class="r">Model</th><th class="r">Mkt</th>' +
@@ -1229,6 +1232,8 @@
       var plTxt = p.status === "void" ? "void" : signedMoney(pl, p.currency);
       return '<tr title="' + esc(metaTitle(p)) +
           '" style="border-left:2px solid ' + bookColor(p.platform) + '">' +
+        '<td class="r num dim pos-id" data-label="ID">' +
+          (p.id != null ? '#' + esc(p.id) : '—') + '</td>' +
         '<td class="num pos-when" data-label="Settled">' + whenCell(p.settled_ts || p.ts_utc) + '</td>' +
         '<td class="pos-match" data-label="Match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
         '<td class="pos-mkt dim" data-label="Market" title="' + esc(p.market) + '">' + esc(marketShort(p.market)) + '</td>' +
@@ -1253,6 +1258,7 @@
     el.innerHTML =
       '<table class="pos-table pos-table-wide">' +
         '<thead><tr>' +
+          '<th class="r dim">#</th>' +
           '<th>Settled</th><th>Match</th><th>Market</th><th>Selection</th>' +
           '<th class="r">Odds</th><th class="r">Stake</th>' +
           '<th class="r">Model</th><th class="r">EV</th>' +
