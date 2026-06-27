@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light">
 <title>WORLD CUP ALPHA // SCORES</title>
 <link rel="stylesheet" href="./style.css">
 <style>
@@ -276,6 +276,106 @@
           </g>
         </svg>
         <p class="viz-note">src/wca/models/venues.py · factor 0.5 + 0.02 pts/m altitude tax over 1000 m gap · opt-in</p>
+      </div>
+    </section>
+
+    <!-- Benchmarking: Repeatable Edge Verdict -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">D // Benchmarking — Repeatable Edge Verdict</span>
+        <span class="panel-meta">Is the edge real yet? Green needs CLV and stability.</span>
+      </div>
+      <div class="panel-body">
+        <p class="viz-sub">Statistical gates to confirm the model's edge is reproducible, not luck. Edge is <b>real</b> when all gates pass; <b>insufficient sample</b> before n_eff ≥ 25.</p>
+
+        <table class="tbl" style="width:100%; margin-top:12px;">
+          <thead>
+            <tr style="background: var(--panel-2);">
+              <th style="width:8%; text-align:center;">Gate</th>
+              <th style="width:35%;">Statistic</th>
+              <th style="width:22%; text-align:right;">Value</th>
+              <th style="width:25%;">Threshold</th>
+              <th style="width:10%; text-align:center;">Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align:center; color:var(--accent); font-weight:600;">G0</td>
+              <td>Power floor (n_eff)</td>
+              <td style="text-align:right; font-family:var(--mono); color:var(--neg);">16.0</td>
+              <td>CLV n_eff ≥ 25 OR ROI n_eff ≥ 100</td>
+              <td style="text-align:center; color:var(--neg); font-weight:600;">✕ FAIL</td>
+            </tr>
+            <tr style="background: var(--panel-2);">
+              <td style="text-align:center; color:var(--accent); font-weight:600;">G1</td>
+              <td>CLV lower bound &gt; ROPE floor</td>
+              <td style="text-align:right; font-family:var(--mono); color:var(--neg);">−0.039</td>
+              <td>&gt; 0.005 (cost-adjusted ROPE)</td>
+              <td style="text-align:center; color:var(--neg); font-weight:600;">✕ FAIL</td>
+            </tr>
+            <tr>
+              <td style="text-align:center; color:var(--accent); font-weight:600;">G2</td>
+              <td>Sequential CLV significance</td>
+              <td style="text-align:right; font-family:var(--mono); color:var(--neg);">0.188</td>
+              <td>z &gt; 3.02 (grows with n_eff)</td>
+              <td style="text-align:center; color:var(--neg); font-weight:600;">✕ FAIL</td>
+            </tr>
+            <tr style="background: var(--panel-2);">
+              <td style="text-align:center; color:var(--accent); font-weight:600;">G3</td>
+              <td>Beat-rate &gt; placebo 95th pct</td>
+              <td style="text-align:right; font-family:var(--mono); color:var(--neg);">0.408</td>
+              <td>&gt; placebo 0.696</td>
+              <td style="text-align:center; color:var(--neg); font-weight:600;">✕ FAIL</td>
+            </tr>
+            <tr>
+              <td style="text-align:center; color:var(--accent); font-weight:600;">G4</td>
+              <td>Skill vs market (paired log-loss)</td>
+              <td style="text-align:right; font-family:var(--mono); color:var(--neg);">−0.007</td>
+              <td>mean≥0 one-sided p≤0.05 (model better)</td>
+              <td style="text-align:center; color:var(--neg); font-weight:600;">✕ FAIL</td>
+            </tr>
+            <tr style="background: var(--panel-2);">
+              <td style="text-align:center; color:var(--text-dim);">G5</td>
+              <td>Calibration (slope=1, intercept=0)</td>
+              <td style="text-align:right; font-family:var(--mono); color:var(--text-dim);">1.247</td>
+              <td>slope C[31 &amp; intercept C[30 (N≈100)</td>
+              <td style="text-align:center; color:var(--text-dim);">— N/A</td>
+            </tr>
+            <tr>
+              <td style="text-align:center; color:var(--accent); font-weight:600;">G6</td>
+              <td>Stability (no break &amp; OOS/IS≥0.5)</td>
+              <td style="text-align:right; font-family:var(--mono); color:var(--neg);">−0.396</td>
+              <td>no break AND OOS/IS &gt; 0.5</td>
+              <td style="text-align:center; color:var(--neg); font-weight:600;">✕ FAIL</td>
+            </tr>
+            <tr style="background: var(--panel-2);">
+              <td style="text-align:center; color:var(--accent); font-weight:600;">G7</td>
+              <td>Multiple testing (BH FDR)</td>
+              <td style="text-align:right; font-family:var(--mono); color:var(--neg);">0.000</td>
+              <td>BH-adjusted q≤0.05 in ≥1 segment</td>
+              <td style="text-align:center; color:var(--neg); font-weight:600;">✕ FAIL</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p style="font-size:11px; color:var(--text-dim); margin-top:12px; line-height:1.6;">
+          <b>Samples to significance:</b> CLV = 25 clustered (leading, low-variance) vs ROI = 3860 (lagging, outcome-variance). Current effective sample: <b style="color:var(--neg);">n_eff = 16.0</b>. That ≈150p gap is why CLV leads the verdict and ROI lags.
+        </p>
+
+        <div style="margin-top:14px; padding:10px; background:var(--panel-2); border-left:3px solid var(--accent); border-radius:2px;">
+          <p style="font-size:11px; color:var(--text); margin:0;"><b>Current verdict:</b> <span style="color:var(--neg);">INSUFFICIENT SAMPLE</span> — n_eff too low to claim real edge. Need ~9× more data (tight clustering) or ~240× more (outcome variance) to reach statistical significance. Keep building.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Analytics Bridge: Link to full Forest visualization on v2 -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">A // Futures — Model vs Market Forest</span>
+        <span class="panel-meta">per-team reach probability · model vs market price</span>
+      </div>
+      <div class="panel-body" style="padding:20px; text-align:center; color:var(--text-dim);">
+        <p style="margin:0;">Full futures forest visualization is on the <a href="http://localhost:8001" style="color:var(--accent); text-decoration:none; font-weight:600;">Analytics (v2) dashboard</a> — <span style="font-size:11px;">interactive stage selector, model vs market probabilities, Kelly stake sizing</span></p>
       </div>
     </section>
   </main>

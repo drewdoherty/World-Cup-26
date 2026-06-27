@@ -2,23 +2,23 @@
    Pure static, no external fonts/CDNs. System monospace stack only. */
 
 :root {
-  --bg: #0a0b0d;
-  --bg-2: #0d0f12;
-  --panel: #0e1014;
-  --panel-2: #111419;
-  --border: #1e2126;
-  --border-2: #262a31;
-  --text: #d4dae0;
-  --text-dim: #6b7480;
-  --muted: #4a525c;
-  --accent: #3fe08a;
-  --pos: #3fe08a;
-  --neg: #ff5c6c;
-  --warn: #f2c14e;
-  --sportsbook: #4ade80;
-  --polymarket: #60a5fa;
-  --kalshi: #a855f7;
-  --track: #15181d;
+  --bg: #F6F3FC;
+  --bg-2: #F0ECFA;
+  --panel: #FFFFFF;
+  --panel-2: #EDE7F8;
+  --border: #DCD3EE;
+  --border-2: #CAC0DB;
+  --text: #2A2440;
+  --text-dim: #6B6488;
+  --muted: #6B6488;
+  --accent: #6D4AD0;
+  --pos: #1A7A4C;
+  --neg: #C0273A;
+  --warn: #9A6A00;
+  --sportsbook: #2563B0;
+  --polymarket: #7A3FB0;
+  --kalshi: #0E7C7B;
+  --track: #EDE7F8;
   --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Monaco,
     Consolas, "Liberation Mono", "Courier New", monospace;
 }
@@ -38,7 +38,7 @@ html, body {
 
 body {
   background:
-    radial-gradient(1200px 600px at 80% -10%, #10151c 0%, rgba(16,21,28,0) 60%),
+    radial-gradient(1200px 600px at 80% -10%, #E8DFF6 0%, rgba(232,223,246,0) 60%),
     var(--bg);
   min-height: 100vh;
 }
@@ -746,6 +746,35 @@ body {
 .rk-plug { font-size: 10px; color: var(--warn); margin-top: 3px; padding-left: 8px; border-left: 2px solid var(--warn); line-height: 1.4; }
 .rk-state { font-size: 11px; padding: 2px 0; }
 .rk-ok { font-size: 12px; color: var(--pos); padding: 4px 0; }
+
+/* enriched panel: exposure + recs + events + accas + promos */
+.rk-sec { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+.rk-note, .rk-modelonly { font-weight: 400; color: var(--muted); text-transform: none; letter-spacing: 0; font-size: 10px; }
+.rk-exrow { display: flex; align-items: baseline; gap: 8px; font-size: 12px; padding: 3px 0; flex-wrap: wrap; }
+.rk-extag { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); border: 1px solid var(--border); border-radius: 2px; padding: 1px 5px; }
+.rk-exnum { margin-left: auto; color: var(--text-dim); }
+.rk-off { font-size: 9px; color: var(--warn); text-transform: uppercase; letter-spacing: 1px; }
+.rk-rec { display: flex; align-items: baseline; gap: 10px; font-size: 12px; padding: 5px 0 5px 8px; border-bottom: 1px solid var(--border); border-left: 2px solid var(--border); flex-wrap: wrap; }
+.rk-rec:last-child { border-bottom: none; }
+.rk-rec.rkc-new { border-left-color: var(--pos); }
+.rk-rec.rkc-hedge { border-left-color: var(--accent); }
+.rk-rec.rkc-topup { border-left-color: var(--muted); }
+.rk-rk { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); min-width: 48px; }
+.rk-rfx { flex: 1 1 220px; }
+.rk-rnum { margin-left: auto; font-family: var(--mono); font-size: 11px; white-space: nowrap; }
+.rk-ev, .rk-acca { display: flex; align-items: baseline; gap: 10px; font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.rk-ev:last-child, .rk-acca:last-child { border-bottom: none; }
+.rk-evn, .rk-anum { margin-left: auto; font-family: var(--mono); font-size: 11px; }
+.rk-alabel { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); min-width: 110px; }
+.rk-alegs { flex: 1 1 240px; }
+.rk-x { color: var(--muted); }
+.rk-venues { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rk-venue { background: var(--panel-2); border: 1px solid var(--border); border-radius: 3px; padding: 8px 10px; }
+.rk-vh { font-size: 12px; margin-bottom: 5px; }
+.rk-boost, .rk-promo { display: block; font-size: 10px; line-height: 1.45; color: var(--text-dim); }
+.rk-boost { color: var(--accent); }
+.rk-basis { margin-top: 14px; font-size: 9px; color: var(--muted); line-height: 1.4; }
+@media (max-width: 860px) { .rk-venues { grid-template-columns: 1fr; } }
 
 @media (max-width: 860px) {
   .sc-body, .sc-body3 { grid-template-columns: 1fr; }
