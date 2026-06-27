@@ -36,6 +36,22 @@
   </div>
 
   <main class="grid">
+    <!-- Risk & Blind Spots -->
+    <section class="panel panel-exposure">
+      <div class="panel-head"><span class="panel-label">⚠️ Risk &amp; Blind Spots // Portfolio Exposure</span><span class="panel-meta" id="exposure-meta"></span></div>
+      <div class="panel-body" id="exposure">
+        <div class="exposure-grid" id="exposure-grid">
+          <div class="exposure-card"><div class="exposure-label">EV (SLATE)</div><div class="exposure-value" id="exp-ev">—</div></div>
+          <div class="exposure-card"><div class="exposure-label">BEST CASE</div><div class="exposure-value exp-positive" id="exp-best">—</div></div>
+          <div class="exposure-card"><div class="exposure-label">WORST CASE</div><div class="exposure-value exp-negative" id="exp-worst">—</div></div>
+          <div class="exposure-card"><div class="exposure-label">P(PROFIT)</div><div class="exposure-value" id="exp-pprofit">—</div></div>
+          <div class="exposure-card"><div class="exposure-label">P(LOSS)</div><div class="exposure-value" id="exp-ploss">—</div></div>
+          <div class="exposure-card"><div class="exposure-label">P(WIN > £50)</div><div class="exposure-value" id="exp-pwin50">—</div></div>
+        </div>
+        <div id="exposure-detail"></div>
+      </div>
+    </section>
+
     <!-- Venues -->
     <section class="panel panel-venues">
       <div class="panel-head"><span class="panel-label">💰 Venues</span><span class="panel-meta" id="venues-meta"></span></div>

@@ -1161,6 +1161,27 @@
     el.hidden = false;
   }
 
+  function renderExposure(exp) {
+    var el = $("exposure");
+    if (!el || !exp || !exp.metrics) return;
+    var m = exp.metrics;
+    ($("exp-ev") || {}).textContent = m.ev !== null ? money(m.ev, "GBP") : "—";
+    ($("exp-best") || {}).textContent = m.best_case !== null ? money(m.best_case, "GBP") : "—";
+    ($("exp-worst") || {}).textContent = m.worst_case !== null ? money(m.worst_case, "GBP") : "—";
+    ($("exp-pprofit") || {}).textContent = m.p_profit !== null ? pct(m.p_profit) : "—";
+    ($("exp-ploss") || {}).textContent = m.p_loss !== null ? pct(m.p_loss) : "—";
+    ($("exp-pwin50") || {}).textContent = m.p_win_50 !== null ? pct(m.p_win_50) : "—";
+    var detail = $("exposure-detail");
+    if (detail) {
+      var note = "Portfolio exposure: " + (exp.n_open_bets || 0) + " open bets.";
+      if (exp.updated_at) {
+        var age = Math.round((Date.now() - Date.parse(exp.updated_at)) / 60000);
+        if (age > 60) note += " (data " + age + " min old)";
+      }
+      detail.innerHTML = '<div class="exposure-note">' + esc(note) + '</div>';
+    }
+  }
+
   function render(d) {
     _lastData = d;
     renderTicker(d);
@@ -1283,6 +1304,16 @@
         if (nd) nd.hidden = true; // success always clears the banner
         render(d);
         enrichPolymarket(d);
+        // Load exposure dashboard (on-load, best-effort).
+        try {
+          var expUrl = "./exposure_dashboard.json?t=" + Date.now();
+          if (typeof fetch === "function") {
+            fetch(expUrl, { cache: "no-store" })
+              .then(function (r) { return r.ok ? r.json() : null; })
+              .then(function (exp) { if (exp) renderExposure(exp); })
+              .catch(function () { /* silent: data unavailable */ });
+          }
+        } catch (e) { /* never let enrichment break the page */ }
       })
       .catch(function (err) {
         // A load during a mid-deploy window can transiently 404 — retry with
