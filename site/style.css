@@ -327,6 +327,8 @@ body {
 }
 .pos-sel .leg { display: block; }
 .pos-sel .leg + .leg { margin-top: 1px; }
+/* Bet ID column — compact mono reference, matches the #N format the bot uses. */
+.pos-id { font-size: 11px; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--muted); }
 /* Date-over-time first cell of both positions tables. */
 .pos-when .wd { display: block; font-size: 10px; line-height: 1.3; color: var(--muted); }
 .pos-when .wt { display: block; font-size: 11px; line-height: 1.3; color: var(--text-dim); font-variant-numeric: tabular-nums; }
@@ -1493,4 +1495,49 @@ main > .track-grid + .panel { margin-top: 12px; }
 
 @media (max-width: 760px) {
   .track-grid { grid-template-columns: 1fr; }
+}
+
+/* Exposure dashboard — Risk & Blind Spots. */
+.panel-exposure { grid-area: exposure; }
+.exposure-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(6, 1fr);
+  margin-bottom: 12px;
+}
+.exposure-card {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px;
+  text-align: center;
+  background: var(--bg-2);
+}
+.exposure-label {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.exposure-value {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--text);
+  font-family: ui-monospace, monospace;
+}
+.exposure-value.exp-positive { color: var(--pos); }
+.exposure-value.exp-negative { color: var(--neg); }
+.exposure-note {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 8px;
+  border-left: 2px solid var(--border);
+  margin-top: 8px;
+}
+
+@media (max-width: 1024px) {
+  .exposure-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 640px) {
+  .exposure-grid { grid-template-columns: repeat(2, 1fr); }
 }

@@ -30,10 +30,20 @@ tr:hover td{background:#0d141b}
 .ven{color:var(--cyan)}
 .foot{color:var(--dim);font-size:10px;margin-top:20px;border-top:1px solid var(--line);padding-top:10px}
 .flag{background:#1a1206;border:1px solid #5e4a1c;color:var(--amb);padding:8px 12px;border-radius:6px;margin-bottom:14px;font-size:12px}
+.eq-panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px 6px;margin-bottom:14px}
+.eq-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.eq-title{font-size:10px;letter-spacing:1px;color:var(--dim);text-transform:uppercase}
+.eq-figs{font-size:11px;display:flex;gap:12px}
+.eq-gbp{color:var(--grn)}.eq-usd{color:var(--cyan)}
+#eq-svg{display:block;width:100%;height:76px}
 </style></head>
 <body><div class="wrap">
 <h1>▌ WCA TERMINAL</h1>
 <div class="sub">offline exposure &amp; P&amp;L · snapshot <span id="gen"></span> · currencies never summed</div>
+<div class="eq-panel">
+<div class="eq-hd"><span class="eq-title">Bankroll Equity · 7d</span><div class="eq-figs"><span class="eq-gbp" id="eq-gbp-val"></span><span class="eq-usd" id="eq-usd-val"></span></div></div>
+<svg id="eq-svg" viewBox="0 0 640 76" preserveAspectRatio="none" role="img" aria-label="Bankroll equity last 7 days"></svg>
+</div>
 <div id="cards" class="cards"></div>
 <div class="tabs"><div class="tab on" data-v="open">OPEN EXPOSURE</div><div class="tab" data-v="closed">CLOSED / SETTLED</div></div>
 <div id="table"></div>
@@ -87,5 +97,49 @@ function render(){
   document.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1}render()});
 }
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');view=t.dataset.v;sortKey=view==='open'?'id':'settled_ts';sortDir=view==='open'?1:-1;render()});
+function _tsMs(ts){var s=String(ts||'');if(s.indexOf('T')>=0&&!/[zZ]|[+\-]\d\d:?\d\d$/.test(s))s+='Z';var v=Date.parse(s);return isNaN(v)?NaN:v;}
+function _r2(n){return Math.round(n*100)/100;}
+function drawEquity(){
+  var W=640,H=76,MT=4,MB=16,ML=2,MR=2,PW=W-ML-MR,PH=H-MT-MB;
+  var now=Date.now(),t7=now-7*24*3600*1000;
+  var settled=D.bets.filter(function(b){return b.status!=='open'&&b.pl!=null&&b.settled_ts;});
+  settled.sort(function(a,b){return _tsMs(a.settled_ts)-_tsMs(b.settled_ts);});
+  var baseG=0,baseU=0;
+  settled.forEach(function(b){var ms=_tsMs(b.settled_ts);if(!isNaN(ms)&&ms<t7){if(b.ccy==='£')baseG+=b.pl;if(b.ccy==='$')baseU+=b.pl;}});
+  var ptsG=[{t:t7,v:baseG}],ptsU=[{t:t7,v:baseU}],cG=baseG,cU=baseU;
+  settled.forEach(function(b){
+    var ms=_tsMs(b.settled_ts);
+    if(isNaN(ms)||ms<t7||ms>now)return;
+    if(b.ccy==='£'){cG=_r2(cG+b.pl);ptsG.push({t:ms,v:cG});}
+    if(b.ccy==='$'){cU=_r2(cU+b.pl);ptsU.push({t:ms,v:cU});}
+  });
+  ptsG.push({t:now,v:cG});ptsU.push({t:now,v:cU});
+  var dG=_r2(cG-baseG),dU=_r2(cU-baseU);
+  var eg=document.getElementById('eq-gbp-val'),eu=document.getElementById('eq-usd-val');
+  if(eg)eg.textContent='£'+(dG>=0?'+':'')+dG.toFixed(2)+' GBP';
+  if(eu)eu.textContent='$'+(dU>=0?'+':'')+dU.toFixed(2)+' USD';
+  var allV=ptsG.concat(ptsU).map(function(p){return p.v;});
+  var vMin=Math.min.apply(null,allV),vMax=Math.max.apply(null,allV);
+  var pad=Math.max((vMax-vMin)*0.12,1);vMin-=pad;vMax+=pad;
+  var vSpan=(vMax-vMin)||1;
+  function sx(t){return _r2(ML+((t-t7)/(now-t7))*PW);}
+  function sy(v){return _r2(MT+(1-(v-vMin)/vSpan)*PH);}
+  function mkSeries(pts,color,gid){
+    if(pts.length<2)return '';
+    var lp=[],prev=pts[0].v;
+    pts.forEach(function(p,i){if(i>0)lp.push(sx(p.t)+','+sy(prev));lp.push(sx(p.t)+','+sy(p.v));prev=p.v;});
+    var bot=_r2(MT+PH);
+    var fp=lp.concat([sx(pts[pts.length-1].t)+','+bot,sx(pts[0].t)+','+bot]);
+    return '<polygon fill="url(#'+gid+')" points="'+fp.join(' ')+'"/>'+
+           '<polyline fill="none" stroke="'+color+'" stroke-width="1.6" stroke-linejoin="round" points="'+lp.join(' ')+'"/>';
+  }
+  var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],ticks='';
+  for(var i=0;i<=6;i++){var tt=t7+i*(now-t7)/6;var lbl=i===0?'7d ago':(i===6?'now':days[new Date(tt).getDay()]);ticks+='<text font-size="9" fill="#6b8290" x="'+sx(tt)+'" y="'+(H-3)+'" text-anchor="middle">'+lbl+'</text>';}
+  var zl='';
+  if(vMin<0&&vMax>0){var zy=sy(0);zl='<line x1="'+_r2(ML)+'" y1="'+zy+'" x2="'+_r2(ML+PW)+'" y2="'+zy+'" stroke="#3a4a55" stroke-dasharray="2 3" stroke-width="1"/>';}
+  var defs='<defs><linearGradient id="eq-g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#33d17a" stop-opacity="0.28"/><stop offset="100%" stop-color="#33d17a" stop-opacity="0"/></linearGradient><linearGradient id="eq-g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4fd6e0" stop-opacity="0.22"/><stop offset="100%" stop-color="#4fd6e0" stop-opacity="0"/></linearGradient></defs>';
+  document.getElementById('eq-svg').innerHTML=defs+ticks+zl+mkSeries(ptsG,'#33d17a','eq-g1')+mkSeries(ptsU,'#4fd6e0','eq-g2');
+}
+drawEquity();
 cards();render();
 </script></body></html>

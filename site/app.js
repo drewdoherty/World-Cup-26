@@ -531,6 +531,8 @@
       var edge = (p.model_prob != null && p.market_prob_devig != null)
         ? (p.model_prob - p.market_prob_devig) : null;
       return '<tr title="' + esc(metaTitle(p)) + '" style="border-left:2px solid ' + col + '">' +
+        '<td class="r num dim pos-id" data-label="ID">' +
+          (p.id != null ? '#' + esc(p.id) : '—') + '</td>' +
         '<td class="num pos-when" data-label="Date">' +
           whenCell(p.ts_utc) + '</td>' +
         '<td class="pos-match" data-label="Match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
@@ -555,6 +557,7 @@
     $("positions").innerHTML =
       '<table class="pos-table pos-table-wide">' +
         '<thead><tr>' +
+          '<th class="r dim">#</th>' +
           '<th>Date</th><th>Match</th><th>Market</th><th>Selection</th>' +
           '<th class="r">Odds</th><th class="r">Stake</th>' +
           '<th class="r">Model</th><th class="r">Mkt</th>' +
@@ -1161,6 +1164,27 @@
     el.hidden = false;
   }
 
+  function renderExposure(exp) {
+    var el = $("exposure");
+    if (!el || !exp || !exp.metrics) return;
+    var m = exp.metrics;
+    ($("exp-ev") || {}).textContent = m.ev !== null ? money(m.ev, "GBP") : "—";
+    ($("exp-best") || {}).textContent = m.best_case !== null ? money(m.best_case, "GBP") : "—";
+    ($("exp-worst") || {}).textContent = m.worst_case !== null ? money(m.worst_case, "GBP") : "—";
+    ($("exp-pprofit") || {}).textContent = m.p_profit !== null ? pct(m.p_profit) : "—";
+    ($("exp-ploss") || {}).textContent = m.p_loss !== null ? pct(m.p_loss) : "—";
+    ($("exp-pwin50") || {}).textContent = m.p_win_50 !== null ? pct(m.p_win_50) : "—";
+    var detail = $("exposure-detail");
+    if (detail) {
+      var note = "Portfolio exposure: " + (exp.n_open_bets || 0) + " open bets.";
+      if (exp.updated_at) {
+        var age = Math.round((Date.now() - Date.parse(exp.updated_at)) / 60000);
+        if (age > 60) note += " (data " + age + " min old)";
+      }
+      detail.innerHTML = '<div class="exposure-note">' + esc(note) + '</div>';
+    }
+  }
+
   function render(d) {
     _lastData = d;
     renderTicker(d);
@@ -1208,6 +1232,8 @@
       var plTxt = p.status === "void" ? "void" : signedMoney(pl, p.currency);
       return '<tr title="' + esc(metaTitle(p)) +
           '" style="border-left:2px solid ' + bookColor(p.platform) + '">' +
+        '<td class="r num dim pos-id" data-label="ID">' +
+          (p.id != null ? '#' + esc(p.id) : '—') + '</td>' +
         '<td class="num pos-when" data-label="Settled">' + whenCell(p.settled_ts || p.ts_utc) + '</td>' +
         '<td class="pos-match" data-label="Match" title="' + esc(p.match) + '">' + esc(dash(p.match)) + '</td>' +
         '<td class="pos-mkt dim" data-label="Market" title="' + esc(p.market) + '">' + esc(marketShort(p.market)) + '</td>' +
@@ -1232,6 +1258,7 @@
     el.innerHTML =
       '<table class="pos-table pos-table-wide">' +
         '<thead><tr>' +
+          '<th class="r dim">#</th>' +
           '<th>Settled</th><th>Match</th><th>Market</th><th>Selection</th>' +
           '<th class="r">Odds</th><th class="r">Stake</th>' +
           '<th class="r">Model</th><th class="r">EV</th>' +
@@ -1283,6 +1310,16 @@
         if (nd) nd.hidden = true; // success always clears the banner
         render(d);
         enrichPolymarket(d);
+        // Load exposure dashboard (on-load, best-effort).
+        try {
+          var expUrl = "./exposure_dashboard.json?t=" + Date.now();
+          if (typeof fetch === "function") {
+            fetch(expUrl, { cache: "no-store" })
+              .then(function (r) { return r.ok ? r.json() : null; })
+              .then(function (exp) { if (exp) renderExposure(exp); })
+              .catch(function () { /* silent: data unavailable */ });
+          }
+        } catch (e) { /* never let enrichment break the page */ }
       })
       .catch(function (err) {
         // A load during a mid-deploy window can transiently 404 — retry with

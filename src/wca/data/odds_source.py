@@ -29,6 +29,14 @@ from wca.data import betfair_exchange, polymarket_odds, theoddsapi
 
 logger = logging.getLogger(__name__)
 
+# Optional archival TEE: additive, never changes betting behavior (guarded).
+# Raw per-source payloads are teed inside each client; here we tee the
+# NORMALIZED, source-attributed odds frame the build path actually consumes.
+try:
+    from wca.archive import tee as _archive_tee
+except Exception:  # pragma: no cover - archive is optional
+    _archive_tee = None
+
 _DEFAULT_ORDER = ("betfair", "theoddsapi", "polymarket")
 
 _COLUMNS = (
@@ -119,6 +127,8 @@ def get_odds(
         if df is not None and not df.empty:
             if not merge:
                 logger.info("odds source %s -> %d rows", name, len(df))
+                if _archive_tee is not None:
+                    _archive_tee.odds_frame(df, name)
                 return df, q
             if union:
                 # Best-price mode: keep ALL of this source's rows so both venues
@@ -139,6 +149,8 @@ def get_odds(
     if merge and frames:
         combined = pd.concat(frames, ignore_index=True)
         logger.info("odds merge -> %d rows across %d sources", len(combined), len(frames))
+        if _archive_tee is not None:
+            _archive_tee.odds_frame(combined, "merged")
         return combined, kept_quota
     logger.warning(
         "all odds sources empty/unavailable (%s); returning empty frame "

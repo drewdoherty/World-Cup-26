@@ -46,6 +46,7 @@ cmd_for() {
     closecapture) printf '%s\n' "$RUN1" closecapture "$VENV_PY" scripts/wca_close_capture.py --db data/wca.db ;;
     publish)      printf '%s\n' "/bin/bash" "$REPO_ROOT/deploy/publish_site.sh" ;;
     watchdog)     printf '%s\n' "/bin/bash" "$HERE/watchdog.sh" ;;
+    archive)      printf '%s\n' "$RUN1" archive      "$VENV_PY" scripts/wca_archive.py snapshot --db data/wca.db --env .env ;;
     *) echo "unknown service $1" >&2; return 1 ;;
   esac
 }
