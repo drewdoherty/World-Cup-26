@@ -11,6 +11,8 @@ from wca.betbuilder import (
     EVS,
     BetBuilder,
     Leg,
+    SizedBuilder,
+    apply_slate_cap,
     build_bet_builder,
     calibrate_lambdas,
     enumerate_legs,
@@ -19,9 +21,27 @@ from wca.betbuilder import (
     independent_poisson_matrix,
     joint_prob,
     matrix_from_feed_entry,
+    matrix_from_models,
     parse_fixture,
+    size_bet_builder,
 )
+from wca.models.dixon_coles import ScorelinePrediction
 from wca.models.scores import btts_from_matrix, implied_1x2, over_under_from_matrix
+
+
+class _StubDC:
+    """Minimal stand-in for DixonColesModel.predict returning a fixed matrix."""
+
+    def __init__(self, matrix):
+        self._m = matrix
+
+    def predict(self, home, away, neutral=True, max_goals=None, warn=True):
+        return ScorelinePrediction(self._m, home, away, 1.2, 1.1)
+
+
+class _StubModels:
+    def __init__(self, matrix):
+        self.dc = _StubDC(matrix)
 
 
 # A self-contained fixture entry shaped like one scores_data.json record.
@@ -256,6 +276,69 @@ def test_format_empty_builders():
     fm = matrix_from_feed_entry(SBR_ENTRY)
     text = format_bet_builder(fm, [], min_odds=EVS)
     assert "No same-game builder" in text
+
+
+def test_matrix_from_models_reconciles_to_prob_fn():
+    # The model matrix must imply exactly the prob_fn's blended 1X2.
+    base = independent_poisson_matrix(1.3, 1.1, max_goals=10)
+    models = _StubModels(base)
+    target = (0.55, 0.25, 0.20)
+    fm = matrix_from_models(
+        models, "A", "B", prob_fn=lambda h, a, ko: target, neutral=True
+    )
+    assert fm.home == "A" and fm.away == "B"
+    assert np.allclose(fm.one_x_two, target, atol=1e-6)
+    # And it is a usable matrix for the builder search.
+    builders = build_bet_builder(fm, min_odds=EVS)
+    assert builders
+    assert builders[0].fair_odds >= EVS - 1e-9
+
+
+def test_size_bet_builder_positive_edge():
+    # Builder p=0.40 at offered 3.0 -> edge +0.2 -> positive quarter-Kelly stake.
+    legs = [Leg("m", "s", "f", np.ones((2, 2), dtype=bool), prob=0.4)]
+    bb = BetBuilder(legs=legs, joint_prob=0.40)
+    sb = size_bet_builder(bb, 3.0, 1000.0, kelly_fraction=0.25, per_bet_cap=0.05)
+    assert isinstance(sb, SizedBuilder)
+    assert abs(sb.edge - 0.2) < 1e-9
+    assert sb.stake > 0
+    assert sb.ev > 0
+
+
+def test_size_bet_builder_zero_stake_on_non_positive_edge():
+    bb = BetBuilder(legs=[], joint_prob=0.40)
+    # Offered below the fair price (1/0.4 = 2.5) -> negative edge -> no bet.
+    sb = size_bet_builder(bb, 2.0, 1000.0)
+    assert sb.edge < 0
+    assert sb.stake == 0.0
+
+
+def test_size_bet_builder_respects_per_bet_cap():
+    bb = BetBuilder(legs=[], joint_prob=0.9)  # large edge at long-ish price
+    sb = size_bet_builder(bb, 2.0, 1000.0, kelly_fraction=1.0, per_bet_cap=0.05)
+    assert sb.stake <= 0.05 * 1000.0 + 1e-9
+
+
+def test_apply_slate_cap_scales_and_preserves_ratio():
+    bbs = [BetBuilder(legs=[], joint_prob=0.4), BetBuilder(legs=[], joint_prob=0.4)]
+    sized = [
+        SizedBuilder(bbs[0], 3.0, 0.2, 0.25, 80.0, 16.0),
+        SizedBuilder(bbs[1], 3.0, 0.2, 0.25, 40.0, 8.0),
+    ]
+    # Cap total at 5% of 1000 = 50; raw total 120 -> scaled to 50, 2:1 preserved.
+    out = apply_slate_cap(sized, 1000.0, daily_exposure_cap=0.05, existing_exposure=0.0)
+    total = sum(sb.stake for sb in out)
+    assert abs(total - 50.0) < 1e-6
+    assert abs(out[0].stake / out[1].stake - 2.0) < 1e-6
+    # EV is rescaled with the stake.
+    assert abs(out[0].ev - out[0].edge * out[0].stake) < 1e-9
+
+
+def test_apply_slate_cap_subtracts_existing_exposure():
+    sized = [SizedBuilder(BetBuilder([], 0.4), 3.0, 0.2, 0.25, 80.0, 16.0)]
+    # Budget = 5%*1000 - 30 = 20; single stake 80 -> scaled to 20.
+    out = apply_slate_cap(sized, 1000.0, daily_exposure_cap=0.05, existing_exposure=30.0)
+    assert abs(out[0].stake - 20.0) < 1e-6
 
 
 def test_end_to_end_real_feed_if_present():

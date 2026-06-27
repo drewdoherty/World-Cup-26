@@ -230,6 +230,57 @@ def matrix_from_feed_entry(
     )
 
 
+def matrix_from_models(
+    models: Any,
+    home: str,
+    away: str,
+    *,
+    prob_fn: Optional[Callable[[str, str, bool], Tuple[float, float, float]]] = None,
+    neutral: bool = True,
+    max_goals: int = DEFAULT_MAX_GOALS,
+) -> FixtureMatrix:
+    """Build a :class:`FixtureMatrix` directly from fitted Elo + Dixon-Coles models.
+
+    Used for fixtures that are not (yet) in the published scores feed — e.g.
+    later group games. The Dixon-Coles score matrix for the fixture is reconciled
+    to the same Elo/DC/market blend the card pipeline uses (via
+    :func:`wca.advancement.make_prob_fn`, market-free for unpriced fixtures), so
+    the result is consistent with how the rest of the platform would price the
+    match and is *more* faithful than the feed-aggregate calibration (it uses the
+    model's real scoreline shape rather than reconstructing one from O/U + BTTS).
+
+    Parameters
+    ----------
+    models:
+        A :class:`wca.card.FittedModels` (Elo rater + outcome model + DC model).
+    home, away:
+        Team labels; ``home`` is the nominal home side for the blend.
+    prob_fn:
+        Optional ``prob_fn(home, away, knockout) -> (p_home, p_draw, p_away)``.
+        Defaults to :func:`wca.advancement.make_prob_fn` over ``models``.
+    neutral:
+        Whether the Dixon-Coles matrix is drawn at a neutral venue (default
+        ``True`` — all 2026 group games bar host fixtures are neutral).
+    """
+    from .models.scores import scoreline_card  # local import: keep base deps light
+
+    if prob_fn is None:
+        from .advancement import make_prob_fn
+
+        prob_fn = make_prob_fn(models)
+
+    blended = prob_fn(home, away, False)
+    pred = models.dc.predict(home, away, neutral=neutral, max_goals=max_goals, warn=False)
+    card = scoreline_card(pred, blended, home=home, away=away)
+    return FixtureMatrix(
+        home=home,
+        away=away,
+        matrix=card.matrix,
+        lambda_home=float(getattr(pred, "lambda_home", 0.0)),
+        lambda_away=float(getattr(pred, "lambda_away", 0.0)),
+    )
+
+
 def load_feed(path: str = "site/scores_data.json") -> List[Dict[str, Any]]:
     """Return the ``fixtures`` list from a scores feed, or ``[]`` on failure."""
     try:
@@ -506,6 +557,102 @@ def build_bet_builder(
     return unique[: int(top_n)]
 
 
+# ---------------------------------------------------------------------------
+# Risk-aware sizing (quarter-Kelly off the ledger bankroll).
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class SizedBuilder:
+    """A builder priced against a real offered price and sized for the bankroll.
+
+    ``offered_odds`` is the price actually available (e.g. bet365's live
+    same-game-multi quote). Edge and stake are computed against the model's joint
+    probability: a builder is only +EV — and therefore only staked — when the
+    offered price exceeds the model-fair price (``offered_odds > builder.fair_odds``,
+    equivalently ``edge > 0``). The stake is fractional-Kelly
+    (:func:`wca.markets.kelly.stake`), so a non-positive edge stakes nothing.
+    """
+
+    builder: BetBuilder
+    offered_odds: float
+    edge: float
+    kelly_fraction: float
+    stake: float
+    ev: float
+
+
+def size_bet_builder(
+    builder: BetBuilder,
+    offered_odds: float,
+    bankroll: float,
+    *,
+    kelly_fraction: float = 0.25,
+    per_bet_cap: float = 0.05,
+) -> SizedBuilder:
+    """Fractional-Kelly stake for one builder at a real offered price.
+
+    Uses the model's joint probability as the win probability and the supplied
+    ``offered_odds`` as the price. Delegates the staking arithmetic to
+    :func:`wca.markets.kelly.stake` (quarter-Kelly by default, hard-capped at
+    ``per_bet_cap`` of bankroll); a non-positive edge yields a zero stake.
+    """
+    from .markets.kelly import stake as kelly_stake
+
+    p = builder.joint_prob
+    o = float(offered_odds)
+    edge_val = p * o - 1.0 if o > 0 else -1.0
+    s = kelly_stake(p, o, bankroll, fraction=kelly_fraction, cap=per_bet_cap) if o > 1.0 else 0.0
+    return SizedBuilder(
+        builder=builder,
+        offered_odds=o,
+        edge=edge_val,
+        kelly_fraction=kelly_fraction,
+        stake=s,
+        ev=edge_val * s,
+    )
+
+
+def apply_slate_cap(
+    sized: Sequence[SizedBuilder],
+    bankroll: float,
+    *,
+    daily_exposure_cap: float = 0.05,
+    existing_exposure: float = 0.0,
+) -> List[SizedBuilder]:
+    """Scale a same-slate set of stakes to respect the remaining exposure budget.
+
+    The combined stake across the slate is capped at
+    ``daily_exposure_cap * bankroll`` *minus* the ``existing_exposure`` already at
+    risk from open bets in the ledger — so today's builders never push total
+    exposure past the daily ceiling. Relative sizing is preserved
+    (:func:`wca.markets.kelly.simultaneous_exposure_scale`). Returns new
+    :class:`SizedBuilder` objects with rescaled ``stake`` and ``ev``.
+    """
+    from .markets.kelly import simultaneous_exposure_scale
+
+    bank = float(bankroll)
+    budget = max(0.0, float(daily_exposure_cap) * bank - float(existing_exposure))
+    budget_fraction = (budget / bank) if bank > 0 else 0.0
+    scaled = simultaneous_exposure_scale(
+        [sb.stake for sb in sized], budget_fraction, bank
+    )
+    out: List[SizedBuilder] = []
+    for sb, new_stake in zip(sized, scaled):
+        ns = float(new_stake)
+        out.append(
+            SizedBuilder(
+                builder=sb.builder,
+                offered_odds=sb.offered_odds,
+                edge=sb.edge,
+                kelly_fraction=sb.kelly_fraction,
+                stake=ns,
+                ev=sb.edge * ns,
+            )
+        )
+    return out
+
+
 def format_bet_builder(
     fm: FixtureMatrix,
     builders: Sequence[BetBuilder],
@@ -543,12 +690,18 @@ def format_bet_builder(
         )
     naive = primary.naive_odds
     ratio = primary.correlation_ratio
-    sign = "positively" if ratio > 1.0 else "negatively"
+    if ratio > 1.01:
+        corr = "net positively correlated (×%.2f), so the honest fair price " \
+               "is shorter" % ratio
+    elif ratio < 0.99:
+        corr = "net negatively correlated (×%.2f), so the honest fair price " \
+               "is longer" % ratio
+    else:
+        corr = "near-independent (×%.2f)" % ratio
     lines.append("")
     lines.append(
-        "  _Naive multiply (legs as independent): `%.2f`. Legs are net %s "
-        "correlated (×%.2f), so the honest fair price is `%.2f`, not `%.2f`._"
-        % (naive, sign, ratio, primary.fair_odds, naive)
+        "  _Naive multiply (legs as independent): `%.2f`. Legs are %s — model-fair "
+        "price `%.2f`, not `%.2f`._" % (naive, corr, primary.fair_odds, naive)
     )
 
     if len(builders) > 1:
