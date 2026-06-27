@@ -1,11 +1,11 @@
-<!-- generated: 2026-06-27T01:45:04 -->
+<!-- generated: 2026-06-27T02:51:50 -->
 ⚽ *Next match* — New Zealand vs Belgium
 Kickoff 2026-06-27 03:00:00+00:00
 
 *Winner* (model blend)
-  New Zealand      7.3%  fair 13.66  best 15.50 (matchbook) +13.5% ✅  £4.64
-  Draw            13.6%  fair 7.38  best 8.80 (betfair_ex_uk) +19.3% ✅  £12.34
-  Belgium         79.1%  fair 1.26  best 1.48 (Polymarket) +17.2% ✅  £100.00
+  New Zealand      7.0%  fair 14.19  best 16.00 (betfair_ex_uk) +12.8% ✅  £4.26
+  Draw            13.5%  fair 7.43  best 9.52 (Polymarket) +28.2% ✅  £16.53
+  Belgium         79.5%  fair 1.26  best 1.48 (Polymarket) +17.8% ✅  £100.00
   _stake = ¼-Kelly @ £2000 bankroll (+EV picks)_
 
 *Corners* (model, exp 8.8)
@@ -14,5 +14,5 @@ Kickoff 2026-06-27 03:00:00+00:00
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-0-2 15.7% | 0-1 12.8% | 0-3 12.6% | 1-2 8.0% | 0-4 7.5% | 1-3 6.4%
-  O/U 2.5: over 56.1% / under 43.9%   BTTS 36.3%
+0-2 15.8% | 0-1 12.8% | 0-3 12.6% | 1-2 8.0% | 0-4 7.6% | 1-3 6.4%
+  O/U 2.5: over 56.2% / under 43.8%   BTTS 36.3%
