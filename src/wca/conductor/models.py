@@ -40,6 +40,11 @@ class TaskStatus(str, Enum):
     FAILED = "failed"        # agent / git / push error (see .error)
     REJECTED = "rejected"    # never ran: cap, budget, or cancel-before-start
     INTERRUPTED = "interrupted"  # was in-flight when the conductor restarted
+    # Agent ran AND committed+pushed the branch, but opening the PR failed (gh
+    # auth / network / rate-limit). The work is SAFE on the pushed branch; the
+    # PR step is retried (bounded backoff + on next startup + via /retry). A
+    # DISTINCT state so this never looks like a plain success or a hard failure.
+    COMMITTED_PR_FAILED = "committed_pr_failed"
 
     @property
     def terminal(self) -> bool:

@@ -526,6 +526,40 @@ def _pr_body(record: TaskRecord) -> str:
     return "\n".join(parts)
 
 
+def attempt_pr(cfg: ConductorConfig, record: TaskRecord, cwd: Optional[Path] = None) -> PrResult:
+    """One PR-open attempt for a committed+pushed branch.
+
+    Defaults to running from the repo root so it still works after the task's
+    worktree has been reclaimed (the branch lives on ``origin``). Shared by
+    :func:`run_task`'s inline backoff, the manager's ``/retry``, and the startup
+    retry, so the title/body are identical on every attempt.
+    """
+    target = Path(cwd) if cwd is not None else cfg.repo_root
+    return open_pr(cfg, target, record.branch or "", _pr_title(record), _pr_body(record))
+
+
+def open_pr_with_backoff(cfg: ConductorConfig, record: TaskRecord,
+                         cwd: Optional[Path] = None,
+                         sleep: Optional[Callable[[float], None]] = None) -> PrResult:
+    """:func:`attempt_pr` with bounded backoff (``cfg.pr_retry_delays`` between
+    tries). Returns the first success, or the last failure once delays run out.
+
+    ``sleep`` is resolved at call time (defaults to ``time.sleep``) so tests can
+    neutralise the waits by patching ``runner.time.sleep``.
+    """
+    _sleep = sleep if sleep is not None else time.sleep
+    pr = attempt_pr(cfg, record, cwd=cwd)
+    if pr.created:
+        return pr
+    for delay in cfg.pr_retry_delays:
+        if delay and delay > 0:
+            _sleep(delay)
+        pr = attempt_pr(cfg, record, cwd=cwd)
+        if pr.created:
+            return pr
+    return pr
+
+
 # -- orchestration --------------------------------------------------------
 
 
@@ -591,14 +625,26 @@ def run_task(cfg: ConductorConfig, record: TaskRecord, notify: Optional[Notify] 
         record.status = TaskStatus.PUSHED.value
         _emit()
 
-        pr = open_pr(cfg, worktree, record.branch or "", _pr_title(record), _pr_body(record))
+        # PR creation intentionally disabled (--no-pr): branch is pushed, only a
+        # compare link is offered. This is NOT a failure.
+        if not cfg.create_pr:
+            pr = attempt_pr(cfg, record, cwd=worktree)
+            record.pr_url = pr.link
+            record.status = TaskStatus.PUSHED.value
+            record.error = pr.error
+            return record
+
+        pr = open_pr_with_backoff(cfg, record, cwd=worktree)
         record.pr_url = pr.link
         if pr.created:
             record.status = TaskStatus.DONE.value
         else:
-            # Branch is pushed and inspectable; PR just needs a manual click.
-            record.status = TaskStatus.PUSHED.value
-            record.error = pr.error
+            # Committed + pushed, but opening the PR FAILED (gh auth / network /
+            # rate-limit). DISTINCT state: the work is SAFE on the branch and the
+            # PR is retried (startup + /retry). The notifier turns this into an
+            # explicit Telegram message — it must never be silent.
+            record.status = TaskStatus.COMMITTED_PR_FAILED.value
+            record.error = pr.error or "PR creation failed"
         return record
 
     except Exception as exc:  # noqa: BLE001 - report, don't propagate
@@ -607,8 +653,10 @@ def run_task(cfg: ConductorConfig, record: TaskRecord, notify: Optional[Notify] 
         return record
     finally:
         record.finished_at = time.time()
-        # Reclaim the worktree when nothing was pushed (failed / no-op runs) so
-        # repeated failures don't pile up throwaway worktrees.
-        if record.status in (TaskStatus.FAILED.value, TaskStatus.NO_CHANGES.value):
+        # Reclaim the worktree when nothing needs it any more: failed / no-op
+        # runs, and committed_pr_failed (its branch is safely on ``origin``, so
+        # the PR retry runs from the repo root and no longer needs the worktree).
+        if record.status in (TaskStatus.FAILED.value, TaskStatus.NO_CHANGES.value,
+                             TaskStatus.COMMITTED_PR_FAILED.value):
             remove_worktree(cfg, record.worktree_path)
         _emit()

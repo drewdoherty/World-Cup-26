@@ -13,6 +13,8 @@ Two features, exercised offline:
 
 from __future__ import annotations
 
+import os
+import subprocess
 import threading
 import time
 
@@ -52,6 +54,136 @@ class FakeClient:
 
 def _msg(text, chat_id=1, user_id=1):
     return {"text": text, "chat": {"id": chat_id}, "from": {"id": user_id}}
+
+
+def _cp(cmd, rc=0, out="", err=""):
+    return subprocess.CompletedProcess(cmd, rc, out, err)
+
+
+def _fake_run(pr_ok=True):
+    """A runner._run seam: agent commits a diff; `gh` succeeds or fails per pr_ok."""
+    def fake(cmd, cwd=None, env=None, timeout=None, on_event=None):
+        base = os.path.basename(cmd[0])
+        if base == "git":
+            sub = cmd[3] if len(cmd) > 3 else ""
+            if sub == "status":
+                return _cp(cmd, out=" M file.py\n")
+            if sub == "remote":
+                return _cp(cmd, out="git@github.com:drewdoherty/World-Cup-26.git")
+            return _cp(cmd)
+        if base == "gh":
+            if pr_ok:
+                return _cp(cmd, out="https://github.com/drewdoherty/World-Cup-26/pull/5")
+            return _cp(cmd, rc=1, err="gh: not logged in")
+        # agent invocation
+        if on_event is not None:
+            on_event({"type": "system", "subtype": "init"})
+        return _cp(cmd, out='{"result":"done","usage":{"input_tokens":5,"output_tokens":5}}')
+    return fake
+
+
+# -- PR-step failure: committed_pr_failed recovery ------------------------
+
+
+def test_pr_failure_yields_committed_pr_failed(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "_run", _fake_run(pr_ok=False))
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(runner.time, "sleep", lambda s: None)  # skip backoff waits
+    cfg = ConductorConfig(repo_root=tmp_path)
+    rec = TaskRecord(id=1, engine="claude", task="do x", shortid="abc", branch="conductor/x")
+    runner.run_task(cfg, rec)
+    assert rec.status == TaskStatus.COMMITTED_PR_FAILED.value
+    assert rec.error  # carries the gh failure reason
+    assert "compare/" in (rec.pr_url or "")  # commit is inspectable on the branch
+
+
+def test_pr_failure_notifies_user_and_persists(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "_run", _fake_run(pr_ok=False))
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(runner.time, "sleep", lambda s: None)
+    db = tmp_path / "state.db"
+    store = ConductorStore(db)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path), store=store)
+    _stub_health(mgr)
+    client = FakeClient()
+    conductor_bot.ConductorBot(client, mgr, set(), None)  # wires mgr.notify = bot._on_update
+    rec = mgr.submit("claude", "ship the feature", chat_id="55")
+    mgr._futures[rec.id].result(timeout=10)
+
+    # distinct state, persisted (survives a reload)
+    assert mgr.get(rec.id).status == TaskStatus.COMMITTED_PR_FAILED.value
+    reloaded = ConductorStore(db).load_tasks()
+    assert any(r.status == TaskStatus.COMMITTED_PR_FAILED.value for r in reloaded)
+
+    # an EXPLICIT Telegram notice was sent — never silent
+    blob = "\n".join(t for _, t in client.sent)
+    assert "PR step FAILED" in blob
+    assert "SAFE" in blob
+    assert "/retry %d" % rec.id in blob
+
+
+def test_pr_retry_succeeds_once_failure_clears(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "_run", _fake_run(pr_ok=False))
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
+    monkeypatch.setattr(runner.time, "sleep", lambda s: None)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _stub_health(mgr)
+    rec = mgr.submit("claude", "do it")
+    mgr._futures[rec.id].result(timeout=10)
+    assert mgr.get(rec.id).status == TaskStatus.COMMITTED_PR_FAILED.value
+
+    # gh auth recovers; retry re-attempts ONLY the PR (same record, not a re-run)
+    monkeypatch.setattr(runner, "_run", _fake_run(pr_ok=True))
+    updated = mgr.retry(rec.id)
+    assert updated.id == rec.id
+    assert updated.status == TaskStatus.DONE.value
+    assert "pull/5" in (updated.pr_url or "")
+    assert updated.error == ""
+
+
+def test_reattach_recovers_pushed_as_pr_pending(tmp_path):
+    db = tmp_path / "state.db"
+    store = ConductorStore(db)
+    # a task that died right after push, before the PR was confirmed
+    store.upsert_task(TaskRecord(id=3, engine="claude", task="t", chat_id="9",
+                                 status=TaskStatus.PUSHED.value, branch="conductor/t",
+                                 dedupe_key="t"))
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path), store=store)
+    assert mgr.get(3).status == TaskStatus.COMMITTED_PR_FAILED.value
+    assert [r.id for r in mgr.take_pr_retry_pending()] == [3]
+    assert mgr.take_interrupted() == []  # not lumped in with truly-lost tasks
+
+
+def test_startup_retry_pending_prs_recovers_and_notifies(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "_run", _fake_run(pr_ok=True))
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
+    db = tmp_path / "state.db"
+    store = ConductorStore(db)
+    store.upsert_task(TaskRecord(id=4, engine="claude", task="t", chat_id="9",
+                                 status=TaskStatus.COMMITTED_PR_FAILED.value,
+                                 branch="conductor/t", error="gh auth", dedupe_key="t"))
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path), store=store)
+    _stub_health(mgr)
+    client = FakeClient()
+    bot = conductor_bot.ConductorBot(client, mgr, set(), None)
+    bot._retry_pending_prs()
+    blob = "\n".join(t for _, t in client.sent)
+    assert "SAFE" in blob and "PR opened on retry" in blob
+    assert mgr.get(4).status == TaskStatus.DONE.value
+
+
+def test_retry_command_reopens_pr(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "_run", _fake_run(pr_ok=True))
+    monkeypatch.setattr(ConductorConfig, "resolve_bin", lambda self, b: "/usr/bin/%s" % b)
+    mgr = ConductorManager(ConductorConfig(repo_root=tmp_path))
+    _stub_health(mgr)
+    mgr._records[2] = TaskRecord(id=2, engine="claude", task="t", branch="conductor/t",
+                                 status=TaskStatus.COMMITTED_PR_FAILED.value, error="gh auth")
+    client = FakeClient()
+    bot = conductor_bot.ConductorBot(client, mgr, set(), None)
+    reply = bot.handle(_msg("/retry 2"))
+    assert "PR opened on retry" in reply
+    assert mgr.get(2).status == TaskStatus.DONE.value
 
 
 # -- persistence + reattach -----------------------------------------------

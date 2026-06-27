@@ -62,6 +62,7 @@ class ConductorManager:
         self._chat_history: Dict[str, List[Dict[str, str]]] = {}
         self._chat_locks: Dict[str, threading.Lock] = {}
         self._interrupted: List[TaskRecord] = []  # in-flight tasks lost to a restart
+        self._pr_retry_pending: List[TaskRecord] = []  # committed but PR step failed
         if self._store is not None:
             self._reattach()
 
@@ -80,25 +81,38 @@ class ConductorManager:
     def _reattach(self) -> None:
         """Reload persisted state on startup; flag tasks lost mid-flight.
 
-        Any task that was QUEUED/RUNNING/PUSHED when the process died can't be
-        resumed (its worktree/agent are gone), so it is marked INTERRUPTED and
-        surfaced to :meth:`take_interrupted` so the bot can tell the user instead
-        of failing silently. The id counter is advanced past every loaded id so a
-        new submission can never collide with a persisted one.
+        A task that was QUEUED/RUNNING when the process died can't be resumed
+        (its worktree/agent are gone), so it is marked INTERRUPTED and surfaced
+        to :meth:`take_interrupted`. A task that had reached PUSHED (commit safe
+        on ``origin``, PR not yet confirmed) — and any task already persisted as
+        COMMITTED_PR_FAILED — is queued for a PR retry via
+        :meth:`take_pr_retry_pending` rather than thrown away, so the "committed
+        but the PR step failed" case is recovered, never stranded. The id
+        counter is advanced past every loaded id so a new submission can never
+        collide with a persisted one.
         """
         try:
             records = self._store.load_tasks()  # type: ignore[union-attr]
         except Exception as exc:  # noqa: BLE001
             print("[conductor] reattach failed: %s" % exc, flush=True)
             return
-        in_flight = {TaskStatus.QUEUED.value, TaskStatus.RUNNING.value, TaskStatus.PUSHED.value}
+        lost = {TaskStatus.QUEUED.value, TaskStatus.RUNNING.value}
         for rec in records:
-            if rec.status in in_flight:
+            if rec.status in lost:
                 rec.status = TaskStatus.INTERRUPTED.value
                 if not rec.error:
                     rec.error = "interrupted by a conductor restart"
                 self._interrupted.append(rec)
                 self._persist(rec)
+            elif rec.status == TaskStatus.PUSHED.value:
+                # committed + pushed but died before the PR was confirmed.
+                rec.status = TaskStatus.COMMITTED_PR_FAILED.value
+                if not rec.error:
+                    rec.error = "PR not confirmed before a restart"
+                self._pr_retry_pending.append(rec)
+                self._persist(rec)
+            elif rec.status == TaskStatus.COMMITTED_PR_FAILED.value:
+                self._pr_retry_pending.append(rec)
             self._records[rec.id] = rec
         self._counter = max([self._store.max_task_id(), *self._records.keys(), 0])  # type: ignore[union-attr]
         try:
@@ -115,6 +129,37 @@ class ConductorManager:
             out = list(self._interrupted)
             self._interrupted = []
         return out
+
+    def take_pr_retry_pending(self) -> List[TaskRecord]:
+        """Return (and clear) committed-but-PR-failed tasks awaiting a PR retry."""
+        with self._lock:
+            out = list(self._pr_retry_pending)
+            self._pr_retry_pending = []
+        return out
+
+    def retry_pr(self, task_id: int) -> Optional[TaskRecord]:
+        """Re-attempt ONLY the PR step for a committed-but-PR-failed task.
+
+        The agent already ran and the branch is on ``origin``; this opens the PR
+        from the repo root (no worktree needed) and flips the task to DONE on
+        success, or leaves it COMMITTED_PR_FAILED with the fresh error. Returns
+        the record (``None`` if unknown). Never re-runs the agent.
+        """
+        rec = self.get(task_id)
+        if rec is None:
+            return None
+        if rec.status not in (TaskStatus.COMMITTED_PR_FAILED.value, TaskStatus.PUSHED.value):
+            return rec  # nothing to retry; caller messages why
+        pr = runner.attempt_pr(self.cfg, rec)
+        rec.pr_url = pr.link or rec.pr_url
+        if pr.created:
+            rec.status = TaskStatus.DONE.value
+            rec.error = ""
+        else:
+            rec.status = TaskStatus.COMMITTED_PR_FAILED.value
+            rec.error = pr.error or "PR creation failed"
+        self._persist(rec)
+        return rec
 
     def _on_transition(self, record: TaskRecord) -> None:
         """Single notify seam handed to the runner: persist, then notify the bot.
@@ -297,14 +342,19 @@ class ConductorManager:
     }
 
     def retry(self, task_id: int) -> Optional[TaskRecord]:
-        """Re-dispatch a finished task as a NEW record (same engine + text).
+        """Re-attempt a finished task.
 
-        Returns None if unknown; returns the original (unchanged) if it's not in
-        a retryable state so the caller can message why.
+        For a COMMITTED_PR_FAILED task the agent already ran and the branch is
+        safe on ``origin`` — so only the PR step is retried (in place, no new
+        record, no re-run). For other retryable states the whole task is
+        re-dispatched as a NEW record. Returns None if unknown; returns the
+        original (unchanged) if it's not in a retryable state.
         """
         old = self.get(task_id)
         if old is None:
             return None
+        if old.status == TaskStatus.COMMITTED_PR_FAILED.value:
+            return self.retry_pr(task_id)  # re-open the PR, don't re-run the agent
         if old.status not in self._RETRYABLE:
             return old
         return self.submit(old.engine, old.task, chat_id=old.chat_id, images=old.images)
@@ -624,6 +674,7 @@ class ConductorManager:
         TaskStatus.FAILED.value: "❌",
         TaskStatus.REJECTED.value: "🚫",
         TaskStatus.INTERRUPTED.value: "♻️",
+        TaskStatus.COMMITTED_PR_FAILED.value: "⚠️",
     }
 
     def status_table(self) -> str:
@@ -644,9 +695,12 @@ class ConductorManager:
             if r.pr_url:
                 label = "PR" if r.status == TaskStatus.DONE.value else "diff"
                 row += "\n   [%s](%s)" % (label, r.pr_url)
+            if r.status == TaskStatus.COMMITTED_PR_FAILED.value:
+                row += "\n   commit SAFE on `%s` · `/retry %d`" % (r.branch, r.id)
             if r.route_reason:
                 row += "\n   route: %s" % r.route_reason
-            if r.error and r.status in {TaskStatus.FAILED.value, TaskStatus.REJECTED.value, TaskStatus.PUSHED.value}:
+            if r.error and r.status in {TaskStatus.FAILED.value, TaskStatus.REJECTED.value,
+                                        TaskStatus.PUSHED.value, TaskStatus.COMMITTED_PR_FAILED.value}:
                 err = r.error if len(r.error) <= 90 else r.error[:87] + "..."
                 row += "\n   ⚠️ %s" % err
             lines.append(row)
