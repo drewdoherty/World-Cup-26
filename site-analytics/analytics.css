@@ -160,6 +160,19 @@ section.panel[id] { scroll-margin-top: 72px; }
 .chip:hover { color: var(--text); border-color: var(--muted); }
 .chip.active { color: var(--bg); background: var(--accent); border-color: var(--accent); font-weight: 600; }
 
+/* Event Markets fixture header ---------------------------------------------- */
+.em-fx-head {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  padding: 14px 12px 4px;
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  letter-spacing: 0.5px;
+}
+.em-fx-head:first-child { border-top: none; margin-top: 0; padding-top: 4px; }
+
 /* SVG chart primitives ----------------------------------------------------- */
 .a-svg { width: 100%; height: auto; display: block; }
 .cx-grid { stroke: var(--border); stroke-width: 1; }

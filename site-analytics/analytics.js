@@ -309,6 +309,170 @@
   }
 
   // =========================================================================
+  //  A · EVENT MARKETS  (scores_data.json)
+  // =========================================================================
+  var eventMarketsSelected = null;
+
+  function _emBestImplied(venues, outcome) {
+    // Prefer Polymarket mid (no vig); else best (lowest implied = best back odds)
+    if (!venues || !venues.length) return null;
+    var pm = null, best = null;
+    venues.forEach(function (v) {
+      var imp = v.implied && v.implied[outcome];
+      if (imp == null || !(imp > 0)) return;
+      if (v.venue === "polymarket") { pm = imp; }
+      if (best === null || imp < best) best = imp;
+    });
+    return pm !== null ? pm : best;
+  }
+
+  function renderEventMarkets() {
+    var sd = FEEDS.scores;
+    if (!sd || !sd.fixtures || !sd.fixtures.length) {
+      $("event-markets-nav").innerHTML = "";
+      $("event-markets-body").innerHTML = pendingMsg("Event Markets");
+      return;
+    }
+    var fixtures = sd.fixtures;
+
+    if (eventMarketsSelected === null) eventMarketsSelected = new Set([0]);
+    Array.from(eventMarketsSelected).forEach(function (i) {
+      if (i >= fixtures.length) eventMarketsSelected.delete(i);
+    });
+    if (!eventMarketsSelected.size) eventMarketsSelected.add(0);
+
+    $("event-markets-nav").innerHTML = fixtures.map(function (fx, i) {
+      var on = eventMarketsSelected.has(i);
+      return "<span class='chip" + (on ? " active" : "") + "' data-idx='" + i + "'>" +
+        esc(fx.fixture) + "</span>";
+    }).join("");
+
+    Array.prototype.forEach.call(
+      $("event-markets-nav").querySelectorAll(".chip"),
+      function (c) {
+        c.addEventListener("click", function () {
+          var idx = parseInt(c.getAttribute("data-idx"), 10);
+          if (eventMarketsSelected.has(idx)) {
+            if (eventMarketsSelected.size > 1) eventMarketsSelected.delete(idx);
+          } else {
+            eventMarketsSelected.add(idx);
+          }
+          renderEventMarkets();
+        });
+      }
+    );
+
+    var gen = sd.meta && sd.meta.generated;
+    if (gen) $("event-markets-meta").textContent = "as of " + String(gen).slice(0, 10) +
+      " · model vs best available price · select one or more games below";
+
+    var html = fixtures
+      .filter(function (_, i) { return eventMarketsSelected.has(i); })
+      .map(function (fx) { return eventMarketBlock(fx); })
+      .join("");
+
+    html += "<div class='legend'>" +
+      "<span><span class='sw' style='background:var(--accent)'></span>model</span>" +
+      "<span><span class='sw' style='background:var(--polymarket)'></span>market price</span>" +
+      "<span class='dim'>bar = |model − market| edge &middot; “model” = no live market data for this outcome</span></div>";
+
+    $("event-markets-body").innerHTML = html;
+  }
+
+  function eventMarketBlock(fx) {
+    var rows = [];
+    var mx = fx.model_1x2 || {};
+    var venues = fx.venues || [];
+
+    // 1X2
+    rows.push({section: "1X2"});
+    rows.push({label: "Home", model: mx.home, market: _emBestImplied(venues, "home")});
+    rows.push({label: "Draw", model: mx.draw, market: _emBestImplied(venues, "draw")});
+    rows.push({label: "Away", model: mx.away, market: _emBestImplied(venues, "away")});
+
+    // O/U goals
+    var ou = fx.over_under;
+    if (ou) {
+      rows.push({section: "O/U " + (ou.line != null ? ou.line : "2.5") + " Goals"});
+      rows.push({label: "Over",  model: ou.over  / 100, market: null});
+      rows.push({label: "Under", model: ou.under / 100, market: null});
+    }
+
+    // BTTS
+    if (fx.btts != null) {
+      rows.push({section: "BTTS"});
+      rows.push({label: "Yes", model: fx.btts / 100,         market: null});
+      rows.push({label: "No",  model: (100 - fx.btts) / 100, market: null});
+    }
+
+    // Top scorelines (model vs Polymarket market prob where available)
+    var topScores = (fx.scores || []).slice(0, 6);
+    if (topScores.length) {
+      rows.push({section: "Top Scorelines (model pick & market)"});
+      topScores.forEach(function (sc) {
+        rows.push({
+          label: sc.score,
+          model: sc.prob / 100,
+          market: sc.pm_prob != null ? sc.pm_prob / 100 : null
+        });
+      });
+    }
+
+    return "<div class='em-fx-head'>" + esc(fx.fixture) + "</div>" + emForestSvg(rows);
+  }
+
+  function emForestSvg(rows) {
+    if (!rows.length) return empty("No market data");
+    var rowH = 22, secH = 18, W = 920, lblW = 160, P = {l: lblW, r: 64, t: 8};
+    var H = rows.reduce(function (a, r) { return a + (r.section ? secH : rowH); }, 0) + 22;
+    var xOf = function (p) { return P.l + p * (W - P.l - P.r); };
+    var parts = [];
+
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (g) {
+      parts.push("<line class='cx-grid' x1='" + xOf(g) + "' y1='" + P.t +
+        "' x2='" + xOf(g) + "' y2='" + (H - 16) + "'/>");
+      parts.push("<text class='cx-tick' x='" + xOf(g) + "' y='" + (H - 4) +
+        "' text-anchor='middle'>" + (g * 100) + "%</text>");
+    });
+
+    var y = P.t;
+    rows.forEach(function (r) {
+      if (r.section) {
+        var sy = y + secH - 6;
+        parts.push("<line x1='" + xOf(0) + "' y1='" + (sy - 5) + "' x2='" + xOf(1) +
+          "' y2='" + (sy - 5) + "' stroke='var(--border)' stroke-width='0.8'/>");
+        parts.push("<text x='" + (lblW - 8) + "' y='" + sy +
+          "' text-anchor='end' class='cx-tick' font-weight='600' fill='var(--accent-2)'>" +
+          esc(r.section) + "</text>");
+        y += secH;
+        return;
+      }
+      if (r.model == null) { y += rowH; return; }
+      var cy = y + rowH / 2;
+      var xm = xOf(r.model);
+      var xk = r.market != null ? xOf(r.market) : null;
+      parts.push("<text class='cx-lbl' x='" + (lblW - 8) + "' y='" + (cy + 4) +
+        "' text-anchor='end'>" + esc(r.label) + "</text>");
+      if (xk != null) {
+        var edgePp = (r.model - r.market) * 100;
+        parts.push("<line class='whisker' x1='" + Math.min(xm, xk) + "' y1='" + cy +
+          "' x2='" + Math.max(xm, xk) + "' y2='" + cy + "'/>");
+        parts.push("<circle class='dot-market' cx='" + xk + "' cy='" + cy + "' r='4'/>");
+        parts.push("<text class='cx-tick' x='" + (W - P.r + 5) + "' y='" + (cy + 4) +
+          "' text-anchor='start' fill='" + (edgePp >= 0 ? "var(--pos)" : "var(--neg)") + "'>" +
+          (edgePp >= 0 ? "+" : "") + num(edgePp, 0) + "pp</text>");
+      } else {
+        parts.push("<text class='cx-tick' x='" + (W - P.r + 5) + "' y='" + (cy + 4) +
+          "' text-anchor='start' fill='var(--muted)'>model</text>");
+      }
+      parts.push("<circle class='dot-model' cx='" + xm + "' cy='" + cy + "' r='4.5'/>");
+      y += rowH;
+    });
+
+    return svg(W, H, parts.join(""));
+  }
+
+  // =========================================================================
   //  B · WIN-RATE  (winrate.json)
   // =========================================================================
   function renderWinrate() {
@@ -539,13 +703,14 @@
       load("clvbench", "tracking_clv_benchmark.json"),
       load("rigor", "rigor.json"),
       load("risk", "risk_pnl.json"),
+      load("scores", "scores_data.json"),
     ]).then(function () {
       var any = Object.keys(FEEDS).some(function (k) { return FEEDS[k]; });
       if (!any) { $("nodata").hidden = false; $("nodata-msg").textContent = "NO DATA FEED — could not load ./data/*.json"; }
       var pendingNew = ["predledger", "winrate", "clvbench", "rigor", "risk"].filter(function (k) { return !FEEDS[k]; });
       if (pendingNew.length) { $("nodata").hidden = false; $("nodata-msg").textContent = "Backend feeds still building: " + pendingNew.join(", ") + " — live panels render once published."; }
 
-      [renderKpi, renderVerdict, renderRisk, renderForest, renderWinrate, renderClv, renderLedger].forEach(function (fn) {
+      [renderKpi, renderVerdict, renderRisk, renderForest, renderEventMarkets, renderWinrate, renderClv, renderLedger].forEach(function (fn) {
         try { fn(); } catch (e) { /* never let one panel break the page */ if (window.console) console.error(fn.name, e); }
       });
       var gen = (FEEDS.data && FEEDS.data.meta && FEEDS.data.meta.generated) || "";
