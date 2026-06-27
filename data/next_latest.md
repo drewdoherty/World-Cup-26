@@ -1,18 +1,18 @@
-<!-- generated: 2026-06-26T23:31:25 -->
-⚽ *Next match* — Cape Verde vs Saudi Arabia
-Kickoff 2026-06-27 00:00:00+00:00
+<!-- generated: 2026-06-27T00:38:17 -->
+⚽ *Next match* — New Zealand vs Belgium
+Kickoff 2026-06-27 03:00:00+00:00
 
 *Winner* (model blend)
-  Cape Verde      34.8%  fair 2.88  best 3.92 (Polymarket) +36.3% ✅  £62.13
-  Draw            30.5%  fair 3.28  best 3.51 (Polymarket) +7.0% ✅  £13.93
-  Saudi Arabia    34.8%  fair 2.88  best 3.51 (Polymarket) +21.9% ✅  £43.71
+  New Zealand      7.1%  fair 14.08  best 16.50 (betfair_ex_uk) +17.2% ✅  £5.54
+  Draw            13.7%  fair 7.31  best 8.70 (Polymarket) +18.9% ✅  £12.27
+  Belgium         79.2%  fair 1.26  best 1.50 (Polymarket) +19.1% ✅  £100.00
   _stake = ¼-Kelly @ £2000 bankroll (+EV picks)_
 
-*Corners* (model, exp 7.9)
-  O/U 8.5: over 39.4% / under 60.6%  fair 2.54 / 1.65
+*Corners* (model, exp 8.8)
+  O/U 8.5: over 51.9% / under 48.1%  fair 1.93 / 2.08
 
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-0-0 14.8% | 1-0 14.8% | 0-1 14.4% | 1-1 12.8% | 0-2 7.1% | 2-0 6.9%
-  O/U 2.5: over 29.2% / under 70.8%   BTTS 36.4%
+0-2 15.7% | 0-1 12.8% | 0-3 12.6% | 1-2 8.0% | 0-4 7.5% | 1-3 6.4%
+  O/U 2.5: over 56.1% / under 43.9%   BTTS 36.3%
