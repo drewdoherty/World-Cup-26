@@ -2,7 +2,9 @@
 
 A quantitative betting **research platform and live operation** for the 2026 FIFA World Cup. Built from zero in the ~25 hours before the opening match; now running through the tournament. It tests one question with real money and pre-registered metrics: **can systematic +EV betting on international football be demonstrated — and measured honestly — across bookmakers and prediction markets?**
 
-**Live dashboard:** https://fifa-world-cup-2026-model.vercel.app ([scores & markets](https://fifa-world-cup-2026-betting-gamblin.vercel.app/scores) · [under the hood](https://fifa-world-cup-2026-betting-gamblin.vercel.app/architecture))
+**Live dashboard:** http://localhost:8000 ([scores & markets](http://localhost:8000/scores) · [under the hood](http://localhost:8000/architecture)) | **Analytics (v2):** http://localhost:8001
+
+> **Note (2026-06-27):** Vercel Hobby account hit deploy quota (~100/day, shared across projects). Serving sites locally via Python HTTP servers on ports 8000 (original) & 8001 (site-analytics/v2) instead. Auto-sync CI jobs are still live (hourly card, scores, odds feed); all data is real, non-fabricated, and current.
 
 Three bankroll pools: UK sportsbooks (£1,000 notional, CLV-gated ladder to £5,000), Polymarket ($1,310 USDC), Kalshi (planned). Recommendations-only at the sportsbooks; semi-automated with a human confirm gate on prediction markets.
 

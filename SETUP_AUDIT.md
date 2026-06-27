@@ -217,8 +217,9 @@
 2. ✅ **Verify the website updates**
    - Run: `python scripts/wca_site.py`
    - Confirm: `site/data.json` has predictions
-   - Visit: https://fifa-world-cup-2026-betting-gamblin.vercel.app
+   - Visit: http://localhost:8000 (or http://localhost:8001 for v2 analytics)
    - Confirm: Predictions section shows scorelines
+   - Note (2026-06-27): Sites now served locally (Python servers on ports 8000/8001) instead of Vercel to conserve deploy quota
 
 3. ✅ **Verify Telegram bot**
    - Send `/summary` — should show portfolio status

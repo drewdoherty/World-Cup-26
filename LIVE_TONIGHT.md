@@ -197,6 +197,8 @@ Once tonight is stable:
 
 **Monitor:**
 - Bot: `/summary`, `/card`, `/scores`, `/bets`
-- Website: https://fifa-world-cup-2026-betting-gamblin.vercel.app
+- Website (original): http://localhost:8000 (scores, markets, architecture)
+- Website (v2 analytics): http://localhost:8001 (tracking, calibration, winrate)
+- Note: Now served locally (Python servers, ports 8000/8001) to conserve Vercel Hobby deploy quota. Auto-sync CI jobs unchanged.
 
 Let me know if anything breaks or you need adjustments!
