@@ -1,11 +1,11 @@
-<!-- generated: 2026-06-27T09:07:48 -->
+<!-- generated: 2026-06-27T11:05:55 -->
 ⚽ *Next match* — Panama vs England
 Kickoff 2026-06-27 21:00:00+00:00
 
 *Winner* (model blend)
-  Panama           6.9%  fair 14.51  best 18.18 (Polymarket) +25.3% ✅  £7.37
-  Draw            14.5%  fair 6.90  best 9.52 (Polymarket) +38.0% ✅  £22.31
-  England         78.6%  fair 1.27  best 1.50 (Polymarket) +18.2% ✅  £100.00
+  Panama           6.2%  fair 16.11  best 22.22 (Polymarket) +37.9% ✅  £8.93
+  Draw            14.6%  fair 6.86  best 9.52 (Polymarket) +38.9% ✅  £22.83
+  England         79.2%  fair 1.26  best 1.50 (Polymarket) +19.1% ✅  £100.00
   _stake = ¼-Kelly @ £2000 bankroll (+EV picks)_
 
 *Corners* (model, exp 8.6)
@@ -14,8 +14,8 @@ Kickoff 2026-06-27 21:00:00+00:00
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-0-2 17.2% | 0-1 15.1% | 0-3 12.7% | 1-2 7.8% | 0-4 7.1% | 1-1 6.4%
-  O/U 2.5: over 50.7% / under 49.3%   BTTS 32.3%
+0-2 17.3% | 0-1 15.2% | 0-3 12.8% | 1-2 7.8% | 0-4 7.1% | 1-1 6.4%
+  O/U 2.5: over 50.8% / under 49.2%   BTTS 32.3%
 
 ────────────────────
 
