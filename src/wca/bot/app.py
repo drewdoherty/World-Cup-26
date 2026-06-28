@@ -1739,10 +1739,15 @@ def format_parked_order(token: str, proposal: Dict[str, Any]) -> str:
 
     header = ("*%s* — backing %s" % (match_desc, backing)) if match_desc else ("*%s*" % backing)
     qline = ("\n    %s → *%s*" % (question, outcome)) if question else ""
+    # Polymarket display rule: $ size + cent share price. Model fair also shown
+    # in cents (model prob * 100 = fair ¢) so the price comparison is like-for-like.
+    cents = round(price * 100.0)
+    fair_cents = round(model_prob * 100.0)
     return (
-        "%s%s @ %.2f | $%.2f | model %.1f%% | ev %+.1f%% | %.1f%% PM pool\n"
+        "%s%s @ %d¢ | $%.2f | fair %d¢ (model %.1f%%) | ev %+.1f%% | %.1f%% PM pool\n"
         "→ `Y %s` execute | `N %s` discard"
-        % (header, qline, price, size_usd, model_prob * 100.0, ev_pct, pct_pm, token, token)
+        % (header, qline, cents, size_usd, fair_cents, model_prob * 100.0,
+           ev_pct, pct_pm, token, token)
     )
 
 
