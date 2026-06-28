@@ -291,6 +291,78 @@ def _synthetic_fixtures_meta():
     }])
 
 
+class TestFairKellyDisplay:
+    """Display overhaul: model fair % + fair decimal odds (+ ¼-Kelly) shown
+    next to every bet-related number in the card renderers."""
+
+    def test_format_card_shows_fair_odds(self):
+        from wca.card import format_card
+        from wca.models.scores import fair_odds
+
+        rec = _rec(model_prob=0.55, odds=2.0, edge=0.05)
+        out = format_card([rec], [PoolConfig(name="main", bankroll=1000.0)])
+        # model % already shown; the fair decimal odds (1/p) must now appear too.
+        assert "55.0%" in out
+        assert ("fair %.2f" % fair_odds(0.55)) in out
+
+    def test_format_ranked_card_shows_fair_odds_and_kelly(self):
+        from wca.card import format_ranked_card
+        from wca.models.scores import fair_odds
+
+        rec = _rec(model_prob=0.55, odds=2.0, edge=0.05, stakes={"main": 12.34})
+        ranked = rank_card([rec])
+        assert ranked.picks, "favourite should be staked, not cut"
+        pool = PoolConfig(name="main", bankroll=1000.0)
+        out = format_ranked_card(ranked, pool)
+        assert "55.0%" in out                              # model fair %
+        assert ("fair %.2f" % fair_odds(0.55)) in out      # fair decimal odds
+        assert "£12.34" in out                             # ¼-Kelly stake (preserved)
+
+    def test_format_ranked_card_cut_list_shows_fair_odds(self):
+        from wca.card import format_ranked_card
+        from wca.models.scores import fair_odds
+
+        # A mispriced-minnow longshot is CUT (no stake) but still shows fair odds.
+        longshot = _rec(
+            match="Dog match", selection="away", team="Dog", odds=9.0,
+            model_prob=0.15, edge=0.20, category="longshot",
+        )
+        ranked = rank_card([longshot])
+        assert ranked.cut, "longshot should be cut"
+        out = format_ranked_card(ranked, PoolConfig(name="main", bankroll=1000.0))
+        assert ("fair %.2f" % fair_odds(0.15)) in out
+        # No edge -> no bet honesty: cut reason still present.
+        assert "EV)" in out
+
+    def test_format_scores_kelly_only_when_bankroll_given(self):
+        from wca.card import format_scores
+        from wca.markets import kelly as kelly_mod
+        from wca.models.scores import ScorelineCard
+        import numpy as _np
+
+        # Minimal hand-built card: one scoreline at p=0.2, min_edge 0.02.
+        mat = _np.zeros((2, 2))
+        mat[1, 0] = 0.2
+        mat[0, 0] = 0.8
+        card = ScorelineCard(
+            home="A", away="B", matrix=mat,
+            top_scorelines=[(1, 0, 0.2)],
+            over_under={2.5: (0.0, 1.0)}, btts=0.0,
+            one_x_two=(0.2, 0.8, 0.0), min_edge=0.02,
+        )
+        # Without a bankroll: no ¼-K token (unchanged REFERENCE behaviour).
+        plain = format_scores([card])
+        assert "¼-K" not in plain
+        assert "fair" in plain  # fair % + fair odds still shown
+        # With a bankroll: ¼-Kelly stake at the min back price, same kernel.
+        sized = format_scores([card], bankroll=1500.0)
+        back = card.min_price(0.2, 0.02)
+        expected = kelly_mod.stake(0.2, back, 1500.0)
+        assert expected > 0
+        assert ("¼-K £%.2f" % expected) in sized
+        assert "REFERENCE" in sized
+
+
 def test_build_card_tags_venue_from_best_price():
     """build_card carries the best-price venue tag onto each recommendation."""
     rng = np.random.default_rng(11)

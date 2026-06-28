@@ -384,6 +384,13 @@ class TestFormatAndBot:
         assert "O/U 8.5" in text
         assert "Striker One" in text
         assert "*Scorelines*" in text and "BTTS" in text
+        # Display overhaul: winner block shows model fair % + fair odds + ¼-Kelly,
+        # and the scorelines line carries fair decimal odds per scoreline.
+        assert "fair" in text
+        assert "¼-Kelly" in text
+        import re as _re
+        # At least one scoreline rendered as "h-a pp.p% (fair X.YY)".
+        assert _re.search(r"\d-\d \d+\.\d% \(fair \d+\.\d{2}\)", text)
 
     def test_format_simultaneous_includes_divider(self):
         from wca.card import fit_models
@@ -487,6 +494,33 @@ class TestGoalscorerCard:
         assert "Any  bk 3.00" in text and "1st  bk 8.00" in text
         assert "£" in text                       # +EV model edge -> Kelly stake
         assert "no scorer market" in text        # fx2 degrades
+        # Display overhaul: each priced leg shows model fair % AND fair odds.
+        assert "model 45.0%" in text             # anytime model prob 0.45
+        assert "%.2f" % (1.0 / 0.45) in text     # anytime fair decimal odds
+        assert "model 16.0%" in text             # first-scorer model prob 0.16
+
+    def test_model_suffix_shows_fair_pct_fair_odds_and_kelly(self):
+        from wca.nextmatch import _model_suffix
+        from wca.markets import kelly as kelly_mod
+
+        card = GoalscorerFixture(
+            home="Alpha", away="Bravo", commence_time="2026-06-11T18:00:00Z",
+            bankroll=1500.0,
+        )
+        # model_p 0.45, fair 1/0.45, +EV vs book 3.0 -> shows %, fair, edge, £.
+        suffix = _model_suffix(0.45, 1.0 / 0.45, 3.0, card)
+        assert "model 45.0%" in suffix
+        assert ("@ %.2f" % (1.0 / 0.45)) in suffix
+        expected = kelly_mod.stake(0.45, 3.0, card.bankroll,
+                                   card.kelly_fraction, card.kelly_cap)
+        assert expected > 0
+        assert ("£%.2f" % expected) in suffix
+
+    def test_model_suffix_empty_without_model_price(self):
+        from wca.nextmatch import _model_suffix
+
+        card = GoalscorerFixture(home="A", away="B", commence_time="t")
+        assert _model_suffix(None, None, 3.0, card) == ""
 
     def test_format_empty(self):
         assert "No upcoming fixtures" in format_goalscorer_card([])

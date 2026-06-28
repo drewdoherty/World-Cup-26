@@ -557,15 +557,16 @@ def _model_suffix(
     book_odds: Optional[float],
     card: "NextMatchCard",
 ) -> str:
-    """`` | model <fair> <edge%> £<stake>`` for a priced goalscorer leg.
+    """`` | model <fair%> @ <fair> <edge%> £<stake>`` for a priced goalscorer leg.
 
-    Empty when the player has no model price (no share). The Kelly stake is
-    quarter-Kelly of the card bankroll vs the best book odds, shown only on a
-    positive model edge (``model_p * book_odds - 1 > 0``).
+    Shows the model probability as an implied fair % and the fair decimal odds
+    (``model_fair = 1/p``). Empty when the player has no model price (no share).
+    The Kelly stake is quarter-Kelly of the card bankroll vs the best book odds,
+    shown only on a positive model edge (``model_p * book_odds - 1 > 0``).
     """
     if not model_p or not model_fair or model_fair <= 1.0:
         return ""
-    s = " | model %.2f" % model_fair
+    s = " | model %.1f%% @ %.2f" % (model_p * 100.0, model_fair)
     if book_odds and book_odds > 1.0:
         edge = model_p * book_odds - 1.0
         s += " %+.0f%%" % (edge * 100)
@@ -715,7 +716,10 @@ def _format_single_next_match(card: NextMatchCard) -> str:
     lines.append("")
     lines.append("*Scorelines* (top %d)" % len(c.top_scorelines))
     lines.append(
-        " | ".join("%d-%d %.1f%%" % (h, a, p * 100) for h, a, p in c.top_scorelines)
+        " | ".join(
+            "%d-%d %.1f%% (fair %.2f)" % (h, a, p * 100, c.fair_odds(p))
+            for h, a, p in c.top_scorelines
+        )
     )
     ou25 = c.over_under.get(2.5)
     if ou25 is not None:

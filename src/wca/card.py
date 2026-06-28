@@ -39,7 +39,7 @@ from wca.markets import kelly as kelly_mod
 from wca.models import venues as venues_mod
 from wca.models.dixon_coles import DixonColesModel
 from wca.models.elo import EloOutcomeModel, EloRater
-from wca.models.scores import ScorelineCard, scoreline_card
+from wca.models.scores import ScorelineCard, fair_odds, scoreline_card
 
 # 1X2 outcome order used throughout: home, draw, away.
 OUTCOMES = ("home", "draw", "away")
@@ -1271,12 +1271,12 @@ def format_card(recs: Sequence[Recommendation], pools: Sequence[PoolConfig]) -> 
         )
         lines.append(
             "*%d. %s* — %s @ *%.2f* (%s)\n"
-            "    model %.1f%% / mkt %.1f%%  edge *%+.1f%%*  [elo %.0f%% dc %.0f%%]\n"
+            "    model %.1f%% (fair %.2f) / mkt %.1f%%  edge *%+.1f%%*  [elo %.0f%% dc %.0f%%]\n"
             "    stake: %s"
             % (
                 i, r.match_desc, r.selection_team, r.best_odds, r.best_book,
-                r.model_prob * 100, r.market_prob * 100, r.edge * 100,
-                r.elo_prob * 100, r.dc_prob * 100, stake_str,
+                r.model_prob * 100, fair_odds(r.model_prob), r.market_prob * 100,
+                r.edge * 100, r.elo_prob * 100, r.dc_prob * 100, stake_str,
             )
         )
     return "\n".join(lines)
@@ -1321,13 +1321,13 @@ def format_ranked_card(
             tilt = "  further-out (%.0fh) — soft market, prioritised" % r.hours_to_kickoff
         lines.append(
             "*%d. [%s] %s* — %s @ *%.2f* via *%s*\n"
-            "    model %.1f%% / mkt %.1f%%  edge *%+.1f%%*  [elo %.0f%% dc %.0f%%]\n"
+            "    model %.1f%% (fair %.2f) / mkt %.1f%%  edge *%+.1f%%*  [elo %.0f%% dc %.0f%%]\n"
             "    stake: %s £%.2f%s"
             % (
                 i, _CATEGORY_LABEL.get(r.category, r.category.upper()),
                 r.match_desc, r.selection_team, r.best_odds, r.venue,
-                r.model_prob * 100, r.market_prob * 100, r.edge * 100,
-                r.elo_prob * 100, r.dc_prob * 100, pool.name, stake, tilt,
+                r.model_prob * 100, fair_odds(r.model_prob), r.market_prob * 100,
+                r.edge * 100, r.elo_prob * 100, r.dc_prob * 100, pool.name, stake, tilt,
             )
         )
 
@@ -1337,10 +1337,11 @@ def format_ranked_card(
         lines.append("*— CUT (excluded from staking, %d) —*" % len(ranked.cut))
         for r in ranked.cut:
             lines.append(
-                "  x %s — %s @ %.2f (model %.1f%%, +%.1f%% EV): %s"
+                "  x %s — %s @ %.2f (model %.1f%% / fair %.2f, +%.1f%% EV): %s"
                 % (
                     r.match_desc, r.selection_team, r.best_odds,
-                    r.model_prob * 100, r.edge * 100, r.cut_reason,
+                    r.model_prob * 100, fair_odds(r.model_prob), r.edge * 100,
+                    r.cut_reason,
                 )
             )
 
@@ -1389,16 +1390,29 @@ def format_ranked_card(
 
 
 def format_scores(
-    cards: Sequence[ScorelineCard], min_edge: float = 0.02
+    cards: Sequence[ScorelineCard],
+    min_edge: float = 0.02,
+    bankroll: Optional[float] = None,
+    kelly_fraction: float = 0.25,
+    kelly_cap: float = 0.05,
 ) -> str:
     """Human-readable scoreline card for the terminal or Telegram (Markdown).
 
     Per fixture: expected goals from the model, the top-6 scorelines
-    (``"2-1  12.3%  fair 8.13  back >= 8.46"``) followed by one line with
-    over/under 2.5 and BTTS probabilities.  The ``back >=`` price is the
-    minimum decimal odds at which backing that scoreline clears ``min_edge``
-    (each card's own ``min_edge`` is used; the argument is a display-only
-    fallback for cards that predate it).
+    (``"2-1  12.3%  fair 8.13  back >= 8.46  £1.20"``) followed by one line with
+    over/under 2.5 and BTTS probabilities.  Each scoreline shows the model
+    probability as an implied fair % and fair decimal odds (``fair = 1/p``).
+    The ``back >=`` price is the minimum decimal odds at which backing that
+    scoreline clears ``min_edge`` (each card's own ``min_edge`` is used; the
+    argument is a display-only fallback for cards that predate it).
+
+    When ``bankroll`` is given, the ¼-Kelly stake (``kelly_fraction`` of
+    full-Kelly, hard-capped at ``kelly_cap`` of bankroll, via
+    :func:`wca.markets.kelly.stake`) is shown for each scoreline, priced at the
+    minimum back price — the most conservative price clearing the edge gate, so
+    the stake never overstates exposure. Scorelines remain REFERENCE markets
+    (no live book odds feed), so the stake is what you would commit *if* you
+    could back at that price; nothing is auto-sized.
     """
     if not cards:
         return "*No scoreline cards* for the current slate."
@@ -1414,14 +1428,26 @@ def format_scores(
         ea = float((cols * c.matrix.sum(axis=0)).sum())
         lines.append("    xG: %.2f-%.2f" % (eh, ea))
         for h, a, p in c.top_scorelines:
-            lines.append(
+            back = c.min_price(p, me)
+            line = (
                 "    %d-%d  %.1f%%  fair %.2f  back >= %.2f"
-                % (h, a, p * 100, c.fair_odds(p), c.min_price(p, me))
+                % (h, a, p * 100, c.fair_odds(p), back)
             )
+            if bankroll is not None and bankroll > 0.0 and back > 1.0:
+                stk = kelly_mod.stake(p, back, bankroll, kelly_fraction, kelly_cap)
+                if stk > 0:
+                    line += "  ¼-K £%.2f" % stk
+            lines.append(line)
         ou25 = c.over_under.get(2.5)
         p_over = ou25[0] if ou25 is not None else float("nan")
         lines.append(
             "    O/U 2.5: over %.1f%% / under %.1f%%   BTTS %.1f%%"
             % (p_over * 100, (1.0 - p_over) * 100, c.btts * 100)
+        )
+    if bankroll is not None and bankroll > 0.0:
+        lines.append("")
+        lines.append(
+            "_¼-K = ¼-Kelly @ £%.0f bankroll, priced at the min back; "
+            "scorelines are REFERENCE (no live book feed)._" % bankroll
         )
     return "\n".join(lines)

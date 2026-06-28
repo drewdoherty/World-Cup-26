@@ -196,6 +196,59 @@ def test_xg_absent_when_not_in_card(tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# handle_scores: fair odds + ¼-Kelly display (reuses kelly.stake kernel)
+# ---------------------------------------------------------------------------
+
+
+def test_top_score_shows_fair_odds(tmp_path):
+    """Each scoreline shows the model implied fair decimal odds (1/p)."""
+    path = _write_card(str(tmp_path))
+    out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
+    # Mexico vs SA top score 1-0 has fair 5.91 in the source card.
+    assert "fair 5.91" in out
+    # Runner-up 2-0 fair 6.45 must also surface.
+    assert "fair 6.45" in out
+
+
+def test_top_score_shows_quarter_kelly_stake(tmp_path):
+    """The most-likely score shows a ¼-Kelly £ stake from kelly.stake."""
+    from wca.markets import kelly as kelly_mod
+
+    path = _write_card(str(tmp_path))
+    out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
+    # Expected stake for the Mexico vs SA top score (16.9% @ back 6.03),
+    # computed by the SAME kernel the renderer uses (default ¼-Kelly + cap).
+    expected = kelly_mod.stake(0.169, 6.03, app.SCORES_DISPLAY_BANKROLL)
+    assert expected > 0  # this scoreline clears the edge gate at its back price
+    assert ("¼-K £%.2f" % expected) in out
+
+
+def test_scores_header_notes_display_only_kelly(tmp_path):
+    path = _write_card(str(tmp_path))
+    out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
+    assert "display-only" in out.lower()
+    assert "REFERENCE" in out
+
+
+def test_fmt_score_kelly_no_edge_returns_empty():
+    """No stake (no edge / missing data) -> empty string, preserving honesty."""
+    # Back at fair (no edge buffer): kelly.stake returns 0 -> no ¼-K token.
+    assert app._fmt_score_kelly(50.0, 2.0) == ""
+    # Missing inputs.
+    assert app._fmt_score_kelly(None, 6.0) == ""
+    assert app._fmt_score_kelly(16.9, None) == ""
+    assert app._fmt_score_kelly(16.9, 1.0) == ""
+
+
+def test_fmt_score_kelly_matches_kernel():
+    """_fmt_score_kelly delegates to kelly.stake with unchanged defaults."""
+    from wca.markets import kelly as kelly_mod
+
+    expected = kelly_mod.stake(0.169, 6.03, app.SCORES_DISPLAY_BANKROLL)
+    assert app._fmt_score_kelly(16.9, 6.03) == "¼-K £%.2f" % expected
+
+
+# ---------------------------------------------------------------------------
 # handle_scores: card with no scorelines section
 # ---------------------------------------------------------------------------
 
