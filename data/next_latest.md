@@ -1,38 +1,38 @@
-<!-- generated: 2026-06-27T22:19:07 -->
-⚽ *Next match* — Colombia vs Portugal
-Kickoff 2026-06-27 23:30:00+00:00
+<!-- generated: 2026-06-28T00:17:11 -->
+⚽ *Next match* — Jordan vs Argentina
+Kickoff 2026-06-28 02:00:00+00:00
 
 *Winner* (model blend)
-  Colombia        28.9%  fair 3.46  best 4.65 (Polymarket) +34.5% ✅  £47.28
-  Draw            28.9%  fair 3.46  best 4.26 (Polymarket) +22.8% ✅  £35.08
-  Portugal        42.2%  fair 2.37  best 2.53 (Polymarket) +6.9% ✅  £22.39
+  Jordan           4.8%  fair 20.86  best 23.53 (Polymarket) +12.8% ✅  £2.83
+  Draw            11.9%  fair 8.41  best 10.53 (Polymarket) +25.2% ✅  £13.21
+  Argentina       83.3%  fair 1.20  best 1.55 (Polymarket) +29.2% ✅  £100.00
   _stake = ¼-Kelly @ £2000 bankroll (+EV picks)_
 
-*Corners* (model, exp 8.1)
-  O/U 8.5: over 42.5% / under 57.5%  fair 2.35 / 1.74
+*Corners* (model, exp 8.9)
+  O/U 8.5: over 52.8% / under 47.2%  fair 1.89 / 2.12
 
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-0-1 14.3% | 1-1 13.1% | 0-0 11.9% | 1-0 10.5% | 0-2 8.5% | 1-2 8.4%
-  O/U 2.5: over 36.1% / under 63.9%   BTTS 42.5%
+0-2 16.7% | 0-3 14.5% | 0-1 12.6% | 0-4 9.4% | 1-2 6.6% | 1-3 5.7%
+  O/U 2.5: over 57.4% / under 42.6%   BTTS 30.7%
 
 ────────────────────
 
-⚽ *Next match* — DR Congo vs Uzbekistan
-Kickoff 2026-06-27 23:30:00+00:00
+⚽ *Next match* — Algeria vs Austria
+Kickoff 2026-06-28 02:00:00+00:00
 
 *Winner* (model blend)
-  DR Congo        44.5%  fair 2.25  best 2.41 (Polymarket) +7.2% ✅  £25.47
-  Draw            31.0%  fair 3.23  best 4.08 (Polymarket) +26.4% ✅  £42.79
-  Uzbekistan      24.6%  fair 4.07  best 6.90 (Polymarket) +69.4% ✅  £58.82
+  Algeria         27.3%  fair 3.67  best 4.65 (Polymarket) +26.9% ✅  £36.78
+  Draw            42.7%  fair 2.34  best 2.15 (Polymarket) -8.2%
+  Austria         30.0%  fair 3.33  best 4.65 (Polymarket) +39.7% ✅  £54.35
   _stake = ¼-Kelly @ £2000 bankroll (+EV picks)_
 
-*Corners* (model, exp 8.0)
-  O/U 8.5: over 40.8% / under 59.2%  fair 2.45 / 1.69
+*Corners* (model, exp 8.4)
+  O/U 8.5: over 46.4% / under 53.6%  fair 2.16 / 1.86
 
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-1-0 17.4% | 0-0 14.0% | 1-1 13.5% | 0-1 9.4% | 2-1 8.9% | 2-0 8.8%
-  O/U 2.5: over 31.8% / under 68.2%   BTTS 39.5%
+1-1 20.3% | 0-0 14.1% | 0-1 8.1% | 1-0 8.0% | 2-2 7.1% | 2-1 6.3%
+  O/U 2.5: over 39.1% / under 60.9%   BTTS 53.4%
