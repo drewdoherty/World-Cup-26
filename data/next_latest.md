@@ -1,11 +1,11 @@
-<!-- generated: 2026-06-28T20:38:37 -->
+<!-- generated: 2026-06-28T22:17:36 -->
 ⚽ *Next match* — Brazil vs Japan
 Kickoff 2026-06-29 17:00:00+00:00
 
 *Winner* (model blend)
-  Brazil          54.7%  fair 1.83  best 2.35 (Polymarket) +28.6% ✅  £100.00
-  Draw            27.6%  fair 3.63  best 3.92 (Polymarket) +8.1% ✅  £13.93
-  Japan           17.8%  fair 5.63  best 6.06 (Polymarket) +7.7% ✅  £7.60
+  Brazil          55.0%  fair 1.82  best 2.35 (Polymarket) +29.4% ✅  £100.00
+  Draw            27.8%  fair 3.60  best 3.92 (Polymarket) +9.0% ✅  £15.38
+  Japan           17.2%  fair 5.82  best 6.45 (Polymarket) +10.9% ✅  £10.01
   _stake = ¼-Kelly @ £2000 bankroll (+EV picks)_
 
 *Corners* (model, exp 8.5)
@@ -14,5 +14,5 @@ Kickoff 2026-06-29 17:00:00+00:00
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-1-1 12.8% | 1-0 11.9% | 2-0 11.5% | 0-0 10.3% | 2-1 7.8% | 3-0 7.1%
+1-1 12.9% | 1-0 12.0% | 2-0 11.5% | 0-0 10.4% | 2-1 7.9% | 3-0 7.1%
   O/U 2.5: over 43.9% / under 56.1%   BTTS 44.0%
