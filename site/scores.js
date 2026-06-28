@@ -237,6 +237,105 @@
       esc(value) + '</span><span class="rk-stat-l">' + esc(label) + '</span></div>';
   }
 
+  // ---- enriched panel: real exposure + recs + events + accas + promos ------
+  // All driven by exp.panel (injected by the exposure builder). Each block
+  // degrades to nothing if its slice is absent, so the legacy feed still works.
+  function recKindClass(kind) {
+    if (!kind) return "rkc-new";
+    if (kind.indexOf("NEW") === 0) return "rkc-new";
+    if (kind.indexOf("HEDGE") === 0) return "rkc-hedge";
+    return "rkc-topup";
+  }
+  function buildPanelExtras(panel) {
+    if (!panel) return "";
+    var out = [];
+
+    // 1. existing real-money exposure (incl. Betfair Exchange result backs)
+    var ex = panel.existing || {};
+    if (ex.bets && ex.bets.length) {
+      var rows = ex.bets.map(function (b) {
+        var off = b.in_slate === false ? ' <span class="rk-off">off-model</span>' : '';
+        return '<div class="rk-exrow"><span class="rk-extag">' + esc(b.venue) + '</span>' +
+          '<b>' + esc(b.selection) + '</b> <span class="dim">' + esc(b.market) +
+          ' · ' + esc(b.fixture) + '</span>' + off +
+          '<span class="rk-exnum num">£' + num(b.stake, 0) + ' @ ' + num(b.odds) + '</span></div>';
+      }).join("");
+      out.push('<div class="rk-sec"><div class="rk-h">Your real-money exposure — ' +
+        gbp(ex.total_stake) + ' at risk' +
+        (ex.note ? ' <span class="rk-note">(' + esc(ex.note) + ')</span>' : '') +
+        '</div>' + rows + '</div>');
+    }
+
+    // 2. risk-aware result recs
+    var recs = panel.recs || [];
+    if (recs.length) {
+      var rr = recs.map(function (r) {
+        return '<div class="rk-rec ' + recKindClass(r.kind) + '">' +
+          '<span class="rk-rk">' + esc((r.kind || "").split(" ")[0]) + '</span>' +
+          '<span class="rk-rfx"><b>' + esc(r.selection) + '</b> <span class="dim">' +
+            esc(r.market) + ' · ' + esc(r.fixture) + '</span></span>' +
+          '<span class="rk-rnum">' + pct1(r.model_pct) + ' · <b>' + num(r.price) +
+            '</b> <span class="dim">' + esc(r.venue) + '</span> · <span class="' +
+            (r.edge_pct >= 0 ? "pos" : "neg") + '">' + (r.edge_pct >= 0 ? "+" : "") +
+            num(r.edge_pct, 1) + '%</span> · ¼K ' + gbp(r.stake) + '</span></div>';
+      }).join("");
+      out.push('<div class="rk-sec"><div class="rk-h">Risk-aware result recs — ' +
+        'new value first, then hedges on matches you\'re already on</div>' + rr + '</div>');
+    }
+
+    // 3. match-event leans (model-only)
+    var evs = panel.events || [];
+    if (evs.length) {
+      var ee = evs.slice(0, 8).map(function (e) {
+        return '<div class="rk-ev"><span class="rk-evm"><b>' + esc(e.market) +
+          '</b> <span class="dim">' + esc(e.fixture) + '</span></span>' +
+          '<span class="rk-evn">' + pct1(e.model_pct) + ' · fair ' + num(e.fair) +
+          ' <span class="dim">' + esc(e.note || "") + '</span></span></div>';
+      }).join("");
+      out.push('<div class="rk-sec"><div class="rk-h">Match-event leans ' +
+        '<span class="rk-modelonly">model-only · no de-vigged market price · check book ≥ fair</span></div>' +
+        ee + '</div>');
+    }
+
+    // 4. low-level-win accas (free-bet tokens)
+    var accas = panel.accas || [];
+    if (accas.length) {
+      var aa = accas.map(function (a) {
+        var legs = (a.legs || []).map(function (L) {
+          return esc(L.sel) + ' <span class="dim">(' + num(L.price) + ')</span>';
+        }).join(' <span class="rk-x">×</span> ');
+        return '<div class="rk-acca"><span class="rk-alabel">' + esc(a.label) + '</span>' +
+          '<span class="rk-alegs">' + legs + '</span>' +
+          '<span class="rk-anum">= <b>' + num(a.combined_odds) + '</b> · P(hit) ' +
+          pct1(a.model_pct) + '</span></div>';
+      }).join("");
+      out.push('<div class="rk-sec"><div class="rk-h">Low-level-win accas — ' +
+        'for acca free-bet tokens (legs ≥ 1.20, sportsbook)</div>' + aa + '</div>');
+    }
+
+    // 5. unused promos / boosts on the venues you use most
+    var tv = panel.top_venues || [];
+    var withOffers = tv.filter(function (v) { return v.n_unused > 0; });
+    if (tv.length) {
+      var vv = tv.map(function (v) {
+        var offers = []
+          .concat((v.boosts || []).map(function (b) { return '<span class="rk-boost">boost: ' + esc(b) + '</span>'; }))
+          .concat((v.ongoing || []).map(function (o) { return '<span class="rk-promo">' + esc(o) + '</span>'; }));
+        var body = offers.length ? offers.join("") :
+          '<span class="dim">no scraped offers (exchange/PM — promo-light)</span>';
+        return '<div class="rk-venue"><div class="rk-vh"><b>' + esc(v.venue) + '</b>' +
+          '<span class="dim"> ' + v.n_bets + ' bets · ' + gbp(v.staked) + ' · ' +
+          v.n_unused + ' unused</span></div>' + body + '</div>';
+      }).join("");
+      out.push('<div class="rk-sec"><div class="rk-h">Unused promos &amp; boosts — your most-used venues</div>' +
+        '<div class="rk-venues">' + vv + '</div></div>');
+    }
+
+    var basis = panel.price_basis
+      ? '<div class="rk-basis">Price basis: ' + esc(panel.price_basis) + '</div>' : "";
+    return out.join("") + basis;
+  }
+
   function renderRisk(exp) {
     if (!exp || !exp.portfolio) {
       $("risk").innerHTML = '<div class="empty">No exposure feed</div>';
@@ -296,7 +395,8 @@
         '<div class="rk-block"><div class="rk-h">Worst result-states</div>' + (worst || '<div class="dim">—</div>') +
           '<div class="rk-h" style="margin-top:8px">Best result-states</div>' + (best || '<div class="dim">—</div>') +
         '</div>' +
-      '</div>';
+      '</div>' +
+      buildPanelExtras(exp.panel);
     var off = [];
     if ((exp.off_slate_accas || []).length) off.push((exp.off_slate_accas).length + " off-slate acca");
     if ((exp.unmapped || []).length) off.push((exp.unmapped).length + " unmapped");

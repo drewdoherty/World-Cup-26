@@ -1414,9 +1414,15 @@ def format_scores(
         ea = float((cols * c.matrix.sum(axis=0)).sum())
         lines.append("    xG: %.2f-%.2f" % (eh, ea))
         for h, a, p in c.top_scorelines:
+            fair = c.fair_odds(p)
+            backp = c.min_price(p, me)
+            # Show the implied probability after each decimal price: the fair
+            # leg restates the model prob; the back leg is the break-even prob at
+            # the minimum price (the gap is the edge buffer you must clear).
             lines.append(
-                "    %d-%d  %.1f%%  fair %.2f  back >= %.2f"
-                % (h, a, p * 100, c.fair_odds(p), c.min_price(p, me))
+                "    %d-%d  %.1f%%  fair %.2f (%.1f%%)  back >= %.2f (%.1f%%)"
+                % (h, a, p * 100, fair, (100.0 / fair) if fair else 0.0,
+                   backp, (100.0 / backp) if backp else 0.0)
             )
         ou25 = c.over_under.get(2.5)
         p_over = ou25[0] if ou25 is not None else float("nan")

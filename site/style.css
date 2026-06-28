@@ -1,7 +1,9 @@
-/* World Cup Alpha — trading-terminal static site.
-   Pure static, no external fonts/CDNs. System monospace stack only. */
+/* World Cup Alpha — trading-terminal static site. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
+  --ui: 'Inter', -apple-system, system-ui, sans-serif;
   --bg: #F6F3FC;
   --bg-2: #F0ECFA;
   --panel: #FFFFFF;
