@@ -1,4 +1,4 @@
-<!-- generated: 2026-06-28T22:17:36 -->
+<!-- generated: 2026-06-28T23:35:10 -->
 ⚽ *Next match* — Brazil vs Japan
 Kickoff 2026-06-29 17:00:00+00:00
 
