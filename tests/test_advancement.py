@@ -65,7 +65,9 @@ def test_all_48_teams_appear_in_scheduled_fixtures():
     # *unplayed*). Filter by the 2026 season so historical World Cups are
     # excluded but already-played 2026 group games are still counted.
     _yr = pd.to_datetime(df["date"], errors="coerce").dt.year
-    wc = df[(df["tournament"] == "FIFA World Cup") & (_yr == 2026)]
+    _dt = pd.to_datetime(df["date"], errors="coerce")
+    # Group stage only (< 2026-06-28); knock-out fixtures cross groups by design.
+    wc = df[(df["tournament"] == "FIFA World Cup") & (_yr == 2026) & (_dt < "2026-06-28")]
     fixture_teams = set(wc["home_team"]).union(set(wc["away_team"]))
 
     group_teams = {t for ts in WC2026_GROUPS.values() for t in ts}
