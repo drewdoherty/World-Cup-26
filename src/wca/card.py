@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -133,6 +133,64 @@ class PoolConfig:
     kelly_fraction: float = 0.25
     per_bet_cap: float = 0.05
     daily_exposure_cap: float = 0.05
+
+    @property
+    def symbol(self) -> str:
+        """Currency symbol for display ($ for the USD/Polymarket pool, else £)."""
+        return "$" if str(self.currency).upper() == "USD" else "£"
+
+
+# ---------------------------------------------------------------------------
+# Dual-pool sizing (user decision, 2026-06-28).
+# ---------------------------------------------------------------------------
+#
+# The desk's bankroll is split equally across its two books and sized at
+# HALF-Kelly (the user chose the aggressive 1/2 over 1/4 after re-exploring
+# both; per-bet + whole-book caps stay on as the guardrails):
+#
+#   gbp pool  ->  £1,500   sportsbooks + exchanges (Betfair / Smarkets / bet365…)
+#   pm  pool  ->  $1,995   Polymarket balance  (£1,500 at the fixed £1 = $1.33)
+#
+# £1,500 + $1,995 ≈ £3,000 total, equally shared. Each book is sized in its OWN
+# currency off its OWN bankroll — Polymarket stakes come out in $ natively off
+# the $1,995 pool (the 1.33 is baked into that figure), every other venue in £.
+# This REPLACES the CLV-earned-rung ladder as the stake-sizing base; the ladder
+# constants below are retained only for the informational bankroll footer.
+GBP_POOL_BANKROLL: float = 1500.0
+PM_POOL_BANKROLL: float = 1995.0
+DUAL_POOL_KELLY_FRACTION: float = 0.50
+GBP_POOL_NAME = "gbp"
+PM_POOL_NAME = "pm"
+
+
+def default_pools() -> List["PoolConfig"]:
+    """The canonical dual pool: £1,500 GBP venues + $1,995 Polymarket, 1/2-Kelly."""
+    return [
+        PoolConfig(
+            name=GBP_POOL_NAME, bankroll=GBP_POOL_BANKROLL, currency="GBP",
+            kelly_fraction=DUAL_POOL_KELLY_FRACTION,
+        ),
+        PoolConfig(
+            name=PM_POOL_NAME, bankroll=PM_POOL_BANKROLL, currency="USD",
+            kelly_fraction=DUAL_POOL_KELLY_FRACTION,
+        ),
+    ]
+
+
+def pool_for_venue(
+    venue: str, pools: Sequence["PoolConfig"]
+) -> "PoolConfig":
+    """Route a recommendation to its currency pool.
+
+    Polymarket -> the USD (``pm``) pool; every sportsbook / exchange -> the GBP
+    (``gbp``) pool. Falls back gracefully to the first pool if a named pool is
+    absent (e.g. a single-pool legacy caller), so callers never KeyError.
+    """
+    pm = next((p for p in pools if p.name == PM_POOL_NAME), None)
+    gbp = next((p for p in pools if p.name == GBP_POOL_NAME), None)
+    if str(venue) == VENUE_POLYMARKET:
+        return pm or gbp or pools[0]
+    return gbp or pools[0]
 
 
 # ---------------------------------------------------------------------------
@@ -1013,11 +1071,20 @@ def build_card(
             e = raw_e * IMMINENT_EDGE_DISCOUNT if (imminent and raw_e > 0) else raw_e
             if e < min_edge:
                 continue
+            # Route each pick to the single currency pool that backs its venue
+            # (Polymarket -> $ pool, every other book -> £ pool) and size it ONLY
+            # there. Every other pool gets 0 so the per-pool deployment, exposure
+            # and daily-cap maths downstream never mix £ and $.
+            target = pool_for_venue(venue_of(book), pools)
             stakes: Dict[str, float] = {}
             for pool in pools:
-                stakes[pool.name] = kelly_mod.stake(
-                    p, net, pool.bankroll,
-                    fraction=pool.kelly_fraction, cap=pool.per_bet_cap,
+                stakes[pool.name] = (
+                    kelly_mod.stake(
+                        p, net, pool.bankroll,
+                        fraction=pool.kelly_fraction, cap=pool.per_bet_cap,
+                    )
+                    if pool.name == target.name
+                    else 0.0
                 )
             recs.append(
                 Recommendation(
@@ -1292,7 +1359,7 @@ _CATEGORY_LABEL = {
 
 def format_ranked_card(
     ranked: RankedCard,
-    pool: PoolConfig,
+    pools: Union[PoolConfig, Sequence[PoolConfig]],
     bank: Optional["PoolBankroll"] = None,
 ) -> str:
     """Operating-rules card (Markdown): ranked picks, CUT list, footer.
@@ -1300,10 +1367,17 @@ def format_ranked_card(
     Renders rule 2 (hit-probability ranking + CUT longshots), rule 3 (the
     further-out tilt — imminent fixtures flagged and edge-discounted), rule 4
     (venue tag + per-venue deployment split + cross-venue whole-book exposure)
-    and rule 1 (the bankroll/rung/Kelly footer with the rung-0 negative-CLV
-    constraint). Reference-only markets (scorelines etc.) are appended by the
-    caller, clearly flagged "REFERENCE, NOT SIZED".
+    and rule 1 (the dual-pool 1/2-Kelly bankroll footer). Each pick is sized
+    and shown in its venue's own currency — Polymarket in $ off the $-pool,
+    every other book in £ off the £-pool. Reference-only markets (scorelines
+    etc.) are appended by the caller, clearly flagged "REFERENCE, NOT SIZED".
+
+    ``pools`` accepts a single :class:`PoolConfig` (legacy single-pool callers)
+    or a sequence; a lone pool is wrapped so per-pick routing still works.
     """
+    pool_list: List[PoolConfig] = (
+        [pools] if isinstance(pools, PoolConfig) else list(pools)
+    )
     lines: List[str] = []
     n = len(ranked.picks)
     lines.append("*World Cup Alpha — bet card* (%d staked picks, hit-prob ranked)" % n)
@@ -1311,7 +1385,8 @@ def format_ranked_card(
     if not ranked.picks:
         lines.append("_No +EV bets clear the selection rule on the current slate._")
     for i, r in enumerate(ranked.picks, 1):
-        stake = r.stakes.get(pool.name, 0.0)
+        rp = pool_for_venue(r.venue, pool_list)
+        stake = r.stakes.get(rp.name, 0.0)
         tilt = ""
         if r.imminent and r.raw_edge is not None:
             tilt = "  IMMINENT: edge discounted %+.1f%%->%+.1f%% (likely model error)" % (
@@ -1322,12 +1397,12 @@ def format_ranked_card(
         lines.append(
             "*%d. [%s] %s* — %s @ *%.2f* via *%s*\n"
             "    model %.1f%% / mkt %.1f%%  edge *%+.1f%%*  [elo %.0f%% dc %.0f%%]\n"
-            "    stake: %s £%.2f%s"
+            "    stake: %s %s%.2f%s"
             % (
                 i, _CATEGORY_LABEL.get(r.category, r.category.upper()),
                 r.match_desc, r.selection_team, r.best_odds, r.venue,
                 r.model_prob * 100, r.market_prob * 100, r.edge * 100,
-                r.elo_prob * 100, r.dc_prob * 100, pool.name, stake, tilt,
+                r.elo_prob * 100, r.dc_prob * 100, rp.name, rp.symbol, stake, tilt,
             )
         )
 
@@ -1344,45 +1419,61 @@ def format_ranked_card(
                 )
             )
 
-    # Cross-venue deployment split + whole-book exposure (rule 4).
+    # Cross-venue deployment split + whole-book exposure (rule 4), PER POOL so
+    # the £ and $ books are summed and capped in their own currency (never mixed).
     if ranked.picks:
-        split = venue_deployment(ranked.picks, pool.name)
-        if split:
-            lines.append("")
-            lines.append(
-                "*Venue split:* "
-                + "  ".join("%s £%.2f" % (v, s) for v, s in split.items())
-            )
-        bankroll = bank.bankroll if bank is not None else pool.bankroll
-        book = whole_book_exposure(ranked.picks, bankroll)
-        flagged = [b for b in book if b["over_cap"]]
-        if flagged:
-            lines.append(
-                "*Whole-book exposure (cross-venue):* %d match(es) over the "
-                "5%%-of-base cap:" % len(flagged)
-            )
-            for b in flagged:
+        for pool in pool_list:
+            pool_picks = [
+                r for r in ranked.picks
+                if float(r.stakes.get(pool.name, 0.0)) > 0.0
+            ]
+            if not pool_picks:
+                continue
+            split = venue_deployment(pool_picks, pool.name)
+            if split:
+                lines.append("")
                 lines.append(
-                    "  ! %s — £%.2f at risk across %s (cap £%.2f)"
-                    % (b["match"], b["stake_at_risk"], ", ".join(b["venues"]), b["cap"])
+                    "*Venue split (%s):* " % pool.name
+                    + "  ".join(
+                        "%s %s%.2f" % (v, pool.symbol, s)
+                        for v, s in split.items()
+                    )
                 )
+            book = whole_book_exposure(pool_picks, pool.bankroll)
+            flagged = [b for b in book if b["over_cap"]]
+            if flagged:
+                lines.append(
+                    "*Whole-book exposure (%s, cross-venue):* %d match(es) over "
+                    "the 5%%-of-base cap:" % (pool.name, len(flagged))
+                )
+                for b in flagged:
+                    lines.append(
+                        "  ! %s — %s%.2f at risk across %s (cap %s%.2f)"
+                        % (
+                            b["match"], pool.symbol, b["stake_at_risk"],
+                            ", ".join(b["venues"]), pool.symbol, b["cap"],
+                        )
+                    )
 
-    # Bankroll / rung / Kelly footer (rule 1).
-    if bank is not None:
-        lines.append("")
-        lines.append("*Bankroll model (sizing base = CLV-earned rung, not cash):*")
-        lines.append("  - %s" % bank.reason)
+    # Bankroll footer (rule 1): dual-pool 1/2-Kelly, each book in its own currency.
+    lines.append("")
+    lines.append("*Bankroll model (1/2-Kelly, equally split across books):*")
+    for pool in pool_list:
         lines.append(
-            "  - actual capital (unpartitioned): £%.0f" % bank.actual_capital
-        )
-        if bank.venue_balances:
-            lines.append(
-                "  - per-venue available: "
-                + "  ".join(
-                    "%s %s%.0f" % (v, "$" if v == VENUE_POLYMARKET else "£", bal)
-                    for v, bal in sorted(bank.venue_balances.items())
-                )
+            "  - %s pool: %s%.0f  (1/2-Kelly, per-bet cap %.0f%%, daily cap %.0f%%)"
+            % (
+                pool.name, pool.symbol, pool.bankroll,
+                pool.per_bet_cap * 100, pool.daily_exposure_cap * 100,
             )
+        )
+    lines.append(
+        "  - £1 = $1.33 fixed; Polymarket sized in $ off the $%.0f pool, every "
+        "other venue in £ off the £%.0f pool." % (PM_POOL_BANKROLL, GBP_POOL_BANKROLL)
+    )
+    if bank is not None:
+        lines.append(
+            "  - actual capital (unpartitioned, ref): £%.0f" % bank.actual_capital
+        )
         if bank.constrained:
             lines.append("  - CONSTRAINED: %s" % bank.constraint_note)
     return "\n".join(lines)

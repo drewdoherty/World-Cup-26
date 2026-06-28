@@ -221,6 +221,7 @@ def main() -> None:
             format_scores,
             resolve_pool_bankroll,
             PoolConfig,
+            default_pools,
         )
         from wca.data import odds_source
     except ImportError as exc:
@@ -311,14 +312,11 @@ def main() -> None:
     # card and must not re-pull/rewrite the main card, /next or predictions.
     # ------------------------------------------------------------------
     if not args.goalscorers_only:
-        # Build card. The pool uses the rung's authorised Kelly fraction so
-        # sizing tracks the same ladder that set the bankroll.
-        pool = PoolConfig(
-            name="main",
-            bankroll=pool_bank.bankroll,
-            kelly_fraction=pool_bank.kelly_fraction,
-        )
-        pools = [pool]
+        # Dual-pool 1/2-Kelly (user, 2026-06-28): £1,500 GBP venues + $1,995
+        # Polymarket, equally split, each book sized in its own currency. This
+        # replaces the CLV-rung ladder as the sizing base; pool_bank is kept only
+        # for the informational footer (actual capital / any constraint note).
+        pools = default_pools()
 
         try:
             # build_card gates +EV outcomes (with the further-out tilt baked in,
@@ -338,7 +336,7 @@ def main() -> None:
         # Scorelines (and any scorer/SGM markets) are REFERENCE-ONLY per the
         # Phase-2 roadmap — shown with models + fair odds but never sized.
         card_text = (
-            format_ranked_card(ranked, pool, bank=pool_bank)
+            format_ranked_card(ranked, pools, bank=pool_bank)
             + "\n\n*— REFERENCE, NOT SIZED (models + fair odds only) —*\n"
             + format_scores(score_cards)
         )
