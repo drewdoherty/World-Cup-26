@@ -57,8 +57,11 @@ _FIXTURE_RE = re.compile(r"^\*(?P<name>.+?)\*\s*$")
 _SCORE_RE = re.compile(
     r"^(?P<score>\d+\s*-\s*\d+)\s+"
     r"(?P<prob>\d+(?:\.\d+)?)%"
-    r"(?:\s+fair\s+(?P<fair>\d+(?:\.\d+)?))?"
-    r"(?:\s+back\s*>=\s*(?P<back>\d+(?:\.\d+)?))?"
+    # The fair / back prices may be followed by an implied-probability note in
+    # parentheses, e.g. "fair 5.63 (17.8%)" — tolerate it (and the older
+    # note-free format) so the site feed keeps parsing either card variant.
+    r"(?:\s+fair\s+(?P<fair>\d+(?:\.\d+)?)(?:\s*\(\d+(?:\.\d+)?%\))?)?"
+    r"(?:\s+back\s*>=\s*(?P<back>\d+(?:\.\d+)?)(?:\s*\(\d+(?:\.\d+)?%\))?)?"
     r"\s*$"
 )
 
