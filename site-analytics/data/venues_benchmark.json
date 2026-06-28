@@ -1,0 +1,998 @@
+{
+  "accuracy": {
+    "model": {
+      "dc": {
+        "brier": 0.529525,
+        "log_loss": 0.873766,
+        "n": 14
+      },
+      "elo": {
+        "brier": 0.593834,
+        "log_loss": 0.990157,
+        "n": 14
+      },
+      "ex_market": {
+        "brier": 0.542202,
+        "log_loss": 0.899291,
+        "n": 14
+      },
+      "model": {
+        "brier": 0.557366,
+        "log_loss": 0.922933,
+        "n": 14
+      }
+    },
+    "n_fixtures": 14,
+    "note": "accuracy is scored on settled fixtures only; agreement with the model is not accuracy",
+    "venues": {
+      "888sport": {
+        "brier": 0.557318,
+        "log_loss": 0.921407,
+        "n": 14
+      },
+      "BetVictor": {
+        "brier": 0.561875,
+        "log_loss": 0.926923,
+        "n": 14
+      },
+      "Betfair": {
+        "brier": 0.567759,
+        "log_loss": 0.938713,
+        "n": 14
+      },
+      "Betfair Sportsbook": {
+        "brier": 0.562268,
+        "log_loss": 0.925348,
+        "n": 14
+      },
+      "Betfred": {
+        "brier": 0.56385,
+        "log_loss": 0.929957,
+        "n": 14
+      },
+      "Betway": {
+        "brier": 0.563476,
+        "log_loss": 0.930485,
+        "n": 14
+      },
+      "BoyleSports": {
+        "brier": 0.562473,
+        "log_loss": 0.929585,
+        "n": 14
+      },
+      "Casumo": {
+        "brier": 0.567916,
+        "log_loss": 0.936994,
+        "n": 14
+      },
+      "Coral": {
+        "brier": 0.562854,
+        "log_loss": 0.934246,
+        "n": 14
+      },
+      "Grosvenor": {
+        "brier": 0.56751,
+        "log_loss": 0.936607,
+        "n": 14
+      },
+      "Ladbrokes": {
+        "brier": 0.564842,
+        "log_loss": 0.938416,
+        "n": 14
+      },
+      "LeoVegas": {
+        "brier": 0.567916,
+        "log_loss": 0.936994,
+        "n": 14
+      },
+      "LiveScore Bet": {
+        "brier": 0.568207,
+        "log_loss": 0.937478,
+        "n": 14
+      },
+      "Matchbook": {
+        "brier": 0.568036,
+        "log_loss": 0.939033,
+        "n": 14
+      },
+      "Paddy Power": {
+        "brier": 0.567332,
+        "log_loss": 0.936598,
+        "n": 14
+      },
+      "Sky Bet": {
+        "brier": 0.570594,
+        "log_loss": 0.947557,
+        "n": 14
+      },
+      "Smarkets": {
+        "brier": 0.566636,
+        "log_loss": 0.9373,
+        "n": 14
+      },
+      "Unibet": {
+        "brier": 0.568971,
+        "log_loss": 0.940216,
+        "n": 14
+      },
+      "Virgin Bet": {
+        "brier": 0.568207,
+        "log_loss": 0.937478,
+        "n": 14
+      },
+      "William Hill": {
+        "brier": 0.696722,
+        "log_loss": 1.110354,
+        "n": 8
+      }
+    }
+  },
+  "coverage": {
+    "n_fixtures": 18,
+    "n_obs": 33,
+    "n_venues": 20,
+    "venues": [
+      "888sport",
+      "BetVictor",
+      "Betfair",
+      "Betfair Sportsbook",
+      "Betfred",
+      "Betway",
+      "BoyleSports",
+      "Casumo",
+      "Coral",
+      "Grosvenor",
+      "Ladbrokes",
+      "LeoVegas",
+      "LiveScore Bet",
+      "Matchbook",
+      "Paddy Power",
+      "Sky Bet",
+      "Smarkets",
+      "Unibet",
+      "Virgin Bet",
+      "William Hill"
+    ]
+  },
+  "coverage_ranking": {
+    "note": "secondary, all-available ranking \u2014 each venue uses its own set of fixtures, so these are NOT directly comparable; the common-support leaderboard above is the only fair ranking",
+    "venues": [
+      {
+        "mean_distance": 0.040792,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "Coral"
+      },
+      {
+        "mean_distance": 0.041564,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "Ladbrokes"
+      },
+      {
+        "mean_distance": 0.042708,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "Betfair Sportsbook"
+      },
+      {
+        "mean_distance": 0.043263,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "888sport"
+      },
+      {
+        "mean_distance": 0.043782,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "Betfred"
+      },
+      {
+        "mean_distance": 0.043964,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "Unibet"
+      },
+      {
+        "mean_distance": 0.044588,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "Smarkets"
+      },
+      {
+        "mean_distance": 0.044668,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "Matchbook"
+      },
+      {
+        "mean_distance": 0.044806,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "Betfair"
+      },
+      {
+        "mean_distance": 0.045182,
+        "n_fixtures": 12,
+        "n_obs": 16,
+        "venue": "William Hill"
+      },
+      {
+        "mean_distance": 0.045187,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "BoyleSports"
+      },
+      {
+        "mean_distance": 0.045341,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "Betway"
+      },
+      {
+        "mean_distance": 0.046133,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "Paddy Power"
+      },
+      {
+        "mean_distance": 0.047197,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "Sky Bet"
+      },
+      {
+        "mean_distance": 0.047997,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "BetVictor"
+      },
+      {
+        "mean_distance": 0.048877,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "LiveScore Bet"
+      },
+      {
+        "mean_distance": 0.048877,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "Virgin Bet"
+      },
+      {
+        "mean_distance": 0.048918,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "Casumo"
+      },
+      {
+        "mean_distance": 0.048918,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "LeoVegas"
+      },
+      {
+        "mean_distance": 0.048919,
+        "n_fixtures": 18,
+        "n_obs": 33,
+        "venue": "Grosvenor"
+      }
+    ]
+  },
+  "exit_test": {
+    "note": "exploratory exit rule (divergence from the closest independent venue -> adverse executable move) requires a held-out shadow ledger; not run live, no promotion without held-out evidence",
+    "state": "insufficient"
+  },
+  "history": [
+    {
+      "closest": "Coral",
+      "generated": "2026-06-27T12:00:00Z",
+      "n_fixtures": 18,
+      "n_obs": 33,
+      "n_venues": 20,
+      "verdict": "no distinguishable winner (top venues' evidence overlaps)"
+    },
+    {
+      "closest": "Coral",
+      "generated": "2026-06-27T12:00:00Z",
+      "n_fixtures": 18,
+      "n_obs": 33,
+      "n_venues": 20,
+      "verdict": "no distinguishable winner (top venues' evidence overlaps)"
+    }
+  ],
+  "hypotheses": [
+    {
+      "comparator": "ex_market",
+      "friedman_stat": 59.6321,
+      "independent": true,
+      "metric": "mae",
+      "n_fixtures": 12,
+      "name": "venues differ vs ex_market (mae)",
+      "p": 4e-06,
+      "q_bh": 7e-06
+    },
+    {
+      "comparator": "ex_market",
+      "friedman_stat": 54.45,
+      "independent": true,
+      "metric": "js",
+      "n_fixtures": 12,
+      "name": "venues differ vs ex_market (js)",
+      "p": 2.8e-05,
+      "q_bh": 3.8e-05
+    },
+    {
+      "comparator": "elo",
+      "friedman_stat": 67.4339,
+      "independent": true,
+      "metric": "mae",
+      "n_fixtures": 12,
+      "name": "venues differ vs elo (mae)",
+      "p": 0.0,
+      "q_bh": 1e-06
+    },
+    {
+      "comparator": "elo",
+      "friedman_stat": 72.3804,
+      "independent": true,
+      "metric": "js",
+      "n_fixtures": 12,
+      "name": "venues differ vs elo (js)",
+      "p": 0.0,
+      "q_bh": 0.0
+    },
+    {
+      "comparator": "dc",
+      "friedman_stat": 15.7857,
+      "independent": true,
+      "metric": "mae",
+      "n_fixtures": 12,
+      "name": "venues differ vs dc (mae)",
+      "p": 0.671524,
+      "q_bh": 0.671524
+    },
+    {
+      "comparator": "dc",
+      "friedman_stat": 20.5929,
+      "independent": true,
+      "metric": "js",
+      "n_fixtures": 12,
+      "name": "venues differ vs dc (js)",
+      "p": 0.359727,
+      "q_bh": 0.411117
+    },
+    {
+      "comparator": "model",
+      "friedman_stat": 71.1054,
+      "independent": false,
+      "metric": "mae",
+      "n_fixtures": 12,
+      "name": "venues differ vs model (mae)",
+      "p": 0.0,
+      "q_bh": 0.0
+    },
+    {
+      "comparator": "model",
+      "friedman_stat": 63.5982,
+      "independent": false,
+      "metric": "js",
+      "n_fixtures": 12,
+      "name": "venues differ vs model (js)",
+      "p": 1e-06,
+      "q_bh": 2e-06
+    }
+  ],
+  "leaderboard": {
+    "friedman": {
+      "p": 4e-06,
+      "stat": 59.6321
+    },
+    "metric": "mae",
+    "n_fixtures": 12,
+    "n_obs": 16,
+    "venues": [
+      {
+        "ci_hi": 0.065381,
+        "ci_lo": 0.023291,
+        "mean_distance": 0.04189,
+        "mean_rank": 6.5938,
+        "n": 16,
+        "p_rank1": 0.2345,
+        "venue": "Coral"
+      },
+      {
+        "ci_hi": 0.06621,
+        "ci_lo": 0.021002,
+        "mean_distance": 0.042186,
+        "mean_rank": 6.8125,
+        "n": 16,
+        "p_rank1": 0.375,
+        "venue": "Betfair Sportsbook"
+      },
+      {
+        "ci_hi": 0.064793,
+        "ci_lo": 0.024209,
+        "mean_distance": 0.04229,
+        "mean_rank": 7.3438,
+        "n": 16,
+        "p_rank1": 0.217,
+        "venue": "Betfred"
+      },
+      {
+        "ci_hi": 0.06558,
+        "ci_lo": 0.023458,
+        "mean_distance": 0.042274,
+        "mean_rank": 7.75,
+        "n": 16,
+        "p_rank1": 0.1625,
+        "venue": "Ladbrokes"
+      },
+      {
+        "ci_hi": 0.069127,
+        "ci_lo": 0.024129,
+        "mean_distance": 0.044837,
+        "mean_rank": 8.5625,
+        "n": 16,
+        "p_rank1": 0.0015,
+        "venue": "BoyleSports"
+      },
+      {
+        "ci_hi": 0.068324,
+        "ci_lo": 0.025616,
+        "mean_distance": 0.045182,
+        "mean_rank": 9.0,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "William Hill"
+      },
+      {
+        "ci_hi": 0.069717,
+        "ci_lo": 0.025053,
+        "mean_distance": 0.045194,
+        "mean_rank": 9.2188,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Unibet"
+      },
+      {
+        "ci_hi": 0.068755,
+        "ci_lo": 0.026012,
+        "mean_distance": 0.045564,
+        "mean_rank": 9.25,
+        "n": 16,
+        "p_rank1": 0.0095,
+        "venue": "888sport"
+      },
+      {
+        "ci_hi": 0.068766,
+        "ci_lo": 0.02641,
+        "mean_distance": 0.045298,
+        "mean_rank": 9.5625,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Betway"
+      },
+      {
+        "ci_hi": 0.069748,
+        "ci_lo": 0.025583,
+        "mean_distance": 0.045774,
+        "mean_rank": 9.5625,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Smarkets"
+      },
+      {
+        "ci_hi": 0.069928,
+        "ci_lo": 0.025089,
+        "mean_distance": 0.045784,
+        "mean_rank": 9.9688,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Matchbook"
+      },
+      {
+        "ci_hi": 0.070405,
+        "ci_lo": 0.025303,
+        "mean_distance": 0.04609,
+        "mean_rank": 10.4062,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Betfair"
+      },
+      {
+        "ci_hi": 0.072086,
+        "ci_lo": 0.025527,
+        "mean_distance": 0.047189,
+        "mean_rank": 10.7812,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Paddy Power"
+      },
+      {
+        "ci_hi": 0.073212,
+        "ci_lo": 0.027046,
+        "mean_distance": 0.048544,
+        "mean_rank": 12.125,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "BetVictor"
+      },
+      {
+        "ci_hi": 0.072946,
+        "ci_lo": 0.026723,
+        "mean_distance": 0.048379,
+        "mean_rank": 12.6875,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Sky Bet"
+      },
+      {
+        "ci_hi": 0.073292,
+        "ci_lo": 0.027323,
+        "mean_distance": 0.048667,
+        "mean_rank": 13.0625,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Grosvenor"
+      },
+      {
+        "ci_hi": 0.075034,
+        "ci_lo": 0.027961,
+        "mean_distance": 0.049837,
+        "mean_rank": 14.1562,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "LiveScore Bet"
+      },
+      {
+        "ci_hi": 0.075034,
+        "ci_lo": 0.027961,
+        "mean_distance": 0.049837,
+        "mean_rank": 14.1562,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Virgin Bet"
+      },
+      {
+        "ci_hi": 0.074279,
+        "ci_lo": 0.028363,
+        "mean_distance": 0.049666,
+        "mean_rank": 14.5,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Casumo"
+      },
+      {
+        "ci_hi": 0.074279,
+        "ci_lo": 0.028363,
+        "mean_distance": 0.049666,
+        "mean_rank": 14.5,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "LeoVegas"
+      }
+    ],
+    "verdict": "no distinguishable winner (top venues' evidence overlaps)"
+  },
+  "lobo_leaderboard": {
+    "friedman": {
+      "p": 0.0,
+      "stat": 101.0857
+    },
+    "metric": "mae",
+    "n_fixtures": 12,
+    "n_obs": 16,
+    "venues": [
+      {
+        "ci_hi": 0.002818,
+        "ci_lo": 0.001777,
+        "mean_distance": 0.002263,
+        "mean_rank": 4.0,
+        "n": 16,
+        "p_rank1": 0.9215,
+        "venue": "Smarkets"
+      },
+      {
+        "ci_hi": 0.003582,
+        "ci_lo": 0.002145,
+        "mean_distance": 0.002846,
+        "mean_rank": 4.625,
+        "n": 16,
+        "p_rank1": 0.0685,
+        "venue": "Matchbook"
+      },
+      {
+        "ci_hi": 0.003412,
+        "ci_lo": 0.002312,
+        "mean_distance": 0.002857,
+        "mean_rank": 4.8125,
+        "n": 16,
+        "p_rank1": 0.0095,
+        "venue": "Betfair"
+      },
+      {
+        "ci_hi": 0.005065,
+        "ci_lo": 0.003483,
+        "mean_distance": 0.004213,
+        "mean_rank": 8.1562,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Unibet"
+      },
+      {
+        "ci_hi": 0.005845,
+        "ci_lo": 0.003647,
+        "mean_distance": 0.004666,
+        "mean_rank": 9.0312,
+        "n": 16,
+        "p_rank1": 0.0005,
+        "venue": "BoyleSports"
+      },
+      {
+        "ci_hi": 0.006053,
+        "ci_lo": 0.003628,
+        "mean_distance": 0.004735,
+        "mean_rank": 9.1875,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Grosvenor"
+      },
+      {
+        "ci_hi": 0.006269,
+        "ci_lo": 0.003807,
+        "mean_distance": 0.004977,
+        "mean_rank": 9.2188,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Casumo"
+      },
+      {
+        "ci_hi": 0.006269,
+        "ci_lo": 0.003807,
+        "mean_distance": 0.004977,
+        "mean_rank": 9.4375,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "LeoVegas"
+      },
+      {
+        "ci_hi": 0.006663,
+        "ci_lo": 0.003805,
+        "mean_distance": 0.005314,
+        "mean_rank": 9.9062,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Paddy Power"
+      },
+      {
+        "ci_hi": 0.007503,
+        "ci_lo": 0.00391,
+        "mean_distance": 0.005626,
+        "mean_rank": 10.3125,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "BetVictor"
+      },
+      {
+        "ci_hi": 0.006939,
+        "ci_lo": 0.003822,
+        "mean_distance": 0.005294,
+        "mean_rank": 10.75,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "LiveScore Bet"
+      },
+      {
+        "ci_hi": 0.006939,
+        "ci_lo": 0.003822,
+        "mean_distance": 0.005294,
+        "mean_rank": 10.75,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Virgin Bet"
+      },
+      {
+        "ci_hi": 0.009473,
+        "ci_lo": 0.00492,
+        "mean_distance": 0.006952,
+        "mean_rank": 12.2812,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Coral"
+      },
+      {
+        "ci_hi": 0.010257,
+        "ci_lo": 0.005007,
+        "mean_distance": 0.007399,
+        "mean_rank": 12.7188,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Ladbrokes"
+      },
+      {
+        "ci_hi": 0.008,
+        "ci_lo": 0.005536,
+        "mean_distance": 0.006756,
+        "mean_rank": 12.8125,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "William Hill"
+      },
+      {
+        "ci_hi": 0.009294,
+        "ci_lo": 0.004979,
+        "mean_distance": 0.007093,
+        "mean_rank": 13.1875,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Sky Bet"
+      },
+      {
+        "ci_hi": 0.008835,
+        "ci_lo": 0.005423,
+        "mean_distance": 0.007132,
+        "mean_rank": 13.25,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Betway"
+      },
+      {
+        "ci_hi": 0.010041,
+        "ci_lo": 0.005854,
+        "mean_distance": 0.008076,
+        "mean_rank": 13.9062,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "888sport"
+      },
+      {
+        "ci_hi": 0.010285,
+        "ci_lo": 0.00631,
+        "mean_distance": 0.008072,
+        "mean_rank": 14.6562,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Betfred"
+      },
+      {
+        "ci_hi": 0.013335,
+        "ci_lo": 0.008863,
+        "mean_distance": 0.010971,
+        "mean_rank": 17.0,
+        "n": 16,
+        "p_rank1": 0.0,
+        "venue": "Betfair Sportsbook"
+      }
+    ],
+    "verdict": "no distinguishable winner (top venues' evidence overlaps)"
+  },
+  "meta": {
+    "freshness_limit_h": 6.0,
+    "generated": "2026-06-27T12:00:00Z",
+    "model_variant": "blend(elo0.30/dc0.70 + market) \u2014 ex-market for ranking",
+    "n_boot": 2000,
+    "primary": "ex_market vs mae",
+    "seed": 20260625,
+    "window": "2026-06-11 .. 2026-06-23"
+  },
+  "placed_arm": {
+    "insufficient": true,
+    "linked": [
+      {
+        "bet_id": 73,
+        "build_ts": "2026-06-13T00:09:50+00:00",
+        "fixture": "Ivory Coast vs Ecuador",
+        "leg": "Away"
+      },
+      {
+        "bet_id": 77,
+        "build_ts": "2026-06-13T00:09:50+00:00",
+        "fixture": "Germany vs Cura\u00e7ao",
+        "leg": "Away"
+      },
+      {
+        "bet_id": 81,
+        "build_ts": "2026-06-13T09:51:23+00:00",
+        "fixture": "Brazil vs Morocco",
+        "leg": "Draw"
+      }
+    ],
+    "n_linked": 3,
+    "n_model_bets": 29,
+    "n_unmatched": 26,
+    "note": "placed-bet arm links each source=model bet to the exact preceding build; unmatched bets are audited, not dropped",
+    "unmatched_audit": [
+      {
+        "bet_id": 1,
+        "market": "h2h",
+        "reason": "bet_predates_first_build"
+      },
+      {
+        "bet_id": 2,
+        "market": "h2h",
+        "reason": "no_matching_fixture_build"
+      },
+      {
+        "bet_id": 6,
+        "market": "pm_moneyline",
+        "reason": "non_1x2_market"
+      },
+      {
+        "bet_id": 7,
+        "market": "pm_moneyline",
+        "reason": "non_1x2_market"
+      },
+      {
+        "bet_id": 8,
+        "market": "pm_moneyline",
+        "reason": "non_1x2_market"
+      },
+      {
+        "bet_id": 9,
+        "market": "pm_moneyline",
+        "reason": "non_1x2_market"
+      },
+      {
+        "bet_id": 10,
+        "market": "Full Time Result",
+        "reason": "no_matching_fixture_build"
+      },
+      {
+        "bet_id": 12,
+        "market": "Both Teams To Score",
+        "reason": "non_1x2_market"
+      },
+      {
+        "bet_id": 14,
+        "market": "Will Japan reach the Round of 16 at the 2026 FIFA World Cup?",
+        "reason": "non_1x2_market"
+      },
+      {
+        "bet_id": 15,
+        "market": "Full-time result",
+        "reason": "bet_predates_first_build"
+      },
+      {
+        "bet_id": 16,
+        "market": "Full-time result",
+        "reason": "bet_predates_first_build"
+      },
+      {
+        "bet_id": 20,
+        "market": "Total Corners",
+        "reason": "non_1x2_market"
+      },
+      {
+        "bet_id": 21,
+        "market": "Total Cards",
+        "reason": "non_1x2_market"
+      },
+      {
+        "bet_id": 50,
+        "market": "Match Odds",
+        "reason": "selection_not_a_team_leg"
+      },
+      {
+        "bet_id": 51,
+        "market": "Full-time result",
+        "reason": "bet_predates_first_build"
+      },
+      {
+        "bet_id": 52,
+        "market": "Full-time result",
+        "reason": "bet_predates_first_build"
+      },
+      {
+        "bet_id": 53,
+        "market": "Match Odds",
+        "reason": "selection_not_a_team_leg"
+      },
+      {
+        "bet_id": 54,
+        "market": "Match Odds",
+        "reason": "selection_not_a_team_leg"
+      },
+      {
+        "bet_id": 58,
+        "market": "polymarket",
+        "reason": "non_1x2_market"
+      },
+      {
+        "bet_id": 59,
+        "market": "Full-time result",
+        "reason": "bet_predates_first_build"
+      },
+      {
+        "bet_id": 70,
+        "market": "FIRST_GOALSCORER",
+        "reason": "non_1x2_market"
+      },
+      {
+        "bet_id": 74,
+        "market": "Match Odds",
+        "reason": "no_matching_fixture_build"
+      },
+      {
+        "bet_id": 75,
+        "market": "Match Odds",
+        "reason": "selection_not_a_team_leg"
+      },
+      {
+        "bet_id": 76,
+        "market": "Match Odds",
+        "reason": "selection_not_a_team_leg"
+      },
+      {
+        "bet_id": 78,
+        "market": "Match Odds",
+        "reason": "selection_not_a_team_leg"
+      },
+      {
+        "bet_id": 79,
+        "market": "Match Odds",
+        "reason": "selection_not_a_team_leg"
+      }
+    ]
+  },
+  "polymarket": {
+    "note": "Polymarket has no captured 1X2 price series in odds_snapshots (only dry-run orders exist), so it cannot yet be ranked as a venue. This section fills once a prospective PM snapshotter accrues matched-time H/D/A partitions.",
+    "state": "COLLECTING"
+  },
+  "segments": [
+    {
+      "closest": "Betfred",
+      "friedman_p": 0.017336,
+      "n_fixtures": 4,
+      "n_obs": 5,
+      "q_bh": 0.052009,
+      "segment": "outcome=Home won",
+      "state": "insufficient"
+    },
+    {
+      "closest": "BoyleSports",
+      "friedman_p": 0.59703,
+      "n_fixtures": 3,
+      "n_obs": 5,
+      "q_bh": 0.716436,
+      "segment": "outcome=Draw won",
+      "state": "insufficient"
+    },
+    {
+      "closest": "Betfair Sportsbook",
+      "friedman_p": 0.073648,
+      "n_fixtures": 1,
+      "n_obs": 2,
+      "q_bh": 0.147295,
+      "segment": "outcome=Away won",
+      "state": "insufficient"
+    },
+    {
+      "closest": "Coral",
+      "friedman_p": 0.0,
+      "n_fixtures": 7,
+      "n_obs": 8,
+      "q_bh": 1e-06,
+      "segment": "favourite:strong_fav (>=60%)",
+      "state": "insufficient"
+    },
+    {
+      "closest": "Betfair Sportsbook",
+      "friedman_p": 0.327148,
+      "n_fixtures": 4,
+      "n_obs": 6,
+      "q_bh": 0.490721,
+      "segment": "favourite:moderate_fav (45-60%)",
+      "state": "insufficient"
+    },
+    {
+      "closest": "BetVictor",
+      "friedman_p": 0.850768,
+      "n_fixtures": 2,
+      "n_obs": 2,
+      "q_bh": 0.850768,
+      "segment": "favourite:open (<45%)",
+      "state": "insufficient"
+    }
+  ]
+}
