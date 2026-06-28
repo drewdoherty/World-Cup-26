@@ -139,6 +139,44 @@ def append_snapshots(con: sqlite3.Connection, rows: Sequence[MarketSnapshot], *,
     return written
 
 
+#: Columns of market_metrics that the derived-metrics builder fills, in order.
+METRIC_COLUMNS = (
+    "ts_utc", "fixture_id", "market_type", "selection", "line",
+    "best_odds", "worst_odds", "avg_odds", "median_odds", "implied_range", "spread",
+    "pct_improvement", "stdev", "consensus_prob", "median_prob", "vig_adj_consensus",
+    "model_prob", "ev_vs_model", "kelly_stake", "clv", "line_move", "rolling_vol",
+    "largest_disagreement", "secs_since_move", "best_venue", "worst_venue",
+)
+
+
+def append_metrics(con: sqlite3.Connection, ts_utc: str, fixture_id: Optional[str],
+                   market_type: str, line: Optional[float],
+                   sel_metrics: Sequence[Dict[str, object]]) -> int:
+    """Persist one market's per-selection derived metrics into ``market_metrics``.
+
+    Accepts the dicts produced by :func:`wca.intel.metrics.build_market_metrics`;
+    missing columns are stored NULL. Returns the number of rows written.
+    """
+    ensure_schema(con)
+    written = 0
+    for m in sel_metrics:
+        row = {"ts_utc": ts_utc, "fixture_id": fixture_id,
+               "market_type": market_type, "line": line}
+        for col in METRIC_COLUMNS:
+            if col in row:
+                continue
+            v = m.get(col)
+            row[col] = v if isinstance(v, (int, float, str)) or v is None else None
+        con.execute(
+            "INSERT INTO market_metrics (%s) VALUES (%s)"
+            % (", ".join(METRIC_COLUMNS), ", ".join(["?"] * len(METRIC_COLUMNS))),
+            tuple(row[c] for c in METRIC_COLUMNS),
+        )
+        written += 1
+    con.commit()
+    return written
+
+
 def latest_per_selection(con: sqlite3.Connection, fixture_id: str, market_type: str,
                          line: Optional[float] = None) -> Dict[str, List[Dict[str, object]]]:
     """Most-recent snapshot per (selection, venue) for one market — the input the

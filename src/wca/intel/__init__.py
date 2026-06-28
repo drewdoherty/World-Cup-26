@@ -14,6 +14,11 @@ See docs/market_intelligence_design.md.
 
 from wca.intel.registry import VENUES, MARKET_TYPES, Venue, venue_for, venue_colour  # noqa: F401
 from wca.intel.store import (  # noqa: F401
-    MarketSnapshot, SNAPSHOT_COLUMNS, ensure_schema, append_snapshots, latest_per_selection,
+    MarketSnapshot, SNAPSHOT_COLUMNS, METRIC_COLUMNS, ensure_schema,
+    append_snapshots, append_metrics, latest_per_selection,
 )
+from wca.intel.metrics import (  # noqa: F401
+    selection_metrics, consensus_probs, build_market_metrics,
+)
+from wca.intel.feed import build_feed, venue_legend  # noqa: F401
 from wca.intel import normalise  # noqa: F401
