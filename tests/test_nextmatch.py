@@ -418,6 +418,14 @@ class TestFormatAndBot:
         assert "Any  bk" in text and "1st  bk" in text   # both markets rendered
         assert "/ PM --" in text             # PM column present (skipped here)
 
+    def test_pm_cents_helper(self):
+        from wca.nextmatch import _fmt_pm_cents
+        assert _fmt_pm_cents(0.45) == "45¢"
+        assert _fmt_pm_cents(0.585) == "58¢"  # banker's-ish rounding to nearest cent
+        assert _fmt_pm_cents(None) == "--"
+        assert _fmt_pm_cents(0.0) == "--"
+        assert _fmt_pm_cents(1.0) == "--"
+
     def test_coherence_guard_flags_incoherent_pm_book(self):
         # The /next bug: all three winner best-prices on Polymarket sum < 100%.
         from wca.nextmatch import NextMatchCard

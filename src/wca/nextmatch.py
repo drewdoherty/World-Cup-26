@@ -568,6 +568,11 @@ def _fmt_odds(o: Optional[float]) -> str:
     return "%.2f" % o if o and o > 1.0 else "--"
 
 
+def _fmt_pm_cents(price: Optional[float]) -> str:
+    """Polymarket share price as a cent value (``45¢``) or ``--``."""
+    return "%d¢" % round(price * 100.0) if price and 0.0 < price < 1.0 else "--"
+
+
 def _model_suffix(
     model_p: Optional[float],
     model_fair: Optional[float],
@@ -639,7 +644,7 @@ def _goalscorer_team_blocks(card) -> List[str]:
                 % (
                     _fmt_odds(ln.anytime_book_odds),
                     (" (%s)" % ln.anytime_book) if ln.anytime_book else "",
-                    _fmt_odds(ln.anytime_pm_odds),
+                    _fmt_pm_cents(ln.anytime_pm_price),
                     _model_suffix(
                         ln.model_p_anytime, ln.model_fair_anytime,
                         ln.anytime_book_odds, card,
