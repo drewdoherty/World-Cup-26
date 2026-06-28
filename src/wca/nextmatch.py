@@ -44,8 +44,25 @@ from wca.card import (
     venue_label,
 )
 from wca.markets import kelly as kelly_mod
+from wca.mispricing import (
+    POLYMARKET,
+    SPORTSBOOK,
+    coherence_note,
+    fmt_fair,
+    fmt_price,
+    fmt_size,
+    from_decimal,
+    from_pm_price,
+)
 from wca.models.props import CornersModel
 from wca.models.scores import ScorelineCard, scoreline_card
+
+
+def _venue_kind(book_label: Optional[str]) -> str:
+    """Map a venue label to a mispricing display kind (Polymarket vs sportsbook)."""
+    if book_label and "polymarket" in book_label.lower():
+        return POLYMARKET
+    return SPORTSBOOK
 
 DEFAULT_CORNERS_LINE = 8.5
 ANYTIME_SCORER_MARKET = "player_goal_scorer_anytime"
@@ -675,24 +692,38 @@ def _format_single_next_match(card: NextMatchCard) -> str:
     ]
     names = {"home": card.home, "draw": "Draw", "away": card.away}
     staked = False
+    best_quotes = []  # one Quote per outcome that has a priced venue
     for outcome in OUTCOMES:
         p, book, odds, edge = card.winner[outcome]
-        fair = (1.0 / p) if p > 0 else float("inf")
-        line = "  %-14s %5.1f%%  fair %.2f" % (names[outcome][:14], p * 100, fair)
+        kind = _venue_kind(book)
+        # Fair value + price render in the venue's native units (decimal for a
+        # sportsbook, cent share price for Polymarket).
+        line = "  %-14s %5.1f%%  fair %s" % (names[outcome][:14], p * 100, fmt_fair(p, kind))
         if book is not None and odds > 1.0:
+            q = (from_pm_price(1.0 / odds, book) if kind == POLYMARKET
+                 else from_decimal(book, odds, kind))
+            best_quotes.append(q)
             flag = " ✅" if edge >= card.min_edge else ""
-            line += "  best %.2f (%s) %+.1f%%%s" % (odds, book, edge * 100, flag)
+            line += "  best %s (%s) %+.1f%%%s" % (fmt_price(q), book, edge * 100, flag)
             stk = kelly_mod.stake(
                 p, odds, card.bankroll, card.kelly_fraction, card.kelly_cap
             )
             if stk > 0:
-                line += "  £%.2f" % stk
+                line += "  " + fmt_size(kind, stk)
                 staked = True
         lines.append(line)
     if staked:
         lines.append(
             "  _stake = ¼-Kelly @ £%.0f bankroll (+EV picks)_" % card.bankroll
         )
+    # Coherence guard: if the best price per outcome sums under 100% the book is
+    # either a real lock-in or stale/non-simultaneous data — never three
+    # independent +EV value bets. Only surfaced when actionable (lock-in/stale).
+    if len(best_quotes) == len(OUTCOMES):
+        note = coherence_note(best_quotes, card.bankroll)
+        if "no lock-in" not in note:
+            lines.append("")
+            lines.append(note)
 
     p_over = card.corners_p_over
     lines.append("")

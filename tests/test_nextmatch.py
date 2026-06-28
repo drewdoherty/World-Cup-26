@@ -418,6 +418,53 @@ class TestFormatAndBot:
         assert "Any  bk" in text and "1st  bk" in text   # both markets rendered
         assert "/ PM --" in text             # PM column present (skipped here)
 
+    def test_coherence_guard_flags_incoherent_pm_book(self):
+        # The /next bug: all three winner best-prices on Polymarket sum < 100%.
+        from wca.nextmatch import NextMatchCard
+        from wca.models.scores import ScorelineCard
+
+        sc = ScorelineCard(
+            home="South Africa", away="Canada",
+            matrix=np.array([[0.5, 0.2], [0.2, 0.1]]),
+            top_scorelines=[(0, 1, 0.2)], over_under={2.5: (0.3, 0.7)},
+            btts=0.34, one_x_two=(0.2, 0.3, 0.5),
+        )
+        card = NextMatchCard(
+            home="South Africa", away="Canada", commence_time="2026-06-28T19:00:00",
+            winner={
+                "home": (0.198, "Polymarket", 6.90, 0.367),
+                "draw": (0.287, "Polymarket", 3.92, 0.124),
+                "away": (0.515, "Polymarket", 2.35, 0.21),
+            },
+            corners_line=8.5, corners_p_over=0.39, corners_mu=7.9, scores=sc,
+        )
+        text = format_next_match([card])
+        assert "<100%" in text                       # coherence guard fired
+        assert "STALE" in text or "verify live" in text.lower()
+        assert "43¢" in text                         # PM price rendered in cents (1/2.35)
+
+    def test_coherent_book_has_no_guard_warning(self):
+        from wca.nextmatch import NextMatchCard
+        from wca.models.scores import ScorelineCard
+
+        sc = ScorelineCard(
+            home="A", away="B", matrix=np.array([[0.5, 0.2], [0.2, 0.1]]),
+            top_scorelines=[(0, 1, 0.2)], over_under={2.5: (0.3, 0.7)},
+            btts=0.34, one_x_two=(0.2, 0.3, 0.5),
+        )
+        # Normal sportsbook book summing > 100% (vig) -> no guard line.
+        card = NextMatchCard(
+            home="A", away="B", commence_time="2026-06-28T19:00:00",
+            winner={
+                "home": (0.45, "Bet365", 2.10, -0.055),
+                "draw": (0.28, "Bet365", 3.40, -0.048),
+                "away": (0.27, "Bet365", 3.40, -0.082),
+            },
+            corners_line=8.5, corners_p_over=0.39, corners_mu=7.9, scores=sc,
+        )
+        text = format_next_match([card])
+        assert "<100%" not in text
+
     def test_handle_next_serves_cache(self, tmp_path):
         from wca.bot.app import handle_next
         from wca.cardcache import write_card
