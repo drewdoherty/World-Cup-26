@@ -216,6 +216,36 @@ section.panel[id] { scroll-margin-top: 72px; }
 .legend { display: flex; gap: 16px; padding: 6px 12px 0; font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
 .legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
 
+/* ---- E // Model vs Venues -------------------------------------------------- */
+.a-tbl { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 11px; margin-top: 4px; }
+.a-tbl th { text-align: right; padding: 3px 8px; color: var(--muted); font-weight: 500;
+  font-size: 9px; letter-spacing: .5px; text-transform: uppercase; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.a-tbl th:first-child, .a-tbl td:first-child { text-align: left; }
+.a-tbl td { padding: 3px 8px; border-bottom: 1px solid var(--border); color: var(--text); white-space: nowrap; }
+.a-tbl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.a-tbl tbody tr:hover { background: var(--panel-2); }
+/* Mobile: the wide nowrap stat tables (leaderboard, accuracy, hypotheses,
+   segments, placed-vs-paper) would otherwise spill off-page on a phone.
+   Make each table its own horizontal-scroll region; the SVG forest plot is
+   already width:100% responsive, so only the tables need this. The
+   min-width:0 lets the stacked .two-col grid items shrink to the viewport so
+   the table's own overflow-x can take over (grid items default to
+   min-width:auto, which would otherwise force the track to the table width). */
+@media (max-width: 760px) {
+  .a-tbl { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .two-col > * { min-width: 0; }
+}
+.a-verdict { font-family: var(--mono); font-size: 13px; font-weight: 600; padding: 9px 12px;
+  border-radius: 4px; border: 1px solid var(--border-2); margin-bottom: 6px; }
+.a-verdict.a-good { color: var(--pos); border-color: var(--pos); background: rgba(26,122,76,.06); }
+.a-verdict.a-warn { color: var(--warn); border-color: var(--warn); background: rgba(154,106,0,.06); }
+.a-note { font-size: 11px; color: var(--text-dim); line-height: 1.55; margin: 6px 0 0; }
+.a-note b { color: var(--text); } .a-note i { color: var(--accent); font-style: normal; }
+.a-badge { display: inline-block; font-family: var(--mono); font-size: 9px; font-weight: 700;
+  letter-spacing: .5px; padding: 2px 8px; border-radius: 3px; margin: 6px 6px 2px 0; border: 1px solid var(--border-2); }
+.a-badge.a-good { color: var(--pos); border-color: var(--pos); }
+.a-badge.a-warn { color: var(--warn); border-color: var(--warn); }
+
 .nodata {
   display: flex; align-items: center; gap: 8px; max-width: 1180px; margin: 10px auto 0; padding: 6px 14px;
   font-family: var(--mono); font-size: 11px; color: var(--warn);

@@ -5,7 +5,7 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 X-WR-CALNAME:FIFA World Cup 2026 (Bahrain Time)
 X-WR-TIMEZONE:Asia/Bahrain
-X-WR-CALDESC:Complete FIFA World Cup 2026 fixture schedule with kickoff times in Bahrain timezone (UTC+3) and 1-hour pre-match alerts. All times converted from UK time (BST) + 2 hours.
+X-WR-CALDESC:Full FIFA World Cup 2026 fixtures incl. knockout bracket (auto-fills as teams advance). Kickoffs in Bahrain time (UTC+3) with 1h alerts.
 BEGIN:VTIMEZONE
 TZID:Asia/Bahrain
 BEGIN:STANDARD
@@ -940,44 +940,450 @@ ACTION:DISPLAY
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-DTSTART;TZID=Asia/Bahrain:20260628T040000
-DTEND;TZID=Asia/Bahrain:20260628T055900
-DTSTAMP:20260612T000000Z
-UID:wc2026-067@worldcupalpha.com
-SUMMARY:Panama vs England
-LOCATION:MetLife Stadium, New Jersey
-DESCRIPTION:Round of 32 - Panama vs England\nStadium: MetLife Stadium\nCity: East Rutherford, New Jersey\nBahrain Time: 4:00 AM (04:00)
+DTSTART;TZID=Asia/Bahrain:20260628T220000
+DTEND;TZID=Asia/Bahrain:20260629T000000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m73@worldcupalpha.com
+SUMMARY:South Africa vs Canada
+LOCATION:SoFi Stadium, Inglewood, Los Angeles
+DESCRIPTION:Round of 32 (Match 73)\nSouth Africa vs Canada\nStadium: SoFi Stadium\nCity: Inglewood, Los Angeles\nBahrain Time: 22:00
 BEGIN:VALARM
 TRIGGER:-PT1H
-DESCRIPTION:World Cup Match in 1 hour: Panama vs England
+DESCRIPTION:World Cup Round of 32 in 1 hour: South Africa vs Canada
 ACTION:DISPLAY
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-DTSTART;TZID=Asia/Bahrain:20260628T040000
-DTEND;TZID=Asia/Bahrain:20260628T055900
-DTSTAMP:20260612T000000Z
-UID:wc2026-068@worldcupalpha.com
-SUMMARY:Croatia vs Ghana
+DTSTART;TZID=Asia/Bahrain:20260629T233000
+DTEND;TZID=Asia/Bahrain:20260630T013000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m74@worldcupalpha.com
+SUMMARY:Germany vs Paraguay
+LOCATION:Gillette Stadium, Foxborough
+DESCRIPTION:Round of 32 (Match 74)\nGermany vs Paraguay\nStadium: Gillette Stadium\nCity: Foxborough\nBahrain Time: 23:30
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: Germany vs Paraguay
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260630T040000
+DTEND;TZID=Asia/Bahrain:20260630T060000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m75@worldcupalpha.com
+SUMMARY:Netherlands vs Morocco
+LOCATION:Estadio BBVA, Guadalupe, Monterrey
+DESCRIPTION:Round of 32 (Match 75)\nNetherlands vs Morocco\nStadium: Estadio BBVA\nCity: Guadalupe, Monterrey\nBahrain Time: 04:00
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: Netherlands vs Morocco
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260629T200000
+DTEND;TZID=Asia/Bahrain:20260629T220000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m76@worldcupalpha.com
+SUMMARY:Brazil vs Japan
+LOCATION:NRG Stadium, Houston
+DESCRIPTION:Round of 32 (Match 76)\nBrazil vs Japan\nStadium: NRG Stadium\nCity: Houston\nBahrain Time: 20:00
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: Brazil vs Japan
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260701T000000
+DTEND;TZID=Asia/Bahrain:20260701T020000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m77@worldcupalpha.com
+SUMMARY:France vs Sweden
+LOCATION:MetLife Stadium, East Rutherford, NJ
+DESCRIPTION:Round of 32 (Match 77)\nFrance vs Sweden\nStadium: MetLife Stadium\nCity: East Rutherford, NJ\nBahrain Time: 00:00
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: France vs Sweden
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260630T200000
+DTEND;TZID=Asia/Bahrain:20260630T220000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m78@worldcupalpha.com
+SUMMARY:Ivory Coast vs Norway
+LOCATION:AT&T Stadium, Arlington, Dallas
+DESCRIPTION:Round of 32 (Match 78)\nIvory Coast vs Norway\nStadium: AT&T Stadium\nCity: Arlington, Dallas\nBahrain Time: 20:00
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: Ivory Coast vs Norway
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260701T040000
+DTEND;TZID=Asia/Bahrain:20260701T060000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m79@worldcupalpha.com
+SUMMARY:Mexico vs Ecuador
+LOCATION:Estadio Azteca, Mexico City
+DESCRIPTION:Round of 32 (Match 79)\nMexico vs Ecuador\nStadium: Estadio Azteca\nCity: Mexico City\nBahrain Time: 04:00
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: Mexico vs Ecuador
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260701T190000
+DTEND;TZID=Asia/Bahrain:20260701T210000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m80@worldcupalpha.com
+SUMMARY:England vs DR Congo
+LOCATION:Mercedes-Benz Stadium, Atlanta
+DESCRIPTION:Round of 32 (Match 80)\nEngland vs DR Congo\nStadium: Mercedes-Benz Stadium\nCity: Atlanta\nBahrain Time: 19:00
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: England vs DR Congo
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260702T030000
+DTEND;TZID=Asia/Bahrain:20260702T050000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m81@worldcupalpha.com
+SUMMARY:USA vs Bosnia & Herzegovina
+LOCATION:Levi's Stadium, Santa Clara, SF Bay
+DESCRIPTION:Round of 32 (Match 81)\nUSA vs Bosnia & Herzegovina\nStadium: Levi's Stadium\nCity: Santa Clara, SF Bay\nBahrain Time: 03:00
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: USA vs Bosnia & Herzegovina
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260701T230000
+DTEND;TZID=Asia/Bahrain:20260702T010000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m82@worldcupalpha.com
+SUMMARY:Belgium vs Senegal
+LOCATION:Lumen Field, Seattle
+DESCRIPTION:Round of 32 (Match 82)\nBelgium vs Senegal\nStadium: Lumen Field\nCity: Seattle\nBahrain Time: 23:00
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: Belgium vs Senegal
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260703T020000
+DTEND;TZID=Asia/Bahrain:20260703T040000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m83@worldcupalpha.com
+SUMMARY:Portugal vs Croatia
+LOCATION:BMO Field, Toronto
+DESCRIPTION:Round of 32 (Match 83)\nPortugal vs Croatia\nStadium: BMO Field\nCity: Toronto\nBahrain Time: 02:00
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: Portugal vs Croatia
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260702T220000
+DTEND;TZID=Asia/Bahrain:20260703T000000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m84@worldcupalpha.com
+SUMMARY:Spain vs Austria
+LOCATION:SoFi Stadium, Inglewood, Los Angeles
+DESCRIPTION:Round of 32 (Match 84)\nSpain vs Austria\nStadium: SoFi Stadium\nCity: Inglewood, Los Angeles\nBahrain Time: 22:00
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: Spain vs Austria
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260703T060000
+DTEND;TZID=Asia/Bahrain:20260703T080000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m85@worldcupalpha.com
+SUMMARY:Switzerland vs Algeria
+LOCATION:BC Place, Vancouver
+DESCRIPTION:Round of 32 (Match 85)\nSwitzerland vs Algeria\nStadium: BC Place\nCity: Vancouver\nBahrain Time: 06:00
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: Switzerland vs Algeria
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260704T010000
+DTEND;TZID=Asia/Bahrain:20260704T030000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m86@worldcupalpha.com
+SUMMARY:Argentina vs Cape Verde
+LOCATION:Hard Rock Stadium, Miami Gardens
+DESCRIPTION:Round of 32 (Match 86)\nArgentina vs Cape Verde\nStadium: Hard Rock Stadium\nCity: Miami Gardens\nBahrain Time: 01:00
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: Argentina vs Cape Verde
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260704T043000
+DTEND;TZID=Asia/Bahrain:20260704T063000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m87@worldcupalpha.com
+SUMMARY:Colombia vs Ghana
+LOCATION:Arrowhead Stadium, Kansas City
+DESCRIPTION:Round of 32 (Match 87)\nColombia vs Ghana\nStadium: Arrowhead Stadium\nCity: Kansas City\nBahrain Time: 04:30
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: Colombia vs Ghana
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260703T210000
+DTEND;TZID=Asia/Bahrain:20260703T230000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m88@worldcupalpha.com
+SUMMARY:Australia vs Egypt
+LOCATION:AT&T Stadium, Arlington, Dallas
+DESCRIPTION:Round of 32 (Match 88)\nAustralia vs Egypt\nStadium: AT&T Stadium\nCity: Arlington, Dallas\nBahrain Time: 21:00
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 32 in 1 hour: Australia vs Egypt
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260705T000000
+DTEND;TZID=Asia/Bahrain:20260705T020000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m89@worldcupalpha.com
+SUMMARY:Winner M74 vs Winner M77
 LOCATION:Lincoln Financial Field, Philadelphia
-DESCRIPTION:Round of 32 - Croatia vs Ghana\nStadium: Lincoln Financial Field\nCity: Philadelphia, Pennsylvania\nBahrain Time: 4:00 AM (04:00)
+DESCRIPTION:Round of 16 (Match 89)\nWinner M74 vs Winner M77\nStadium: Lincoln Financial Field\nCity: Philadelphia\nBahrain Time: 00:00\nWinner of Match 74 / Winner of Match 77
 BEGIN:VALARM
 TRIGGER:-PT1H
-DESCRIPTION:World Cup Match in 1 hour: Croatia vs Ghana
+DESCRIPTION:World Cup Round of 16 in 1 hour: Winner M74 vs Winner M77
 ACTION:DISPLAY
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-DTSTART;TZID=Asia/Bahrain:20260719T200000
-DTEND;TZID=Asia/Bahrain:20260719T215900
-DTSTAMP:20260612T000000Z
-UID:wc2026-final@worldcupalpha.com
-SUMMARY:FIFA World Cup 2026 Final
-LOCATION:MetLife Stadium, New Jersey
-DESCRIPTION:FIFA World Cup 2026 Final\nStadium: MetLife Stadium\nCity: East Rutherford, New Jersey\nBahrain Time: 8:00 PM (20:00)
+DTSTART;TZID=Asia/Bahrain:20260704T200000
+DTEND;TZID=Asia/Bahrain:20260704T220000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m90@worldcupalpha.com
+SUMMARY:Winner M73 vs Winner M75
+LOCATION:NRG Stadium, Houston
+DESCRIPTION:Round of 16 (Match 90)\nWinner M73 vs Winner M75\nStadium: NRG Stadium\nCity: Houston\nBahrain Time: 20:00\nWinner of Match 73 / Winner of Match 75
 BEGIN:VALARM
 TRIGGER:-PT1H
-DESCRIPTION:World Cup Final in 1 hour!
+DESCRIPTION:World Cup Round of 16 in 1 hour: Winner M73 vs Winner M75
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260705T230000
+DTEND;TZID=Asia/Bahrain:20260706T010000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m91@worldcupalpha.com
+SUMMARY:Winner M76 vs Winner M78
+LOCATION:MetLife Stadium, East Rutherford, NJ
+DESCRIPTION:Round of 16 (Match 91)\nWinner M76 vs Winner M78\nStadium: MetLife Stadium\nCity: East Rutherford, NJ\nBahrain Time: 23:00\nWinner of Match 76 / Winner of Match 78
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 16 in 1 hour: Winner M76 vs Winner M78
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260706T030000
+DTEND;TZID=Asia/Bahrain:20260706T050000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m92@worldcupalpha.com
+SUMMARY:Winner M79 vs Winner M80
+LOCATION:Estadio Azteca, Mexico City
+DESCRIPTION:Round of 16 (Match 92)\nWinner M79 vs Winner M80\nStadium: Estadio Azteca\nCity: Mexico City\nBahrain Time: 03:00\nWinner of Match 79 / Winner of Match 80\nKickoff time to confirm
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 16 in 1 hour: Winner M79 vs Winner M80
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260706T220000
+DTEND;TZID=Asia/Bahrain:20260707T000000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m93@worldcupalpha.com
+SUMMARY:Winner M83 vs Winner M84
+LOCATION:AT&T Stadium, Arlington, Dallas
+DESCRIPTION:Round of 16 (Match 93)\nWinner M83 vs Winner M84\nStadium: AT&T Stadium\nCity: Arlington, Dallas\nBahrain Time: 22:00\nWinner of Match 83 / Winner of Match 84
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 16 in 1 hour: Winner M83 vs Winner M84
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260707T030000
+DTEND;TZID=Asia/Bahrain:20260707T050000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m94@worldcupalpha.com
+SUMMARY:Winner M81 vs Winner M82
+LOCATION:Lumen Field, Seattle
+DESCRIPTION:Round of 16 (Match 94)\nWinner M81 vs Winner M82\nStadium: Lumen Field\nCity: Seattle\nBahrain Time: 03:00\nWinner of Match 81 / Winner of Match 82
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 16 in 1 hour: Winner M81 vs Winner M82
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260707T190000
+DTEND;TZID=Asia/Bahrain:20260707T210000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m95@worldcupalpha.com
+SUMMARY:Winner M86 vs Winner M88
+LOCATION:Mercedes-Benz Stadium, Atlanta
+DESCRIPTION:Round of 16 (Match 95)\nWinner M86 vs Winner M88\nStadium: Mercedes-Benz Stadium\nCity: Atlanta\nBahrain Time: 19:00\nWinner of Match 86 / Winner of Match 88
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 16 in 1 hour: Winner M86 vs Winner M88
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260707T230000
+DTEND;TZID=Asia/Bahrain:20260708T010000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m96@worldcupalpha.com
+SUMMARY:Winner M85 vs Winner M87
+LOCATION:BC Place, Vancouver
+DESCRIPTION:Round of 16 (Match 96)\nWinner M85 vs Winner M87\nStadium: BC Place\nCity: Vancouver\nBahrain Time: 23:00\nWinner of Match 85 / Winner of Match 87
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Round of 16 in 1 hour: Winner M85 vs Winner M87
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260709T230000
+DTEND;TZID=Asia/Bahrain:20260710T010000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m97@worldcupalpha.com
+SUMMARY:Winner M89 vs Winner M90
+LOCATION:Gillette Stadium, Foxborough
+DESCRIPTION:Quarter-final (Match 97)\nWinner M89 vs Winner M90\nStadium: Gillette Stadium\nCity: Foxborough\nBahrain Time: 23:00\nWinner of Match 89 / Winner of Match 90
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Quarter-final in 1 hour: Winner M89 vs Winner M90
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260710T220000
+DTEND;TZID=Asia/Bahrain:20260711T000000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m98@worldcupalpha.com
+SUMMARY:Winner M93 vs Winner M94
+LOCATION:SoFi Stadium, Inglewood, Los Angeles
+DESCRIPTION:Quarter-final (Match 98)\nWinner M93 vs Winner M94\nStadium: SoFi Stadium\nCity: Inglewood, Los Angeles\nBahrain Time: 22:00\nWinner of Match 93 / Winner of Match 94
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Quarter-final in 1 hour: Winner M93 vs Winner M94
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260712T000000
+DTEND;TZID=Asia/Bahrain:20260712T020000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m99@worldcupalpha.com
+SUMMARY:Winner M91 vs Winner M92
+LOCATION:Hard Rock Stadium, Miami Gardens
+DESCRIPTION:Quarter-final (Match 99)\nWinner M91 vs Winner M92\nStadium: Hard Rock Stadium\nCity: Miami Gardens\nBahrain Time: 00:00\nWinner of Match 91 / Winner of Match 92
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Quarter-final in 1 hour: Winner M91 vs Winner M92
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260712T040000
+DTEND;TZID=Asia/Bahrain:20260712T060000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m100@worldcupalpha.com
+SUMMARY:Winner M95 vs Winner M96
+LOCATION:Arrowhead Stadium, Kansas City
+DESCRIPTION:Quarter-final (Match 100)\nWinner M95 vs Winner M96\nStadium: Arrowhead Stadium\nCity: Kansas City\nBahrain Time: 04:00\nWinner of Match 95 / Winner of Match 96
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Quarter-final in 1 hour: Winner M95 vs Winner M96
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260714T220000
+DTEND;TZID=Asia/Bahrain:20260715T000000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m101@worldcupalpha.com
+SUMMARY:Winner M97 vs Winner M98
+LOCATION:AT&T Stadium, Arlington, Dallas
+DESCRIPTION:Semi-final (Match 101)\nWinner M97 vs Winner M98\nStadium: AT&T Stadium\nCity: Arlington, Dallas\nBahrain Time: 22:00\nWinner of Match 97 / Winner of Match 98
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Semi-final in 1 hour: Winner M97 vs Winner M98
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260715T220000
+DTEND;TZID=Asia/Bahrain:20260716T000000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m102@worldcupalpha.com
+SUMMARY:Winner M99 vs Winner M100
+LOCATION:Mercedes-Benz Stadium, Atlanta
+DESCRIPTION:Semi-final (Match 102)\nWinner M99 vs Winner M100\nStadium: Mercedes-Benz Stadium\nCity: Atlanta\nBahrain Time: 22:00\nWinner of Match 99 / Winner of Match 100
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Semi-final in 1 hour: Winner M99 vs Winner M100
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260719T000000
+DTEND;TZID=Asia/Bahrain:20260719T020000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m103@worldcupalpha.com
+SUMMARY:Loser M101 vs Loser M102
+LOCATION:Hard Rock Stadium, Miami Gardens
+DESCRIPTION:Third-place Play-off (Match 103)\nLoser M101 vs Loser M102\nStadium: Hard Rock Stadium\nCity: Miami Gardens\nBahrain Time: 00:00\nLoser of Match 101 / Loser of Match 102
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup Third-place Play-off in 1 hour: Loser M101 vs Loser M102
+ACTION:DISPLAY
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Bahrain:20260719T220000
+DTEND;TZID=Asia/Bahrain:20260720T000000
+DTSTAMP:20260628T120000Z
+UID:wc2026-m104@worldcupalpha.com
+SUMMARY:FIFA World Cup 2026 Final: Winner M101 vs Winner M102
+LOCATION:MetLife Stadium, East Rutherford, NJ
+DESCRIPTION:FINAL (Match 104)\nWinner M101 vs Winner M102\nStadium: MetLife Stadium\nCity: East Rutherford, NJ\nBahrain Time: 22:00\nWinner of Match 101 / Winner of Match 102
+BEGIN:VALARM
+TRIGGER:-PT1H
+DESCRIPTION:World Cup FINAL in 1 hour: Winner M101 vs Winner M102
 ACTION:DISPLAY
 END:VALARM
 END:VEVENT

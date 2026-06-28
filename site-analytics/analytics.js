@@ -684,6 +684,136 @@
   // =========================================================================
   //  LOAD + RENDER
   // =========================================================================
+  // ---- E // Model vs Venues ----------------------------------------------
+  function fmt(v, dp) { return (v == null || isNaN(v)) ? "—" : Number(v).toFixed(dp == null ? 4 : dp); }
+
+  function venuesBars(rows) {
+    // Horizontal bars of mean distance with bootstrap CI whiskers; top 12.
+    var top = rows.filter(function (r) { return r.mean_distance != null; }).slice(0, 12);
+    if (!top.length) return empty("no common-support ranking");
+    var W = 720, rowH = 22, padL = 150, padR = 60, padT = 8, padB = 22;
+    var H = top.length * rowH + padT + padB;
+    var maxD = 0;
+    top.forEach(function (r) { maxD = Math.max(maxD, r.ci_hi != null ? r.ci_hi : r.mean_distance); });
+    maxD = maxD > 0 ? maxD * 1.08 : 1;
+    var x = function (d) { return padL + (d / maxD) * (W - padL - padR); };
+    var parts = [];
+    top.forEach(function (r, i) {
+      var cy = padT + i * rowH + rowH / 2;
+      var best = i === 0;
+      var col = best ? "var(--accent)" : "var(--muted)";
+      parts.push('<text x="' + (padL - 6) + '" y="' + (cy + 3) + '" text-anchor="end" font-size="10" fill="var(--text)">' + esc(r.venue) + '</text>');
+      // CI whisker
+      if (r.ci_lo != null && r.ci_hi != null) {
+        parts.push('<line x1="' + x(r.ci_lo) + '" x2="' + x(r.ci_hi) + '" y1="' + cy + '" y2="' + cy + '" stroke="var(--border-2)" stroke-width="1"/>');
+        parts.push('<line x1="' + x(r.ci_lo) + '" x2="' + x(r.ci_lo) + '" y1="' + (cy - 4) + '" y2="' + (cy + 4) + '" stroke="var(--border-2)" stroke-width="1"/>');
+        parts.push('<line x1="' + x(r.ci_hi) + '" x2="' + x(r.ci_hi) + '" y1="' + (cy - 4) + '" y2="' + (cy + 4) + '" stroke="var(--border-2)" stroke-width="1"/>');
+      }
+      parts.push('<circle cx="' + x(r.mean_distance) + '" cy="' + cy + '" r="4" fill="' + col + '"/>');
+      parts.push('<text x="' + (W - padR + 4) + '" y="' + (cy + 3) + '" font-size="9" fill="var(--text-dim)">P1 ' + Math.round((r.p_rank1 || 0) * 100) + '%</text>');
+    });
+    parts.push('<text x="' + padL + '" y="' + (H - 6) + '" font-size="9" fill="var(--muted)">0</text>');
+    parts.push('<text x="' + (W - padR) + '" y="' + (H - 6) + '" font-size="9" fill="var(--muted)" text-anchor="end">MAE ' + fmt(maxD, 3) + '</text>');
+    return svg(W, H, parts.join(""));
+  }
+
+  function miniTable(headers, rows) {
+    var h = headers.map(function (x) { return "<th>" + esc(x) + "</th>"; }).join("");
+    var b = rows.map(function (r) {
+      return "<tr>" + r.map(function (c, i) {
+        return '<td' + (i === 0 ? '' : ' class="num"') + '>' + (c == null ? "—" : esc(c)) + "</td>";
+      }).join("") + "</tr>";
+    }).join("");
+    return '<table class="a-tbl"><thead><tr>' + h + "</tr></thead><tbody>" + b + "</tbody></table>";
+  }
+
+  function renderVenues() {
+    var v = FEEDS.venues;
+    if (!v) { if ($("venues-verdict")) $("venues-verdict").innerHTML = pendingMsg("Model vs Venues"); return; }
+    var cov = v.coverage || {}, lb = v.leaderboard || {}, meta = v.meta || {};
+
+    if ($("venues-meta")) $("venues-meta").textContent =
+      "window " + (meta.window || "—") + " · " + (meta.primary || "") + " · freshness " + (meta.freshness_limit_h || "?") + "h";
+
+    // KPIs
+    var kpis = [
+      ["Common-support fixtures", lb.n_fixtures != null ? lb.n_fixtures : "—"],
+      ["Observations (build×fixture)", cov.n_obs != null ? cov.n_obs : "—"],
+      ["Venues compared", cov.n_venues != null ? cov.n_venues : "—"],
+      ["Friedman p", lb.friedman && lb.friedman.p != null ? fmt(lb.friedman.p, 5) : "—"],
+    ];
+    $("venues-kpi").innerHTML = kpis.map(function (k) {
+      return '<div class="kpi"><span class="k-label">' + esc(k[0]) + '</span><span class="k-value">' + esc(String(k[1])) + "</span></div>";
+    }).join("");
+
+    // Verdict banner
+    var verdict = lb.verdict || "—";
+    var good = /closest venue/.test(verdict);
+    var cls = good ? "a-verdict a-good" : "a-verdict a-warn";
+    $("venues-verdict").innerHTML =
+      '<div class="' + cls + '">' + esc(verdict) + '</div>' +
+      '<p class="a-note">Model side is the <b>ex-market blend</b> (Elo/DC only) — it contains no market consensus, so a venue&rsquo;s closeness is independent evidence. ' +
+      'The leave-one-book-out board (each venue vs the consensus of the <i>other</i> books) agrees: <b>' + esc((v.lobo_leaderboard || {}).verdict || "—") + '</b>.</p>' +
+      venuesBars(lb.venues || []);
+
+    // Leaderboard table
+    var rows = (lb.venues || []).map(function (r) {
+      return [r.venue, fmt(r.mean_distance), (r.ci_lo == null ? "—" : fmt(r.ci_lo) + "–" + fmt(r.ci_hi)),
+        fmt(r.mean_rank, 2), Math.round((r.p_rank1 || 0) * 100) + "%", r.n];
+    });
+    $("venues-leaderboard").innerHTML =
+      "<div class='sub-head'>Common-support leaderboard (same fixtures, all venues fresh)</div>" +
+      miniTable(["Venue", "MAE", "95% CI", "Mean rank", "P(rank1)", "n"], rows);
+
+    // Accuracy: model vs venues (agreement != accuracy)
+    var acc = v.accuracy || {};
+    var accRows = [];
+    if (acc.model) {
+      Object.keys(acc.model).forEach(function (c) {
+        var m = acc.model[c]; if (m && m.n) accRows.push(["model:" + c, fmt(m.brier), fmt(m.log_loss), m.n]);
+      });
+    }
+    var accVen = acc.venues || {};
+    Object.keys(accVen).sort(function (a, b) { return (accVen[a].brier || 9) - (accVen[b].brier || 9); })
+      .slice(0, 6).forEach(function (k) { accRows.push([k, fmt(accVen[k].brier), fmt(accVen[k].log_loss), accVen[k].n]); });
+    $("venues-accuracy").innerHTML = (acc.n_fixtures
+      ? miniTable(["Side", "Brier", "LogLoss", "n"], accRows) +
+        "<p class='a-note'>Lower is better. A venue can match the model (zero distance) yet both be wrong — accuracy is scored against realised outcomes, separately from closeness.</p>"
+      : empty("accuracy — settled fixtures insufficient", true));
+
+    // Hypotheses (Friedman + BH-FDR)
+    var hyp = (v.hypotheses || []).map(function (h) {
+      return [h.name, h.independent ? "yes" : "no (circular)", h.p == null ? "—" : fmt(h.p, 5),
+        h.q_bh == null ? "—" : fmt(h.q_bh, 5), h.n_fixtures];
+    });
+    $("venues-hypotheses").innerHTML = hyp.length
+      ? miniTable(["Hypothesis", "Independent", "Friedman p", "q (BH)", "fix"], hyp)
+      : empty("no hypotheses");
+
+    // Segments
+    var seg = (v.segments || []).map(function (s) {
+      return [s.segment, s.n_fixtures, s.friedman_p == null ? "—" : fmt(s.friedman_p, 4),
+        s.q_bh == null ? "—" : fmt(s.q_bh, 4), s.state === "ok" ? (s.closest || "—") : "insufficient"];
+    });
+    $("venues-segments").innerHTML = seg.length
+      ? miniTable(["Segment", "fix", "p", "q (BH)", "closest"], seg)
+      : empty("no segments");
+
+    // Arms: placed vs paper, Polymarket
+    var pa = v.placed_arm || {}, pm = v.polymarket || {};
+    var unmatched = (pa.unmatched_audit || []).reduce(function (acc2, u) {
+      acc2[u.reason] = (acc2[u.reason] || 0) + 1; return acc2;
+    }, {});
+    var reasons = Object.keys(unmatched).map(function (r) { return r + ": " + unmatched[r]; }).join(", ");
+    $("venues-arms").innerHTML =
+      '<div class="a-badge ' + (pa.insufficient ? "a-warn" : "a-good") + '">PLACED ARM ' + (pa.insufficient ? "INSUFFICIENT" : "OK") + '</div>' +
+      "<p class='a-note'>Linked <b>" + (pa.n_linked || 0) + "</b> / " + (pa.n_model_bets || 0) +
+      " source=model bets to their exact preceding build. Unmatched (audited, not dropped): " + esc(reasons || "none") +
+      ". Placed legs are selected where model & market disagree — a biased sample vs the full paper book.</p>" +
+      '<div class="a-badge a-warn">POLYMARKET ' + esc(pm.state || "—") + '</div>' +
+      "<p class='a-note'>" + esc(pm.note || "") + "</p>";
+  }
+
   function load(name, file) {
     return fetch("./data/" + file, { cache: "no-store" })
       .then(function (r) { return r.ok ? r.json() : null; })
@@ -704,13 +834,14 @@
       load("rigor", "rigor.json"),
       load("risk", "risk_pnl.json"),
       load("scores", "scores_data.json"),
+      load("venues", "venues_benchmark.json"),
     ]).then(function () {
       var any = Object.keys(FEEDS).some(function (k) { return FEEDS[k]; });
       if (!any) { $("nodata").hidden = false; $("nodata-msg").textContent = "NO DATA FEED — could not load ./data/*.json"; }
       var pendingNew = ["predledger", "winrate", "clvbench", "rigor", "risk"].filter(function (k) { return !FEEDS[k]; });
       if (pendingNew.length) { $("nodata").hidden = false; $("nodata-msg").textContent = "Backend feeds still building: " + pendingNew.join(", ") + " — live panels render once published."; }
 
-      [renderKpi, renderVerdict, renderRisk, renderForest, renderEventMarkets, renderWinrate, renderClv, renderLedger].forEach(function (fn) {
+      [renderKpi, renderVerdict, renderRisk, renderForest, renderEventMarkets, renderWinrate, renderClv, renderVenues, renderLedger].forEach(function (fn) {
         try { fn(); } catch (e) { /* never let one panel break the page */ if (window.console) console.error(fn.name, e); }
       });
       var gen = (FEEDS.data && FEEDS.data.meta && FEEDS.data.meta.generated) || "";
