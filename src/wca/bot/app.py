@@ -57,6 +57,8 @@ NEXT_PATH = "data/next_latest.md"
 GOALSCORERS_PATH = "data/goalscorers_latest.md"
 BETBUILDER_PATH = "data/betbuilder_latest.md"
 SCORES_FEED_PATH = "site/scores_data.json"
+ARB_DATA_PATH = "site/arb_data.json"
+ARB_MAX_AGE_HOURS = 6.0
 CARD_MAX_AGE_HOURS = 6.0
 # The odds feed behind /accas and /boost should refresh frequently; warn beyond
 # this. Structure snapshots change rarely, so its window is generous.
@@ -147,6 +149,7 @@ HELP_TEXT = (
     "/accas [value|edge|hedge|longshot|promo] — model accas; default=low-win favourites @ modest odds (edge=high-edge underdogs)\n"
     "/structure — project structure metrics\n"
     "/pm — Polymarket parked orders + trader status\n"
+    "/arb — locked-in cross-venue mispricings (£+decimal books, $+¢ Polymarket)\n"
     "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
     "/boost — price a bookmaker price-boost vs the model (usage below)\n"
     "/restart — restart the bot (admin; `/restart pull` redeploys first)\n"
@@ -2411,6 +2414,56 @@ def handle_redeem(text: str, db_path: str = "data/wca.db") -> str:
     return msg
 
 
+def handle_arb(arb_path: str = ARB_DATA_PATH, now_utc: Optional[str] = None) -> str:
+    """`/arb` — surface locked-in cross-venue (and same-venue) mispricings.
+
+    Reads the cached arb feed (``site/arb_data.json``, built by the monitoring
+    pipeline) and renders each opportunity with the desk's display rule:
+    sportsbook/exchange legs in £ + decimal odds, Polymarket legs in $ + cent
+    share price. Monitoring-only — every reply says so; nothing is executed.
+    """
+    import json
+
+    if now_utc is None:
+        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    try:
+        with open(arb_path, "r", encoding="utf-8") as fh:
+            feed = json.load(fh)
+    except (OSError, ValueError):
+        return (
+            "*Arbitrage / lock-ins*\n"
+            "No arb feed cached yet (`%s`). The monitoring build "
+            "(`scripts/wca_arb_data.py`) writes it." % arb_path
+        )
+
+    meta = feed.get("meta") or {}
+    generated = meta.get("generated")
+    banner = _stale_banner(generated, now_utc, ARB_MAX_AGE_HOURS, label="arb feed")
+    arbs = feed.get("arbs") or []
+    lines = [banner + "*Arbitrage / lock-ins* (monitoring-only)",
+             "_Sportsbook: £ + decimal · Polymarket: $ + ¢ share price._", ""]
+    if not arbs:
+        lines.append("No risk-free lock-ins in the latest scan.")
+        return "\n".join(lines)
+
+    for a in arbs[:12]:
+        lines.append("*%s* — %s `%s`  +%.2f%% guaranteed" % (
+            a.get("fixture", "?"), a.get("market", "?"),
+            a.get("selection", "?"), float(a.get("guaranteed_pct", 0.0)) * 100.0,
+        ))
+        for leg in a.get("legs", []):
+            sym = "$" if str(leg.get("currency", "")).upper() == "USD" else "£"
+            is_pm = "polymarket" in str(leg.get("venue", "")).lower()
+            net = float(leg.get("net", 0.0) or 0.0)
+            price = ("%d¢" % round(100.0 / net)) if (is_pm and net > 0) else ("%.2f" % net)
+            lines.append("   • %s %s @ %s — %s%.2f" % (
+                leg.get("side", "back"), leg.get("venue", "?"), price,
+                sym, float(leg.get("stake", 0.0) or 0.0),
+            ))
+        lines.append("")
+    return "\n".join(lines).rstrip()
+
+
 def dispatch(text: str, db_path: str) -> str:
     """Map an incoming text message to a reply."""
     confirm = handle_confirmation(text, db_path)
@@ -2450,6 +2503,8 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_structure()
     if cmd == "/pm":
         return handle_pm(db_path)
+    if cmd == "/arb":
+        return handle_arb()
     if cmd == "/settle":
         return handle_settle(text, db_path)
     if cmd == "/boost":
