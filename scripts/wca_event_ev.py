@@ -208,7 +208,11 @@ def main() -> int:
         if r["edge"] < -0.10:
             continue
         star = " *" if r["edge"] >= MIN_EDGE else ""
-        price = ("%.3f" % r["price"]) if r["price"] < 1 else ("%.2f" % r["price"])
+        # Venue display rule: Polymarket as a cent share price, books as decimal.
+        if "polymarket" in str(r.get("book", "")).lower() and 0.0 < r["price"] < 1.0:
+            price = "%d¢" % round(r["price"] * 100.0)
+        else:
+            price = ("%.3f" % r["price"]) if r["price"] < 1 else ("%.2f" % r["price"])
         print("%-16s %-34s %-26s %6.1f%% %7s %+6.1f%%  %s%s" %
               (r["market"], r["fixture"][:34], r["selection"][:26],
                r["model_p"] * 100, price, r["edge"] * 100, r["book"], star))
