@@ -224,8 +224,10 @@ def test_no_sample_feed_committed():
 
 def test_renderer_has_empty_state():
     import os
-    js = open(os.path.join(os.path.dirname(__file__), "..", "site", "arb.js")).read()
-    assert "No risk-free opportunities" in js  # honest empty state, not samples
+    # Empty states are now HTML hidden divs (not JS-injected strings).
+    html = open(os.path.join(os.path.dirname(__file__), "..", "site", "arb.html")).read()
+    assert "NO GUARANTEED ARBS" in html  # honest empty state for arb section
+    assert "NO ACTIONABLE SINGLES" in html  # honest empty state for singles section
 
 
 def test_sportsbook_back_pairs_with_exchange_lay():

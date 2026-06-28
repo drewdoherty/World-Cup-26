@@ -1,0 +1,529 @@
+/* Action Desk — light lilac theme.
+   Self-contained: covers everything arb.html needs.
+   Does NOT affect other pages (no shared selectors). */
+
+:root {
+  --ll-bg:        #fdfcff;
+  --ll-surface:   #f6f4ff;
+  --ll-surface-2: #ece9f8;
+  --ll-border:    #ddd9f0;
+  --ll-border-2:  #c8c3e4;
+  --ll-text:      #18152e;
+  --ll-text-dim:  #5c587a;
+  --ll-muted:     #9390b2;
+  --ll-accent:    #6d28d9;
+  --ll-accent-lt: #ede9fe;
+  --ll-pos:       #15803d;
+  --ll-pos-bg:    #f0fdf4;
+  --ll-neg:       #b91c1c;
+  --ll-neg-bg:    #fef2f2;
+  --ll-warn:      #b45309;
+  --ll-warn-bg:   #fffbeb;
+  --ll-sb:        #1d4ed8;   /* sportsbook rail — blue  */
+  --ll-sb-bg:     #eff6ff;
+  --ll-pm:        #7c3aed;   /* Polymarket rail — purple */
+  --ll-pm-bg:     #f5f3ff;
+  --ll-kal:       #0f766e;   /* Kalshi rail — teal */
+  --ll-kal-bg:    #f0fdfa;
+  --ll-add:       #15803d;
+  --ll-div:       #1d4ed8;
+  --ll-hedge:     #b45309;
+  --ll-chip-h:    10px;
+  --ll-mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  background: var(--ll-bg);
+  color: var(--ll-text);
+  font-family: var(--ll-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --------------------------------------------------------------------------
+   APP SHELL
+-------------------------------------------------------------------------- */
+
+#arb-app {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 14px 40px;
+}
+
+/* --------------------------------------------------------------------------
+   STICKY HEADER
+-------------------------------------------------------------------------- */
+
+.arb-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--ll-bg);
+  border-bottom: 1px solid var(--ll-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.arb-header-top {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.arb-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 16px 10px 2px;
+  border-right: 1px solid var(--ll-border);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.arb-brand-mark {
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--ll-accent);
+  font-size: 14px;
+}
+.arb-brand-sub {
+  color: var(--ll-muted);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ----- KPI strip ----- */
+
+.arb-kpis {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  overflow: hidden;
+}
+
+.arb-kpi {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  padding: 7px 16px;
+  border-right: 1px solid var(--ll-border);
+  min-width: 0;
+}
+.arb-kpi-label {
+  font-size: 8.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ll-muted);
+  white-space: nowrap;
+}
+.arb-kpi-value {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ll-text);
+}
+.arb-kpi-value.pos { color: var(--ll-pos); }
+.arb-kpi-value.neg { color: var(--ll-neg); }
+.arb-kpi-value.dim { color: var(--ll-text-dim); }
+
+/* ----- Nav ----- */
+
+.arb-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+  padding: 0 6px;
+  border-right: 1px solid var(--ll-border);
+}
+.arb-nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 12px;
+  color: var(--ll-text-dim);
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+}
+.arb-nav-link:hover { color: var(--ll-accent); }
+.arb-nav-here {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 12px;
+  color: var(--ll-accent);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  border-bottom: 2px solid var(--ll-accent);
+}
+
+/* --------------------------------------------------------------------------
+   FILTER TOOLBAR
+-------------------------------------------------------------------------- */
+
+.arb-toolbar {
+  padding: 8px 6px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-top: 1px solid var(--ll-border);
+  background: var(--ll-surface);
+}
+
+.arb-toolbar-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ll-muted);
+  white-space: nowrap;
+  padding: 0 6px 0 2px;
+}
+
+.arb-filter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.arb-filter select,
+.arb-filter input[type="text"] {
+  background: var(--ll-bg);
+  border: 1px solid var(--ll-border-2);
+  border-radius: 5px;
+  color: var(--ll-text);
+  font: inherit;
+  font-size: 11px;
+  padding: 3px 7px;
+  min-width: 80px;
+  cursor: pointer;
+  outline: none;
+}
+.arb-filter select:focus,
+.arb-filter input:focus {
+  border-color: var(--ll-accent);
+  box-shadow: 0 0 0 2px var(--ll-accent-lt);
+}
+
+.arb-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1px solid var(--ll-border-2);
+  background: var(--ll-bg);
+  color: var(--ll-text-dim);
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 0.1s;
+}
+.arb-filter-chip[data-active="true"] {
+  background: var(--ll-accent);
+  border-color: var(--ll-accent);
+  color: #fff;
+}
+.arb-filter-chip:hover:not([data-active="true"]) {
+  border-color: var(--ll-accent);
+  color: var(--ll-accent);
+}
+
+.arb-density-btn {
+  margin-left: auto;
+  padding: 3px 10px;
+  border: 1px solid var(--ll-border-2);
+  border-radius: 5px;
+  background: var(--ll-bg);
+  color: var(--ll-text-dim);
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.arb-density-btn:hover { border-color: var(--ll-accent); color: var(--ll-accent); }
+
+/* --------------------------------------------------------------------------
+   SECTIONS
+-------------------------------------------------------------------------- */
+
+.arb-section {
+  margin-top: 18px;
+}
+
+.arb-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0 2px 6px;
+  border-bottom: 2px solid var(--ll-border);
+  margin-bottom: 0;
+}
+.arb-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ll-text);
+}
+.arb-section-count {
+  font-size: 10px;
+  color: var(--ll-muted);
+}
+.arb-section-freshness {
+  margin-left: auto;
+  font-size: 9.5px;
+  color: var(--ll-muted);
+}
+
+/* --------------------------------------------------------------------------
+   TABLES
+-------------------------------------------------------------------------- */
+
+.arb-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.arb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+/* density=compact shrinks rows */
+.density-compact .arb-table {
+  font-size: 11px;
+}
+
+.arb-table thead th {
+  padding: 7px 10px;
+  text-align: left;
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--ll-muted);
+  border-bottom: 1px solid var(--ll-border);
+  white-space: nowrap;
+  font-weight: 600;
+  background: var(--ll-surface);
+}
+.arb-table thead th.r { text-align: right; }
+
+.arb-table tbody tr {
+  border-bottom: 1px solid var(--ll-border);
+  transition: background 0.08s;
+}
+.arb-table tbody tr:hover {
+  background: var(--ll-surface);
+}
+.arb-table tbody td {
+  padding: 8px 10px;
+  vertical-align: middle;
+}
+.density-compact .arb-table tbody td {
+  padding: 4px 8px;
+}
+.arb-table tbody td.r {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.arb-table tbody td.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   CHIPS & BADGES
+-------------------------------------------------------------------------- */
+
+.arb-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Action labels */
+.badge-add    { background: var(--ll-pos-bg); color: var(--ll-add); }
+.badge-div    { background: var(--ll-sb-bg);  color: var(--ll-div); }
+.badge-hedge  { background: var(--ll-warn-bg); color: var(--ll-hedge); }
+
+/* Stale tag */
+.badge-stale  { background: var(--ll-warn-bg); color: var(--ll-warn); }
+
+/* Venue rail chips */
+.badge-sb  { background: var(--ll-sb-bg);  color: var(--ll-sb);  }
+.badge-pm  { background: var(--ll-pm-bg);  color: var(--ll-pm);  }
+.badge-kal { background: var(--ll-kal-bg); color: var(--ll-kal); }
+.badge-mod { background: var(--ll-surface-2); color: var(--ll-text-dim); }
+
+/* Promo */
+.badge-promo  { background: #fdf4ff; color: #7e22ce; }
+.badge-pc-req { background: var(--ll-warn-bg); color: var(--ll-warn); }
+
+/* Market */
+.badge-market {
+  background: var(--ll-surface-2);
+  color: var(--ll-text-dim);
+}
+
+/* Age indicator */
+.age-tag {
+  font-size: 9px;
+  color: var(--ll-muted);
+  white-space: nowrap;
+}
+.age-tag.stale { color: var(--ll-warn); }
+
+/* --------------------------------------------------------------------------
+   SOURCE TAGS (row-level)
+-------------------------------------------------------------------------- */
+
+.source-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+
+/* --------------------------------------------------------------------------
+   COLOUR UTILITIES
+-------------------------------------------------------------------------- */
+
+.pos   { color: var(--ll-pos); }
+.neg   { color: var(--ll-neg); }
+.warn  { color: var(--ll-warn); }
+.dim   { color: var(--ll-text-dim); }
+.muted { color: var(--ll-muted); }
+.bold  { font-weight: 600; }
+
+/* --------------------------------------------------------------------------
+   EMPTY STATES
+-------------------------------------------------------------------------- */
+
+.arb-empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--ll-muted);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  border: 1px dashed var(--ll-border);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+}
+.arb-empty strong { display: block; font-size: 13px; color: var(--ll-text-dim); margin-bottom: 4px; }
+
+/* --------------------------------------------------------------------------
+   WITHHELD PANEL
+-------------------------------------------------------------------------- */
+
+.arb-withheld-table .arb-table tbody tr {
+  background: var(--ll-warn-bg);
+  opacity: 0.85;
+}
+
+/* --------------------------------------------------------------------------
+   NO-DATA OVERLAY
+-------------------------------------------------------------------------- */
+
+.arb-nodata {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  background: var(--ll-neg-bg);
+  color: var(--ll-neg);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 6px;
+  margin: 14px 0;
+}
+.arb-nodata-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--ll-neg);
+  animation: blink 1s step-start infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* --------------------------------------------------------------------------
+   FOOTER
+-------------------------------------------------------------------------- */
+
+.arb-foot {
+  margin-top: 28px;
+  padding: 10px 0;
+  border-top: 1px solid var(--ll-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  color: var(--ll-muted);
+}
+.arb-foot-mark {
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ll-border-2);
+}
+
+/* --------------------------------------------------------------------------
+   MONITORING BANNER
+-------------------------------------------------------------------------- */
+
+.arb-monitor-banner {
+  background: var(--ll-accent-lt);
+  color: var(--ll-accent);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--ll-border);
+}
+
+/* --------------------------------------------------------------------------
+   MOBILE (compact cards)
+-------------------------------------------------------------------------- */
+
+@media (max-width: 700px) {
+  .arb-table thead { display: none; }
+  .arb-table tbody tr {
+    display: block;
+    border: 1px solid var(--ll-border);
+    border-radius: 6px;
+    margin: 8px 0;
+    padding: 8px 10px;
+    background: var(--ll-surface);
+  }
+  .arb-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    border: none;
+    text-align: left !important;
+  }
+  .arb-table tbody td::before {
+    content: attr(data-label);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ll-muted);
+    flex: 0 0 90px;
+  }
+  .arb-kpi-value { font-size: 12px; }
+}

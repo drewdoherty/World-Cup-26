@@ -1,30 +1,36 @@
-"""Generate ``site/bet_recs.json`` for the Bet Recs page (formerly Arbitrage).
+"""Generate ``site/bet_recs.json`` — the Action Desk feed.
 
-Two products, both *monitoring only* (no execution):
+Builds a deterministic, multi-section bet recommendation feed from cached data.
+No model fit, no live Odds API pull. Free Polymarket reads only (cached via
+``site/advancement_data.json`` which the scheduled build already refreshes).
 
-1. **Best Bets** — model-backed prop recommendations. For every market where the
-   project has a calibrated model probability we evaluate **both sides** of the
-   Polymarket market (back YES vs back NO), fee-adjust, pick the positive-EV
-   side and size it with **fractional Kelly** (``--fraction``) on a fixed
-   ``--bankroll``, hard-capped at ``--cap`` of the bankroll.
+Sections emitted
+----------------
+* match_singles     — 1X2 singles where blended model > de-vigged consensus.
+                      Top-3 per fixture by net EV. Moneyline-gate enforced on
+                      any non-1X2 market (not currently active — no live book
+                      prices for BTTS/totals in cache).
+* event_props       — calibrated corners/cards/scorers; empty when real price
+                      snapshots are older than PRICE_STALE_SECS.
+* advancement_futures — Monte Carlo sim vs Polymarket; conditioned on results
+                        to date.  PM fees applied. Quarter-Kelly on PM pool.
+* guaranteed_arbs   — settlement-safe cross-venue arbs (fee/FX-adjusted).
+* withheld          — rows that fail any gate (drift, stale, edge, caps).
 
-2. **Prop Arbs** — Polymarket-vs-sportsbook prop arbitrage monitor. v1 surfaces
-   *PM-internal* arbs (buying YES and NO on the same market costs < 1 after fee
-   — always settlement-safe because both legs are the same market). The
-   book-vs-PM scorer family is structurally present but inert until a live
-   sportsbook prop feed is wired (it needs the settlement-key vocabulary in
-   ``wca.arb`` extended to scorer markets — see the Arbitrage blind-spot note).
+Risk governance
+---------------
+Uses ``wca.card.resolve_pool_bankroll`` against ``data/wca.db`` (falls back to
+rung-0 defaults when ledger is absent so the feed can be regenerated from CI
+without the runtime DB). Flat quarter-Kelly at every rung; the rung scales the
+bankroll, not the fraction.
 
-Coverage (v1): the **group-winner** family is priced **live** off Polymarket.
-The model probabilities come from ``site/advancement_data.json``; if that feed
-is older than the latest result the panel is flagged STALE, and any single rec
-whose live price has drifted more than ``--drift`` from the model's baseline
-price is withheld from the actionable list (the model hasn't seen that news).
+GBP and USD are kept strictly separate. FX is disclosed when combined in the
+dashboard but never silently mixed.
 
-Usage:
-    PYTHONPATH=src python scripts/wca_betrecs.py \
-        [--bankroll 250] [--fraction 0.5] [--cap 0.05] \
-        [--min-edge 0.02] [--drift 0.10] [--out site/bet_recs.json]
+Usage::
+
+    PYTHONPATH=src python scripts/wca_betrecs.py [--db PATH] [--out PATH]
+        [--min-edge FLOAT] [--stale-model-hours INT] [--pm-bankroll FLOAT]
 """
 from __future__ import annotations
 
@@ -32,141 +38,557 @@ import argparse
 import datetime as dt
 import json
 import sys
-import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+# ---------------------------------------------------------------------------
+# Constants matching card.py governance
+# ---------------------------------------------------------------------------
+
+FLAT_KELLY_FRACTION: float = 0.25
+DEFAULT_BANKROLL_GBP: float = 2000.0    # rung-0 sportsbook pool
+DEFAULT_PM_BANKROLL_USD: float = 1310.0  # Polymarket pool
+PER_BET_CAP: float = 0.05               # 5% hard cap per bet
+DAILY_EXPOSURE_CAP: float = 0.25        # 25% total daily cap
+SELECTION_MIN_PROB: float = 0.20        # hard floor on model prob
+LONGSHOT_PROB: float = 0.25             # minnow filter threshold
+MIN_EDGE: float = 0.02                  # minimum edge gate (2pp)
+MODEL_STALE_HOURS: int = 24             # model older than this → withheld
+PRICE_STALE_SECS: int = 7200           # 2h — price age beyond which rows go withheld
+FX_FALLBACK_GBP_USD: float = 1.27      # fallback when no FX available
+
+# PM taker fee: fee = 0.03 × p × (1 - p)
+PM_FEE_RATE: float = 0.03
+
+OUTCOMES = ("home", "draw", "away")
+
 
 # ---------------------------------------------------------------------------
-# Both-sides Kelly evaluation
+# Tiny helpers
 # ---------------------------------------------------------------------------
 
-def _eval_side(p: float, buy_price: float, bankroll: float, fraction: float,
-               cap: float) -> Dict[str, Any]:
-    """Evaluate backing one Polymarket YES-share with win prob *p* at *buy_price*.
-
-    Returns the fee-adjusted $-EV per $1 staked and the fractional-Kelly stake.
-    """
-    from wca.advancement import pm_taker_fee
-    from wca.markets import kelly
-
-    if buy_price is None or buy_price <= 0.0 or buy_price >= 1.0:
-        return {"price": buy_price, "ev": None, "stake": 0.0}
-    fee = pm_taker_fee(buy_price)
-    net_cost = buy_price + fee
-    ev = p - net_cost                      # share pays 1 if it resolves YES
-    odds = 1.0 / net_cost if net_cost > 0 else 0.0
-    stake = kelly.stake(p, odds, bankroll, fraction=fraction, cap=cap) if odds > 1.0 else 0.0
-    return {"price": round(buy_price, 4), "ev": round(ev, 4), "stake": round(stake, 2)}
+def _utcnow() -> dt.datetime:
+    return dt.datetime.utcnow()
 
 
-def _rec_row(market: str, label: str, team: str, group: Optional[str],
-             p_yes: float, yes_ask: float, no_ask: float, live_mid: float,
-             baseline_pm: Optional[float], bankroll: float, fraction: float,
-             cap: float) -> Dict[str, Any]:
-    """Build a both-sides rec row for a binary YES/NO Polymarket market."""
-    yes = _eval_side(p_yes, yes_ask, bankroll, fraction, cap)        # back YES
-    no = _eval_side(1.0 - p_yes, no_ask, bankroll, fraction, cap)    # back NO
-    yes["side"], no["side"] = "YES", "NO"
-    yes["desc"], no["desc"] = label, _negate_label(label)
-    best = yes if (yes["ev"] or -9) >= (no["ev"] or -9) else no
-    drift = None
-    if baseline_pm is not None and live_mid is not None:
-        drift = round(abs(live_mid - baseline_pm), 4)
+def _age_secs(ts_str: Optional[str]) -> Optional[int]:
+    """Return seconds since ISO/UTC timestamp, or None if unparseable."""
+    if not ts_str:
+        return None
+    # Normalise: strip Z, UTC, and +HH:MM / -HH:MM tz suffixes before parsing.
+    s = str(ts_str).strip()
+    s = s.rstrip("Z").replace(" UTC", "")
+    # Strip +00:00 / -05:30 style suffix
+    if len(s) > 6 and s[-6] in ("+", "-") and s[-3] == ":":
+        s = s[:-6]
+    for fmt in (
+        "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%dT%H:%M",
+        "%Y-%m-%d %H:%M",
+    ):
+        try:
+            gen = dt.datetime.strptime(s, fmt)
+            return max(0, int((_utcnow() - gen).total_seconds()))
+        except ValueError:
+            continue
+    return None
+
+
+def _pm_fee(p: float) -> float:
+    return PM_FEE_RATE * p * (1.0 - p)
+
+
+def _kelly_stake(
+    p: float,
+    price: float,
+    bankroll: float,
+    fraction: float = FLAT_KELLY_FRACTION,
+    cap: float = PER_BET_CAP,
+) -> float:
+    """Fractional-Kelly stake, hard-capped at ``cap × bankroll``."""
+    if price <= 1.0 or p <= 0.0 or bankroll <= 0.0:
+        return 0.0
+    b = price - 1.0
+    f_full = (p * price - 1.0) / b
+    if f_full <= 0.0:
+        return 0.0
+    f = min(f_full * fraction, cap)
+    return round(f * bankroll, 2)
+
+
+def _net_ev(p: float, price: float) -> float:
+    """EV per unit stake: p × price − 1."""
+    return round(p * price - 1.0, 6)
+
+
+def _devig_price(devig_prob: float) -> Optional[float]:
+    """Implied price from de-vigged probability. Returns None if ≤ 0."""
+    if devig_prob is None or devig_prob <= 0.0:
+        return None
+    return round(1.0 / devig_prob, 4)
+
+
+# ---------------------------------------------------------------------------
+# Bankroll resolution
+# ---------------------------------------------------------------------------
+
+def _resolve_sportsbook_pool(db_path: str) -> Dict[str, Any]:
+    """Try to read CLV ladder from ledger; return rung-0 defaults if absent."""
+    try:
+        from wca.card import resolve_pool_bankroll
+        pb = resolve_pool_bankroll(db_path)
+        return {
+            "bankroll": pb.bankroll,
+            "rung": pb.rung,
+            "kelly_fraction": pb.kelly_fraction,
+            "per_bet_cap": PER_BET_CAP,
+            "max_stake": round(pb.bankroll * PER_BET_CAP, 2),
+            "n_settled": pb.n_settled,
+            "clv_to_date": pb.clv_to_date,
+            "reason": pb.reason,
+            "currency": "GBP",
+            "source": "ledger",
+        }
+    except Exception:
+        return {
+            "bankroll": DEFAULT_BANKROLL_GBP,
+            "rung": 0,
+            "kelly_fraction": FLAT_KELLY_FRACTION,
+            "per_bet_cap": PER_BET_CAP,
+            "max_stake": round(DEFAULT_BANKROLL_GBP * PER_BET_CAP, 2),
+            "n_settled": 0,
+            "clv_to_date": None,
+            "reason": "rung 0 default (ledger unavailable)",
+            "currency": "GBP",
+            "source": "default",
+        }
+
+
+def _pm_pool(bankroll_usd: float) -> Dict[str, Any]:
     return {
-        "market": market,
-        "team": team,
-        "group": group,
-        "model_prob": round(p_yes, 4),
-        "live_mid": round(live_mid, 4) if live_mid is not None else None,
-        "baseline_pm": round(baseline_pm, 4) if baseline_pm is not None else None,
-        "drift": drift,
-        "best_side": best["side"],
-        "edge": best["ev"],
-        "stake": best["stake"],
-        "yes": yes,
-        "no": no,
+        "bankroll": bankroll_usd,
+        "kelly_fraction": FLAT_KELLY_FRACTION,
+        "per_bet_cap": PER_BET_CAP,
+        "max_stake": round(bankroll_usd * PER_BET_CAP, 2),
+        "currency": "USD",
     }
 
 
-def _negate_label(label: str) -> str:
-    if label.lower().startswith("win "):
-        return "NOT " + label[0].lower() + label[1:]
-    return "NOT (" + label + ")"
-
-
 # ---------------------------------------------------------------------------
-# Live Polymarket group-winner prices (hardened, bounded)
+# Feed loaders
 # ---------------------------------------------------------------------------
 
-def _live_group_winner_prices(timeout: float = 8.0) -> Tuple[Dict[str, Dict[str, float]], Optional[str]]:
-    """Fetch live group-winner YES/NO/mid per team. Returns ({team: prices}, err)."""
-    import wca.data.polymarket as poly
-    poly._TIMEOUT = timeout
-    from wca.advancement import (
-        _group_winner_event_letter, _team_markets, _yes_mid, _yes_ask, _no_ask,
-    )
-
-    out: Dict[str, Dict[str, float]] = {}
+def _load_json(path: str, default: Any = None) -> Tuple[Any, Optional[int]]:
+    """Load JSON file and return (data, age_secs). Returns default on error."""
     try:
-        evs = poly.find_world_cup_markets(include_closed=False)
-    except Exception as ex:  # one hung pull must not kill the whole product
-        return out, type(ex).__name__
-    for e in evs:
-        letter = _group_winner_event_letter(str(e.get("title") or ""))
-        if not letter:
-            continue
-        for team, m in _team_markets(e):
-            try:
-                mid = _yes_mid(m)
-                if mid is None:
-                    continue
-                out[team] = {
-                    "yes_ask": _yes_ask(m, mid),
-                    "no_ask": _no_ask(m, mid),
-                    "mid": mid,
-                    "group": letter,
-                }
-            except Exception:
-                continue                       # skip one bad market, keep going
-    return out, None
+        p = Path(path)
+        data = json.loads(p.read_text())
+        ts = (
+            (data.get("meta") or {}).get("generated")
+            or (data.get("meta") or {}).get("generated_at")
+        )
+        age = _age_secs(ts)
+        return data, age
+    except Exception:
+        return default, None
+
+
+def _venue_balances_from_data(data_json: Dict[str, Any]) -> Dict[str, float]:
+    """Extract per-venue open stakes from data.json."""
+    venues = data_json.get("venues") or {}
+    out: Dict[str, float] = {}
+    for k, v in venues.items():
+        if isinstance(v, dict) and "open_stake" in v:
+            out[k] = float(v["open_stake"])
+    return out
+
+
+def _fx_from_arb_data(arb_json: Dict[str, Any]) -> Tuple[float, str]:
+    """Extract GBP/USD rate; fall back to constant."""
+    meta = arb_json.get("meta") or {}
+    rate = meta.get("fx_usd_per_gbp") or meta.get("fx_gbp_usd") or FX_FALLBACK_GBP_USD
+    src = meta.get("fx_source") or "fallback"
+    return float(rate), str(src)
 
 
 # ---------------------------------------------------------------------------
-# Prop-arb monitor (PM-internal; settlement-safe)
+# Match singles builder
 # ---------------------------------------------------------------------------
 
-def _pm_internal_arbs(live: Dict[str, Dict[str, float]], min_profit: float = 0.005,
-                      bankroll: float = 250.0) -> List[Dict[str, Any]]:
-    """Buy YES and NO on the SAME PM market for < 1 total cost after fee."""
-    from wca import arb
+def _label_action(
+    fixture: str,
+    selection: str,
+    open_fixtures: set,
+    blind_spots: List[str],
+) -> str:
+    """Return ADD / DIVERSIFY / HEDGE."""
+    team_lower = selection.lower()
+    if any(bs.lower() in team_lower or team_lower in bs.lower() for bs in blind_spots):
+        return "HEDGE"
+    if fixture in open_fixtures:
+        return "DIVERSIFY"
+    return "ADD"
 
-    found: List[Dict[str, Any]] = []
-    for team, px in live.items():
-        yes, no = px.get("yes_ask"), px.get("no_ask")
-        if yes is None or no is None:
+
+def _promo_status(fixture: str, venue: str, promos_data: Dict[str, Any]) -> Tuple[Optional[str], str]:
+    """Return (promo_name, promo_status_code).
+
+    promo_status_code: "applied" | "PROMO CHECK REQUIRED" | "none"
+    """
+    sites = promos_data.get("sites") or []
+    for site in sites:
+        name = (site.get("name") or "").lower()
+        if venue.lower() not in name and name not in venue.lower():
             continue
-        ny = arb.pm_yes_to_decimal(yes)
-        nn = arb.pm_yes_to_decimal(no)
-        res = arb.two_way_arb(ny, nn, "polymarket_yes", "polymarket_no", net=True)
-        if res is None or res["profit_pct"] < min_profit:
+        boosts = site.get("boosts") or []
+        for b in boosts:
+            title = b.get("title") or ""
+            if "match odds" in title.lower() or "power price" in title.lower():
+                return title, "PROMO CHECK REQUIRED"
+    return None, "none"
+
+
+def build_match_singles(
+    predictions: List[Dict[str, Any]],
+    sb_pool: Dict[str, Any],
+    open_fixtures: set,
+    blind_spots: List[str],
+    promos_data: Dict[str, Any],
+    model_age_secs: Optional[int],
+    min_edge: float = MIN_EDGE,
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """Build match singles from blended model vs de-vigged consensus.
+
+    Returns (actionable, withheld).
+    """
+    bankroll = sb_pool["bankroll"]
+    kelly_frac = sb_pool["kelly_fraction"]
+    max_stake = sb_pool["max_stake"]
+
+    model_stale = model_age_secs is not None and model_age_secs > MODEL_STALE_HOURS * 3600
+
+    actionable: List[Dict[str, Any]] = []
+    withheld: List[Dict[str, Any]] = []
+
+    for fix in (predictions or []):
+        fixture = fix.get("fixture") or ""
+        kickoff = fix.get("kickoff") or ""
+        group = fix.get("group") or ""
+        generated = fix.get("generated") or ""
+        model = fix.get("model") or {}
+        market = fix.get("market") or {}
+
+        if not model or not market:
             continue
-        legs = [
-            {"venue": "Polymarket", "side": "YES", "desc": "win Group %s" % px.get("group"),
-             "price": round(yes, 4), "stake": round(res["stake_fractions"][0] * bankroll, 2),
-             "currency": "USD"},
-            {"venue": "Polymarket", "side": "NO", "desc": "NOT win Group %s" % px.get("group"),
-             "price": round(no, 4), "stake": round(res["stake_fractions"][1] * bankroll, 2),
-             "currency": "USD"},
-        ]
-        found.append({
-            "kind": "pm_internal", "market": "group_winner", "team": team,
-            "group": px.get("group"), "guaranteed_pct": round(res["profit_pct"], 4),
-            "legs": legs,
-        })
-    return sorted(found, key=lambda a: a["guaranteed_pct"], reverse=True)
+
+        # Kickoff guard: skip if kickoff is in the past (> 3h ago)
+        if kickoff:
+            kick_age = _age_secs(kickoff)
+            if kick_age is not None and kick_age > 3 * 3600:
+                continue
+
+        teams = fixture.split(" vs ")
+        team_map = {
+            "home": teams[0] if teams else "Home",
+            "draw": "Draw",
+            "away": teams[1] if len(teams) > 1 else "Away",
+        }
+
+        recs_this_fixture: List[Dict[str, Any]] = []
+
+        for outcome in OUTCOMES:
+            p_model = float(model.get(outcome) or 0.0)
+            p_devig = float(market.get(outcome) or 0.0)
+
+            if p_devig <= 0.0 or p_model <= 0.0:
+                continue
+
+            price = _devig_price(p_devig)
+            if price is None or price <= 1.0:
+                continue
+
+            edge = round(p_model - p_devig, 6)
+            ev = _net_ev(p_model, price)
+
+            team = team_map[outcome]
+
+            stale = model_stale
+            stale_reason = "model feed stale (>%dh)" % MODEL_STALE_HOURS if stale else None
+
+            # Selection rules
+            if p_model < SELECTION_MIN_PROB:
+                withheld.append({
+                    "id": "%s_%s_1x2" % (fixture.lower().replace(" vs ", "_vs_").replace(" ", "_"), outcome),
+                    "fixture": fixture, "kickoff": kickoff, "group": group,
+                    "market": "1X2", "selection": outcome, "team": team,
+                    "model_prob": round(p_model, 4), "price": price,
+                    "edge": round(edge, 4), "ev_net": round(ev, 4), "stake": 0.0,
+                    "currency": "GBP", "withheld_reason": "model_prob %.0f%% < floor %.0f%%" % (p_model * 100, SELECTION_MIN_PROB * 100),
+                    "stale": stale, "stale_reason": stale_reason,
+                })
+                continue
+
+            if p_model < LONGSHOT_PROB and edge > 0:
+                withheld.append({
+                    "id": "%s_%s_1x2" % (fixture.lower().replace(" vs ", "_vs_").replace(" ", "_"), outcome),
+                    "fixture": fixture, "kickoff": kickoff, "group": group,
+                    "market": "1X2", "selection": outcome, "team": team,
+                    "model_prob": round(p_model, 4), "price": price,
+                    "edge": round(edge, 4), "ev_net": round(ev, 4), "stake": 0.0,
+                    "currency": "GBP", "withheld_reason": "longshot filter: prob %.0f%% < %.0f%% (minnow risk)" % (p_model * 100, LONGSHOT_PROB * 100),
+                    "stale": stale, "stale_reason": stale_reason,
+                })
+                continue
+
+            if edge < min_edge:
+                continue
+
+            if stale:
+                withheld.append({
+                    "id": "%s_%s_1x2" % (fixture.lower().replace(" vs ", "_vs_").replace(" ", "_"), outcome),
+                    "fixture": fixture, "kickoff": kickoff, "group": group,
+                    "market": "1X2", "selection": outcome, "team": team,
+                    "model_prob": round(p_model, 4), "price": price,
+                    "edge": round(edge, 4), "ev_net": round(ev, 4), "stake": 0.0,
+                    "currency": "GBP", "withheld_reason": stale_reason or "stale",
+                    "stale": True, "stale_reason": stale_reason,
+                })
+                continue
+
+            stake = _kelly_stake(p_model, price, bankroll, kelly_frac, PER_BET_CAP)
+            stake = min(stake, max_stake)
+
+            if stake <= 0:
+                continue
+
+            action = _label_action(fixture, team, open_fixtures, blind_spots)
+            promo_name, promo_st = _promo_status(fixture, "smarkets", promos_data)
+
+            rec = {
+                "id": "%s_%s_1x2" % (fixture.lower().replace(" vs ", "_vs_").replace(" ", "_"), outcome),
+                "fixture": fixture,
+                "kickoff": kickoff,
+                "group": group,
+                "market": "1X2",
+                "selection": outcome,
+                "team": team,
+                "venue": "smarkets",
+                "currency": "GBP",
+                "model_prob": round(p_model, 4),
+                "price": price,
+                "price_source": "devig_consensus",
+                "edge": round(edge, 4),
+                "ev_net": round(ev, 4),
+                "stake": stake,
+                "action_label": action,
+                "current_exposure": {"fixture_open": fixture in open_fixtures},
+                "proposed_risk": {"stake": stake, "max_loss": stake},
+                "promo": {"name": promo_name} if promo_name else None,
+                "promo_status": promo_st if promo_st != "none" else None,
+                "ages": {
+                    "model_secs": model_age_secs,
+                    "price_secs": model_age_secs,
+                    "exposure_secs": None,
+                },
+                "stale": stale,
+                "stale_reason": stale_reason,
+                "tags": ["model", "1X2", "devig_price"],
+            }
+            recs_this_fixture.append(rec)
+
+        # Top-3 per fixture by ev_net
+        recs_this_fixture.sort(key=lambda r: r["ev_net"], reverse=True)
+        for rec in recs_this_fixture[:3]:
+            actionable.append(rec)
+        for rec in recs_this_fixture[3:]:
+            rec["withheld_reason"] = "top-3 per fixture cap"
+            withheld.append(rec)
+
+    actionable.sort(key=lambda r: r["ev_net"], reverse=True)
+    return actionable, withheld
+
+
+# ---------------------------------------------------------------------------
+# Event/player props builder
+# ---------------------------------------------------------------------------
+
+def build_event_props(
+    prop_cal: Dict[str, Any],
+    model_predictions: List[Dict[str, Any]],
+    sb_pool: Dict[str, Any],
+    price_age_secs: Optional[int],
+    model_age_secs: Optional[int],
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """Build calibrated prop recommendations.
+
+    Currently only emits records when real market price snapshots are fresh
+    enough (< PRICE_STALE_SECS). Player scorer models are omitted — no real
+    player xG-share inputs are wired yet.
+
+    Returns (actionable, withheld).
+    """
+    withheld: List[Dict[str, Any]] = []
+
+    # No live book prices in cache: emit honest withheld rows for all props.
+    fixtures_cal = prop_cal.get("fixtures") or []
+    for fix_cal in fixtures_cal:
+        fixture = fix_cal.get("fixture") or ""
+        for mkt, label in [("corners", "corners over 8.5"), ("cards", "cards over 2.5")]:
+            mkt_data = fix_cal.get(mkt) or {}
+            if not mkt_data:
+                continue
+            withheld.append({
+                "id": "%s_%s" % (fixture.lower().replace(" ", "_"), mkt),
+                "fixture": fixture,
+                "market": mkt,
+                "selection": label,
+                "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
+                "stale": True,
+                "stale_reason": "price snapshot absent or older than %dh" % (PRICE_STALE_SECS // 3600),
+                "tags": ["model", "prop", "no_price"],
+            })
+
+    # Scorer props explicitly noted as not actionable
+    withheld.append({
+        "id": "scorer_props_all",
+        "fixture": "ALL",
+        "market": "anytime_scorer",
+        "selection": "—",
+        "withheld_reason": "player xG-share + penalty-taker injection not yet wired (no real inputs)",
+        "stale": False,
+        "stale_reason": None,
+        "tags": ["model", "scorer", "unsupported"],
+    })
+
+    return [], withheld
+
+
+# ---------------------------------------------------------------------------
+# Advancement/futures builder
+# ---------------------------------------------------------------------------
+
+def build_advancement_futures(
+    adv_data: Dict[str, Any],
+    pm_pool: Dict[str, Any],
+    adv_age_secs: Optional[int],
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """Build advancement/futures recs from cached advancement_data.json.
+
+    The advancement module already computes fee-adjusted edges and quarter-Kelly
+    stakes for the PM pool. We re-apply governance caps here for consistency.
+
+    Returns (actionable, withheld).
+    """
+    bankroll = pm_pool["bankroll"]
+    kelly_frac = pm_pool["kelly_fraction"]
+    max_stake = pm_pool["max_stake"]
+
+    model_stale = adv_age_secs is not None and adv_age_secs > MODEL_STALE_HOURS * 3600
+
+    actionable: List[Dict[str, Any]] = []
+    withheld: List[Dict[str, Any]] = []
+
+    meta = adv_data.get("meta") or {}
+    stages_available = set(meta.get("stages") or [])
+
+    for team_entry in (adv_data.get("teams") or []):
+        team = team_entry.get("team") or ""
+        group = team_entry.get("group") or ""
+        model_probs = team_entry.get("model") or {}
+        pm_data = team_entry.get("pm") or {}
+        delta = team_entry.get("delta") or {}
+
+        for stage, pm_info in (pm_data.items() if isinstance(pm_data, dict) else []):
+            pm_price = pm_info.get("pm")
+            edge_adj = pm_info.get("edge_adj")
+
+            if pm_price is None or edge_adj is None:
+                continue
+
+            p_model = float(model_probs.get(stage) or 0.0)
+            if p_model <= 0.0:
+                continue
+
+            # Fee-adjusted EV: back YES at pm_price, fee = PM_FEE_RATE×p×(1-p)
+            fee = _pm_fee(pm_price)
+            net_cost = pm_price + fee
+            ev = p_model - net_cost
+
+            if ev < MIN_EDGE:
+                continue
+
+            price = 1.0 / net_cost if net_cost > 0 else 0.0
+            stake = _kelly_stake(p_model, price, bankroll, kelly_frac, PER_BET_CAP)
+            stake = min(stake, max_stake)
+
+            if stake <= 0:
+                continue
+
+            stale = model_stale
+            stale_reason = "advancement model stale (>%dh)" % MODEL_STALE_HOURS if stale else None
+
+            rec = {
+                "id": "%s_%s_pm" % (team.lower().replace(" ", "_"), stage.lower()),
+                "team": team,
+                "group": group,
+                "stage": stage,
+                "market": "advancement",
+                "selection": "reach_%s" % stage,
+                "venue": "polymarket",
+                "currency": "USD",
+                "model_prob": round(p_model, 4),
+                "pm_price": round(pm_price, 4),
+                "pm_fee": round(fee, 4),
+                "price": round(price, 4),
+                "edge_adj": round(edge_adj, 4),
+                "ev_net": round(ev, 4),
+                "stake": round(stake, 2),
+                "action_label": "ADD",
+                "ages": {
+                    "model_secs": adv_age_secs,
+                    "price_secs": adv_age_secs,
+                },
+                "stale": stale,
+                "stale_reason": stale_reason,
+                "tags": ["model", "advancement", "polymarket"],
+            }
+
+            if stale:
+                rec["withheld_reason"] = stale_reason
+                withheld.append(rec)
+            else:
+                actionable.append(rec)
+
+    # Sort: descending EV, then by stage
+    _stage_order = {"QF": 0, "SF": 1, "Final": 2, "win": 3, "R16": 4, "R32": 5}
+    actionable.sort(key=lambda r: (-r["ev_net"], _stage_order.get(r["stage"], 9)))
+    return actionable, withheld
+
+
+# ---------------------------------------------------------------------------
+# Guaranteed arbs builder (pass-through from arb_data.json)
+# ---------------------------------------------------------------------------
+
+def build_guaranteed_arbs(
+    arb_data: Dict[str, Any],
+    arb_age_secs: Optional[int],
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """Pass through guaranteed arbs from arb_data.json, adding liquidity note."""
+    arbs = arb_data.get("arbs") or []
+    out: List[Dict[str, Any]] = []
+    for a in arbs:
+        rec = dict(a)
+        rec["tags"] = rec.get("tags") or ["arb", "settlement_safe"]
+        # Require quoted depth or label unverified
+        if not any("depth" in str(l) for l in (rec.get("legs") or [])):
+            rec["liquidity_note"] = "price-only, liquidity unverified"
+        rec["ages"] = {"price_secs": arb_age_secs}
+        out.append(rec)
+    out.sort(key=lambda r: -(r.get("guaranteed_pct") or 0.0))
+    return out, []
 
 
 # ---------------------------------------------------------------------------
@@ -175,101 +597,125 @@ def _pm_internal_arbs(live: Dict[str, Dict[str, float]], min_profit: float = 0.0
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--bankroll", type=float, default=250.0)
-    ap.add_argument("--fraction", type=float, default=0.5)   # 1/2 Kelly
-    ap.add_argument("--cap", type=float, default=0.05)       # 5% hard cap
-    ap.add_argument("--min-edge", type=float, default=0.02)  # 2% gross edge gate
-    ap.add_argument("--drift", type=float, default=0.10)     # stale-model guard
-    ap.add_argument("--adv", default="site/advancement_data.json")
+    ap.add_argument("--db", default="data/wca.db")
     ap.add_argument("--out", default="site/bet_recs.json")
-    ap.add_argument("--timeout", type=float, default=8.0)
+    ap.add_argument("--min-edge", type=float, default=MIN_EDGE)
+    ap.add_argument("--stale-model-hours", type=int, default=MODEL_STALE_HOURS)
+    ap.add_argument("--pm-bankroll", type=float, default=DEFAULT_PM_BANKROLL_USD)
+    ap.add_argument("--predictions", default="data/model_predictions.json")
+    ap.add_argument("--advancement", default="site/advancement_data.json")
+    ap.add_argument("--exposure", default="site/exposure_dashboard.json")
+    ap.add_argument("--data", default="site/data.json")
+    ap.add_argument("--promos", default="site/promos_data.json")
+    ap.add_argument("--arb-data", default="site/arb_data.json")
+    ap.add_argument("--prop-cal", default="data/prop_calibration.json")
     args = ap.parse_args()
 
-    adv = json.loads(Path(args.adv).read_text())
-    model_generated = adv.get("model_generated") or adv.get("meta", {}).get("generated")
-    model: Dict[str, Dict[str, Any]] = {}
-    for t in adv.get("teams", []):
-        gw = t.get("model", {}).get("group_winner")
-        if gw is None:
-            continue
-        base = (t.get("pm", {}).get("group_winner") or {}).get("pm")
-        model[t["team"]] = {"p": gw, "group": t.get("group"), "baseline_pm": base}
+    # Bankroll governance
+    sb_pool = _resolve_sportsbook_pool(args.db)
+    pm_pool_data = _pm_pool(args.pm_bankroll)
 
-    t0 = time.time()
-    live, fetch_err = _live_group_winner_prices(timeout=args.timeout)
-    fetch_secs = round(time.time() - t0, 1)
+    # Load feeds with ages
+    predictions_raw, pred_age = _load_json(args.predictions, {"fixtures": []})
+    predictions = (predictions_raw or {}).get("fixtures") or []
+    adv_raw, adv_age = _load_json(args.advancement, {})
+    exposure_raw, exp_age = _load_json(args.exposure, {})
+    data_raw, _ = _load_json(args.data, {})
+    promos_raw, promo_age = _load_json(args.promos, {})
+    arb_raw, arb_age = _load_json(args.arb_data, {})
+    prop_cal_raw, prop_age = _load_json(args.prop_cal, {})
 
-    actionable: List[Dict[str, Any]] = []
-    flagged: List[Dict[str, Any]] = []          # withheld: stale-drift or no model/price
-    for team, mv in model.items():
-        px = live.get(team)
-        if not px:
-            continue
-        row = _rec_row(
-            market="group_winner", label="win Group %s" % mv["group"], team=team,
-            group=mv["group"], p_yes=mv["p"], yes_ask=px["yes_ask"], no_ask=px["no_ask"],
-            live_mid=px["mid"], baseline_pm=mv["baseline_pm"], bankroll=args.bankroll,
-            fraction=args.fraction, cap=args.cap,
-        )
-        if row["edge"] is None or row["edge"] < args.min_edge or row["stake"] <= 0:
-            continue
-        if row["drift"] is not None and row["drift"] > args.drift:
-            row["flag"] = "model stale vs market (drift %.0f%%) — review before staking" % (row["drift"] * 100)
-            flagged.append(row)
-        else:
-            actionable.append(row)
-    actionable.sort(key=lambda r: r["edge"], reverse=True)
-    flagged.sort(key=lambda r: r["drift"] or 0, reverse=True)
+    # FX
+    fx_rate, fx_src = _fx_from_arb_data(arb_raw or {})
 
-    prop_arbs = _pm_internal_arbs(live, bankroll=args.bankroll)
+    # Open exposure context
+    exp_metrics = (exposure_raw or {}).get("metrics") or {}
+    blind_spots_raw = (exposure_raw or {}).get("blind_spots") or []
+    blind_spots = [str(bs) for bs in blind_spots_raw if isinstance(bs, str)]
+    n_open = int(exp_metrics.get("n_open_bets") or (exposure_raw or {}).get("n_open_bets") or 0)
+    open_fixtures: set = set()  # TODO: parse from ledger if available
 
-    # Staleness: model older than ~18h is suspect mid-tournament (one matchday).
-    model_stale = False
-    if model_generated:
-        try:
-            gen = dt.datetime.fromisoformat(str(model_generated).replace("Z", "").replace(" UTC", "").strip())
-            model_stale = (dt.datetime.utcnow() - gen) > dt.timedelta(hours=18)
-        except Exception:
-            model_stale = False
+    # Build sections
+    match_singles, withheld_ms = build_match_singles(
+        predictions, sb_pool, open_fixtures, blind_spots, promos_raw or {},
+        model_age_secs=pred_age, min_edge=args.min_edge,
+    )
+    event_props, withheld_ep = build_event_props(
+        prop_cal_raw or {}, predictions, sb_pool,
+        price_age_secs=prop_age, model_age_secs=pred_age,
+    )
+    adv_futures, withheld_af = build_advancement_futures(
+        adv_raw or {}, pm_pool_data, adv_age_secs=adv_age,
+    )
+    guar_arbs, withheld_ga = build_guaranteed_arbs(arb_raw or {}, arb_age_secs=arb_age)
+    withheld = withheld_ms + withheld_ep + withheld_af + withheld_ga
+
+    actionable_count = len(match_singles) + len(event_props) + len(adv_futures) + len(guar_arbs)
 
     payload = {
         "meta": {
-            "generated": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
-            "bankroll": args.bankroll,
-            "currency": "USD",
-            "kelly_fraction": args.fraction,
-            "per_bet_cap": args.cap,
-            "max_stake": round(args.bankroll * args.cap, 2),
-            "min_edge": args.min_edge,
-            "drift_guard": args.drift,
-            "model_generated": model_generated,
-            "model_stale": model_stale,
-            "coverage": "group_winner (live PM). Model-backed; reach-stage / anytime-scorer / exact-score families wired next.",
-            "live_fetch_secs": fetch_secs,
-            "live_fetch_error": fetch_err,
+            "generated": _utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
             "monitoring_only": True,
-            "note": "Read-only monitoring. No execution. Both sides analysed; "
-                    "positive-EV side sized at fractional Kelly. Stakes hard-capped.",
+            "sportsbook_pool": sb_pool,
+            "pm_pool": pm_pool_data,
+            "open_exposure": {
+                "ev": exp_metrics.get("ev"),
+                "best_case": exp_metrics.get("best_case"),
+                "worst_case": exp_metrics.get("worst_case"),
+                "p_profit": exp_metrics.get("p_profit"),
+                "n_open": n_open,
+            },
+            "fx": {
+                "gbp_usd": fx_rate,
+                "source": fx_src,
+                "note": "currencies kept separate; FX disclosed for combined dashboard only",
+            },
+            "ages": {
+                "model_secs": pred_age,
+                "advancement_secs": adv_age,
+                "price_secs": None,
+                "promo_secs": promo_age,
+                "exposure_secs": exp_age,
+            },
+            "coverage": {
+                "match_singles": (
+                    "1X2 from blended model (10%% Elo + 30%% DC + 60%% market) vs "
+                    "de-vigged consensus. Price = market-implied (no best-price pull). "
+                    "Top-3 per fixture by net EV. BTTS/totals: withheld — no live book price."
+                ),
+                "event_props": (
+                    "Corners/cards: calibrated but withheld — no live sportsbook price snapshot. "
+                    "Player scorer: withheld — player xG-share not yet wired."
+                ),
+                "advancement_futures": (
+                    "Monte Carlo sim vs Polymarket advancement markets. "
+                    "PM taker fee (3%% × p × (1-p)) applied. Quarter-Kelly on PM pool ($%.0f)." % args.pm_bankroll
+                ),
+                "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty.",
+            },
+            "actionable_count": actionable_count,
+            "withheld_count": len(withheld),
         },
-        "best_bets": actionable,
-        "flagged": flagged,
-        "prop_arbs": {
-            "pm_internal": prop_arbs,
-            "pm_vs_book": [],
-            "pm_vs_book_note": "Inert until a live sportsbook scorer feed + prop "
-                               "settlement keys are wired in wca.arb (Arbitrage blind-spot fix).",
-        },
+        "match_singles": match_singles,
+        "event_props": event_props,
+        "advancement_futures": adv_futures,
+        "guaranteed_arbs": guar_arbs,
+        "withheld": withheld,
     }
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2))
-    print("wrote %s — %d best bets, %d flagged, %d pm-internal arbs (live fetch %ss%s)" % (
-        out, len(actionable), len(flagged), len(prop_arbs), fetch_secs,
-        ", err=%s" % fetch_err if fetch_err else "",
-    ))
-    if model_stale:
-        print("  WARNING: model feed (%s) looks stale — recs gated by drift guard." % model_generated)
+
+    print(
+        "wrote %s — match_singles=%d, adv_futures=%d, arbs=%d, withheld=%d (pred_age=%s, adv_age=%s)" % (
+            out, len(match_singles), len(adv_futures), len(guar_arbs), len(withheld),
+            ("%ds" % pred_age if pred_age is not None else "?"),
+            ("%ds" % adv_age if adv_age is not None else "?"),
+        )
+    )
+    if (pred_age or 0) > MODEL_STALE_HOURS * 3600:
+        print("  WARNING: model predictions stale (%dh) — match singles may be withheld." % (pred_age // 3600))
     return 0
 
 

@@ -100,6 +100,14 @@ jobs:
       # neither of which exists on a CI runner. It is generated locally
       # (wca_tracking_data.py) and the script refuses degraded overwrites.
 
+      - name: Regenerate Action Desk feed (bet_recs.json)
+        env:
+          PYTHONPATH: src
+        run: |
+          # wca_betrecs.py reads only cached feeds — no live Odds API pull.
+          # No ledger DB on CI: falls back to rung-0 sportsbook pool defaults.
+          python scripts/wca_betrecs.py >> logs/betrecs.log 2>&1 || true
+
       - name: Commit changes
         run: |
           git config user.email "bot@world-cup-alpha.local"
@@ -108,7 +116,7 @@ jobs:
                   data/model_predictions.json data/model_predictions_log.jsonl \
                   data/raw/martj42_cleaned.csv \
                   data/corrections.json data/corrections_review.json data/audit.json \
-                  site/data.json site/linemove.json site/scores_data.json
+                  site/data.json site/linemove.json site/scores_data.json site/bet_recs.json
           git commit -m "Auto-sync: daily card + site data" || true
           # Retry around concurrent pushes (local daemons also push to main).
           # '-X theirs' keeps the freshly regenerated local copy for the
