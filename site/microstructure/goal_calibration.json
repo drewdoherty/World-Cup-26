@@ -1,0 +1,34 @@
+{
+  "key": "goal_calibration",
+  "generated_at": "2026-06-29 07:23:55 UTC",
+  "stats": {
+    "n": 72,
+    "sum_xg": 173.3,
+    "sum_actual": 215,
+    "gap_total": -41.7,
+    "gap_per_game": -0.579,
+    "model_gpg": 2.407,
+    "actual_gpg": 2.986,
+    "z_goals": 3.17,
+    "p_goals": 0.0016,
+    "pct_games_over_model": 57.0,
+    "scale_to_match": 1.24,
+    "shortfall_pct": 24.0,
+    "exp_draws": 16.9,
+    "actual_draws": 20,
+    "draw_surplus": 3.1,
+    "z_draw": 0.88,
+    "p_draw": 0.3774,
+    "model_draw_rate": 23.4,
+    "actual_draw_rate": 27.8,
+    "gpg_drawn": 1.8,
+    "gpg_decisive": 3.44,
+    "drawn_scorelines": {
+      "0-0": 7,
+      "1-1": 9,
+      "2-2": 3,
+      "3-3": 1
+    }
+  },
+  "verdict": "COMPATIBLE \u2014 goal under-prediction is real and significant; the draw surplus is sampling noise. Raise base goal expectancy (~24%); leave the Dixon-Coles draw term until draws persist after the level fix."
+}
