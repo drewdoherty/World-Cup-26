@@ -1,0 +1,55 @@
+# Market-Intelligence tiered polling config.
+#
+# Read by wca.intel.poller.load_polling_config(). If this file is missing or
+# unparseable the planner falls back to the SAME baked-in defaults below, so
+# tests and a fresh checkout work without it. Parsed with PyYAML when available,
+# otherwise a tiny built-in parser handles this simple (no nested-list) shape.
+#
+# Cadence = minimum seconds between polls for a fixture in that window-to-kickoff.
+# Markets = which market_types to request in that window. The planner intersects
+# these with what each source actually offers, so listing "ah"/props here is
+# harmless when no source sells them yet (they simply drop out).
+
+# --- Tiered cadence by time-to-kickoff -------------------------------------- #
+# Windows are evaluated nearest-first; a fixture past kickoff is not polled.
+windows:
+  # > 24h to KO: cheap baseline — moneyline + totals, once every 6 hours.
+  - max_mins_to_ko: null        # null = no upper bound (>24h bucket)
+    min_mins_to_ko: 1440        # 24h
+    cadence_s: 21600            # 6h
+    markets: [moneyline, ou]
+  # 24h - 3h: hourly, add AH + BTTS.
+  - max_mins_to_ko: 1440
+    min_mins_to_ko: 180         # 3h
+    cadence_s: 3600             # 1h
+    markets: [moneyline, ou, ah, btts]
+  # 3h - 1h: every 30 min, add model-priced props where offered.
+  - max_mins_to_ko: 180
+    min_mins_to_ko: 60          # 1h
+    cadence_s: 1800             # 30m
+    markets: [moneyline, ou, ah, btts, player_prop]
+  # 1h - KO: tight 12-minute cadence, full available set.
+  - max_mins_to_ko: 60
+    min_mins_to_ko: 0
+    cadence_s: 720              # 12m
+    markets: [moneyline, ou, ah, btts, player_prop, team_total]
+
+# --- Market priority tiers (lower number = drop FIRST under budget pressure) - #
+# The budget governor sheds the lowest-priority markets first, always keeping
+# moneyline. Markets absent here default to priority 1 (shed early).
+priority:
+  player_prop: 1
+  team_total: 1
+  ah: 2
+  btts: 3
+  ou: 4
+  moneyline: 5      # never dropped (also hard-pinned in code)
+
+# --- Budget governor -------------------------------------------------------- #
+budget:
+  # OddsAPI credit balance at/below which degradation kicks in.
+  floor_credits: 500
+  # At/below this, also down-shift cadence (poll half as often).
+  hard_floor_credits: 100
+  # How many regions a fetch covers (credit cost ≈ markets × regions).
+  regions: 1
