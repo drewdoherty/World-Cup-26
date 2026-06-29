@@ -56,14 +56,8 @@ jobs:
         run: |
           python scripts/wca_promos_data.py >> logs/promos.log 2>&1
 
-      - name: Commit refreshed feed
-        run: |
-          git config user.email "bot@world-cup-alpha.local"
-          git config user.name "World Cup Alpha Bot"
-          git add site/promos_data.json
-          git diff --cached --quiet || git commit -m "Auto-sync: daily promo sweep"
-          # Retry around concurrent pushes (the card / hourly jobs also push).
-          for i in 1 2 3; do
-            git pull --rebase -X theirs origin main && git push origin main && break
-            sleep $((i * 10))
-          done
+      # site/promos_data.json is a generated feed and is no longer committed to
+      # git (feeds are built at serve time and rsynced to consumers — see
+      # docs/data-and-artifacts.md). The regeneration step above still runs as a
+      # generator smoke-check. If a cloud→serve transport is later needed, publish
+      # the feed here to object storage instead of committing it to main.

@@ -26,36 +26,32 @@ build output.
 
 ## Generated site feeds — `site/*.json`, `site/microstructure/*.json`
 
-- **What:** ~27 JSON feeds (data.json, linemove.json (~1.76 MB), scores_data.json,
-  bet_recs.json, promos_data.json, the `microstructure/*` set, …) produced by the
+- **What:** 15 top-level JSON feeds (`site/data.json`, `site/linemove.json`
+  (~1.76 MB), `scores_data.json`, `bet_recs.json`, `promos_data.json`,
+  `tracking_data.json`, `exposure_*`, `advancement_*`, `arb_*`, …) produced by the
   card / scores / promos / sync jobs (`src/wca/sitedata.py`, `linemove.py`,
   `scorespage.py`, `promosdata.py`, `arbdata.py`, … and the `scripts/wca_*_data.py`
   wrappers).
-- **Target policy:** generated build output — should be rebuilt at deploy/serve
-  time, not committed.
-- **⚠ Current publish path is git — untracking is NOT yet a no-op.** Today these
-  files are *published by being committed to `main`*:
-  - `.github/workflows/daily-card.yml` → `git add site/data.json site/linemove.json
-    site/scores_data.json site/bet_recs.json` then push to `main`.
-  - `.github/workflows/daily-promos.yml` → `git add site/promos_data.json`.
-  - `.github/workflows/hourly-odds.yml` → `git add site/scores_data.json
-    site/scores_markets.json`.
-  - Consumers read the tracked copies: Vercel serves `origin/main`; the Mac Mini
-    autopulls `main` and serves it (and runs its own build that also pushes).
-- **What breaks if we just `.gitignore` them now:**
-  1. Those CI jobs name the files **explicitly** in `git add`; `git add` on an
-     ignored path exits non-zero, and the workflow shell runs with `-e`, so the
-     Auto-sync jobs would **fail**.
-  2. Any consumer that gets site data from `origin/main` (Vercel; the mini when
-     its own build is down) would go **stale**.
-- **Migration required before untracking** (each is pipeline change, out of scope
-  for a "touch-zero-logic" cleanup step — needs explicit sign-off):
-  1. Stop committing site feeds: drop the `site/*.json` paths from the `git add`
-     lists in the three workflows above (and the mini's build/push service).
-  2. Replace the transport: have the deploy/serve layer build the feeds locally at
-     startup/deploy (the generator scripts already exist), or publish them to
-     object storage / a release asset the site reads.
-  3. Only then add `site/*.json` + `site/microstructure/*.json` to `.gitignore`
-     and `git rm --cached` them.
-- The localhost serve on the mini (generates feeds locally) is not directly broken
-  by untracking, but the git-based propagation to other consumers is.
+- **Status: untracked.** `git rm --cached site/*.json` + `site/*.json` in
+  `.gitignore`. Files stay on disk; they are regenerated, not committed.
+- **How they reach the live sites (git is NOT the transport):**
+  - The **Mac Mini** regenerates the feeds locally every hour
+    (`deploy/publish_site.sh`) and serves them from its own working tree.
+  - The **MacBook** localhost sites (ports 8000/8001) pull the feeds via **rsync
+    over SSH** from the mini (`deploy/macbook/pull_feeds.sh`) — explicitly *"without
+    going through git"*.
+  - So the serving paths never depended on the git-tracked copies; the four git
+    committers below were redundant churn (`site/linemove.json` alone was
+    re-committed on most Auto-sync runs).
+- **Publish path migrated off git** (this branch) — the four committers now
+  regenerate feeds but no longer `git add`/commit them:
+  - `.github/workflows/daily-card.yml`, `daily-promos.yml`, `hourly-odds.yml`
+  - `deploy/publish_site.sh` (the mini's hourly `com.wca.publish` job)
+- **One residual external check (not in this repo):** if a **Vercel** project is
+  still serving `origin/main`, it no longer receives feeds via git and would go
+  stale — repoint it to a deploy-time build or to rsync/object storage, or confirm
+  it is retired (the sites were moved to localhost after hitting the Vercel quota).
+- **`site/microstructure/*.json` is intentionally still tracked** for now: it is
+  frozen one-off output of the `scripts/microstructure/` recon (no live job
+  regenerates it, so it does not churn) and its consumer transport isn't wired to
+  rsync. Untrack it in a follow-up once a regeneration/serve path is confirmed.

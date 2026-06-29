@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-# Refresh results/scores + regenerate the public site feed, then commit & push —
-# so the live site stays current without a manual push. Driven by the
-# com.wca.publish launchd job (hourly). Safe to run repeatedly:
-#   * commits ONLY the four site feeds, and only when they actually changed
+# Refresh results/scores + regenerate the public site feed so the live site stays
+# current. The regenerated site/*.json feeds are served locally and rsynced to the
+# MacBook (deploy/macbook/pull_feeds.sh); they are NOT committed to git (build
+# output, see docs/data-and-artifacts.md). This job still commits + pushes the
+# durable card/model caches. Driven by the com.wca.publish launchd job (hourly).
+# Safe to run repeatedly:
+#   * commits ONLY the card/model caches, and only when they actually changed
 #   * rebases before pushing to absorb the cloud Actions' commits (no conflicts)
 set -uo pipefail
 cd "${WCA_REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
@@ -23,14 +26,14 @@ stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 # cheap on most hourly runs. Live Polymarket prices + group standings refresh every run.
 "$PY" scripts/wca_advancement_data.py >/dev/null 2>&1 || true
 
-# 2. stage the site feed + the cached cards; bail if nothing changed.
-#    card_latest.md / next_latest.md / model_predictions.json are committed here so
-#    the freshly built outputs (1) persist to git instead of being reverted to a
-#    stale blob by com.wca.sync and (2) feed downstream (card git-log history, and
-#    the exact model 1X2 used by scores/exposure).
-git add site/data.json site/linemove.json site/scores_data.json site/tracking_data.json \
-        site/exposure_data.json site/exposure_dashboard.json site/advancement_history.json site/advancement_data.json \
-        data/card_latest.md data/next_latest.md data/model_predictions.json \
+# 2. stage the cached cards + model predictions; bail if nothing changed.
+#    The site/*.json feeds are regenerated above so the local serve + the MacBook
+#    rsync (deploy/macbook/pull_feeds.sh) stay fresh, but they are NO LONGER
+#    committed to git — feeds are built at serve time, not version-controlled
+#    (see docs/data-and-artifacts.md). card_latest.md / next_latest.md /
+#    model_predictions.json ARE still committed so the freshly built outputs
+#    persist (card git-log history + the exact model 1X2 used by scores/exposure).
+git add data/card_latest.md data/next_latest.md data/model_predictions.json \
         data/advancement_current_vs_pretournament.json
 if git diff --cached --quiet; then
   echo "$(stamp) publish: no site changes"; exit 0

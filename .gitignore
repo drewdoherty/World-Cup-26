@@ -10,6 +10,13 @@ data/raw/*
 data/processed/*
 data/*.db
 !data/raw/.gitkeep
+# Generated site feeds — build output of the card/scores/promos/sync jobs, NOT
+# source. Published at serve time (the mini regenerates them locally and the
+# MacBook rsyncs them — see deploy/publish_site.sh + deploy/macbook/pull_feeds.sh),
+# so git is no longer their transport. (`site/*.json` matches only the top-level
+# feeds; site/microstructure/*.json is frozen one-off output, still tracked for
+# now — see docs/data-and-artifacts.md.)
+site/*.json
 !data/processed/.gitkeep
 # The cleaned, verified results dataset IS a tracked deliverable (raw mirror is
 # not — it is re-downloaded). Rebuilt by scripts/wca_clean_results.py.

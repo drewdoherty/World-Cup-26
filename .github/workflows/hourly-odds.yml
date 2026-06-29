@@ -65,9 +65,10 @@ jobs:
           # advancement_data.json for the advancement side.
           python scripts/wca_scores_markets_data.py >> logs/scores.log 2>&1 || true
 
-      # The runner has no ledger DB (gitignored), so the SQLite side goes to
-      # a throwaway file — the durable output is the raw JSON dump in
-      # data/raw/snapshots/ (git-tracked; feeds linemove's event metadata).
+      # The runner has no ledger DB (gitignored), so the SQLite side goes to a
+      # throwaway file. The raw JSON dump lands in data/raw/snapshots/ (untracked;
+      # re-downloadable — mirror off-repo per docs/data-and-artifacts.md). On a CI
+      # runner this is ephemeral; durable snapshot capture happens on the mini.
       - name: Ingest odds snapshot
         continue-on-error: true  # a transient API failure must not block the scores commit
         env:
@@ -76,13 +77,11 @@ jobs:
         run: |
           python scripts/wca_snapshot_odds.py >> logs/odds.log 2>&1
 
-      - name: Commit refreshed feeds
+      # site/scores_data.json + site/scores_markets.json (generated feeds) and
+      # data/raw/snapshots (raw odds dumps) are no longer committed to git — feeds
+      # are built at serve time and rsynced to consumers; snapshots are mirrored
+      # off-repo (see docs/data-and-artifacts.md). The regenerate/ingest steps
+      # above still run as smoke-checks; nothing is committed from this job now.
+      - name: Note — feeds and snapshots are not committed
         run: |
-          git config user.email "bot@world-cup-alpha.local"
-          git config user.name "World Cup Alpha Bot"
-          git add site/scores_data.json site/scores_markets.json data/raw/snapshots
-          git diff --cached --quiet || git commit -m "Auto-sync: hourly scores feed + odds snapshot"
-          for i in 1 2 3; do
-            git pull --rebase -X theirs origin main && git push origin main && break
-            sleep $((i * 10))
-          done
+          echo "site/*.json feeds + data/raw/snapshots are artifacts; not tracked."

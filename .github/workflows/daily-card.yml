@@ -112,12 +112,14 @@ jobs:
         run: |
           git config user.email "bot@world-cup-alpha.local"
           git config user.name "World Cup Alpha Bot"
+          # site/*.json are generated feeds, no longer committed to git (built at
+          # serve time and rsynced to consumers — see docs/data-and-artifacts.md).
+          # The card/next/goalscorers .md caches + model predictions stay tracked.
           git add data/card_latest.md data/next_latest.md data/goalscorers_latest.md \
                   data/model_predictions.json data/model_predictions_log.jsonl \
                   data/raw/martj42_cleaned.csv \
-                  data/corrections.json data/corrections_review.json data/audit.json \
-                  site/data.json site/linemove.json site/scores_data.json site/bet_recs.json
-          git commit -m "Auto-sync: daily card + site data" || true
+                  data/corrections.json data/corrections_review.json data/audit.json
+          git diff --cached --quiet || git commit -m "Auto-sync: daily card + predictions" || true
           # Retry around concurrent pushes (local daemons also push to main).
           # '-X theirs' keeps the freshly regenerated local copy for the
           # wholesale-rewritten site feeds.
