@@ -48,6 +48,9 @@ cmd_for() {
     watchdog)     printf '%s\n' "/bin/bash" "$HERE/watchdog.sh" ;;
     archive)      printf '%s\n' "$RUN1" archive      "$VENV_PY" scripts/wca_archive.py snapshot --db data/wca.db --env .env ;;
     pmdrift)      printf '%s\n' "$RUN1" pmdrift      "$VENV_PY" scripts/wca_pm_reconcile.py --check --db data/wca.db --env .env --notify ;;
+    positions)    printf '%s\n' "$RUN1" positions    "$VENV_PY" scripts/wca_positions_sync.py --db data/wca.db --env .env --once ;;
+    analytics)    printf '%s\n' "/bin/bash" "$HERE/../../scripts/wca_build_analytics.sh" ;;
+    venues)       printf '%s\n' "$RUN1" venues       "$VENV_PY" scripts/wca_venues_benchmark.py --pred-db data/dev.db --odds-db data/wca.db ;;
     *) echo "unknown service $1" >&2; return 1 ;;
   esac
 }
