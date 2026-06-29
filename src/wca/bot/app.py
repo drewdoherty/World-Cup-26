@@ -128,6 +128,7 @@ _TELEGRAM_COMMANDS = [
     {"command": "scores",      "description": "Predicted FT scorelines per fixture"},
     {"command": "accas",       "description": "4+ leg accumulators, next 5 matches"},
     {"command": "pm",          "description": "Polymarket parked orders + trader status"},
+    {"command": "arb",         "description": "Cross-venue arbitrage scan (indicative; relay odds)"},
     {"command": "settle",      "description": "Settle a bet: /settle <id> <outcome> [odds]"},
     {"command": "boost",       "description": "Price a bookmaker boost vs the model"},
     {"command": "ping",        "description": "Liveness check"},
@@ -147,6 +148,7 @@ HELP_TEXT = (
     "/accas [value|edge|hedge|longshot|promo] — model accas; default=low-win favourites @ modest odds (edge=high-edge underdogs)\n"
     "/structure — project structure metrics\n"
     "/pm — Polymarket parked orders + trader status\n"
+    "/arb [team] — cross-venue arbitrage scan (indicative; relay odds, no live depth)\n"
     "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
     "/boost — price a bookmaker price-boost vs the model (usage below)\n"
     "/restart — restart the bot (admin; `/restart pull` redeploys first)\n"
@@ -2411,6 +2413,141 @@ def handle_redeem(text: str, db_path: str = "data/wca.db") -> str:
     return msg
 
 
+# Markets the relay actually captures that the arb scanner can pair. ``moneyline``
+# carries an optional matching ``moneyline_lay`` book for back-vs-lay; ``btts`` /
+# ``ou`` are complementary 2-way back-arbs. (See wca.intel.normalise market map.)
+_ARB_MARKETS = ("moneyline", "btts", "ou")
+# Only scan recent snapshots — the relay DB is huge and most rows are historical.
+_ARB_LOOKBACK_HOURS = 48.0
+
+
+def handle_arb(text: str, db_path: str = "data/wca.db") -> str:
+    """`/arb [team]` — scan recent odds for cross-venue arbitrage (indicative).
+
+    Read-only: pulls the most recent ``odds_snapshots`` rows (last
+    ``_ARB_LOOKBACK_HOURS``), normalises them via
+    :func:`wca.intel.normalise.from_oddsapi_rows`, groups by fixture×market, and
+    runs :func:`wca.intel.arb.scan_market`.  An optional substring after ``/arb``
+    filters fixtures by team name.
+
+    HONEST: our exchange/PM quotes come off the OddsAPI relay (no depth, often
+    minutes-to-days stale), so the report marks opportunities *indicative* and
+    NEVER places a bet — verify live on a direct exchange/PM API before acting.
+    """
+    import sqlite3
+    from collections import defaultdict
+
+    from wca.intel import arb as arb_core
+    from wca.intel.normalise import from_oddsapi_rows
+    from wca.intel.store import latest_per_selection, ensure_schema
+
+    parts = text.strip().split(maxsplit=1)
+    team_filter = parts[1].strip().lower() if len(parts) > 1 else ""
+
+    now = datetime.now(timezone.utc)
+    cutoff = (now.timestamp() - _ARB_LOOKBACK_HOURS * 3600.0)
+    cutoff_iso = datetime.fromtimestamp(cutoff, tz=timezone.utc).isoformat()
+
+    try:
+        con = sqlite3.connect(db_path)
+    except Exception as exc:  # noqa: BLE001
+        return "\U0001f50d *Arbitrage scan*\nCould not open the odds DB (%s)." % exc
+    try:
+        try:
+            cur = con.execute(
+                "SELECT ts_utc, source, match_id, market, selection, decimal_odds, raw "
+                "FROM odds_snapshots WHERE ts_utc >= ? ORDER BY ts_utc",
+                (cutoff_iso,),
+            )
+            rows = [
+                {"ts_utc": r[0], "source": r[1], "match_id": r[2], "market": r[3],
+                 "selection": r[4], "decimal_odds": r[5], "raw": r[6]}
+                for r in cur.fetchall()
+            ]
+        except sqlite3.OperationalError:
+            return ("\U0001f50d *Arbitrage scan*\nNo `odds_snapshots` table yet — "
+                    "the odds collector hasn't populated this DB.")
+
+        if not rows:
+            return ("\U0001f50d *Arbitrage scan*\nNo odds in the last %.0fh — the "
+                    "relay feed looks idle (mini asleep?). Nothing to scan."
+                    % _ARB_LOOKBACK_HOURS)
+
+        snaps = from_oddsapi_rows(rows)
+        # fixture_id -> "Home vs Away" from the raw payloads (snapshots don't
+        # carry raw, so build the label map from the source rows here).
+        label: Dict[str, str] = _arb_fixture_labels(rows)
+        # Persist into a throwaway in-memory store so we can reuse the canonical
+        # latest_per_selection() grouping (most-recent per selection×venue).
+        mem = sqlite3.connect(":memory:")
+        try:
+            ensure_schema(mem)
+            from wca.intel.store import append_snapshots
+            # eps=0 / max_staleness=0 so every snapshot is kept (no change-gating
+            # here — we want the freshest quote per venue, not a compact history).
+            append_snapshots(mem, snaps, eps=0.0, max_staleness_s=0.0)
+            # Collect the (fixture, market, line) groups present in the data.
+            pairs = set()
+            for s in snaps:
+                if s.fixture_id is None:
+                    continue
+                pairs.add((s.fixture_id, s.market_type, s.line))
+
+            all_opps = []
+            seen = set()
+            for fid, mt, line in pairs:
+                if mt.endswith("_lay"):
+                    continue  # lay markets are consumed alongside their back market
+                fixture = label.get(fid, fid)
+                if team_filter and team_filter not in fixture.lower():
+                    continue
+                latest = latest_per_selection(mem, fid, mt, line=line)
+                if not latest:
+                    continue
+                lay_latest = None
+                if mt == "moneyline":
+                    lay_latest = latest_per_selection(mem, fid, "moneyline_lay", line=line)
+                key = (fid, mt, line)
+                if key in seen:
+                    continue
+                seen.add(key)
+                all_opps.extend(arb_core.scan_market(
+                    latest, market_type=mt, fixture=fixture, now=now,
+                    lay_latest=lay_latest,
+                ))
+        finally:
+            mem.close()
+    except Exception as exc:  # noqa: BLE001 — never crash the bot loop
+        return "\U0001f50d *Arbitrage scan*\nScan failed: %s" % exc
+    finally:
+        con.close()
+
+    all_opps.sort(key=lambda o: o.guaranteed_return_pct, reverse=True)
+    return arb_core.format_arb_report(all_opps, now=now)
+
+
+def _arb_fixture_labels(rows: List[Dict[str, Any]]) -> Dict[str, str]:
+    """Map match_id -> "Home vs Away" from odds_snapshots raw payloads."""
+    import json
+
+    out: Dict[str, str] = {}
+    for r in rows:
+        mid = r.get("match_id")
+        if not mid or mid in out:
+            continue
+        raw = r.get("raw") or {}
+        if isinstance(raw, str):
+            try:
+                raw = json.loads(raw)
+            except ValueError:
+                raw = {}
+        if isinstance(raw, dict):
+            home, away = raw.get("home_team"), raw.get("away_team")
+            if home and away:
+                out[mid] = "%s vs %s" % (home, away)
+    return out
+
+
 def dispatch(text: str, db_path: str) -> str:
     """Map an incoming text message to a reply."""
     confirm = handle_confirmation(text, db_path)
@@ -2450,6 +2587,8 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_structure()
     if cmd == "/pm":
         return handle_pm(db_path)
+    if cmd == "/arb":
+        return handle_arb(text, db_path)
     if cmd == "/settle":
         return handle_settle(text, db_path)
     if cmd == "/boost":
