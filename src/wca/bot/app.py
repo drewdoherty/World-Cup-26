@@ -58,6 +58,12 @@ GOALSCORERS_PATH = "data/goalscorers_latest.md"
 BETBUILDER_PATH = "data/betbuilder_latest.md"
 SCORES_FEED_PATH = "site/scores_data.json"
 CARD_MAX_AGE_HOURS = 6.0
+# Reference bankroll used to size the display-only ¼-Kelly stake shown next to
+# each predicted scoreline in /scores. Scorelines have no live book feed (they
+# are REFERENCE markets), so this is "what a ¼-Kelly bet would commit if you
+# could back at the shown price" — nothing is auto-sized off it. Quarter-Kelly
+# and the per-bet cap are the kelly.stake defaults; we do NOT change them.
+SCORES_DISPLAY_BANKROLL = 1500.0
 # The odds feed behind /accas and /boost should refresh frequently; warn beyond
 # this. Structure snapshots change rarely, so its window is generous.
 SCORES_FEED_MAX_AGE_HOURS = 6.0
@@ -676,7 +682,12 @@ def handle_scores(
     header = "⚽ *Predicted scores* — %s" % generated if generated else "⚽ *Predicted scores*"
 
     banner = _stale_banner(generated, now_utc, CARD_MAX_AGE_HOURS, label="card")
-    lines = [banner + header if banner else header, ""]
+    lines = [
+        banner + header if banner else header,
+        "_fair = 1/model-prob; ¼-K = ¼-Kelly @ £%.0f (display-only, "
+        "scorelines are REFERENCE — no live book feed)_" % SCORES_DISPLAY_BANKROLL,
+        "",
+    ]
     for fx in fixtures:
         scores = fx.get("scores") or []
         if not scores:
@@ -691,12 +702,22 @@ def handle_scores(
         if xg_home is not None and xg_away is not None:
             lines.append("xG %.2f – %.2f" % (xg_home, xg_away))
 
-        # Top score (most likely) + up to 4 runner-ups.
+        # Top score (most likely) + up to 4 runner-ups. Each shows the model
+        # implied fair % and fair decimal odds (1/p); the most-likely score
+        # additionally shows the ¼-Kelly stake (display-only, see
+        # SCORES_DISPLAY_BANKROLL) priced at its minimum back price.
         top = scores[0]
-        top_str = "*%s* (%s%%)" % (top["score"], _fmt_prob(top["prob"]))
+        top_str = "*%s* (%s%% / fair %s)" % (
+            top["score"], _fmt_prob(top["prob"]), _fmt_fair(top.get("fair")),
+        )
+        kelly_str = _fmt_score_kelly(top.get("prob"), top.get("back"))
+        if kelly_str:
+            top_str += " " + kelly_str
         runners = scores[1:5]
         runner_strs = [
-            "%s %s%%" % (s["score"], _fmt_prob(s["prob"])) for s in runners
+            "%s %s%% (fair %s)"
+            % (s["score"], _fmt_prob(s["prob"]), _fmt_fair(s.get("fair")))
+            for s in runners
         ]
         score_line = top_str
         if runner_strs:
@@ -844,6 +865,36 @@ def _fmt_prob(prob: Optional[float]) -> str:
     if prob is None:
         return "?"
     return "%.1f" % prob
+
+
+def _fmt_fair(fair: Optional[float]) -> str:
+    """Format fair decimal odds (``1/p``) as a 2-d.p. string, ``?`` if unknown."""
+    if fair is None:
+        return "?"
+    return "%.2f" % fair
+
+
+def _fmt_score_kelly(prob_pct: Optional[float], back: Optional[float]) -> str:
+    """``¼-K £x.xx`` for a predicted scoreline, or ``""`` when there is no stake.
+
+    Reuses :func:`wca.markets.kelly.stake` (its quarter-Kelly fraction and
+    per-bet cap defaults are unchanged) with the model probability and the
+    scoreline's minimum back price — the most conservative price that clears the
+    edge gate. Returns an empty string when the probability/price are missing or
+    the kernel returns a zero stake (no edge / no bet), keeping the existing
+    "no edge -> no bet" honesty inline.
+    """
+    if prob_pct is None or back is None or back <= 1.0:
+        return ""
+    from wca.markets import kelly as kelly_mod
+
+    p = float(prob_pct) / 100.0
+    if not (0.0 < p <= 1.0):
+        return ""
+    stk = kelly_mod.stake(p, float(back), SCORES_DISPLAY_BANKROLL)
+    if stk <= 0:
+        return ""
+    return "¼-K £%.2f" % stk
 
 
 def handle_structure(docs_dir: Optional[str] = None) -> str:
