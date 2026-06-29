@@ -196,6 +196,52 @@ def test_xg_absent_when_not_in_card(tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# handle_scores: fair % / fair decimal odds / ¼-Kelly display (rebuilt #99)
+# ---------------------------------------------------------------------------
+
+
+def test_scores_show_fair_decimal_on_top_and_runners(tmp_path):
+    path = _write_card(str(tmp_path))
+    out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
+    # Top score (1-0) shows its prob AND fair decimal odds (1/p = 5.91 from card).
+    assert "16.9% / fair 5.91" in out
+    # A runner-up also carries its fair decimal odds.
+    assert "fair 6.45" in out  # 2-0 runner-up
+
+
+def test_scores_show_quarter_kelly_on_top_score(tmp_path):
+    path = _write_card(str(tmp_path))
+    out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
+    # The most-likely scoreline shows a display-only ¼-Kelly stake.
+    assert "¼-K £" in out
+    # And the header explains it is display-only against the reference bankroll.
+    assert "display-only" in out and "1500" in out
+
+
+def test_scores_kelly_value_matches_kelly_kernel(tmp_path):
+    """The displayed ¼-K stake equals wca.markets.kelly.stake for the top score."""
+    from wca.markets import kelly as kelly_mod
+    path = _write_card(str(tmp_path))
+    out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
+    # Mexico v SA top: 1-0 at 16.9%, min back 6.03 (from the card body).
+    expected = kelly_mod.stake(0.169, 6.03, app.SCORES_DISPLAY_BANKROLL)
+    if expected > 0:
+        assert ("¼-K £%.2f" % expected) in out
+
+
+def test_scores_fair_unknown_renders_question_mark(tmp_path):
+    """A scoreline without a parsed fair price degrades to 'fair ?', never crashes."""
+    path = os.path.join(str(tmp_path), "card.md")
+    cardcache.write_card(
+        "*World Cup Alpha — scorelines* (1 fixtures)\n\n*A vs B*\n"
+        "    1-0  20.0%\n"
+        "    O/U 2.5: over 50.0% / under 50.0%   BTTS 40.0%\n",
+        path, ts_utc="2026-06-11T12:00:00")
+    out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
+    assert "fair ?" in out
+
+
+# ---------------------------------------------------------------------------
 # handle_scores: card with no scorelines section
 # ---------------------------------------------------------------------------
 
