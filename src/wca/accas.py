@@ -53,7 +53,11 @@ LONGSHOT_ODDS = 9.0
 VALUE_MAX_COMBINED = 12.0
 
 DEFAULT_MIN_EDGE = 0.02
-DEFAULT_BANKROLL = 2500.0
+#: Fallback sizing base used only when the governance ladder is unavailable
+#: (``wca.card.resolve_pool_bankroll`` cannot be imported or raises). Mirrors
+#: that ladder's rung-0 deployable bankroll (``card.LADDER_BANKROLLS[0]`` = £2,000
+#: now) so the fallback never silently over-sizes vs the real base.
+DEFAULT_BANKROLL = 2000.0
 KELLY_FRACTION = 0.25
 
 #: Promo scrape freshness gate. Sites stale/blocked beyond this → PROMO CHECK REQUIRED.
@@ -207,8 +211,17 @@ def _resolve_bankroll(db_path: str, default: float = DEFAULT_BANKROLL) -> Tuple[
         return float(default), KELLY_FRACTION, reason
 
 
-def _get_fx() -> Tuple[float, str]:
-    """GBP→USD rate. Returns (usd_per_gbp, source_tag). Never raises."""
+def _get_fx(allow_network: bool = False) -> Tuple[float, str]:
+    """GBP→USD rate. Returns (usd_per_gbp, source_tag). Never raises.
+
+    Credit discipline: the interactive ``/accas`` path makes **zero** network
+    calls, so the default (``allow_network=False``) returns the cached fallback
+    rate without a live fetch. Pass ``allow_network=True`` only from
+    non-interactive contexts (daemons / reports) that may spend a live fetch.
+    """
+    if not allow_network:
+        from wca.fx import FALLBACK_USD_PER_GBP
+        return FALLBACK_USD_PER_GBP, "fallback"
     try:
         from wca.fx import get_gbp_usd
         r = get_gbp_usd()
@@ -429,6 +442,7 @@ def candidate_scorer_legs(
     fixtures: List[Dict[str, Any]],
     snapshot_prices: Dict[str, Dict[Tuple[str, str], Tuple[float, str]]],
     lambdas: Dict[str, Dict[str, float]],
+    players: Optional[Dict[str, List[Any]]] = None,
     *,
     min_edge: float = DEFAULT_MIN_EDGE,
     players_path: str = "data/players.json",
@@ -437,8 +451,12 @@ def candidate_scorer_legs(
 
     Only fires when:
      1. Cached lambdas provide team goal expectations.
-     2. player params exist in ``data/players.json``.
+     2. player params exist (``players`` injection, else ``data/players.json``).
      3. A fresh book price is in the odds snapshot for the scorer market.
+
+    ``players`` (team → ``[PlayerParams]``) may be passed directly to bypass the
+    on-disk override file; when ``None`` the cached overrides are loaded from
+    ``players_path`` (the interactive path — no network).
     """
     try:
         from wca.models.scorers import ScorerPricer, load_player_overrides
@@ -446,7 +464,7 @@ def candidate_scorer_legs(
         return []
 
     pricer = ScorerPricer()
-    player_db = load_player_overrides(players_path)
+    player_db = players if players is not None else load_player_overrides(players_path)
     if not player_db:
         return []
 
@@ -1432,6 +1450,7 @@ def build_accas(
     mode: str = "value",
     min_edge: Optional[float] = None,
     bankroll: Optional[float] = None,
+    allow_network: bool = False,
 ) -> Dict[str, Any]:
     """Orchestrate the /accas pipeline.
 
@@ -1439,7 +1458,8 @@ def build_accas(
      1. Load cached model probs + lambdas from model_predictions.json.
      2. Load cached odds snapshot from SQLite.
      3. Resolve bankroll from ledger CLV ladder (fallback DEFAULT_BANKROLL).
-     4. Load FX rate (live with fallback).
+     4. Load FX rate (offline cached fallback; ``allow_network=True`` opts into
+        a live fetch from non-interactive callers).
      5. Build candidate legs across all supported markets.
      6. Build rich exposure from open bets.
      7. Assemble accas / promo accas.
@@ -1448,7 +1468,7 @@ def build_accas(
     """
     fixtures, snap, lambdas = load_fixtures(preds_path, scores_path, db_path)
     open_bets = load_open_bets(db_path, site_data)
-    fx_rate, fx_source = _get_fx()
+    fx_rate, fx_source = _get_fx(allow_network=allow_network)
     exposure = build_exposure(open_bets, fx_usd_per_gbp=fx_rate)
 
     # Bankroll resolution
@@ -1632,6 +1652,11 @@ def format_accas(result: Dict[str, Any]) -> str:
         if unsupported:
             lines.append("")
             lines.append("_Unsupported (no model/price): %s_" % ", ".join(unsupported[:4]))
+        # Bankroll / FX context — shown even with no qualifying bet so the
+        # sizing base and cross-currency rate are always visible.
+        lines.append("")
+        lines.append("_Bankroll £%.0f · FX 1 GBP = %.3f USD [%s]_"
+                     % (bankroll, fx_rate, fx_source))
         return _truncate("\n".join(lines))
 
     # Accas

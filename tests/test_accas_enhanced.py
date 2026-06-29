@@ -495,10 +495,14 @@ class TestPlayerPropsLegs:
                 "model_1x2": {"home": 0.45, "draw": 0.25, "away": 0.30},
             }
         ]
-        lambdas = {"brazil france": {"lambda_home": 1.4, "lambda_away": 1.1}}
+        # lambdas are keyed by the raw fixture name (see load_fixtures /
+        # candidate_scorer_legs' lambdas.get(name)), not the tokenised form.
+        lambdas = {"Brazil vs France": {"lambda_home": 1.4, "lambda_away": 1.1}}
         snap = {
             _fixture_token("Brazil vs France"): {
-                ("anytime_scorer", "Neymar Anytime"): (3.50, "bk"),
+                # Anytime-scorer prices are keyed by bare player name (see
+                # candidate_scorer_legs' lookup), not "<name> Anytime".
+                ("anytime_scorer", "Neymar"): (3.50, "bk"),
             }
         }
         players = {
