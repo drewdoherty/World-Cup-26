@@ -368,6 +368,7 @@ class DixonColesModel:
         max_goals: int = 10,
         attack_prior: Optional[Dict[str, float]] = None,
         defence_prior: Optional[Dict[str, float]] = None,
+        goal_supply_boost: float = 1.0,
     ) -> None:
         if xi is not None and half_life_years is not None:
             raise ValueError("pass at most one of xi / half_life_years")
@@ -383,6 +384,15 @@ class DixonColesModel:
         self.min_matches = int(min_matches)
         self.low_data_reg_multiplier = float(low_data_reg_multiplier)
         self.max_goals = int(max_goals)
+        # Post-hoc multiplicative correction on BOTH Poisson means, applied at
+        # prediction time (not during the fit). 1.0 = no change. Used to correct
+        # a calibrated goal-supply level shift the historical fit can't see —
+        # e.g. an in-tournament goal glut. Set/justified by
+        # ``scripts/wca_dc_goal_calibration.py``. Symmetric, so it shifts
+        # totals/scorelines/BTTS without distorting the 1X2 home/away balance.
+        if goal_supply_boost <= 0:
+            raise ValueError("goal_supply_boost must be positive")
+        self.goal_supply_boost = float(goal_supply_boost)
         # Structural shrinkage targets (raw, as supplied). The per-fit, mean-zero
         # re-centred versions are stored as ``_attack_prior_c`` / ``_defence_prior_c``.
         self.attack_prior: Dict[str, float] = dict(attack_prior) if attack_prior else {}
@@ -681,7 +691,8 @@ class DixonColesModel:
         gamma = self.home_advantage if not neutral else 0.0
         log_lh = self.mu + atk_h - dfc_a + gamma
         log_la = self.mu + atk_a - dfc_h
-        return math.exp(log_lh), math.exp(log_la)
+        b = self.goal_supply_boost
+        return math.exp(log_lh) * b, math.exp(log_la) * b
 
     def score_matrix(
         self,
@@ -756,6 +767,7 @@ class DixonColesModel:
             "mu": self.mu,
             "home_advantage": self.home_advantage,
             "rho": self.rho,
+            "goal_supply_boost": self.goal_supply_boost,
             "match_counts": dict(self.match_counts),
             "attack_prior": dict(self.attack_prior),
             "defence_prior": dict(self.defence_prior),
@@ -775,6 +787,7 @@ class DixonColesModel:
             max_goals=data.get("max_goals", 10),
             attack_prior=data.get("attack_prior") or None,
             defence_prior=data.get("defence_prior") or None,
+            goal_supply_boost=float(data.get("goal_supply_boost", 1.0)),
         )
         obj.teams = list(data.get("teams", []))
         obj._team_index = {t: i for i, t in enumerate(obj.teams)}

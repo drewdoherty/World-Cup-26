@@ -544,3 +544,61 @@ def test_fit_scales_to_many_matches():
     assert model.fitted
     # Must complete in well under a minute.
     assert elapsed < 50.0
+
+
+# --------------------------------------------------------------------------- #
+# Goal-supply boost (post-hoc multiplicative correction on both Poisson means)
+# --------------------------------------------------------------------------- #
+
+def _toy_model(boost=1.0):
+    m = DixonColesModel(goal_supply_boost=boost)
+    m.teams = ["A", "B"]
+    m._team_index = {"A": 0, "B": 1}
+    m.attack = {"A": 0.2, "B": -0.1}
+    m.defence = {"A": 0.1, "B": -0.2}
+    m.mu = 0.2
+    m.home_advantage = 0.25
+    m.rho = -0.05
+    m.fitted = True
+    return m
+
+
+def test_goal_supply_boost_default_is_identity():
+    m = DixonColesModel()
+    assert m.goal_supply_boost == 1.0
+
+
+def test_goal_supply_boost_scales_both_lambdas():
+    base = _toy_model(1.0)
+    boosted = _toy_model(1.18)
+    lh0, la0 = base.expected_lambdas("A", "B", neutral=True)
+    lh1, la1 = boosted.expected_lambdas("A", "B", neutral=True)
+    assert lh1 == pytest.approx(lh0 * 1.18, rel=1e-9)
+    assert la1 == pytest.approx(la0 * 1.18, rel=1e-9)
+
+
+def test_goal_supply_boost_raises_goals_and_drops_draws():
+    base = _toy_model(1.0).predict("A", "B", neutral=True)
+    boosted = _toy_model(1.18).predict("A", "B", neutral=True)
+    # more goals expected -> higher P(over 2.5) and P(BTTS yes)
+    assert boosted.over_under(2.5)["over"] > base.over_under(2.5)["over"]
+    assert boosted.both_teams_to_score()["yes"] > base.both_teams_to_score()["yes"]
+    # a higher symmetric goal supply makes exact-level scores rarer, so P(draw)
+    # falls (the freed mass flows to the win outcomes).
+    _, d0, _ = base.one_x_two()
+    _, d1, _ = boosted.one_x_two()
+    assert d1 < d0
+
+
+def test_goal_supply_boost_roundtrips_through_dict():
+    m = _toy_model(1.18)
+    m2 = DixonColesModel.from_dict(m.to_dict())
+    assert m2.goal_supply_boost == pytest.approx(1.18)
+    # absent key -> backward-compatible identity
+    d = m.to_dict(); del d["goal_supply_boost"]
+    assert DixonColesModel.from_dict(d).goal_supply_boost == 1.0
+
+
+def test_goal_supply_boost_rejects_nonpositive():
+    with pytest.raises(ValueError):
+        DixonColesModel(goal_supply_boost=0.0)

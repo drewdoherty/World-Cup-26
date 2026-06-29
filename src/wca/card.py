@@ -65,6 +65,16 @@ DEFAULT_ELO_POINTS_PER_DC_PRIOR = 400.0
 LOGGED_RESULTS_ELO_K_SCALE = 0.05
 DEFAULT_ELO_K_SCALE = 1.0
 
+# Multiplicative correction on the Dixon-Coles goal supply (both Poisson means),
+# applied at prediction time to fix a calibrated level shift the historical fit
+# can't see. WC2026 scored ~24% above the pre-tournament model over 72 group
+# games (Poisson z=+3.2, p≈0.0016, walk-forward positive); 1.18 is the MLE
+# (1.24) shrunk ~0.75x in log-space to hedge knockout regime change. Re-derive
+# with scripts/wca_dc_goal_calibration.py; keep in sync with
+# data/dc_params_corrected.json's "goal_supply_boost". Symmetric, so it lifts
+# totals/scorelines/BTTS without distorting the 1X2 home/away balance.
+DEFAULT_GOAL_SUPPLY_BOOST = 1.18
+
 
 def _elo_initial_ratings_from_dc_prior(
     *,
@@ -528,6 +538,7 @@ def fit_models(
     elo_prior_scale: Optional[float] = None,
     elo_points_per_dc_prior: float = DEFAULT_ELO_POINTS_PER_DC_PRIOR,
     elo_k_scale: float = DEFAULT_ELO_K_SCALE,
+    goal_supply_boost: float = DEFAULT_GOAL_SUPPLY_BOOST,
 ) -> FittedModels:
     """Fit Elo (rating + outcome) and Dixon-Coles on the results history.
 
@@ -606,6 +617,7 @@ def fit_models(
         xi=xi_from_half_life(half_life_years),
         attack_prior=atk_prior,
         defence_prior=dfc_prior,
+        goal_supply_boost=goal_supply_boost,
     )
     dc.fit_dataframe(played, reference_date=reference_date)
 
