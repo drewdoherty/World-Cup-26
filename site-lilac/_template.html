@@ -1677,24 +1677,43 @@ const DATA = {"meta":{"terminal":"2026-06-21 10:51:46 UTC","scores":"2026-06-21 
     $('#standingsMeta').innerHTML=metaLine(Object.keys(ST).length+' groups', DATA.meta.adv, 'live results');
   })();
 
-  /* risk & blind spots — real EMPTY state + off-slate table */
+  /* risk & blind spots — real portfolio exposure (reads DATA.exposure live) */
   (function(){
-    var EX=DATA.exposure, pf=EX.portfolio;
-    $('#riskStrip').innerHTML=''+
-      '<div class="si"><div class="l">EV</div><div class="v muted">'+money('',pf.ev,2).replace('','£0.00').replace(/.*/,'£0.00')+'</div></div>';
-    // build strip honestly with zeros
+    var EX=DATA.exposure||{}, pf=EX.portfolio||{}, corr=EX.correlation||{};
+    var fixtures=EX.fixtures||[], bs=EX.blindspots||[];
+    var hasData=!!(pf.best||pf.worst||fixtures.length||(pf.ev!=null&&pf.ev!==0));
+    // KPI strip — real GBP portfolio values (currencies not blended; MC on GBP pool)
     var strip=[
-      ['EV','£0.00 / $0.00'],['Best','£0.00 / $0.00'],['Worst','£0.00 / $0.00'],
-      ['P(profit)',pctRaw(pf.p_profit*100,0)],['P(loss)',pctRaw(pf.p_loss*100,0)],['Scenarios',pf.n_scenarios]
+      ['EV', signMoney('£',pf.ev,2), clsSign(pf.ev)],
+      ['Best', money('£',pf.best,2), 'pos'],
+      ['Worst', signMoney('£',pf.worst,2), 'neg'],
+      ['P(profit)', (pf.p_profit!=null?pctRaw(pf.p_profit*100,0):EMD), 'pos'],
+      ['P(loss)', (pf.p_loss!=null?pctRaw(pf.p_loss*100,0):EMD), 'neg'],
+      ['Scenarios', (pf.n_scenarios!=null?num(pf.n_scenarios,0):EMD), 'muted']
     ];
-    $('#riskStrip').innerHTML=strip.map(function(s){ return '<div class="si"><div class="l">'+s[0]+'</div><div class="v muted">'+s[1]+'</div></div>'; }).join('');
-    $('#riskEmpty').innerHTML='<div class="empty"><div class="ei">&#128566;</div><div class="et">No upcoming fixtures</div><div class="es">'+esc(EX.narrative)+' — live portfolio, correlation and blind-spots are empty (all zeros, '+EX.blindspots.length+' blind-spots). Updated '+(ageDays(DATA.meta.exposure)+'d ago')+'.</div></div>';
+    $('#riskStrip').innerHTML=strip.map(function(s){ return '<div class="si"><div class="l">'+s[0]+'</div><div class="v '+s[2]+'">'+s[1]+'</div></div>'; }).join('');
+    if(!hasData){
+      $('#riskEmpty').innerHTML='<div class="empty"><div class="ei">&#128566;</div><div class="et">No upcoming fixtures</div><div class="es">live portfolio is empty. Updated '+ageDays(DATA.meta.exposure)+'d ago.</div></div>';
+    } else {
+      var narr=corr.narrative?'<div class="note" style="margin-bottom:6px">'+esc(corr.narrative)+'</div>':'';
+      var bsHtml;
+      if(!bs.length){
+        bsHtml='<div class="note pos">No meaningful blind spots — every probable outcome carries positive exposure.</div>';
+      } else {
+        bsHtml=bs.map(function(b){
+          var pl=b.plug||{};
+          var plug=(pl.available)?'<div class="note" style="margin:2px 0 0">'+esc(pl.recommendation||'')+' <span class="muted">('+esc(pl.outcome||'')+' @ '+odd(pl.best_odds)+' '+esc(pl.best_venue||'')+', EV '+(pl.ev_pct>=0?'+':'')+num(pl.ev_pct,1)+'%)</span></div>':(pl.note?'<div class="note muted" style="margin:2px 0 0">'+esc(pl.note)+'</div>':'');
+          return '<div style="padding:5px 0;border-bottom:1px solid var(--border)"><span class="tag void" style="font-size:8px">BLIND</span> <b>'+esc(b.fixture||'')+'</b> &mdash; <b>'+esc(b.outcome||'')+'</b> <span class="muted">&middot; '+(b.prob!=null?pctRaw(b.prob*100,0):EMD)+' likely &middot; net '+signMoney('£',b.net_pnl,2)+'</span>'+plug+'</div>';
+        }).join('');
+      }
+      $('#riskEmpty').innerHTML=narr+'<div class="lbl" style="margin:6px 0 2px">Blind spots ('+bs.length+')</div>'+bsHtml;
+    }
     // off-slate table
-    var rows=EX.off_slate_events.map(function(e){
+    var rows=(EX.off_slate_events||[]).map(function(e){
       return '<tr class="rail nv"><td class="first">'+trunc(e.match,22)+'</td><td>'+trunc(e.selection,24)+'</td><td class="num">'+odd(e.odds)+'</td><td class="num">£'+num(e.stake,2)+'</td><td class="num pos">+£'+num(e.profit,2)+'</td><td>'+(e.free?'<span class="tag boost">FREE</span>':'<span class="tag void" style="font-size:8px">staked</span>')+'</td></tr>';
     }).join('');
     $('#offSlateTable').innerHTML='<thead><tr><th>Event</th><th>Selection</th><th class="r">Odds</th><th class="r">Stake</th><th class="r">Pot. profit</th><th>Flag</th></tr></thead><tbody>'+rows+'</tbody>';
-    $('#riskMeta').innerHTML=metaLine('empty portfolio · '+EX.off_slate_events.length+' off-slate', DATA.meta.exposure, 'MC paths (idle) + open ledger');
+    $('#riskMeta').innerHTML=metaLine((hasData?fixtures.length+' fixtures · '+bs.length+' blind-spots':'empty portfolio')+' · '+(EX.off_slate_events||[]).length+' off-slate', DATA.meta.exposure, 'MC portfolio + open ledger');
   })();
 
   /* scorelines · exposure · best price */
