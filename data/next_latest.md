@@ -1,18 +1,18 @@
-<!-- generated: 2026-06-29T20:18:08 -->
-⚽ *Next match* — Germany vs Paraguay
-Kickoff 2026-06-29 20:30:00+00:00
+<!-- generated: 2026-06-29T22:34:05 -->
+⚽ *Next match* — Netherlands vs Morocco
+Kickoff 2026-06-30 01:00:00+00:00
 
 *Winner* (model blend)
-  Germany         66.5%  fair 1.50  best 1.36 (Polymarket) -9.5%
-  Draw            21.1%  fair 4.74  best 5.41 (Polymarket) +14.1% ✅  £16.03
-  Paraguay        12.4%  fair 8.07  best 11.76 (Polymarket) +45.8% ✅  £21.29
+  Netherlands     42.3%  fair 2.37  best 2.47 (Polymarket) +4.4% ✅  £14.84
+  Draw            31.0%  fair 3.22  best 3.17 (Polymarket) -1.6%
+  Morocco         26.7%  fair 3.74  best 3.51 (Polymarket) -6.2%
   _stake = ¼-Kelly @ £2000 bankroll (+EV picks)_
 
-*Corners* (model, exp 8.5)
-  O/U 8.5: over 47.9% / under 52.1%  fair 2.09 / 1.92
+*Corners* (model, exp 8.0)
+  O/U 8.5: over 41.3% / under 58.7%  fair 2.42 / 1.70
 
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-1-0 14.5% | 2-0 13.2% | 2-1 11.0% | 1-1 10.0% | 3-0 7.6% | 0-0 7.1%
-  O/U 2.5: over 49.0% / under 51.0%   BTTS 45.8%
+1-0 14.4% | 0-0 14.0% | 1-1 13.5% | 0-1 11.4% | 2-0 9.3% | 2-1 7.2%
+  O/U 2.5: over 32.5% / under 67.5%   BTTS 39.2%
