@@ -1,96 +1,103 @@
-<!-- generated: 2026-06-28T23:35:10 -->
-*World Cup Alpha — bet card* (23 staked picks, hit-prob ranked)
+<!-- generated: 2026-06-29T05:02:24 -->
+*World Cup Alpha — bet card* (25 staked picks, hit-prob ranked)
 
-*1. [FAV] England vs DR Congo* — England @ *1.79* via *polymarket*
-    model 72.0% / mkt 70.9%  edge *+28.5%*  [elo 72% dc 74%]
-    stake: main £7.00  further-out (64h) — soft market, prioritised
+*1. [FAV] England vs DR Congo* — England @ *1.80* via *polymarket*
+    model 71.3% / mkt 69.8%  edge *+28.5%*  [elo 72% dc 74%]
+    stake: main £6.66  further-out (59h) — soft market, prioritised
 *2. [FAV] Spain vs Austria* — Spain @ *1.83* via *polymarket*
     model 69.0% / mkt 70.3%  edge *+26.5%*  [elo 73% dc 65%]
-    stake: main £7.00  further-out (91h) — soft market, prioritised
-*3. [FAV] France vs Sweden* — France @ *1.72* via *polymarket*
-    model 67.6% / mkt 71.6%  edge *+16.6%*  [elo 80% dc 55%]
-    stake: main £7.00  further-out (45h) — soft market, prioritised
+    stake: main £6.66  further-out (86h) — soft market, prioritised
+*3. [FAV] France vs Sweden* — France @ *1.68* via *polymarket*
+    model 68.4% / mkt 73.0%  edge *+15.0%*  [elo 80% dc 55%]
+    stake: main £6.66  further-out (40h) — soft market, prioritised
 *4. [FAV] United States vs Bosnia and Herzegovina* — United States @ *1.90* via *polymarket*
-    model 64.2% / mkt 66.9%  edge *+22.3%*  [elo 72% dc 56%]
-    stake: main £7.00  further-out (72h) — soft market, prioritised
-*5. [FAV] Germany vs Paraguay* — Germany @ *1.87* via *polymarket*
-    model 62.7% / mkt 67.3%  edge *+17.3%*  [elo 51% dc 58%]
-    stake: main £6.96
+    model 63.2% / mkt 65.2%  edge *+20.4%*  [elo 72% dc 56%]
+    stake: main £6.66  further-out (67h) — soft market, prioritised
+*5. [FAV] Germany vs Paraguay* — Germany @ *1.83* via *polymarket*
+    model 62.5% / mkt 66.9%  edge *+14.7%*  [elo 51% dc 58%]
+    stake: main £5.85
 *6. [FAV] Brazil vs Japan* — Brazil @ *2.35* via *polymarket*
     model 55.0% / mkt 50.9%  edge *+29.4%*  [elo 50% dc 65%]
-    stake: main £7.00
+    stake: main £6.66
 *7. [FAV] Portugal vs Croatia* — Portugal @ *2.56* via *polymarket*
     model 46.7% / mkt 46.4%  edge *+19.7%*  [elo 48% dc 47%]
-    stake: main £4.42  further-out (95h) — soft market, prioritised
-*8. [FAV] Belgium vs Senegal* — Belgium @ *2.99* via *polymarket*
-    model 43.8% / mkt 39.2%  edge *+30.7%*  [elo 47% dc 52%]
-    stake: main £5.42  further-out (68h) — soft market, prioritised
-*9. [FAV] Ivory Coast vs Norway* — Norway @ *2.74* via *polymarket*
+    stake: main £4.20  further-out (90h) — soft market, prioritised
+*8. [FAV] Switzerland vs Algeria* — Switzerland @ *2.78* via *polymarket*
+    model 44.7% / mkt 42.6%  edge *+24.3%*  [elo 51% dc 47%]
+    stake: main £4.55  further-out (94h) — soft market, prioritised
+*9. [FAV] Belgium vs Senegal* — Belgium @ *2.94* via *polymarket*
+    model 44.1% / mkt 39.8%  edge *+29.9%*  [elo 47% dc 52%]
+    stake: main £5.12  further-out (63h) — soft market, prioritised
+*10. [FAV] Ivory Coast vs Norway* — Norway @ *2.74* via *polymarket*
     model 42.4% / mkt 42.9%  edge *+16.2%*  [elo 45% dc 40%]
-    stake: main £3.26  further-out (41h) — soft market, prioritised
-*10. [FAV] Netherlands vs Morocco* — Netherlands @ *3.08* via *polymarket*
-    model 40.9% / mkt 38.0%  edge *+26.0%*  [elo 42% dc 46%]
-    stake: main £4.38  further-out (25h) — soft market, prioritised
-*11. [FAV] Mexico vs Ecuador* — Draw @ *3.08* via *polymarket*
-    model 34.9% / mkt 39.4%  edge *+7.5%*  [elo 26% dc 29%]
-    stake: main £1.26  further-out (49h) — soft market, prioritised
-*12. [DRAW] Portugal vs Croatia* — Draw @ *3.64* via *polymarket*
+    stake: main £3.10  further-out (36h) — soft market, prioritised
+*11. [FAV] Netherlands vs Morocco* — Netherlands @ *3.08* via *polymarket*
+    model 40.7% / mkt 37.6%  edge *+25.2%*  [elo 42% dc 46%]
+    stake: main £4.03
+*12. [FAV] Mexico vs Ecuador* — Draw @ *2.99* via *polymarket*
+    model 35.2% / mkt 39.9%  edge *+5.1%*  [elo 26% dc 29%]
+    stake: main £0.86  further-out (44h) — soft market, prioritised
+*13. [DRAW] Belgium vs Senegal* — Draw @ *3.39* via *polymarket*
+    model 31.6% / mkt 34.5%  edge *+7.3%*  [elo 28% dc 27%]
+    stake: main £1.01  further-out (63h) — soft market, prioritised
+*14. [DRAW] Switzerland vs Algeria* — Draw @ *3.51* via *polymarket*
+    model 31.1% / mkt 33.7%  edge *+9.2%*  [elo 27% dc 27%]
+    stake: main £1.23  further-out (94h) — soft market, prioritised
+*15. [DRAW] Portugal vs Croatia* — Draw @ *3.64* via *polymarket*
     model 31.0% / mkt 32.7%  edge *+12.6%*  [elo 28% dc 29%]
-    stake: main £1.67  further-out (95h) — soft market, prioritised
-*13. [DRAW] Ivory Coast vs Norway* — Draw @ *3.77* via *polymarket*
+    stake: main £1.58  further-out (90h) — soft market, prioritised
+*16. [DRAW] Ivory Coast vs Norway* — Draw @ *3.77* via *polymarket*
     model 30.5% / mkt 31.2%  edge *+15.0%*  [elo 28% dc 30%]
-    stake: main £1.89  further-out (41h) — soft market, prioritised
-*14. [DRAW] Brazil vs Japan* — Draw @ *3.92* via *polymarket*
+    stake: main £1.80  further-out (36h) — soft market, prioritised
+*17. [DRAW] Brazil vs Japan* — Draw @ *3.92* via *polymarket*
     model 27.8% / mkt 30.5%  edge *+9.0%*  [elo 27% dc 23%]
-    stake: main £1.08
-*15. [2ND-FAV] Mexico vs Ecuador* — Mexico @ *3.23* via *polymarket*
-    model 40.8% / mkt 37.6%  edge *+31.7%*  [elo 53% dc 43%]
-    stake: main £4.99  further-out (49h) — soft market, prioritised
-*16. [2ND-FAV] Netherlands vs Morocco* — Draw @ *3.17* via *polymarket*
-    model 34.2% / mkt 36.8%  edge *+8.5%*  [elo 29% dc 31%]
-    stake: main £1.37  further-out (25h) — soft market, prioritised
-*17. [2ND-FAV] Belgium vs Senegal* — Draw @ *3.28* via *polymarket*
-    model 32.3% / mkt 35.7%  edge *+6.1%*  [elo 28% dc 27%]
-    stake: main £0.93  further-out (68h) — soft market, prioritised
-*18. [2ND-FAV] Germany vs Paraguay* — Draw @ *5.71* via *polymarket*
-    model 23.3% / mkt 22.0%  edge *+33.4%*  [elo 27% dc 25%]
-    stake: main £2.48
-*19. [2ND-FAV] United States vs Bosnia and Herzegovina* — Draw @ *5.41* via *polymarket*
-    model 23.2% / mkt 23.6%  edge *+25.4%*  [elo 17% dc 24%]
-    stake: main £2.02  further-out (72h) — soft market, prioritised
-*20. [2ND-FAV] Spain vs Austria* — Draw @ *5.71* via *polymarket*
+    stake: main £1.02
+*18. [2ND-FAV] Mexico vs Ecuador* — Mexico @ *3.17* via *polymarket*
+    model 40.8% / mkt 37.5%  edge *+29.5%*  [elo 53% dc 43%]
+    stake: main £4.51  further-out (44h) — soft market, prioritised
+*19. [2ND-FAV] Netherlands vs Morocco* — Draw @ *3.17* via *polymarket*
+    model 33.9% / mkt 36.4%  edge *+7.7%*  [elo 29% dc 31%]
+    stake: main £1.18
+*20. [2ND-FAV] Germany vs Paraguay* — Draw @ *5.41* via *polymarket*
+    model 23.8% / mkt 22.7%  edge *+28.4%*  [elo 27% dc 25%]
+    stake: main £2.14
+*21. [2ND-FAV] United States vs Bosnia and Herzegovina* — Draw @ *5.41* via *polymarket*
+    model 22.8% / mkt 23.0%  edge *+23.5%*  [elo 17% dc 24%]
+    stake: main £1.78  further-out (67h) — soft market, prioritised
+*22. [2ND-FAV] Spain vs Austria* — Draw @ *5.71* via *polymarket*
     model 21.9% / mkt 22.6%  edge *+25.2%*  [elo 17% dc 22%]
-    stake: main £1.87  further-out (91h) — soft market, prioritised
-*21. [2ND-FAV] France vs Sweden* — Draw @ *6.45* via *polymarket*
-    model 20.6% / mkt 19.1%  edge *+33.0%*  [elo 13% dc 26%]
-    stake: main £2.12  further-out (45h) — soft market, prioritised
-*22. [2ND-FAV] England vs DR Congo* — Draw @ *6.06* via *polymarket*
-    model 20.0% / mkt 20.9%  edge *+21.3%*  [elo 17% dc 19%]
-    stake: main £1.47  further-out (64h) — soft market, prioritised
-*23. [LONGSHOT] Ivory Coast vs Norway* — Ivory Coast @ *4.55* via *polymarket*
+    stake: main £1.78  further-out (86h) — soft market, prioritised
+*23. [2ND-FAV] England vs DR Congo* — Draw @ *5.71* via *polymarket*
+    model 20.7% / mkt 22.0%  edge *+18.2%*  [elo 17% dc 19%]
+    stake: main £1.28  further-out (59h) — soft market, prioritised
+*24. [LONGSHOT] Ivory Coast vs Norway* — Ivory Coast @ *4.55* via *polymarket*
     model 27.1% / mkt 25.9%  edge *+23.2%*  [elo 26% dc 30%]
-    stake: main £2.29  further-out (41h) — soft market, prioritised
+    stake: main £2.18  further-out (36h) — soft market, prioritised
+*25. [LONGSHOT] Netherlands vs Morocco* — Morocco @ *4.44* via *polymarket*
+    model 25.4% / mkt 26.0%  edge *+12.8%*  [elo 29% dc 23%]
+    stake: main £1.24
 
-*— CUT (excluded from staking, 10) —*
-  x United States vs Bosnia and Herzegovina — Bosnia and Herzegovina @ 13.33 (model 12.6%, +68.1% EV): below 20% hit-probability floor (model 12.6%) — too unlikely to return PnL even at +68.1% EV
+*— CUT (excluded from staking, 11) —*
   x Spain vs Austria — Austria @ 18.18 (model 9.1%, +65.9% EV): below 20% hit-probability floor (model 9.1%) — too unlikely to return PnL even at +65.9% EV
-  x Germany vs Paraguay — Paraguay @ 11.76 (model 13.9%, +63.7% EV): below 20% hit-probability floor (model 13.9%) — too unlikely to return PnL even at +63.7% EV
-  x France vs Sweden — Sweden @ 13.33 (model 11.8%, +57.1% EV): below 20% hit-probability floor (model 11.8%) — too unlikely to return PnL even at +57.1% EV
+  x Germany vs Paraguay — Paraguay @ 11.76 (model 13.8%, +61.8% EV): below 20% hit-probability floor (model 13.8%) — too unlikely to return PnL even at +61.8% EV
+  x France vs Sweden — Sweden @ 13.33 (model 11.7%, +56.6% EV): below 20% hit-probability floor (model 11.7%) — too unlikely to return PnL even at +56.6% EV
+  x United States vs Bosnia and Herzegovina — Bosnia and Herzegovina @ 10.53 (model 14.0%, +46.9% EV): below 20% hit-probability floor (model 14.0%) — too unlikely to return PnL even at +46.9% EV
+  x France vs Sweden — Draw @ 6.90 (model 19.8%, +36.6% EV): below 20% hit-probability floor (model 19.8%) — too unlikely to return PnL even at +36.6% EV
   x Portugal vs Croatia — Croatia @ 5.71 (model 22.3%, +27.7% EV): mispriced-minnow longshot (outright underdog, model 22.3% < 25%) — +27.7% EV but loses ~90% of the time; de-prioritised
-  x Mexico vs Ecuador — Ecuador @ 5.26 (model 24.2%, +27.6% EV): mispriced-minnow longshot (outright underdog, model 24.2% < 25%) — +27.6% EV but loses ~90% of the time; de-prioritised
-  x England vs DR Congo — DR Congo @ 15.38 (model 8.0%, +23.4% EV): below 20% hit-probability floor (model 8.0%) — too unlikely to return PnL even at +23.4% EV
-  x Netherlands vs Morocco — Morocco @ 4.65 (model 24.9%, +15.6% EV): mispriced-minnow longshot (outright underdog, model 24.9% < 25%) — +15.6% EV but loses ~90% of the time; de-prioritised
-  x Belgium vs Senegal — Senegal @ 4.65 (model 23.9%, +11.0% EV): mispriced-minnow longshot (outright underdog, model 23.9% < 25%) — +11.0% EV but loses ~90% of the time; de-prioritised
+  x Mexico vs Ecuador — Ecuador @ 5.26 (model 24.0%, +26.3% EV): mispriced-minnow longshot (outright underdog, model 24.0% < 25%) — +26.3% EV but loses ~90% of the time; de-prioritised
+  x England vs DR Congo — DR Congo @ 15.38 (model 8.0%, +23.0% EV): below 20% hit-probability floor (model 8.0%) — too unlikely to return PnL even at +23.0% EV
+  x Switzerland vs Algeria — Algeria @ 5.00 (model 24.1%, +20.6% EV): mispriced-minnow longshot (outright underdog, model 24.1% < 25%) — +20.6% EV but loses ~90% of the time; de-prioritised
   x Brazil vs Japan — Japan @ 6.45 (model 17.2%, +10.9% EV): below 20% hit-probability floor (model 17.2%) — too unlikely to return PnL even at +10.9% EV
+  x Belgium vs Senegal — Senegal @ 4.55 (model 24.2%, +10.0% EV): mispriced-minnow longshot (outright underdog, model 24.2% < 25%) — +10.0% EV but loses ~90% of the time; de-prioritised
 
-*Venue split:* polymarket £84.89
+*Venue split:* polymarket £83.72
 
 *Bankroll model (sizing base = CLV-earned rung, not cash):*
   - £2000 (manual override) — ladder would set rung 0 (£2000) from 0/50 settled-with-close bets, CLV n/a
   - actual capital (unpartitioned): £3000
 
 *— REFERENCE, NOT SIZED (models + fair odds only) —*
-*World Cup Alpha — scorelines* (11 fixtures)
+*World Cup Alpha — scorelines* (12 fixtures)
 
 *Brazil vs Japan*
     xG: 1.68-0.77
@@ -103,34 +110,34 @@
     O/U 2.5: over 43.9% / under 56.1%   BTTS 44.0%
 
 *Netherlands vs Morocco*
-    xG: 1.17-0.83
-    0-0  15.2%  fair 6.57 (15.2%)  back >= 6.70 (14.9%)
-    1-1  15.0%  fair 6.66 (15.0%)  back >= 6.79 (14.7%)
-    1-0  13.8%  fair 7.26 (13.8%)  back >= 7.41 (13.5%)
-    0-1  10.5%  fair 9.53 (10.5%)  back >= 9.72 (10.3%)
-    2-0  8.9%  fair 11.18 (8.9%)  back >= 11.40 (8.8%)
-    2-1  7.1%  fair 14.15 (7.1%)  back >= 14.43 (6.9%)
-    O/U 2.5: over 32.1% / under 67.9%   BTTS 40.5%
+    xG: 1.16-0.84
+    0-0  15.1%  fair 6.62 (15.1%)  back >= 6.75 (14.8%)
+    1-1  14.9%  fair 6.71 (14.9%)  back >= 6.84 (14.6%)
+    1-0  13.7%  fair 7.31 (13.7%)  back >= 7.45 (13.4%)
+    0-1  10.7%  fair 9.34 (10.7%)  back >= 9.52 (10.5%)
+    2-0  8.9%  fair 11.25 (8.9%)  back >= 11.47 (8.7%)
+    2-1  7.0%  fair 14.24 (7.0%)  back >= 14.52 (6.9%)
+    O/U 2.5: over 32.2% / under 67.8%   BTTS 40.4%
 
 *United States vs Bosnia and Herzegovina*
-    xG: 1.92-0.84
-    1-0  12.7%  fair 7.87 (12.7%)  back >= 8.03 (12.4%)
-    2-0  11.8%  fair 8.47 (11.8%)  back >= 8.64 (11.6%)
-    2-1  11.2%  fair 8.92 (11.2%)  back >= 9.10 (11.0%)
-    1-1  11.1%  fair 9.04 (11.1%)  back >= 9.22 (10.8%)
-    3-0  7.0%  fair 14.36 (7.0%)  back >= 14.65 (6.8%)
-    0-0  6.8%  fair 14.73 (6.8%)  back >= 15.03 (6.7%)
-    O/U 2.5: over 52.0% / under 48.0%   BTTS 50.8%
+    xG: 1.90-0.86
+    1-0  12.5%  fair 8.00 (12.5%)  back >= 8.16 (12.3%)
+    2-0  11.6%  fair 8.61 (11.6%)  back >= 8.78 (11.4%)
+    2-1  11.0%  fair 9.06 (11.0%)  back >= 9.24 (10.8%)
+    1-1  10.9%  fair 9.18 (10.9%)  back >= 9.36 (10.7%)
+    3-0  6.9%  fair 14.58 (6.9%)  back >= 14.88 (6.7%)
+    0-0  6.7%  fair 14.96 (6.7%)  back >= 15.26 (6.6%)
+    O/U 2.5: over 52.1% / under 47.9%   BTTS 50.7%
 
 *Germany vs Paraguay*
     xG: 1.80-0.77
-    1-0  14.0%  fair 7.14 (14.0%)  back >= 7.28 (13.7%)
-    2-0  12.5%  fair 7.99 (12.5%)  back >= 8.15 (12.3%)
-    1-1  11.0%  fair 9.06 (11.0%)  back >= 9.24 (10.8%)
-    2-1  10.4%  fair 9.60 (10.4%)  back >= 9.79 (10.2%)
-    0-0  7.9%  fair 12.66 (7.9%)  back >= 12.91 (7.7%)
-    3-0  7.1%  fair 14.00 (7.1%)  back >= 14.28 (7.0%)
-    O/U 2.5: over 47.6% / under 52.4%   BTTS 46.3%
+    1-0  13.9%  fair 7.17 (13.9%)  back >= 7.31 (13.7%)
+    2-0  12.5%  fair 8.03 (12.5%)  back >= 8.19 (12.2%)
+    1-1  11.2%  fair 8.90 (11.2%)  back >= 9.08 (11.0%)
+    2-1  10.4%  fair 9.64 (10.4%)  back >= 9.83 (10.2%)
+    0-0  8.0%  fair 12.44 (8.0%)  back >= 12.69 (7.9%)
+    3-0  7.1%  fair 14.06 (7.1%)  back >= 14.34 (7.0%)
+    O/U 2.5: over 47.5% / under 52.5%   BTTS 46.4%
 
 *Ivory Coast vs Norway*
     xG: 0.98-1.27
@@ -143,44 +150,44 @@
     O/U 2.5: over 39.0% / under 61.0%   BTTS 46.1%
 
 *France vs Sweden*
-    xG: 1.80-0.70
-    1-0  16.7%  fair 5.98 (16.7%)  back >= 6.10 (16.4%)
-    2-0  13.9%  fair 7.17 (13.9%)  back >= 7.31 (13.7%)
-    2-1  11.4%  fair 8.78 (11.4%)  back >= 8.96 (11.2%)
-    1-1  9.6%  fair 10.37 (9.6%)  back >= 10.58 (9.5%)
-    0-0  7.5%  fair 13.35 (7.5%)  back >= 13.62 (7.3%)
-    3-0  7.4%  fair 13.45 (7.4%)  back >= 13.71 (7.3%)
-    O/U 2.5: over 46.0% / under 54.0%   BTTS 43.3%
+    xG: 1.82-0.69
+    1-0  16.9%  fair 5.90 (16.9%)  back >= 6.02 (16.6%)
+    2-0  14.1%  fair 7.08 (14.1%)  back >= 7.22 (13.8%)
+    2-1  11.5%  fair 8.67 (11.5%)  back >= 8.85 (11.3%)
+    1-1  9.3%  fair 10.79 (9.3%)  back >= 11.01 (9.1%)
+    3-0  7.5%  fair 13.28 (7.5%)  back >= 13.55 (7.4%)
+    0-0  7.2%  fair 13.89 (7.2%)  back >= 14.17 (7.1%)
+    O/U 2.5: over 46.3% / under 53.7%   BTTS 43.1%
 
 *Mexico vs Ecuador*
-    xG: 1.31-0.98
-    1-1  16.4%  fair 6.10 (16.4%)  back >= 6.22 (16.1%)
-    0-0  12.4%  fair 8.03 (12.4%)  back >= 8.19 (12.2%)
-    1-0  11.5%  fair 8.69 (11.5%)  back >= 8.87 (11.3%)
-    2-1  8.1%  fair 12.33 (8.1%)  back >= 12.58 (7.9%)
-    2-0  8.0%  fair 12.45 (8.0%)  back >= 12.70 (7.9%)
-    0-1  8.0%  fair 12.57 (8.0%)  back >= 12.82 (7.8%)
-    O/U 2.5: over 39.4% / under 60.6%   BTTS 48.7%
+    xG: 1.31-0.97
+    1-1  16.5%  fair 6.05 (16.5%)  back >= 6.17 (16.2%)
+    0-0  12.6%  fair 7.97 (12.6%)  back >= 8.13 (12.3%)
+    1-0  11.5%  fair 8.70 (11.5%)  back >= 8.88 (11.3%)
+    2-1  8.1%  fair 12.35 (8.1%)  back >= 12.60 (7.9%)
+    2-0  8.0%  fair 12.46 (8.0%)  back >= 12.71 (7.9%)
+    0-1  7.9%  fair 12.70 (7.9%)  back >= 12.95 (7.7%)
+    O/U 2.5: over 39.3% / under 60.7%   BTTS 48.8%
 
 *England vs DR Congo*
-    xG: 1.96-0.47
-    2-0  16.8%  fair 5.95 (16.8%)  back >= 6.07 (16.5%)
-    1-0  16.4%  fair 6.08 (16.4%)  back >= 6.20 (16.1%)
-    3-0  11.2%  fair 8.94 (11.2%)  back >= 9.12 (11.0%)
-    0-0  9.5%  fair 10.57 (9.5%)  back >= 10.78 (9.3%)
-    1-1  8.5%  fair 11.72 (8.5%)  back >= 11.95 (8.4%)
-    2-1  7.5%  fair 13.25 (7.5%)  back >= 13.51 (7.4%)
-    O/U 2.5: over 43.7% / under 56.3%   BTTS 32.0%
+    xG: 1.95-0.47
+    2-0  16.6%  fair 6.01 (16.6%)  back >= 6.13 (16.3%)
+    1-0  16.3%  fair 6.14 (16.3%)  back >= 6.26 (16.0%)
+    3-0  11.1%  fair 9.02 (11.1%)  back >= 9.20 (10.9%)
+    0-0  9.8%  fair 10.23 (9.8%)  back >= 10.43 (9.6%)
+    1-1  8.8%  fair 11.34 (8.8%)  back >= 11.56 (8.6%)
+    2-1  7.5%  fair 13.37 (7.5%)  back >= 13.63 (7.3%)
+    O/U 2.5: over 43.4% / under 56.6%   BTTS 32.2%
 
 *Belgium vs Senegal*
     xG: 1.39-0.93
-    1-1  15.1%  fair 6.61 (15.1%)  back >= 6.74 (14.8%)
-    0-0  11.8%  fair 8.50 (11.8%)  back >= 8.67 (11.5%)
-    1-0  11.3%  fair 8.82 (11.3%)  back >= 8.99 (11.1%)
-    2-0  9.0%  fair 11.15 (9.0%)  back >= 11.37 (8.8%)
-    0-1  8.5%  fair 11.79 (8.5%)  back >= 12.02 (8.3%)
-    2-1  7.7%  fair 12.92 (7.7%)  back >= 13.18 (7.6%)
-    O/U 2.5: over 40.3% / under 59.7%   BTTS 47.1%
+    1-1  14.8%  fair 6.75 (14.8%)  back >= 6.89 (14.5%)
+    0-0  11.5%  fair 8.69 (11.5%)  back >= 8.87 (11.3%)
+    1-0  11.4%  fair 8.75 (11.4%)  back >= 8.92 (11.2%)
+    2-0  9.0%  fair 11.06 (9.0%)  back >= 11.28 (8.9%)
+    0-1  8.6%  fair 11.62 (8.6%)  back >= 11.85 (8.4%)
+    2-1  7.8%  fair 12.82 (7.8%)  back >= 13.08 (7.6%)
+    O/U 2.5: over 40.6% / under 59.4%   BTTS 47.0%
 
 *Spain vs Austria*
     xG: 1.98-0.66
@@ -201,3 +208,13 @@
     2-1  8.8%  fair 11.34 (8.8%)  back >= 11.57 (8.6%)
     0-1  7.7%  fair 12.98 (7.7%)  back >= 13.24 (7.6%)
     O/U 2.5: over 40.3% / under 59.7%   BTTS 46.8%
+
+*Switzerland vs Algeria*
+    xG: 1.45-1.02
+    1-1  14.8%  fair 6.76 (14.8%)  back >= 6.89 (14.5%)
+    1-0  11.0%  fair 9.12 (11.0%)  back >= 9.31 (10.7%)
+    0-0  10.0%  fair 9.96 (10.0%)  back >= 10.16 (9.8%)
+    2-1  8.7%  fair 11.47 (8.7%)  back >= 11.70 (8.5%)
+    2-0  8.5%  fair 11.74 (8.5%)  back >= 11.97 (8.4%)
+    0-1  7.3%  fair 13.62 (7.3%)  back >= 13.90 (7.2%)
+    O/U 2.5: over 44.3% / under 55.7%   BTTS 50.9%
