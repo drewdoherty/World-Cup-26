@@ -117,15 +117,20 @@ class TestSelectionRule:
         assert len(ranked.cut) == 1
         assert "floor" in ranked.cut[0].cut_reason.lower()
 
-    def test_short_high_prob_longshot_survives(self):
-        """A longshot whose model prob clears LONGSHOT_PROB is NOT a minnow."""
+    def test_all_longshots_cut_from_cash(self):
+        """Category-based cut (user, 2026-06-29): NO cash on outright-underdog
+        longshots regardless of probability — even one well above LONGSHOT_PROB
+        is routed to the free-bet/lottery pool, never the cash card."""
         short = _rec(
             selection="away", team="Live", odds=3.2,
             model_prob=LONGSHOT_PROB + 0.05, edge=0.04, category="longshot",
         )
         ranked = rank_card([short])
-        assert [r.selection_team for r in ranked.picks] == ["Live"]
-        assert ranked.cut == []
+        assert ranked.picks == []
+        assert [r.selection_team for r in ranked.cut] == ["Live"]
+        cut = ranked.cut[0]
+        assert "longshot" in cut.cut_reason.lower()
+        assert all(v == 0.0 for v in cut.stakes.values())
 
     def test_ranking_order_fav_draw_secondfav(self):
         fav = _rec(team="Fav", model_prob=0.55, edge=0.03, category="favourite")

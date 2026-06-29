@@ -164,6 +164,48 @@ def test_polymarket_skips_non_fixture_events():
     assert polymarket_odds.rows_from_events([outright]) == []
 
 
+def _pm_aux_event(suffix_label, slug_suffix):
+    """A Halftime/Second-Half ancillary event whose markets reuse the team name.
+
+    These carry LONGER prices than the full-match win, so before the fix they
+    won best_price and were quoted as the match-winner line (phantom edge).
+    """
+    return {
+        "id": "evt1-%s" % slug_suffix,
+        "slug": "fifwc-ecu-ger-2026-06-25-%s" % slug_suffix,
+        "title": "Ecuador vs. Germany - %s" % suffix_label,
+        "endDate": "2026-06-25T20:00:00Z",
+        "markets": [
+            _pm_market("Germany", "Germany %s?" % suffix_label.lower(), 0.45, 0.46),
+            _pm_market("Ecuador", "Ecuador %s?" % suffix_label.lower(), 0.30, 0.31),
+            _pm_market("Draw (Ecuador vs. Germany)",
+                       "Tied %s?" % suffix_label.lower(), 0.30, 0.31),
+        ],
+    }
+
+
+def test_polymarket_drops_halftime_second_half_events():
+    """2026-06-29 phantom-edge fix: only the bare full-match event is admitted.
+
+    Polymarket lists separate Halftime Result / Second Half Result events whose
+    markets reuse the team name, so they would otherwise be ingested as
+    full-match h2h rows and their longer prices quoted as the match-winner line.
+    """
+    events = [
+        _pm_event(),
+        _pm_aux_event("Halftime Result", "halftime-result"),
+        _pm_aux_event("Second Half Result", "second-half-result"),
+    ]
+    rows = polymarket_odds.rows_from_events(events)
+    # Exactly the 3 full-match rows survive — no HT/2H contamination.
+    assert len(rows) == 3
+    assert {r["outcome_name"] for r in rows} == {"Ecuador", "Germany", "Draw"}
+    # The surviving Germany price is the FULL-MATCH price (~1.606), NOT the
+    # longer halftime price (~2.19) that previously won best-price.
+    g = next(r for r in rows if r["outcome_name"] == "Germany")
+    assert g["decimal_odds"] == pytest.approx(1.606, abs=0.01)
+
+
 def test_polymarket_get_odds_injected_events_no_network():
     df, quota = polymarket_odds.get_odds(events=[_pm_event()])
     assert not df.empty

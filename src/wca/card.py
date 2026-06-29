@@ -249,6 +249,17 @@ LONGSHOT_PROB: float = 0.25               # below this an outright-underdog is a
 #                                           when +EV (they lose ~90% of the time).
 STRUCTURAL_DRAW_BAND: Tuple[float, float] = (0.25, 0.32)  # draws we *want*.
 
+# Coherence guard: a complete 1X2 book's implied probabilities (sum of 1/odds)
+# always overround to >= 1.0; anything materially below is an impossible book
+# (cross-market contamination) and is dropped in _index_odds.
+MIN_COHERENT_BOOK_IMPLIED_SUM: float = 0.98
+
+# Single-source policy (user, 2026-06-29): when an outcome is priced by FEWER
+# than this many distinct books, there is no cross-venue confirmation, so the
+# pick is flagged "indicative" and NOT auto-staked. Set WCA_STAKE_SINGLE_SOURCE
+# truthy to override and size single-source picks anyway.
+MIN_BOOKS_FOR_STAKING: int = 2
+
 # Further-out tilt. Markets are softest furthest from kickoff; large edges on
 # imminent fixtures are more likely model error than true mispricing.
 IMMINENT_HOURS: float = 6.0               # < this to kickoff = "imminent".
@@ -475,6 +486,8 @@ class Recommendation:
     #                                       structural_draw / longshot (rule 2)
     cut: bool = False                     # excluded from STAKED picks (rule 2)
     cut_reason: str = ""
+    indicative: bool = False              # single-source price (no cross-venue
+    #                                       confirmation) — shown, not auto-staked
 
 
 @dataclass
@@ -722,6 +735,23 @@ def _index_odds(odds_df: pd.DataFrame) -> Dict[str, Dict[str, object]]:
                     prices[slot] = odd
             if not prices:
                 books.pop(str(book), None)
+
+    # Coherence guard (2026-06-29 defense-in-depth): drop any COMPLETE 1X2 book
+    # whose implied probabilities sum to materially below 1.0 — an impossible
+    # "sub-fair" book that only arises from merging prices across DIFFERENT
+    # markets under one bookmaker_key (e.g. Polymarket's halftime / second-half
+    # events collapsed together, each outcome taking the longest leg). A real
+    # single market always overrounds to >= 1.0, so this never drops a genuine
+    # book; it backstops the Polymarket parser filter so contamination can't
+    # reach best_price / market_consensus even if a new ancillary market leaks.
+    for fx in fixtures.values():
+        fx_books: Dict[str, Dict[str, float]] = fx["books"]  # type: ignore[assignment]
+        for book in list(fx_books.keys()):
+            prices = fx_books[book]
+            if all(o in prices and prices[o] > 1.0 for o in OUTCOMES):
+                implied = sum(1.0 / prices[o] for o in OUTCOMES)
+                if implied < MIN_COHERENT_BOOK_IMPLIED_SUM:
+                    fx_books.pop(book, None)
     return fixtures
 
 
@@ -784,6 +814,23 @@ def net_odds(book: Optional[str], gross: float) -> float:
     if gross is None or gross <= 1.0:
         return gross
     return 1.0 + (gross - 1.0) * (1.0 - _commission(book))
+
+
+def _stake_single_source() -> bool:
+    """Whether to size picks whose only price is a single, unconfirmed book.
+
+    Default OFF (user, 2026-06-29): a single-source price (e.g. Polymarket alone,
+    no Betfair/exchange to confirm) is shown as 'indicative' and NOT staked.
+    ``WCA_STAKE_SINGLE_SOURCE`` truthy overrides for when the lone book is deep.
+    """
+    return os.environ.get("WCA_STAKE_SINGLE_SOURCE", "").strip().lower() in (
+        "1", "true", "yes", "on",
+    )
+
+
+def books_pricing(books: Dict[str, Dict[str, float]], outcome: str) -> int:
+    """Number of distinct books offering a usable price for ``outcome``."""
+    return sum(1 for prices in books.values() if prices.get(outcome, 0.0) > 1.0)
 
 
 def best_price(books: Dict[str, Dict[str, float]], outcome: str) -> Tuple[Optional[str], float]:
@@ -1079,6 +1126,14 @@ def build_card(
             e = raw_e * IMMINENT_EDGE_DISCOUNT if (imminent and raw_e > 0) else raw_e
             if e < min_edge:
                 continue
+            # Single-source guard (rule, 2026-06-29): if this outcome is priced
+            # by fewer than MIN_BOOKS_FOR_STAKING distinct books there is no
+            # cross-venue confirmation (e.g. Polymarket alone), so flag it
+            # indicative and DON'T auto-stake it unless explicitly overridden.
+            indicative = (
+                books_pricing(fb.books, outcome) < MIN_BOOKS_FOR_STAKING
+                and not _stake_single_source()
+            )
             # Route each pick to the single currency pool that backs its venue
             # (Polymarket -> $ pool, every other book -> £ pool) and size it ONLY
             # there. Every other pool gets 0 so the per-pool deployment, exposure
@@ -1091,7 +1146,7 @@ def build_card(
                         p, net, pool.bankroll,
                         fraction=pool.kelly_fraction, cap=pool.per_bet_cap,
                     )
-                    if pool.name == target.name
+                    if (pool.name == target.name and not indicative)
                     else 0.0
                 )
             recs.append(
@@ -1115,6 +1170,7 @@ def build_card(
                     hours_to_kickoff=h2k,
                     imminent=imminent,
                     category=classify_outcome(outcome, p, fb.mkt_map),
+                    indicative=indicative,
                 )
             )
 
@@ -1391,11 +1447,15 @@ def _cut_reason(rec: Recommendation) -> Optional[str]:
             "to return PnL even at +%.1f%% EV"
             % (SELECTION_MIN_PROB * 100, rec.model_prob * 100, rec.edge * 100)
         )
-    if rec.category == "longshot" and rec.model_prob < LONGSHOT_PROB:
+    if rec.category == "longshot":
+        # Category-based cut (user, 2026-06-29): NO cash on outright-underdog
+        # longshots regardless of exact probability — they lose far more often
+        # than not even when +EV. The likely-PnL rule routes these to the
+        # free-bet / lottery pool only, never the cash card.
         return (
-            "mispriced-minnow longshot (outright underdog, model %.1f%% < "
-            "%.0f%%) — +%.1f%% EV but loses ~90%% of the time; de-prioritised"
-            % (rec.model_prob * 100, LONGSHOT_PROB * 100, rec.edge * 100)
+            "outright-underdog longshot (model %.1f%%) — no cash on minnows "
+            "(likely-PnL rule); free-bet/lottery pool only, +%.1f%% EV"
+            % (rec.model_prob * 100, rec.edge * 100)
         )
     return None
 
@@ -1552,21 +1612,35 @@ def format_ranked_card(
         [pools] if isinstance(pools, PoolConfig) else list(pools)
     )
     lines: List[str] = []
-    n = len(ranked.picks)
-    lines.append("*World Cup Alpha — bet card* (%d staked picks, hit-prob ranked)" % n)
+    n_indicative = sum(1 for r in ranked.picks if r.indicative)
+    n_staked = len(ranked.picks) - n_indicative
+    header = "*World Cup Alpha — bet card* (%d staked" % n_staked
+    if n_indicative:
+        header += ", %d indicative" % n_indicative
+    header += " picks, hit-prob ranked)"
+    lines.append(header)
     lines.append("")
     if not ranked.picks:
         lines.append("_No +EV bets clear the selection rule on the current slate._")
+    if n_indicative and n_staked == 0:
+        lines.append(
+            "_⚠ Every pick is single-source (Polymarket only) — INDICATIVE, "
+            "not staked. Wire a 2nd book (Betfair creds) or set "
+            "WCA_STAKE_SINGLE_SOURCE=1 to size them._"
+        )
+        lines.append("")
     for i, r in enumerate(ranked.picks, 1):
         rp = pool_for_venue(r.venue, pool_list)
         stake = r.stakes.get(rp.name, 0.0)
         tilt = ""
-        if r.imminent and r.raw_edge is not None:
+        if r.indicative:
+            tilt = "  INDICATIVE — single-source, no cross-venue confirmation (not staked)"
+        elif r.imminent and r.raw_edge is not None:
             tilt = "  IMMINENT: edge discounted %+.1f%%->%+.1f%% (likely model error)" % (
                 r.raw_edge * 100, r.edge * 100
             )
         elif r.hours_to_kickoff is not None and r.hours_to_kickoff >= FURTHER_OUT_HOURS:
-            tilt = "  further-out (%.0fh) — soft market, prioritised" % r.hours_to_kickoff
+            tilt = "  further-out (%.0fh) — thin/soft market" % r.hours_to_kickoff
         lines.append(
             "*%d. [%s] %s* — %s @ *%.2f* via *%s*\n"
             "    model %.1f%% / mkt %.1f%%  edge *%+.1f%%*  [elo %.0f%% dc %.0f%%]\n"
