@@ -66,6 +66,48 @@ def _split_title(title: str) -> Optional[Tuple[str, str]]:
     return parts[0], parts[1]
 
 
+# Market-type suffixes Polymarket appends to a fixture's ANCILLARY events
+# (separate from the full-match winner): "<Home> vs. <Away> - Halftime Result",
+# "... - Second Half Result", "... - Exact Score", etc. Each ancillary event
+# reuses the team name as its market ``groupItemTitle``, so without this filter
+# they get admitted as full-match h2h rows. The "leading at halftime" price is
+# LONGER than the full-match win price, so it wins ``card.best_price`` and gets
+# quoted as the match-winner price — the 2026-06-29 phantom-edge bug. The bare
+# full-match event has NO " - <type>" suffix in either its title or slug.
+_AUX_SLUG_MARKERS: Tuple[str, ...] = (
+    "halftime-result",
+    "second-half-result",
+    "exact-score",
+    "more-markets",
+    "total-corners",
+    "total-goals",
+    "player-props",
+    "first-to-score",
+    "both-teams-to-score",
+    "double-chance",
+)
+
+
+def _is_full_match_event(event: Dict[str, Any]) -> bool:
+    """True only for the bare per-fixture full-match (match-winner) event.
+
+    Polymarket lists several ancillary events per fixture (Halftime Result,
+    Second Half Result, Exact Score, ...) whose markets reuse the team name as
+    ``groupItemTitle``; admitting them as full-match h2h rows contaminates
+    best-price and consensus. The full-match event's title is a bare
+    ``"<Home> vs. <Away>"`` (no " - " suffix) and its slug carries no
+    market-type marker. We reject on EITHER signal so a rename of one can't
+    leak the other back in.
+    """
+    title = event.get("title") or ""
+    if " - " in title:  # any "<fixture> - <market type>" ancillary event
+        return False
+    slug = (event.get("slug") or "").lower()
+    if any(marker in slug for marker in _AUX_SLUG_MARKERS):
+        return False
+    return True
+
+
 def rows_from_events(
     events: List[Dict[str, Any]],
     *,
@@ -78,6 +120,11 @@ def rows_from_events(
     """
     rows: List[Dict[str, Any]] = []
     for event in events or []:
+        # Only the bare full-match event — never the Halftime/Second-Half/Exact
+        # Score ancillary events, whose team-named markets would otherwise be
+        # mis-admitted as the match-winner line (2026-06-29 phantom-edge bug).
+        if not _is_full_match_event(event):
+            continue
         teams = _split_title(event.get("title") or "")
         if teams is None:
             continue
