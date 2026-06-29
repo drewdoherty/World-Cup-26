@@ -814,6 +814,230 @@
       "<p class='a-note'>" + esc(pm.note || "") + "</p>";
   }
 
+  // =========================================================================
+  //  F · MARKET INTELLIGENCE  (market_intel.json)
+  // =========================================================================
+  var intelSelected = null;
+
+  var INTEL_MKT_LABEL = { moneyline: "1X2", moneyline_lay: "1X2 (lay)", ou: "Over/Under", btts: "BTTS", ah: "Asian H'cap" };
+  function intelMktLabel(mt, line) {
+    var base = INTEL_MKT_LABEL[mt] || mt;
+    return (line != null && line !== "") ? base + " " + line : base;
+  }
+  function intelSelLabel(sel, fx) {
+    if (sel === "Home") return (fx && fx.home) ? fx.home : "Home";
+    if (sel === "Away") return (fx && fx.away) ? fx.away : "Away";
+    return sel;
+  }
+  function intelDot(colour) {
+    return "<span class='sw' style='background:" + esc(colour || "#9A93B0") + "'></span>";
+  }
+  function intelStaleBadge(stale, age) {
+    var mins = (age == null) ? null : Math.round(age / 60);
+    if (stale) return "<span class='a-badge a-warn'>STALE" + (mins != null ? " " + mins + "m" : "") + "</span>";
+    return "<span class='a-badge a-good'>FRESH" + (mins != null ? " " + mins + "m" : "") + "</span>";
+  }
+  function intelPriceCell(s, key, vkey) {
+    // s = selection metrics; key='best_odds'|'worst_odds'; vkey='best_venue'|'worst_venue'
+    if (!s || s[key] == null) return "—";
+    var v = s[vkey], col = (s.venues && s.venues[v] && s.venues[v].colour) || null;
+    return intelDot(col) + num(s[key], 2) + " <span class='dim'>" + esc(v) + "</span>";
+  }
+
+  function renderMarketIntel() {
+    var f = FEEDS.intel;
+    if (!f || !f.fixtures) { if ($("intel-spread")) $("intel-spread").innerHTML = pendingMsg("Market Intelligence"); return; }
+    var fixtures = f.fixtures || [], meta = f.meta || {}, venues = f.venues || [];
+
+    if ($("intel-meta")) {
+      var gen = f.generated_at ? String(f.generated_at).replace("T", " ").replace("Z", "") + " UTC" : "—";
+      $("intel-meta").textContent = (meta.n_markets || 0) + " markets · " + (meta.n_fixtures || 0) + " fixtures · as of " + gen;
+    }
+
+    if (!fixtures.length) {
+      $("intel-kpi").innerHTML = "";
+      $("intel-legend").innerHTML = "";
+      $("intel-nav").innerHTML = "";
+      $("intel-detail").innerHTML = "";
+      $("intel-spread").innerHTML = empty("No upcoming fixtures within the capture window — cross-venue prices appear once odds are captured for fixtures kicking off soon.", true);
+      $("intel-notes").innerHTML = intelNotes(meta);
+      return;
+    }
+
+    // ---- KPI strip
+    var allMkts = [];
+    fixtures.forEach(function (fx) { (fx.markets || []).forEach(function (m) { allMkts.push(m); }); });
+    var freshAges = allMkts.map(function (m) { return m.age_secs; }).filter(function (a) { return a != null; });
+    var minAge = freshAges.length ? Math.min.apply(null, freshAges) : null;
+    var staleN = allMkts.filter(function (m) { return m.stale; }).length;
+    var kpis = [
+      kpi("Fixtures", String(meta.n_fixtures || fixtures.length)),
+      kpi("Markets", String(meta.n_markets || allMkts.length)),
+      kpi("Venues tracked", String(venues.length)),
+      kpi("Freshest quote", minAge == null ? "—" : Math.round(minAge / 60) + "m",
+        staleN + " / " + allMkts.length + " stale"),
+    ];
+    $("intel-kpi").innerHTML = kpis.join("");
+
+    // ---- venue legend (stable colours, kind, cost, liquidity honesty)
+    $("intel-legend").innerHTML =
+      "<div class='sub-head'>Venues (stable colours · commission · price source)</div>" +
+      "<div class='legend intel-legend'>" + venues.map(function (v) {
+        var comm = v.commission ? (Math.round(v.commission * 1000) / 10) + "%" : "0%";
+        var liq = v.has_liquidity ? "live" : "relay";
+        return "<span title='" + esc(v.kind) + "'>" + intelDot(v.colour) + esc(v.venue) +
+          " <span class='dim'>" + esc(v.kind.replace("_", " ")) + " · " + comm + " · " + liq + "</span></span>";
+      }).join("") + "</div>";
+
+    // ---- cross-fixture spread headline (moneyline), biggest dislocation first
+    var spreadRows = [];
+    fixtures.forEach(function (fx, i) {
+      var ml = (fx.markets || []).filter(function (m) { return m.market_type === "moneyline"; })[0];
+      if (!ml) return;
+      var bySel = {};
+      (ml.selections || []).forEach(function (s) { bySel[s.selection] = s; });
+      var maxImpr = 0;
+      (ml.selections || []).forEach(function (s) { if (s.pct_improvement != null) maxImpr = Math.max(maxImpr, s.pct_improvement); });
+      spreadRows.push({
+        idx: i, fx: fx, ml: ml, bySel: bySel, maxImpr: maxImpr,
+      });
+    });
+    spreadRows.sort(function (a, b) { return b.maxImpr - a.maxImpr; });
+
+    if (!spreadRows.length) {
+      $("intel-spread").innerHTML = empty("No 1X2 markets in the current capture.", true);
+    } else {
+      var head = "<tr><th>Match</th><th>KO</th><th class='num'>Books</th><th>Home best</th><th>Draw best</th><th>Away best</th><th class='num'>Max %Δ</th><th>Quote</th></tr>";
+      var body = spreadRows.map(function (r) {
+        var ko = r.fx.ko_utc ? String(r.fx.ko_utc).slice(5, 16).replace("T", " ") : "—";
+        return "<tr>" +
+          "<td>" + esc((r.fx.home || "?") + " v " + (r.fx.away || "?")) + "</td>" +
+          "<td class='num'>" + esc(ko) + "</td>" +
+          "<td class='num'>" + (r.ml.n_venues || "—") + "</td>" +
+          "<td>" + intelPriceCell(r.bySel.Home, "best_odds", "best_venue") + "</td>" +
+          "<td>" + intelPriceCell(r.bySel.Draw, "best_odds", "best_venue") + "</td>" +
+          "<td>" + intelPriceCell(r.bySel.Away, "best_odds", "best_venue") + "</td>" +
+          "<td class='num'>" + (r.maxImpr ? pct(r.maxImpr, 1) : "—") + "</td>" +
+          "<td>" + intelStaleBadge(r.ml.stale, r.ml.age_secs) + "</td>" +
+          "</tr>";
+      }).join("");
+      $("intel-spread").innerHTML =
+        "<div class='sub-head'>Best price per outcome across all books · sorted by largest cross-venue gap (the execution edge)</div>" +
+        "<table class='a-tbl'><thead>" + head + "</thead><tbody>" + body + "</tbody></table>";
+    }
+
+    // ---- fixture picker + per-market detail
+    if (intelSelected == null || intelSelected >= fixtures.length) intelSelected = (spreadRows[0] ? spreadRows[0].idx : 0);
+    $("intel-nav").innerHTML = fixtures.map(function (fx, i) {
+      var lbl = (fx.home || "?") + " v " + (fx.away || "?");
+      return "<span class='chip" + (i === intelSelected ? " active" : "") + "' data-idx='" + i + "'>" + esc(lbl) + "</span>";
+    }).join("");
+    Array.prototype.forEach.call($("intel-nav").querySelectorAll(".chip"), function (c) {
+      c.addEventListener("click", function () { intelSelected = parseInt(c.getAttribute("data-idx"), 10); renderMarketIntel(); });
+    });
+
+    $("intel-detail").innerHTML = intelDetail(fixtures[intelSelected]);
+    $("intel-notes").innerHTML = intelNotes(meta);
+  }
+
+  function intelDetail(fx) {
+    if (!fx) return "";
+    var mkts = (fx.markets || []).slice();
+    if (!mkts.length) return empty("No markets captured for this fixture.");
+    var blocks = mkts.map(function (m) {
+      var rows = (m.selections || []).map(function (s) {
+        var disagree = (s.largest_disagreement != null && s.disagreement_pair)
+          ? pctp(s.largest_disagreement * 100, 1) + " <span class='dim'>" + esc(s.disagreement_pair[0]) + "/" + esc(s.disagreement_pair[1]) + "</span>"
+          : "—";
+        return "<tr>" +
+          "<td>" + esc(intelSelLabel(s.selection, fx)) + "</td>" +
+          "<td class='num'>" + (s.consensus_prob != null ? pct(s.consensus_prob, 1) : "—") + "</td>" +
+          "<td>" + intelPriceCell(s, "best_odds", "best_venue") + "</td>" +
+          "<td>" + intelPriceCell(s, "worst_odds", "worst_venue") + "</td>" +
+          "<td class='num'>" + (s.implied_range != null ? pctp(s.implied_range * 100, 1) : "—") + "</td>" +
+          "<td class='num'>" + (s.pct_improvement != null ? pct(s.pct_improvement, 1) : "—") + "</td>" +
+          "<td>" + disagree + "</td>" +
+          "</tr>";
+      }).join("");
+      return "<div class='sub-panel'><div class='sub-head'>" +
+        esc(intelMktLabel(m.market_type, m.line)) +
+        " <span class='dim'>· " + (m.n_venues || 0) + " books</span> " + intelStaleBadge(m.stale, m.age_secs) +
+        "</div><table class='a-tbl'><thead><tr>" +
+        "<th>Selection</th><th class='num'>Consensus</th><th>Best</th><th>Worst</th><th class='num'>Range</th><th class='num'>%Δ best/worst</th><th>Widest split</th>" +
+        "</tr></thead><tbody>" + rows + "</tbody></table></div>";
+    }).join("");
+    var ml = mkts.filter(function (m) { return m.market_type === "moneyline" && m.history; })[0];
+    var charts = ml ? intelHistoryBlock(ml.history, fx) : "";
+    return "<div class='sub-head'>" + esc((fx.home || "?") + " v " + (fx.away || "?")) +
+      (fx.ko_utc ? " <span class='dim'>· KO " + esc(String(fx.ko_utc).slice(0, 16).replace("T", " ")) + " UTC</span>" : "") +
+      "</div>" + charts + blocks;
+  }
+
+  // Price history: implied-prob + decimal-odds over time, one line per venue.
+  function intelHistoryBlock(hist, fx) {
+    if (!hist || !hist.series || !hist.series.length) return "";
+    var sel = intelSelLabel(hist.selection, fx);
+    if (!hist.chartable) {
+      return "<div class='two-col'><div class='sub-panel'><div class='sub-head'>Price history · " + esc(sel) +
+        "</div>" + empty("history accrues as snapshots are collected (currently " +
+          (hist.n_points || 0) + " point" + ((hist.n_points === 1) ? "" : "s") + " — one capture so far)", true) + "</div></div>";
+    }
+    var legend = "<div class='legend'>" + hist.series.map(function (s) {
+      return "<span>" + intelDot(s.colour) + esc(s.venue) + "</span>";
+    }).join("") + "</div>";
+    return "<div class='two-col'>" +
+      "<div class='sub-panel'><div class='sub-head'>Implied probability over time · " + esc(sel) + "</div>" +
+        intelHistChart(hist.series, 2, { pct: true }) + "</div>" +
+      "<div class='sub-panel'><div class='sub-head'>Decimal odds over time · " + esc(sel) + "</div>" +
+        intelHistChart(hist.series, 1, { pct: false }) + "</div>" +
+      "</div>" + legend;
+  }
+
+  function intelHistChart(series, vi, opts) {
+    opts = opts || {};
+    var pts = [];
+    series.forEach(function (s) { (s.points || []).forEach(function (p) {
+      var t = Date.parse(p[0]); var v = p[vi];
+      if (!isNaN(t) && v != null && !isNaN(v)) pts.push([t, Number(v)]);
+    }); });
+    if (pts.length < 2) return empty("not enough points to plot");
+    var tMin = Math.min.apply(null, pts.map(function (p) { return p[0]; }));
+    var tMax = Math.max.apply(null, pts.map(function (p) { return p[0]; }));
+    var vMin = Math.min.apply(null, pts.map(function (p) { return p[1]; }));
+    var vMax = Math.max.apply(null, pts.map(function (p) { return p[1]; }));
+    if (tMax === tMin) tMax = tMin + 1;
+    var pad = (vMax - vMin) * 0.12 || (vMax * 0.05) || 0.05;
+    vMin -= pad; vMax += pad;
+    var W = 460, H = 180, P = { l: 44, r: 10, t: 10, b: 22 };
+    var X = function (t) { return P.l + (t - tMin) / (tMax - tMin) * (W - P.l - P.r); };
+    var Y = function (v) { return P.t + (1 - (v - vMin) / (vMax - vMin)) * (H - P.t - P.b); };
+    var parts = [];
+    [0, 0.5, 1].forEach(function (g) {
+      var vv = vMin + g * (vMax - vMin), yy = Y(vv);
+      parts.push("<line class='cx-grid' x1='" + P.l + "' y1='" + yy + "' x2='" + (W - P.r) + "' y2='" + yy + "'/>");
+      parts.push("<text class='cx-tick' x='" + (P.l - 5) + "' y='" + (yy + 3) + "' text-anchor='end'>" +
+        (opts.pct ? Math.round(vv * 100) + "%" : vv.toFixed(2)) + "</text>");
+    });
+    series.forEach(function (s) {
+      var sp = (s.points || []).map(function (p) { return [Date.parse(p[0]), Number(p[vi])]; })
+        .filter(function (p) { return !isNaN(p[0]) && !isNaN(p[1]); })
+        .sort(function (a, b) { return a[0] - b[0]; });
+      if (!sp.length) return;
+      var col = s.colour || "#9A93B0";
+      if (sp.length === 1) { parts.push("<circle cx='" + X(sp[0][0]) + "' cy='" + Y(sp[0][1]) + "' r='3' fill='" + col + "'/>"); return; }
+      var d = sp.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join(" ");
+      parts.push("<path d='" + d + "' fill='none' stroke='" + col + "' stroke-width='1.6'/>");
+    });
+    return svg(W, H, parts.join(""));
+  }
+
+  function intelNotes(meta) {
+    var notes = (meta && meta.notes) || [];
+    if (!notes.length) return "";
+    return "<p class='a-note'><b>Honest scope.</b> " + notes.map(esc).join(" ") +
+      " Consensus is vig-removed (Shin) over complete books only; best/worst are raw quoted odds. Cross-venue gap (%Δ) is the dependable structural edge — execution/cost, not prediction.</p>";
+  }
+
   function load(name, file) {
     return fetch("./data/" + file, { cache: "no-store" })
       .then(function (r) { return r.ok ? r.json() : null; })
@@ -835,13 +1059,14 @@
       load("risk", "risk_pnl.json"),
       load("scores", "scores_data.json"),
       load("venues", "venues_benchmark.json"),
+      load("intel", "market_intel.json"),
     ]).then(function () {
       var any = Object.keys(FEEDS).some(function (k) { return FEEDS[k]; });
       if (!any) { $("nodata").hidden = false; $("nodata-msg").textContent = "NO DATA FEED — could not load ./data/*.json"; }
       var pendingNew = ["predledger", "winrate", "clvbench", "rigor", "risk"].filter(function (k) { return !FEEDS[k]; });
       if (pendingNew.length) { $("nodata").hidden = false; $("nodata-msg").textContent = "Backend feeds still building: " + pendingNew.join(", ") + " — live panels render once published."; }
 
-      [renderKpi, renderVerdict, renderRisk, renderForest, renderEventMarkets, renderWinrate, renderClv, renderVenues, renderLedger].forEach(function (fn) {
+      [renderKpi, renderVerdict, renderRisk, renderForest, renderEventMarkets, renderWinrate, renderClv, renderVenues, renderMarketIntel, renderLedger].forEach(function (fn) {
         try { fn(); } catch (e) { /* never let one panel break the page */ if (window.console) console.error(fn.name, e); }
       });
       var gen = (FEEDS.data && FEEDS.data.meta && FEEDS.data.meta.generated) || "";
