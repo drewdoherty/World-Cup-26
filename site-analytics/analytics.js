@@ -966,9 +966,69 @@
         "<th>Selection</th><th class='num'>Consensus</th><th>Best</th><th>Worst</th><th class='num'>Range</th><th class='num'>%Δ best/worst</th><th>Widest split</th>" +
         "</tr></thead><tbody>" + rows + "</tbody></table></div>";
     }).join("");
+    var ml = mkts.filter(function (m) { return m.market_type === "moneyline" && m.history; })[0];
+    var charts = ml ? intelHistoryBlock(ml.history, fx) : "";
     return "<div class='sub-head'>" + esc((fx.home || "?") + " v " + (fx.away || "?")) +
       (fx.ko_utc ? " <span class='dim'>· KO " + esc(String(fx.ko_utc).slice(0, 16).replace("T", " ")) + " UTC</span>" : "") +
-      "</div>" + blocks;
+      "</div>" + charts + blocks;
+  }
+
+  // Price history: implied-prob + decimal-odds over time, one line per venue.
+  function intelHistoryBlock(hist, fx) {
+    if (!hist || !hist.series || !hist.series.length) return "";
+    var sel = intelSelLabel(hist.selection, fx);
+    if (!hist.chartable) {
+      return "<div class='two-col'><div class='sub-panel'><div class='sub-head'>Price history · " + esc(sel) +
+        "</div>" + empty("history accrues as snapshots are collected (currently " +
+          (hist.n_points || 0) + " point" + ((hist.n_points === 1) ? "" : "s") + " — one capture so far)", true) + "</div></div>";
+    }
+    var legend = "<div class='legend'>" + hist.series.map(function (s) {
+      return "<span>" + intelDot(s.colour) + esc(s.venue) + "</span>";
+    }).join("") + "</div>";
+    return "<div class='two-col'>" +
+      "<div class='sub-panel'><div class='sub-head'>Implied probability over time · " + esc(sel) + "</div>" +
+        intelHistChart(hist.series, 2, { pct: true }) + "</div>" +
+      "<div class='sub-panel'><div class='sub-head'>Decimal odds over time · " + esc(sel) + "</div>" +
+        intelHistChart(hist.series, 1, { pct: false }) + "</div>" +
+      "</div>" + legend;
+  }
+
+  function intelHistChart(series, vi, opts) {
+    opts = opts || {};
+    var pts = [];
+    series.forEach(function (s) { (s.points || []).forEach(function (p) {
+      var t = Date.parse(p[0]); var v = p[vi];
+      if (!isNaN(t) && v != null && !isNaN(v)) pts.push([t, Number(v)]);
+    }); });
+    if (pts.length < 2) return empty("not enough points to plot");
+    var tMin = Math.min.apply(null, pts.map(function (p) { return p[0]; }));
+    var tMax = Math.max.apply(null, pts.map(function (p) { return p[0]; }));
+    var vMin = Math.min.apply(null, pts.map(function (p) { return p[1]; }));
+    var vMax = Math.max.apply(null, pts.map(function (p) { return p[1]; }));
+    if (tMax === tMin) tMax = tMin + 1;
+    var pad = (vMax - vMin) * 0.12 || (vMax * 0.05) || 0.05;
+    vMin -= pad; vMax += pad;
+    var W = 460, H = 180, P = { l: 44, r: 10, t: 10, b: 22 };
+    var X = function (t) { return P.l + (t - tMin) / (tMax - tMin) * (W - P.l - P.r); };
+    var Y = function (v) { return P.t + (1 - (v - vMin) / (vMax - vMin)) * (H - P.t - P.b); };
+    var parts = [];
+    [0, 0.5, 1].forEach(function (g) {
+      var vv = vMin + g * (vMax - vMin), yy = Y(vv);
+      parts.push("<line class='cx-grid' x1='" + P.l + "' y1='" + yy + "' x2='" + (W - P.r) + "' y2='" + yy + "'/>");
+      parts.push("<text class='cx-tick' x='" + (P.l - 5) + "' y='" + (yy + 3) + "' text-anchor='end'>" +
+        (opts.pct ? Math.round(vv * 100) + "%" : vv.toFixed(2)) + "</text>");
+    });
+    series.forEach(function (s) {
+      var sp = (s.points || []).map(function (p) { return [Date.parse(p[0]), Number(p[vi])]; })
+        .filter(function (p) { return !isNaN(p[0]) && !isNaN(p[1]); })
+        .sort(function (a, b) { return a[0] - b[0]; });
+      if (!sp.length) return;
+      var col = s.colour || "#9A93B0";
+      if (sp.length === 1) { parts.push("<circle cx='" + X(sp[0][0]) + "' cy='" + Y(sp[0][1]) + "' r='3' fill='" + col + "'/>"); return; }
+      var d = sp.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join(" ");
+      parts.push("<path d='" + d + "' fill='none' stroke='" + col + "' stroke-width='1.6'/>");
+    });
+    return svg(W, H, parts.join(""));
   }
 
   function intelNotes(meta) {

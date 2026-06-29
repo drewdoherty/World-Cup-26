@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Sequence
 
 from wca.intel.metrics import build_market_metrics
-from wca.intel.registry import VENUES, venue_colour
+from wca.intel.registry import VENUES, venue_colour, venue_for
 from wca.intel.store import MarketSnapshot
 
 #: Quotes older than this (seconds) are flagged stale / not executable.
@@ -68,6 +68,55 @@ def venue_legend() -> List[Dict[str, object]]:
             for v in VENUES.values()]
 
 
+#: How many points to keep per (selection, venue) series (down-sampled, newest-biased).
+DEFAULT_HISTORY_POINTS = 60
+
+
+def _primary_selection(selections: Sequence[str]) -> Optional[str]:
+    """The one outcome a single-line-per-venue chart should track for a market."""
+    for pref in ("Home", "Over", "Yes"):
+        if pref in selections:
+            return pref
+    return selections[0] if selections else None
+
+
+def _history_series(snaps: Sequence[MarketSnapshot], selection: str,
+                    max_points: int = DEFAULT_HISTORY_POINTS) -> List[Dict[str, object]]:
+    """Per-venue time-series for one selection: [{venue, colour, points:[[ts,odds,implied]]}].
+
+    Only registered venues are charted (so colours are meaningful and the line
+    count stays bounded); each series is time-ordered and tail-capped to
+    ``max_points`` so the feed stays compact as history accrues.
+    """
+    by_venue: Dict[str, List[List[object]]] = {}
+    for s in snaps:
+        if s.selection != selection or s.ts_utc is None:
+            continue
+        if venue_for(s.venue) is None:   # chart curated venues only
+            continue
+        by_venue.setdefault(s.venue, []).append([s.ts_utc, s.decimal_odds, s.implied_raw])
+    out: List[Dict[str, object]] = []
+    for venue, pts in by_venue.items():
+        pts.sort(key=lambda p: p[0] or "")
+        if len(pts) > max_points:
+            pts = pts[-max_points:]
+        out.append({"venue": venue, "colour": venue_colour(venue), "points": pts})
+    out.sort(key=lambda d: d["venue"])
+    return out
+
+
+def _market_history(group: Sequence[MarketSnapshot], selections: Sequence[str]) -> Optional[Dict[str, object]]:
+    """Compact price-history block for a market's primary outcome (chart input)."""
+    sel = _primary_selection(list(selections))
+    if not sel:
+        return None
+    series = _history_series(group, sel)
+    n_pts = sum(len(s["points"]) for s in series)
+    if not series or n_pts <= len(series):   # nothing to plot yet (≤1 point/venue)
+        return {"selection": sel, "series": series, "n_points": n_pts, "chartable": False}
+    return {"selection": sel, "series": series, "n_points": n_pts, "chartable": True}
+
+
 def build_feed(snaps: Sequence[MarketSnapshot], *, now_utc: str,
                fixture_meta: Optional[Dict[str, Dict[str, object]]] = None,
                models: Optional[Dict[str, Dict[str, Dict[str, float]]]] = None,
@@ -103,13 +152,19 @@ def build_feed(snaps: Sequence[MarketSnapshot], *, now_utc: str,
             lt = _parse(latest_ts)
             age = (now - lt).total_seconds() if (now and lt) else None
             n_markets += 1
-            m_out.append({
+            m_rec = {
                 "market_type": mt, "line": line,
                 "n_venues": max((m.get("n_venues", 0) for m in sel_metrics), default=0),
                 "latest_ts": latest_ts, "age_secs": age,
                 "stale": (age is None or age > stale_s),
                 "selections": sel_metrics,
-            })
+            }
+            # Price-history chart input for the headline 1X2 market (bounded).
+            if mt == "moneyline":
+                hist = _market_history(group, list(latest.keys()))
+                if hist:
+                    m_rec["history"] = hist
+            m_out.append(m_rec)
         fixtures.append({
             "fixture_id": fid, "home": meta.get("home"), "away": meta.get("away"),
             "ko_utc": meta.get("ko_utc"), "markets": m_out,

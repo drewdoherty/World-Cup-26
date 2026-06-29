@@ -21,4 +21,8 @@ from wca.intel.metrics import (  # noqa: F401
     selection_metrics, consensus_probs, build_market_metrics,
 )
 from wca.intel.feed import build_feed, venue_legend  # noqa: F401
-from wca.intel import normalise  # noqa: F401
+from wca.intel.poller import (  # noqa: F401
+    PollingConfig, Fixture, FixturePlan, plan_polls, load_polling_config, default_polling_config,
+)
+from wca.intel.arb import ArbLeg, ArbOpportunity, scan_market, format_arb_report  # noqa: F401
+from wca.intel import normalise, sources  # noqa: F401
