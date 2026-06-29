@@ -78,6 +78,13 @@ _RESULT_MARKETS = {
     "h2h", "1x2", "moneyline", "money line",
 }
 
+#: Bare over/under market names that carry no "goals" word in the market label.
+#: ``wca.accas`` and the ledger use ``"totals"`` as the canonical match-totals
+#: key (selection like "Over 2.5"), so match the market name directly.
+_TOTALS_MARKETS = {
+    "totals", "total", "match total", "match totals", "goals",
+}
+
 
 def _norm(s: Any) -> str:
     return str(s or "").strip().lower()
@@ -166,6 +173,11 @@ def _classify(market: str, selection: str) -> str:
     ):
         return "over_under"
     if "goals" in blob and (_OVER_RE.search(blob) or _UNDER_RE.search(blob)):
+        return "over_under"
+    # Bare totals market (canonical accas/ledger key, e.g. market="totals",
+    # selection="Over 2.5") — no "goals" word in the label, so key off the
+    # market name when the selection states an over/under side.
+    if m in _TOTALS_MARKETS and (_OVER_RE.search(s) or _UNDER_RE.search(s)):
         return "over_under"
     if m in _RESULT_MARKETS:
         return "result"
