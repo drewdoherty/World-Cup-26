@@ -39,6 +39,7 @@ from wca.markets import kelly as kelly_mod
 from wca.models import venues as venues_mod
 from wca.models.dixon_coles import DixonColesModel
 from wca.models.elo import EloOutcomeModel, EloRater
+from wca.models.props import CardsModel, CornersModel
 from wca.models.scores import ScorelineCard, scoreline_card
 
 # 1X2 outcome order used throughout: home, draw, away.
@@ -255,6 +256,13 @@ IMMINENT_EDGE_DISCOUNT: float = 0.5       # halve the modelled edge on imminent
 #                                           fixtures before sizing (flag, don't
 #                                           size the full gap).
 FURTHER_OUT_HOURS: float = 24.0           # >= this = "further out" → prioritised.
+
+# Reference-only match-event lines surfaced on the card (DISPLAY ONLY, never
+# staked). Half-integer so no continuity correction is needed in the NB models.
+# Corners 8.5 matches the next-match preview default (DEFAULT_CORNERS_LINE);
+# cards 3.5 straddles the calibrated WC base rate (~3.41 total cards/match).
+DEFAULT_EVENT_CORNERS_LINE: float = 8.5
+DEFAULT_EVENT_CARDS_LINE: float = 3.5
 
 # Cross-venue. The odds-source orchestrator tags every price with a
 # ``bookmaker_key``; these are the three venues the desk actually deploys into.
@@ -1166,6 +1174,171 @@ def build_score_cards(
             )
         )
     return cards
+
+
+# ---------------------------------------------------------------------------
+# Match-event references (DISPLAY ONLY — never staked, never sized).
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class MatchEventsReference:
+    """Reference-only match-event view for one fixture (NOT a stakeable pick).
+
+    Surfaces corners O/U, cards O/U and BTTS alongside the main bet card purely
+    as *reference*. None of these fields feed sizing, Kelly or the +EV gate —
+    they reuse already-fitted models (the same Dixon-Coles expected goals the
+    1X2 bets use) so the desk can eyeball event markets without a second
+    pipeline. There is deliberately no ``edge``, ``stake`` or best-price field:
+    these are never staked.
+
+    Fields
+    ------
+    home, away:
+        Canonical team labels (same spelling as the 1X2 recommendations).
+    commence_time:
+        ISO-8601 kickoff string, copied from the fixture's odds feed.
+    corners_line / corners_p_over / corners_mu:
+        The corners O/U line, P(total corners > line) from
+        :class:`~wca.models.props.CornersModel`, and the model's expected total
+        corners. Reuses the exact CornersModel path :mod:`wca.nextmatch` uses.
+    cards_line / cards_p_over / cards_mu:
+        The cards O/U line, P(total cards > line) from
+        :class:`~wca.models.props.CardsModel` (previously orphaned — wired here
+        for the first time), and the expected total cards. With no team
+        aggression priors available at card-build time the multipliers stay at
+        their 1.0 defaults, so this is the tournament base rate — flagged as a
+        baseline in the formatter.
+    btts:
+        P(both teams score), taken from the reconciled scoreline matrix so it is
+        consistent with the blended 1X2 the card bets against (identical source
+        to the scoreline reference already shown in the footer).
+    """
+
+    home: str
+    away: str
+    commence_time: str
+    corners_line: float
+    corners_p_over: float
+    corners_mu: float
+    cards_line: float
+    cards_p_over: float
+    cards_mu: float
+    btts: float
+
+
+def build_event_references(
+    models: FittedModels,
+    odds_df: pd.DataFrame,
+    fixtures_meta: pd.DataFrame,
+    weights: BlendWeights = BlendWeights(),
+    host_nations: Sequence[str] = ("United States", "Mexico", "Canada", "USA"),
+    neutral_host_factor: float = DEFAULT_NEUTRAL_HOST_FACTOR,
+    corners_line: float = DEFAULT_EVENT_CORNERS_LINE,
+    cards_line: float = DEFAULT_EVENT_CARDS_LINE,
+    corners_model: Optional[CornersModel] = None,
+    cards_model: Optional[CardsModel] = None,
+) -> List[MatchEventsReference]:
+    """Reference-only match-event view per fixture already on the card.
+
+    DISPLAY ONLY. For every fixture with a usable market this reuses the
+    already-fitted models — the Dixon-Coles expected goals behind the 1X2 bets —
+    to surface three event markets as *reference, never staked*:
+
+    * **corners O/U** via :class:`~wca.models.props.CornersModel`, driven by the
+      DC ``lambda_home`` / ``lambda_away`` exactly like :mod:`wca.nextmatch`;
+    * **cards O/U** via :class:`~wca.models.props.CardsModel` (calibrated but
+      previously never called — wired in here at its tournament base rate, with
+      aggression multipliers left at 1.0 as no team foul priors are available at
+      card-build time);
+    * **BTTS** from the reconciled scoreline matrix (the same source as the
+      scoreline reference in the footer), so it agrees with the blended 1X2.
+
+    No probability or Kelly math from :func:`build_card` is touched — this is a
+    parallel, non-staked surface aligned one-to-one with the fixtures that
+    survive market filtering, in odds-feed order.
+
+    Parameters
+    ----------
+    models, odds_df, fixtures_meta, weights, host_nations, neutral_host_factor:
+        As in :func:`build_card` / :func:`build_score_cards`; ``weights`` should
+        match the recommendations so BTTS reconciles to the same 1X2.
+    corners_line, cards_line:
+        Half-integer O/U lines to evaluate (defaults 8.5 / 3.5).
+    corners_model, cards_model:
+        Optional pre-built models (defaults to fresh calibrated instances).
+    """
+    blends = _iter_fixture_blends(
+        models, odds_df, fixtures_meta, weights, host_nations, neutral_host_factor
+    )
+
+    cm = corners_model or CornersModel()
+    km = cards_model or CardsModel()
+
+    refs: List[MatchEventsReference] = []
+    for fb in blends:
+        pred = models.dc.predict(fb.home, fb.away, neutral=fb.neutral, warn=False)
+        lam_h = float(getattr(pred, "lambda_home", 0.0) or 0.0)
+        lam_a = float(getattr(pred, "lambda_away", 0.0) or 0.0)
+
+        # BTTS from the reconciled matrix so it matches the blended 1X2 bets use.
+        scores = scoreline_card(
+            pred,
+            (fb.blended["home"], fb.blended["draw"], fb.blended["away"]),
+            home=fb.home,
+            away=fb.away,
+        )
+
+        refs.append(
+            MatchEventsReference(
+                home=fb.home,
+                away=fb.away,
+                commence_time=str(fb.fx["commence_time"]),
+                corners_line=float(corners_line),
+                corners_p_over=cm.prob_over(corners_line, lam_h, lam_a),
+                corners_mu=cm.mean_total(lam_h, lam_a),
+                cards_line=float(cards_line),
+                cards_p_over=km.prob_over(cards_line),
+                cards_mu=km.mean_total(),
+                btts=float(scores.btts),
+            )
+        )
+    return refs
+
+
+def format_event_references(refs: Sequence[MatchEventsReference]) -> str:
+    """Human-readable match-event reference block (Markdown), clearly non-staked.
+
+    Renders the corners O/U, cards O/U and BTTS surfaced by
+    :func:`build_event_references`. Every line is explicitly flagged
+    REFERENCE / NOT STAKED — these markets are never sized and carry no edge.
+    """
+    if not refs:
+        return "*No match-event references* for the current slate."
+    lines: List[str] = [
+        "*World Cup Alpha — match events (REFERENCE, NOT STAKED)* (%d fixtures)"
+        % len(refs),
+        "_Reference only — reused models, never sized, no edge/stake._",
+    ]
+    for r in refs:
+        lines.append("")
+        lines.append("*%s vs %s*" % (r.home, r.away))
+        lines.append(
+            "    corners O/U %.1f: over %.1f%% / under %.1f%%  (xCorners %.1f)"
+            % (
+                r.corners_line, r.corners_p_over * 100,
+                (1.0 - r.corners_p_over) * 100, r.corners_mu,
+            )
+        )
+        lines.append(
+            "    cards O/U %.1f: over %.1f%% / under %.1f%%  (xCards %.1f, base rate)"
+            % (
+                r.cards_line, r.cards_p_over * 100,
+                (1.0 - r.cards_p_over) * 100, r.cards_mu,
+            )
+        )
+        lines.append("    BTTS: yes %.1f%% / no %.1f%%" % (r.btts * 100, (1.0 - r.btts) * 100))
+    return "\n".join(lines)
 
 
 def apply_daily_exposure_caps(
