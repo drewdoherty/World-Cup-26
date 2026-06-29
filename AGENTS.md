@@ -57,7 +57,22 @@ defensively (`config._augmented_path`), but fixing it at the launch level is
 the durable fix. For PR creation without `gh`, provide `GH_TOKEN`/`GITHUB_TOKEN`
 (the REST fallback and `scripts/gh_pr.sh` use it).
 
-## 5. Quick reference
+## 5. Data & generated-artifact discipline
+
+**Raw data and generated artifacts are NEVER committed — they are
+re-downloadable or rebuilt at deploy.** Git tracks source (code, config, durable
+hand-curated datasets), not runtime input or build output.
+
+- **Raw odds-API snapshots** (`data/raw/snapshots/`) — re-downloadable; untracked
+  via `data/raw/*`. Mirror to off-repo object storage, never to git.
+- **Generated site feeds** (`site/*.json`, `site/microstructure/*.json`) — build
+  output of the card/feed/sync jobs. These should be produced at deploy/serve
+  time, not version-controlled. See `docs/data-and-artifacts.md` for the current
+  publish path and the migration needed before they can be safely untracked.
+- The durable, hand-curated exceptions stay tracked and are listed explicitly in
+  `.gitignore` (`!data/raw/martj42_cleaned.csv`, `!data/processed/wc2026_results.json`).
+
+## 6. Quick reference
 
 - Entry: `scripts/wca_conductor.py`; pipeline: `runner.py`; fan-out/cap/health/merge: `manager.py`; routing: `dispatcher.py`; safe env + PATH/bin resolution: `config.py`; auth probing: `health.py`.
 - PR fallback script: `scripts/gh_pr.sh`. Tests: `tests/test_conductor.py` (offline; the `runner._run` seam is patched).
