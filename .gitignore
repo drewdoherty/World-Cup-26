@@ -16,7 +16,10 @@ data/*.db
 !data/raw/martj42_cleaned.csv
 .DS_Store
 .claude/
-!data/raw/snapshots/
+# Raw odds-API snapshots are re-downloadable runtime input, NOT source. They are
+# covered by `data/raw/*` above and must stay untracked (they totalled ~625 MB /
+# 533 files when removed). Durable storage lives off-repo — see
+# docs/data-and-artifacts.md.
 !data/processed/wc2026_results.json
 
 # SQLite WAL sidecars (live DB state — never track)
