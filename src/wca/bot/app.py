@@ -944,7 +944,7 @@ def handle_settle(text: str, db_path: str) -> str:
     # Settling moves a bet from open -> closed, so the site's closed-positions
     # feed is now stale. Regenerate + push it immediately rather than waiting up
     # to an hour for the publish cron. Best-effort (never blocks the reply).
-    _sheets_settle_bet(bet_id, db_path)
+    _notion_settle_bet(bet_id, db_path)
     _autosync(db_path, reason="bet %d settled %s" % (bet_id, outcome))
     return reply
 
@@ -1492,7 +1492,7 @@ def handle_photo_confirmation(
         except Exception as exc:  # report per-bet failure, keep going
             logged.append("ERR %s: %s" % (b.selection, exc))
     new_ids = [int(l.split()[0].lstrip("#")) for l in logged if l.startswith("#")]
-    _sheets_push_bets(new_ids, db_path)
+    _notion_push_bets(new_ids, db_path)
     _autosync(db_path, "screenshot ingest")
     a2 = " (A2)" if account == "2" else ""
     return "Logged %d to the ledger [%s%s]:\n%s" % (
@@ -1512,31 +1512,31 @@ def _autosync(db_path: str, reason: str) -> None:
         print("[bot] autosync skipped: %s" % exc)
 
 
-def _sheets_push_bets(bet_ids: list, db_path: str) -> None:
-    """Push newly recorded bets to Google Sheets. Fire-and-forget, never raises."""
+def _notion_push_bets(bet_ids: list, db_path: str) -> None:
+    """Push newly recorded bets to Notion. Fire-and-forget, never raises."""
     import os
-    if not os.environ.get("SHEETS_BET_LEDGER_ID"):
+    if not os.environ.get("NOTION_TOKEN") or not os.environ.get("NOTION_BET_DB_ID"):
         return
     try:
-        from wca.sheets.sync import push_single_bet
+        from wca.notion.sync import push_single_bet
         for bid in bet_ids:
             push_single_bet(bid, db_path=db_path)
-        print("[bot] sheets: pushed %d bet(s)" % len(bet_ids))
+        print("[bot] notion: pushed %d bet(s)" % len(bet_ids))
     except Exception as exc:
-        print("[bot] sheets push skipped: %s" % exc)
+        print("[bot] notion push skipped: %s" % exc)
 
 
-def _sheets_settle_bet(bet_id: int, db_path: str) -> None:
-    """Move a settled bet from Open → Closed in Google Sheets. Never raises."""
+def _notion_settle_bet(bet_id: int, db_path: str) -> None:
+    """Update a settled bet's Notion page. Never raises."""
     import os
-    if not os.environ.get("SHEETS_BET_LEDGER_ID"):
+    if not os.environ.get("NOTION_TOKEN") or not os.environ.get("NOTION_BET_DB_ID"):
         return
     try:
-        from wca.sheets.sync import settle_in_sheet
-        settle_in_sheet(bet_id, db_path=db_path)
-        print("[bot] sheets: moved bet %d to Closed" % bet_id)
+        from wca.notion.sync import settle_in_notion
+        settle_in_notion(bet_id, db_path=db_path)
+        print("[bot] notion: updated settled bet %d" % bet_id)
     except Exception as exc:
-        print("[bot] sheets settle skipped: %s" % exc)
+        print("[bot] notion settle skipped: %s" % exc)
 
 
 # ---------------------------------------------------------------------------
@@ -2181,7 +2181,7 @@ def _execute_parked_order(
                 "wallet on-chain." % (n, order_id, bid, " and ".join(missing))
             )
 
-    _sheets_push_bets([bid], db_path)
+    _notion_push_bets([bid], db_path)
     _autosync(db_path, "polymarket order")
     mode = "DRY-RUN (signed, not submitted)" if dry_run else "LIVE — submitted"
     return (
