@@ -233,6 +233,18 @@ FLAT_KELLY_FRACTION: float = 0.25
 # are reported side-by-side in the card footer so the gap between "what we hold"
 # and "what the evidence clears us to deploy" is always explicit. Passed as an
 # INPUT to the resolver (default here is the documented figure, never sized off).
+#
+# BANKROLL-FUNGIBILITY RULE (user, 2026-06-30) — applies to ALL sizing, here and
+# anywhere else stakes are computed (see also wca.exposure_corr.DEFAULT_BANKROLL
+# and docs/policy/bankroll.md):
+#   Capital moves FREELY across accounts, venues and currencies (£<->$). The
+#   bankroll is ALWAYS this combined effective pool (~£3,000), NEVER the balance
+#   sitting in any one account, venue, app or wallet. A balance shown in a single
+#   book — e.g. a "£276.57" sportsbook-app wallet on a bet slip — is a liquidity/
+#   routing detail (top-ups and transfers are assumed frictionless), NOT a sizing
+#   cap. Size off the combined pool, then route the stake to whichever venue holds
+#   the bet and move funds to cover it. Do NOT shrink a stake because one wallet
+#   looks light.
 DEFAULT_ACTUAL_CAPITAL_GBP: float = 3000.0
 
 # Staking is a flat QUARTER-KELLY at every rung (user, 2026-06-26): there is no

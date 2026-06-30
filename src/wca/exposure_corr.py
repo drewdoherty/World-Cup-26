@@ -53,6 +53,11 @@ from .models.scores import (
 
 # Effective combined bankroll (£1,500 sportsbook pool + ~$1,995 ≈ £1,500
 # on-chain) used for the per-underlying exposure cap.
+#
+# This is the COMBINED, cross-venue, cross-currency pool — capital is fungible
+# (£<->$, freely transferable between accounts/venues), so the bankroll is never
+# the balance in any single account/wallet/app. See the bankroll-fungibility rule
+# in wca.card (near DEFAULT_ACTUAL_CAPITAL_GBP) and docs/policy/bankroll.md.
 DEFAULT_BANKROLL = 3000.0
 
 # Max NET downside per correlated underlying (one fixture = one exposure).

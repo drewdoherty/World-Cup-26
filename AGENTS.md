@@ -31,6 +31,7 @@ token accounting + auth, and everything routed to Claude in practice). Routing
 6. **Integration over parallel-merge.** When several related branches exist, create ONE `integrate/<topic>` branch off `main`, merge/cherry-pick the chosen branches into it, resolve conflicts once, get tests green, open one PR. Pick the *better* of any duplicate pair — never both.
 7. **Pre-flight file-overlap check.** Two tasks touching the same file (`src/wca/bot/app.py`, `src/wca/accas.py`, `scripts/wca_build_card.py`) must be serialized or merged into one task.
 8. **Every task must leave the tree green.** Run `pytest -q` in the worktree before push; a red suite is FAILED, not PUSHED.
+9. **Bankroll is the combined fungible pool (~£3,000), never a single wallet balance.** Capital moves freely across accounts/venues/currencies (£↔$); a balance shown in one app (e.g. a £276 sportsbook wallet on a bet slip) is a routing detail, not a sizing cap. Size off the pool, then route. Full rule: `docs/policy/bankroll.md`.
 
 ## 3. Concurrency
 
