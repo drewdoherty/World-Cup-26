@@ -180,6 +180,17 @@ def main() -> None:
         ),
     )
     parser.add_argument("--env", default=".env", help="dotenv file to load")
+    parser.add_argument(
+        "--dc-level-target",
+        type=float,
+        default=None,
+        help=(
+            "Dixon-Coles total-goals level anchor (mean goals/match) the fit is "
+            "recalibrated to via a scalar mu shift. Omit to use the deployed "
+            "default (2.81, the recent World-Cup base rate); pass 0 to disable "
+            "the recalibration and use the raw penalised-MLE intercept."
+        ),
+    )
     args = parser.parse_args()
 
     _load_dotenv(args.env)
@@ -232,9 +243,19 @@ def main() -> None:
     # Load and fit models.
     # ------------------------------------------------------------------
     results_path = resolve_results_path()
+    # Total-goals level anchor: default to the deployed 2.81 recalibration unless
+    # the operator overrides via --dc-level-target (0 disables the shift).
+    from wca.card import DEFAULT_DC_LEVEL_TARGET
+
+    if args.dc_level_target is None:
+        dc_level_target = DEFAULT_DC_LEVEL_TARGET
+    elif args.dc_level_target <= 0:
+        dc_level_target = None
+    else:
+        dc_level_target = float(args.dc_level_target)
     try:
         results = load_results(results_path)
-        models = fit_models(results)
+        models = fit_models(results, dc_level_target=dc_level_target)
     except Exception as exc:
         print("ERROR: model fitting failed: %s" % exc, file=sys.stderr)
         sys.exit(1)
