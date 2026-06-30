@@ -400,6 +400,9 @@ class DixonColesModel:
         self.rho: float = 0.0
         self.match_counts: Dict[str, int] = {}
         self.fitted: bool = False
+        # Total-goals level recalibration target applied to ``mu`` (None = raw
+        # penalised-MLE intercept, the historical default).
+        self._level_target: Optional[float] = None
 
     @property
     def half_life_years(self) -> float:
@@ -457,6 +460,7 @@ class DixonColesModel:
         days_ago: Optional[Sequence[float]] = None,
         neutral: Optional[Sequence[bool]] = None,
         maxiter: int = 500,
+        level_target: Optional[float] = None,
     ) -> "DixonColesModel":
         """Penalised weighted maximum-likelihood fit.
 
@@ -475,6 +479,20 @@ class DixonColesModel:
             home/away (non-neutral) fixture.
         maxiter:
             Maximum L-BFGS-B iterations.
+        level_target:
+            Optional total-goals **level anchor** (mean goals per match) the
+            fitted model should reproduce on its own training slate. When given,
+            after the MLE solve the intercept ``mu`` is shifted by
+            ``Δ = log(level_target / model_slate_total)`` so the fitted-data mean
+            expected total matches ``level_target``. ``attack``/``defence``/
+            ``rho``/``home_advantage`` are untouched, so the supremacy log-ratio
+            ``log(λ_h/λ_a)`` — and therefore the *raw* 1X2 difference — is
+            invariant; only the overall goal level moves. ``None`` (default)
+            leaves the raw MLE intercept unchanged, i.e. behaviour is
+            bit-for-bit identical to the historical fit. See
+            ``docs/research/wca_alpha_2026/08_xg_and_totals.md`` for the
+            recalibration rationale (the global ``mu`` undershoots the recent
+            World-Cup base scoring rate by ~0.4–0.5 goals/match).
         """
         home_teams = list(home_teams)
         away_teams = list(away_teams)
@@ -624,6 +642,34 @@ class DixonColesModel:
         )
 
         atk, dfc, mu, gamma, rho = unpack(res.x)
+
+        # Optional total-goals level recalibration (backward-compatible: only
+        # active when ``level_target`` is supplied). The global penalised-MLE
+        # intercept ``mu`` is anchored to a 49k-match corpus dominated by
+        # lower-scoring defensive internationals and undershoots the recent
+        # World-Cup base scoring rate; this shifts ``mu`` by a scalar so the
+        # fitted-data mean expected total matches ``level_target`` while leaving
+        # the supremacy log-ratio ``log(λ_h/λ_a)`` invariant. See
+        # ``docs/research/wca_alpha_2026/08_xg_and_totals.md`` §5.2.
+        if level_target is not None:
+            # Reference slate is the actual training matchups evaluated at a
+            # NEUTRAL venue (gamma=0). The level anchor must be neutral because
+            # the deployment slate (a World-Cup finals) is neutral; folding home
+            # advantage into the reference would conflate the home-goal uplift
+            # with the base scoring level and under-shift mu. Using the realised
+            # matchups (not an all-pairs round-robin) keeps the reference on
+            # realistic, balanced pairings — a round-robin over the full team
+            # pool is dominated by extreme mismatches whose exp() convexity
+            # inflates the mean far above any real slate.
+            log_lh = mu + atk[hi] - dfc[ai]
+            log_la = mu + atk[ai] - dfc[hi]
+            slate_total = float(
+                (np.exp(log_lh) + np.exp(log_la)).mean()
+            )
+            if slate_total > 0 and level_target > 0:
+                mu = float(mu) + math.log(float(level_target) / slate_total)
+            self._level_target = float(level_target)  # type: ignore[attr-defined]
+
         self.attack = {t: float(atk[i]) for i, t in enumerate(teams)}
         self.defence = {t: float(dfc[i]) for i, t in enumerate(teams)}
         self.mu = float(mu)
@@ -633,7 +679,13 @@ class DixonColesModel:
         self._opt_result = res  # type: ignore[attr-defined]
         return self
 
-    def fit_dataframe(self, df: "pd.DataFrame", reference_date=None, maxiter: int = 500) -> "DixonColesModel":
+    def fit_dataframe(
+        self,
+        df: "pd.DataFrame",
+        reference_date=None,
+        maxiter: int = 500,
+        level_target: Optional[float] = None,
+    ) -> "DixonColesModel":
         """Fit from a results ``DataFrame``.
 
         Required columns: ``home_team``, ``away_team``, ``home_score``,
@@ -662,7 +714,92 @@ class DixonColesModel:
             days_ago=days_ago,
             neutral=neutral,
             maxiter=maxiter,
+            level_target=level_target,
         )
+
+    def recalibrate_level(
+        self,
+        target_total: float,
+        *,
+        neutral: bool = True,
+        fixtures: Optional[Sequence[Tuple[str, str]]] = None,
+    ) -> float:
+        """Shift the level anchor ``mu`` so the slate mean total ≈ ``target_total``.
+
+        This is the post-fit / file-level equivalent of ``fit(level_target=...)``:
+        it computes the model's current mean expected total over a reference set
+        of fixtures and adds ``Δ = log(target_total / model_slate_total)`` to
+        ``mu``. ``attack``/``defence``/``rho``/``home_advantage`` are untouched,
+        so the supremacy log-ratio (and the raw 1X2 *difference*) is invariant;
+        only the goal level moves.
+
+        Parameters
+        ----------
+        target_total:
+            Desired mean total goals per match on the reference slate.
+        neutral:
+            Whether the reference slate is played at neutral venues (World-Cup
+            fixtures are neutral). Controls whether ``home_advantage`` enters the
+            per-fixture lambdas.
+        fixtures:
+            Reference ``(home, away)`` slate the level is anchored against —
+            **strongly prefer passing the actual deployment fixtures** (e.g. the
+            World-Cup finals pairings). When ``None``, an all-pairs round-robin
+            over the fitted ``teams`` is used; this is only meaningful for a
+            *balanced* team pool, because over a broad real pool (hundreds of
+            teams of wildly varying strength) the round-robin mean is dominated
+            by extreme mismatches whose ``exp()`` convexity inflates the total
+            far above any realistic slate. Production callers
+            (``scripts/wca_recalibrate_dc_level.py``) pass the explicit WC slate.
+
+        Returns
+        -------
+        float
+            The applied ``Δmu`` (added to ``mu``).
+        """
+        if target_total <= 0:
+            raise ValueError("target_total must be positive")
+        if not self.teams:
+            raise RuntimeError("model has no fitted teams to recalibrate against")
+
+        gamma = self.home_advantage if not neutral else 0.0
+        totals: List[float] = []
+        if fixtures is not None:
+            for home, away in fixtures:
+                lam_h, lam_a = self.expected_lambdas(
+                    home, away, neutral=neutral, warn=False
+                )
+                totals.append(lam_h + lam_a)
+        else:
+            # All-pairs round-robin over fitted teams. exp(mu) factorises out, so
+            # the slate mean is a clean function of the attack/defence dispersion.
+            atk = np.array([self.attack.get(t, 0.0) for t in self.teams], dtype=float)
+            dfc = np.array([self.defence.get(t, 0.0) for t in self.teams], dtype=float)
+            n = len(self.teams)
+            # lambda_home(i vs j) = exp(mu + atk_i - dfc_j + gamma);
+            # lambda_away = exp(mu + atk_j - dfc_i). Average over all ordered
+            # pairs i != j of (lambda_home + lambda_away).
+            ea = np.exp(atk)
+            ed = np.exp(-dfc)
+            base = math.exp(self.mu)
+            # mean over ordered pairs i!=j of exp(atk_i)*exp(-dfc_j):
+            sum_ea = ea.sum()
+            sum_ed = ed.sum()
+            cross = sum_ea * sum_ed - float((ea * ed).sum())  # exclude i==j
+            denom = n * (n - 1)
+            mean_home = base * math.exp(gamma) * cross / denom
+            mean_away = base * cross / denom
+            slate_total = float(mean_home + mean_away)
+            delta = math.log(target_total / slate_total) if slate_total > 0 else 0.0
+            self.mu = float(self.mu + delta)
+            self._level_target = float(target_total)  # type: ignore[attr-defined]
+            return delta
+
+        slate_total = float(np.mean(totals)) if totals else 0.0
+        delta = math.log(target_total / slate_total) if slate_total > 0 else 0.0
+        self.mu = float(self.mu + delta)
+        self._level_target = float(target_total)  # type: ignore[attr-defined]
+        return delta
 
     # -- prediction ---------------------------------------------------------
 
@@ -762,6 +899,10 @@ class DixonColesModel:
             "attack_prior_centered": dict(self._attack_prior_c),
             "defence_prior_centered": dict(self._defence_prior_c),
             "fitted": self.fitted,
+            # Total-goals level recalibration target the fit was anchored to, if
+            # any (None = raw penalised-MLE intercept). Captured for provenance;
+            # ``mu`` already embeds the applied shift.
+            "level_target": getattr(self, "_level_target", None),
         }
 
     @classmethod
@@ -791,6 +932,8 @@ class DixonColesModel:
         obj.rho = float(data.get("rho", 0.0))
         obj.match_counts = {str(k): int(v) for k, v in data.get("match_counts", {}).items()}
         obj.fitted = bool(data.get("fitted", False))
+        lt = data.get("level_target")
+        obj._level_target = float(lt) if lt is not None else None
         return obj
 
     def to_json(self) -> str:
