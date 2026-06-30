@@ -1,4 +1,4 @@
-<!-- generated: 2026-06-30T18:16:47 -->
+<!-- generated: 2026-06-30T20:24:40 -->
 ⚽ *Next match* — France vs Sweden
 Kickoff 2026-06-30 21:00:00+00:00
 

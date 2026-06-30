@@ -1,18 +1,15 @@
-<!-- generated: 2026-06-30T18:16:47 -->
-*World Cup Alpha — bet card* (0 staked, 4 indicative picks, hit-prob ranked)
+<!-- generated: 2026-06-30T20:24:40 -->
+*World Cup Alpha — bet card* (0 staked, 3 indicative picks, hit-prob ranked)
 
 _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. Wire a 2nd book (Betfair creds) or set WCA_STAKE_SINGLE_SOURCE=1 to size them._
 
 *1. [FAV] Belgium vs Senegal* — Belgium @ *2.25* via *polymarket*
     model 46.8% / mkt 44.3%  edge *+5.1%*  [elo 47% dc 52%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
-*2. [FAV] Mexico vs Ecuador* — Mexico @ *2.35* via *polymarket*
-    model 43.9% / mkt 42.7%  edge *+3.3%*  [elo 53% dc 43%]
+*2. [DRAW] Canada vs Morocco* — Draw @ *3.64* via *polymarket*
+    model 29.1% / mkt 27.6%  edge *+6.0%*  [elo 28% dc 32%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
-*3. [DRAW] Canada vs Morocco* — Draw @ *3.77* via *polymarket*
-    model 28.5% / mkt 26.6%  edge *+7.7%*  [elo 28% dc 32%]
-    stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
-*4. [2ND-FAV] United States vs Bosnia and Herzegovina* — Draw @ *5.41* via *polymarket*
+*3. [2ND-FAV] United States vs Bosnia and Herzegovina* — Draw @ *5.41* via *polymarket*
     model 20.2% / mkt 18.6%  edge *+9.1%*  [elo 17% dc 24%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
 
@@ -22,12 +19,12 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
   x Spain vs Austria — Austria @ 11.76 (model 10.0%, +17.4% EV): below 20% hit-probability floor (model 10.0%) — too unlikely to return PnL even at +17.4% EV
   x Portugal vs Croatia — Croatia @ 5.41 (model 20.9%, +13.2% EV): outright-underdog longshot (model 20.9%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +13.2% EV
   x Australia vs Egypt — Australia @ 3.51 (model 31.6%, +11.0% EV): outright-underdog longshot (model 31.6%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +11.0% EV
-  x Canada vs Morocco — Canada @ 5.71 (model 19.4%, +10.8% EV): below 20% hit-probability floor (model 19.4%) — too unlikely to return PnL even at +10.8% EV
   x France vs Sweden — Draw @ 6.45 (model 18.5%, +9.7% EV): below 20% hit-probability floor (model 18.5%) — too unlikely to return PnL even at +9.7% EV
   x Argentina vs Cape Verde — Draw @ 8.70 (model 12.5%, +9.0% EV): below 20% hit-probability floor (model 12.5%) — too unlikely to return PnL even at +9.0% EV
+  x Canada vs Morocco — Canada @ 5.41 (model 20.0%, +8.1% EV): below 20% hit-probability floor (model 20.0%) — too unlikely to return PnL even at +8.1% EV
   x Spain vs Austria — Draw @ 5.71 (model 18.9%, +8.0% EV): below 20% hit-probability floor (model 18.9%) — too unlikely to return PnL even at +8.0% EV
   x England vs DR Congo — DR Congo @ 15.38 (model 6.9%, +6.7% EV): below 20% hit-probability floor (model 6.9%) — too unlikely to return PnL even at +6.7% EV
-  x Mexico vs Ecuador — Ecuador @ 4.26 (model 24.6%, +4.8% EV): outright-underdog longshot (model 24.6%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +4.8% EV
+  x Mexico vs Ecuador — Ecuador @ 4.44 (model 24.0%, +3.4% EV): outright-underdog longshot (model 24.0%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +3.4% EV
   x Argentina vs Cape Verde — Cape Verde @ 22.99 (model 4.5%, +3.2% EV): below 20% hit-probability floor (model 4.5%) — too unlikely to return PnL even at +3.2% EV
   x Switzerland vs Algeria — Algeria @ 4.26 (model 24.1%, +2.5% EV): outright-underdog longshot (model 24.1%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +2.5% EV
   x England vs DR Congo — Draw @ 5.71 (model 17.9%, +2.4% EV): below 20% hit-probability floor (model 17.9%) — too unlikely to return PnL even at +2.4% EV
@@ -82,13 +79,13 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
     O/U 2.5: over 50.2% / under 49.8%   BTTS 28.5%
 
 *Mexico vs Ecuador*
-    xG: 1.35-0.98
+    xG: 1.36-0.97
     1-1  14.8%  fair 6.76 (14.8%)  back >= 6.89 (14.5%)
-    1-0  12.2%  fair 8.18 (12.2%)  back >= 8.34 (12.0%)
+    1-0  12.4%  fair 8.06 (12.4%)  back >= 8.23 (12.2%)
     0-0  11.1%  fair 9.01 (11.1%)  back >= 9.19 (10.9%)
-    2-1  8.8%  fair 11.43 (8.8%)  back >= 11.65 (8.6%)
-    2-0  8.6%  fair 11.63 (8.6%)  back >= 11.87 (8.4%)
-    0-1  8.0%  fair 12.53 (8.0%)  back >= 12.78 (7.8%)
+    2-1  8.9%  fair 11.27 (8.9%)  back >= 11.50 (8.7%)
+    2-0  8.7%  fair 11.48 (8.7%)  back >= 11.71 (8.5%)
+    0-1  7.8%  fair 12.84 (7.8%)  back >= 13.10 (7.6%)
     O/U 2.5: over 40.9% / under 59.1%   BTTS 48.3%
 
 *England vs DR Congo*
@@ -152,11 +149,11 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
     O/U 2.5: over 38.8% / under 61.2%   BTTS 35.1%
 
 *Canada vs Morocco*
-    xG: 0.64-1.23
-    0-1  20.0%  fair 5.01 (20.0%)  back >= 5.11 (19.6%)
-    0-0  14.8%  fair 6.77 (14.8%)  back >= 6.91 (14.5%)
-    0-2  12.0%  fair 8.31 (12.0%)  back >= 8.48 (11.8%)
-    1-1  11.5%  fair 8.71 (11.5%)  back >= 8.88 (11.3%)
-    1-0  9.6%  fair 10.44 (9.6%)  back >= 10.64 (9.4%)
-    1-2  7.9%  fair 12.60 (7.9%)  back >= 12.85 (7.8%)
-    O/U 2.5: over 28.8% / under 71.2%   BTTS 33.0%
+    xG: 0.65-1.21
+    0-1  19.5%  fair 5.13 (19.5%)  back >= 5.23 (19.1%)
+    0-0  15.1%  fair 6.63 (15.1%)  back >= 6.76 (14.8%)
+    0-2  11.8%  fair 8.51 (11.8%)  back >= 8.68 (11.5%)
+    1-1  11.7%  fair 8.53 (11.7%)  back >= 8.70 (11.5%)
+    1-0  9.9%  fair 10.12 (9.9%)  back >= 10.32 (9.7%)
+    1-2  7.8%  fair 12.90 (7.8%)  back >= 13.16 (7.6%)
+    O/U 2.5: over 28.6% / under 71.4%   BTTS 33.1%
