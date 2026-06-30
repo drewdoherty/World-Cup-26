@@ -1,4 +1,4 @@
-<!-- generated: 2026-06-30T10:41:39 -->
+<!-- generated: 2026-06-30T13:17:49 -->
 ⚽ *Next match* — Ivory Coast vs Norway
 Kickoff 2026-06-30 17:00:00+00:00
 
