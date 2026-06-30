@@ -1,0 +1,192 @@
+{
+  "n_matches": 128,
+  "match_total_sot": {
+    "n": 128,
+    "mean": 8.3203125,
+    "var": 14.61312746062992,
+    "var_mean_ratio": 1.7563195445639717,
+    "nb_k_mm": 11.001054461440331,
+    "min": 1.0,
+    "max": 22.0,
+    "p10": 4.0,
+    "p50": 8.0,
+    "p90": 13.0
+  },
+  "match_total_shots": {
+    "n": 128,
+    "mean": 25.0,
+    "var": 52.661417322834644,
+    "var_mean_ratio": 2.106456692913386,
+    "nb_k_mm": 22.594648448619413,
+    "min": 9.0,
+    "max": 45.0,
+    "p10": 17.0,
+    "p50": 24.0,
+    "p90": 37.0
+  },
+  "team_sot": {
+    "n": 256,
+    "mean": 4.16015625,
+    "var": 7.3977787990196076,
+    "var_mean_ratio": 1.7782454202338212,
+    "nb_k_mm": 5.345558279996168,
+    "min": 0.0,
+    "max": 14.0,
+    "p10": 1.0,
+    "p50": 4.0,
+    "p90": 8.0
+  },
+  "team_shots": {
+    "n": 256,
+    "mean": 12.5,
+    "var": 32.4156862745098,
+    "var_mean_ratio": 2.5932549019607842,
+    "nb_k_mm": 7.845574480653737,
+    "min": 0.0,
+    "max": 31.0,
+    "p10": 6.0,
+    "p50": 12.0,
+    "p90": 21.0
+  },
+  "conversions": {
+    "sot_per_shot": 0.3328125,
+    "goals_per_sot": 0.36901408450704226,
+    "goals_per_shot": 0.1228125,
+    "sot_per_xg": 2.721510554689596,
+    "goals_per_xg": 1.0042757258150339
+  },
+  "correlations_team_side": {
+    "sot_vs_xg": 0.7680269032492623,
+    "sot_vs_shots": 0.7438911875846617,
+    "sot_vs_goals": 0.6259705171307809,
+    "shots_vs_xg": 0.6964923438013694
+  },
+  "correlations_match_total": {
+    "sot_vs_xg": 0.8086903833673272,
+    "sot_vs_goals": 0.7227033699826398
+  },
+  "team_sot_on_xg_regression": {
+    "slope": 1.6962066351422458,
+    "intercept": 1.5673003735754039,
+    "elasticity_at_mean": 0.6232592529245979
+  },
+  "player_sot": {
+    "n_players_with_minutes": 1096,
+    "n_players_non_thin_180min": 615,
+    "sot_p90_mean_nonthin": 0.3428902224050111,
+    "sot_p90_p50_nonthin": 0.19522776572668113,
+    "sot_p90_p90_nonthin": 0.9554204660587641,
+    "on_target_rate_mean": 0.33095690534380257,
+    "on_target_rate_pooled": 0.3328125
+  },
+  "top_sot_p90_players": [
+    {
+      "player": "Neymar da Silva Santos Junior",
+      "team": "Brazil",
+      "minutes": 762.0,
+      "shots": 39,
+      "sot": 20,
+      "sot_p90": 2.3622047244,
+      "on_target_rate": 0.5128205128
+    },
+    {
+      "player": "Wahbi Khazri",
+      "team": "Tunisia",
+      "minutes": 353.0,
+      "shots": 17,
+      "sot": 8,
+      "sot_p90": 2.0396600567,
+      "on_target_rate": 0.4705882353
+    },
+    {
+      "player": "Denis Cheryshev",
+      "team": "Russia",
+      "minutes": 312.0,
+      "shots": 14,
+      "sot": 7,
+      "sot_p90": 2.0192307692,
+      "on_target_rate": 0.5
+    },
+    {
+      "player": "Lionel Andr\u00e9s Messi Cuccittini",
+      "team": "Argentina",
+      "minutes": 1117.0,
+      "shots": 52,
+      "sot": 25,
+      "sot_p90": 2.0143240824,
+      "on_target_rate": 0.4807692308
+    },
+    {
+      "player": "Marcus Rashford",
+      "team": "England",
+      "minutes": 410.0,
+      "shots": 17,
+      "sot": 9,
+      "sot_p90": 1.9756097561,
+      "on_target_rate": 0.5294117647
+    },
+    {
+      "player": "Marcus Berg",
+      "team": "Sweden",
+      "minutes": 435.0,
+      "shots": 15,
+      "sot": 8,
+      "sot_p90": 1.6551724138,
+      "on_target_rate": 0.5333333333
+    },
+    {
+      "player": "Raphael Dias Belloli",
+      "team": "Brazil",
+      "minutes": 328.0,
+      "shots": 8,
+      "sot": 6,
+      "sot_p90": 1.6463414634,
+      "on_target_rate": 0.75
+    },
+    {
+      "player": "Michy Batshuayi Tunga",
+      "team": "Belgium",
+      "minutes": 276.0,
+      "shots": 14,
+      "sot": 5,
+      "sot_p90": 1.6304347826,
+      "on_target_rate": 0.3571428571
+    },
+    {
+      "player": "Lautaro Javier Mart\u00ednez",
+      "team": "Argentina",
+      "minutes": 280.0,
+      "shots": 15,
+      "sot": 5,
+      "sot_p90": 1.6071428571,
+      "on_target_rate": 0.3333333333
+    },
+    {
+      "player": "Hee-Chan Hwang",
+      "team": "South Korea",
+      "minutes": 336.0,
+      "shots": 8,
+      "sot": 6,
+      "sot_p90": 1.6071428571,
+      "on_target_rate": 0.75
+    },
+    {
+      "player": "Gylfi \u00de\u00f3r Sigur\u00f0sson",
+      "team": "Iceland",
+      "minutes": 285.0,
+      "shots": 10,
+      "sot": 5,
+      "sot_p90": 1.5789473684,
+      "on_target_rate": 0.5
+    },
+    {
+      "player": "Kylian Mbapp\u00e9 Lottin",
+      "team": "France",
+      "minutes": 1203.0,
+      "shots": 40,
+      "sot": 21,
+      "sot_p90": 1.5710723192,
+      "on_target_rate": 0.525
+    }
+  ]
+}
