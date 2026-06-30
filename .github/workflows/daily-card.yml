@@ -8,7 +8,7 @@ on:
   # creds); Betfair/TheOddsAPI best-price activate automatically once their
   # secrets are present in the repo's Actions secret store.
   schedule:
-    - cron: '17 * * * *'   # hourly at :17 (offset from the :00 odds snapshot)
+    - cron: '17 6,10,15,20 * * *'   # 4x daily (06:17, 10:17, 15:17, 20:17 UTC) — R32+ has 1-2 games/day
   workflow_dispatch:  # Allow manual trigger too
 
 # Serialize with the hourly job — both commit site data to main.
