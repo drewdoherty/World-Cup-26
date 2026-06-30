@@ -1,18 +1,18 @@
-<!-- generated: 2026-06-30T15:45:00 -->
-⚽ *Next match* — Ivory Coast vs Norway
-Kickoff 2026-06-30 17:00:00+00:00
+<!-- generated: 2026-06-30T18:16:47 -->
+⚽ *Next match* — France vs Sweden
+Kickoff 2026-06-30 21:00:00+00:00
 
 *Winner* (model blend)
-  Ivory Coast     27.0%  fair 3.71  best 3.92 (Polymarket) +5.7% ✅  £9.81
-  Draw            29.0%  fair 3.45  best 3.51 (Polymarket) +1.7%  £3.34
-  Norway          44.1%  fair 2.27  best 2.20 (Polymarket) -3.2%
+  France          70.7%  fair 1.41  best 1.31 (Polymarket) -7.5%
+  Draw            18.5%  fair 5.40  best 6.45 (Polymarket) +19.4% ✅  £17.76
+  Sweden          10.8%  fair 9.28  best 13.33 (Polymarket) +43.6% ✅  £17.69
   _stake = ¼-Kelly @ £2000 bankroll (+EV picks)_
 
-*Corners* (model, exp 8.2)
-  O/U 8.5: over 44.1% / under 55.9%  fair 2.27 / 1.79
+*Corners* (model, exp 8.4)
+  O/U 8.5: over 46.1% / under 53.9%  fair 2.17 / 1.85
 
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-0-1 13.5% | 1-1 13.5% | 0-0 10.9% | 1-0 9.1% | 1-2 8.9% | 0-2 8.7%
-  O/U 2.5: over 39.3% / under 60.7%   BTTS 45.6%
+1-0 17.6% | 2-0 14.6% | 2-1 11.9% | 1-1 8.7% | 3-0 7.8% | 0-0 6.7%
+  O/U 2.5: over 46.8% / under 53.2%   BTTS 42.7%
