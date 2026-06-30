@@ -568,6 +568,13 @@ class FittedModels:
     elo_outcome: EloOutcomeModel
     dc: DixonColesModel
     n_matches: int
+    #: Optional two-timescale opponent-adjusted goal blend (F7). Populated ONLY
+    #: when ``fit_models(goal_blend=True)`` is requested; ``None`` by default so
+    #: every existing consumer and the production staking path are unchanged. The
+    #: blend is TRACKING-ONLY / OOS-gated — it is a parallel view for later CLV
+    #: validation and is NOT wired into EV/sizing. See
+    #: :mod:`wca.models.goalblend`.
+    goal_blend: Optional["object"] = None
 
 
 # ---------------------------------------------------------------------------
@@ -601,6 +608,8 @@ def fit_models(
     elo_points_per_dc_prior: float = DEFAULT_ELO_POINTS_PER_DC_PRIOR,
     elo_k_scale: float = DEFAULT_ELO_K_SCALE,
     dc_level_target: Optional[float] = None,
+    goal_blend: bool = False,
+    goal_blend_config: Optional["object"] = None,
 ) -> FittedModels:
     """Fit Elo (rating + outcome) and Dixon-Coles on the results history.
 
@@ -694,7 +703,33 @@ def fit_models(
     if dc_level_target is not None:
         apply_wc_level_anchor(dc, dc_level_target)
 
-    return FittedModels(rater=rater, elo_outcome=elo_outcome, dc=dc, n_matches=len(played))
+    # -- Two-timescale opponent-adjusted goal blend (F7, DEFAULT OFF) -------
+    # When ``goal_blend`` is False (default) NOTHING below runs and the returned
+    # ``FittedModels.goal_blend`` is ``None``, so every existing consumer and the
+    # production staking path are bit-identical. When opted in, a second
+    # short-half-life DC is fit on the SAME played history and convex-blended
+    # per team by credibility weight; the result is TRACKING-ONLY (a parallel
+    # view for later OOS CLV validation), never wired into EV/sizing here.
+    blend_obj = None
+    if goal_blend:
+        from wca.models.goalblend import GoalBlendConfig, build_goal_blend
+
+        cfg = goal_blend_config
+        if cfg is None:
+            # Inherit the level anchor when the long fit was anchored, so the
+            # blend's totals level matches the deployed convention.
+            cfg = GoalBlendConfig(level_target=dc_level_target)
+        blend_obj = build_goal_blend(
+            dc, played, reference_date=reference_date, config=cfg
+        )
+
+    return FittedModels(
+        rater=rater,
+        elo_outcome=elo_outcome,
+        dc=dc,
+        n_matches=len(played),
+        goal_blend=blend_obj,
+    )
 
 
 # ---------------------------------------------------------------------------
