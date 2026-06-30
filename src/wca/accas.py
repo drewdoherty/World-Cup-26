@@ -27,6 +27,7 @@ Modes: ``value`` (default, moneyline +EV favourites at modest combined odds),
 from __future__ import annotations
 
 import json
+import logging
 import math
 import os
 import re
@@ -34,6 +35,13 @@ import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
+
+from wca.snapshot_freshness import (
+    DEFAULT_MAX_AGE_HOURS as _SNAPSHOT_MAX_AGE_HOURS,
+    check_snapshot_freshness as _check_snapshot_freshness,
+)
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -1284,11 +1292,19 @@ def _pct_to_frac(d: Dict[str, Any]) -> Dict[str, Any]:
 
 def _load_snapshot_derivatives(
     db_path: str,
+    now: Optional[datetime] = None,
+    max_age_hours: float = _SNAPSHOT_MAX_AGE_HOURS,
 ) -> Dict[str, Dict[Tuple[str, str], Tuple[float, str]]]:
     """Best book prices per fixture-token from the latest snapshot.
 
     Extended to include asian_handicap / player_props / corners / cards
     markets in addition to the original totals/btts.
+
+    Staleness guard: the newest snapshot's age is checked against
+    ``max_age_hours`` (default :data:`wca.snapshot_freshness.DEFAULT_MAX_AGE_HOURS`).
+    When the latest snapshot is stale a WARNING is logged and **no** derivative
+    prices are returned, so EV is never quoted off hours-old odds.  ``now`` is
+    injectable for deterministic tests; it defaults to the wall clock.
     """
     out: Dict[str, Dict[Tuple[str, str], Tuple[float, str]]] = {}
     _MARKETS = (
@@ -1301,6 +1317,13 @@ def _load_snapshot_derivatives(
         con = sqlite3.connect(db_path)
         m = con.execute("SELECT MAX(ts_utc) FROM odds_snapshots").fetchone()[0]
         if not m:
+            return out
+        freshness = _check_snapshot_freshness(
+            m, now=now, max_age_hours=max_age_hours,
+            context="accas odds_snapshots derivatives",
+        )
+        if freshness.is_stale:
+            con.close()
             return out
         placeholders = ",".join("?" * len(_MARKETS))
         rows = con.execute(
