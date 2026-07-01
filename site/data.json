@@ -1,12 +1,12 @@
 {
   "meta": {
-    "generated": "2026-07-01 16:46:02 UTC"
+    "generated": "2026-07-01T17:02:02"
   },
   "totals": {
-    "wagered": 0.0,
-    "open_stake": 0.0,
+    "wagered": 3.0,
+    "open_stake": 3.0,
     "settled_pl": 0.0,
-    "n_bets": 0
+    "n_bets": 1
   },
   "totals_by_currency": {
     "GBP": {
@@ -16,7 +16,7 @@
       "n_bets": 0
     },
     "USD": {
-      "wagered": 0.0,
+      "wagered": 3.0,
       "open_stake": 1645.6151,
       "settled_pl": 0.0,
       "n_bets": 15
@@ -31,7 +31,7 @@
       "currency": "GBP"
     },
     "polymarket": {
-      "wagered": 0.0,
+      "wagered": 3.0,
       "open_stake": 1645.6151,
       "settled_pl": 0.0,
       "n_bets": 15,
@@ -61,9 +61,38 @@
       "label": "Sportsbook 2"
     }
   },
-  "source_summary": {},
-  "platforms": {},
-  "platforms_by_account": {},
+  "source_summary": {
+    "model": {
+      "USD": {
+        "wagered": 3.0,
+        "open_stake": 3.0,
+        "settled_pl": 0.0,
+        "n_bets": 1
+      }
+    }
+  },
+  "platforms": {
+    "polymarket": {
+      "venue": "polymarket",
+      "currency": "USD",
+      "wagered": 3.0,
+      "open_stake": 3.0,
+      "settled_pl": 0.0,
+      "n_bets": 1
+    }
+  },
+  "platforms_by_account": {
+    "1": {
+      "polymarket": {
+        "venue": "polymarket",
+        "currency": "USD",
+        "wagered": 3.0,
+        "open_stake": 3.0,
+        "settled_pl": 0.0,
+        "n_bets": 1
+      }
+    }
+  },
   "closed_positions": [],
   "pnl_series": {
     "sportsbook": {
@@ -229,12 +258,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 186.82,
-      "cur_price": 0.59,
+      "cur_value": 188.4,
+      "cur_price": 0.595,
       "avg_price": 0.5839,
       "shares": 316.6407,
-      "cash_pnl": 1.91,
-      "pct_pnl": 0.010329388516423997,
+      "cash_pnl": 3.49,
+      "pct_pnl": 0.018874118283937046,
       "notes": "live PM position (data-API)"
     },
     {
@@ -463,12 +492,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 6.45,
-      "cur_price": 0.9375,
+      "cur_value": 6.48,
+      "cur_price": 0.9415,
       "avg_price": 0.8719,
       "shares": 6.8807,
-      "cash_pnl": 0.45,
-      "pct_pnl": 0.07500125002083367,
+      "cash_pnl": 0.48,
+      "pct_pnl": 0.08000133335555593,
       "notes": "live PM position (data-API)"
     }
   ],
