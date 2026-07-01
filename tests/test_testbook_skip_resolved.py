@@ -45,3 +45,13 @@ def test_build_candidates_skips_kicked_off_fixture():
     before_ko = datetime(2026, 6, 30, 12, 0, tzinfo=timezone.utc)
     assert trader.build_candidates(model, [ev], now=after_ko) == []     # kicked off -> skip
     assert len(trader.build_candidates(model, [ev], now=before_ko)) >= 1  # pre-KO -> priced
+
+
+def test_kickoff_guard_defaults_now_no_crash():
+    # Regression: a fixture WITH a kickoff + no explicit now must not crash
+    # ('<=' vs None). now defaults to utcnow; a 2020 kickoff is skipped cleanly.
+    scores = {"fixtures": [{"fixture": "France vs Sweden", "model_1x2": {"home": 0.8},
+        "over_under": {}, "btts": None, "scores": [], "kickoff": "2020-01-01T00:00:00+00:00"}]}
+    model = trader.load_model(scores, {"teams": []})
+    ev = {"title": "France vs. Sweden", "markets": []}
+    assert trader.build_candidates(model, [ev]) == []   # defaulted now, past KO -> skip, no error

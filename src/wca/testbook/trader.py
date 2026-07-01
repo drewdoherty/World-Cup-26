@@ -287,6 +287,8 @@ def _parse_ko(s):
 def build_candidates(model: Dict[str, object], pm_events: Sequence[Dict[str, object]],
                      *, min_volume: float = 0.0, now=None) -> List[Candidate]:
     """All model-vs-PM YES candidates across the priced market families."""
+    if now is None:
+        now = datetime.now(timezone.utc)
     fixtures = model["fixtures"]
     advance = model["advance"]
     out: List[Candidate] = []
@@ -326,7 +328,7 @@ def build_candidates(model: Dict[str, object], pm_events: Sequence[Dict[str, obj
             fixture = fx["raw"]
             home, away = fx["home"], fx["away"]
             ko = _parse_ko(fx.get("kickoff"))
-            if ko is not None and ko <= now:
+            if now is not None and ko is not None and ko <= now:
                 continue  # fixture already kicked off -> pre-match markets are dead
             is_bare = " - " not in title
             suffix = title.split(" - ", 1)[1].strip().lower() if " - " in title else ""
@@ -428,6 +430,7 @@ def run_paper_pass(con, model: Dict[str, object], pm_events: Sequence[Dict[str, 
     a bug or a wrong model, not alpha (the ev_calibration_gap validator confirms
     which as fixtures settle). Returns a summary dict.
     """
+    now = now or datetime.now(timezone.utc)
     bankroll = store.realized_balance(con) + store.deployed_capital(con)  # equity base for sizing
     held = {r["token_id"] for r in store.open_bets(con) if r.get("token_id")}
     cands = build_candidates(model, pm_events, min_volume=min_volume, now=now)
