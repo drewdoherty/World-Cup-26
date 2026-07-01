@@ -1,0 +1,2428 @@
+{
+  "generated_utc": "2026-07-01T06:09:12.449993+00:00",
+  "calibration": {
+    "n_rows": 296,
+    "n_rows_live": 186,
+    "by_category": {
+      "advance": {
+        "n": 186.0,
+        "mean_edge": 0.007466129032258064,
+        "median_edge": -0.001,
+        "mean_abs_edge": 0.06460483870967743,
+        "rmse": 0.13915965361249066,
+        "frac_model_high": 0.3172043010752688
+      },
+      "match_result": {
+        "n": 30.0,
+        "mean_edge": -0.0059500000000000065,
+        "median_edge": -0.005684999999999996,
+        "mean_abs_edge": 0.05008646666666667,
+        "rmse": 0.12702857676076934,
+        "frac_model_high": 0.43333333333333335
+      },
+      "exact_score": {
+        "n": 53.0,
+        "mean_edge": -0.0019622641509433984,
+        "median_edge": -0.0030000000000000027,
+        "mean_abs_edge": 0.009018867924528301,
+        "rmse": 0.01074577582649143,
+        "frac_model_high": 0.41509433962264153
+      },
+      "btts": {
+        "n": 27.0,
+        "mean_edge": 0.12488888888888888,
+        "median_edge": 0.14699999999999996,
+        "mean_abs_edge": 0.15155555555555558,
+        "rmse": 0.17802309463162982,
+        "frac_model_high": 0.7407407407407407
+      }
+    },
+    "by_category_live": {
+      "advance": {
+        "n": 79.0,
+        "mean_edge": -0.04393037974683544,
+        "median_edge": -0.017100000000000004,
+        "mean_abs_edge": 0.07398607594936708,
+        "rmse": 0.12223307731491267,
+        "frac_model_high": 0.3670886075949367
+      },
+      "match_result": {
+        "n": 27.0,
+        "mean_edge": -0.006555518518518524,
+        "median_edge": -0.007459999999999994,
+        "mean_abs_edge": 0.014063370370370372,
+        "rmse": 0.017796508570399317,
+        "frac_model_high": 0.4074074074074074
+      },
+      "exact_score": {
+        "n": 53.0,
+        "mean_edge": -0.0019622641509433984,
+        "median_edge": -0.0030000000000000027,
+        "mean_abs_edge": 0.009018867924528301,
+        "rmse": 0.01074577582649143,
+        "frac_model_high": 0.41509433962264153
+      },
+      "btts": {
+        "n": 27.0,
+        "mean_edge": 0.12488888888888888,
+        "median_edge": 0.14699999999999996,
+        "mean_abs_edge": 0.15155555555555558,
+        "rmse": 0.17802309463162982,
+        "frac_model_high": 0.7407407407407407
+      }
+    },
+    "top_edges": [
+      {
+        "category": "advance",
+        "subject": "Morocco",
+        "label": "Morocco to reach QF",
+        "model_prob": 0.2625,
+        "pm_price": 0.72,
+        "edge": -0.45749999999999996,
+        "token_id": "80469983622362292934201130967985086577549898587490030396039229303322414634366"
+      },
+      {
+        "category": "advance",
+        "subject": "France",
+        "label": "France to reach SF",
+        "model_prob": 0.3354,
+        "pm_price": 0.79,
+        "edge": -0.45460000000000006,
+        "token_id": "100129780550616595145553750912141386610721021591799769049531023014005791181112"
+      },
+      {
+        "category": "advance",
+        "subject": "France",
+        "label": "France to reach QF",
+        "model_prob": 0.4929,
+        "pm_price": 0.91,
+        "edge": -0.4171,
+        "token_id": "44144917732595893040754964491864709067654226507467205857307994775141295998491"
+      },
+      {
+        "category": "advance",
+        "subject": "France",
+        "label": "France to reach Final",
+        "model_prob": 0.1933,
+        "pm_price": 0.55,
+        "edge": -0.3567,
+        "token_id": "51277730199673248502312053152395889329467978674848674323688606017636121233913"
+      },
+      {
+        "category": "btts",
+        "subject": "Switzerland vs Algeria",
+        "label": "BTTS Yes",
+        "model_prob": 0.501,
+        "pm_price": 0.18,
+        "edge": 0.321,
+        "token_id": "44930010442017738209129553845642737481104207442889653425563106467577315922099"
+      },
+      {
+        "category": "btts",
+        "subject": "United States vs Bosnia and Herzegovina",
+        "label": "BTTS Yes",
+        "model_prob": 0.501,
+        "pm_price": 0.19,
+        "edge": 0.311,
+        "token_id": "107690450696682906336262158917934755263014885723281122336444392482422899507452"
+      },
+      {
+        "category": "btts",
+        "subject": "Portugal vs Croatia",
+        "label": "BTTS Yes",
+        "model_prob": 0.46,
+        "pm_price": 0.18,
+        "edge": 0.28,
+        "token_id": "79548349777935423231571596208080820285105068822747243891110180009752364298187"
+      },
+      {
+        "category": "btts",
+        "subject": "Spain vs Austria",
+        "label": "BTTS Yes",
+        "model_prob": 0.433,
+        "pm_price": 0.16,
+        "edge": 0.273,
+        "token_id": "43794292429782895619300588511542768922760811725652785818714682309815333916527"
+      },
+      {
+        "category": "btts",
+        "subject": "Belgium vs Senegal",
+        "label": "BTTS Yes",
+        "model_prob": 0.461,
+        "pm_price": 0.21,
+        "edge": 0.251,
+        "token_id": "114577052015712029521203114272277279668539814225811558753919819540232354708097"
+      },
+      {
+        "category": "btts",
+        "subject": "United States vs Bosnia and Herzegovina",
+        "label": "BTTS Yes",
+        "model_prob": 0.501,
+        "pm_price": 0.26,
+        "edge": 0.241,
+        "token_id": "15011765530610802056253058371309154526914312192896014698021582809949244553433"
+      },
+      {
+        "category": "advance",
+        "subject": "United States",
+        "label": "United States to reach QF",
+        "model_prob": 0.2458,
+        "pm_price": 0.47,
+        "edge": -0.22419999999999998,
+        "token_id": "58426604845376813636426734023596730606887726299773063125531757282666996152261"
+      },
+      {
+        "category": "advance",
+        "subject": "Mexico",
+        "label": "Mexico to reach QF",
+        "model_prob": 0.1979,
+        "pm_price": 0.42,
+        "edge": -0.2221,
+        "token_id": "20062763070234515015151948961878714420681535103051189769381052445058518253776"
+      },
+      {
+        "category": "btts",
+        "subject": "Switzerland vs Algeria",
+        "label": "BTTS Yes",
+        "model_prob": 0.501,
+        "pm_price": 0.28,
+        "edge": 0.22099999999999997,
+        "token_id": "42049839665835862493554205813426915094452923942008399157545206214149773834486"
+      },
+      {
+        "category": "btts",
+        "subject": "Australia vs Egypt",
+        "label": "BTTS Yes",
+        "model_prob": 0.376,
+        "pm_price": 0.16,
+        "edge": 0.216,
+        "token_id": "26654489089368214946807997090573221912241030668961067085749995272654416134315"
+      },
+      {
+        "category": "btts",
+        "subject": "Spain vs Austria",
+        "label": "BTTS Yes",
+        "model_prob": 0.433,
+        "pm_price": 0.22,
+        "edge": 0.213,
+        "token_id": "56168324402369745902297834656622638875875720706380091357637906029549226491435"
+      },
+      {
+        "category": "advance",
+        "subject": "Norway",
+        "label": "Norway to reach QF",
+        "model_prob": 0.1625,
+        "pm_price": 0.37,
+        "edge": -0.2075,
+        "token_id": "42801526225265228705160188697405046804690750803157302921674256416193759686876"
+      },
+      {
+        "category": "btts",
+        "subject": "Colombia vs Ghana",
+        "label": "BTTS Yes",
+        "model_prob": 0.35200000000000004,
+        "pm_price": 0.15,
+        "edge": 0.20200000000000004,
+        "token_id": "88828906707287032217413058660244035471670662270100875119123095615219688392944"
+      },
+      {
+        "category": "btts",
+        "subject": "England vs DR Congo",
+        "label": "BTTS Yes",
+        "model_prob": 0.313,
+        "pm_price": 0.12,
+        "edge": 0.193,
+        "token_id": "47406978242138849706578296998181475548614626164732175418028823115593625282193"
+      },
+      {
+        "category": "advance",
+        "subject": "United States",
+        "label": "United States to reach R16",
+        "model_prob": 0.6582,
+        "pm_price": 0.84,
+        "edge": -0.18179999999999996,
+        "token_id": "50689824544140790164597422216341950114909833384590029149136676161633646909552"
+      },
+      {
+        "category": "btts",
+        "subject": "Portugal vs Croatia",
+        "label": "BTTS Yes",
+        "model_prob": 0.46,
+        "pm_price": 0.28,
+        "edge": 0.18,
+        "token_id": "48192288462707704810313056432820991863986088694251329181461111229030902483618"
+      },
+      {
+        "category": "btts",
+        "subject": "Belgium vs Senegal",
+        "label": "BTTS Yes",
+        "model_prob": 0.461,
+        "pm_price": 0.29,
+        "edge": 0.17100000000000004,
+        "token_id": "48218302478031953778063392920354622230836224332334862169617478288826816780407"
+      },
+      {
+        "category": "advance",
+        "subject": "Mexico",
+        "label": "Mexico to reach SF",
+        "model_prob": 0.0714,
+        "pm_price": 0.24,
+        "edge": -0.16859999999999997,
+        "token_id": "79662302913196017008860759363526936485934932022967495194576190174521819521615"
+      },
+      {
+        "category": "advance",
+        "subject": "Bosnia and Herzegovina",
+        "label": "Bosnia and Herzegovina to reach R16",
+        "model_prob": 0.3418,
+        "pm_price": 0.18,
+        "edge": 0.1618,
+        "token_id": "19111887821597990697249822009024112874565297498953380938153357192096868577237"
+      },
+      {
+        "category": "advance",
+        "subject": "Belgium",
+        "label": "Belgium to reach QF",
+        "model_prob": 0.4809,
+        "pm_price": 0.32,
+        "edge": 0.1609,
+        "token_id": "41627885049995029465470620514626699506208739011538617046163940978061106451805"
+      },
+      {
+        "category": "advance",
+        "subject": "Canada",
+        "label": "Canada to reach QF",
+        "model_prob": 0.1487,
+        "pm_price": 0.3,
+        "edge": -0.1513,
+        "token_id": "50474333445445440441491411537845732824526025567388867484086798909473918479975"
+      },
+      {
+        "category": "btts",
+        "subject": "Argentina vs Cape Verde",
+        "label": "BTTS Yes",
+        "model_prob": 0.287,
+        "pm_price": 0.14,
+        "edge": 0.14699999999999996,
+        "token_id": "107747983509127634497161587255315408297040109108461829439902913439667464434617"
+      },
+      {
+        "category": "btts",
+        "subject": "Australia vs Egypt",
+        "label": "BTTS Yes",
+        "model_prob": 0.376,
+        "pm_price": 0.23,
+        "edge": 0.146,
+        "token_id": "8651914520233031898412822928391772572588495928391357996638630585361930950430"
+      },
+      {
+        "category": "advance",
+        "subject": "Argentina",
+        "label": "Argentina to reach SF",
+        "model_prob": 0.5276,
+        "pm_price": 0.67,
+        "edge": -0.14240000000000008,
+        "token_id": "89536067333293473447901433413782685510126736303748247526034263106383356680639"
+      },
+      {
+        "category": "advance",
+        "subject": "United States",
+        "label": "United States to reach SF",
+        "model_prob": 0.058,
+        "pm_price": 0.2,
+        "edge": -0.14200000000000002,
+        "token_id": "74285492488118478188590069158124267531403316939418298313489615925461634714863"
+      },
+      {
+        "category": "advance",
+        "subject": "Norway",
+        "label": "Norway to reach SF",
+        "model_prob": 0.0597,
+        "pm_price": 0.19,
+        "edge": -0.1303,
+        "token_id": "62948040058811530738851582948100508585678711039782457351344064638643339400332"
+      },
+      {
+        "category": "btts",
+        "subject": "England vs DR Congo",
+        "label": "BTTS Yes",
+        "model_prob": 0.313,
+        "pm_price": 0.19,
+        "edge": 0.123,
+        "token_id": "69091710678268600059631910995169930243081967958558057576897517040158216825079"
+      },
+      {
+        "category": "btts",
+        "subject": "Colombia vs Ghana",
+        "label": "BTTS Yes",
+        "model_prob": 0.35200000000000004,
+        "pm_price": 0.24,
+        "edge": 0.11200000000000004,
+        "token_id": "9746499361446890136318616018295954325287959214056616897359557441339302379635"
+      },
+      {
+        "category": "advance",
+        "subject": "Argentina",
+        "label": "Argentina to reach Final",
+        "model_prob": 0.3067,
+        "pm_price": 0.41,
+        "edge": -0.1033,
+        "token_id": "29655164621652735807988359935603921446734809810207924831871042520148753286761"
+      },
+      {
+        "category": "advance",
+        "subject": "Morocco",
+        "label": "Morocco to reach SF",
+        "model_prob": 0.0984,
+        "pm_price": 0.198,
+        "edge": -0.09960000000000001,
+        "token_id": "47854818125142579705136730484306012843275003274878888606842114188142707548341"
+      },
+      {
+        "category": "btts",
+        "subject": "Belgium vs Senegal",
+        "label": "BTTS Yes",
+        "model_prob": 0.461,
+        "pm_price": 0.56,
+        "edge": -0.09900000000000003,
+        "token_id": "107496843850220811016783593940808649534240177426382887622561822326071407386086"
+      },
+      {
+        "category": "advance",
+        "subject": "Egypt",
+        "label": "Egypt to reach R16",
+        "model_prob": 0.4669,
+        "pm_price": 0.56,
+        "edge": -0.09310000000000007,
+        "token_id": "104042010020205963699312303425779911083463098226046311238500942106882448184304"
+      },
+      {
+        "category": "btts",
+        "subject": "Argentina vs Cape Verde",
+        "label": "BTTS Yes",
+        "model_prob": 0.287,
+        "pm_price": 0.2,
+        "edge": 0.08699999999999997,
+        "token_id": "27565900782079528920338305120731423721265937391127368539735693977315949186998"
+      },
+      {
+        "category": "advance",
+        "subject": "Senegal",
+        "label": "Senegal to reach R16",
+        "model_prob": 0.3347,
+        "pm_price": 0.42,
+        "edge": -0.08529999999999999,
+        "token_id": "57658384840022958882700756432857712593833858044198870604484883946723861100819"
+      },
+      {
+        "category": "advance",
+        "subject": "Australia",
+        "label": "Australia to reach R16",
+        "model_prob": 0.5331,
+        "pm_price": 0.45,
+        "edge": 0.08310000000000001,
+        "token_id": "29007489509419477937475949564533663477138972922740204804000386223259767819959"
+      },
+      {
+        "category": "advance",
+        "subject": "Argentina",
+        "label": "Argentina to reach QF",
+        "model_prob": 0.7478,
+        "pm_price": 0.83,
+        "edge": -0.08219999999999994,
+        "token_id": "42049767027177141793216438574630512982100826722139693578545492971135279030059"
+      },
+      {
+        "category": "advance",
+        "subject": "Belgium",
+        "label": "Belgium to reach SF",
+        "model_prob": 0.1857,
+        "pm_price": 0.11,
+        "edge": 0.0757,
+        "token_id": "69308688490171395576850307939004739703133311275309901259098144580114964835504"
+      },
+      {
+        "category": "advance",
+        "subject": "Belgium",
+        "label": "Belgium to reach R16",
+        "model_prob": 0.6653,
+        "pm_price": 0.59,
+        "edge": 0.07530000000000003,
+        "token_id": "78042267197293570277682494823265701631907405223712907561037063598368049101974"
+      },
+      {
+        "category": "advance",
+        "subject": "Portugal",
+        "label": "Portugal to reach R16",
+        "model_prob": 0.6272,
+        "pm_price": 0.7,
+        "edge": -0.07279999999999998,
+        "token_id": "4636895290782996516947488795119278164825978421574419164349079895840406563410"
+      },
+      {
+        "category": "btts",
+        "subject": "Australia vs Egypt",
+        "label": "BTTS Yes",
+        "model_prob": 0.376,
+        "pm_price": 0.44,
+        "edge": -0.064,
+        "token_id": "2504938542323302353949929822637848399484018393596177798978648575325444954906"
+      },
+      {
+        "category": "advance",
+        "subject": "Croatia",
+        "label": "Croatia to reach R16",
+        "model_prob": 0.3728,
+        "pm_price": 0.31,
+        "edge": 0.06280000000000002,
+        "token_id": "14779992534553874143485262476310069109231696626953666459828369235598734034368"
+      },
+      {
+        "category": "advance",
+        "subject": "Australia",
+        "label": "Australia to reach QF",
+        "model_prob": 0.1221,
+        "pm_price": 0.061,
+        "edge": 0.0611,
+        "token_id": "46983790987150534576459730041665072359443254356509061379481679577740931650264"
+      },
+      {
+        "category": "advance",
+        "subject": "Spain",
+        "label": "Spain to reach Final",
+        "model_prob": 0.2599,
+        "pm_price": 0.2,
+        "edge": 0.05990000000000001,
+        "token_id": "101923360499625332788062329411404784738023855630916769561935447176668677624752"
+      },
+      {
+        "category": "advance",
+        "subject": "Brazil",
+        "label": "Brazil to reach Final",
+        "model_prob": 0.2397,
+        "pm_price": 0.18,
+        "edge": 0.0597,
+        "token_id": "34787230403043355128636001070710444359614063013416600771124899051091155533274"
+      },
+      {
+        "category": "advance",
+        "subject": "Spain",
+        "label": "Spain to reach QF",
+        "model_prob": 0.5325,
+        "pm_price": 0.59,
+        "edge": -0.057499999999999996,
+        "token_id": "1128068099367400133339734456801907163830463549252435367845457195871360046930"
+      },
+      {
+        "category": "advance",
+        "subject": "Spain",
+        "label": "Spain to reach R16",
+        "model_prob": 0.8135,
+        "pm_price": 0.87,
+        "edge": -0.056499999999999995,
+        "token_id": "100478491497912339293826694196669738102185530665446742290473924005534727209235"
+      },
+      {
+        "category": "advance",
+        "subject": "Mexico",
+        "label": "Mexico to reach Final",
+        "model_prob": 0.0279,
+        "pm_price": 0.084,
+        "edge": -0.056100000000000004,
+        "token_id": "44875352804270966260326725617943549165054912423727317327254824975565921809445"
+      },
+      {
+        "category": "advance",
+        "subject": "Morocco",
+        "label": "Morocco to reach Final",
+        "model_prob": 0.0379,
+        "pm_price": 0.091,
+        "edge": -0.053099999999999994,
+        "token_id": "89425408670207070621979825849065586507178132915358763765127245631028306353294"
+      },
+      {
+        "category": "advance",
+        "subject": "Norway",
+        "label": "Norway to reach Final",
+        "model_prob": 0.0209,
+        "pm_price": 0.07,
+        "edge": -0.049100000000000005,
+        "token_id": "23063155955271078819366528095108117847939210886304219398997160384062018779310"
+      },
+      {
+        "category": "advance",
+        "subject": "Ghana",
+        "label": "Ghana to reach QF",
+        "model_prob": 0.048,
+        "pm_price": 0.096,
+        "edge": -0.048,
+        "token_id": "92929049403291600039809296570873176458833893219954880928177823451402314818629"
+      },
+      {
+        "category": "btts",
+        "subject": "Colombia vs Ghana",
+        "label": "BTTS Yes",
+        "model_prob": 0.35200000000000004,
+        "pm_price": 0.4,
+        "edge": -0.04799999999999999,
+        "token_id": "56263796775208437338404230535992847934808456913110735623606042270498346190401"
+      },
+      {
+        "category": "advance",
+        "subject": "Belgium",
+        "label": "Belgium to reach Final",
+        "model_prob": 0.0833,
+        "pm_price": 0.036,
+        "edge": 0.0473,
+        "token_id": "42642733841375868250019824393895616178120731186981831192119559664402455807907"
+      },
+      {
+        "category": "btts",
+        "subject": "England vs DR Congo",
+        "label": "BTTS Yes",
+        "model_prob": 0.313,
+        "pm_price": 0.36,
+        "edge": -0.046999999999999986,
+        "token_id": "51451816631839273329213113516675744490457506738307600454854723306850733271813"
+      },
+      {
+        "category": "advance",
+        "subject": "England",
+        "label": "England to reach SF",
+        "model_prob": 0.3149,
+        "pm_price": 0.36,
+        "edge": -0.04509999999999997,
+        "token_id": "55294405439268844550383434100266469978217752464671073044130093830763750964730"
+      },
+      {
+        "category": "match_result",
+        "subject": "United States vs Bosnia and Herzegovina",
+        "label": "United States win (FT 90')",
+        "model_prob": 0.666593,
+        "pm_price": 0.71,
+        "edge": -0.04340699999999997,
+        "token_id": "4633569295739345295929299496370398790000429459208303788658430774702495448690"
+      },
+      {
+        "category": "advance",
+        "subject": "Brazil",
+        "label": "Brazil to reach QF",
+        "model_prob": 0.607,
+        "pm_price": 0.65,
+        "edge": -0.04300000000000004,
+        "token_id": "14622822431877937260172873758036677888173738361400353760616622961118276749989"
+      },
+      {
+        "category": "btts",
+        "subject": "Argentina vs Cape Verde",
+        "label": "BTTS Yes",
+        "model_prob": 0.287,
+        "pm_price": 0.33,
+        "edge": -0.04300000000000004,
+        "token_id": "17807080257517218533924454664474080767073946598297804737428385416638372892642"
+      },
+      {
+        "category": "advance",
+        "subject": "United States",
+        "label": "United States to reach Final",
+        "model_prob": 0.0163,
+        "pm_price": 0.057,
+        "edge": -0.0407,
+        "token_id": "66838617789346516409327873387385715577053478133739337062169449451151113366291"
+      },
+      {
+        "category": "btts",
+        "subject": "Portugal vs Croatia",
+        "label": "BTTS Yes",
+        "model_prob": 0.46,
+        "pm_price": 0.5,
+        "edge": -0.03999999999999998,
+        "token_id": "109164583353136444473920746079290569286862141438415115200998630733626589913613"
+      },
+      {
+        "category": "advance",
+        "subject": "Austria",
+        "label": "Austria to reach R16",
+        "model_prob": 0.1865,
+        "pm_price": 0.148,
+        "edge": 0.038500000000000006,
+        "token_id": "19026008105710881174402136424867307682414247079345570053873882738881968051050"
+      },
+      {
+        "category": "advance",
+        "subject": "Ghana",
+        "label": "Ghana to reach R16",
+        "model_prob": 0.1717,
+        "pm_price": 0.21,
+        "edge": -0.0383,
+        "token_id": "20185832484513139380368763294602355083423806359594590663439105794037427828406"
+      },
+      {
+        "category": "advance",
+        "subject": "Croatia",
+        "label": "Croatia to reach QF",
+        "model_prob": 0.1274,
+        "pm_price": 0.09,
+        "edge": 0.03740000000000002,
+        "token_id": "36372488470567513916199892411526124198000315045895823607111869847212935109154"
+      },
+      {
+        "category": "advance",
+        "subject": "England",
+        "label": "England to reach Final",
+        "model_prob": 0.1729,
+        "pm_price": 0.21,
+        "edge": -0.037099999999999994,
+        "token_id": "38330908233013235601308136733112038101325243427323717348299316649415227409423"
+      },
+      {
+        "category": "advance",
+        "subject": "Brazil",
+        "label": "Brazil to reach SF",
+        "model_prob": 0.3961,
+        "pm_price": 0.36,
+        "edge": 0.03610000000000002,
+        "token_id": "67055561509316093471395796595350646294389919019450083805134054234605733966507"
+      },
+      {
+        "category": "match_result",
+        "subject": "Portugal vs Croatia",
+        "label": "Portugal win (FT 90')",
+        "model_prob": 0.514072,
+        "pm_price": 0.55,
+        "edge": -0.03592800000000007,
+        "token_id": "105300101902444670024314531766229236783176275346588264475245645697082520508325"
+      },
+      {
+        "category": "match_result",
+        "subject": "Australia vs Egypt",
+        "label": "Egypt win (FT 90')",
+        "model_prob": 0.355074,
+        "pm_price": 0.39,
+        "edge": -0.03492600000000001,
+        "token_id": "86532936246759869909563954733130420453288003695560964566482181231108253829977"
+      },
+      {
+        "category": "advance",
+        "subject": "Colombia",
+        "label": "Colombia to reach SF",
+        "model_prob": 0.2447,
+        "pm_price": 0.21,
+        "edge": 0.03470000000000001,
+        "token_id": "62248902504776532171321579309957511395071764235484690217859382972556120827687"
+      },
+      {
+        "category": "advance",
+        "subject": "Bosnia and Herzegovina",
+        "label": "Bosnia and Herzegovina to reach QF",
+        "model_prob": 0.0824,
+        "pm_price": 0.049,
+        "edge": 0.0334,
+        "token_id": "39134168251460093285880958762458856472891972183292487745166445916549524136176"
+      },
+      {
+        "category": "match_result",
+        "subject": "Spain vs Austria",
+        "label": "Spain win (FT 90')",
+        "model_prob": 0.708375,
+        "pm_price": 0.74,
+        "edge": -0.031625000000000014,
+        "token_id": "110474601866909537724044216141585040787927916157559633438159999666255694855775"
+      },
+      {
+        "category": "advance",
+        "subject": "Portugal",
+        "label": "Portugal to reach Final",
+        "model_prob": 0.0984,
+        "pm_price": 0.13,
+        "edge": -0.0316,
+        "token_id": "78512201071473916877180477359507111087054980172241483782475280980291290538026"
+      },
+      {
+        "category": "advance",
+        "subject": "Portugal",
+        "label": "Portugal to reach SF",
+        "model_prob": 0.1888,
+        "pm_price": 0.22,
+        "edge": -0.031200000000000006,
+        "token_id": "99727015938368111556950948161264621801691411793475424281847354262534407487491"
+      },
+      {
+        "category": "advance",
+        "subject": "Spain",
+        "label": "Spain to reach SF",
+        "model_prob": 0.4094,
+        "pm_price": 0.44,
+        "edge": -0.030600000000000016,
+        "token_id": "94114201224211049031571044475406189237583412588859764322595606591995897942500"
+      },
+      {
+        "category": "advance",
+        "subject": "Portugal",
+        "label": "Portugal to reach QF",
+        "model_prob": 0.281,
+        "pm_price": 0.31,
+        "edge": -0.02899999999999997,
+        "token_id": "76787618383374466979871553366997433014652562507650011954266479224591225325644"
+      },
+      {
+        "category": "advance",
+        "subject": "Colombia",
+        "label": "Colombia to reach R16",
+        "model_prob": 0.8283,
+        "pm_price": 0.8,
+        "edge": 0.028299999999999992,
+        "token_id": "49510818485199258128237498482663394999954782925780267070519787324961115623294"
+      },
+      {
+        "category": "exact_score",
+        "subject": "United States vs Bosnia and Herzegovina",
+        "label": "Exact 3-0",
+        "model_prob": 0.073,
+        "pm_price": 0.1,
+        "edge": -0.02700000000000001,
+        "token_id": "19924042275346882765604320009234769596426801244839970280856823556759536200527"
+      },
+      {
+        "category": "advance",
+        "subject": "Paraguay",
+        "label": "Paraguay to reach QF",
+        "model_prob": 0.0801,
+        "pm_price": 0.107,
+        "edge": -0.026899999999999993,
+        "token_id": "34767947553502624703884313490470605949751747550095709162185153299905183521529"
+      },
+      {
+        "category": "match_result",
+        "subject": "Australia vs Egypt",
+        "label": "Australia win (FT 90')",
+        "model_prob": 0.315696,
+        "pm_price": 0.29,
+        "edge": 0.025695999999999997,
+        "token_id": "53970838488584180633352427972739785822858048152217079560347483794342661373892"
+      },
+      {
+        "category": "advance",
+        "subject": "Switzerland",
+        "label": "Switzerland to reach R16",
+        "model_prob": 0.6361,
+        "pm_price": 0.66,
+        "edge": -0.023900000000000032,
+        "token_id": "854942240692369766220064231220872259284305909962452160127646676178266684472"
+      },
+      {
+        "category": "advance",
+        "subject": "Algeria",
+        "label": "Algeria to reach R16",
+        "model_prob": 0.3639,
+        "pm_price": 0.34,
+        "edge": 0.023899999999999977,
+        "token_id": "80147110899507321278343948301244907703483368342427733918406159306205257043331"
+      },
+      {
+        "category": "advance",
+        "subject": "Algeria",
+        "label": "Algeria to reach QF",
+        "model_prob": 0.1232,
+        "pm_price": 0.1,
+        "edge": 0.0232,
+        "token_id": "90789441004126390689605459268340543775329224440309203890782498257852252164117"
+      },
+      {
+        "category": "btts",
+        "subject": "Spain vs Austria",
+        "label": "BTTS Yes",
+        "model_prob": 0.433,
+        "pm_price": 0.41,
+        "edge": 0.02300000000000002,
+        "token_id": "61927677229094273385677864843343302720417820655350953465326381066694288675401"
+      },
+      {
+        "category": "advance",
+        "subject": "Switzerland",
+        "label": "Switzerland to reach QF",
+        "model_prob": 0.2873,
+        "pm_price": 0.31,
+        "edge": -0.022699999999999998,
+        "token_id": "61927759967011821811377551550903325512429436537424931762760101962989960031399"
+      },
+      {
+        "category": "btts",
+        "subject": "United States vs Bosnia and Herzegovina",
+        "label": "BTTS Yes",
+        "model_prob": 0.501,
+        "pm_price": 0.48,
+        "edge": 0.02100000000000002,
+        "token_id": "62410703355784078879142976704970810724880967683193011688554187025759134238436"
+      },
+      {
+        "category": "advance",
+        "subject": "Croatia",
+        "label": "Croatia to reach SF",
+        "model_prob": 0.0706,
+        "pm_price": 0.05,
+        "edge": 0.020599999999999993,
+        "token_id": "78872300199163842916759594549506049742241752102482354702650387363572407267082"
+      },
+      {
+        "category": "advance",
+        "subject": "Australia",
+        "label": "Australia to reach SF",
+        "model_prob": 0.0433,
+        "pm_price": 0.023,
+        "edge": 0.0203,
+        "token_id": "71740532939167463118635677661186853270647609831289982762291191377959520228565"
+      },
+      {
+        "category": "match_result",
+        "subject": "Argentina vs Cape Verde",
+        "label": "Argentina win (FT 90')",
+        "model_prob": 0.830866,
+        "pm_price": 0.85,
+        "edge": -0.019133999999999984,
+        "token_id": "43456878767945280970650160648663035360756131789534577706790459269909777535061"
+      },
+      {
+        "category": "btts",
+        "subject": "Switzerland vs Algeria",
+        "label": "BTTS Yes",
+        "model_prob": 0.501,
+        "pm_price": 0.52,
+        "edge": -0.019000000000000017,
+        "token_id": "82530076000437744350801171840855364119118749909916024980845567559194070238737"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Colombia vs Ghana",
+        "label": "Exact 1-1",
+        "model_prob": 0.10099999999999999,
+        "pm_price": 0.12,
+        "edge": -0.019000000000000003,
+        "token_id": "16339919535939112495130904252387148865007158909013857543717992943124068274670"
+      },
+      {
+        "category": "match_result",
+        "subject": "Colombia vs Ghana",
+        "label": "Draw (FT)",
+        "model_prob": 0.231953,
+        "pm_price": 0.25,
+        "edge": -0.018047000000000007,
+        "token_id": "74465184772301188489011024618947583704857068259629739095253675726347456742213"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Belgium vs Senegal",
+        "label": "Exact 2-1",
+        "model_prob": 0.08199999999999999,
+        "pm_price": 0.1,
+        "edge": -0.018000000000000016,
+        "token_id": "37413934468000617814751486057459826676131701156051962305256816517847008410451"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Spain vs Austria",
+        "label": "Exact 3-0",
+        "model_prob": 0.092,
+        "pm_price": 0.11,
+        "edge": -0.018000000000000002,
+        "token_id": "73134626160924200922284631973050850281667251237232461623051996969222311438585"
+      },
+      {
+        "category": "advance",
+        "subject": "Egypt",
+        "label": "Egypt to reach QF",
+        "model_prob": 0.1021,
+        "pm_price": 0.12,
+        "edge": -0.0179,
+        "token_id": "101599057574366050346761933076291726568829153889920931378926936519027417673016"
+      },
+      {
+        "category": "advance",
+        "subject": "England",
+        "label": "England to reach R16",
+        "model_prob": 0.8622,
+        "pm_price": 0.88,
+        "edge": -0.017800000000000038,
+        "token_id": "79587887567449330673515576523858404649671814243732254048190539061987240744526"
+      },
+      {
+        "category": "advance",
+        "subject": "Canada",
+        "label": "Canada to reach SF",
+        "model_prob": 0.0319,
+        "pm_price": 0.049,
+        "edge": -0.017100000000000004,
+        "token_id": "115051106174422342018596407557021288919209986629931753002998843294650488221552"
+      },
+      {
+        "category": "exact_score",
+        "subject": "United States vs Bosnia and Herzegovina",
+        "label": "Exact 2-0",
+        "model_prob": 0.12300000000000001,
+        "pm_price": 0.14,
+        "edge": -0.017,
+        "token_id": "66829967724315345680616402722104620066224412261169179574947304239091910779043"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Belgium vs Senegal",
+        "label": "Exact 0-0",
+        "model_prob": 0.107,
+        "pm_price": 0.09,
+        "edge": 0.017,
+        "token_id": "97637992526514426292181079936775161987171110189231549665793657192031135176247"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Switzerland vs Algeria",
+        "label": "Exact 0-1",
+        "model_prob": 0.073,
+        "pm_price": 0.09,
+        "edge": -0.017,
+        "token_id": "42028552970176730135374665840727786717928168185968521195355805148470888303088"
+      },
+      {
+        "category": "match_result",
+        "subject": "United States vs Bosnia and Herzegovina",
+        "label": "Bosnia and Herzegovina win (FT 90')",
+        "model_prob": 0.12688,
+        "pm_price": 0.11,
+        "edge": 0.016879999999999992,
+        "token_id": "34408866647976593954627079997680480471193582323801865990245640173708429835258"
+      },
+      {
+        "category": "advance",
+        "subject": "Paraguay",
+        "label": "Paraguay to reach SF",
+        "model_prob": 0.0314,
+        "pm_price": 0.048,
+        "edge": -0.016600000000000004,
+        "token_id": "57105566125620058917319992649008320380014879891173941043664278689417119705311"
+      },
+      {
+        "category": "match_result",
+        "subject": "England vs DR Congo",
+        "label": "England win (FT 90')",
+        "model_prob": 0.753909,
+        "pm_price": 0.77,
+        "edge": -0.016090999999999966,
+        "token_id": "47128076194656719884583796201362709805790165917758295559618985609098741011893"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Argentina vs Cape Verde",
+        "label": "Exact 1-0",
+        "model_prob": 0.166,
+        "pm_price": 0.15,
+        "edge": 0.016000000000000014,
+        "token_id": "75136920424882305924467127422634876401656914780835583461978729398011809514133"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Belgium vs Senegal",
+        "label": "Exact 2-0",
+        "model_prob": 0.095,
+        "pm_price": 0.08,
+        "edge": 0.015,
+        "token_id": "24838868463003983733264682992009656382162511604475418591881109907940809373863"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Switzerland vs Algeria",
+        "label": "Exact 1-0",
+        "model_prob": 0.115,
+        "pm_price": 0.13,
+        "edge": -0.015,
+        "token_id": "23450304511772138163686288406506791812420357314538421947330025908514624359415"
+      },
+      {
+        "category": "advance",
+        "subject": "Canada",
+        "label": "Canada to reach Final",
+        "model_prob": 0.007,
+        "pm_price": 0.021,
+        "edge": -0.014000000000000002,
+        "token_id": "89213630165214047229558386221609640009027601327751312513236271512008084172785"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Belgium vs Senegal",
+        "label": "Exact 1-1",
+        "model_prob": 0.136,
+        "pm_price": 0.15,
+        "edge": -0.013999999999999985,
+        "token_id": "23351363387010703929050500852489401458689853560483975963666471250945426454015"
+      },
+      {
+        "category": "advance",
+        "subject": "Ghana",
+        "label": "Ghana to reach SF",
+        "model_prob": 0.0089,
+        "pm_price": 0.022,
+        "edge": -0.013099999999999999,
+        "token_id": "6808241987866394081699061395540632766240859251099275318595606956667089277941"
+      },
+      {
+        "category": "exact_score",
+        "subject": "England vs DR Congo",
+        "label": "Exact 1-0",
+        "model_prob": 0.17300000000000001,
+        "pm_price": 0.16,
+        "edge": 0.013000000000000012,
+        "token_id": "49230821065190929388623697122977080188877975980506798902762972349649772505909"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Portugal vs Croatia",
+        "label": "Exact 2-1",
+        "model_prob": 0.09699999999999999,
+        "pm_price": 0.11,
+        "edge": -0.013000000000000012,
+        "token_id": "113534017472064608323448814253588021804143094022611486814287656771903146043718"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Switzerland vs Algeria",
+        "label": "Exact 1-1",
+        "model_prob": 0.13699999999999998,
+        "pm_price": 0.15,
+        "edge": -0.013000000000000012,
+        "token_id": "83498400432741019436780398164991661600937779173181177201170549123509190430106"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Colombia vs Ghana",
+        "label": "Exact 2-1",
+        "model_prob": 0.087,
+        "pm_price": 0.1,
+        "edge": -0.013000000000000012,
+        "token_id": "100324596837025139820415384179368151720523119656012767427191532501431774631369"
+      },
+      {
+        "category": "match_result",
+        "subject": "Belgium vs Senegal",
+        "label": "Senegal win (FT 90')",
+        "model_prob": 0.247198,
+        "pm_price": 0.26,
+        "edge": -0.012802000000000008,
+        "token_id": "101186338300259647808521159297117949746868383615820554531962956488824987030486"
+      },
+      {
+        "category": "match_result",
+        "subject": "Spain vs Austria",
+        "label": "Draw (FT)",
+        "model_prob": 0.19225,
+        "pm_price": 0.18,
+        "edge": 0.012250000000000011,
+        "token_id": "110944718573054763745445792438007369988665915888567174660803016238425796254924"
+      },
+      {
+        "category": "advance",
+        "subject": "Cape Verde",
+        "label": "Cape Verde to reach QF",
+        "model_prob": 0.028,
+        "pm_price": 0.04,
+        "edge": -0.012,
+        "token_id": "83327421248385933281601901165501733552982003173305793014676446639436607294847"
+      },
+      {
+        "category": "advance",
+        "subject": "Senegal",
+        "label": "Senegal to reach SF",
+        "model_prob": 0.049,
+        "pm_price": 0.061,
+        "edge": -0.011999999999999997,
+        "token_id": "32486663561694145938069480507430739785166001601012507083733657489475387319558"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Portugal vs Croatia",
+        "label": "Exact 0-0",
+        "model_prob": 0.102,
+        "pm_price": 0.09,
+        "edge": 0.011999999999999997,
+        "token_id": "72939346910100770622778905435264155336129330299291529912971459949232868356844"
+      },
+      {
+        "category": "match_result",
+        "subject": "Switzerland vs Algeria",
+        "label": "Draw (FT)",
+        "model_prob": 0.288191,
+        "pm_price": 0.3,
+        "edge": -0.011809000000000014,
+        "token_id": "52089539338074641654799643228933406735343544687802407952997175402964899976256"
+      },
+      {
+        "category": "exact_score",
+        "subject": "United States vs Bosnia and Herzegovina",
+        "label": "Exact 3-1",
+        "model_prob": 0.069,
+        "pm_price": 0.08,
+        "edge": -0.010999999999999996,
+        "token_id": "83727591470656974552811355904109823957148175835805583860111866099368634070788"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Australia vs Egypt",
+        "label": "Exact 1-2",
+        "model_prob": 0.069,
+        "pm_price": 0.08,
+        "edge": -0.010999999999999996,
+        "token_id": "72519898142550517197046123876885669271355865905298131238156379945422833153777"
+      },
+      {
+        "category": "exact_score",
+        "subject": "England vs DR Congo",
+        "label": "Exact 2-1",
+        "model_prob": 0.079,
+        "pm_price": 0.09,
+        "edge": -0.010999999999999996,
+        "token_id": "66711855967287565871256940455256036543232651072334847669933362741659261051715"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Spain vs Austria",
+        "label": "Exact 1-1",
+        "model_prob": 0.091,
+        "pm_price": 0.08,
+        "edge": 0.010999999999999996,
+        "token_id": "73611820020571711695993864084831532904730804673457777171784369901105769662875"
+      },
+      {
+        "category": "advance",
+        "subject": "Senegal",
+        "label": "Senegal to reach QF",
+        "model_prob": 0.1909,
+        "pm_price": 0.18,
+        "edge": 0.010899999999999993,
+        "token_id": "19415400604867485087730359530774210758378853324534815736215173082457943638036"
+      },
+      {
+        "category": "match_result",
+        "subject": "Australia vs Egypt",
+        "label": "Draw (FT)",
+        "model_prob": 0.329231,
+        "pm_price": 0.34,
+        "edge": -0.010769000000000029,
+        "token_id": "84037528096247589121932460644816367456733721388752689681145885530943661082375"
+      },
+      {
+        "category": "match_result",
+        "subject": "Belgium vs Senegal",
+        "label": "Draw (FT)",
+        "model_prob": 0.289994,
+        "pm_price": 0.3,
+        "edge": -0.010006000000000015,
+        "token_id": "70734912499390294762635620491284391639475146683001061643495623464632375277430"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Argentina vs Cape Verde",
+        "label": "Exact 0-0",
+        "model_prob": 0.06,
+        "pm_price": 0.05,
+        "edge": 0.009999999999999995,
+        "token_id": "74301410451718837863745268233572779487623961343793004817700172548725627960269"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Belgium vs Senegal",
+        "label": "Exact 1-0",
+        "model_prob": 0.12,
+        "pm_price": 0.11,
+        "edge": 0.009999999999999995,
+        "token_id": "53547286306036265408062111368694226717807960460920805932998412058322421482287"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Australia vs Egypt",
+        "label": "Exact 1-1",
+        "model_prob": 0.14,
+        "pm_price": 0.15,
+        "edge": -0.009999999999999981,
+        "token_id": "93336309596882784618337377771105183966558367853028100902876931654786011682443"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Colombia vs Ghana",
+        "label": "Exact 1-0",
+        "model_prob": 0.18,
+        "pm_price": 0.17,
+        "edge": 0.009999999999999981,
+        "token_id": "76862201139998602907919885613399982410112112329673029635709766901131392701219"
+      },
+      {
+        "category": "match_result",
+        "subject": "Switzerland vs Algeria",
+        "label": "Switzerland win (FT 90')",
+        "model_prob": 0.470078,
+        "pm_price": 0.48,
+        "edge": -0.009921999999999986,
+        "token_id": "87420881416753183950847701965163525629817652213917429006273635360524465160861"
+      },
+      {
+        "category": "match_result",
+        "subject": "England vs DR Congo",
+        "label": "Draw (FT)",
+        "model_prob": 0.180155,
+        "pm_price": 0.19,
+        "edge": -0.009844999999999993,
+        "token_id": "69720115775052841901641625498034904993405939321208883889567585171348787024367"
+      },
+      {
+        "category": "advance",
+        "subject": "Austria",
+        "label": "Austria to reach SF",
+        "model_prob": 0.0266,
+        "pm_price": 0.036,
+        "edge": -0.009399999999999999,
+        "token_id": "96951758614297588238618694066952451530290997593186719991698344306084062932161"
+      },
+      {
+        "category": "match_result",
+        "subject": "Spain vs Austria",
+        "label": "Austria win (FT 90')",
+        "model_prob": 0.099375,
+        "pm_price": 0.09,
+        "edge": 0.009375000000000008,
+        "token_id": "98527153031306952978660040867395139087621992676427333568334777278688370278755"
+      },
+      {
+        "category": "exact_score",
+        "subject": "United States vs Bosnia and Herzegovina",
+        "label": "Exact 1-1",
+        "model_prob": 0.099,
+        "pm_price": 0.09,
+        "edge": 0.009000000000000008,
+        "token_id": "14881882187344370371173477367316620109817132539802350594449942958856457363435"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Australia vs Egypt",
+        "label": "Exact 0-2",
+        "model_prob": 0.071,
+        "pm_price": 0.08,
+        "edge": -0.009000000000000008,
+        "token_id": "57309163301725425907254496082634739279570637291395220998709880590629335080079"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Argentina vs Cape Verde",
+        "label": "Exact 2-0",
+        "model_prob": 0.18899999999999997,
+        "pm_price": 0.18,
+        "edge": 0.00899999999999998,
+        "token_id": "19885879377140111412615124422827563821795770907530974113754542438168168556905"
+      },
+      {
+        "category": "match_result",
+        "subject": "Portugal vs Croatia",
+        "label": "Croatia win (FT 90')",
+        "model_prob": 0.208602,
+        "pm_price": 0.2,
+        "edge": 0.008601999999999999,
+        "token_id": "87174293490112529998913581015460784091668285134964562963484251070427507993480"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Australia vs Egypt",
+        "label": "Exact 0-0",
+        "model_prob": 0.158,
+        "pm_price": 0.15,
+        "edge": 0.008000000000000007,
+        "token_id": "85254195234209348639093065439207390078906745390258921852102644715576375438741"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Australia vs Egypt",
+        "label": "Exact 1-0",
+        "model_prob": 0.128,
+        "pm_price": 0.12,
+        "edge": 0.008000000000000007,
+        "token_id": "113137156091555190724108444798955972801161456949298523902578767845470371595498"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Belgium vs Senegal",
+        "label": "Exact 0-1",
+        "model_prob": 0.08800000000000001,
+        "pm_price": 0.08,
+        "edge": 0.008000000000000007,
+        "token_id": "7552368884758228836031415810869192804018620093090490994815109703482855399459"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Spain vs Austria",
+        "label": "Exact 1-0",
+        "model_prob": 0.142,
+        "pm_price": 0.15,
+        "edge": -0.008000000000000007,
+        "token_id": "86072789782570590582876808901993617457608084603614442963614235576003606388610"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Switzerland vs Algeria",
+        "label": "Exact 2-1",
+        "model_prob": 0.092,
+        "pm_price": 0.1,
+        "edge": -0.008000000000000007,
+        "token_id": "8723496482635164431296337261111398123109709634089102235916484131757214579879"
+      },
+      {
+        "category": "advance",
+        "subject": "DR Congo",
+        "label": "DR Congo to reach R16",
+        "model_prob": 0.1378,
+        "pm_price": 0.13,
+        "edge": 0.007800000000000001,
+        "token_id": "48375015639547620216330094939805692244923875244365005211598619227315183036649"
+      },
+      {
+        "category": "match_result",
+        "subject": "Colombia vs Ghana",
+        "label": "Ghana win (FT 90')",
+        "model_prob": 0.11254,
+        "pm_price": 0.12,
+        "edge": -0.007459999999999994,
+        "token_id": "105539798766547200092323662417726863479637721229836283901511466011186180591923"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Colombia vs Ghana",
+        "label": "Exact 0-0",
+        "model_prob": 0.107,
+        "pm_price": 0.1,
+        "edge": 0.006999999999999992,
+        "token_id": "98480938609612201522078699075274253113118272000582494118185767441220998849499"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Spain vs Austria",
+        "label": "Exact 2-0",
+        "model_prob": 0.14300000000000002,
+        "pm_price": 0.15,
+        "edge": -0.0069999999999999785,
+        "token_id": "1705443437875897005688988397774390915508630429530991457078758611507094058844"
+      },
+      {
+        "category": "advance",
+        "subject": "Colombia",
+        "label": "Colombia to reach Final",
+        "model_prob": 0.1108,
+        "pm_price": 0.104,
+        "edge": 0.0068000000000000005,
+        "token_id": "87874922573280957405073053711998890628107829783535977397504480554710455392553"
+      },
+      {
+        "category": "match_result",
+        "subject": "United States vs Bosnia and Herzegovina",
+        "label": "Draw (FT)",
+        "model_prob": 0.206528,
+        "pm_price": 0.2,
+        "edge": 0.006527999999999978,
+        "token_id": "7461808142402940723226612613163043078472639078077557222185478409281679793928"
+      },
+      {
+        "category": "advance",
+        "subject": "Egypt",
+        "label": "Egypt to reach SF",
+        "model_prob": 0.0347,
+        "pm_price": 0.041,
+        "edge": -0.0063,
+        "token_id": "111647819143151504098117494939930742571907549091124854477300802261245027249476"
+      },
+      {
+        "category": "match_result",
+        "subject": "Argentina vs Cape Verde",
+        "label": "Draw (FT)",
+        "model_prob": 0.126044,
+        "pm_price": 0.12,
+        "edge": 0.006043999999999994,
+        "token_id": "50594101292041950051188723960534854293621624124622267043333086480644780479430"
+      },
+      {
+        "category": "advance",
+        "subject": "Argentina",
+        "label": "Argentina to reach R16",
+        "model_prob": 0.914,
+        "pm_price": 0.92,
+        "edge": -0.006000000000000005,
+        "token_id": "110353260023944385936425867090912454834335615109053111135278498219254215717487"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Switzerland vs Algeria",
+        "label": "Exact 0-0",
+        "model_prob": 0.094,
+        "pm_price": 0.1,
+        "edge": -0.006000000000000005,
+        "token_id": "3119771940681321349027819657526184376132806226129739544879846973314664116101"
+      },
+      {
+        "category": "exact_score",
+        "subject": "United States vs Bosnia and Herzegovina",
+        "label": "Exact 2-1",
+        "model_prob": 0.11599999999999999,
+        "pm_price": 0.11,
+        "edge": 0.0059999999999999915,
+        "token_id": "53839309906489127105092596447187625448909519853861877844150310818955809079421"
+      },
+      {
+        "category": "exact_score",
+        "subject": "England vs DR Congo",
+        "label": "Exact 0-0",
+        "model_prob": 0.086,
+        "pm_price": 0.08,
+        "edge": 0.0059999999999999915,
+        "token_id": "49722251049068319974156172740903084914824931927191273805089511856699202684056"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Portugal vs Croatia",
+        "label": "Exact 2-0",
+        "model_prob": 0.10400000000000001,
+        "pm_price": 0.11,
+        "edge": -0.0059999999999999915,
+        "token_id": "70332059108864564043544336212768834620671284913710227296976444708168300380934"
+      },
+      {
+        "category": "match_result",
+        "subject": "England vs DR Congo",
+        "label": "DR Congo win (FT 90')",
+        "model_prob": 0.065936,
+        "pm_price": 0.06,
+        "edge": 0.005935999999999997,
+        "token_id": "40095690165100403740959014720632641918616938378417968277635915917247868465688"
+      },
+      {
+        "category": "match_result",
+        "subject": "Colombia vs Ghana",
+        "label": "Colombia win (FT 90')",
+        "model_prob": 0.655507,
+        "pm_price": 0.65,
+        "edge": 0.005506999999999929,
+        "token_id": "76150025241705071715660741383746313361341926806422361774139695469030476859782"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Argentina vs Cape Verde",
+        "label": "Exact 2-1",
+        "model_prob": 0.075,
+        "pm_price": 0.08,
+        "edge": -0.0050000000000000044,
+        "token_id": "985646038942686643255122503870654653608343155194166817116142718998161558199"
+      },
+      {
+        "category": "advance",
+        "subject": "DR Congo",
+        "label": "DR Congo to reach QF",
+        "model_prob": 0.0332,
+        "pm_price": 0.029,
+        "edge": 0.004199999999999999,
+        "token_id": "25715130102058253589298268535749397625263555420358261712760013222167471252264"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Colombia vs Ghana",
+        "label": "Exact 3-0",
+        "model_prob": 0.084,
+        "pm_price": 0.08,
+        "edge": 0.0040000000000000036,
+        "token_id": "63698988709721594366747412325667866705847495318940389768337122423582312343493"
+      },
+      {
+        "category": "match_result",
+        "subject": "Argentina vs Cape Verde",
+        "label": "Cape Verde win (FT 90')",
+        "model_prob": 0.04309,
+        "pm_price": 0.047,
+        "edge": -0.003909999999999997,
+        "token_id": "27797173830695790192472564926188861680026963949667326881806426254251568869114"
+      },
+      {
+        "category": "advance",
+        "subject": "England",
+        "label": "England to reach QF",
+        "model_prob": 0.5837,
+        "pm_price": 0.58,
+        "edge": 0.0037000000000000366,
+        "token_id": "14432807076000601507215416401881299761163947689030790159977482663032949353306"
+      },
+      {
+        "category": "advance",
+        "subject": "Switzerland",
+        "label": "Switzerland to reach SF",
+        "model_prob": 0.1027,
+        "pm_price": 0.099,
+        "edge": 0.003699999999999995,
+        "token_id": "103493863332754371201759692475592619819800488748318590025773806305338466147803"
+      },
+      {
+        "category": "advance",
+        "subject": "Austria",
+        "label": "Austria to reach QF",
+        "model_prob": 0.0591,
+        "pm_price": 0.056,
+        "edge": 0.0030999999999999986,
+        "token_id": "31243485838008283486326836483996602905577587731898462043199915115664326359959"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Australia vs Egypt",
+        "label": "Exact 0-1",
+        "model_prob": 0.147,
+        "pm_price": 0.15,
+        "edge": -0.0030000000000000027,
+        "token_id": "110884159352304444063318215429657461406242156500845711303194556647359817182499"
+      },
+      {
+        "category": "exact_score",
+        "subject": "England vs DR Congo",
+        "label": "Exact 1-1",
+        "model_prob": 0.077,
+        "pm_price": 0.08,
+        "edge": -0.0030000000000000027,
+        "token_id": "106409794985028890363960398946778290994906421655337452878256135694726927649799"
+      },
+      {
+        "category": "exact_score",
+        "subject": "England vs DR Congo",
+        "label": "Exact 2-0",
+        "model_prob": 0.177,
+        "pm_price": 0.18,
+        "edge": -0.0030000000000000027,
+        "token_id": "16047808077948144282213432252316393820004374436473187657968196578765866295527"
+      },
+      {
+        "category": "exact_score",
+        "subject": "England vs DR Congo",
+        "label": "Exact 3-0",
+        "model_prob": 0.11699999999999999,
+        "pm_price": 0.12,
+        "edge": -0.0030000000000000027,
+        "token_id": "6683787556919873221949441552579564031786382995314732113730820178903646776565"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Spain vs Austria",
+        "label": "Exact 0-0",
+        "model_prob": 0.067,
+        "pm_price": 0.07,
+        "edge": -0.0030000000000000027,
+        "token_id": "20603547334858412833653787235873290734637948559436088742662106463020767504821"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Colombia vs Ghana",
+        "label": "Exact 2-0",
+        "model_prob": 0.153,
+        "pm_price": 0.15,
+        "edge": 0.0030000000000000027,
+        "token_id": "18616180018650789184299501375204107517268714996302672744992453181663895498866"
+      },
+      {
+        "category": "match_result",
+        "subject": "Belgium vs Senegal",
+        "label": "Belgium win (FT 90')",
+        "model_prob": 0.462807,
+        "pm_price": 0.46,
+        "edge": 0.002807000000000004,
+        "token_id": "51550519425443949709378847779649788844021865732808641475643382400046061806350"
+      },
+      {
+        "category": "match_result",
+        "subject": "Portugal vs Croatia",
+        "label": "Draw (FT)",
+        "model_prob": 0.277326,
+        "pm_price": 0.28,
+        "edge": -0.0026740000000000097,
+        "token_id": "51119174525701806371550479635410149688193271356842779075353445408012707878262"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Spain vs Austria",
+        "label": "Exact 2-1",
+        "model_prob": 0.102,
+        "pm_price": 0.1,
+        "edge": 0.001999999999999988,
+        "token_id": "48108602170000664043754071542550592305694809460715503424638801004633388925603"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Portugal vs Croatia",
+        "label": "Exact 1-0",
+        "model_prob": 0.142,
+        "pm_price": 0.14,
+        "edge": 0.001999999999999974,
+        "token_id": "22991614995664461679679028380140304024628255252139818626793353583804765303174"
+      },
+      {
+        "category": "advance",
+        "subject": "Cape Verde",
+        "label": "Cape Verde to reach R16",
+        "model_prob": 0.0861,
+        "pm_price": 0.088,
+        "edge": -0.001899999999999999,
+        "token_id": "11766225864610588538945996494195510329997072069623106737960526474161929636557"
+      },
+      {
+        "category": "match_result",
+        "subject": "Switzerland vs Algeria",
+        "label": "Algeria win (FT 90')",
+        "model_prob": 0.241731,
+        "pm_price": 0.24,
+        "edge": 0.0017310000000000103,
+        "token_id": "75771817078472080882207303024349440209183684662422891257718386385240666521405"
+      },
+      {
+        "category": "advance",
+        "subject": "Algeria",
+        "label": "Algeria to reach SF",
+        "model_prob": 0.0326,
+        "pm_price": 0.031,
+        "edge": 0.0015999999999999973,
+        "token_id": "62705081738949086048321335089780096347119929153013820966387375054422999112462"
+      },
+      {
+        "category": "advance",
+        "subject": "Colombia",
+        "label": "Colombia to reach QF",
+        "model_prob": 0.5414,
+        "pm_price": 0.54,
+        "edge": 0.0013999999999999568,
+        "token_id": "45602434877024282198654168883312586919377763282561779076186837775199208908433"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Portugal vs Croatia",
+        "label": "Exact 0-1",
+        "model_prob": 0.071,
+        "pm_price": 0.07,
+        "edge": 0.000999999999999987,
+        "token_id": "84693645302799206014146042854423772480708681634811161778201491956591818792104"
+      },
+      {
+        "category": "advance",
+        "subject": "Switzerland",
+        "label": "Switzerland to reach Final",
+        "model_prob": 0.0372,
+        "pm_price": 0.038,
+        "edge": -0.0008000000000000021,
+        "token_id": "2032868846159953092745022941521179604230025014125771596734795991303090319311"
+      },
+      {
+        "category": "exact_score",
+        "subject": "United States vs Bosnia and Herzegovina",
+        "label": "Exact 1-0",
+        "model_prob": 0.13,
+        "pm_price": 0.13,
+        "edge": 0.0,
+        "token_id": "3062328493459625159582350776420483543034161847476751461157733466843924264203"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Argentina vs Cape Verde",
+        "label": "Exact 3-0",
+        "model_prob": 0.14,
+        "pm_price": 0.14,
+        "edge": 0.0,
+        "token_id": "58151570336317874509203891094154553540263410169105295504995168433129754961777"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Portugal vs Croatia",
+        "label": "Exact 1-1",
+        "model_prob": 0.13,
+        "pm_price": 0.13,
+        "edge": 0.0,
+        "token_id": "60304249916681238199709172463934757156197521165277881854756534120556572780888"
+      },
+      {
+        "category": "exact_score",
+        "subject": "Switzerland vs Algeria",
+        "label": "Exact 2-0",
+        "model_prob": 0.09,
+        "pm_price": 0.09,
+        "edge": 0.0,
+        "token_id": "55675129987011642566380682412623376117805533131035813838155680935118422552376"
+      }
+    ]
+  },
+  "term_structure": {
+    "n_ladder_violations": 0,
+    "ladder_violations": [],
+    "n_advance_vs_ft_flags": 1,
+    "advance_vs_ft_flags": [
+      {
+        "team": "United States",
+        "source": "model",
+        "advance_prob": 0.6582,
+        "ft_win_prob": 0.666593,
+        "gap": 0.008392999999999984
+      }
+    ]
+  },
+  "mark_to_market": {
+    "totals": {
+      "overall": {
+        "GBP": {
+          "n": 2,
+          "n_marked": 0,
+          "n_unmarked": 2,
+          "stake_marked": 0.0,
+          "unrealized_pl": 0.0,
+          "roi_pct": 0.0
+        },
+        "USD": {
+          "n": 32,
+          "n_marked": 31,
+          "n_unmarked": 1,
+          "stake_marked": 1240.0,
+          "unrealized_pl": -211.50717547150242,
+          "roi_pct": -17.05703027995987
+        }
+      },
+      "by_book": {
+        "real": {
+          "GBP": {
+            "n": 2,
+            "n_marked": 0,
+            "n_unmarked": 2,
+            "stake_marked": 0.0,
+            "unrealized_pl": 0.0,
+            "roi_pct": 0.0
+          },
+          "USD": {
+            "n": 1,
+            "n_marked": 0,
+            "n_unmarked": 1,
+            "stake_marked": 0.0,
+            "unrealized_pl": 0.0,
+            "roi_pct": 0.0
+          }
+        },
+        "paper": {
+          "USD": {
+            "n": 31,
+            "n_marked": 31,
+            "n_unmarked": 0,
+            "stake_marked": 1240.0,
+            "unrealized_pl": -211.50717547150242,
+            "roi_pct": -17.05703027995987
+          }
+        }
+      },
+      "by_basis": {
+        "outright": {
+          "GBP": {
+            "n": 1,
+            "n_marked": 0,
+            "n_unmarked": 1,
+            "stake_marked": 0.0,
+            "unrealized_pl": 0.0,
+            "roi_pct": 0.0
+          }
+        },
+        "advance": {
+          "USD": {
+            "n": 9,
+            "n_marked": 8,
+            "n_unmarked": 1,
+            "stake_marked": 320.0,
+            "unrealized_pl": -11.977401979588969,
+            "roi_pct": -3.742938118621553
+          }
+        },
+        "prop": {
+          "GBP": {
+            "n": 1,
+            "n_marked": 0,
+            "n_unmarked": 1,
+            "stake_marked": 0.0,
+            "unrealized_pl": 0.0,
+            "roi_pct": 0.0
+          },
+          "USD": {
+            "n": 14,
+            "n_marked": 14,
+            "n_unmarked": 0,
+            "stake_marked": 560.0,
+            "unrealized_pl": -181.85448015092066,
+            "roi_pct": -32.47401431266441
+          }
+        },
+        "btts": {
+          "USD": {
+            "n": 5,
+            "n_marked": 5,
+            "n_unmarked": 0,
+            "stake_marked": 200.0,
+            "unrealized_pl": -16.898594311866624,
+            "roi_pct": -8.449297155933312
+          }
+        },
+        "totals": {
+          "USD": {
+            "n": 4,
+            "n_marked": 4,
+            "n_unmarked": 0,
+            "stake_marked": 160.0,
+            "unrealized_pl": -0.7766990291262132,
+            "roi_pct": -0.4854368932038833
+          }
+        }
+      },
+      "n_positions": 34
+    },
+    "positions": [
+      {
+        "book": "real",
+        "bet_id": 11,
+        "fixture": "FIFA World Cup 2026 Golden Boot",
+        "market": "outright_golden_boot",
+        "selection": "Harry Kane (England)",
+        "resolution_basis": "outright",
+        "token_id": null,
+        "stake": 10.0,
+        "currency": "GBP",
+        "entry_price": null,
+        "decimal_odds": 7.5,
+        "mark_price": null,
+        "unrealized_pl": null,
+        "shares": 75.0
+      },
+      {
+        "book": "real",
+        "bet_id": 57,
+        "fixture": "Ghana eliminated R32 of the World Cup",
+        "market": "Polymarket advancement: Will Ghana be eliminated in the Round of 32 at the 2026 FIFA World Cup?",
+        "selection": "No \u2014 Ghana not eliminated in Round of 32",
+        "resolution_basis": "advance",
+        "token_id": null,
+        "stake": 1.0,
+        "currency": "USD",
+        "entry_price": null,
+        "decimal_odds": 1.4708,
+        "mark_price": null,
+        "unrealized_pl": null,
+        "shares": 1.4708
+      },
+      {
+        "book": "real",
+        "bet_id": 99,
+        "fixture": "Portugal-Uzbekistan / England-Ghana / Colombia-DR Congo (treble)",
+        "market": "Treble \u2014 Player 1+ SOT (boosted)",
+        "selection": "Ronaldo O1.5 SOT + Kane O1.5 SOT + Diaz O1.5 SOT",
+        "resolution_basis": "prop",
+        "token_id": null,
+        "stake": 10.0,
+        "currency": "GBP",
+        "entry_price": null,
+        "decimal_odds": 5.05,
+        "mark_price": null,
+        "unrealized_pl": null,
+        "shares": 50.5
+      },
+      {
+        "book": "paper",
+        "bet_id": 1,
+        "fixture": "Argentina vs Cape Verde",
+        "market": "btts",
+        "selection": "BTTS Yes",
+        "resolution_basis": "btts",
+        "token_id": "107747983509127634497161587255315408297040109108461829439902913439667464434617",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.14,
+        "decimal_odds": null,
+        "mark_price": 0.135,
+        "unrealized_pl": -1.4285714285714306,
+        "shares": 285.71428571428567
+      },
+      {
+        "book": "paper",
+        "bet_id": 2,
+        "fixture": "Australia vs Egypt",
+        "market": "btts",
+        "selection": "BTTS Yes",
+        "resolution_basis": "btts",
+        "token_id": "8651914520233031898412822928391772572588495928391357996638630585361930950430",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.23,
+        "decimal_odds": null,
+        "mark_price": 0.2,
+        "unrealized_pl": -5.217391304347821,
+        "shares": 173.91304347826087
+      },
+      {
+        "book": "paper",
+        "bet_id": 3,
+        "fixture": "Spain vs Austria",
+        "market": "player_shots",
+        "selection": "Pedri 1+ shots",
+        "resolution_basis": "prop",
+        "token_id": "46339518362280887235279023183743821553906958863076933893728740035088344032763",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.8,
+        "decimal_odds": null,
+        "mark_price": 0.675,
+        "unrealized_pl": -6.25,
+        "shares": 50.0
+      },
+      {
+        "book": "paper",
+        "bet_id": 4,
+        "fixture": "Mexico vs Ecuador",
+        "market": "player_shots_on_target",
+        "selection": "Santiago Gimenez 2+ shots on target",
+        "resolution_basis": "prop",
+        "token_id": "81454339010925442368356390053547699415992502706516655960110920243309527344416",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.2,
+        "decimal_odds": null,
+        "mark_price": 0.1,
+        "unrealized_pl": -20.0,
+        "shares": 200.0
+      },
+      {
+        "book": "paper",
+        "bet_id": 5,
+        "fixture": "England vs DR Congo",
+        "market": "player_assists",
+        "selection": "Harry Kane 1+ assists",
+        "resolution_basis": "prop",
+        "token_id": "29273147010909296589332842584717660791014510726971153422606483075963252045658",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.16,
+        "decimal_odds": null,
+        "mark_price": 0.17,
+        "unrealized_pl": 2.5,
+        "shares": 250.0
+      },
+      {
+        "book": "paper",
+        "bet_id": 6,
+        "fixture": "England vs DR Congo",
+        "market": "btts",
+        "selection": "BTTS Yes",
+        "resolution_basis": "btts",
+        "token_id": "69091710678268600059631910995169930243081967958558057576897517040158216825079",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.19,
+        "decimal_odds": null,
+        "mark_price": 0.185,
+        "unrealized_pl": -1.05263157894737,
+        "shares": 210.52631578947367
+      },
+      {
+        "book": "paper",
+        "bet_id": 7,
+        "fixture": "Spain vs Austria",
+        "market": "player_goals",
+        "selection": "Pedri 1+ goals",
+        "resolution_basis": "prop",
+        "token_id": "53448574335055922145178979571470918752266222720418883977047344937431278250926",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.13,
+        "decimal_odds": null,
+        "mark_price": 0.11,
+        "unrealized_pl": -6.153846153846153,
+        "shares": 307.6923076923077
+      },
+      {
+        "book": "paper",
+        "bet_id": 8,
+        "fixture": "Belgium vs Senegal",
+        "market": "player_shots",
+        "selection": "Sadio Mane 2+ shots",
+        "resolution_basis": "prop",
+        "token_id": "41577625484366718048969287659301771041805156816092255297516038007692679314565",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.6,
+        "decimal_odds": null,
+        "mark_price": 0.335,
+        "unrealized_pl": -17.666666666666664,
+        "shares": 66.66666666666667
+      },
+      {
+        "book": "paper",
+        "bet_id": 9,
+        "fixture": "Spain vs Austria",
+        "market": "player_shots",
+        "selection": "Marcel Sabitzer 2+ shots",
+        "resolution_basis": "prop",
+        "token_id": "48316360160922325231454983752312010329572594919074499907336083174966344212858",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.45,
+        "decimal_odds": null,
+        "mark_price": 0.285,
+        "unrealized_pl": -14.666666666666671,
+        "shares": 88.88888888888889
+      },
+      {
+        "book": "paper",
+        "bet_id": 10,
+        "fixture": "Colombia vs Ghana",
+        "market": "btts",
+        "selection": "BTTS Yes",
+        "resolution_basis": "btts",
+        "token_id": "9746499361446890136318616018295954325287959214056616897359557441339302379635",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.25,
+        "decimal_odds": null,
+        "mark_price": 0.205,
+        "unrealized_pl": -7.200000000000003,
+        "shares": 160.0
+      },
+      {
+        "book": "paper",
+        "bet_id": 11,
+        "fixture": "Spain vs Austria",
+        "market": "player_goals",
+        "selection": "Nico Williams 1+ goals",
+        "resolution_basis": "prop",
+        "token_id": "114786236933993822931543658843108081972546076965049244946053545622974214071829",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.048,
+        "decimal_odds": null,
+        "mark_price": 0.0255,
+        "unrealized_pl": -18.75,
+        "shares": 833.3333333333334
+      },
+      {
+        "book": "paper",
+        "bet_id": 12,
+        "fixture": "Spain vs Austria",
+        "market": "player_shots_on_target",
+        "selection": "Pedri 2+ shots on target",
+        "resolution_basis": "prop",
+        "token_id": "85189157910301557009921866869384061713388281031755221731963599283746775137257",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.18,
+        "decimal_odds": null,
+        "mark_price": 0.09,
+        "unrealized_pl": -20.0,
+        "shares": 222.22222222222223
+      },
+      {
+        "book": "paper",
+        "bet_id": 13,
+        "fixture": "Argentina vs Cape Verde",
+        "market": "btts",
+        "selection": "BTTS Yes",
+        "resolution_basis": "btts",
+        "token_id": "27565900782079528920338305120731423721265937391127368539735693977315949186998",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.2,
+        "decimal_odds": null,
+        "mark_price": 0.19,
+        "unrealized_pl": -2.0,
+        "shares": 200.0
+      },
+      {
+        "book": "paper",
+        "bet_id": 14,
+        "fixture": "Australia",
+        "market": "advance",
+        "selection": "Australia to reach R16",
+        "resolution_basis": "advance",
+        "token_id": "29007489509419477937475949564533663477138972922740204804000386223259767819959",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.45,
+        "decimal_odds": null,
+        "mark_price": 0.445,
+        "unrealized_pl": -0.44444444444444287,
+        "shares": 88.88888888888889
+      },
+      {
+        "book": "paper",
+        "bet_id": 15,
+        "fixture": "Belgium",
+        "market": "advance",
+        "selection": "Belgium to reach SF",
+        "resolution_basis": "advance",
+        "token_id": "69308688490171395576850307939004739703133311275309901259098144580114964835504",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.11,
+        "decimal_odds": null,
+        "mark_price": 0.105,
+        "unrealized_pl": -1.8181818181818201,
+        "shares": 363.6363636363636
+      },
+      {
+        "book": "paper",
+        "bet_id": 16,
+        "fixture": "Belgium",
+        "market": "advance",
+        "selection": "Belgium to reach R16",
+        "resolution_basis": "advance",
+        "token_id": "78042267197293570277682494823265701631907405223712907561037063598368049101974",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.59,
+        "decimal_odds": null,
+        "mark_price": 0.585,
+        "unrealized_pl": -0.3389830508474603,
+        "shares": 67.79661016949153
+      },
+      {
+        "book": "paper",
+        "bet_id": 17,
+        "fixture": "Belgium vs Senegal",
+        "market": "totals_ou25",
+        "selection": "Under 2.5",
+        "resolution_basis": "totals",
+        "token_id": "95563237146179919161455601725855003480388556199651001441582704355811157748915",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.515,
+        "decimal_odds": null,
+        "mark_price": 0.505,
+        "unrealized_pl": -0.7766990291262132,
+        "shares": 77.66990291262135
+      },
+      {
+        "book": "paper",
+        "bet_id": 18,
+        "fixture": "Croatia",
+        "market": "advance",
+        "selection": "Croatia to reach R16",
+        "resolution_basis": "advance",
+        "token_id": "14779992534553874143485262476310069109231696626953666459828369235598734034368",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.31,
+        "decimal_odds": null,
+        "mark_price": 0.3,
+        "unrealized_pl": -1.2903225806451601,
+        "shares": 129.03225806451613
+      },
+      {
+        "book": "paper",
+        "bet_id": 19,
+        "fixture": "United States vs Bosnia and Herzegovina",
+        "market": "player_shots",
+        "selection": "Christian Pulisic 1+ shots",
+        "resolution_basis": "prop",
+        "token_id": "35600175668109025904437656494224236827862456361441679066385683658883743252112",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.93,
+        "decimal_odds": null,
+        "mark_price": 0.78,
+        "unrealized_pl": -6.451612903225808,
+        "shares": 43.01075268817204
+      },
+      {
+        "book": "paper",
+        "bet_id": 20,
+        "fixture": "Australia",
+        "market": "advance",
+        "selection": "Australia to reach QF",
+        "resolution_basis": "advance",
+        "token_id": "46983790987150534576459730041665072359443254356509061379481679577740931650264",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.06,
+        "decimal_odds": null,
+        "mark_price": 0.0595,
+        "unrealized_pl": -0.3333333333333286,
+        "shares": 666.6666666666667
+      },
+      {
+        "book": "paper",
+        "bet_id": 21,
+        "fixture": "Argentina vs Cape Verde",
+        "market": "totals_ou25",
+        "selection": "Under 2.5",
+        "resolution_basis": "totals",
+        "token_id": "64139056142428195412934173861626009635158566189507817289492463413463155017890",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.435,
+        "decimal_odds": null,
+        "mark_price": 0.435,
+        "unrealized_pl": 0.0,
+        "shares": 91.95402298850574
+      },
+      {
+        "book": "paper",
+        "bet_id": 22,
+        "fixture": "Spain",
+        "market": "advance",
+        "selection": "Spain to reach Final",
+        "resolution_basis": "advance",
+        "token_id": "101923360499625332788062329411404784738023855630916769561935447176668677624752",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.2,
+        "decimal_odds": null,
+        "mark_price": 0.195,
+        "unrealized_pl": -1.0,
+        "shares": 200.0
+      },
+      {
+        "book": "paper",
+        "bet_id": 23,
+        "fixture": "Brazil",
+        "market": "advance",
+        "selection": "Brazil to reach Final",
+        "resolution_basis": "advance",
+        "token_id": "34787230403043355128636001070710444359614063013416600771124899051091155533274",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.18,
+        "decimal_odds": null,
+        "mark_price": 0.175,
+        "unrealized_pl": -1.1111111111111143,
+        "shares": 222.22222222222223
+      },
+      {
+        "book": "paper",
+        "bet_id": 24,
+        "fixture": "Spain vs Austria",
+        "market": "player_shots_on_target",
+        "selection": "Marcel Sabitzer 1+ shots on target",
+        "resolution_basis": "prop",
+        "token_id": "61767083487090505150572977485277632724017153992219588632495028790439131845599",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.42,
+        "decimal_odds": null,
+        "mark_price": 0.21,
+        "unrealized_pl": -20.0,
+        "shares": 95.23809523809524
+      },
+      {
+        "book": "paper",
+        "bet_id": 25,
+        "fixture": "Mexico vs Ecuador",
+        "market": "player_shots_on_target",
+        "selection": "Enner Valencia 1+ shots on target",
+        "resolution_basis": "prop",
+        "token_id": "17167804340408772792513970558280352668968986014271317302295768293170445231802",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.5,
+        "decimal_odds": null,
+        "mark_price": 0.1,
+        "unrealized_pl": -32.0,
+        "shares": 80.0
+      },
+      {
+        "book": "paper",
+        "bet_id": 26,
+        "fixture": "Belgium vs Senegal",
+        "market": "player_shots",
+        "selection": "Romelu Lukaku 1+ shots",
+        "resolution_basis": "prop",
+        "token_id": "40456485801970710342711180111348313887994965599064247045116744695855012423759",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.91,
+        "decimal_odds": null,
+        "mark_price": 0.655,
+        "unrealized_pl": -11.208791208791208,
+        "shares": 43.956043956043956
+      },
+      {
+        "book": "paper",
+        "bet_id": 27,
+        "fixture": "Portugal vs Croatia",
+        "market": "totals_ou25",
+        "selection": "Under 2.5",
+        "resolution_basis": "totals",
+        "token_id": "39454486903303538756082861161474656873596842135700057591835332314446507376185",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.535,
+        "decimal_odds": null,
+        "mark_price": 0.535,
+        "unrealized_pl": 0.0,
+        "shares": 74.76635514018692
+      },
+      {
+        "book": "paper",
+        "bet_id": 28,
+        "fixture": "Spain vs Austria",
+        "market": "player_goals",
+        "selection": "Marcel Sabitzer 1+ goals",
+        "resolution_basis": "prop",
+        "token_id": "86218542132490971527312803183545258211243823555181534085281762856981826828702",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.12,
+        "decimal_odds": null,
+        "mark_price": 0.105,
+        "unrealized_pl": -5.0,
+        "shares": 333.33333333333337
+      },
+      {
+        "book": "paper",
+        "bet_id": 29,
+        "fixture": "Belgium vs Senegal",
+        "market": "player_shots",
+        "selection": "Sadio Mane 1+ shots",
+        "resolution_basis": "prop",
+        "token_id": "21100874906916994427408643497249920421830915494007929271921923889197600136632",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.87,
+        "decimal_odds": null,
+        "mark_price": 0.735,
+        "unrealized_pl": -6.206896551724142,
+        "shares": 45.97701149425287
+      },
+      {
+        "book": "paper",
+        "bet_id": 30,
+        "fixture": "Belgium",
+        "market": "advance",
+        "selection": "Belgium to reach Final",
+        "resolution_basis": "advance",
+        "token_id": "42642733841375868250019824393895616178120731186981831192119559664402455807907",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.039,
+        "decimal_odds": null,
+        "mark_price": 0.0335,
+        "unrealized_pl": -5.641025641025642,
+        "shares": 1025.6410256410256
+      },
+      {
+        "book": "paper",
+        "bet_id": 31,
+        "fixture": "Australia vs Egypt",
+        "market": "totals_ou25",
+        "selection": "Under 2.5",
+        "resolution_basis": "totals",
+        "token_id": "37483810838905141459312911957423352390730228282284508325603887723158414916776",
+        "stake": 40.0,
+        "currency": "USD",
+        "entry_price": 0.665,
+        "decimal_odds": null,
+        "mark_price": 0.665,
+        "unrealized_pl": 0.0,
+        "shares": 60.150375939849624
+      }
+    ]
+  },
+  "charts": [
+    "reports/audit_20260701_pm_analytics_calibration_scatter.png",
+    "reports/audit_20260701_pm_analytics_category_bias.png"
+  ]
+}

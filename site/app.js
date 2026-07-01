@@ -330,7 +330,9 @@
     }
   }
 
-  var VENUE_COLOR = { sportsbook: "#4ade80", polymarket: "#60a5fa", kalshi: "#a855f7" };
+  // Venue series colours — aligned to the lilac theme's --sportsbook/--polymarket/
+  // --kalshi CSS vars so JS-drawn chart rails match the CSS chrome on light bg.
+  var VENUE_COLOR = { sportsbook: "#2563B0", polymarket: "#7A3FB0", kalshi: "#0E7C7B" };
 
   // Per-book accent colours — the SINGLE source of truth for every venue
   // surface (venues-panel dots, open + closed row rails, open + closed venue
@@ -339,25 +341,27 @@
   // "Virgin Bet", "Sky Bet" — all resolve instead of falling through to grey.
   // Each in-use venue gets a visually distinct hue; the two Betfair surfaces
   // intentionally share the gold/orange family but stay distinguishable.
-  var BOOK_FALLBACK = "#9ca3af";
+  // Categorical per-book hues. Tuned to stay legible on the lilac (light) page:
+  // pale neons (lime/gold/mint) were darkened, hues kept distinct.
+  var BOOK_FALLBACK = "#9390B2";
   var BOOK_COLOR = {
-    paddypower: "#22c55e",         // green
+    paddypower: "#15803d",         // green
     bet365: "#4d7c0f",             // olive / dark green
-    virginbet: "#ef4444",          // red
-    skybet: "#818cf8",             // indigo
-    betway: "#84cc16",             // lime
-    betfair: "#facc15",            // gold (exchange)
-    betfairexuk: "#facc15",
-    betfairexchange: "#facc15",
-    betfairsportsbook: "#f97316",  // orange (sportsbook)
-    betfred: "#ec4899",            // pink
+    virginbet: "#dc2626",          // red
+    skybet: "#4f46e5",             // indigo
+    betway: "#4d7c0f",             // lime -> dark lime
+    betfair: "#b45309",            // gold (exchange)
+    betfairexuk: "#b45309",
+    betfairexchange: "#b45309",
+    betfairsportsbook: "#c2410c",  // orange (sportsbook)
+    betfred: "#be185d",            // pink
     williamhill: "#1d4ed8",        // deep blue
-    smarkets: "#2dd4bf",           // teal
-    matchbook: "#f472b6",          // rose
-    coral: "#fb923c",              // amber
-    ladbrokes: "#dc2626",          // dark red
-    polymarket: "#60a5fa",         // light blue
-    kalshi: "#a855f7"              // purple
+    smarkets: "#0f766e",           // teal
+    matchbook: "#db2777",          // rose
+    coral: "#c2410c",              // amber
+    ladbrokes: "#b91c1c",          // dark red
+    polymarket: "#7A3FB0",         // purple (polymarket rail)
+    kalshi: "#0E7C7B"              // teal (kalshi rail)
   };
   function bookColor(name) {
     var k = String(name === null || name === undefined ? "" : name)
@@ -451,8 +455,8 @@
       var pvk = platformVenueKey(k);
       // Sportsbook splits share the green family but are visually distinct:
       // account 1 keeps the canonical green, account 2 uses a teal-green.
-      var color = (k === "sportsbook_2") ? "#34d399"
-        : (VENUE_COLOR[pvk] || "#9ca3af");
+      var color = (k === "sportsbook_2") ? "#0E7C7B"
+        : (VENUE_COLOR[pvk] || "#9390B2");
       // Per-book breakdown: each sportsbook account uses its own per-account
       // split (so a2 shows its books just like a1); other venues use the
       // combined platforms map.
@@ -504,7 +508,7 @@
     var o = (p.manual_override == null) ? "" : String(p.manual_override).trim();
     if (!o) return '<td class="pos-ovr" data-label="Override"><span class="dim">—</span></td>';
     return '<td class="pos-ovr" data-label="Override" title="' + esc(o) +
-      '"><span class="ovr-flag" style="color:#f2c14e;font-weight:600">✎ manual</span></td>';
+      '"><span class="ovr-flag" style="color:var(--warn);font-weight:600">✎ manual</span></td>';
   }
 
   function renderPositions(d) {
@@ -594,7 +598,7 @@
         return '<div class="score-row">' +
           '<span class="score-label">' + esc(s.score) + '</span>' +
           '<span class="score-bar"><span class="score-fill" style="width:' +
-            (frac * 100).toFixed(1) + '%;background:#4ade80;opacity:.85"></span></span>' +
+            (frac * 100).toFixed(1) + '%;background:var(--accent);opacity:.85"></span></span>' +
           '<span class="score-prob">' + p.toFixed(1) + '%' +
             (fair ? ' <span class="dim">· ' + fair.toFixed(1) + '</span>' : '') +
           '</span>' +
@@ -892,9 +896,9 @@
     var svg = chartFrame(yLabels, timeTicks(t0, t1, scaleX));
 
     var SERIES = [
-      { key: "home", color: "#4ade80", name: "Home" },
-      { key: "draw", color: "#9ca3af", name: "Draw" },
-      { key: "away", color: "#ef4444", name: "Away" }
+      { key: "home", color: "#6D4AD0", name: "Home" },
+      { key: "draw", color: "#9390B2", name: "Draw" },
+      { key: "away", color: "#C0273A", name: "Away" }
     ];
     SERIES.forEach(function (sr) {
       lineSeries(pts, sr.key, scaleX, scaleY, toPct).forEach(function (seg) {
@@ -942,7 +946,7 @@
     // (~50px) cannot fit per-leg "Home (model)" labels without clipping.
     if (modelLegs.length) {
       var my2 = ly + SERIES.length * 14;
-      var mcolor = modelLegs.length === 1 ? modelLegs[0].color : "#6b7280";
+      var mcolor = modelLegs.length === 1 ? modelLegs[0].color : "#6B6488";
       svg += '<line stroke="' + mcolor + '" stroke-width="2" ' +
         'stroke-dasharray="3 2" opacity="0.65" x1="' + r2(lx) + '" y1="' +
         r2(my2 - 2) + '" x2="' + r2(lx + 8) + '" y2="' + r2(my2 - 2) + '"/>';
@@ -1017,9 +1021,9 @@
   // positions plus closed ones — so the curve is true turnover and history
   // does not vanish as bets settle.
   var CUM_STYLE = {
-    GBP: { color: "#4ade80", dash: "" },
-    USD: { color: "#60a5fa", dash: "4 3" },
-    EUR: { color: "#a78bfa", dash: "1 3" }
+    GBP: { color: "#6D4AD0", dash: "" },
+    USD: { color: "#2563B0", dash: "4 3" },
+    EUR: { color: "#0E7C7B", dash: "1 3" }
   };
 
   function drawCumStake(d) {
@@ -1061,7 +1065,7 @@
     var svg = chartFrame(yLabels, timeTicks(tMin, tMax, scaleX));
 
     ccys.forEach(function (ccy) {
-      var st = CUM_STYLE[ccy] || { color: "#9ca3af", dash: "" };
+      var st = CUM_STYLE[ccy] || { color: "#9390B2", dash: "" };
       var steps = series[ccy];
       // build a step (left-continuous) path: hold then rise
       var pts = [];
@@ -1096,8 +1100,8 @@
     if (!el) return;
     var ps = d.pnl_series || {};
     var seriesDefs = [
-      { key: "sportsbook", color: "#4ade80", dash: null, ccy: (ps.sportsbook || {}).currency || "GBP" },
-      { key: "prediction_markets", color: "#60a5fa", dash: "4 3", ccy: (ps.prediction_markets || {}).currency || "USD" }
+      { key: "sportsbook", color: "#2563B0", dash: null, ccy: (ps.sportsbook || {}).currency || "GBP" },
+      { key: "prediction_markets", color: "#7A3FB0", dash: "4 3", ccy: (ps.prediction_markets || {}).currency || "USD" }
     ];
     var all = [];
     seriesDefs.forEach(function (sd) {
@@ -1168,12 +1172,30 @@
     var el = $("exposure");
     if (!el || !exp || !exp.metrics) return;
     var m = exp.metrics;
-    ($("exp-ev") || {}).textContent = m.ev !== null ? money(m.ev, "GBP") : "—";
-    ($("exp-best") || {}).textContent = m.best_case !== null ? money(m.best_case, "GBP") : "—";
-    ($("exp-worst") || {}).textContent = m.worst_case !== null ? money(m.worst_case, "GBP") : "—";
-    ($("exp-pprofit") || {}).textContent = m.p_profit !== null ? pct(m.p_profit) : "—";
-    ($("exp-ploss") || {}).textContent = m.p_loss !== null ? pct(m.p_loss) : "—";
-    ($("exp-pwin50") || {}).textContent = m.p_win_50 !== null ? pct(m.p_win_50) : "—";
+    // best/worst-case are currency-coherent: GBP (sportsbook) and USD
+    // (Polymarket) are reported separately, never summed. Show both currencies
+    // when a USD figure is present so a £ label is never put on a $ number.
+    var bc = (m.by_currency && m.by_currency.GBP) ? m.by_currency.GBP : null;
+    var uc = (m.by_currency && m.by_currency.USD) ? m.by_currency.USD : null;
+    function ccy(gbpVal, usdVal) {
+      if (gbpVal === null || gbpVal === undefined) return "—";
+      var s = money(gbpVal, "GBP");
+      if (usdVal !== null && usdVal !== undefined && Math.abs(usdVal) > 1e-9) {
+        s += " + " + money(usdVal, "USD");
+      }
+      return s;
+    }
+    ($("exp-ev") || {}).textContent = m.ev !== null && m.ev !== undefined ? money(m.ev, "GBP") : "—";
+    ($("exp-best") || {}).textContent = bc ? ccy(bc.best_case, uc && uc.best_case)
+      : (m.best_case !== null && m.best_case !== undefined ? money(m.best_case, "GBP") : "—");
+    ($("exp-worst") || {}).textContent = bc ? ccy(bc.worst_case, uc && uc.worst_case)
+      : (m.worst_case !== null && m.worst_case !== undefined ? money(m.worst_case, "GBP") : "—");
+    // Win probabilities: shown only when honestly computed; "n/a" otherwise
+    // (the model can't score outright/futures/prop exposure).
+    function prob(v) { return (v !== null && v !== undefined) ? pct(v) : "n/a"; }
+    ($("exp-pprofit") || {}).textContent = prob(m.p_profit);
+    ($("exp-ploss") || {}).textContent = prob(m.p_loss);
+    ($("exp-pwin50") || {}).textContent = prob(m.p_win_50);
     var detail = $("exposure-detail");
     if (detail) {
       var note = "Portfolio exposure: " + (exp.n_open_bets || 0) + " open bets.";
@@ -1187,13 +1209,15 @@
 
   function render(d) {
     _lastData = d;
-    renderTicker(d);
-    renderVenues(d);
-    renderPositions(d);
-    renderClosedPositions(d);
-    renderPredictions(d);
-    renderCharts(d);
-    renderFooter(d);
+    // Isolate every panel so one bad renderer can't halt the rest and leave
+    // the page half-drawn (log and continue).
+    try { renderTicker(d); } catch (e) { console.error("renderTicker failed", e); }
+    try { renderVenues(d); } catch (e) { console.error("renderVenues failed", e); }
+    try { renderPositions(d); } catch (e) { console.error("renderPositions failed", e); }
+    try { renderClosedPositions(d); } catch (e) { console.error("renderClosedPositions failed", e); }
+    try { renderPredictions(d); } catch (e) { console.error("renderPredictions failed", e); }
+    try { renderCharts(d); } catch (e) { console.error("renderCharts failed", e); }
+    try { renderFooter(d); } catch (e) { console.error("renderFooter failed", e); }
   }
 
   function renderClosedPositions(d) {

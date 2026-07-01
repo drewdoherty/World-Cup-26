@@ -57,6 +57,7 @@ NEXT_PATH = "data/next_latest.md"
 GOALSCORERS_PATH = "data/goalscorers_latest.md"
 BETBUILDER_PATH = "data/betbuilder_latest.md"
 SCORES_FEED_PATH = "site/scores_data.json"
+PM_HISTORY_PATH = "data/pm_price_history.jsonl"
 CARD_MAX_AGE_HOURS = 6.0
 # Reference bankroll used to size the display-only ¼-Kelly stake shown next to
 # each predicted scoreline in /scores. Scorelines have no live book feed (they
@@ -135,6 +136,7 @@ _TELEGRAM_COMMANDS = [
     {"command": "accas",       "description": "4+ leg accumulators, next 5 matches"},
     {"command": "pm",          "description": "Polymarket parked orders + trader status"},
     {"command": "arb",         "description": "Cross-venue arbitrage scan (indicative; relay odds)"},
+    {"command": "movers",      "description": "Top Polymarket share-price movers by category (3 charts)"},
     {"command": "settle",      "description": "Settle a bet: /settle <id> <outcome> [odds]"},
     {"command": "boost",       "description": "Price a bookmaker boost vs the model"},
     {"command": "ping",        "description": "Liveness check"},
@@ -155,6 +157,7 @@ HELP_TEXT = (
     "/structure — project structure metrics\n"
     "/pm — Polymarket parked orders + trader status\n"
     "/arb [team] — cross-venue arbitrage scan (indicative; relay odds, no live depth)\n"
+    "/movers — top Polymarket share-price movers (props / futures / advancement; 3 charts)\n"
     "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
     "/boost — price a bookmaker price-boost vs the model (usage below)\n"
     "/restart — restart the bot (admin; `/restart pull` redeploys first)\n"
@@ -403,83 +406,147 @@ def _pool_rows(db_path: str) -> Dict[str, Dict[str, float]]:
     return pools
 
 
+# Committed dual-pool bankroll basis (user-chosen, 2026-06-30):
+#   £1,500 sportsbook  +  $1,995 Polymarket, where $1,995 == £1,500 at the
+#   $1.33/£ rate the pools were sized on, so the combined book is £3,000.
+# Not all of either pool is necessarily deposited yet; ROI is reported as
+# *total P&L over this committed £3,000*, not over realised stake.
+_GBP_BANKROLL = 1500.0
+_USD_BANKROLL = 1995.0
+_TOTAL_BANKROLL_GBP = 3000.0
+_USD_TO_GBP = _GBP_BANKROLL / _USD_BANKROLL  # 0.75188 ; i.e. $1.33 == £1
+
+
+def _pm_live_usd(fetch=None) -> Optional[Dict[str, float]]:
+    """Live on-chain P&L of Polymarket positions (both wallets), in USD.
+
+    Splits current holdings by resolution state, marking each off cost basis
+    (``size × avg_price``):
+
+    * ``realised``   — resolved (``redeemable``) positions: payout − cost. A
+      lost market marks to 0, so its whole cost is a realised loss; a won market
+      marks to its redeem value.
+    * ``unrealised`` — still-open positions: current value − cost (live MTM).
+
+    Returns realised/unrealised plus open value & counts, or ``None`` if the
+    Data API is unreachable. This is the authoritative Polymarket source: the
+    SQLite ledger drifts from the chain (resolved-but-unswept losses never get
+    booked), so ``/summary`` marks the PM book straight off the wallet rather
+    than the ledger. ``fetch`` is injectable for tests.
+    """
+    if fetch is None:
+        try:
+            from wca.pm.positions import fetch_positions as fetch
+        except Exception:
+            return None
+    wallets = (
+        "0x86b4c55a4df1fbea0f325e842434e0a537caa549",  # PM1 (manual / vl880)
+        "0xd42e35059b0615c4c7a9cf7db5427b313ebb7b31",  # PM2 (deposit wallet)
+    )
+    realised = unrealised = open_value = 0.0
+    n_open = n_resolved = 0
+    for w in wallets:
+        try:
+            rows = fetch(w, limit=500, open_only=False, timeout=8)
+        except Exception:
+            return None
+        for p in rows or []:
+            size = float(getattr(p, "size", 0.0) or 0.0)
+            value = float(getattr(p, "current_value", 0.0) or 0.0)
+            cost = size * float(getattr(p, "avg_price", 0.0) or 0.0)
+            if getattr(p, "redeemable", False):
+                realised += value - cost
+                n_resolved += 1
+            elif size > 0:
+                unrealised += value - cost
+                open_value += value
+                n_open += 1
+    return {
+        "realised": realised, "unrealised": unrealised,
+        "open_value": open_value, "n_open": n_open, "n_resolved": n_resolved,
+    }
+
+
 def handle_summary(db_path: str) -> str:
+    """Realised + unrealised P&L per book, with ROI over the £3,000 basis.
+
+    Sportsbook (GBP) and Polymarket (USD) are each shown with realised P&L
+    (settled bets, from the ledger) and unrealised P&L (open positions). PM
+    unrealised is live mark-to-market from the Data API; sportsbook bets aren't
+    exchange-traded so they carry no live mark (held at cost). The two books are
+    combined in GBP at the committed $1,995 = £1,500 rate, and ROI is the total
+    P&L as a percentage of the £3,000 committed bankroll.
+    """
     s = reports.summary(db_path=db_path)
+    pools = _pool_rows(db_path)
 
     def pct(v: float) -> str:
         return "N/A" if v != v else "%.2f%%" % (v * 100)
 
-    pools = _pool_rows(db_path)
+    money = lambda x: "{:,.0f}".format(x)
 
-    # Build a compact code-block table for the pool rows.
-    pool_table_rows = []
-    for v in ("sportsbook", "polymarket", "polymarket-auto", "kalshi"):
-        if v not in pools:
-            continue
-        d = pools[v]
-        sym = _VENUE_SYMBOL[v]
-        bank = d["deposited"] + d["settled_pl"]
-        at_risk = d["open"]
-        pl = d["settled_pl"]
-        pool_table_rows.append(
-            "%-15s %s%9.2f  %s%8.2f  %s%+8.2f"
-            % (v, sym, bank, sym, at_risk, sym, pl)
+    # ---- Sportsbook book: realised from the ledger (settled bets) ----------
+    sb = pools.get("sportsbook", {})
+    gbp_realised = float(sb.get("settled_pl", 0.0))
+    gbp_open = float(sb.get("open", 0.0))
+    gbp_unrealised = 0.0  # sportsbook bets are held at cost (no live market)
+
+    # ---- Polymarket book: realised + unrealised straight off the chain -----
+    # The ledger under-books PM (resolved-but-unswept losses never settle), so
+    # the PM book is marked live from the wallet, not the SQLite ledger.
+    pm = _pm_live_usd()
+    if pm:
+        usd_realised = float(pm["realised"])
+        usd_unrealised = float(pm["unrealised"])
+    else:
+        # Degraded: fall back to the ledger's realised, no live mark.
+        usd_realised = sum(
+            float(pools.get(v, {}).get("settled_pl", 0.0)) for v in ("polymarket", "polymarket-auto")
         )
+        usd_unrealised = 0.0
 
-    # Never sum across currencies: aggregate per symbol (£ pools vs $ pools).
-    by_ccy: Dict[str, Dict[str, float]] = {}
-    for v, d in pools.items():
-        sym = _VENUE_SYMBOL.get(v, "$")
-        c = by_ccy.setdefault(sym, {"open": 0.0, "settled_staked": 0.0, "settled_pl": 0.0})
-        c["open"] += d["open"]
-        c["settled_staked"] += d.get("settled_staked", 0.0)
-        c["settled_pl"] += d["settled_pl"]
+    sb_total_gbp = gbp_realised + gbp_unrealised
+    pm_total_usd = usd_realised + usd_unrealised
+    pm_total_gbp = pm_total_usd * _USD_TO_GBP
+    total_pl_gbp = sb_total_gbp + pm_total_gbp
+    roi = total_pl_gbp / _TOTAL_BANKROLL_GBP if _TOTAL_BANKROLL_GBP else float("nan")
 
-    def per_ccy(fmt: str, key: str) -> str:
-        return " / ".join(
-            fmt % (sym, by_ccy[sym][key]) for sym in ("£", "$") if sym in by_ccy
-        ) or "0.00"
-
-    def roi_per_ccy() -> str:
-        parts = []
-        for sym in ("£", "$"):
-            if sym not in by_ccy:
-                continue
-            staked = by_ccy[sym]["settled_staked"]
-            r = (by_ccy[sym]["settled_pl"] / staked) if staked else float("nan")
-            parts.append("%s %s" % (sym, pct(r)))
-        return " / ".join(parts) or "N/A"
+    def cell(sym: str, val: float, w: int = 10) -> str:
+        return ("%s%+.2f" % (sym, val)).rjust(w)
 
     lines = [
         "\U0001f4b0 *World Cup Alpha — portfolio*",
         "Bets: %d (open %d / won %d / lost %d / void %d)"
         % (s["total_bets"], s["open_bets"], s["won_bets"], s["lost_bets"], s["void_bets"]),
-        "At risk (open): %s" % per_ccy("%s%.2f", "open"),
-        "Settled staked: %s   P&L: %s" % (per_ccy("%s%.2f", "settled_staked"), per_ccy("%s%+.2f", "settled_pl")),
-        "ROI: %s   Avg CLV: %s   Beat close: %s"
-        % (roi_per_ccy(), pct(s["avg_clv"]), pct(s["pct_beat_close"])),
         "",
-        "*Bankroll by pool*",
+        "*P&L by book*",
+        "```",
+        "%-11s %10s %10s %10s" % ("BOOK", "REALISED", "UNREAL'D", "TOTAL"),
+        "%-11s %s %s %s" % ("Sportsbook", cell("£", gbp_realised), cell("£", gbp_unrealised), cell("£", sb_total_gbp)),
+        "%-11s %s %s %s" % ("Polymarket", cell("$", usd_realised), cell("$", usd_unrealised), cell("$", pm_total_usd)),
+        "```",
     ]
 
-    if pool_table_rows:
-        lines.append("```")
-        lines.append("%-15s %10s  %9s  %9s" % ("POOL", "BANK", "AT RISK", "P&L"))
-        lines.extend(pool_table_rows)
-        lines.append("```")
-
-    for v in ("sportsbook", "polymarket", "polymarket-auto", "kalshi"):
-        if v not in pools:
-            continue
-        d = pools[v]
-        sym = _VENUE_SYMBOL[v]
-        bank = d["deposited"] + d["settled_pl"]
+    if pm:
         lines.append(
-            "%s: %s%.2f (deposited %s%.2f, P&L %s%+.2f, at risk %s%.2f)"
-            % (v, sym, bank, sym, d["deposited"], sym, d["settled_pl"], sym, d["open"])
+            "Open: sportsbook £%.2f at cost · Polymarket %d live worth $%.2f (+ %d resolved)"
+            % (gbp_open, pm["n_open"], pm["open_value"], pm["n_resolved"])
         )
-    if not pools:
-        lines.append("(no pools yet — record deposits with `bankroll add`)")
+    else:
+        lines.append(
+            "Open: sportsbook £%.2f at cost · Polymarket live MTM unavailable "
+            "(realised from ledger, unrealised shown as $0)" % gbp_open
+        )
+
+    lines += [
+        "",
+        "*Combined* — basis £%s ($%s = £%s)" % (money(_TOTAL_BANKROLL_GBP), money(_USD_BANKROLL), money(_GBP_BANKROLL)),
+        "  Sportsbook  £%+.2f" % sb_total_gbp,
+        "  Polymarket  £%+.2f  ($%+.2f × %.4f)" % (pm_total_gbp, pm_total_usd, _USD_TO_GBP),
+        "  Total P&L   £%+.2f" % total_pl_gbp,
+        "*ROI on £%s: %s*" % (money(_TOTAL_BANKROLL_GBP), pct(roi)),
+        "Avg CLV: %s   Beat close: %s" % (pct(s["avg_clv"]), pct(s["pct_beat_close"])),
+    ]
     return "\n".join(lines)
 
 
@@ -976,8 +1043,10 @@ def handle_settle(text: str, db_path: str) -> str:
 
         stake = float(row["stake"] or 0.0)
         odds_backed = float(row["decimal_odds"] or 0.0)
+
+        from wca.ledger import store as _store
         is_free = str(row["source"] or "model") == "offer"
-        is_lay = "lay" in (str(row["market"] or "") + " " + str(row["selection"] or "")).lower()
+        is_lay = _store.is_lay_bet(row["market"], row["selection"])
 
         # Explicit closing odds win; otherwise fall back to the close the
         # snapshot daemon auto-captured at kickoff (mirrors wca_settle.py, so
@@ -991,17 +1060,13 @@ def handle_settle(text: str, db_path: str) -> str:
             )
 
         # Realized P&L pays at the price the bet was BACKED at (the close only
-        # feeds CLV, never the payout). Free bets are stake-not-returned (a loss
-        # costs £0); lays risk the LIABILITY (stake*(odds-1)), not the stake.
-        if outcome == "void":
-            settled_pl = 0.0
-        elif is_lay:
-            liability = stake * (odds_backed - 1)
-            settled_pl = stake if outcome == "won" else -liability
-        elif outcome == "won":
-            settled_pl = stake * (odds_backed - 1)
-        else:  # lost
-            settled_pl = 0.0 if is_free else -stake
+        # feeds CLV, never the payout). The void -> free -> lay -> back order
+        # lives in store.settled_pl, the single source of truth shared with
+        # store.settle_bet and wca_settle.py — so a free-bet ('offer') row is
+        # never charged a lay liability on a loss (a loss costs £0).
+        settled_pl = _store.settled_pl(
+            outcome, stake, odds_backed, is_free=is_free, is_lay=is_lay
+        )
 
         # CLV: backed price vs closing line — the ledger-wide convention
         # (ratio - 1), shared with wca.ledger.store.set_closing_odds and
@@ -1014,7 +1079,6 @@ def handle_settle(text: str, db_path: str) -> str:
         # the bot can settle on a DB whose first settlement came through here).
         from datetime import datetime, timezone
 
-        from wca.ledger import store as _store
         _store._ensure_settled_ts_column(con)
         now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         con.execute(
@@ -2599,6 +2663,72 @@ def _arb_fixture_labels(rows: List[Dict[str, Any]]) -> Dict[str, str]:
     return out
 
 
+def _load_pm_movers_records(db_path: str) -> List[Dict[str, Any]]:
+    """PM price-history records: the versioned JSONL + the live pm_snapshots table.
+
+    The JSONL accrues in git from the CI snapshotter; the DB table is richer on
+    the mini. Overlap is de-duped downstream by :func:`wca.pmmovers.clean_records`.
+    """
+    from wca import pmhistory
+
+    records: List[Dict[str, Any]] = list(pmhistory.load_records(PM_HISTORY_PATH))
+    try:
+        import sqlite3
+
+        con = sqlite3.connect(db_path)
+        try:
+            cur = con.execute(
+                "SELECT ts_utc, kind, team, stage, market_slug, token_id, pm_mid, model_prob"
+                " FROM pm_snapshots"
+            )
+            cols = [c[0] for c in cur.description]
+            records += [dict(zip(cols, row)) for row in cur.fetchall()]
+        finally:
+            con.close()
+    except Exception:
+        pass  # no DB / no table -> JSONL only
+    return records
+
+
+def build_movers_reply(db_path: str = "data/wca.db") -> Dict[str, Any]:
+    """Assemble the /movers reply: an intro line + the three category charts.
+
+    Returns ``{"intro": str|None, "charts": [(caption, png_bytes|None), ...],
+    "text": str}``. ``text`` is the plain digest used as the fallback when no
+    chart can be rendered (matplotlib missing) or in non-photo contexts.
+    """
+    from wca import pmmovers
+
+    records = _load_pm_movers_records(db_path)
+    recs = pmmovers.clean_records(records)
+    if not recs:
+        msg = ("*Polymarket top movers*\nNo PM price history captured yet — the "
+               "snapshotter (`scripts/wca_pm_snapshot.py`, twice-hourly CI) needs "
+               "≥ 2 captures before moves exist.")
+        return {"intro": None, "charts": [], "text": msg}
+
+    windows = pmmovers.default_windows(recs)
+    now = pmmovers.anchor_time(recs)
+    charts = pmmovers.build_charts(recs, windows=windows)
+    intro = ("*Polymarket top movers* — biggest share-price moves by category\n"
+             "_as of %s · windows %s_" % (
+                 now.strftime("%Y-%m-%d %H:%M UTC") if now else "n/a",
+                 ", ".join(l for l, _ in windows)))
+    chart_pairs = [(c["caption"], c["png"]) for c in charts]
+    text = pmmovers.text_summary(recs, windows=windows)
+    return {"intro": intro, "charts": chart_pairs, "text": text}
+
+
+def handle_movers(db_path: str = "data/wca.db") -> str:
+    """Text digest of PM movers (dispatch fallback; charts go via the run loop)."""
+    return build_movers_reply(db_path)["text"]
+
+
+def _is_movers_command(text: str) -> bool:
+    head = text.strip().split()[0].lower().split("@")[0] if text.strip() else ""
+    return head == "/movers"
+
+
 def dispatch(text: str, db_path: str) -> str:
     """Map an incoming text message to a reply."""
     confirm = handle_confirmation(text, db_path)
@@ -2640,6 +2770,10 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_pm(db_path)
     if cmd == "/arb":
         return handle_arb(text, db_path)
+    if cmd == "/movers":
+        # The run loop intercepts /movers to send charts; this text digest is the
+        # fallback (no matplotlib) and the non-photo path.
+        return handle_movers(db_path)
     if cmd == "/settle":
         return handle_settle(text, db_path)
     if cmd == "/boost":
@@ -2782,6 +2916,27 @@ def run(
                             )
                         except TelegramError:
                             pass
+                continue
+
+            # 1c) /movers — image command: render the three PM category charts
+            #     and send them as photos (read-only). Handled here, not in the
+            #     text-only dispatch(), so it can call send_photo per chart.
+            if _is_movers_command(text):
+                try:
+                    mreply = build_movers_reply(db_path)
+                except Exception as exc:
+                    mreply = {"intro": None, "charts": [], "text": "Error building movers: %s" % exc}
+                charts = [(cap, png) for cap, png in mreply.get("charts", []) if png]
+                try:
+                    if charts:
+                        if mreply.get("intro"):
+                            client.send_message(chat_id, mreply["intro"])
+                        for cap, png in charts:
+                            client.send_photo(chat_id, png, filename="pm_movers.png", caption=cap)
+                    else:
+                        client.send_message(chat_id, mreply.get("text") or "No PM movers yet.")
+                except TelegramError as exc:
+                    print("send error: %s" % exc)
                 continue
 
             # 2) Money-touching text (yes/no betslip confirms, Y/N BET-/PM-

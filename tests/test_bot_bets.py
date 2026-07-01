@@ -41,14 +41,24 @@ def test_bets_empty(tmp_path):
     assert "flat" in app.handle_bets(db)
 
 
-def test_summary_shows_pools_and_open_risk(tmp_path):
+def test_summary_shows_books_and_roi(tmp_path, monkeypatch):
+    # No live network in tests: pin PM on-chain P&L to known figures.
+    monkeypatch.setattr(
+        app, "_pm_live_usd",
+        lambda *a, **k: {"realised": -50.0, "unrealised": 30.0,
+                         "open_value": 200.0, "n_open": 2, "n_resolved": 3},
+    )
     db = str(tmp_path / "t.db")
     _seed(db)
     out = app.handle_summary(db)
-    assert "At risk (open):" in out
-    assert "sportsbook: £1000.00" in out
-    assert "polymarket: $1310.00" in out
-    assert "at risk $22.00" in out
+    # Per-book table + the £3,000-basis ROI line.
+    assert "*P&L by book*" in out
+    assert "Sportsbook" in out and "Polymarket" in out
+    assert "REALISED" in out and "UNREAL'D" in out
+    assert "ROI on £3,000:" in out
+    # Open sportsbook stake (5.68 + 2.00) is reported at cost; PM is live.
+    assert "sportsbook £7.68 at cost" in out
+    assert "2 live worth $200.00 (+ 3 resolved)" in out
 
 
 def test_venue_mapping():

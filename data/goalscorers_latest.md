@@ -1,48 +1,48 @@
-<!-- generated: 2026-06-26T13:53:36 -->
+<!-- generated: 2026-06-30T11:53:56 -->
 ⚽ *Goalscorers* — next 5 games
 _anytime + first · best book / Polymarket; ¼-Kelly £ stake on most likely + best EV_
 
-*Norway vs France*  _Jun 26 19:00Z_
+*Ivory Coast vs Norway*  _Jun 30 17:00Z_
 _top anytime (both teams — add squad to split + FGS)_
-  Kylian Mbappe         1.92 (Betfair)  imp 52%
-  Marcus Thuram         2.50 (William Hill)  imp 40%
-  Jean-Philippe Mateta  2.70 (Betfair)  imp 37%
-  Erling Braut Haaland  2.74 (Betfair)  imp 36%
-  Ousmane Dembele       3.20 (Betfair)  imp 31%
-  Bradley Barcola       3.30 (William Hill)  imp 30%
+  Erling Braut Haaland  1.94 (Betfair)  imp 52%
+  Jorgen Strand Larsen  3.00 (Betfair)  imp 33%
+  Alexander Sorloth     3.80 (Betfair)  imp 26%
+  Jens Petter Hauge     4.50 (Betfair)  imp 22%
+  Sepe Elye Wahi        4.50 (Betfair)  imp 22%
+  Evann Guessand        4.60 (Betfair)  imp 22%
 
-*Senegal vs Iraq*  _Jun 26 19:00Z_
+*France vs Sweden*  _Jun 30 21:00Z_
 _top anytime (both teams — add squad to split + FGS)_
-  Assane Diao           2.00 (William Hill)  imp 50%
-  Cherif Ndiaye         2.02 (Betfair)  imp 50%
-  Cheikh Ahmadou Bamba  2.10 (Betfair)  imp 48%
-  Ismaila Sarr          2.25 (William Hill)  imp 44%
-  Iliman-Cheikh Ndiaye  2.40 (Betfair)  imp 42%
-  Nicolas Jackson       2.42 (Betfair)  imp 41%
+  Kylian Mbappe         1.67 (Betfair)  imp 60%
+  Jean-Philippe Mateta  2.10 (William Hill)  imp 48%
+  Marcus Thuram         2.30 (Betfair)  imp 43%
+  Ousmane Dembele       2.58 (Betfair)  imp 39%
+  Michael Olise         3.00 (Betfair)  imp 33%
+  Maghnes Akliouche     3.40 (Betfair)  imp 29%
 
-*Cape Verde vs Saudi Arabia*  _Jun 27 00:00Z_
+*Mexico vs Ecuador*  _Jul 01 01:00Z_
 _top anytime (both teams — add squad to split + FGS)_
-  Khalid Al Ghannam     3.25 (William Hill)  imp 31%
-  Dailon Rocha Livrame  3.40 (William Hill)  imp 29%
-  Saleh Al-Shehri       3.75 (William Hill)  imp 27%
-  Salem Al-Dawsari      3.75 (Sky Bet)  imp 27%
-  Firas Al-Buraikan     4.00 (Betfair)  imp 25%
-  Willy Semedo          4.00 (William Hill)  imp 25%
+  Guillermo Martinez    3.40 (William Hill)  imp 29%
+  Santiago Gimenez      3.40 (William Hill)  imp 29%
+  Armando Gonzalez Alb  3.50 (William Hill)  imp 29%
+  Raul Jimenez          3.60 (Betfair)  imp 28%
+  Julian Quinones       4.10 (Betfair)  imp 24%
+  Enner Valencia        4.50 (Betfair)  imp 22%
 
-*Uruguay vs Spain*  _Jun 27 00:00Z_
+*England vs DR Congo*  _Jul 01 16:00Z_
 _top anytime (both teams — add squad to split + FGS)_
-  Borja Iglesias        2.40 (William Hill)  imp 42%
-  Mikel Oyarzabal       2.66 (Betfair)  imp 38%
-  Ferran Torres Garcia  2.74 (Betfair)  imp 36%
-  Lamine Yamal          3.15 (Betfair)  imp 32%
-  Victor Munoz          3.50 (William Hill)  imp 29%
-  Mikel Merino          3.75 (Betfair)  imp 27%
+  Ollie Watkins         1.80 (William Hill)  imp 56%
+  Harry Kane            1.81 (Betfair)  imp 55%
+  Ivan Toney            1.91 (William Hill)  imp 52%
+  Marcus Rashford       3.10 (Betfair)  imp 32%
+  Morgan Rogers         3.25 (William Hill)  imp 31%
+  Anthony Gordon        3.50 (Betfair)  imp 29%
 
-*New Zealand vs Belgium*  _Jun 27 03:00Z_
+*Belgium vs Senegal*  _Jul 01 20:00Z_
 _top anytime (both teams — add squad to split + FGS)_
-  Romelu Lukaku         1.71 (Betfair)  imp 58%
-  Matias Fernandez Par  2.20 (William Hill)  imp 45%
-  Charles De Ketelaere  2.36 (Betfair)  imp 42%
-  Kevin De Bruyne       2.50 (William Hill)  imp 40%
-  Hans Vanaken          2.62 (William Hill)  imp 38%
-  Jeremy Doku           2.62 (William Hill)  imp 38%
+  Romelu Lukaku         2.80 (Betfair)  imp 36%
+  Cheikh Ahmadou Bamba  3.75 (William Hill)  imp 27%
+  Matias Fernandez Par  3.75 (William Hill)  imp 27%
+  Nicolas Jackson       4.10 (Betfair)  imp 24%
+  Charles De Ketelaere  4.20 (Betfair)  imp 24%
+  Sadio Mane            4.20 (William Hill)  imp 24%

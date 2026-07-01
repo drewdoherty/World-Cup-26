@@ -1,18 +1,23 @@
-<!-- generated: 2026-06-29T17:49:52 -->
-⚽ *Next match* — Germany vs Paraguay
-Kickoff 2026-06-29 20:30:00+00:00
+<!-- generated: 2026-06-30T11:53:56 -->
+⚽ *Next match* — Ivory Coast vs Norway
+Kickoff 2026-06-30 17:00:00+00:00
 
 *Winner* (model blend)
-  Germany         65.9%  fair 1.52  best 1.38 (Polymarket) -9.1%
-  Draw            21.1%  fair 4.74  best 5.41 (Polymarket) +14.1% ✅  £16.04
-  Paraguay        13.0%  fair 7.69  best 10.53 (Polymarket) +36.8% ✅  £19.32
+  Ivory Coast     27.8%  fair 3.59  best 3.90 (Smarkets) +8.5% ✅  £14.72
+  Draw            27.6%  fair 3.62  best 3.70 (Smarkets) +2.2% ✅  £4.15
+  Norway          44.5%  fair 2.25  best 2.20 (betfair_ex_uk) -2.0%
   _stake = ¼-Kelly @ £2000 bankroll (+EV picks)_
 
-*Corners* (model, exp 8.5)
-  O/U 8.5: over 47.9% / under 52.1%  fair 2.09 / 1.92
+*Corners* (model, exp 8.6)
+  O/U 8.5: over 49.2% / under 50.8%  fair 2.03 / 1.97
 
-*Top goalscorers* — no scorer market available yet.
+*Anytime scorer* (best book price, vig in)
+  Erling Braut Haala  1.94 (Betfair)  imp 52%
+  Jorgen Strand Lars  3.00 (Betfair)  imp 33%
+  Alexander Sorloth   3.80 (Betfair)  imp 26%
+  Jens Petter Hauge   4.50 (Betfair)  imp 22%
+  Sepe Elye Wahi      4.50 (Betfair)  imp 22%
 
 *Scorelines* (top 6)
-1-0 14.4% | 2-0 13.1% | 2-1 10.9% | 1-1 10.0% | 3-0 7.6% | 0-0 7.1%
-  O/U 2.5: over 49.0% / under 51.0%   BTTS 45.8%
+1-1 13.2% | 0-1 9.8% | 1-2 9.4% | 0-2 7.8% | 0-0 7.7% | 1-0 6.9%
+  O/U 2.5: over 50.0% / under 50.0%   BTTS 54.9%

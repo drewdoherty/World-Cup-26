@@ -38,6 +38,7 @@ Markets* (Hausch, Lo & Ziemba eds).
 from __future__ import annotations
 
 import logging
+import re
 import sqlite3
 from typing import List, Optional
 
@@ -55,6 +56,65 @@ REALIZED_STATUSES = ("won", "lost", "cashed")
 CLOSED_STATUSES = ("won", "lost", "void", "cashed")
 
 from wca.venues import canon_platform
+
+
+# ---------------------------------------------------------------------------
+# Settlement P&L — the single source of truth shared by every settle path
+# (store.settle_bet, the Telegram /settle command in wca.bot.app, and the
+# scripts/wca_settle.py CLI). Keeping the maths here is what guarantees the
+# three paths agree on a free-bet / lay / back loss.
+# ---------------------------------------------------------------------------
+
+# Whole-word "lay": matches "Lay (Bet Against)" / "lay" but NOT labels that
+# merely *contain* the letters l-a-y — "Player"/"player", "overlay", "parlay",
+# "replay", "display". The old `"lay" in label` substring sniff mis-flagged
+# those player/acca markets as lays and charged them a lay liability on a loss.
+_LAY_TOKEN_RE = re.compile(r"\blay\b")
+
+
+def is_lay_bet(market: Optional[str], selection: Optional[str]) -> bool:
+    """True when ``market``/``selection`` denote an exchange LAY (Bet Against).
+
+    Uses a word-boundary match so only a standalone "lay" token counts; a
+    market like "Treble — Player 1+ SOT" is no longer mistaken for a lay.
+    """
+    blob = (str(market or "") + " " + str(selection or "")).lower()
+    return bool(_LAY_TOKEN_RE.search(blob))
+
+
+def settled_pl(
+    outcome: str,
+    stake: float,
+    decimal_odds: float,
+    *,
+    is_free: bool = False,
+    is_lay: bool = False,
+) -> float:
+    """Realized P&L (in stake currency) for a settled bet.
+
+    Resolution order is deliberate — first match wins:
+
+    1. ``void``  -> ``0.0`` (stake returned, no P&L impact).
+    2. free bet  -> won: ``(odds-1)*stake`` (profit only); lost: ``0.0``.
+       A free bet's stake is NOT returned, so a loss costs nothing. This is
+       checked BEFORE the lay branch so an 'offer' row whose label happens to
+       contain "lay" (or, before the regex fix, "player") is never charged a
+       lay liability on a loss.
+    3. lay       -> won: ``+stake`` (keep the backer's stake); lost:
+       ``-liability`` (``stake*(odds-1)``) — a lay risks the liability.
+    4. back      -> won: ``(odds-1)*stake``; lost: ``-stake``.
+    """
+    o = str(outcome).strip().lower()
+    stake = float(stake)
+    decimal_odds = float(decimal_odds)
+    if o == "void":
+        return 0.0
+    if is_free:
+        return stake * (decimal_odds - 1.0) if o == "won" else 0.0
+    if is_lay:
+        liability = stake * (decimal_odds - 1.0)
+        return stake if o == "won" else -liability
+    return stake * (decimal_odds - 1.0) if o == "won" else -stake
 
 
 # ---------------------------------------------------------------------------
@@ -393,20 +453,12 @@ def settle_bet(
         odds_val = float(row["decimal_odds"])
         source = str(row["source"] or "model")
         is_free = source == "offer"
-        is_lay = "lay" in (str(row["market"] or "") + " " + str(row["selection"] or "")).lower()
-        # P&L conventions:
-        #  - Back bet:  won -> (odds-1)*stake ;  lost -> -stake.
-        #  - Free bet (source='offer', stake NOT returned): won -> (odds-1)*stake
-        #    (profit only) ; lost -> £0 (no stake at risk).
-        #  - Lay bet (Bet Against): won -> +backer stake ; lost -> -LIABILITY
-        #    (stake*(odds-1)), because a lay risks the liability, not the stake.
-        if is_lay:
-            liability = (odds_val - 1.0) * stake_val
-            pl = stake_val if result_lower == "won" else -liability
-        elif result_lower == "won":
-            pl = (odds_val - 1.0) * stake_val
-        else:  # lost
-            pl = 0.0 if is_free else -stake_val
+        is_lay = is_lay_bet(row["market"], row["selection"])
+        # P&L conventions (see settled_pl): free bet is resolved before lay so
+        # an 'offer' row never books a lay liability on a loss.
+        pl = settled_pl(
+            result_lower, stake_val, odds_val, is_free=is_free, is_lay=is_lay
+        )
 
         _ensure_settled_ts_column(conn)
         if settled_ts_utc is None:

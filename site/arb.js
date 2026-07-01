@@ -463,13 +463,16 @@
     fetchJson("./bet_recs.json")
       .then(function (data) {
         _recs = data;
-        renderKpis(data);
-        renderSingles(data.match_singles || []);
-        renderProps(data.event_props || []);
-        renderAdv(data.advancement_futures || []);
-        renderArbs(data.guaranteed_arbs || []);
-        renderWithheld(data.withheld || []);
-        renderFooter(data);
+        // Isolate every panel: one render throwing must not blank the page or
+        // trip the global "FEED UNAVAILABLE" banner (that is reserved for an
+        // actual fetch/parse failure, handled by .catch below).
+        try { renderKpis(data); } catch (e) { console.error("renderKpis failed", e); }
+        try { renderSingles(data.match_singles || []); } catch (e) { console.error("renderSingles failed", e); }
+        try { renderProps(data.event_props || []); } catch (e) { console.error("renderProps failed", e); }
+        try { renderAdv(data.advancement_futures || []); } catch (e) { console.error("renderAdv failed", e); }
+        try { renderArbs(data.guaranteed_arbs || []); } catch (e) { console.error("renderArbs failed", e); }
+        try { renderWithheld(data.withheld || []); } catch (e) { console.error("renderWithheld failed", e); }
+        try { renderFooter(data); } catch (e) { console.error("renderFooter failed", e); }
       })
       .catch(function () {
         showNoData("BET RECS FEED UNAVAILABLE — run wca_betrecs.py to regenerate");

@@ -402,13 +402,18 @@
     function gameRow(g) {
       var id = gid(g);
       var hl = state.selGame === id ? " sm-hl" : "";
+      var projCls = g.projected ? " sm-proj-tie" : "";
       var ftHtml = g.ft
         ? '<div class="sm-ft">' + esc(g.ft) + '</div>'
         : '<div class="sm-ft sm-ft-na"></div>';
       var sub = g.group ? (" · Grp " + esc(g.group)) : (g.round ? (" · " + esc(g.round)) : "");
-      return '<div class="sm-row' + hl + '" data-gid="' + esc(id) + '">' +
+      // Model-inferred pairings carry a small "proj" tag so a mixed round (some
+      // real ties, some projected) reads honestly at a glance.
+      var projTag = g.projected ? '<span class="sm-proj-tag" title="model-projected matchup">proj</span>' : "";
+      var dateTxt = g.date ? esc(String(g.date).slice(5)) : "";
+      return '<div class="sm-row' + hl + projCls + '" data-gid="' + esc(id) + '">' +
         '<div class="sm-fix"><span class="sm-tm">' + esc(g.home) + " v " + esc(g.away) +
-        '</span><span class="sm-meta">' + esc(String(g.date).slice(5)) + sub +
+        '</span><span class="sm-meta">' + dateTxt + sub + projTag +
         '</span></div>' +
         ftHtml +
         '<div class="sm-1x2">' + bar(g.x1x2) + '<span class="sm-n">' + pc(g.x1x2[0]) + "·" +
@@ -431,7 +436,19 @@
       if (KO[state.stage]) {
         var games = d[KO[state.stage]] || [];
         if (games.length) {
-          return '<div class="sm-grp"><div class="sm-gh">' +
+          // Honest labelling. A round with any model-inferred matchup gets a
+          // "projected bracket" banner; R32 (matchups set, results pending) a
+          // milder note. Per-tie ".sm-proj-tie" tags the model-inferred rows.
+          var projRounds = d.projected_rounds || [];
+          var isProj = projRounds.indexOf(state.stage) >= 0 ||
+            games.some(function (g) { return g.projected; });
+          var note = "";
+          if (state.stage === "r32") {
+            note = '<div class="sm-note">Matchups set; results pending — ties are decided by the group standings, not yet played.</div>';
+          } else if (isProj) {
+            note = '<div class="sm-note sm-note-proj">Projected bracket — matchups follow the model’s most-likely path; actual ties depend on results.</div>';
+          }
+          return note + '<div class="sm-grp"><div class="sm-gh">' +
             esc((games[0].round || state.stage).toUpperCase()) + "</div>" +
             games.map(gameRow).join("") + "</div>";
         }
@@ -472,9 +489,12 @@
       if (state.mode === "stage") {
         sub = '<div class="sm-stages">' + (d.stages || []).map(function (s) {
           var cls = "sm-stab" + (s.key === state.stage ? " on" : "") +
-            (s.status === "next" ? " sm-next" : "") + (s.status === "locked" ? " sm-lock" : "");
+            (s.status === "next" ? " sm-next" : "") +
+            (s.status === "projected" ? " sm-proj-tab" : "") +
+            (s.status === "locked" ? " sm-lock" : "");
           var bdg = s.status === "current" ? '<i class="sm-bdg">● ' + s.count + " left</i>" :
-            (s.status === "next" ? '<i class="sm-bdg">▷ next</i>' : "");
+            (s.status === "next" ? '<i class="sm-bdg">▷ next</i>' :
+            (s.status === "projected" ? '<i class="sm-bdg">◇ projected</i>' : ""));
           return '<span class="' + cls + '" data-stage="' + s.key + '">' + esc(s.label) + bdg + "</span>";
         }).join("") + "</div>";
       } else {
