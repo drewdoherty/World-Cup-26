@@ -123,8 +123,37 @@ CREATE TABLE IF NOT EXISTS odds_snapshots (
 
 
 def _connect(db_path: str) -> sqlite3.Connection:
-    """Return a connection with foreign-keys and WAL-mode enabled."""
-    conn = sqlite3.connect(db_path)
+    """Return a connection with foreign-keys and WAL-mode enabled.
+
+    Delegates the open to :func:`wca.db.connect`, which picks the shared Turso
+    (libSQL) database when ``WCA_DB_URL`` is set and otherwise falls back to a
+    local ``sqlite3.connect(db_path)`` — the historical behaviour. The
+    ``row_factory`` and the two PRAGMAs are (re)applied here so this function is
+    byte-for-byte behaviour-identical to the legacy implementation whenever
+    ``WCA_DB_URL`` is unset (dev, tests, and the mini until cut-over).
+    """
+    import os
+
+    from wca import db as _wca_db
+
+    conn = _wca_db.connect(db_path)
+    if os.environ.get("WCA_DB_URL"):
+        # Shared Turso (libSQL) path. The experimental client may not accept a
+        # sqlite3 ``row_factory`` nor the SQLite-only WAL pragma; apply the same
+        # setup best-effort so a capability gap never breaks a read. NOTE: this
+        # branch is unexercised by the test suite (no real Turso instance in CI).
+        try:  # pragma: no cover - requires a live libSQL connection
+            conn.row_factory = sqlite3.Row  # type: ignore[assignment]
+        except Exception:
+            pass
+        for _pragma in ("PRAGMA journal_mode=WAL", "PRAGMA foreign_keys=ON"):
+            try:  # pragma: no cover - requires a live libSQL connection
+                conn.execute(_pragma)
+            except Exception:
+                pass
+        return conn
+
+    # Local sqlite fallback: byte-for-byte identical to the legacy behaviour.
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
