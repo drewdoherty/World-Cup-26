@@ -81,3 +81,51 @@ def test_snapshotter_rows_from_advancement():
     assert len(rows) == 2
     r16 = [r for r in rows if r["stage"] == "R16"][0]
     assert r16["team"] == "Argentina" and r16["pm_mid"] == 0.92 and r16["model_prob"] == 0.85
+
+
+def _snapshotter_mod():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "wca_pm_snapshot", os.path.join(os.path.dirname(__file__), "..", "scripts", "wca_pm_snapshot.py"))
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    return mod
+
+
+def test_classify_event_buckets():
+    m = _snapshotter_mod()
+    assert m.classify_event("Brazil vs. Morocco - Player Props") == "prop"
+    assert m.classify_event("Spain vs. Austria - Exact Score") == "prop"
+    assert m.classify_event("England vs. DR Congo - Total Corners") == "prop"
+    assert m.classify_event("Argentina vs. Cabo Verde - More Markets") == "prop"
+    assert m.classify_event("World Cup: Christian Pulisic Goals") == "prop"
+    assert m.classify_event("World Cup: Golden Boot Winner") == "futures"
+    assert m.classify_event("World Cup: Furthest Advancing UEFA Nation") == "futures"
+    assert m.classify_event("World Cup: Brazil Stage of Elimination") == "advancement"
+    # skips: bare 1X2, halftime/2nd-half, novelty, unknown
+    assert m.classify_event("Mexico vs. Ecuador") is None
+    assert m.classify_event("Mexico vs. Ecuador - Halftime Result") is None
+    assert m.classify_event("President Trump to Attend World Cup Final?") is None
+
+
+def test_rows_from_wc_markets_props_and_feed_owned():
+    m = _snapshotter_mod()
+    events = [
+        {"title": "Brazil vs. Morocco - Player Props", "slug": "fifwc-bra-mar-props",
+         "markets": [{"groupItemTitle": "Endrick: 1+ goals", "outcomes": '["Yes","No"]',
+                      "outcomePrices": '["0.42","0.58"]', "clobTokenIds": '["tok1","tok2"]'}]},
+        {"title": "World Cup: Golden Boot Winner", "slug": "wc-golden-boot",
+         "markets": [{"groupItemTitle": "Lionel Messi", "outcomes": '["Yes","No"]',
+                      "outcomePrices": '["0.5","0.5"]', "clobTokenIds": '["tA","tB"]'}]},
+        {"title": "World Cup Winner", "slug": "world-cup-winner",   # feed-owned -> skipped
+         "markets": [{"groupItemTitle": "France", "outcomes": '["Yes","No"]',
+                      "outcomePrices": '["0.28","0.72"]', "clobTokenIds": '["tC","tD"]'}]},
+        {"title": "Mexico vs. Ecuador", "slug": "fifwc-mex-ecu",     # bare 1X2 -> skipped
+         "markets": [{"groupItemTitle": "Mexico", "outcomes": '["Yes","No"]',
+                      "outcomePrices": '["0.5","0.5"]', "clobTokenIds": '["tE","tF"]'}]},
+    ]
+    rows = m.rows_from_wc_markets(events, only={"prop", "futures"}, skip_feed_owned=True)
+    kinds = sorted(r["kind"] for r in rows)
+    assert kinds == ["futures", "prop"]              # champion + 1X2 dropped
+    prop = [r for r in rows if r["kind"] == "prop"][0]
+    assert prop["pm_mid"] == 0.42 and "Endrick" in prop["team"]
+    assert "::" in prop["market_slug"]              # stable composite key

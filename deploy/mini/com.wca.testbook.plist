@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Mac mini launchd job: paper test-book trade cycle (every 10 minutes).
+
+  PAPER ONLY. The trader writes solely to data/test_book.db (a fake-$2000 book),
+  places NO real orders, and never touches the real ledger (data/wca.db). It pulls
+  live Polymarket prices (read-only) + the local model feeds and logs +EV paper
+  fills. There is nothing to "promote to live" here — it is a research book until
+  it proves out.
+
+  Cadence: every 10 minutes (StartInterval 600). For genuine 5-min, set 300.
+
+  Requires: the mini's model feeds (site/scores_data.json, site/advancement_data.json)
+  kept fresh by the existing card/site build jobs, and python3 with the repo deps
+  (numpy; the trader itself needs no matplotlib).
+
+  Install (on the mini):
+    cp deploy/mini/com.wca.testbook.plist ~/Library/LaunchAgents/
+    # edit WCA_REPO below if the checkout path differs
+    launchctl unload ~/Library/LaunchAgents/com.wca.testbook.plist 2>/dev/null || true
+    launchctl load   ~/Library/LaunchAgents/com.wca.testbook.plist
+    launchctl kickstart -k gui/$(id -u)/com.wca.testbook   # run one cycle now
+-->
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.wca.testbook</string>
+  <key>WorkingDirectory</key><string>/Users/andrewdoherty/World-Cup-26</string>
+  <key>EnvironmentVariables</key><dict>
+    <key>WCA_REPO</key><string>/Users/andrewdoherty/World-Cup-26</string>
+    <key>WCA_TESTBOOK_EDGE</key><string>0.04</string>
+  </dict>
+  <key>ProgramArguments</key><array>
+    <string>/bin/bash</string>
+    <string>/Users/andrewdoherty/World-Cup-26/scripts/wca_test_book_cycle.sh</string>
+  </array>
+  <key>StartInterval</key><integer>600</integer>
+  <key>RunAtLoad</key><true/>
+  <key>StandardOutPath</key><string>/Users/andrewdoherty/World-Cup-26/logs/test_book.out.log</string>
+  <key>StandardErrorPath</key><string>/Users/andrewdoherty/World-Cup-26/logs/test_book.err.log</string>
+</dict></plist>
