@@ -44,12 +44,26 @@ from wca.markets import bankroll as BANK  # noqa: E402
 
 LIVE_KELLY = BANK.PM_KELLY_FRACTION       # ¼-Kelly (global rule)
 LIVE_CCY = BANK.PM_CCY                     # "$" — PM accounting is USD
-LIVE_MAX_FRAC = float(os.environ.get("WCA_TESTBOOK_LIVE_MAXFRAC", "0"))  # 0 = uncapped
+LIVE_MAX_FRAC = BANK.PM_MAX_STAKE_FRAC     # per-bet cap (4% of bankroll)
 
 
 def _live_bankroll(report):
     """Latest live PM bankroll in USD = £3,000 ± realised P&L at $1.33 = £1."""
     return BANK.pm_bankroll_usd(report.get("realized_pl", 0.0))
+
+
+def _existing_live_exposure(con, bankroll):
+    """Live-equivalent $ exposure of the currently-open book (for the whole-book cap).
+
+    Re-sizes each open position at the live rule from its stored belief/entry so
+    the 75% whole-book cap accounts for legs already on."""
+    total = 0.0
+    for b in store.open_bets(con):
+        q, p = b.get("model_prob"), b.get("entry_price")
+        if q is None or p is None:
+            continue
+        total += float(BANK.size_placement(q, p, bankroll, max_frac=LIVE_MAX_FRAC)["stake"])
+    return total
 
 
 def _now():
@@ -86,22 +100,30 @@ def cmd_trade(args):
     from wca.testbook import notify
     rep = store.report(con)
     bankroll = _live_bankroll(rep)
+    # Whole-book 75% cap: the just-placed fills are already open, so existing
+    # (pre-pass) exposure = all-open minus this pass's new legs.
+    new_total = sum(BANK.size_placement(p["model"], p["price"], bankroll,
+                                        max_frac=LIVE_MAX_FRAC)["stake"] for p in res["placed"])
+    existing = max(0.0, _existing_live_exposure(con, bankroll) - new_total)
+    scale = BANK.book_scale(new_total, existing, bankroll)
     print("Pass @ %s: %d candidates, placed %d, skipped %d | cash $%.2f deployed $%.2f"
           % (res["ts"], res["candidates"], res["n_placed"], res["skipped"],
              res["balance"], res["deployed"]))
-    print("Live bankroll %s%.0f (£%.0f @ $%.2f %+0.0f realised) · %g×Kelly"
+    print("Live bankroll %s%.0f (£%.0f @ $%.2f %+0.0f realised) · %g×Kelly · cap %.0f%%/bet · book %.0f%% (open ~%s%.0f, scale ×%.2f)"
           % (LIVE_CCY, bankroll, BANK.GBP_PM_BANKROLL_BASE, BANK.GBP_USD,
-             rep.get("realized_pl", 0.0), LIVE_KELLY))
+             rep.get("realized_pl", 0.0), LIVE_KELLY, 100 * LIVE_MAX_FRAC,
+             100 * BANK.PM_BOOK_CAP_FRAC, LIVE_CCY, existing, scale))
     for p in res["placed"]:
         s = notify.live_sizing(p["model"], p["price"], bankroll,
                                kelly_frac=LIVE_KELLY, max_frac=LIVE_MAX_FRAC)
         print("  +[%s/%s] %-34s @ %.0f¢  fair %.0f%%  edge %+.0f%%  -> stake %s%.0f (%.1f%%)"
               % (p["basis"], p["market"], p["selection"][:34], p["price"] * 100,
-                 p["model"] * 100, p["edge"] * 100, LIVE_CCY, s["stake"], 100 * s["frac"]))
+                 p["model"] * 100, p["edge"] * 100, LIVE_CCY,
+                 s["stake"] * scale, 100 * s["frac"] * scale))
     # Ping the dev chat (@worldcupdevbot) with this pass's activity + P&L chart.
     if notify.send(notify.format_activity(
             res, rep, live_bankroll=bankroll, kelly_frac=LIVE_KELLY,
-            max_frac=LIVE_MAX_FRAC, currency=LIVE_CCY)):
+            max_frac=LIVE_MAX_FRAC, currency=LIVE_CCY, book_scale=scale)):
         print("  (pinged @worldcupdevbot)")
         if _send_chart(con, rep):
             print("  (posted P&L chart)")
