@@ -32,6 +32,7 @@ import pandas as pd  # noqa: E402
 
 from wca.card import fit_models, dc_probs, elo_probs  # noqa: E402
 from wca.data.cleaning import resolve_results_path  # noqa: E402
+from wca.data.results import load_shootouts, shootout_winner  # noqa: E402
 from wca.advancement import WC2026_GROUPS  # noqa: E402
 from wca.sim.tournament2026 import (  # noqa: E402
     R32_TIES,
@@ -163,10 +164,28 @@ def _ft_winner(home: str, away: str, ft: Optional[str]) -> Optional[str]:
     return None  # a level FT means the tie went to ET/pens we can't read here
 
 
+_SHOOTOUTS_PATH = "data/raw/shootouts.csv"
+
+
+def _load_shootouts_safe(path: str = _SHOOTOUTS_PATH):
+    """Load the shootouts CSV if present; return None on any absence/error.
+
+    Guarded so the generator behaves exactly as before when the file is missing
+    (the file is gitignored and re-downloaded, so it may not exist locally).
+    """
+    try:
+        if not os.path.exists(path):
+            return None
+        return load_shootouts(path)
+    except Exception:
+        return None
+
+
 def _projected_bracket(
     models,
     standings: Dict[str, Any],
     actual_ties: Optional[Dict[str, List[Dict[str, Any]]]] = None,
+    shootouts_df=None,
 ) -> Dict[str, List[Dict[str, Any]]]:
     """Build the full knockout bracket, priced with the same rich markets.
 
@@ -220,12 +239,22 @@ def _projected_bracket(
         rnd_key = _MATCH_ROUND_KEY[match_no]
         actual = actual_index.get(rnd_key, {}).get(frozenset((home, away)))
         m = _market(models, home, away)
-        # Modal winner from 90-min home vs away win prob (draw ignored); an
-        # actual, decisive FT overrides it when the tie has been played.
+        # Modal winner from 90-min home vs away win prob (draw ignored); a real,
+        # DECIDED result overrides it when the tie has been played.
         modal = home if m["x1x2"][0] >= m["x1x2"][2] else away
         ft = actual.get("ft") if actual else None
         date = actual.get("date") if actual else None
+        # Winner resolution, in priority order:
+        #   (a) decisive FT (home != away) -> FT winner, DECIDED
+        #   (b) drawn FT WITH a shootout record for this pair+date -> pens
+        #       winner, DECIDED (a real matchup with a real winner; downstream
+        #       ties fed only by decided winners then get projected=False)
+        #   (c) drawn FT, no shootout record -> modal winner, PROJECTED
+        #   (d) no FT -> modal winner, PROJECTED
         real_winner = _ft_winner(home, away, ft)
+        if real_winner is None and ft is not None:
+            # Level after 90 min and played: look for a penalty-shootout result.
+            real_winner = shootout_winner(shootouts_df, home, away, when=date)
         winners[match_no] = real_winner or modal
         winner_known[match_no] = real_winner is not None
         # 'projected' iff the *matchup* is model-inferred. R32 matchups are fixed
@@ -317,7 +346,11 @@ def build(results_path: str, advancement_path: str) -> Dict[str, Any]:
     # modal winner. Every tie carries the SAME rich markets as the group rows,
     # and real FT/date land on the matching slot. See _projected_bracket.
     ko_games: Dict[str, List[Dict[str, Any]]] = {k: [] for k, _ in _KO_WINDOWS}
-    bracket = _projected_bracket(models, standings, actual_ties)
+    # Penalty-shootout winners so a knockout tie level after 90 min still
+    # advances the team that actually won on pens (results spine has 90' only).
+    # Guarded: missing file => behave exactly as before (modal winner).
+    shootouts_df = _load_shootouts_safe()
+    bracket = _projected_bracket(models, standings, actual_ties, shootouts_df)
     for rnd in ("r32", "r16", "qf", "sf", "final"):
         if bracket.get(rnd):
             ko_games[rnd] = bracket[rnd]

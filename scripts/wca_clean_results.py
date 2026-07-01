@@ -37,7 +37,7 @@ if _SRC not in sys.path:
 import pandas as pd  # noqa: E402
 
 from wca.data import cleaning, fixture_sources, reconcile  # noqa: E402
-from wca.data.results import download_results  # noqa: E402
+from wca.data.results import download_results, download_shootouts  # noqa: E402
 
 REVIEW_PATH = "data/corrections_review.json"
 AUDIT_PATH = "data/audit.json"
@@ -75,6 +75,16 @@ def main(argv=None) -> int:
     if not args.no_network:
         try:
             download_results(force=args.force_download)
+            # Penalty-shootout winners (separate martj42 file). A knockout tie
+            # level after 90 min shows only its drawn score in results.csv, so
+            # the projected bracket needs this to advance the real winner. A
+            # shootouts failure must NEVER break the pipeline, so warn + carry on
+            # with any existing mirror.
+            try:
+                download_shootouts(force=args.force_download)
+            except Exception as exc:
+                print(f"WARN: shootouts download failed ({exc}); "
+                      f"using existing mirror if present", file=sys.stderr)
         except Exception as exc:
             print(f"WARN: raw download failed ({exc}); using existing mirror",
                   file=sys.stderr)

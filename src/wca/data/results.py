@@ -10,7 +10,7 @@ import logging
 import os
 from datetime import date, datetime
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 import pandas as pd
 import requests
@@ -20,6 +20,15 @@ _DEFAULT_URL = (
     "/master/results.csv"
 )
 _DEFAULT_DEST = "data/raw/results.csv"
+# Penalty-shootout outcomes live in a SEPARATE martj42 file — results.csv only
+# carries the 90-minute score, so a knockout tie that finished level and went to
+# pens looks like an unresolved draw without this. Columns: date, home_team,
+# away_team, winner, first_shooter.
+_SHOOTOUTS_URL = (
+    "https://raw.githubusercontent.com/martj42/international_results"
+    "/master/shootouts.csv"
+)
+_SHOOTOUTS_DEST = "data/raw/shootouts.csv"
 _TIMEOUT = 30
 _HEADERS = {
     "User-Agent": "WorldCupAlpha/0.1 (research; contact via GitHub)",
@@ -74,6 +83,122 @@ def download_results(
     dest_path.write_bytes(resp.content)
     logger.info("Saved %d bytes to %s", len(resp.content), dest_path)
     return dest_path
+
+
+def download_shootouts(
+    dest: str = _SHOOTOUTS_DEST,
+    url: str = _SHOOTOUTS_URL,
+    force: bool = False,
+) -> Path:
+    """Download the martj42 penalty-shootouts CSV with a freshness check.
+
+    Mirrors :func:`download_results`: skips the download if the destination
+    already exists *and* was last modified today (UTC), unless *force* is
+    *True*. This file records the winner of any knockout tie that finished
+    level and went to a penalty shootout — information that ``results.csv``
+    (90-minute score only) does not carry.
+
+    Parameters
+    ----------
+    dest:
+        Local path to write the CSV. Parent directories are created if absent.
+    url:
+        Source URL; defaults to the master branch on GitHub.
+    force:
+        If *True*, always download even if the file is fresh.
+
+    Returns
+    -------
+    Path object pointing at the downloaded file.
+    """
+    dest_path = Path(dest)
+    if not dest_path.is_absolute():
+        dest_path = Path(os.getcwd()) / dest_path
+
+    # UTC on both sides — see download_results for the local-vs-UTC rationale.
+    today_str = datetime.utcnow().date().isoformat()
+
+    if not force and dest_path.exists():
+        mtime = datetime.utcfromtimestamp(dest_path.stat().st_mtime).date()
+        if mtime.isoformat() == today_str:
+            logger.info(
+                "shootouts.csv is fresh (mtime=%s), skipping download.", mtime
+            )
+            return dest_path
+
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+    logger.info("Downloading shootouts.csv from %s …", url)
+    resp = requests.get(url, headers=_HEADERS, timeout=_TIMEOUT)
+    resp.raise_for_status()
+    dest_path.write_bytes(resp.content)
+    logger.info("Saved %d bytes to %s", len(resp.content), dest_path)
+    return dest_path
+
+
+def load_shootouts(path: Union[str, Path]) -> pd.DataFrame:
+    """Load the martj42 shootouts CSV into a typed DataFrame.
+
+    Columns: ``date`` (parsed to ``datetime64[ns]``), ``home_team``,
+    ``away_team``, ``winner``, ``first_shooter``. Unparseable dates coerce to
+    ``NaT`` so downstream date filters stay well-typed (see :func:`load_results`
+    for the same coercion rationale).
+    """
+    df = pd.read_csv(path, parse_dates=["date"])
+    if "date" in df.columns:
+        df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    return df
+
+
+def shootout_winner(
+    shootouts_df: Optional[pd.DataFrame],
+    home: str,
+    away: str,
+    when: Optional[Union[str, date, datetime, pd.Timestamp]] = None,
+) -> Optional[str]:
+    """Return the penalty-shootout winner for an *unordered* team pair, or None.
+
+    Matches on the ``{home, away}`` pair in either order. When *when* is given,
+    the match is additionally restricted to the same calendar date if the
+    timestamp parses cleanly; a year-only value restricts to that year. Purely
+    defensive: an empty/None frame, a missing pair, or missing columns all
+    yield ``None`` rather than raising.
+    """
+    if shootouts_df is None or len(shootouts_df) == 0:
+        return None
+    cols = shootouts_df.columns
+    if not {"home_team", "away_team", "winner"}.issubset(cols):
+        return None
+
+    df = shootouts_df
+    pair_mask = (
+        (df["home_team"] == home) & (df["away_team"] == away)
+    ) | (
+        (df["home_team"] == away) & (df["away_team"] == home)
+    )
+    cand = df[pair_mask]
+    if cand.empty:
+        return None
+
+    if when is not None and "date" in cols:
+        ts = pd.to_datetime(when, errors="coerce")
+        if pd.notna(ts):
+            cand_dates = pd.to_datetime(cand["date"], errors="coerce")
+            same_day = cand[cand_dates.dt.date == ts.date()]
+            if not same_day.empty:
+                cand = same_day
+            else:
+                # Same calendar date failed; accept a same-year match only (the
+                # year is the reliably-trustworthy field). If neither matches,
+                # the date restriction eliminated every row -> no result, rather
+                # than returning an unrelated historical shootout for this pair.
+                cand = cand[cand_dates.dt.year == ts.year]
+                if cand.empty:
+                    return None
+
+    winner = cand.iloc[0]["winner"]
+    if pd.isna(winner):
+        return None
+    return str(winner)
 
 
 def load_results(path: Union[str, Path]) -> pd.DataFrame:
