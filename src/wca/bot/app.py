@@ -2116,6 +2116,24 @@ def _execute_parked_order(
         except Exception as exc:
             return "PM-%d: could not init trader (%s)." % (n, exc)
 
+    # Batch entry: a single parked id whose proposal carries ``batch`` = a list
+    # of sub-order proposals. One ``Y PM-<n>`` fires every sub through the SAME
+    # tested single-order path (reusing the resolved trader + dry_run), so a
+    # confirmed batch is atomic to the user and immune to the auto-proposer
+    # parking new orders in between. A sub that fails never aborts the rest.
+    batch = proposal.get("batch")
+    if isinstance(batch, list) and batch:
+        parts = []
+        for i, sub in enumerate(batch, 1):
+            try:
+                r = _execute_parked_order(
+                    n, sub, db_path, ts_utc=ts_utc, trader=trader
+                )
+            except Exception as exc:  # noqa: BLE001 - isolate one sub's failure
+                r = "sub failed — %s" % exc
+            parts.append("  [%d/%d] %s" % (i, len(batch), r))
+        return "PM-%d BATCH — %d order(s):\n%s" % (n, len(batch), "\n".join(parts))
+
     price = float(proposal.get("price", 0.0))
     size = float(proposal.get("size", 0.0))
     side = str(proposal.get("side", "BUY")).upper()
