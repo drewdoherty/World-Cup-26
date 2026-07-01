@@ -174,8 +174,9 @@ def format_exits(actions: Sequence[Dict[str, object]],
         is_close = a.get("action") == "close"
         verb, emoji = ("EXIT (full)", "\U0001F534") if is_close else ("TRIM", "\U0001F7E0")
         sel = str(a.get("selection") or ("#%s" % a.get("id")))
-        ctx = _context(a.get("basis"), a.get("fixture"), sel)
-        lines.append("%s *%s* %s%s" % (emoji, verb, sel, ("  ·  " + ctx) if ctx else ""))
+        ctx = _context(a.get("market") or a.get("basis"), a.get("fixture"), sel)
+        tag = ("  ·  " + ctx) if ctx else ""
+        lines.append("%s *%s* — %s%s  _(#%s)_" % (emoji, verb, sel, tag, a.get("id")))
         detail = "    SELL %.0f sh @ %s (entry %s) · realised $%+.2f" % (
             float(a.get("shares_sold") or 0), _cents(a.get("exit_price")),
             _cents(a.get("entry_price")), float(a.get("realized_pl") or 0.0))
