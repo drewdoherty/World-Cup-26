@@ -38,17 +38,18 @@ SPREAD_CAP = 0.10         # R3: exit when bid-ask spread exceeds this
 MIN_DEPTH = 0.0           # R3: exit when best-bid depth below this (0 = off)
 
 # LIVE-money sizing shown on the @worldcupdevbot BUY lines (for manual A1 bets).
-# Bankroll = base ± the book's realised P&L; stake = LIVE_KELLY × Kelly × bankroll.
-# All overridable via env so the operator can retune without a code change.
-LIVE_BANKROLL_BASE = float(os.environ.get("WCA_TESTBOOK_LIVE_BANKROLL", "3000"))
-LIVE_KELLY = float(os.environ.get("WCA_TESTBOOK_LIVE_KELLY", "0.25"))   # ¼-Kelly
+# Uses the PROJECT-WIDE Polymarket bankroll rule (wca.markets.bankroll): USD
+# accounting, bankroll = £3,000 ± realised P&L at $1.33 = £1, ¼-Kelly.
+from wca.markets import bankroll as BANK  # noqa: E402
+
+LIVE_KELLY = BANK.PM_KELLY_FRACTION       # ¼-Kelly (global rule)
+LIVE_CCY = BANK.PM_CCY                     # "$" — PM accounting is USD
 LIVE_MAX_FRAC = float(os.environ.get("WCA_TESTBOOK_LIVE_MAXFRAC", "0"))  # 0 = uncapped
-LIVE_CCY = os.environ.get("WCA_TESTBOOK_LIVE_CCY", "£")
 
 
 def _live_bankroll(report):
-    """Latest live bankroll = base ± realised P&L to date."""
-    return LIVE_BANKROLL_BASE + float(report.get("realized_pl", 0.0) or 0.0)
+    """Latest live PM bankroll in USD = £3,000 ± realised P&L at $1.33 = £1."""
+    return BANK.pm_bankroll_usd(report.get("realized_pl", 0.0))
 
 
 def _now():
@@ -88,8 +89,8 @@ def cmd_trade(args):
     print("Pass @ %s: %d candidates, placed %d, skipped %d | cash $%.2f deployed $%.2f"
           % (res["ts"], res["candidates"], res["n_placed"], res["skipped"],
              res["balance"], res["deployed"]))
-    print("Live bankroll %s%.0f (base %s%.0f %+0.0f realised) · %g×Kelly"
-          % (LIVE_CCY, bankroll, LIVE_CCY, LIVE_BANKROLL_BASE,
+    print("Live bankroll %s%.0f (£%.0f @ $%.2f %+0.0f realised) · %g×Kelly"
+          % (LIVE_CCY, bankroll, BANK.GBP_PM_BANKROLL_BASE, BANK.GBP_USD,
              rep.get("realized_pl", 0.0), LIVE_KELLY))
     for p in res["placed"]:
         s = notify.live_sizing(p["model"], p["price"], bankroll,

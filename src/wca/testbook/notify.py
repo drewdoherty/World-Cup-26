@@ -91,7 +91,7 @@ def _book_line(report: Optional[Dict[str, object]]) -> Optional[str]:
 
 def format_activity(pass_result: Dict[str, object], report: Optional[Dict[str, object]] = None,
                     *, max_lines: int = 8, live_bankroll: Optional[float] = None,
-                    kelly_frac: float = 0.25, max_frac: float = 0.0, currency: str = "£",
+                    kelly_frac: float = 0.25, max_frac: float = 0.0, currency: str = "$",
                     hot_frac: float = 0.10) -> Optional[str]:
     """Render a paper trade-pass summary for Telegram, or None if nothing happened.
 
@@ -142,8 +142,8 @@ def format_activity(pass_result: Dict[str, object], report: Optional[Dict[str, o
     if n > max_lines:
         lines.append("  …and %d more (see `report`)" % (n - max_lines))
     if live_bankroll is not None and placed:
-        lines.append("_per-bet %s (not whole-book correlation-adjusted); "
-                     "PM settles USD — apply your GBP/USD rate._" % klabel)
+        lines.append("_%s of a £3,000±realised bankroll at $1.33=£1 (USD); "
+                     "per-bet, not whole-book correlation-adjusted._" % klabel)
     return "\n".join(lines)
 
 

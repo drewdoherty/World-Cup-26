@@ -52,16 +52,17 @@ def test_live_sizing_quarter_kelly_and_cap():
     assert notify.live_sizing(0.30, 0.40, 3000.0)["stake"] == 0.0
 
 
-def test_format_activity_live_bankroll_shows_kelly_stake():
+def test_format_activity_live_bankroll_shows_kelly_stake_in_usd():
+    # Bankroll is USD (£3,000 → $3,990 at $1.33=£1).
     res = {"n_placed": 1, "candidates": 4, "placed": [
         {"basis": "advance", "fixture": "Belgium", "selection": "Belgium to reach QF",
          "price": 0.32, "model": 0.48, "edge": 0.16, "stake": 40.0}]}
-    msg = notify.format_activity(res, live_bankroll=3168.0)
-    assert "¼-Kelly on £3,168 bankroll" in msg      # header names the live bankroll
+    msg = notify.format_activity(res, live_bankroll=3990.0)
+    assert "¼-Kelly on $3,990 bankroll" in msg        # USD header
     assert "@ 32¢ ask · fair 48¢ · edge +16%" in msg
-    assert "stake £186" in msg                       # 3168 × 0.25 × 0.2353 ≈ 186
+    assert "stake $235" in msg                          # 3990 × 0.25 × 0.2353 ≈ 235
     assert "5.9% of bankroll" in msg
-    assert "GBP/USD" in msg                           # FX caveat footer
+    assert "$1.33=£1" in msg                            # FX rule stated in footer
 
 
 def test_format_activity_live_bankroll_flags_hot_and_caps():
@@ -69,10 +70,10 @@ def test_format_activity_live_bankroll_flags_hot_and_caps():
     res = {"n_placed": 1, "candidates": 1, "placed": [
         {"basis": "prop", "selection": "Pedri 1+ shots", "price": 0.82,
          "model": 0.94, "edge": 0.12, "stake": 31.0}]}
-    hot = notify.format_activity(res, live_bankroll=3000.0)
+    hot = notify.format_activity(res, live_bankroll=3990.0)
     assert "⚠ hot" in hot
-    capped = notify.format_activity(res, live_bankroll=3000.0, max_frac=0.02)
-    assert "capped" in capped and "stake £60" in capped
+    capped = notify.format_activity(res, live_bankroll=3990.0, max_frac=0.02)
+    assert "capped" in capped and "stake $80" in capped   # 2% of $3,990
 
 
 def test_format_exits_explains_what_and_why():
