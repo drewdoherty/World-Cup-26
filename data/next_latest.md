@@ -1,18 +1,18 @@
-<!-- generated: 2026-07-01T13:42:31 -->
-⚽ *Next match* — England vs DR Congo
-Kickoff 2026-07-01 16:00:00+00:00
+<!-- generated: 2026-07-01T16:41:51 -->
+⚽ *Next match* — Belgium vs Senegal
+Kickoff 2026-07-01 20:00:00+00:00
 
 *Winner* (model blend)
-  England         76.2%  fair 1.31  best 1.31 (Polymarket) -0.4%
-  Draw            17.6%  fair 5.68  best 5.41 (Polymarket) -4.9%
-  DR Congo         6.2%  fair 16.18  best 18.18 (Polymarket) +12.3% ✅  £3.59
+  Belgium         48.4%  fair 2.07  best 2.20 (Polymarket) +6.3% ✅  £26.26
+  Draw            28.0%  fair 3.58  best 3.39 (Polymarket) -5.2%
+  Senegal         23.7%  fair 4.22  best 4.08 (Polymarket) -3.4%
   _stake = ¼-Kelly @ £2000 bankroll (+EV picks)_
 
-*Corners* (model, exp 8.8)
-  O/U 8.5: over 51.2% / under 48.8%  fair 1.95 / 2.05
+*Corners* (model, exp 8.7)
+  O/U 8.5: over 50.3% / under 49.7%  fair 1.99 / 2.01
 
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-2-0 15.3% | 1-0 12.8% | 3-0 11.8% | 1-1 8.2% | 2-1 8.1% | 4-0 6.9%
-  O/U 2.5: over 53.7% / under 46.3%   BTTS 37.9%
+1-1 13.3% | 1-0 9.3% | 2-1 8.8% | 2-0 8.6% | 0-0 7.7% | 0-1 6.4%
+  O/U 2.5: over 51.0% / under 49.0%   BTTS 54.4%
