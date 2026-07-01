@@ -42,6 +42,14 @@ def _now():
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def _send_chart(con, report=None):
+    """Best-effort: render the equity/P&L curve and post it to @worldcupdevbot."""
+    from wca.testbook import chart, notify
+    rep = report if report is not None else store.report(con)
+    png = chart.render_equity_png(store.equity_series(con), seed=rep.get("seed", 0.0))
+    return notify.send_photo(png, notify.chart_caption(rep))
+
+
 def _load_model():
     with open(_SCORES) as fh:
         scores = json.load(fh)
@@ -68,10 +76,13 @@ def cmd_trade(args):
         print("  +[%s/%s] %-34s @ %.0f¢  model %.0f%%  edge %+.0f%%  $%.2f"
               % (p["basis"], p["market"], p["selection"][:34], p["price"] * 100,
                  p["model"] * 100, p["edge"] * 100, p["stake"]))
-    # Ping the dev chat (@worldcupdevbot) with this pass's activity.
+    # Ping the dev chat (@worldcupdevbot) with this pass's activity + P&L chart.
     from wca.testbook import notify
-    if notify.send(notify.format_activity(res, store.report(con))):
+    rep = store.report(con)
+    if notify.send(notify.format_activity(res, rep)):
         print("  (pinged @worldcupdevbot)")
+        if _send_chart(con, rep):
+            print("  (posted P&L chart)")
     return 0
 
 
@@ -112,10 +123,10 @@ def cmd_mark(args):
             continue
         rule, action, sell_shares, threshold = decision
         if action == "close":
-            store.close(con, b["id"], bid, ts)
+            realized_pl = store.close(con, b["id"], bid, ts)
             sold, stake_after = shares, 0.0
         else:
-            store.trim(con, b["id"], sell_shares, bid, ts)
+            realized_pl = store.trim(con, b["id"], sell_shares, bid, ts)
             sold, stake_after = sell_shares, max(0.0, (shares - sell_shares)) * entry
         store.log_decision(
             con, action=action, rule=rule, bet_id=b["id"], token_id=tok, fixture=b.get("fixture"),
@@ -124,11 +135,24 @@ def cmd_mark(args):
             kelly_mult=KELLY_MULT, max_stake_frac=MAX_STAKE_FRAC, entry_price=entry,
             stake_before=stake, stake_after=stake_after, shares_delta=sold,
             rule_threshold=threshold, ts_utc=ts)
-        actions.append("#%d %s/%s %.1fsh@%.0f¢" % (b["id"], rule, action, sold, bid * 100))
-    print("Marked %d open positions.%s" % (n, ("  Exit actions: " + "; ".join(actions)) if actions else ""))
+        actions.append({
+            "id": b["id"], "action": action, "rule": rule,
+            "fixture": b.get("fixture"), "selection": b.get("selection"),
+            "basis": b["resolution_basis"], "market": b.get("market_type"),
+            "entry_price": entry, "exit_price": bid, "shares_sold": sold,
+            "realized_pl": realized_pl, "stake_after": stake_after,
+            "q": float(q_t), "spread": spread})
+    print("Marked %d open positions." % n)
+    for a in actions:
+        verb = "EXIT" if a["action"] == "close" else "TRIM"
+        print("  %-4s #%-4d %-30s sold %.1fsh @ %.0f¢ (entry %.0f¢) realised $%+.2f · %s"
+              % (verb, a["id"], str(a["selection"])[:30], a["shares_sold"],
+                 a["exit_price"] * 100, a["entry_price"] * 100, a["realized_pl"], a["rule"]))
     if actions:
         from wca.testbook import notify
-        notify.send("\U0001F9EA *Test book* — %d exit action(s):\n  %s" % (len(actions), "\n  ".join(actions)))
+        rep = store.report(con)
+        if notify.send(notify.format_exits(actions, rep)):
+            _send_chart(con, rep)
     return cmd_report(args)
 
 
@@ -199,8 +223,19 @@ def cmd_settle(args):
     print("Settled: %s | P&L $%+.2f | %d still unresolved"
           % (summ["settled"], summ["pl"], summ["unresolved"]))
     from wca.testbook import notify
-    notify.send(notify.format_settlement(summ, store.report(con)))
+    rep = store.report(con)
+    if notify.send(notify.format_settlement(summ, rep)):
+        _send_chart(con, rep)
     return cmd_report(args)
+
+
+def cmd_chart(args):
+    """Render the equity/P&L curve and post it to @worldcupdevbot on demand."""
+    con = store.connect(_DB)
+    ok = _send_chart(con)
+    print("Posted P&L chart to @worldcupdevbot." if ok
+          else "Chart not sent (no matplotlib, empty book, or no bot credentials).")
+    return 0
 
 
 def cmd_equity(args):
@@ -224,6 +259,7 @@ def main(argv=None) -> int:
     s = sub.add_parser("settle"); s.set_defaults(fn=cmd_settle)
     e = sub.add_parser("equity"); e.set_defaults(fn=cmd_equity)
     d = sub.add_parser("decisions"); d.set_defaults(fn=cmd_decisions)
+    c = sub.add_parser("chart"); c.set_defaults(fn=cmd_chart)
     args = ap.parse_args(argv)
     return args.fn(args)
 
