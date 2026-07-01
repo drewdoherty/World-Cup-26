@@ -85,7 +85,12 @@ def _run_sim():
     from wca.data.results import load_results
 
     models = fit_models(load_results(resolve_results_path()))
-    cur = adv.run_advancement(models)               # conditioned on played results
+    # Pin BOTH played group results (results=None auto-loads them) AND played
+    # knockout ties incl. penalty-shootout winners (ko_results). Without the
+    # latter the sim re-plays every knockout from scratch, so an eliminated team
+    # keeps a large survival probability (e.g. Germany P(R16)=0.72 after losing
+    # its R32 shootout) — the panel numbers must reflect real KO eliminations.
+    cur = adv.run_advancement(models, ko_results=adv.load_played_knockout_results())
     pre = adv.run_advancement(models, results=[])   # pre-tournament baseline
     return cur, pre
 
