@@ -237,8 +237,6 @@ def _price_player_props(fx: Dict[str, object], ev: Dict[str, object]) -> List["C
     except Exception:
         return []
     out: List[Candidate] = []
-    if now is None:
-        now = datetime.now(timezone.utc)
     for r in rows:
         out.append(Candidate(
             fixture=fx["raw"], market_type="player_%s" % r.market_type,
