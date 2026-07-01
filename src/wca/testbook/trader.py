@@ -91,6 +91,19 @@ def eval_exit_rules(*, q_t: float, p_bid: Optional[float], p_mid: Optional[float
     return None
 
 
+def _market_tradeable(market: Dict[str, object]) -> bool:
+    """False if a PM market is resolved / not accepting orders (a dead fixture).
+
+    Once a match kicks off, its pre-match markets stop accepting orders (and later
+    close). Taking a paper position on those is the leak that produced the early
+    player-prop losses — guard every entry through here."""
+    if market.get("closed") is True or market.get("active") is False:
+        return False
+    if market.get("acceptingOrders") is False:
+        return False
+    return True
+
+
 def yes_quote(market: Dict[str, object]) -> Optional[Dict[str, object]]:
     """YES-side quote for a TRUE Yes/No binary market: token, ask, bid, mid, vol, spread.
 
@@ -99,6 +112,8 @@ def yes_quote(market: Dict[str, object]) -> Optional[Dict[str, object]]:
     [Team1, Team2] (where index 0 is NOT "Yes"). Those markets need their own
     outcome-aware pricing, not this helper.
     """
+    if not _market_tradeable(market):
+        return None
     toks = _parse_json_array(market.get("clobTokenIds"))
     if not toks:
         return None
@@ -131,6 +146,8 @@ def outcome_quote(market: Dict[str, object], want: str) -> Optional[Dict[str, ob
     [Team1,Team2] markets where there is no 'Yes' outcome. Returns token + ask
     (the YES-equivalent buy price of that outcome) + bid/mid/vol/spread.
     """
+    if not _market_tradeable(market):
+        return None
     toks = _parse_json_array(market.get("clobTokenIds"))
     outs = _parse_json_array(market.get("outcomes")) or []
     prices = _parse_json_array(market.get("outcomePrices")) or []
