@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-07-01T07:55:51"
+    "generated": "2026-07-01T07:56:30"
   },
   "totals": {
-    "wagered": 3637.8600000000015,
+    "wagered": 3647.8600000000015,
     "open_stake": 1746.7000000000005,
     "settled_pl": 292.6975,
-    "n_bets": 206
+    "n_bets": 207
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 1745.36,
+      "wagered": 1755.36,
       "open_stake": 680.96,
       "settled_pl": 177.09550000000002,
-      "n_bets": 150
+      "n_bets": 151
     },
     "USD": {
       "wagered": 1892.5000000000007,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 1745.36,
+      "wagered": 1755.36,
       "open_stake": 680.96,
       "settled_pl": 177.09550000000002,
-      "n_bets": 150,
+      "n_bets": 151,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 1568.86,
-      "open_stake": 895.52,
+      "wagered": 1578.86,
+      "open_stake": 905.52,
       "settled_pl": 227.09550000000002,
-      "n_bets": 127,
+      "n_bets": 128,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -64,10 +64,10 @@
   "source_summary": {
     "offer": {
       "GBP": {
-        "wagered": 468.06,
-        "open_stake": 233.06,
+        "wagered": 478.06,
+        "open_stake": 243.06,
         "settled_pl": 156.67,
-        "n_bets": 50
+        "n_bets": 51
       }
     },
     "model": {
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "Unknown": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 25.0,
+      "open_stake": 10.0,
+      "settled_pl": -5.0,
+      "n_bets": 4
+    },
     "Betway": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -212,14 +220,6 @@
       "settled_pl": 42.97,
       "n_bets": 11
     },
-    "Unknown": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 15.0,
-      "open_stake": 0.0,
-      "settled_pl": -5.0,
-      "n_bets": 3
-    },
     "Virgin Bet": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -247,6 +247,14 @@
   },
   "platforms_by_account": {
     "1": {
+      "Unknown": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 25.0,
+        "open_stake": 10.0,
+        "settled_pl": -5.0,
+        "n_bets": 4
+      },
       "Betway": {
         "venue": "sportsbook",
         "currency": "GBP",
@@ -350,14 +358,6 @@
         "open_stake": 5.0,
         "settled_pl": 42.97,
         "n_bets": 11
-      },
-      "Unknown": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 15.0,
-        "open_stake": 0.0,
-        "settled_pl": -5.0,
-        "n_bets": 3
       },
       "Virgin Bet": {
         "venue": "sportsbook",
@@ -4776,6 +4776,27 @@
       "cash_pnl": 0.24,
       "pct_pnl": 0.04000066667777796,
       "notes": "live PM position (data-API)"
+    },
+    {
+      "id": 264,
+      "ts_utc": "2026-07-01T07:56:30",
+      "match": "England vs Congo DR | Colombia vs Ghana | Spain vs Austria | Canada vs Morocco",
+      "match_id": "MANUAL_ENGLAND_VS_CONGO_DR_COLOMBIA_VS_GHANA_SPAIN_VS_A",
+      "market": "Accumulator",
+      "selection": "Total Goals -> Over 2.5 + Total Goals -> Under 2.5 + Total Goals -> Over 2.5 + Total Goals -> Under 2.5",
+      "platform": "Unknown",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 9.22,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.88; Accumulator; legs: Total Goals -> Over 2.5 | Total Goals -> Under 2.5 | Total Goals -> Over 2.5 | Total Goals -> Under 2.5; SNR",
+      "manual_override": null
     },
     {
       "id": 263,
