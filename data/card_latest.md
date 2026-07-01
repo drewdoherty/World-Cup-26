@@ -1,5 +1,5 @@
-<!-- generated: 2026-07-01T10:51:04 -->
-*World Cup Alpha — bet card* (0 staked, 2 indicative picks, hit-prob ranked)
+<!-- generated: 2026-07-01T13:42:31 -->
+*World Cup Alpha — bet card* (0 staked, 3 indicative picks, hit-prob ranked)
 
 _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. Wire a 2nd book (Betfair creds) or set WCA_STAKE_SINGLE_SOURCE=1 to size them._
 
@@ -9,6 +9,9 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
 *2. [FAV] Belgium vs Senegal* — Belgium @ *2.20* via *polymarket*
     model 48.1% / mkt 45.3%  edge *+5.8%*  [elo 47% dc 54%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
+*3. [DRAW] Canada vs Morocco* — Draw @ *3.64* via *polymarket*
+    model 28.1% / mkt 27.6%  edge *+2.3%*  [elo 28% dc 29%]
+    stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
 
 *— CUT (excluded from staking, 10) —*
   x Paraguay vs France — Paraguay @ 22.22 (model 8.3%, +84.1% EV): below 20% hit-probability floor (model 8.3%) — too unlikely to return PnL even at +84.1% EV
@@ -17,9 +20,9 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
   x Spain vs Austria — Austria @ 11.76 (model 9.8%, +15.0% EV): below 20% hit-probability floor (model 9.8%) — too unlikely to return PnL even at +15.0% EV
   x Australia vs Egypt — Australia @ 3.51 (model 32.1%, +12.6% EV): outright-underdog longshot (model 32.1%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +12.6% EV
   x Portugal vs Croatia — Croatia @ 5.13 (model 21.4%, +9.7% EV): outright-underdog longshot (model 21.4%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +9.7% EV
+  x Canada vs Morocco — Canada @ 5.41 (model 19.9%, +7.7% EV): below 20% hit-probability floor (model 19.9%) — too unlikely to return PnL even at +7.7% EV
   x England vs DR Congo — DR Congo @ 18.18 (model 6.2%, +6.2% EV): below 20% hit-probability floor (model 6.2%) — too unlikely to return PnL even at +6.2% EV
   x Switzerland vs Algeria — Algeria @ 4.44 (model 23.7%, +5.2% EV): outright-underdog longshot (model 23.7%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +5.2% EV
-  x Canada vs Morocco — Canada @ 5.13 (model 20.4%, +4.5% EV): outright-underdog longshot (model 20.4%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +4.5% EV
   x Spain vs Austria — Draw @ 5.71 (model 18.0%, +2.9% EV): below 20% hit-probability floor (model 18.0%) — too unlikely to return PnL even at +2.9% EV
 
 *Bankroll model (1/2-Kelly, equally split across books):*
@@ -123,13 +126,13 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
 
 *Canada vs Morocco*
     xG: 0.76-1.39
-    0-1  15.8%  fair 6.33 (15.8%)  back >= 6.45 (15.5%)
-    1-1  12.5%  fair 8.00 (12.5%)  back >= 8.16 (12.3%)
-    0-0  11.9%  fair 8.37 (11.9%)  back >= 8.54 (11.7%)
-    0-2  11.3%  fair 8.81 (11.3%)  back >= 8.99 (11.1%)
-    1-2  8.6%  fair 11.59 (8.6%)  back >= 11.82 (8.5%)
-    1-0  8.5%  fair 11.81 (8.5%)  back >= 12.05 (8.3%)
-    O/U 2.5: over 36.5% / under 63.5%   BTTS 40.2%
+    0-1  15.9%  fair 6.29 (15.9%)  back >= 6.42 (15.6%)
+    1-1  12.6%  fair 7.95 (12.6%)  back >= 8.11 (12.3%)
+    0-0  12.0%  fair 8.32 (12.0%)  back >= 8.49 (11.8%)
+    0-2  11.4%  fair 8.77 (11.4%)  back >= 8.94 (11.2%)
+    1-2  8.7%  fair 11.53 (8.7%)  back >= 11.76 (8.5%)
+    1-0  8.3%  fair 12.08 (8.3%)  back >= 12.33 (8.1%)
+    O/U 2.5: over 36.4% / under 63.6%   BTTS 40.3%
 
 *Paraguay vs France*
     xG: 0.62-2.01

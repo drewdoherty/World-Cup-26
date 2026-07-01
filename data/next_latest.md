@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-01T10:51:04 -->
+<!-- generated: 2026-07-01T13:42:31 -->
 ⚽ *Next match* — England vs DR Congo
 Kickoff 2026-07-01 16:00:00+00:00
 
