@@ -58,6 +58,34 @@
     color: var(--ll-muted);
     text-transform: none;
   }
+
+  /* -------- One-click PLACE (localhost-only; JS reveals it) -------------- */
+  .wca-place-btn {
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border: 1px solid var(--ll-accent, #16c784);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--ll-accent, #16c784);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .wca-place-btn:hover:not(:disabled) { background: var(--ll-accent, #16c784); color: #04120b; }
+  .wca-place-btn:disabled { opacity: 0.55; cursor: default; }
+  .wca-place-btn.placed { border-color: var(--ll-muted); color: var(--ll-muted); }
+  .wca-place-err {
+    display: block;
+    margin-top: 3px;
+    font-size: 9px;
+    color: var(--ll-danger, #e5484d);
+    max-width: 220px;
+    white-space: normal;
+  }
+  .wca-place-note { font-size: 9px; color: var(--ll-muted); }
 </style>
 </head>
 <body>
@@ -202,6 +230,8 @@
               <th>Action</th>
               <th>Promo</th>
               <th>Source</th>
+              <!-- PLACE: localhost-only; JS reveals it via .wca-place-col -->
+              <th class="wca-place-col" hidden>Place</th>
             </tr>
           </thead>
           <tbody id="body-singles"></tbody>
@@ -234,6 +264,8 @@
               <th class="r">Stake</th>
               <th>Action</th>
               <th>Source</th>
+              <!-- PLACE: localhost-only; JS reveals it via .wca-place-col -->
+              <th class="wca-place-col" hidden>Place</th>
             </tr>
           </thead>
           <tbody id="body-props"></tbody>
@@ -270,6 +302,8 @@
               <th class="r">Stake ($)</th>
               <th>Action</th>
               <th>Source</th>
+              <!-- PLACE: localhost-only; JS reveals it via .wca-place-col -->
+              <th class="wca-place-col" hidden>Place</th>
             </tr>
           </thead>
           <tbody id="body-adv"></tbody>
