@@ -12,6 +12,7 @@ stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 
 # 1. refresh results + regenerate feeds (tolerate transient failures)
 "$PY" scripts/wca_scores_data.py   >/dev/null 2>&1 || true
+"$PY" scripts/wca_forest_data.py   >/dev/null 2>&1 || true
 "$PY" scripts/wca_site.py          >/dev/null 2>&1 || true
 "$PY" scripts/wca_tracking_data.py >/dev/null 2>&1 || true
 "$PY" scripts/wca_exposure_data.py >/dev/null 2>&1 || true
@@ -28,7 +29,7 @@ stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 #    the freshly built outputs (1) persist to git instead of being reverted to a
 #    stale blob by com.wca.sync and (2) feed downstream (card git-log history, and
 #    the exact model 1X2 used by scores/exposure).
-git add site/data.json site/linemove.json site/scores_data.json site/tracking_data.json \
+git add site/data.json site/linemove.json site/scores_data.json site/forest_data.json site/tracking_data.json \
         site/exposure_data.json site/exposure_dashboard.json site/advancement_history.json site/advancement_data.json \
         data/card_latest.md data/next_latest.md data/model_predictions.json \
         data/advancement_current_vs_pretournament.json

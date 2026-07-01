@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light">
+<title>WORLD CUP ALPHA // EVENT MARKETS</title>
+<link rel="stylesheet" href="./style.css">
+<style>
+  /* Event-Markets forest — scoped, lilac-themed via shared CSS vars ---------- */
+  .fx-chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 12px; }
+  .fx-chip {
+    padding: 5px 11px; font-size: 11px; font-family: var(--mono);
+    border: 1px solid var(--border-2); border-radius: 4px;
+    color: var(--text-dim); background: var(--panel); cursor: pointer;
+    white-space: nowrap; user-select: none;
+  }
+  .fx-chip:hover { color: var(--text); border-color: var(--muted); }
+  .fx-chip.on { color: var(--bg); background: var(--accent); border-color: var(--accent); font-weight: 600; }
+  .fx-chip .fx-nm { font-size: 8px; opacity: .8; margin-left: 6px; font-style: normal; }
+
+  .em-fx-head {
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    color: var(--text); padding: 14px 4px 4px; border-top: 1px solid var(--border);
+    margin-top: 8px; letter-spacing: .5px;
+  }
+  .em-fx-head:first-child { border-top: none; margin-top: 0; padding-top: 2px; }
+  .em-fx-head .em-ko { font-weight: 400; color: var(--muted); font-size: 10px; margin-left: 8px; letter-spacing: 0; }
+  .em-fx-head .em-nolive { color: var(--warn); font-size: 9px; margin-left: 8px; letter-spacing: .5px; }
+
+  .a-svg { width: 100%; height: auto; display: block; }
+  .cx-grid { stroke: var(--border); stroke-width: 1; }
+  .cx-tick { fill: var(--muted); font: 9px var(--mono); }
+  .cx-lbl { fill: var(--text); font: 11px var(--mono); }
+  .whisker { stroke: var(--border-2); stroke-width: 6; stroke-linecap: round; }
+  .dot-model { fill: var(--accent); stroke: var(--panel); stroke-width: 1; }
+  .dot-market { fill: var(--polymarket); stroke: var(--panel); stroke-width: 1; }
+
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin: 12px 0 2px; font-size: 11px; color: var(--text-dim); }
+  .legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+  .legend .dim { color: var(--muted); }
+  .empty { color: var(--text-dim); font-size: 12px; padding: 10px 0; }
+  .fpending { color: var(--text-dim); font-size: 12px; padding: 10px 0; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="ticker" id="ticker">
+    <div class="brand">
+      <span class="brand-mark">WCA</span>
+      <span class="brand-sub">WORLD CUP ALPHA</span>
+    </div>
+    <nav class="scores-nav">
+      <a class="scores-nav-link" href="./index.html">Bets</a>
+      <a class="scores-nav-link" href="./scores.html">Scores &amp; Markets</a>
+      <span class="scores-nav-here">Event Markets</span>
+      <a class="scores-nav-link" href="./architecture.html">Under The Hood</a>
+      <a class="scores-nav-link" href="./promos.html">Promos &amp; Offers</a>
+      <a class="scores-nav-link" href="./arb.html">Bet Recs</a>
+      <a class="scores-nav-link" href="./benchmarks.html">Benchmarks</a>
+    </nav>
+  </header>
+
+  <div class="nodata" id="nodata" hidden>
+    <span class="nodata-dot"></span>
+    <span id="nodata-msg">NO DATA FEED</span>
+  </div>
+
+  <main>
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">Event Markets // Model vs Market Forest</span>
+        <span class="panel-meta" id="forest-meta">per-fixture markets &middot; model vs best available price</span>
+      </div>
+      <div class="panel-body">
+        <p class="viz-sub" style="font-size:11px;color:var(--text-dim);line-height:1.6;margin:0 0 12px">
+          Pick one or more upcoming fixtures. Each row shows the <b style="color:var(--accent)">model</b> probability and the
+          <b style="color:var(--polymarket)">market</b> price for that outcome; the bar between them is the
+          <b>|model &minus; market|</b> edge (green = model above market, red = below). Where no live market
+          price exists for an outcome, only the model dot is shown, labelled &ldquo;model&rdquo;.
+        </p>
+        <div id="forest-nav" class="fx-chips"></div>
+        <div class="panel-body" id="forest-body" style="padding:0"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span class="foot-gen" id="foot-gen"></span>
+    <span class="foot-mark">WORLD CUP ALPHA</span>
+  </footer>
+</div>
+<script src="./forest.js"></script>
+</body>
+</html>
