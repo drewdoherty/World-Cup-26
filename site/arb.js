@@ -124,6 +124,132 @@
   }
 
   // --------------------------------------------------------------------------
+  // One-click PLACE (localhost-only). SAFETY: this entire module is inert on
+  // any non-localhost host (Vercel), so the deployed page can never render or
+  // fire a button. Guarded so a missing config or a non-localhost load never
+  // throws.
+  // --------------------------------------------------------------------------
+
+  // True only on a genuine local dev load. Everything below short-circuits off
+  // this — the render helpers emit nothing when it is false.
+  var IS_LOCAL = (function () {
+    try {
+      var h = (location && location.hostname) || "";
+      return h === "localhost" || h === "127.0.0.1" || h === "[::1]" || h === "::1";
+    } catch (e) { return false; }
+  })();
+
+  var PLACE_ENDPOINT = "http://127.0.0.1:8010/place";
+  var PLACE_TOKEN_KEY = "wcaPlaceToken";  // localStorage key for the shared secret
+
+  function placeToken() {
+    // The shared secret the user configured (matches server WCA_PLACE_TOKEN).
+    // Prompt ONCE if unset; a cancelled prompt leaves it unset (button errors
+    // rather than firing without a secret).
+    try {
+      var t = window.localStorage.getItem(PLACE_TOKEN_KEY);
+      if (t && t.trim()) return t.trim();
+      var entered = window.prompt(
+        "One-time setup: paste the WCA place-server shared secret " +
+        "(WCA_PLACE_TOKEN). Stored locally in this browser only.");
+      if (entered && entered.trim()) {
+        window.localStorage.setItem(PLACE_TOKEN_KEY, entered.trim());
+        return entered.trim();
+      }
+    } catch (e) { /* localStorage/prompt unavailable — fall through */ }
+    return null;
+  }
+
+  function makeNonce() {
+    // Per-click idempotency token.
+    var rnd;
+    try { rnd = Math.random().toString(36).slice(2); } catch (e) { rnd = "" + Math.random(); }
+    return "web-" + Date.now() + "-" + rnd;
+  }
+
+  // Render the PLACE cell for one row. Returns "" unless local AND the row is a
+  // fireable Polymarket ADD (so 01/02 rows only get a live button when they
+  // actually carry a polymarket-venue order).
+  function placeCell(r) {
+    if (!IS_LOCAL || !r) return "";
+    var isPm = String(r.venue || "").toLowerCase() === "polymarket";
+    var isAdd = String(r.action_label || "") === "ADD";
+    if (!isPm || !isAdd || r.stale || !r.id) {
+      return '<td data-label="Place"><span class="wca-place-note">&mdash;</span></td>';
+    }
+    return '<td data-label="Place">' +
+      '<button type="button" class="wca-place-btn" data-place-id="' + esc(r.id) + '">Place</button>' +
+      "</td>";
+  }
+
+  // POST one placement to the local server. Never throws to the caller.
+  function postPlace(recId) {
+    var token = placeToken();
+    if (!token) {
+      return Promise.resolve({ ok: false, message: "no place token configured (set the shared secret)" });
+    }
+    var body = JSON.stringify({ rec_id: recId, nonce: makeNonce() });
+    return fetch(PLACE_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-WCA-Place-Token": token },
+      body: body,
+    })
+      .then(function (resp) {
+        return resp.json().catch(function () {
+          return { ok: false, message: "server returned non-JSON (HTTP " + resp.status + ")" };
+        });
+      })
+      .catch(function (e) {
+        return { ok: false, message: "place server unreachable (" + (e && e.message || e) + ")" };
+      });
+  }
+
+  // Delegated click handler wired once. Only active on localhost.
+  function wirePlace() {
+    if (!IS_LOCAL) return;
+    document.addEventListener("click", function (ev) {
+      var btn = ev.target && ev.target.closest ? ev.target.closest(".wca-place-btn") : null;
+      if (!btn || btn.disabled) return;
+      var recId = btn.getAttribute("data-place-id");
+      if (!recId) return;
+
+      // Clear any prior inline error on this cell.
+      var cell = btn.parentNode;
+      var prevErr = cell && cell.querySelector ? cell.querySelector(".wca-place-err") : null;
+      if (prevErr) prevErr.parentNode.removeChild(prevErr);
+
+      btn.disabled = true;
+      var restore = btn.textContent;
+      btn.textContent = "…";
+
+      postPlace(recId).then(function (res) {
+        if (res && res.ok) {
+          btn.textContent = res.dry_run ? "DRY ✓" : "PLACED ✓";
+          btn.classList.add("placed");
+          // keep disabled — prevents further clicks on a placed row
+          // Refresh the KPI strip / feed so exposure reflects the new order.
+          try { load(); } catch (e) { /* refresh best-effort */ }
+        } else {
+          btn.disabled = false;
+          btn.textContent = restore;
+          var msg = (res && res.message) || "place failed";
+          var span = document.createElement("span");
+          span.className = "wca-place-err";
+          span.textContent = msg;
+          if (cell) cell.appendChild(span);
+        }
+      });
+    });
+  }
+
+  // Reveal the localhost-only PLACE <th> columns (hidden by default in HTML).
+  function revealPlaceColumns() {
+    if (!IS_LOCAL) return;
+    var cols = document.querySelectorAll(".wca-place-col");
+    for (var i = 0; i < cols.length; i++) { cols[i].hidden = false; }
+  }
+
+  // --------------------------------------------------------------------------
   // Fetch
   // --------------------------------------------------------------------------
 
@@ -235,6 +361,7 @@
         '<td data-label="Action">' + actionBadge(r.action_label) + "</td>" +
         '<td data-label="Promo">' + promoBadge(r.promo_status, r.promo && r.promo.name) + "</td>" +
         '<td data-label="Source">' + venueBadge(r.venue) + " " + staleBadge(r.stale) + " " + modelAgeTag + "</td>" +
+        placeCell(r) +
         "</tr>";
     }).join("");
     tbody.innerHTML = html;
@@ -264,6 +391,7 @@
         '<td data-label="Stake" class="r">' + currency(r.stake, r.currency) + "</td>" +
         '<td data-label="Action">' + actionBadge(r.action_label) + "</td>" +
         '<td data-label="Source">' + venueBadge(r.venue) + " " + staleBadge(r.stale) + "</td>" +
+        placeCell(r) +
         "</tr>";
     }).join("");
     tbody.innerHTML = html;
@@ -307,6 +435,7 @@
         '<td data-label="Stake ($)" class="r">' + usd(r.stake) + "</td>" +
         '<td data-label="Action">' + actionBadge(r.action_label) + "</td>" +
         '<td data-label="Source"><span class="arb-badge badge-pm">PM</span> ' + staleBadge(r.stale) + " " + modelAge + "</td>" +
+        placeCell(r) +
         "</tr>";
     }).join("");
     tbody.innerHTML = html;
@@ -533,10 +662,16 @@
 
   wireFilters();
   wireDensity();
+  wirePlace();            // no-op unless localhost
+
+  function boot() {
+    revealPlaceColumns(); // no-op unless localhost
+    load();
+  }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", load);
+    document.addEventListener("DOMContentLoaded", boot);
   } else {
-    load();
+    boot();
   }
 })();
