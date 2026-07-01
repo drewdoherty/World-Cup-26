@@ -39,7 +39,7 @@
       var first = (snaps[0].probs || {})[t], last = latest[t];
       var dd = (first != null && last != null) ? ((last - first) * 100) : null;
       var dCell = dd == null ? "&mdash;" :
-        '<span style="color:' + (dd >= 0 ? "#3fe08a" : "#e0603f") + '">' + (dd >= 0 ? "+" : "") + dd.toFixed(1) + "</span>";
+        '<span style="color:' + (dd >= 0 ? "#1A7A4C" : "#C0273A") + '">' + (dd >= 0 ? "+" : "") + dd.toFixed(1) + "</span>";
       return "<tr><td>" + t + "</td>" + cells + "<td>" + dCell + "</td></tr>";
     }).join("");
     return '<table class="tbl"><thead>' + head + "</thead><tbody>" + rows + "</tbody></table>";
