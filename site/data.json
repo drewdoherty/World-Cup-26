@@ -1,39 +1,39 @@
 {
   "meta": {
-    "generated": "2026-07-01 06:07:50 UTC"
+    "generated": "2026-07-01T06:39:34"
   },
   "totals": {
-    "wagered": 3617.8600000000015,
-    "open_stake": 1736.7000000000005,
-    "settled_pl": 134.49749999999995,
-    "n_bets": 204
+    "wagered": 3627.8600000000015,
+    "open_stake": 1746.7000000000005,
+    "settled_pl": 292.6975,
+    "n_bets": 205
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 1725.36,
-      "open_stake": 670.96,
+      "wagered": 1735.36,
+      "open_stake": 680.96,
       "settled_pl": 177.09550000000002,
-      "n_bets": 148
+      "n_bets": 149
     },
     "USD": {
       "wagered": 1892.5000000000007,
-      "open_stake": 1364.7961,
-      "settled_pl": -42.59800000000001,
+      "open_stake": 1440.7959,
+      "settled_pl": 115.60199999999996,
       "n_bets": 14
     }
   },
   "venues": {
     "sportsbook": {
-      "wagered": 1725.36,
-      "open_stake": 670.96,
+      "wagered": 1735.36,
+      "open_stake": 680.96,
       "settled_pl": 177.09550000000002,
-      "n_bets": 148,
+      "n_bets": 149,
       "currency": "GBP"
     },
     "polymarket": {
       "wagered": 1892.5000000000007,
-      "open_stake": 1364.7961,
-      "settled_pl": -42.59800000000001,
+      "open_stake": 1440.7959,
+      "settled_pl": 115.60199999999996,
       "n_bets": 14,
       "currency": "USD"
     },
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 1548.86,
-      "open_stake": 875.52,
+      "wagered": 1558.86,
+      "open_stake": 885.52,
       "settled_pl": 227.09550000000002,
-      "n_bets": 125,
+      "n_bets": 126,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,11 +62,25 @@
     }
   },
   "source_summary": {
+    "model": {
+      "GBP": {
+        "wagered": 813.24,
+        "open_stake": 546.4600000000002,
+        "settled_pl": 85.89549999999997,
+        "n_bets": 53
+      },
+      "USD": {
+        "wagered": 856.04,
+        "open_stake": 260.88,
+        "settled_pl": 32.86200000000002,
+        "n_bets": 26
+      }
+    },
     "punt": {
       "USD": {
         "wagered": 1036.46,
         "open_stake": 804.8600000000001,
-        "settled_pl": 121.21999999999997,
+        "settled_pl": 82.73999999999995,
         "n_bets": 30
       },
       "GBP": {
@@ -84,20 +98,6 @@
         "n_bets": 49
       }
     },
-    "model": {
-      "GBP": {
-        "wagered": 803.24,
-        "open_stake": 536.46,
-        "settled_pl": 85.89549999999997,
-        "n_bets": 52
-      },
-      "USD": {
-        "wagered": 856.04,
-        "open_stake": 260.88,
-        "settled_pl": -163.81799999999998,
-        "n_bets": 26
-      }
-    },
     "hedge": {
       "GBP": {
         "wagered": 22.0,
@@ -108,12 +108,20 @@
     }
   },
   "platforms": {
+    "Betway": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 20.0,
+      "open_stake": 10.0,
+      "settled_pl": -10.0,
+      "n_bets": 2
+    },
     "polymarket": {
       "venue": "polymarket",
       "currency": "USD",
       "wagered": 1892.5000000000007,
       "open_stake": 1065.7400000000002,
-      "settled_pl": -42.59800000000001,
+      "settled_pl": 115.60199999999996,
       "n_bets": 56
     },
     "Betfair Sportsbook": {
@@ -228,14 +236,6 @@
       "settled_pl": -29.0,
       "n_bets": 5
     },
-    "Betway": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 10.0,
-      "open_stake": 0.0,
-      "settled_pl": -10.0,
-      "n_bets": 1
-    },
     "Sky Bet": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -247,12 +247,20 @@
   },
   "platforms_by_account": {
     "1": {
+      "Betway": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 20.0,
+        "open_stake": 10.0,
+        "settled_pl": -10.0,
+        "n_bets": 2
+      },
       "polymarket": {
         "venue": "polymarket",
         "currency": "USD",
         "wagered": 1860.2900000000004,
         "open_stake": 1064.7400000000002,
-        "settled_pl": -11.388,
+        "settled_pl": 146.81199999999995,
         "n_bets": 53
       },
       "Betfair Sportsbook": {
@@ -366,14 +374,6 @@
         "open_stake": 0.0,
         "settled_pl": -10.0,
         "n_bets": 1
-      },
-      "Betway": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 10.0,
-        "open_stake": 0.0,
-        "settled_pl": -10.0,
-        "n_bets": 1
       }
     },
     "2": {
@@ -467,7 +467,7 @@
     {
       "id": 229,
       "ts_utc": "2026-06-28T06:44:31Z",
-      "settled_ts": "2026-07-01T06:07:36Z",
+      "settled_ts": "2026-07-01T06:07:52Z",
       "match": "Exact Score: South Africa 1 - 1 Canada?",
       "match_id": "pm_recon",
       "market": "pm_other",
@@ -483,11 +483,11 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "status": "won",
-      "pl": 33.67,
+      "status": "lost",
+      "pl": -4.81,
       "closing_odds": null,
       "clv": null,
-      "notes": "RECONCILED on-chain 2026-06-28; wallet=PM1 shares=38.4615 cur_price=0.125 cur_value=4.81; ENTRY COST APPROX (=cur_value), real cost PENDING [won via pm-reconcile 2026-07-01: on-chain redeemable]",
+      "notes": "RECONCILED on-chain 2026-06-28; wallet=PM1 shares=38.4615 cur_price=0.125 cur_value=4.81; ENTRY COST APPROX (=cur_value), real cost PENDING [won via pm-reconcile 2026-07-01: on-chain redeemable] [CORRECTED: Canada 1-0 SA, 1-1 did not occur]",
       "manual_override": null
     },
     {
@@ -1325,7 +1325,7 @@
     {
       "id": 170,
       "ts_utc": "2026-06-26T05:27:00",
-      "settled_ts": "2026-07-01T06:07:36Z",
+      "settled_ts": "2026-07-01T06:07:52Z",
       "match": "Brazil reach the Round of 16",
       "match_id": "0xd0c3a4f045a3f6f4d502ffc21eb2da13eb5fe232905d6d495117c25af64d6f6b",
       "market": "pm_reach_r16",
@@ -1341,17 +1341,17 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "status": "lost",
-      "pl": -63.01,
+      "status": "won",
+      "pl": 33.67,
       "closing_odds": null,
       "clv": null,
-      "notes": "polymarket acct1 0x86b4c55a; 96.7 sh @ 0.652; cost $63.01; value $69.13; pnl $+6.12; redeemable=False; reconciled 2026-06-26 [lost via pm-reconcile 2026-07-01: resolved $0 on-chain]",
+      "notes": "polymarket acct1 0x86b4c55a; 96.7 sh @ 0.652; cost $63.01; value $69.13; pnl $+6.12; redeemable=False; reconciled 2026-06-26 [lost via pm-reconcile 2026-07-01: resolved $0 on-chain] [CORRECTED: Brazil beat Japan, reach-R16 YES pays]",
       "manual_override": null
     },
     {
       "id": 169,
       "ts_utc": "2026-06-26T05:27:00",
-      "settled_ts": "2026-07-01T06:07:36Z",
+      "settled_ts": "2026-07-01T06:07:52Z",
       "match": "Japan reach the Round of 16",
       "match_id": "0x691a596c894b4742167158f873a7443e6bf9b4f584fc9c6a8c91abec12b182d6",
       "market": "pm_reach_r16",
@@ -1367,11 +1367,11 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "status": "lost",
-      "pl": -60.0,
+      "status": "won",
+      "pl": 40.0,
       "closing_odds": null,
       "clv": null,
-      "notes": "polymarket acct1 0x86b4c55a; 100.0 sh @ 0.600; cost $60.00; value $68.99; pnl $+8.99; redeemable=False; reconciled 2026-06-26 [lost via pm-reconcile 2026-07-01: resolved $0 on-chain]",
+      "notes": "polymarket acct1 0x86b4c55a; 100.0 sh @ 0.600; cost $60.00; value $68.99; pnl $+8.99; redeemable=False; reconciled 2026-06-26 [lost via pm-reconcile 2026-07-01: resolved $0 on-chain] [CORRECTED: Japan eliminated by Brazil]",
       "manual_override": null
     },
     {
@@ -4352,31 +4352,31 @@
         ],
         [
           "2026-07-01T06:07:36Z",
-          73.98
+          68.79
         ],
         [
           "2026-07-01T06:07:36Z",
-          102.46
+          76.74
         ],
         [
           "2026-07-01T06:07:36Z",
-          110.41
+          70.74
         ],
         [
           "2026-07-01T06:07:36Z",
-          104.41
+          46.74
         ],
         [
-          "2026-07-01T06:07:36Z",
-          41.4
+          "2026-07-01T06:07:52Z",
+          41.93
         ],
         [
-          "2026-07-01T06:07:36Z",
-          -18.6
+          "2026-07-01T06:07:52Z",
+          75.6
         ],
         [
-          "2026-07-01T06:07:36Z",
-          -42.6
+          "2026-07-01T06:07:52Z",
+          115.6
         ]
       ]
     }
@@ -4457,12 +4457,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 214.27,
-      "cur_price": 0.635,
+      "cur_value": 215.96,
+      "cur_price": 0.64,
       "avg_price": 0.5037,
       "shares": 337.4399,
-      "cash_pnl": 44.28,
-      "pct_pnl": 0.260471813985007,
+      "cash_pnl": 45.96,
+      "pct_pnl": 0.2703542134315926,
       "notes": "live PM position (data-API)"
     },
     {
@@ -4489,6 +4489,32 @@
       "shares": 318.5789,
       "cash_pnl": 1.59,
       "pct_pnl": 0.02626813988527927,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x26f7aac052",
+      "ts_utc": "",
+      "match": "Will Belgium reach the Round of 16 at the 2026 FIFA World Cup?",
+      "match_id": "0x26f7aac05232d917ca3cc570afef59a88ab156a10beb0f1abddf0c7221ca5c05",
+      "market": "Will Belgium reach the Round of 16 at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.719986240110079,
+      "stake": 130.3797,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 131.17,
+      "cur_price": 0.585,
+      "avg_price": 0.5814,
+      "shares": 224.217,
+      "cash_pnl": 0.79,
+      "pct_pnl": 0.006059225477585851,
       "notes": "live PM position (data-API)"
     },
     {
@@ -4622,32 +4648,6 @@
       "notes": "live PM position (data-API)"
     },
     {
-      "id": "pm-0x26f7aac052",
-      "ts_utc": "",
-      "match": "Will Belgium reach the Round of 16 at the 2026 FIFA World Cup?",
-      "match_id": "0x26f7aac05232d917ca3cc570afef59a88ab156a10beb0f1abddf0c7221ca5c05",
-      "market": "Will Belgium reach the Round of 16 at the 2026 FIFA World Cup?",
-      "selection": "Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "manual",
-      "currency": "USD",
-      "decimal_odds": 1.7546938059308652,
-      "stake": 54.3799,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "cur_value": 55.81,
-      "cur_price": 0.585,
-      "avg_price": 0.5699,
-      "shares": 95.4035,
-      "cash_pnl": 1.43,
-      "pct_pnl": 0.02629648086885044,
-      "notes": "live PM position (data-API)"
-    },
-    {
       "id": "pm-0x5ddf2373c4",
       "ts_utc": "",
       "match": "Will Argentina reach the Quarterfinals at the 2026 FIFA World Cup?",
@@ -4665,12 +4665,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 72.19,
-      "cur_price": 0.825,
+      "cur_value": 73.06,
+      "cur_price": 0.835,
       "avg_price": 0.8,
       "shares": 87.5,
-      "cash_pnl": 2.19,
-      "pct_pnl": 0.031285714285714285,
+      "cash_pnl": 3.06,
+      "pct_pnl": 0.04371428571428571,
       "notes": "live PM position (data-API)"
     },
     {
@@ -4750,6 +4750,27 @@
       "cash_pnl": 0.24,
       "pct_pnl": 0.04000066667777796,
       "notes": "live PM position (data-API)"
+    },
+    {
+      "id": 262,
+      "ts_utc": "2026-07-01T06:39:33",
+      "match": "England vs DR Congo",
+      "match_id": "MANUAL_ENGLAND_VS_DR_CONGO",
+      "market": "Bet Builder",
+      "selection": "Both Teams To Score -> No + Over/Under 2.5 Goals -> Over 2.5",
+      "platform": "Betway",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 4.5,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.88; Bet Builder; legs: Both Teams To Score -> No | Over/Under 2.5 Goals -> Over 2.5",
+      "manual_override": null
     },
     {
       "id": 255,
