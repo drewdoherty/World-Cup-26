@@ -56,21 +56,13 @@ def live_sizing(q, p, bankroll: float, *, kelly_frac: float = 0.25,
                 max_frac: float = 0.0) -> Dict[str, object]:
     """Binary-YES fractional-Kelly stake on the LIVE bankroll.
 
-    ``f* = (q - p)/(1 - p)`` (floored at 0); the recommended fraction is
-    ``kelly_frac · f*`` (¼-Kelly by default). ``max_frac > 0`` caps the fraction
-    (e.g. 0.02 = never stake more than 2% of bankroll); ``0`` = uncapped true
-    ¼-Kelly. Returns ``{stake, frac, f_star, capped}``.
+    Thin wrapper over the project sizing rule (:func:`wca.markets.bankroll.
+    size_placement`) so the paper pings and the live sizing can never diverge.
+    ``max_frac > 0`` caps the fraction; ``0`` = uncapped. Returns
+    ``{stake, frac, f_star, capped}``.
     """
-    try:
-        q, p, bk = float(q), float(p), float(bankroll)
-    except (TypeError, ValueError):
-        return {"stake": 0.0, "frac": 0.0, "f_star": 0.0, "capped": False}
-    f_star = max(0.0, (q - p) / (1.0 - p)) if 0.0 < p < 1.0 else 0.0
-    frac = kelly_frac * f_star
-    capped = False
-    if max_frac and frac > max_frac:
-        frac, capped = max_frac, True
-    return {"stake": frac * bk, "frac": frac, "f_star": f_star, "capped": capped}
+    from wca.markets.bankroll import size_placement
+    return size_placement(q, p, bankroll, kelly_frac=kelly_frac, max_frac=max_frac)
 
 
 def _context(basis, fixture, selection) -> str:
@@ -92,7 +84,7 @@ def _book_line(report: Optional[Dict[str, object]]) -> Optional[str]:
 def format_activity(pass_result: Dict[str, object], report: Optional[Dict[str, object]] = None,
                     *, max_lines: int = 8, live_bankroll: Optional[float] = None,
                     kelly_frac: float = 0.25, max_frac: float = 0.0, currency: str = "$",
-                    hot_frac: float = 0.10) -> Optional[str]:
+                    hot_frac: float = 0.10, book_scale: float = 1.0) -> Optional[str]:
     """Render a paper trade-pass summary for Telegram, or None if nothing happened.
 
     Each placement renders as a BUY instruction ready to mirror manually on the A1
@@ -115,10 +107,13 @@ def format_activity(pass_result: Dict[str, object], report: Optional[Dict[str, o
     if book:
         lines.append(book)
     klabel = "¼-Kelly" if abs(kelly_frac - 0.25) < 1e-9 else ("%g×Kelly" % kelly_frac)
+    scaled = live_bankroll is not None and book_scale < 0.999
     if placed:
         if live_bankroll is not None:
-            lines.append("▶ *BUY on A1 Polymarket* — %s on %s bankroll:" % (
-                klabel, _money(currency, live_bankroll)))
+            hdr = "▶ *BUY on A1 Polymarket* — %s on %s bankroll" % (
+                klabel, _money(currency, live_bankroll))
+            hdr += (" (book-scaled ×%.2f to fit cap):" % book_scale) if scaled else ":"
+            lines.append(hdr)
         else:
             lines.append("▶ *BUY on A1 Polymarket:*")
     for p in placed[:max_lines]:
@@ -131,9 +126,12 @@ def format_activity(pass_result: Dict[str, object], report: Optional[Dict[str, o
                 _cents(price), _cents(p.get("model")), _pct(p.get("edge", 0))))
             s = live_sizing(p.get("model"), price, live_bankroll,
                             kelly_frac=kelly_frac, max_frac=max_frac)
-            tag = "capped" if s["capped"] else ("⚠ hot" if s["frac"] >= hot_frac else klabel)
+            stake = float(s["stake"]) * book_scale
+            frac = float(s["frac"]) * book_scale
+            base_tag = "capped" if s["capped"] else ("⚠ hot" if s["frac"] >= hot_frac else klabel)
+            tag = (base_tag + " · book-scaled") if scaled else base_tag
             lines.append("    *stake %s* · %.1f%% of bankroll (%s)" % (
-                _money(currency, s["stake"]), 100.0 * float(s["frac"]), tag))
+                _money(currency, stake), 100.0 * frac, tag))
         else:
             stake = float(p.get("stake", 0) or 0)
             lines.append("    @ %s ask · fair %s · edge %s · $%.0f (%.0f sh)" % (
@@ -142,8 +140,12 @@ def format_activity(pass_result: Dict[str, object], report: Optional[Dict[str, o
     if n > max_lines:
         lines.append("  …and %d more (see `report`)" % (n - max_lines))
     if live_bankroll is not None and placed:
-        lines.append("_%s of a £3,000±realised bankroll at $1.33=£1 (USD); "
-                     "per-bet, not whole-book correlation-adjusted._" % klabel)
+        caps = []
+        if max_frac:
+            caps.append("%.0f%%/bet" % (100 * max_frac))
+        caps.append("75% whole-book")
+        lines.append("_%s (%s) of a £3,000±realised bankroll at $1.33=£1 (USD)._"
+                     % (klabel, ", ".join(caps)))
     return "\n".join(lines)
 
 

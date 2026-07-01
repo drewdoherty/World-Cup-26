@@ -73,7 +73,17 @@ def test_format_activity_live_bankroll_flags_hot_and_caps():
     hot = notify.format_activity(res, live_bankroll=3990.0)
     assert "⚠ hot" in hot
     capped = notify.format_activity(res, live_bankroll=3990.0, max_frac=0.02)
-    assert "capped" in capped and "stake $80" in capped   # 2% of $3,990
+    assert "capped" in capped and "stake $80" in capped
+
+
+def test_format_activity_book_scale_shrinks_and_flags():
+    res = {"n_placed": 1, "candidates": 4, "placed": [
+        {"basis": "advance", "fixture": "Belgium", "selection": "Belgium to reach QF",
+         "price": 0.32, "model": 0.48, "edge": 0.16, "stake": 40.0}]}
+    # 5.88% ¼-Kelly of $3,990 = $235; ×0.5 book scale -> ~$117 and a scaled note.
+    msg = notify.format_activity(res, live_bankroll=3990.0, book_scale=0.5)
+    assert "book-scaled ×0.50" in msg
+    assert "stake $117" in msg and "book-scaled" in msg   # 2% of $3,990
 
 
 def test_format_exits_explains_what_and_why():
