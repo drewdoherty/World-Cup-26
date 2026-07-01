@@ -459,19 +459,93 @@
     if (msgEl) msgEl.textContent = msg || "BET RECS FEED UNAVAILABLE";
   }
 
+  function hideNoData() {
+    var el = $("arb-nodata");
+    if (el) el.hidden = true;
+  }
+
+  // Run one render sub-section in isolation. A failure in a single section
+  // must NOT blank the whole page or trip the hard "feed unavailable" error —
+  // the fetch/parse already succeeded. Log and continue.
+  function safeRender(name, fn) {
+    try {
+      fn();
+    } catch (err) {
+      if (typeof console !== "undefined" && console.error) {
+        console.error("[arb] render section failed: " + name, err);
+      }
+    }
+  }
+
+  // Lazily create the subtle staleness note element (not present in the
+  // static HTML). Inserted right after the hard error banner so both share
+  // the same page region, but styled distinctly (muted/amber, not red).
+  function ensureStaleEl() {
+    var el = $("arb-stale");
+    if (el) return el;
+    var anchor = $("arb-nodata");
+    if (!anchor || !anchor.parentNode) return null;
+    el = document.createElement("div");
+    el.id = "arb-stale";
+    el.className = "arb-stale";
+    el.hidden = true;
+    // Deliberately understated: an advisory note, never an alarm.
+    el.style.cssText =
+      "font-size:10px;letter-spacing:.04em;color:var(--ll-warn);" +
+      "padding:2px 12px;opacity:.85;";
+    anchor.parentNode.insertBefore(el, anchor.nextSibling);
+    return el;
+  }
+
+  // Honest staleness note, distinct from the hard "unavailable" error.
+  // Derives freshness solely from the feed's own "generated" timestamp — no
+  // fabrication. Shows nothing if the timestamp is missing/unparseable.
+  function renderStaleness(data) {
+    var el = ensureStaleEl();
+    if (!el) return;
+    var gen = (data.meta || {}).generated;
+    var genMs = gen ? Date.parse(String(gen).replace(" UTC", "Z").replace(" ", "T")) : NaN;
+    if (isNaN(genMs)) {
+      // Cannot compute freshness honestly — say nothing rather than guess.
+      el.hidden = true;
+      el.textContent = "";
+      return;
+    }
+    var ageSecs = Math.max(0, Math.round((Date.now() - genMs) / 1000));
+    var label = ageFmt(ageSecs);
+    el.textContent = "feed " + label + " old";
+    // Only surface the note once the feed is genuinely getting stale (>2h).
+    var STALE_THRESH_SECS = 7200;
+    if (ageSecs > STALE_THRESH_SECS) {
+      el.classList.add("stale");
+      el.hidden = false;
+    } else {
+      el.classList.remove("stale");
+      el.hidden = true;
+    }
+  }
+
   function load() {
     fetchJson("./bet_recs.json")
       .then(function (data) {
+        // Fetch + JSON parse succeeded: this is a good feed. Guarantee the
+        // hard error banner is hidden regardless of any per-section hiccup.
+        hideNoData();
         _recs = data;
-        renderKpis(data);
-        renderSingles(data.match_singles || []);
-        renderProps(data.event_props || []);
-        renderAdv(data.advancement_futures || []);
-        renderArbs(data.guaranteed_arbs || []);
-        renderWithheld(data.withheld || []);
-        renderFooter(data);
+        safeRender("kpis", function () { renderKpis(data); });
+        safeRender("singles", function () { renderSingles(data.match_singles || []); });
+        safeRender("props", function () { renderProps(data.event_props || []); });
+        safeRender("adv", function () { renderAdv(data.advancement_futures || []); });
+        safeRender("arbs", function () { renderArbs(data.guaranteed_arbs || []); });
+        safeRender("withheld", function () { renderWithheld(data.withheld || []); });
+        safeRender("footer", function () { renderFooter(data); });
+        safeRender("staleness", function () { renderStaleness(data); });
       })
-      .catch(function () {
+      .catch(function (err) {
+        // Only a genuine fetch/parse failure reaches here.
+        if (typeof console !== "undefined" && console.error) {
+          console.error("[arb] feed fetch/parse failed", err);
+        }
         showNoData("BET RECS FEED UNAVAILABLE — run wca_betrecs.py to regenerate");
       });
   }

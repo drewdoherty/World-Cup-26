@@ -1,6 +1,6 @@
 name: Publish Site (Turso)
 
-# Cloud publish of the public site feeds, twice per hour, independent of the
+# Cloud publish of the public site feeds, every 15 minutes, independent of the
 # Mac mini. This job is READ-ONLY with respect to state: it only regenerates
 # site/*.json from the shared Turso (libSQL) database and commits the changed
 # feeds. It does NOT call the odds API and does NOT write to the ledger.
@@ -13,8 +13,8 @@ name: Publish Site (Turso)
 
 on:
   schedule:
-    # Every 30 minutes (top and half past the hour).
-    - cron: "0,30 * * * *"
+    # Every 15 minutes.
+    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 # Serialize with the other feeds-to-main jobs and with itself so two publishes
@@ -89,6 +89,7 @@ jobs:
           python -c "from wca.exposure_dashboard import publish_dashboard_json; publish_dashboard_json('data/wca.db')" >/dev/null 2>&1 || true
           python scripts/wca_advancement_history.py >/dev/null 2>&1 || true
           python scripts/wca_advancement_data.py    >/dev/null 2>&1 || true
+          python scripts/wca_betrecs.py             >/dev/null 2>&1 || true
 
       # Commit ONLY the regenerated site feeds. Author AND committer must be this
       # exact GitHub-linked no-reply address or Vercel rejects the deploy.
@@ -104,10 +105,11 @@ jobs:
           git config user.email "132697109+drewdoherty@users.noreply.github.com"
           git add site/data.json site/linemove.json site/scores_data.json site/forest_data.json \
                   site/tracking_data.json site/exposure_data.json site/exposure_dashboard.json \
-                  site/advancement_history.json site/advancement_data.json
+                  site/advancement_history.json site/advancement_data.json \
+                  site/bet_recs.json
           # Empty diff must not error — commit + push only when something changed.
           git diff --cached --quiet || (
-            git commit -m "chore(site): 2x/hour cloud publish from Turso [skip ci]" &&
+            git commit -m "chore(site): 15-min cloud publish from Turso [skip ci]" &&
             for i in 1 2 3; do
               git pull --rebase -X theirs origin main && git push origin main && break
               sleep $((i * 10))

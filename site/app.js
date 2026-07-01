@@ -229,6 +229,9 @@
   // ---- renderers ----------------------------------------------------------
 
   function renderTicker(d) {
+    // The KPI ticker only lives on the Bets page; when app.js is loaded on a
+    // page without the ticker container (e.g. Under The Hood) skip silently.
+    if (!$("ticker-stats")) return;
     var t = d.totals || {};
     var byCcy = d.totals_by_currency || null;
     var clv = d.clv || {};
@@ -391,6 +394,9 @@
   }
 
   function renderVenues(d) {
+    // Panel container may be absent (moved to a different page); guard so the
+    // shared renderer never throws when loaded where #venues does not exist.
+    if (!$("venues")) return;
     var venues = d.venues || {};
     // When the data layer splits sportsbook by account it emits sportsbook_1 /
     // sportsbook_2 (each with a .label) and drops the combined "sportsbook"
@@ -512,6 +518,7 @@
   }
 
   function renderPositions(d) {
+    if (!$("positions")) return;
     var all = d.positions || [];
     var pos = posFilter.open === "today" ? all.filter(function (p) { return isToday(p.ts_utc); }) : all;
     if (!pos.length) {
@@ -573,6 +580,7 @@
   }
 
   function renderPredictions(d) {
+    if (!$("predictions")) return;
     var preds = d.predictions || [];
     if (!preds.length) {
       $("predictions").innerHTML = '<div class="empty">No fixture predictions</div>';
@@ -628,6 +636,7 @@
   }
 
   function renderFooter(d) {
+    if (!$("foot-gen")) return;
     var gen = (d.meta && d.meta.generated) ? d.meta.generated : "";
     $("foot-gen").textContent = gen ? ("Generated " + gen) : "Generated —";
   }
@@ -1164,7 +1173,9 @@
 
   function showNoData(msg) {
     var el = $("nodata");
-    $("nodata-msg").textContent = msg || "NO DATA FEED";
+    if (!el) return;
+    var m = $("nodata-msg");
+    if (m) m.textContent = msg || "NO DATA FEED";
     el.hidden = false;
   }
 

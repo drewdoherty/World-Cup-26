@@ -23,9 +23,16 @@
       <span class="scores-nav-here">Under The Hood</span>
       <a class="scores-nav-link" href="./promos.html">Promos &amp; Offers</a>
       <a class="scores-nav-link" href="./arb.html">Bet Recs</a>
+      <a class="scores-nav-link" href="./microstructure.html">Microstructure</a>
       <a class="scores-nav-link" href="./benchmarks.html">Benchmarks</a>
     </nav>
   </header>
+
+  <!-- Connection / no-data banner (shared by app.js + tracking.js) -->
+  <div class="nodata" id="nodata" hidden>
+    <span class="nodata-dot"></span>
+    <span id="nodata-msg">NO DATA FEED</span>
+  </div>
 
   <main>
     <!-- Intro / one-line mental model -->
@@ -69,6 +76,168 @@
       </div>
       <div class="panel-body" id="improve"></div>
     </section>
+
+    <!-- ================================================================= -->
+    <!-- Live analytics (moved from the Bets page). These populate from the  -->
+    <!-- real ledger via app.js (data.json / exposure_dashboard.json) and    -->
+    <!-- tracking.js (tracking_data.json), both loaded at the foot of page.  -->
+    <!-- ================================================================= -->
+    <section class="panel arch-analytics-head">
+      <div class="panel-head">
+        <span class="panel-label">Live Analytics // Book, Model &amp; Results</span>
+        <span class="panel-meta">from the ledger</span>
+      </div>
+    </section>
+
+    <!-- Risk & Blind Spots -->
+    <section class="panel panel-exposure">
+      <div class="panel-head"><span class="panel-label">⚠️ Risk &amp; Blind Spots // Portfolio Exposure</span><span class="panel-meta" id="exposure-meta"></span></div>
+      <div class="panel-body" id="exposure">
+        <div class="exposure-grid" id="exposure-grid">
+          <div class="exposure-card"><div class="exposure-label">EV (SLATE)</div><div class="exposure-value" id="exp-ev">—</div></div>
+          <div class="exposure-card"><div class="exposure-label">BEST CASE</div><div class="exposure-value exp-positive" id="exp-best">—</div></div>
+          <div class="exposure-card"><div class="exposure-label">WORST CASE</div><div class="exposure-value exp-negative" id="exp-worst">—</div></div>
+          <div class="exposure-card"><div class="exposure-label">P(PROFIT)</div><div class="exposure-value" id="exp-pprofit">—</div></div>
+          <div class="exposure-card"><div class="exposure-label">P(LOSS)</div><div class="exposure-value" id="exp-ploss">—</div></div>
+          <div class="exposure-card"><div class="exposure-label">P(WIN > £50)</div><div class="exposure-value" id="exp-pwin50">—</div></div>
+        </div>
+        <div id="exposure-detail"></div>
+      </div>
+    </section>
+
+    <!-- Venues + Predictions side by side (both breathe at desktop width) -->
+    <div class="arch-cols-2">
+      <section class="panel panel-venues">
+        <div class="panel-head"><span class="panel-label">💰 Venues</span><span class="panel-meta" id="venues-meta"></span></div>
+        <div class="panel-body" id="venues"></div>
+      </section>
+
+      <section class="panel panel-predictions">
+        <div class="panel-head"><span class="panel-label">🔮 Predictions // Scorelines</span><span class="panel-meta" id="predictions-meta"></span></div>
+        <div class="panel-body" id="predictions"></div>
+      </section>
+    </div>
+
+    <!-- Closed positions (full-width, mirrors the open table + P&L) -->
+    <section class="panel panel-positions panel-closed">
+      <div class="panel-head">
+        <span class="panel-label">🏁 Positions // Closed</span>
+        <div class="pos-toggle" id="pos-closed-toggle">
+          <button class="pos-tog active" data-panel="closed" data-filter="all">All</button>
+          <button class="pos-tog" data-panel="closed" data-filter="today">Today</button>
+        </div>
+        <span class="panel-meta" id="positions-closed-meta"></span>
+      </div>
+      <div class="panel-body panel-scroll" id="positions-closed"></div>
+    </section>
+
+    <!-- Charts (full-width) -->
+    <section class="panel panel-charts">
+      <div class="panel-head"><span class="panel-label">📈 Charts // Market &amp; Book</span><span class="panel-meta" id="charts-meta"></span></div>
+      <div class="panel-body" id="charts">
+        <div class="chart-block" id="chart-linemove">
+          <div class="chart-head">
+            <span class="chart-title">Line Movement // Implied Probability</span>
+            <select class="chart-select" id="linemove-select" aria-label="Fixture"></select>
+          </div>
+          <div class="chart-canvas" id="linemove-canvas"></div>
+        </div>
+        <div class="chart-block" id="chart-pnl">
+          <div class="chart-head">
+            <span class="chart-title">P&amp;L // Realized (Sportsbook £ vs Prediction Markets $)</span>
+          </div>
+          <div class="chart-canvas" id="pnl-canvas"></div>
+        </div>
+        <div class="chart-block" id="chart-cumstake">
+          <div class="chart-head">
+            <span class="chart-title">Cumulative Staked // By Currency</span>
+          </div>
+          <div class="chart-canvas" id="cumstake-canvas"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Prediction Tracking (from tracking.js) ========= -->
+    <section class="panel" style="margin-top:14px">
+      <div class="panel-head">
+        <span class="panel-label">Tracking // Prediction Tracking — Model vs Reality</span>
+        <span class="panel-meta" id="stats-meta"></span>
+      </div>
+      <div class="track-stats" id="stats"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">01 // Model vs Market On The Actual Outcome</span>
+        <span class="panel-meta">edge by Match No. &mdash; bar up/green = model beat the close; hover for standings &amp; scorelines</span>
+      </div>
+      <div class="panel-body" id="outcome-bars"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">02 // Prediction Scoreboard</span>
+        <span class="panel-meta" id="board-meta"></span>
+      </div>
+      <div class="panel-body panel-scroll" id="scoreboard"></div>
+    </section>
+
+    <div class="track-grid">
+      <section class="panel">
+        <div class="panel-head">
+          <span class="panel-label">03 // Calibration (1X2 Legs)</span>
+          <span class="panel-meta">bins come later as N grows</span>
+        </div>
+        <div class="panel-body" id="calibration"></div>
+      </section>
+      <section class="panel">
+        <div class="panel-head">
+          <span class="panel-label">04 // CLV vs P/L (Settled Bets)</span>
+          <span class="panel-meta" id="clv-meta"></span>
+        </div>
+        <div class="panel-body" id="clv-pl"></div>
+      </section>
+    </div>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">05 // P&amp;L by Bet — Model EV &amp; by Source</span>
+        <span class="panel-meta" id="betpnl-meta"></span>
+      </div>
+      <div class="panel-body" id="betpnl"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">06 // Return per &pound;1 / $1 Staked</span>
+        <span class="panel-meta" id="retunit-meta"></span>
+      </div>
+      <div class="panel-body" id="retunit"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">07 // Realized Conviction vs The Market</span>
+        <span class="panel-meta" id="conviction-meta"></span>
+      </div>
+      <div class="panel-body" id="conviction"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">On The Board // Awaiting Results</span>
+        <span class="panel-meta" id="pending-meta"></span>
+      </div>
+      <div class="panel-body panel-scroll" id="pending"></div>
+    </section>
+
+    <div class="track-note">
+      Pre-match predictions reconstructed from daily card history; results updated
+      as matches settle. Model 1X2 uses the exact blended triple persisted at
+      card-build time where available (from 13 Jun); earlier fixtures are
+      approximate (rebuilt from the top-6 scoreline ladder). Market 1X2 is the
+      de-vigged consensus at the last odds capture before kickoff.
+    </div>
   </main>
 
   <footer class="foot">
@@ -77,5 +246,11 @@
   </footer>
 </div>
 <script src="./architecture.js"></script>
+<!-- Shared ledger renderers: app.js populates exposure/venues/predictions/
+     closed-positions/charts; tracking.js populates the prediction-tracking
+     panels. Both null-guard every container, so they no-op for whatever is
+     absent on this page (e.g. the KPI ticker + open positions live on Bets). -->
+<script src="./app.js"></script>
+<script src="./tracking.js"></script>
 </body>
 </html>

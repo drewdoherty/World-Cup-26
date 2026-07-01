@@ -190,6 +190,37 @@ body {
 .panel-predictions { grid-area: predictions; }
 .panel-charts { grid-area: charts; }
 
+/* --- Bets page (index): KPI ticker + the single Open Positions table. ---
+   A plain vertical stack — the dense table always gets full page width so it
+   never squishes. Everything else was moved to Under The Hood. */
+.bets-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+}
+.bets-note {
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  color: var(--muted);
+  padding: 2px 2px 4px;
+}
+.bets-note a { color: var(--accent); text-decoration: none; }
+.bets-note a:hover { text-decoration: underline; }
+
+/* --- Under The Hood analytics: full-width stack with a couple of paired
+   rows. The two-up row uses a min track wide enough that neither Venues nor
+   Predictions ever collapses to a squished sliver; below ~880px it wraps to a
+   single column so nothing overlaps. When app.js is not on a page these rules
+   simply go unused. */
+.arch-analytics-head { margin-top: 18px; }
+.arch-analytics-head .panel-head { border-bottom: none; }
+.arch-cols-2 {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
 .panel {
   background:
     linear-gradient(180deg, var(--panel-2), var(--panel));
@@ -1311,7 +1342,10 @@ body {
 
 main > .panel + .panel,
 main > .track-grid,
-main > .track-grid + .panel { margin-top: 12px; }
+main > .track-grid + .panel,
+main > .arch-cols-2,
+main > .arch-cols-2 + .panel,
+main > .panel + .arch-cols-2 { margin-top: 12px; }
 
 /* Headline stat tiles (reuse the ticker's label/value type scale). */
 .track-stats {

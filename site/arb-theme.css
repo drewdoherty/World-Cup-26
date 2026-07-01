@@ -452,6 +452,9 @@ html, body {
   border-radius: 6px;
   margin: 14px 0;
 }
+/* the `hidden` attribute must win over the flex display above, else the banner
+   stays visible even when the feed loads fine. */
+.arb-nodata[hidden] { display: none !important; }
 .arb-nodata-dot {
   width: 7px; height: 7px;
   border-radius: 50%;

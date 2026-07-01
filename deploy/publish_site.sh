@@ -23,6 +23,7 @@ stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 # (a cached run is ~10s; a re-sim ~3 min, dominated by the Elo+DC fit), so this is
 # cheap on most hourly runs. Live Polymarket prices + group standings refresh every run.
 "$PY" scripts/wca_advancement_data.py >/dev/null 2>&1 || true
+"$PY" scripts/wca_betrecs.py       >/dev/null 2>&1 || true
 
 # 2. stage the site feed + the cached cards; bail if nothing changed.
 #    card_latest.md / next_latest.md / model_predictions.json are committed here so
@@ -31,6 +32,7 @@ stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 #    the exact model 1X2 used by scores/exposure).
 git add site/data.json site/linemove.json site/scores_data.json site/forest_data.json site/tracking_data.json \
         site/exposure_data.json site/exposure_dashboard.json site/advancement_history.json site/advancement_data.json \
+        site/bet_recs.json \
         data/card_latest.md data/next_latest.md data/model_predictions.json \
         data/advancement_current_vs_pretournament.json
 if git diff --cached --quiet; then

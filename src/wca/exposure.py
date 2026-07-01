@@ -43,6 +43,38 @@ BLINDSPOT_NET_FLOOR = 0.50
 _RESULT_MARKETS = {"Full-time result", "Match Odds", "Match Winner", "h2h"}
 # Team-name aliases seen in bet descriptions vs the model fixture spelling.
 _ALIAS = {"Türkiye": "Turkey", "Turkiye": "Turkey", "Korea Republic": "South Korea"}
+# Platforms whose stakes / returns are denominated in USD; everything else GBP.
+_USD_PLATFORMS = {"polymarket"}
+
+
+def _currency_for(platform: Any) -> str:
+    return "USD" if str(platform or "").strip().lower() in _USD_PLATFORMS else "GBP"
+
+
+def _implied_prob(bet: Dict[str, Any]) -> Optional[float]:
+    """A settlement probability for an off-slate binary bet.
+
+    Prefer the persisted ``model_prob``; otherwise fall back to the market-implied
+    probability ``1 / decimal_odds`` (no de-vig data is available at this layer,
+    so this is a conservative single-side implied price, not a fair probability).
+    Returns ``None`` when neither is usable, so the caller can honestly exclude
+    the bet from probability-weighted metrics rather than inventing one.
+    """
+    mp = bet.get("model_prob")
+    try:
+        if mp is not None:
+            mp = float(mp)
+            if 0.0 < mp < 1.0:
+                return mp
+    except (TypeError, ValueError):
+        pass
+    try:
+        odds = float(bet.get("decimal_odds"))
+    except (TypeError, ValueError):
+        return None
+    if odds > 1.0:
+        return 1.0 / odds
+    return None
 
 
 def _team_key(name: str) -> str:
@@ -247,6 +279,8 @@ def build_exposure_data(
                 "type": market, "selection": b.get("selection"),
                 "stake": float(b["stake"]), "profit": _profit(b),
                 "free": _is_free(b), "odds": float(b["decimal_odds"]),
+                "currency": _currency_for(b.get("platform")),
+                "prob": _implied_prob(b),
             }
             if fx is None:
                 rec["match"] = md
@@ -269,7 +303,13 @@ def build_exposure_data(
                           has_bets=fx in fixtures_with_bets)
         for fx in slate
     ]
-    portfolio, correlation = _portfolio_scenarios(slate, result_bets, acca_bets)
+    # Off-slate independent positions (Polymarket binaries, player-prop trebles,
+    # outrights) carry real best/worst exposure but do NOT settle on the 1X2
+    # slate, so the scenario engine folds them in as independent win/lose
+    # branches rather than dropping them (which zeroed the whole portfolio).
+    off_slate_indep = event_bets.get("(off-slate)", [])
+    portfolio, correlation = _portfolio_scenarios(
+        slate, result_bets, acca_bets, off_slate_indep)
     blindspots = _collect_blindspots(fixtures_out)
     correlated = _correlated_exposure(slate, result_bets, event_bets, bankroll)
 
@@ -439,38 +479,109 @@ def _plug_for(fx, outcome, prob, fx_odds):
             "ev_pct": round(ev * 100, 1), "recommendation": rec}
 
 
-def _portfolio_scenarios(slate, result_bets, acca_bets):
-    """Joint result-scenario P&L distribution over the slate."""
+def _indep_bounds(bets):
+    """Loose best/worst P&L bounds for a bag of independent bets (one currency).
+
+    best: every bet wins -> sum of profits.
+    worst: every real-money bet loses -> minus sum of stakes (free bets cost £0).
+    """
+    best = sum(b["profit"] for b in bets)
+    worst = -sum(b["stake"] for b in bets if not b.get("free"))
+    return best, worst
+
+
+def _convolve_bernoulli(dist, prob, win_pnl, lose_pnl):
+    """Convolve a P&L distribution (list of (p, pnl)) with one independent bet.
+
+    The bet wins (``win_pnl``) with probability ``prob`` and loses
+    (``lose_pnl``) otherwise; each existing state splits into its two branches.
+    """
+    out = []
+    for p, pnl in dist:
+        out.append((p * prob, pnl + win_pnl))
+        out.append((p * (1.0 - prob), pnl + lose_pnl))
+    return out
+
+
+def _portfolio_scenarios(slate, result_bets, acca_bets, off_slate_indep=None):
+    """Joint result-scenario P&L distribution over the slate.
+
+    Off-slate independent positions (``off_slate_indep`` — Polymarket binaries,
+    prop trebles, outrights that do not settle on the 1X2 slate) are folded into
+    the **GBP** headline distribution as independent win/lose branches so the
+    portfolio ev/best/worst/p_profit reflect the real open book instead of a
+    fabricated all-zero when no bet maps onto the slate. USD-denominated
+    positions are kept currency-coherent in a separate ``usd`` sub-block (never
+    summed into the GBP headline). Independent bets with no usable settlement
+    probability still move best/worst (loose bounds) but are excluded from the
+    probability-weighted distribution honestly.
+    """
+    off_slate_indep = off_slate_indep or []
+    gbp_indep = [b for b in off_slate_indep if b.get("currency") == "GBP"]
+    usd_indep = [b for b in off_slate_indep if b.get("currency") == "USD"]
+
     fxs = list(slate.keys())
-    if not fxs:
+    # Base GBP P&L distribution from the 1X2 slate (empty slate -> a single
+    # zero-P&L state so off-slate GBP bets can still be folded in).
+    if fxs:
+        scns = []
+        for combo in itertools.product(
+                *[[slate[f]["home"], "Draw", slate[f]["away"]] for f in fxs]):
+            sel = dict(zip(fxs, combo))
+            p = 1.0
+            for f in fxs:
+                p *= (slate[f]["p"].get(sel[f]) or 0.0)
+            pnl = 0.0
+            for rb in result_bets:
+                if sel[rb["fx"]] == rb["sel"]:
+                    pnl += rb["profit"]
+                elif not rb["free"]:
+                    pnl -= rb["stake"]
+            for ab in acca_bets:
+                if ab["off"]:
+                    continue
+                if all(sel[f] == s for (f, s) in ab["legs"]):
+                    pnl += ab["profit"]
+            scns.append((p, pnl, sel))
+    else:
+        scns = [(1.0, 0.0, {})]
+
+    n_slate_scns = len(scns)
+
+    # Fold GBP off-slate bets that carry a settlement probability into the joint
+    # distribution as independent Bernoulli branches.
+    gbp_priced = [b for b in gbp_indep if b.get("prob") is not None]
+    gbp_unpriced = [b for b in gbp_indep if b.get("prob") is None]
+    dist = [(p, pnl) for p, pnl, _ in scns]
+    for b in gbp_priced:
+        win = b["profit"]
+        lose = 0.0 if b.get("free") else -b["stake"]
+        dist = _convolve_bernoulli(dist, float(b["prob"]), win, lose)
+    # Unpriced GBP bets can't enter the probability distribution honestly, but
+    # their guaranteed-best (all-win) leg still shifts realistically-reachable
+    # P&L; add their summed profit as a deterministic offset only to the best/
+    # worst bounds (handled above), leaving the distribution probability-clean.
+
+    if not fxs and not gbp_priced and not gbp_indep and not usd_indep:
         return ({"ev": 0.0, "best": 0.0, "worst": 0.0, "p_profit": 0.0,
-                 "p_loss": 0.0, "p_big_win": 0.0, "n_scenarios": 0},
+                 "p_loss": 0.0, "p_big_win": 0.0, "n_scenarios": 0,
+                 "usd": {"ev": 0.0, "best": 0.0, "worst": 0.0,
+                         "p_profit": 0.0, "p_loss": 0.0, "n_bets": 0}},
                 {"worst_states": [], "narrative": "no upcoming fixtures"})
-    scns = []
-    for combo in itertools.product(
-            *[[slate[f]["home"], "Draw", slate[f]["away"]] for f in fxs]):
-        sel = dict(zip(fxs, combo))
-        p = 1.0
-        for f in fxs:
-            p *= (slate[f]["p"].get(sel[f]) or 0.0)
-        pnl = 0.0
-        for rb in result_bets:
-            if sel[rb["fx"]] == rb["sel"]:
-                pnl += rb["profit"]
-            elif not rb["free"]:
-                pnl -= rb["stake"]
-        for ab in acca_bets:
-            if ab["off"]:
-                continue
-            if all(sel[f] == s for (f, s) in ab["legs"]):
-                pnl += ab["profit"]
-        scns.append((p, pnl, sel))
-    ev = sum(p * pnl for p, pnl, _ in scns)
-    best = max(pnl for _, pnl, _ in scns)
-    worst = min(pnl for _, pnl, _ in scns)
-    p_profit = sum(p for p, pnl, _ in scns if pnl > 0.5)
-    p_loss = sum(p for p, pnl, _ in scns if pnl < -0.5)
-    p_big = sum(p for p, pnl, _ in scns if pnl >= 50)
+
+    ev = sum(p * pnl for p, pnl in dist)
+    dist_best = max(pnl for _, pnl in dist)
+    dist_worst = min(pnl for _, pnl in dist)
+    # Headline best/worst: the priced bets are already in ``dist``; add the
+    # unpriced GBP bets' deterministic all-win (best) / all-lose (worst) offsets.
+    unpriced_best = sum(b["profit"] for b in gbp_unpriced)
+    unpriced_worst = -sum(b["stake"] for b in gbp_unpriced if not b.get("free"))
+    best = dist_best + unpriced_best
+    worst = dist_worst + unpriced_worst
+    p_profit = sum(p for p, pnl in dist if pnl > 0.5)
+    p_loss = sum(p for p, pnl in dist if pnl < -0.5)
+    p_big = sum(p for p, pnl in dist if pnl >= 50)
+
     worst_states = [
         {"pnl": round(pnl, 2), "prob": round(p, 4),
          "results": [sel[f] for f in fxs]}
@@ -481,17 +592,60 @@ def _portfolio_scenarios(slate, result_bets, acca_bets):
          "results": [sel[f] for f in fxs]}
         for p, pnl, sel in sorted(scns, key=lambda x: -x[1])[:3]
     ]
-    # upside concentration: how much of the win-probability rides the favourites
-    narrative = (
-        "Upside is concentrated: the biggest payouts (£%.0f best case) need the "
-        "favourites to land together, while %.0f%% of result-states leave the "
-        "book down. Downside is driven by the real-money singles, not the free "
-        "accas." % (best, p_loss * 100)
-    )
+
+    # USD book (Polymarket): kept separate so currencies are never summed.
+    usd_best, usd_worst = _indep_bounds(usd_indep)
+    usd_priced = [b for b in usd_indep if b.get("prob") is not None]
+    usd_ev = 0.0
+    for b in usd_priced:
+        win = b["profit"]
+        lose = 0.0 if b.get("free") else -b["stake"]
+        pr = float(b["prob"])
+        usd_ev += pr * win + (1.0 - pr) * lose
+    # P(profit)/P(loss) for the USD sub-book from its independent Bernoullis.
+    usd_dist = [(1.0, 0.0)]
+    for b in usd_priced:
+        win = b["profit"]
+        lose = 0.0 if b.get("free") else -b["stake"]
+        usd_dist = _convolve_bernoulli(usd_dist, float(b["prob"]), win, lose)
+    usd_p_profit = sum(p for p, pnl in usd_dist if pnl > 0.005)
+    usd_p_loss = sum(p for p, pnl in usd_dist if pnl < -0.005)
+    usd_block = {
+        "ev": round(usd_ev, 2), "best": round(usd_best, 2),
+        "worst": round(usd_worst, 2),
+        "p_profit": round(usd_p_profit, 4) if usd_priced else None,
+        "p_loss": round(usd_p_loss, 4) if usd_priced else None,
+        "n_bets": len(usd_indep),
+    }
+
+    # Narrative reflects whichever book carries the exposure.
+    if fxs and (result_bets or [a for a in acca_bets if not a["off"]]):
+        narrative = (
+            "Upside is concentrated: the biggest payouts (£%.0f best case) need "
+            "the favourites to land together, while %.0f%% of result-states leave "
+            "the book down. Downside is driven by the real-money singles, not the "
+            "free accas." % (best, p_loss * 100)
+        )
+    elif gbp_indep or usd_indep:
+        parts = []
+        if gbp_indep:
+            parts.append("£%.0f best / £%.0f worst on %d off-slate GBP position%s"
+                         % (best, worst, len(gbp_indep),
+                            "" if len(gbp_indep) == 1 else "s"))
+        if usd_indep:
+            parts.append("$%.0f best / $%.0f worst on %d Polymarket position%s"
+                         % (usd_best, usd_worst, len(usd_indep),
+                            "" if len(usd_indep) == 1 else "s"))
+        narrative = ("No open bets settle on the 1X2 slate; exposure is entirely "
+                     "off-slate: " + "; ".join(parts) + ".")
+    else:
+        narrative = "no upcoming fixtures"
+
     portfolio = {
         "ev": round(ev, 2), "best": round(best, 2), "worst": round(worst, 2),
         "p_profit": round(p_profit, 4), "p_loss": round(p_loss, 4),
-        "p_big_win": round(p_big, 4), "n_scenarios": len(scns),
+        "p_big_win": round(p_big, 4), "n_scenarios": n_slate_scns,
+        "usd": usd_block,
     }
     correlation = {"worst_states": worst_states, "best_states": big_states,
                    "narrative": narrative}
