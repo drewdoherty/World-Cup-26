@@ -1209,13 +1209,15 @@
 
   function render(d) {
     _lastData = d;
-    renderTicker(d);
-    renderVenues(d);
-    renderPositions(d);
-    renderClosedPositions(d);
-    renderPredictions(d);
-    renderCharts(d);
-    renderFooter(d);
+    // Isolate every panel so one bad renderer can't halt the rest and leave
+    // the page half-drawn (log and continue).
+    try { renderTicker(d); } catch (e) { console.error("renderTicker failed", e); }
+    try { renderVenues(d); } catch (e) { console.error("renderVenues failed", e); }
+    try { renderPositions(d); } catch (e) { console.error("renderPositions failed", e); }
+    try { renderClosedPositions(d); } catch (e) { console.error("renderClosedPositions failed", e); }
+    try { renderPredictions(d); } catch (e) { console.error("renderPredictions failed", e); }
+    try { renderCharts(d); } catch (e) { console.error("renderCharts failed", e); }
+    try { renderFooter(d); } catch (e) { console.error("renderFooter failed", e); }
   }
 
   function renderClosedPositions(d) {
