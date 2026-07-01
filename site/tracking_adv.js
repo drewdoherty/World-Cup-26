@@ -53,8 +53,8 @@
         active +
         '" data-bucket="' +
         key +
-        '" style="padding:6px 12px;border-radius:6px;border:1px solid #1d2731;background:#0a0e12;color:#cfe3d0;cursor:pointer;font-size:12px' +
-        (active ? ";border-color:#4fd6e0;color:#4fd6e0" : "") +
+        '" style="padding:6px 12px;border-radius:6px;border:1px solid #DCD3EE;background:#FFFFFF;color:#2A2440;cursor:pointer;font-size:12px' +
+        (active ? ";border-color:#6D4AD0;color:#6D4AD0" : "") +
         '">' +
         label +
         "</button>";
@@ -65,8 +65,8 @@
       btn.addEventListener("click", function () {
         renderBucket(this.dataset.bucket);
         document.querySelectorAll(".adv-bucket-chip").forEach(function (b) {
-          b.style.borderColor = b === btn ? "#4fd6e0" : "#1d2731";
-          b.style.color = b === btn ? "#4fd6e0" : "#cfe3d0";
+          b.style.borderColor = b === btn ? "#6D4AD0" : "#DCD3EE";
+          b.style.color = b === btn ? "#6D4AD0" : "#2A2440";
         });
       });
     });
@@ -111,9 +111,9 @@
       });
     });
 
-    var isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    var tick = isDark ? "#9bb0bd" : "#5f5e5a";
-    var grid = isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)";
+    // Site is a fixed light (lilac) theme regardless of OS preference.
+    var tick = "#6B6488";
+    var grid = "rgba(42,36,64,.10)";
 
     chart = new Chart(ctx, {
       type: "line",

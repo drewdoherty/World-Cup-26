@@ -298,7 +298,7 @@ function drawCalibration(D) {
   const scaleY = v => pad.top + (1 - v) * cH;
 
   // Grid & diagonal
-  ctx.strokeStyle = '#1e2126';
+  ctx.strokeStyle = '#DCD3EE';
   ctx.lineWidth = 1;
   for (let i = 0; i <= 4; i++) {
     const y = pad.top + (i / 4) * cH;
@@ -307,13 +307,13 @@ function drawCalibration(D) {
     ctx.beginPath(); ctx.moveTo(x, pad.top); ctx.lineTo(x, H - pad.bottom); ctx.stroke();
   }
   // Diagonal
-  ctx.strokeStyle = '#3a3f47';
+  ctx.strokeStyle = '#C8C3E4';
   ctx.setLineDash([4, 4]);
   ctx.beginPath(); ctx.moveTo(scaleX(0), scaleY(0)); ctx.lineTo(scaleX(1), scaleY(1)); ctx.stroke();
   ctx.setLineDash([]);
 
   // Axes labels
-  ctx.fillStyle = '#4a525c';
+  ctx.fillStyle = '#9390B2';
   ctx.font = '10px ui-monospace, monospace';
   ctx.textAlign = 'center';
   for (let v = 0; v <= 1; v += 0.25) {
@@ -326,8 +326,8 @@ function drawCalibration(D) {
 
   // Series
   const series = [
-    { data: D.calibration_bins.model, color: '#3fe08a' },
-    { data: D.calibration_bins.market, color: '#60a5fa' },
+    { data: D.calibration_bins.model, color: '#6D4AD0' },
+    { data: D.calibration_bins.market, color: '#2563B0' },
   ];
 
   series.forEach(({ data, color }) => {
@@ -376,22 +376,22 @@ function drawGoalsDist(D) {
     const bottom = H - pad.bottom;
 
     // WC2026
-    ctx.fillStyle = '#ff5c6c';
+    ctx.fillStyle = '#6D4AD0';
     ctx.fillRect(bx + 1, scaleY(actual[i]), each, bottom - scaleY(actual[i]));
 
     // WC2022
-    ctx.fillStyle = '#3fe08a';
+    ctx.fillStyle = '#9390B2';
     ctx.fillRect(bx + each + 3, scaleY(baseline[i]), each, bottom - scaleY(baseline[i]));
 
     // X label
-    ctx.fillStyle = '#4a525c';
+    ctx.fillStyle = '#9390B2';
     ctx.font = '10px ui-monospace, monospace';
     ctx.textAlign = 'center';
     ctx.fillText(x, bx + bw / 2, H - 8);
   });
 
   // Axis
-  ctx.strokeStyle = '#1e2126';
+  ctx.strokeStyle = '#DCD3EE';
   ctx.beginPath();
   ctx.moveTo(pad.left, H - pad.bottom);
   ctx.lineTo(W - pad.right, H - pad.bottom);

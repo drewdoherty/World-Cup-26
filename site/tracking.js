@@ -762,8 +762,8 @@
   // y-axis is in decimal currency per unit staked, break-even on the zero line.
   function retChartSVG(acc) {
     var series = [
-      { key: "sb", color: "#3fe08a", ccy: "£", label: "sportsbook (£)" },
-      { key: "pm", color: "#60a5fa", ccy: "$", label: "polymarket ($)" }
+      { key: "sb", color: "#2563B0", ccy: "£", label: "sportsbook (£)" },
+      { key: "pm", color: "#7A3FB0", ccy: "$", label: "polymarket ($)" }
     ];
     var all = [];
     series.forEach(function (s) { (acc[s.key].pts || []).forEach(function (p) { if (p.t != null) all.push(p); }); });
@@ -820,7 +820,7 @@
       var lab = s.label + " — " + (n ? n + " bets" : "0 settled");
       var yo = P.t + 2 + i * 14;
       out.push('<rect x="' + (P.l + 6) + '" y="' + yo + '" width="9" height="9" fill="' + s.color + '"/>' +
-        '<text x="' + (P.l + 19) + '" y="' + (yo + 9) + '" fill="#d4dae0" font-size="10">' + esc(lab) + '</text>');
+        '<text x="' + (P.l + 19) + '" y="' + (yo + 9) + '" fill="#2A2440" font-size="10">' + esc(lab) + '</text>');
     });
     out.push('</svg>');
     return out.join("");
@@ -893,7 +893,7 @@
   function convChartSVG(s) {
     var conv = s.conv, pl = s.pl;
     if (!conv.length) return '<div class="empty">No graded fixtures with market prices yet</div>';
-    var GREEN = "#3fe08a", RED = "#e0603f", AMBER = "#f2c14e";
+    var GREEN = "#1A7A4C", RED = "#C0273A", AMBER = "#9A6A00";
     var ts = [];
     conv.forEach(function (p) { if (p.t != null) ts.push(p.t); });
     pl.forEach(function (p) { if (p.t != null) ts.push(p.t); });
@@ -959,7 +959,7 @@
     [["model conviction (cum, pp)", GREEN], ["settled P/L (£)", AMBER]].forEach(function (L, i) {
       var yo = P.t + 2 + i * 14;
       out.push('<rect x="' + (P.l + 6) + '" y="' + yo + '" width="9" height="9" fill="' + L[1] + '"/>' +
-        '<text x="' + (P.l + 19) + '" y="' + (yo + 9) + '" fill="#d4dae0" font-size="10">' + esc(L[0]) + '</text>');
+        '<text x="' + (P.l + 19) + '" y="' + (yo + 9) + '" fill="#2A2440" font-size="10">' + esc(L[0]) + '</text>');
     });
     out.push('</svg>');
     return out.join("");
