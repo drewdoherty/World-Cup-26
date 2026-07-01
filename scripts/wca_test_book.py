@@ -37,6 +37,19 @@ OVER_KELLY_BAND = 0.5     # R2: trim when marked exposure > f_target*(1+band)
 SPREAD_CAP = 0.10         # R3: exit when bid-ask spread exceeds this
 MIN_DEPTH = 0.0           # R3: exit when best-bid depth below this (0 = off)
 
+# LIVE-money sizing shown on the @worldcupdevbot BUY lines (for manual A1 bets).
+# Bankroll = base ± the book's realised P&L; stake = LIVE_KELLY × Kelly × bankroll.
+# All overridable via env so the operator can retune without a code change.
+LIVE_BANKROLL_BASE = float(os.environ.get("WCA_TESTBOOK_LIVE_BANKROLL", "3000"))
+LIVE_KELLY = float(os.environ.get("WCA_TESTBOOK_LIVE_KELLY", "0.25"))   # ¼-Kelly
+LIVE_MAX_FRAC = float(os.environ.get("WCA_TESTBOOK_LIVE_MAXFRAC", "0"))  # 0 = uncapped
+LIVE_CCY = os.environ.get("WCA_TESTBOOK_LIVE_CCY", "£")
+
+
+def _live_bankroll(report):
+    """Latest live bankroll = base ± realised P&L to date."""
+    return LIVE_BANKROLL_BASE + float(report.get("realized_pl", 0.0) or 0.0)
+
 
 def _now():
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -69,17 +82,25 @@ def cmd_trade(args):
         con, model, events, ts_utc=_now(),
         edge_threshold=args.edge, kelly_mult=args.kelly,
         max_stake_frac=args.max_stake, min_volume=args.min_volume)
+    from wca.testbook import notify
+    rep = store.report(con)
+    bankroll = _live_bankroll(rep)
     print("Pass @ %s: %d candidates, placed %d, skipped %d | cash $%.2f deployed $%.2f"
           % (res["ts"], res["candidates"], res["n_placed"], res["skipped"],
              res["balance"], res["deployed"]))
+    print("Live bankroll %s%.0f (base %s%.0f %+0.0f realised) · %g×Kelly"
+          % (LIVE_CCY, bankroll, LIVE_CCY, LIVE_BANKROLL_BASE,
+             rep.get("realized_pl", 0.0), LIVE_KELLY))
     for p in res["placed"]:
-        print("  +[%s/%s] %-34s @ %.0f¢  model %.0f%%  edge %+.0f%%  $%.2f"
+        s = notify.live_sizing(p["model"], p["price"], bankroll,
+                               kelly_frac=LIVE_KELLY, max_frac=LIVE_MAX_FRAC)
+        print("  +[%s/%s] %-34s @ %.0f¢  fair %.0f%%  edge %+.0f%%  -> stake %s%.0f (%.1f%%)"
               % (p["basis"], p["market"], p["selection"][:34], p["price"] * 100,
-                 p["model"] * 100, p["edge"] * 100, p["stake"]))
+                 p["model"] * 100, p["edge"] * 100, LIVE_CCY, s["stake"], 100 * s["frac"]))
     # Ping the dev chat (@worldcupdevbot) with this pass's activity + P&L chart.
-    from wca.testbook import notify
-    rep = store.report(con)
-    if notify.send(notify.format_activity(res, rep)):
+    if notify.send(notify.format_activity(
+            res, rep, live_bankroll=bankroll, kelly_frac=LIVE_KELLY,
+            max_frac=LIVE_MAX_FRAC, currency=LIVE_CCY)):
         print("  (pinged @worldcupdevbot)")
         if _send_chart(con, rep):
             print("  (posted P&L chart)")
