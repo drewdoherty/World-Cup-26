@@ -421,10 +421,15 @@ def main() -> None:
         "Running %d-sim tournament (seed %d)%s…"
         % (args.n_sims, args.seed, (" [%s]" % ", ".join(flags)) if flags else "")
     )
-    from wca.advancement import load_played_group_results
+    from wca.advancement import (
+        load_played_group_results,
+        load_played_knockout_results,
+    )
 
     played = load_played_group_results()
     print("  fixing %d already-played group result(s) in the sim" % len(played))
+    ko_played = load_played_knockout_results()
+    print("  pinning %d already-played knockout tie(s) in the sim" % len(ko_played))
     sim_df = run_advancement(
         models,
         n_sims=args.n_sims,
@@ -433,6 +438,7 @@ def main() -> None:
         weights=weights,
         venue_aware=args.venue_aware,
         results=played,
+        ko_results=ko_played,
     )
 
     # 3. Pull Polymarket.
