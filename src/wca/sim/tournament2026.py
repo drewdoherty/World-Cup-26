@@ -324,6 +324,14 @@ class TournamentSimulator:
     allocation
         Override for the third-placed allocation table (defaults to the official
         ``THIRDS_ALLOCATION``); injectable for what-if analysis.
+    fixed_knockouts
+        Already-played knockout ties to *pin* rather than re-simulate, as
+        ``{frozenset((team_a, team_b)): winner_name}``. Because the group stage
+        is finished before any knockout is played, each R32-slot's two
+        participants are constant across sims, so a pinned tie applies
+        uniformly. ``None`` (default) re-simulates every knockout, preserving the
+        original from-scratch behaviour. An entry whose winner name is not a
+        known team is ignored (the tie falls through to simulation).
     """
 
     def __init__(
@@ -336,6 +344,7 @@ class TournamentSimulator:
         fair_play: Optional[Mapping[str, float]] = None,
         fifa_rank: Optional[Mapping[str, float]] = None,
         allocation: Optional[Mapping[str, str]] = None,
+        fixed_knockouts: Optional[Mapping[frozenset, str]] = None,
     ) -> None:
         if set(groups) != set(GROUP_LETTERS):
             raise ValueError(
@@ -373,6 +382,14 @@ class TournamentSimulator:
             for r in _normalise_results(self.groups, results):
                 g = self._group_of_pair(r.home, r.away)
                 self._fixed[(g, frozenset((r.home, r.away)))] = (r.home_goals, r.away_goals)
+
+        # Fixed knockout ties, keyed by the unordered team pair -> winner name.
+        # Copied defensively so callers can not mutate our state mid-run.
+        self._fixed_ko: Dict[frozenset, str] = (
+            {frozenset(pair): winner for pair, winner in fixed_knockouts.items()}
+            if fixed_knockouts
+            else {}
+        )
 
         self._prob_cache: Dict[Tuple[str, str, bool], Tuple[float, float, float]] = {}
 
@@ -722,7 +739,10 @@ class TournamentSimulator:
         """Resolve a knockout tie between team-global-index arrays ``a`` vs ``b``.
 
         Returns the winners' global indices. A 90-minute draw is decided by the
-        extra-time / penalty model.
+        extra-time / penalty model. A pair present in ``self._fixed_ko`` (an
+        already-played tie) is pinned to its recorded winner for every sim rather
+        than resolved probabilistically, so eliminated teams stop showing a
+        survival probability once their tie has been played.
         """
 
         n = a.shape[0]
@@ -738,6 +758,16 @@ class TournamentSimulator:
             ai = int(code >> 16)
             bi = int(code & 0xFFFF)
             ta, tb = self.teams[ai], self.teams[bi]
+            # Pin an already-played tie to its recorded winner. Guard: an unknown
+            # winner name falls through to the probabilistic resolve (never a
+            # KeyError).
+            if self._fixed_ko:
+                fixed_winner = self._fixed_ko.get(frozenset((ta, tb)))
+                if fixed_winner is not None:
+                    wi = self._team_index.get(fixed_winner)
+                    if wi is not None:
+                        winners[mask] = wi
+                        continue
             pa, pd, pb = self._probs(ta, tb, knockout=True)
             decisive = pa + pb
             qa = 0.5 if decisive <= 0 else pa / decisive

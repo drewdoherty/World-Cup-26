@@ -47,7 +47,7 @@ World Cup Group <X> Winner                  group_position 1st  finished 1st in 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, FrozenSet, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -375,6 +375,89 @@ def load_played_group_results(
     return out
 
 
+def load_played_knockout_results(
+    groups: Optional[Dict[str, List[str]]] = None,
+    results_path: Optional[str] = None,
+    shootouts_df: Optional[pd.DataFrame] = None,
+) -> Dict[FrozenSet[str], str]:
+    """Return already-played 2026 World Cup *knockout* ties with a resolved winner.
+
+    Mirrors :func:`load_played_group_results` but selects the CROSS-group
+    fixtures (a knockout tie is between two teams that are **not** in the same
+    2026 group) that have a final scoreline, and resolves each tie to a winner
+    *name*:
+
+    * a decisive 90-minute result -> the higher-scoring side;
+    * a drawn 90-minute result -> the penalty-shootout winner via
+      :func:`wca.data.results.shootout_winner` (matched on the unordered pair and
+      the fixture date). A drawn tie with **no** shootout record is *skipped*
+      (it cannot be pinned — leaving it unfixed keeps the sim from inventing a
+      winner it has no basis for).
+
+    These are passed to :class:`TournamentSimulator` so completed knockout ties
+    are *fixed* rather than re-simulated from scratch — otherwise an eliminated
+    team still shows a large survival probability and an advanced team a tiny
+    one, because the simulator would replay every knockout round.
+
+    Returns
+    -------
+    ``{frozenset((home, away)): winner_name}`` keyed by the unordered team pair
+    (canonical names). The R32-slot participants are constant across sims once
+    the groups are finished, so a pinned tie applies uniformly.
+    """
+    grp = groups if groups is not None else WC2026_GROUPS
+    team_to_group = {t: g for g, ts in grp.items() for t in ts}
+
+    if results_path is None:
+        from wca.data.cleaning import resolve_results_path
+
+        results_path = resolve_results_path()
+
+    df = pd.read_csv(results_path)
+    df = df[df["tournament"] == "FIFA World Cup"].copy()
+    dates = pd.to_datetime(df["date"], errors="coerce")
+    df["_date"] = dates
+    df = df[dates.dt.year == 2026]
+    df = df.dropna(subset=["home_score", "away_score"])
+
+    # Shootouts are optional: a missing/absent file simply means drawn ties can
+    # not be pinned (they are skipped), never an error.
+    if shootouts_df is None:
+        try:
+            from wca.data.results import load_shootouts
+
+            shootouts_df = load_shootouts("data/raw/shootouts.csv")
+        except Exception:  # noqa: BLE001 - shootouts are a best-effort anchor.
+            shootouts_df = None
+
+    from wca.data.results import shootout_winner
+
+    out: Dict[FrozenSet[str], str] = {}
+    for _, r in df.iterrows():
+        home = canonical(str(r["home_team"]))
+        away = canonical(str(r["away_team"]))
+        gh, ga = team_to_group.get(home), team_to_group.get(away)
+        # A knockout tie is CROSS-group. Skip intra-group (group-stage) rows and
+        # any team that does not resolve to a 2026 group.
+        if gh is None or ga is None or gh == ga:
+            continue
+        hg, ag = int(r["home_score"]), int(r["away_score"])
+        if hg > ag:
+            winner = home
+        elif ag > hg:
+            winner = away
+        else:
+            # Drawn after 90'/ET -> decided on penalties. Match on the pair and
+            # the fixture date; skip if there is no shootout record to pin it.
+            when = r.get("_date")
+            winner = shootout_winner(shootouts_df, home, away, when=when)
+            if winner is None:
+                continue
+            winner = canonical(str(winner))
+        out[frozenset((home, away))] = winner
+    return out
+
+
 def run_advancement(
     models: FittedModels,
     n_sims: int = 20000,
@@ -384,6 +467,7 @@ def run_advancement(
     weights: Optional[BlendWeights] = None,
     venue_aware: bool = False,
     results: Optional[Sequence[Result]] = None,
+    ko_results: Optional[Mapping[FrozenSet[str], str]] = None,
 ) -> pd.DataFrame:
     """Simulate the tournament and return per-team stage probabilities.
 
@@ -407,6 +491,13 @@ def run_advancement(
         Already-played group matches to fix (not re-simulate). Defaults to
         auto-loading them via :func:`load_played_group_results`; pass an empty
         list to force a from-scratch pre-tournament simulation.
+    ko_results:
+        Already-played *knockout* ties to fix, as
+        ``{frozenset((team_a, team_b)): winner_name}`` (see
+        :func:`load_played_knockout_results`). ``None`` (default) re-simulates
+        every knockout round, which is only correct *before* the knockouts
+        start; once R32 is played, pass the pinned ties so eliminated teams no
+        longer show a survival probability.
 
     Returns
     -------
@@ -427,7 +518,9 @@ def run_advancement(
     prob_fn = make_prob_fn(
         models, odds_df=odds_df, weights=weights, venue_aware=venue_aware
     )
-    sim = TournamentSimulator(grp, prob_fn, results=results)
+    sim = TournamentSimulator(
+        grp, prob_fn, results=results, fixed_knockouts=ko_results
+    )
     res = sim.simulate(n_sims=n_sims, rng_seed=seed)
 
     team_to_group = {t: g for g, ts in grp.items() for t in ts}
