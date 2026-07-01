@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-06-30 17:06:18 UTC",
+    "generated": "2026-07-01 06:51:57 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 2000.0,
@@ -8,9 +8,9 @@
       "kelly_fraction": 0.25,
       "per_bet_cap": 0.05,
       "max_stake": 100.0,
-      "n_settled": 25,
-      "clv_to_date": 0.0034241984860852435,
-      "reason": "rung 0 sizing-base \u00a32000 (notional pool \u00a32000) \u2014 25/50 settled-with-close bets, CLV +0.0034, Kelly fraction 0.25",
+      "n_settled": 0,
+      "clv_to_date": null,
+      "reason": "rung 0 sizing-base \u00a32000 (notional pool \u00a32000) \u2014 0/50 settled-with-close bets, CLV n/a, Kelly fraction 0.25",
       "currency": "GBP",
       "source": "ledger"
     },
@@ -22,13 +22,13 @@
       "currency": "USD"
     },
     "open_exposure": {
-      "ev": 0.14,
+      "ev": 0.0,
       "best_case": 0.0,
-      "worst_case": -60.0,
-      "best_case_usd": 40.0,
-      "worst_case_usd": -1.0,
+      "worst_case": 0.0,
+      "best_case_usd": 0.0,
+      "worst_case_usd": 0.0,
       "p_profit": null,
-      "n_open": 8,
+      "n_open": 0,
       "source": "ledger"
     },
     "fx": {
@@ -37,10 +37,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 83786,
-      "advancement_secs": 114509,
+      "model_secs": 282,
+      "advancement_secs": 2618,
       "price_secs": null,
-      "promo_secs": 101845,
+      "promo_secs": 69550,
       "exposure_secs": null
     },
     "coverage": {
@@ -49,10 +49,49 @@
       "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($1310).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
-    "actionable_count": 1,
-    "withheld_count": 57
+    "actionable_count": 31,
+    "withheld_count": 21
   },
   "match_singles": [
+    {
+      "id": "australia_vs_egypt_home_1x2",
+      "fixture": "Australia vs Egypt",
+      "kickoff": "2026-07-03 18:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "home",
+      "team": "Australia",
+      "venue": "smarkets",
+      "currency": "GBP",
+      "model_prob": 0.3213,
+      "price": 3.5286,
+      "price_source": "devig_consensus",
+      "edge": 0.0379,
+      "ev_net": 0.1337,
+      "stake": 26.44,
+      "action_label": "ADD",
+      "current_exposure": {
+        "fixture_open": false
+      },
+      "proposed_risk": {
+        "stake": 26.44,
+        "max_loss": 26.44
+      },
+      "promo": null,
+      "promo_status": null,
+      "ages": {
+        "model_secs": 282,
+        "price_secs": 282,
+        "exposure_secs": null
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "1X2",
+        "devig_price"
+      ]
+    },
     {
       "id": "belgium_vs_senegal_home_1x2",
       "fixture": "Belgium vs Senegal",
@@ -63,25 +102,64 @@
       "team": "Belgium",
       "venue": "smarkets",
       "currency": "GBP",
-      "model_prob": 0.4628,
-      "price": 2.3084,
+      "model_prob": 0.482,
+      "price": 2.2066,
       "price_source": "devig_consensus",
-      "edge": 0.0296,
-      "ev_net": 0.0683,
-      "stake": 26.1,
+      "edge": 0.0288,
+      "ev_net": 0.0635,
+      "stake": 26.33,
       "action_label": "ADD",
       "current_exposure": {
         "fixture_open": false
       },
       "proposed_risk": {
-        "stake": 26.1,
-        "max_loss": 26.1
+        "stake": 26.33,
+        "max_loss": 26.33
       },
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 83786,
-        "price_secs": 83786,
+        "model_secs": 282,
+        "price_secs": 282,
+        "exposure_secs": null
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "1X2",
+        "devig_price"
+      ]
+    },
+    {
+      "id": "colombia_vs_ghana_home_1x2",
+      "fixture": "Colombia vs Ghana",
+      "kickoff": "2026-07-04 01:30:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "home",
+      "team": "Colombia",
+      "venue": "smarkets",
+      "currency": "GBP",
+      "model_prob": 0.6688,
+      "price": 1.5553,
+      "price_source": "devig_consensus",
+      "edge": 0.0258,
+      "ev_net": 0.0401,
+      "stake": 36.13,
+      "action_label": "ADD",
+      "current_exposure": {
+        "fixture_open": false
+      },
+      "proposed_risk": {
+        "stake": 36.13,
+        "max_loss": 36.13
+      },
+      "promo": null,
+      "promo_status": null,
+      "ages": {
+        "model_secs": 282,
+        "price_secs": 282,
         "exposure_secs": null
       },
       "stale": false,
@@ -94,63 +172,822 @@
     }
   ],
   "event_props": [],
-  "advancement_futures": [],
+  "advancement_futures": [
+    {
+      "id": "ecuador_r16_pm",
+      "team": "Ecuador",
+      "group": "E",
+      "stage": "R16",
+      "market": "advancement",
+      "selection": "reach_R16",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.479,
+      "pm_price": 0.0005,
+      "pm_fee": 0.0,
+      "price": 1941.7759,
+      "edge_adj": 0.478,
+      "ev_net": 0.4785,
+      "stake": 65.5,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "ecuador_qf_pm",
+      "team": "Ecuador",
+      "group": "E",
+      "stage": "QF",
+      "market": "advancement",
+      "selection": "reach_QF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1852,
+      "pm_price": 0.0005,
+      "pm_fee": 0.0,
+      "price": 1941.7759,
+      "edge_adj": 0.1842,
+      "ev_net": 0.1847,
+      "stake": 60.52,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "bosnia_and_herzegovina_r16_pm",
+      "team": "Bosnia and Herzegovina",
+      "group": "B",
+      "stage": "R16",
+      "market": "advancement",
+      "selection": "reach_R16",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.3418,
+      "pm_price": 0.17,
+      "pm_fee": 0.0042,
+      "price": 5.7394,
+      "edge_adj": 0.1574,
+      "ev_net": 0.1676,
+      "stake": 65.5,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "belgium_qf_pm",
+      "team": "Belgium",
+      "group": "G",
+      "stage": "QF",
+      "market": "advancement",
+      "selection": "reach_QF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.4809,
+      "pm_price": 0.315,
+      "pm_fee": 0.0065,
+      "price": 3.1107,
+      "edge_adj": 0.1544,
+      "ev_net": 0.1594,
+      "stake": 65.5,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "australia_r16_pm",
+      "team": "Australia",
+      "group": "D",
+      "stage": "R16",
+      "market": "advancement",
+      "selection": "reach_R16",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.5331,
+      "pm_price": 0.445,
+      "pm_fee": 0.0074,
+      "price": 2.2104,
+      "edge_adj": 0.0757,
+      "ev_net": 0.0807,
+      "stake": 48.26,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "belgium_sf_pm",
+      "team": "Belgium",
+      "group": "G",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1857,
+      "pm_price": 0.105,
+      "pm_fee": 0.0028,
+      "price": 9.2748,
+      "edge_adj": 0.0728,
+      "ev_net": 0.0779,
+      "stake": 28.59,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "brazil_win_pm",
+      "team": "Brazil",
+      "group": "C",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1414,
+      "pm_price": 0.0665,
+      "pm_fee": 0.0019,
+      "price": 14.6279,
+      "edge_adj": 0.0725,
+      "ev_net": 0.073,
+      "stake": 25.68,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "belgium_r16_pm",
+      "team": "Belgium",
+      "group": "G",
+      "stage": "R16",
+      "market": "advancement",
+      "selection": "reach_R16",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.6653,
+      "pm_price": 0.585,
+      "pm_fee": 0.0073,
+      "price": 1.6884,
+      "edge_adj": 0.068,
+      "ev_net": 0.073,
+      "stake": 58.65,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "ecuador_sf_pm",
+      "team": "Ecuador",
+      "group": "E",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0684,
+      "pm_price": 0.0005,
+      "pm_fee": 0.0,
+      "price": 1941.7759,
+      "edge_adj": 0.0674,
+      "ev_net": 0.0679,
+      "stake": 22.24,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "croatia_r16_pm",
+      "team": "Croatia",
+      "group": "L",
+      "stage": "R16",
+      "market": "advancement",
+      "selection": "reach_R16",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.3728,
+      "pm_price": 0.3,
+      "pm_fee": 0.0063,
+      "price": 3.2648,
+      "edge_adj": 0.0564,
+      "ev_net": 0.0665,
+      "stake": 31.4,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "australia_qf_pm",
+      "team": "Australia",
+      "group": "D",
+      "stage": "QF",
+      "market": "advancement",
+      "selection": "reach_QF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1221,
+      "pm_price": 0.0595,
+      "pm_fee": 0.0017,
+      "price": 16.3455,
+      "edge_adj": 0.0594,
+      "ev_net": 0.0609,
+      "stake": 21.25,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "brazil_final_pm",
+      "team": "Brazil",
+      "group": "C",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.2397,
+      "pm_price": 0.175,
+      "pm_fee": 0.0043,
+      "price": 5.5763,
+      "edge_adj": 0.0553,
+      "ev_net": 0.0604,
+      "stake": 24.09,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "spain_final_pm",
+      "team": "Spain",
+      "group": "H",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.2599,
+      "pm_price": 0.195,
+      "pm_fee": 0.0047,
+      "price": 5.0073,
+      "edge_adj": 0.0551,
+      "ev_net": 0.0602,
+      "stake": 24.63,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "spain_win_pm",
+      "team": "Spain",
+      "group": "H",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1529,
+      "pm_price": 0.1005,
+      "pm_fee": 0.0027,
+      "price": 9.6888,
+      "edge_adj": 0.0492,
+      "ev_net": 0.0497,
+      "stake": 18.15,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "belgium_final_pm",
+      "team": "Belgium",
+      "group": "G",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0833,
+      "pm_price": 0.0335,
+      "pm_fee": 0.001,
+      "price": 29.0096,
+      "edge_adj": 0.0463,
+      "ev_net": 0.0488,
+      "stake": 16.56,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "bosnia_and_herzegovina_qf_pm",
+      "team": "Bosnia and Herzegovina",
+      "group": "B",
+      "stage": "QF",
+      "market": "advancement",
+      "selection": "reach_QF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0824,
+      "pm_price": 0.041,
+      "pm_fee": 0.0012,
+      "price": 23.7082,
+      "edge_adj": 0.032,
+      "ev_net": 0.0402,
+      "stake": 13.75,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "croatia_qf_pm",
+      "team": "Croatia",
+      "group": "L",
+      "stage": "QF",
+      "market": "advancement",
+      "selection": "reach_QF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1274,
+      "pm_price": 0.085,
+      "pm_fee": 0.0023,
+      "price": 11.4504,
+      "edge_adj": 0.0349,
+      "ev_net": 0.0401,
+      "stake": 14.38,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "colombia_sf_pm",
+      "team": "Colombia",
+      "group": "K",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.2447,
+      "pm_price": 0.2,
+      "pm_fee": 0.0048,
+      "price": 4.8828,
+      "edge_adj": 0.0297,
+      "ev_net": 0.0399,
+      "stake": 16.43,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "austria_r16_pm",
+      "team": "Austria",
+      "group": "J",
+      "stage": "R16",
+      "market": "advancement",
+      "selection": "reach_R16",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1865,
+      "pm_price": 0.1475,
+      "pm_fee": 0.0038,
+      "price": 6.6106,
+      "edge_adj": 0.0347,
+      "ev_net": 0.0352,
+      "stake": 13.59,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "brazil_sf_pm",
+      "team": "Brazil",
+      "group": "C",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.3961,
+      "pm_price": 0.355,
+      "pm_fee": 0.0069,
+      "price": 2.7634,
+      "edge_adj": 0.0292,
+      "ev_net": 0.0342,
+      "stake": 17.57,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "colombia_r16_pm",
+      "team": "Colombia",
+      "group": "K",
+      "stage": "R16",
+      "market": "advancement",
+      "selection": "reach_R16",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.8283,
+      "pm_price": 0.795,
+      "pm_fee": 0.0049,
+      "price": 1.2502,
+      "edge_adj": 0.0235,
+      "ev_net": 0.0284,
+      "stake": 46.5,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "algeria_qf_pm",
+      "team": "Algeria",
+      "group": "J",
+      "stage": "QF",
+      "market": "advancement",
+      "selection": "reach_QF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1232,
+      "pm_price": 0.095,
+      "pm_fee": 0.0026,
+      "price": 10.2481,
+      "edge_adj": 0.0205,
+      "ev_net": 0.0256,
+      "stake": 9.3,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "colombia_win_pm",
+      "team": "Colombia",
+      "group": "K",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0529,
+      "pm_price": 0.0275,
+      "pm_fee": 0.0008,
+      "price": 35.3328,
+      "edge_adj": 0.0241,
+      "ev_net": 0.0246,
+      "stake": 8.29,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "ecuador_final_pm",
+      "team": "Ecuador",
+      "group": "E",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0249,
+      "pm_price": 0.0005,
+      "pm_fee": 0.0,
+      "price": 1941.7759,
+      "edge_adj": 0.0239,
+      "ev_net": 0.0244,
+      "stake": 7.99,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "australia_sf_pm",
+      "team": "Australia",
+      "group": "D",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0433,
+      "pm_price": 0.02,
+      "pm_fee": 0.0006,
+      "price": 48.572,
+      "edge_adj": 0.0196,
+      "ev_net": 0.0227,
+      "stake": 7.59,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "algeria_r16_pm",
+      "team": "Algeria",
+      "group": "J",
+      "stage": "R16",
+      "market": "advancement",
+      "selection": "reach_R16",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.3639,
+      "pm_price": 0.335,
+      "pm_fee": 0.0067,
+      "price": 2.9267,
+      "edge_adj": 0.0172,
+      "ev_net": 0.0222,
+      "stake": 11.05,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "croatia_sf_pm",
+      "team": "Croatia",
+      "group": "L",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0706,
+      "pm_price": 0.049,
+      "pm_fee": 0.0014,
+      "price": 19.8421,
+      "edge_adj": 0.0192,
+      "ev_net": 0.0202,
+      "stake": 6.97,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    },
+    {
+      "id": "belgium_win_pm",
+      "team": "Belgium",
+      "group": "G",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0319,
+      "pm_price": 0.0115,
+      "pm_fee": 0.0003,
+      "price": 84.4521,
+      "edge_adj": 0.0195,
+      "ev_net": 0.0201,
+      "stake": 6.65,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2618,
+        "price_secs": 2618
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ]
+    }
+  ],
   "guaranteed_arbs": [],
   "withheld": [
-    {
-      "id": "france_vs_sweden_draw_1x2",
-      "fixture": "France vs Sweden",
-      "kickoff": "2026-06-30 21:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "selection": "draw",
-      "team": "Draw",
-      "model_prob": 0.1844,
-      "price": 6.5125,
-      "edge": 0.0308,
-      "ev_net": 0.2007,
-      "stake": 0.0,
-      "currency": "GBP",
-      "withheld_reason": "model_prob 18% < floor 20%",
-      "stale": false,
-      "stale_reason": null
-    },
-    {
-      "id": "france_vs_sweden_away_1x2",
-      "fixture": "France vs Sweden",
-      "kickoff": "2026-06-30 21:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "selection": "away",
-      "team": "Sweden",
-      "model_prob": 0.1065,
-      "price": 13.5766,
-      "edge": 0.0328,
-      "ev_net": 0.4458,
-      "stake": 0.0,
-      "currency": "GBP",
-      "withheld_reason": "model_prob 11% < floor 20%",
-      "stale": false,
-      "stale_reason": null
-    },
-    {
-      "id": "mexico_vs_ecuador_away_1x2",
-      "fixture": "Mexico vs Ecuador",
-      "kickoff": "2026-07-01 01:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "selection": "away",
-      "team": "Ecuador",
-      "model_prob": 0.2457,
-      "price": 4.2833,
-      "edge": 0.0123,
-      "ev_net": 0.0525,
-      "stake": 0.0,
-      "currency": "GBP",
-      "withheld_reason": "longshot filter: prob 25% < 25% (minnow risk)",
-      "stale": false,
-      "stale_reason": null
-    },
     {
       "id": "england_vs_dr_congo_draw_1x2",
       "fixture": "England vs DR Congo",
@@ -159,10 +996,10 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.179,
-      "price": 5.7627,
-      "edge": 0.0054,
-      "ev_net": 0.0313,
+      "model_prob": 0.1752,
+      "price": 5.4491,
+      "edge": -0.0083,
+      "ev_net": -0.0451,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 18% < floor 20%",
@@ -177,13 +1014,13 @@
       "market": "1X2",
       "selection": "away",
       "team": "DR Congo",
-      "model_prob": 0.0685,
-      "price": 15.7048,
-      "edge": 0.0048,
-      "ev_net": 0.075,
+      "model_prob": 0.0615,
+      "price": 18.6258,
+      "edge": 0.0078,
+      "ev_net": 0.1462,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "model_prob 7% < floor 20%",
+      "withheld_reason": "model_prob 6% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
@@ -195,13 +1032,13 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.2026,
-      "price": 5.3784,
-      "edge": 0.0167,
-      "ev_net": 0.0896,
+      "model_prob": 0.1983,
+      "price": 5.1679,
+      "edge": 0.0048,
+      "ev_net": 0.0248,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "longshot filter: prob 20% < 25% (minnow risk)",
+      "withheld_reason": "model_prob 20% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
@@ -213,10 +1050,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Bosnia and Herzegovina",
-      "model_prob": 0.125,
-      "price": 10.4737,
-      "edge": 0.0296,
-      "ev_net": 0.3096,
+      "model_prob": 0.1292,
+      "price": 9.651,
+      "edge": 0.0256,
+      "ev_net": 0.2473,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 13% < floor 20%",
@@ -231,13 +1068,13 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.1878,
-      "price": 5.7627,
-      "edge": 0.0143,
-      "ev_net": 0.0824,
+      "model_prob": 0.1802,
+      "price": 5.6859,
+      "edge": 0.0043,
+      "ev_net": 0.0244,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "model_prob 19% < floor 20%",
+      "withheld_reason": "model_prob 18% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
@@ -249,13 +1086,13 @@
       "market": "1X2",
       "selection": "away",
       "team": "Austria",
-      "model_prob": 0.092,
-      "price": 13.5759,
-      "edge": 0.0183,
-      "ev_net": 0.2484,
+      "model_prob": 0.0981,
+      "price": 11.7062,
+      "edge": 0.0127,
+      "ev_net": 0.1481,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "model_prob 9% < floor 20%",
+      "withheld_reason": "model_prob 10% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
@@ -267,10 +1104,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Croatia",
-      "model_prob": 0.2128,
+      "model_prob": 0.2149,
       "price": 5.2482,
-      "edge": 0.0222,
-      "ev_net": 0.1166,
+      "edge": 0.0243,
+      "ev_net": 0.1276,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "longshot filter: prob 21% < 25% (minnow risk)",
@@ -285,13 +1122,85 @@
       "market": "1X2",
       "selection": "away",
       "team": "Algeria",
-      "model_prob": 0.2392,
-      "price": 4.234,
-      "edge": 0.003,
-      "ev_net": 0.0126,
+      "model_prob": 0.2403,
+      "price": 4.2834,
+      "edge": 0.0068,
+      "ev_net": 0.0292,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "longshot filter: prob 24% < 25% (minnow risk)",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "argentina_vs_cape_verde_draw_1x2",
+      "fixture": "Argentina vs Cape Verde",
+      "kickoff": "2026-07-03 22:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "draw",
+      "team": "Draw",
+      "model_prob": 0.1143,
+      "price": 8.8249,
+      "edge": 0.001,
+      "ev_net": 0.0091,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "model_prob 11% < floor 20%",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "argentina_vs_cape_verde_away_1x2",
+      "fixture": "Argentina vs Cape Verde",
+      "kickoff": "2026-07-03 22:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "away",
+      "team": "Cape Verde",
+      "model_prob": 0.0435,
+      "price": 22.5053,
+      "edge": -0.0009,
+      "ev_net": -0.0202,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "model_prob 4% < floor 20%",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "colombia_vs_ghana_away_1x2",
+      "fixture": "Colombia vs Ghana",
+      "kickoff": "2026-07-04 01:30:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "away",
+      "team": "Ghana",
+      "model_prob": 0.1089,
+      "price": 8.802,
+      "edge": -0.0048,
+      "ev_net": -0.0419,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "model_prob 11% < floor 20%",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "canada_vs_morocco_home_1x2",
+      "fixture": "Canada vs Morocco",
+      "kickoff": "2026-07-04 17:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "home",
+      "team": "Canada",
+      "model_prob": 0.2055,
+      "price": 5.1676,
+      "edge": 0.012,
+      "ev_net": 0.0619,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "longshot filter: prob 21% < 25% (minnow risk)",
       "stale": false,
       "stale_reason": null
     },
@@ -420,1116 +1329,6 @@
         "scorer",
         "unsupported"
       ]
-    },
-    {
-      "id": "spain_win_pm",
-      "team": "Spain",
-      "group": "H",
-      "stage": "win",
-      "market": "advancement",
-      "selection": "reach_win",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1529,
-      "pm_price": 0.1105,
-      "pm_fee": 0.0029,
-      "price": 8.8146,
-      "edge_adj": 0.0389,
-      "ev_net": 0.0395,
-      "stake": 14.57,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "spain_final_pm",
-      "team": "Spain",
-      "group": "H",
-      "stage": "Final",
-      "market": "advancement",
-      "selection": "reach_Final",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.2599,
-      "pm_price": 0.225,
-      "pm_fee": 0.0052,
-      "price": 4.3435,
-      "edge_adj": 0.0246,
-      "ev_net": 0.0297,
-      "stake": 12.62,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "brazil_sf_pm",
-      "team": "Brazil",
-      "group": "C",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.3961,
-      "pm_price": 0.28,
-      "pm_fee": 0.006,
-      "price": 3.4959,
-      "edge_adj": 0.0999,
-      "ev_net": 0.1101,
-      "stake": 50.48,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "brazil_qf_pm",
-      "team": "Brazil",
-      "group": "C",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.607,
-      "pm_price": 0.495,
-      "pm_fee": 0.0075,
-      "price": 1.9901,
-      "edge_adj": 0.0995,
-      "ev_net": 0.1045,
-      "stake": 65.5,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "brazil_win_pm",
-      "team": "Brazil",
-      "group": "C",
-      "stage": "win",
-      "market": "advancement",
-      "selection": "reach_win",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1414,
-      "pm_price": 0.0565,
-      "pm_fee": 0.0016,
-      "price": 17.2119,
-      "edge_adj": 0.0828,
-      "ev_net": 0.0833,
-      "stake": 28.96,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "brazil_final_pm",
-      "team": "Brazil",
-      "group": "C",
-      "stage": "Final",
-      "market": "advancement",
-      "selection": "reach_Final",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.2397,
-      "pm_price": 0.155,
-      "pm_fee": 0.0039,
-      "price": 6.2921,
-      "edge_adj": 0.0757,
-      "ev_net": 0.0808,
-      "stake": 31.45,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "netherlands_sf_pm",
-      "team": "Netherlands",
-      "group": "F",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.251,
-      "pm_price": 0.225,
-      "pm_fee": 0.0052,
-      "price": 4.3435,
-      "edge_adj": 0.0157,
-      "ev_net": 0.0208,
-      "stake": 8.84,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "colombia_r16_pm",
-      "team": "Colombia",
-      "group": "K",
-      "stage": "R16",
-      "market": "advancement",
-      "selection": "reach_R16",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.8283,
-      "pm_price": 0.775,
-      "pm_fee": 0.0052,
-      "price": 1.2817,
-      "edge_adj": 0.0432,
-      "ev_net": 0.0481,
-      "stake": 65.5,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "colombia_sf_pm",
-      "team": "Colombia",
-      "group": "K",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.2447,
-      "pm_price": 0.19,
-      "pm_fee": 0.0046,
-      "price": 5.1383,
-      "edge_adj": 0.0399,
-      "ev_net": 0.0501,
-      "stake": 20.37,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "colombia_win_pm",
-      "team": "Colombia",
-      "group": "K",
-      "stage": "win",
-      "market": "advancement",
-      "selection": "reach_win",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.0529,
-      "pm_price": 0.0255,
-      "pm_fee": 0.0007,
-      "price": 38.1018,
-      "edge_adj": 0.0261,
-      "ev_net": 0.0267,
-      "stake": 8.96,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "colombia_qf_pm",
-      "team": "Colombia",
-      "group": "K",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.5414,
-      "pm_price": 0.5,
-      "pm_fee": 0.0075,
-      "price": 1.9704,
-      "edge_adj": 0.0239,
-      "ev_net": 0.0339,
-      "stake": 22.54,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "germany_qf_pm",
-      "team": "Germany",
-      "group": "E",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.3426,
-      "pm_price": 0.295,
-      "pm_fee": 0.0062,
-      "price": 3.3196,
-      "edge_adj": 0.0363,
-      "ev_net": 0.0414,
-      "stake": 19.39,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "belgium_qf_pm",
-      "team": "Belgium",
-      "group": "G",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.4809,
-      "pm_price": 0.315,
-      "pm_fee": 0.0065,
-      "price": 3.1107,
-      "edge_adj": 0.1544,
-      "ev_net": 0.1594,
-      "stake": 65.5,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "belgium_sf_pm",
-      "team": "Belgium",
-      "group": "G",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1857,
-      "pm_price": 0.105,
-      "pm_fee": 0.0028,
-      "price": 9.2748,
-      "edge_adj": 0.0728,
-      "ev_net": 0.0779,
-      "stake": 28.59,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "belgium_r16_pm",
-      "team": "Belgium",
-      "group": "G",
-      "stage": "R16",
-      "market": "advancement",
-      "selection": "reach_R16",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.6653,
-      "pm_price": 0.605,
-      "pm_fee": 0.0072,
-      "price": 1.6335,
-      "edge_adj": 0.0482,
-      "ev_net": 0.0531,
-      "stake": 44.87,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "belgium_final_pm",
-      "team": "Belgium",
-      "group": "G",
-      "stage": "Final",
-      "market": "advancement",
-      "selection": "reach_Final",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.0833,
-      "pm_price": 0.0405,
-      "pm_fee": 0.0012,
-      "price": 24.0005,
-      "edge_adj": 0.0411,
-      "ev_net": 0.0416,
-      "stake": 14.23,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "switzerland_sf_pm",
-      "team": "Switzerland",
-      "group": "B",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1027,
-      "pm_price": 0.0795,
-      "pm_fee": 0.0022,
-      "price": 12.2406,
-      "edge_adj": 0.0195,
-      "ev_net": 0.021,
-      "stake": 7.49,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "morocco_sf_pm",
-      "team": "Morocco",
-      "group": "C",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.0984,
-      "pm_price": 0.075,
-      "pm_fee": 0.0021,
-      "price": 12.9733,
-      "edge_adj": 0.0162,
-      "ev_net": 0.0213,
-      "stake": 7.57,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "croatia_r16_pm",
-      "team": "Croatia",
-      "group": "L",
-      "stage": "R16",
-      "market": "advancement",
-      "selection": "reach_R16",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.3728,
-      "pm_price": 0.305,
-      "pm_fee": 0.0064,
-      "price": 3.2117,
-      "edge_adj": 0.0564,
-      "ev_net": 0.0614,
-      "stake": 29.22,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "croatia_qf_pm",
-      "team": "Croatia",
-      "group": "L",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1274,
-      "pm_price": 0.085,
-      "pm_fee": 0.0023,
-      "price": 11.4504,
-      "edge_adj": 0.0349,
-      "ev_net": 0.0401,
-      "stake": 14.38,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "croatia_sf_pm",
-      "team": "Croatia",
-      "group": "L",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.0706,
-      "pm_price": 0.046,
-      "pm_fee": 0.0013,
-      "price": 21.1343,
-      "edge_adj": 0.0181,
-      "ev_net": 0.0233,
-      "stake": 8.0,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "ecuador_r16_pm",
-      "team": "Ecuador",
-      "group": "E",
-      "stage": "R16",
-      "market": "advancement",
-      "selection": "reach_R16",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.479,
-      "pm_price": 0.385,
-      "pm_fee": 0.0071,
-      "price": 2.5503,
-      "edge_adj": 0.0819,
-      "ev_net": 0.0869,
-      "stake": 46.81,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "ecuador_qf_pm",
-      "team": "Ecuador",
-      "group": "E",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1852,
-      "pm_price": 0.1175,
-      "pm_fee": 0.0031,
-      "price": 8.2911,
-      "edge_adj": 0.0641,
-      "ev_net": 0.0646,
-      "stake": 24.05,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "senegal_qf_pm",
-      "team": "Senegal",
-      "group": "I",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1909,
-      "pm_price": 0.165,
-      "pm_fee": 0.0041,
-      "price": 5.9125,
-      "edge_adj": 0.0167,
-      "ev_net": 0.0218,
-      "stake": 8.58,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "sweden_r16_pm",
-      "team": "Sweden",
-      "group": "F",
-      "stage": "R16",
-      "market": "advancement",
-      "selection": "reach_R16",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.2371,
-      "pm_price": 0.115,
-      "pm_fee": 0.0031,
-      "price": 8.4708,
-      "edge_adj": 0.1139,
-      "ev_net": 0.119,
-      "stake": 44.21,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "sweden_qf_pm",
-      "team": "Sweden",
-      "group": "F",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.0844,
-      "pm_price": 0.0295,
-      "pm_fee": 0.0009,
-      "price": 32.9393,
-      "edge_adj": 0.0535,
-      "ev_net": 0.054,
-      "stake": 18.25,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "ivory_coast_r16_pm",
-      "team": "Ivory Coast",
-      "group": "E",
-      "stage": "R16",
-      "market": "advancement",
-      "selection": "reach_R16",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.4251,
-      "pm_price": 0.345,
-      "pm_fee": 0.0068,
-      "price": 2.8427,
-      "edge_adj": 0.0683,
-      "ev_net": 0.0733,
-      "stake": 37.04,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "australia_r16_pm",
-      "team": "Australia",
-      "group": "D",
-      "stage": "R16",
-      "market": "advancement",
-      "selection": "reach_R16",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.5331,
-      "pm_price": 0.435,
-      "pm_fee": 0.0074,
-      "price": 2.2605,
-      "edge_adj": 0.0857,
-      "ev_net": 0.0907,
-      "stake": 53.28,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "australia_qf_pm",
-      "team": "Australia",
-      "group": "D",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1221,
-      "pm_price": 0.084,
-      "pm_fee": 0.0023,
-      "price": 11.5864,
-      "edge_adj": 0.0327,
-      "ev_net": 0.0358,
-      "stake": 12.83,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "australia_sf_pm",
-      "team": "Australia",
-      "group": "D",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.0433,
-      "pm_price": 0.02,
-      "pm_fee": 0.0006,
-      "price": 48.572,
-      "edge_adj": 0.0217,
-      "ev_net": 0.0227,
-      "stake": 7.59,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "paraguay_r16_pm",
-      "team": "Paraguay",
-      "group": "D",
-      "stage": "R16",
-      "market": "advancement",
-      "selection": "reach_R16",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.2776,
-      "pm_price": 0.145,
-      "pm_fee": 0.0037,
-      "price": 6.7241,
-      "edge_adj": 0.1238,
-      "ev_net": 0.1289,
-      "stake": 49.58,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "paraguay_qf_pm",
-      "team": "Paraguay",
-      "group": "D",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.0801,
-      "pm_price": 0.028,
-      "pm_fee": 0.0008,
-      "price": 34.7024,
-      "edge_adj": 0.0492,
-      "ev_net": 0.0513,
-      "stake": 17.29,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "algeria_r16_pm",
-      "team": "Algeria",
-      "group": "J",
-      "stage": "R16",
-      "market": "advancement",
-      "selection": "reach_R16",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.3639,
-      "pm_price": 0.335,
-      "pm_fee": 0.0067,
-      "price": 2.9267,
-      "edge_adj": 0.0172,
-      "ev_net": 0.0222,
-      "stake": 11.05,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "algeria_qf_pm",
-      "team": "Algeria",
-      "group": "J",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1232,
-      "pm_price": 0.1,
-      "pm_fee": 0.0027,
-      "price": 9.7371,
-      "edge_adj": 0.0103,
-      "ev_net": 0.0205,
-      "stake": 7.48,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "austria_r16_pm",
-      "team": "Austria",
-      "group": "J",
-      "stage": "R16",
-      "market": "advancement",
-      "selection": "reach_R16",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1865,
-      "pm_price": 0.1395,
-      "pm_fee": 0.0036,
-      "price": 6.9881,
-      "edge_adj": 0.0388,
-      "ev_net": 0.0434,
-      "stake": 16.59,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "bosnia_and_herzegovina_r16_pm",
-      "team": "Bosnia and Herzegovina",
-      "group": "B",
-      "stage": "R16",
-      "market": "advancement",
-      "selection": "reach_R16",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.3418,
-      "pm_price": 0.175,
-      "pm_fee": 0.0043,
-      "price": 5.5763,
-      "edge_adj": 0.1574,
-      "ev_net": 0.1625,
-      "stake": 64.84,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
-    },
-    {
-      "id": "bosnia_and_herzegovina_qf_pm",
-      "team": "Bosnia and Herzegovina",
-      "group": "B",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.0824,
-      "pm_price": 0.0355,
-      "pm_fee": 0.001,
-      "price": 27.3769,
-      "edge_adj": 0.0402,
-      "ev_net": 0.0459,
-      "stake": 15.59,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 114509,
-        "price_secs": 114509
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "withheld_reason": "advancement model stale (>24h)"
     }
   ]
 }
