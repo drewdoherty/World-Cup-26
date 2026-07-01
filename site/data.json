@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-07-01T07:56:30"
+    "generated": "2026-07-01T07:56:53"
   },
   "totals": {
-    "wagered": 3647.8600000000015,
+    "wagered": 3657.8600000000015,
     "open_stake": 1746.7000000000005,
     "settled_pl": 292.6975,
-    "n_bets": 207
+    "n_bets": 208
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 1755.36,
+      "wagered": 1765.36,
       "open_stake": 680.96,
       "settled_pl": 177.09550000000002,
-      "n_bets": 151
+      "n_bets": 152
     },
     "USD": {
       "wagered": 1892.5000000000007,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 1755.36,
+      "wagered": 1765.36,
       "open_stake": 680.96,
       "settled_pl": 177.09550000000002,
-      "n_bets": 151,
+      "n_bets": 152,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 1578.86,
-      "open_stake": 905.52,
+      "wagered": 1588.86,
+      "open_stake": 915.52,
       "settled_pl": 227.09550000000002,
-      "n_bets": 128,
+      "n_bets": 129,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -64,10 +64,10 @@
   "source_summary": {
     "offer": {
       "GBP": {
-        "wagered": 478.06,
-        "open_stake": 243.06,
+        "wagered": 488.06,
+        "open_stake": 253.06,
         "settled_pl": 156.67,
-        "n_bets": 51
+        "n_bets": 52
       }
     },
     "model": {
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "bet365": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 203.0,
+      "open_stake": 151.0,
+      "settled_pl": 51.61,
+      "n_bets": 22
+    },
     "Unknown": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -139,14 +147,6 @@
       "open_stake": 495.58,
       "settled_pl": 167.36,
       "n_bets": 42
-    },
-    "bet365": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 193.0,
-      "open_stake": 141.0,
-      "settled_pl": 51.61,
-      "n_bets": 21
     },
     "Paddy Power": {
       "venue": "sportsbook",
@@ -247,6 +247,14 @@
   },
   "platforms_by_account": {
     "1": {
+      "bet365": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 203.0,
+        "open_stake": 151.0,
+        "settled_pl": 51.61,
+        "n_bets": 22
+      },
       "Unknown": {
         "venue": "sportsbook",
         "currency": "GBP",
@@ -278,14 +286,6 @@
         "open_stake": 477.08,
         "settled_pl": 177.36,
         "n_bets": 27
-      },
-      "bet365": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 193.0,
-        "open_stake": 141.0,
-        "settled_pl": 51.61,
-        "n_bets": 21
       },
       "Paddy Power": {
         "venue": "sportsbook",
@@ -4776,6 +4776,27 @@
       "cash_pnl": 0.24,
       "pct_pnl": 0.04000066667777796,
       "notes": "live PM position (data-API)"
+    },
+    {
+      "id": 265,
+      "ts_utc": "2026-07-01T07:56:53",
+      "match": "Switzerland vs Algeria",
+      "match_id": "MANUAL_SWITZERLAND_VS_ALGERIA",
+      "market": "Accumulator",
+      "selection": "Player Shots On Target 1+ -> Breel Embolo + Player Shots On Target 1+ -> Dan Ndoye + Player Shots On Target 1+ -> Ruben Vargas + Player Shots On Target 1+ -> Granit Xhaka",
+      "platform": "bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 8.0,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.92; Accumulator; legs: Player Shots On Target 1+ -> Breel Embolo | Player Shots On Target 1+ -> Dan Ndoye | Player Shots On Target 1+ -> Ruben Vargas | Player Shots On Target 1+ -> Granit Xhaka; SNR",
+      "manual_override": null
     },
     {
       "id": 264,
