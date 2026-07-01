@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Sequence
 
 from wca.data.polymarket import _parse_json_array
@@ -236,6 +237,8 @@ def _price_player_props(fx: Dict[str, object], ev: Dict[str, object]) -> List["C
     except Exception:
         return []
     out: List[Candidate] = []
+    if now is None:
+        now = datetime.now(timezone.utc)
     for r in rows:
         out.append(Candidate(
             fixture=fx["raw"], market_type="player_%s" % r.market_type,
@@ -259,7 +262,8 @@ def load_model(scores: Dict, advancement: Dict) -> Dict[str, object]:
         key = frozenset({canonical(h), canonical(a)})
         fixtures[key] = {"home": canonical(h), "away": canonical(a), "raw": fx,
                          "model_1x2": f.get("model_1x2") or {}, "over_under": f.get("over_under") or {},
-                         "btts": f.get("btts"), "scores": f.get("scores") or []}
+                         "btts": f.get("btts"), "scores": f.get("scores") or [],
+                         "kickoff": f.get("kickoff")}
     advance: Dict[str, Dict[str, float]] = {}
     for t in (advancement or {}).get("teams", []):
         advance[canonical(t.get("team") or "")] = t.get("model") or {}
@@ -269,8 +273,19 @@ def load_model(scores: Dict, advancement: Dict) -> Dict[str, object]:
 # --------------------------------------------------------------------------- candidate building
 
 
+def _parse_ko(s):
+    """Parse a fixture kickoff ISO string to tz-aware UTC, or None."""
+    if not s:
+        return None
+    try:
+        d = datetime.fromisoformat(str(s).replace("Z", "+00:00"))
+        return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+    except Exception:
+        return None
+
+
 def build_candidates(model: Dict[str, object], pm_events: Sequence[Dict[str, object]],
-                     *, min_volume: float = 0.0) -> List[Candidate]:
+                     *, min_volume: float = 0.0, now=None) -> List[Candidate]:
     """All model-vs-PM YES candidates across the priced market families."""
     fixtures = model["fixtures"]
     advance = model["advance"]
@@ -310,6 +325,9 @@ def build_candidates(model: Dict[str, object], pm_events: Sequence[Dict[str, obj
                 continue
             fixture = fx["raw"]
             home, away = fx["home"], fx["away"]
+            ko = _parse_ko(fx.get("kickoff"))
+            if ko is not None and ko <= now:
+                continue  # fixture already kicked off -> pre-match markets are dead
             is_bare = " - " not in title
             suffix = title.split(" - ", 1)[1].strip().lower() if " - " in title else ""
 
@@ -400,7 +418,7 @@ def run_paper_pass(con, model: Dict[str, object], pm_events: Sequence[Dict[str, 
                    ts_utc: str, edge_threshold: float = 0.04, kelly_mult: float = 0.5,
                    max_stake_frac: float = 0.02, min_price: float = 0.03, max_price: float = 0.97,
                    min_volume: float = 0.0, max_edge: float = 0.15,
-                   max_open_per_token: int = 1) -> Dict[str, object]:
+                   max_open_per_token: int = 1, now=None) -> Dict[str, object]:
     """One scan: log paper fills for every +EV candidate not already held.
 
     Sizing = ``kelly_mult`` × Kelly × bankroll, capped at ``max_stake_frac`` of
@@ -412,7 +430,7 @@ def run_paper_pass(con, model: Dict[str, object], pm_events: Sequence[Dict[str, 
     """
     bankroll = store.realized_balance(con) + store.deployed_capital(con)  # equity base for sizing
     held = {r["token_id"] for r in store.open_bets(con) if r.get("token_id")}
-    cands = build_candidates(model, pm_events, min_volume=min_volume)
+    cands = build_candidates(model, pm_events, min_volume=min_volume, now=now)
     suspicious = [c for c in cands if c.edge > max_edge]
     cands = [c for c in cands if edge_threshold <= c.edge <= max_edge
              and min_price <= c.price <= max_price]
