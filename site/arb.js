@@ -83,6 +83,41 @@
     return stale ? '<span class="arb-badge badge-stale">STALE</span>' : "";
   }
 
+  // Market-kind badge — SAFETY-CRITICAL. Advancement (Polymarket moneyline)
+  // pays if the team PROGRESSES, including extra-time / penalties. A 90-minute
+  // 1X2 pays only on the 90'+stoppage result, so a KO tie that goes to ET/pens
+  // is a DRAW for that market. The two are genuinely different bets now that
+  // KOs have ET+pens; the badge colours (purple = advance, blue = 90') and
+  // labels must make them impossible to confuse at a glance.
+  function marketKindBadge(kind, label) {
+    if (kind === "advancement") {
+      return '<span class="arb-badge badge-mkt-adv" title="Polymarket moneyline — pays if the team progresses, including extra-time and penalties">'
+        + esc(label || "ADVANCE · ET+PENS") + "</span>";
+    }
+    if (kind === "result_90") {
+      return '<span class="arb-badge badge-mkt-90" title="1X2 — settles on the score after 90 minutes + stoppage only. A knockout tie that goes to ET/penalties is a DRAW for this market.">'
+        + esc(label || "90-MIN 1X2") + "</span>";
+    }
+    return "";
+  }
+
+  // 90-minute 1X2 split for an advancement rec's next KO tie, from the team's
+  // perspective: "win / draw / opp" with the DRAW emphasised (a KO draw at 90'
+  // is a real, common outcome that sends the tie to ET/pens).
+  function matchSplit(m) {
+    if (!m || typeof m !== "object") return "—";
+    var w = m.team_win, d = m.draw, o = m.opp_win;
+    if (w == null && d == null && o == null) return "—";
+    function p(v) { return v == null || isNaN(+v) ? "—" : Math.round(Number(v) * 100); }
+    return '<span class="mk-split">'
+      + '<span class="mk-w" title="team win (90′)">' + p(w) + "</span>"
+      + '<span class="mk-sep">/</span>'
+      + '<span class="mk-d" title="draw at 90′ — goes to ET/pens">' + p(d) + "</span>"
+      + '<span class="mk-sep">/</span>'
+      + '<span class="mk-o" title="opponent win (90′)">' + p(o) + "</span>"
+      + "</span>";
+  }
+
   function evClass(v) {
     if (v === null || v === undefined || isNaN(+v)) return "";
     return Number(v) > 0 ? "pos bold" : (Number(v) < 0 ? "neg" : "dim");
@@ -183,9 +218,14 @@
       var ages = r.ages || {};
       var priceAgeTag = ageTag(ages.price_secs, 7200);
       var modelAgeTag = ageTag(ages.model_secs, 86400);
+      // 90-min result badge (older data without market_kind falls back to the
+      // plain market label so nothing throws and the cell is never blank).
+      var mktBadge = r.market_kind
+        ? marketKindBadge(r.market_kind, r.market_label)
+        : '<span class="arb-badge badge-market">' + esc(r.market || "") + "</span>";
       return "<tr>" +
         '<td data-label="Fixture">' + esc(r.fixture || "") + ' <span class="dim">' + esc(r.kickoff ? r.kickoff.slice(0, 10) : "") + "</span></td>" +
-        '<td data-label="Market"><span class="arb-badge badge-market">' + esc(r.market || "") + "</span></td>" +
+        '<td data-label="Market">' + mktBadge + "</td>" +
         '<td data-label="Selection"><strong>' + esc(r.team || r.selection || "") + "</strong></td>" +
         '<td data-label="Model %" class="r">' + pct(r.model_prob) + "</td>" +
         '<td data-label="Price" class="r num">' + priceStr(r.price) + ' <span class="dim" style="font-size:9px">' + esc(r.price_source === "devig_consensus" ? "devig" : "") + "</span>" + priceAgeTag + "</td>" +
@@ -245,9 +285,21 @@
     var html = visible.map(function (r) {
       var ages = r.ages || {};
       var modelAge = ageTag(ages.model_secs, 86400);
+      // Market-kind badge: advancement recs are Polymarket moneylines (pay on
+      // progression, incl. ET+pens). Fall back gracefully for older data.
+      var mktBadge = marketKindBadge(r.market_kind || "advancement", r.market_label);
+      // Opponent + next-KO-tie 90' split (guard: older data has neither).
+      var opp = r.opponent
+        ? '<strong>' + esc(r.opponent) + "</strong>"
+          + (r.match_round ? ' <span class="dim">' + esc(r.match_round) + "</span>" : "")
+        : "—";
+      var split = matchSplit(r.match_1x2);
       return "<tr>" +
         '<td data-label="Team"><strong>' + esc(r.team || "") + '</strong> <span class="dim">' + esc(r.group || "") + "</span></td>" +
+        '<td data-label="Market">' + mktBadge + "</td>" +
         '<td data-label="Stage"><span class="arb-badge badge-market">' + esc(r.stage || "") + "</span></td>" +
+        '<td data-label="Opponent (next KO)">' + opp + "</td>" +
+        '<td data-label="90′ 1X2 (W/D/L)" class="r" title="model 90-minute result for the next KO tie — a draw here goes to ET/pens">' + split + "</td>" +
         '<td data-label="Model %" class="r">' + pct(r.model_prob) + "</td>" +
         '<td data-label="PM Price" class="r num">' + priceStr(r.pm_price) + "</td>" +
         '<td data-label="PM Fee" class="r dim">' + pct(r.pm_fee, 2) + "</td>" +

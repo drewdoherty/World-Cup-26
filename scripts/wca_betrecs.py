@@ -287,6 +287,90 @@ def _fx_from_arb_data(arb_json: Dict[str, Any]) -> Tuple[float, str]:
 
 
 # ---------------------------------------------------------------------------
+# Knockout bracket enrichment (scores_markets.json)
+#
+# Advancement (Polymarket moneyline) recs settle if the team PROGRESSES — that
+# includes extra-time and penalties. A 90-minute 1X2 rec settles only on the
+# score after 90'+stoppage, so a knockout tie that goes to ET/pens is a DRAW
+# for the 1X2 market. Now that KOs have ET+pens these are genuinely different
+# markets; we surface the team's next KO tie (opponent + 90' 1X2 split) so an
+# advancement rec is never confused with — or placed as — a 90-min result bet.
+# ---------------------------------------------------------------------------
+
+# KO round order, earliest → latest. Used to walk from the current round
+# forward when finding a team's next unplayed tie.
+_KO_ROUND_KEYS = ("r32_games", "r16_games", "qf_games", "sf_games", "final_games")
+
+
+def _next_ko_tie(team: str, scores_markets: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Find ``team``'s next *unplayed* knockout tie in the projected bracket.
+
+    Walks r32 → r16 → qf → sf → final and returns the first tie (earliest
+    round) that contains ``team`` (as home or away) and is unplayed (``ft`` is
+    None). Returns ``None`` if the team has no upcoming KO tie in the bracket
+    or ``scores_markets`` is unavailable.
+    """
+    if not scores_markets or not team:
+        return None
+    for round_key in _KO_ROUND_KEYS:
+        for tie in (scores_markets.get(round_key) or []):
+            if not isinstance(tie, dict):
+                continue
+            if tie.get("ft") is not None:
+                continue  # already played — not their next tie
+            if tie.get("home") == team or tie.get("away") == team:
+                return tie
+    return None
+
+
+def _match_1x2_for_team(team: str, tie: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Orient a tie's 90-minute 1X2 split from ``team``'s perspective.
+
+    ``x1x2`` is [P(home win 90'), P(draw), P(away win 90')]. Returns
+    {"team_win", "draw", "opp_win"} rounded to 3dp, or None if unavailable.
+    """
+    x1x2 = tie.get("x1x2")
+    if not isinstance(x1x2, (list, tuple)) or len(x1x2) < 3:
+        return None
+    home_p, draw_p, away_p = float(x1x2[0]), float(x1x2[1]), float(x1x2[2])
+    if tie.get("home") == team:
+        team_p, opp_p = home_p, away_p
+    elif tie.get("away") == team:
+        team_p, opp_p = away_p, home_p
+    else:
+        return None
+    return {
+        "team_win": round(team_p, 3),
+        "draw": round(draw_p, 3),
+        "opp_win": round(opp_p, 3),
+    }
+
+
+def _enrich_advancement_rec(rec: Dict[str, Any], scores_markets: Dict[str, Any]) -> None:
+    """Add opponent / next-KO-tie context to an advancement rec, in place.
+
+    Never raises: on any missing data the context fields are set to null so
+    the front-end shows an em-dash rather than a wrong or stale opponent.
+    """
+    rec["market_kind"] = "advancement"
+    rec["market_label"] = "Advance · incl. ET+pens"
+    # Defaults (older data / no bracket → em-dash on the page).
+    rec.setdefault("opponent", None)
+    rec.setdefault("match_round", None)
+    rec.setdefault("match_1x2", None)
+
+    tie = _next_ko_tie(rec.get("team") or "", scores_markets)
+    if not tie:
+        return
+
+    team = rec.get("team") or ""
+    opponent = tie.get("away") if tie.get("home") == team else tie.get("home")
+    rec["opponent"] = opponent
+    rec["match_round"] = tie.get("round")
+    rec["match_1x2"] = _match_1x2_for_team(team, tie)
+
+
+# ---------------------------------------------------------------------------
 # Match singles builder
 # ---------------------------------------------------------------------------
 
@@ -445,6 +529,11 @@ def build_match_singles(
                 "kickoff": kickoff,
                 "group": group,
                 "market": "1X2",
+                # 1X2 settles on the 90'+stoppage result only. In a knockout,
+                # a tie that goes to ET/pens is a DRAW for this market — this
+                # is a genuinely different bet from a PM advancement moneyline.
+                "market_kind": "result_90",
+                "market_label": "90-min 1X2 (+ stoppage)",
                 "selection": outcome,
                 "team": team,
                 "venue": "smarkets",
@@ -546,6 +635,7 @@ def build_advancement_futures(
     adv_data: Dict[str, Any],
     pm_pool: Dict[str, Any],
     adv_age_secs: Optional[int],
+    scores_markets: Optional[Dict[str, Any]] = None,
 ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     """Build advancement/futures recs from cached advancement_data.json.
 
@@ -562,6 +652,8 @@ def build_advancement_futures(
 
     actionable: List[Dict[str, Any]] = []
     withheld: List[Dict[str, Any]] = []
+
+    scores_markets = scores_markets or {}
 
     meta = adv_data.get("meta") or {}
     stages_available = set(meta.get("stages") or [])
@@ -628,6 +720,11 @@ def build_advancement_futures(
                 "tags": ["model", "advancement", "polymarket"],
             }
 
+            # Enrich with the team's next KO tie (opponent + 90' 1X2 split) and
+            # market-kind labels so an advancement moneyline is never confused
+            # with a 90-minute 1X2 result bet. Never crashes on missing data.
+            _enrich_advancement_rec(rec, scores_markets)
+
             if stale:
                 rec["withheld_reason"] = stale_reason
                 withheld.append(rec)
@@ -681,6 +778,7 @@ def main() -> int:
     ap.add_argument("--promos", default="site/promos_data.json")
     ap.add_argument("--arb-data", default="site/arb_data.json")
     ap.add_argument("--prop-cal", default="data/prop_calibration.json")
+    ap.add_argument("--scores-markets", default="site/scores_markets.json")
     args = ap.parse_args()
 
     # Bankroll governance
@@ -696,6 +794,9 @@ def main() -> int:
     promos_raw, promo_age = _load_json(args.promos, {})
     arb_raw, arb_age = _load_json(args.arb_data, {})
     prop_cal_raw, prop_age = _load_json(args.prop_cal, {})
+    # Projected KO bracket — for advancement-rec opponent + 90' 1X2 context.
+    # Guarded: missing/unreadable → enrichment fields simply stay null.
+    scores_markets_raw, _ = _load_json(args.scores_markets, {})
 
     # FX
     fx_rate, fx_src = _fx_from_arb_data(arb_raw or {})
@@ -718,6 +819,7 @@ def main() -> int:
     )
     adv_futures, withheld_af = build_advancement_futures(
         adv_raw or {}, pm_pool_data, adv_age_secs=adv_age,
+        scores_markets=scores_markets_raw or {},
     )
     guar_arbs, withheld_ga = build_guaranteed_arbs(arb_raw or {}, arb_age_secs=arb_age)
     withheld = withheld_ms + withheld_ep + withheld_af + withheld_ga
