@@ -35,6 +35,16 @@ stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 # the publish (mirrors the || true style above).
 "$PY" scripts/wca_arb_data.py  >/dev/null 2>&1 || true
 "$PY" scripts/wca_betrecs.py   >/dev/null 2>&1 || true
+# Mirror the freshly-built main-site feeds into the analytics feed dir. localhost
+# :8001 reads site-analytics/data/*.json directly and the :8002 lilac terminal is
+# built from it (next line) — but these main-feed copies had NO refresher and
+# froze on 2026-06-30, leaving both stale. Copy them here (after regen, before the
+# lilac build) so 8001 + 8002 track the live data. The analytics job's OWN feeds
+# (winrate/rigor/risk_pnl/clvbench/predledger) are written there separately.
+for _f in data scores_data scores_markets bet_recs arb_data exposure_data exposure_dashboard \
+          tracking_data advancement_data advancement_history forest_data linemove; do
+  [ -f "site/$_f.json" ] && cp "site/$_f.json" "site-analytics/data/$_f.json" 2>/dev/null || true
+done
 # rebuild the 8002 lilac terminal from the analytics feeds (writes site-lilac/index.html
 # + site-lilac/lilac_ledger.json; the latter is gitignored and NOT staged below).
 "$PY" scripts/wca_lilac_ledger.py --feeds site-analytics/data --template site-lilac/_template.html --out site-lilac >/dev/null 2>&1 || true
