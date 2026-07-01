@@ -100,6 +100,111 @@ def _msg_text(message: Dict[str, object]) -> str:
 _MAX_ALBUM_IMAGES = 10
 
 
+def _paper_book_db() -> str:
+    """Path to the isolated paper test-book DB (repo-root/data/test_book.db)."""
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(root, "data", "test_book.db")
+
+
+def _paper_book_report(db_path: Optional[str] = None) -> str:
+    """Exposure + performance of the paper test book, for the /paper command."""
+    import os as _os
+
+    path = db_path or _paper_book_db()
+    if not _os.path.exists(path):
+        return ("🧪 *Test book* — not initialised yet.\n"
+                "No paper book at `%s`. The trade cycle seeds it on first run." % path)
+    try:
+        from wca.testbook import store
+    except Exception as exc:  # pragma: no cover
+        return "🧪 *Test book* — module unavailable (%s)." % exc
+
+    con = store.connect(path)
+    rep = store.report(con)
+    if rep.get("seed", 0) == 0 and rep.get("n_open", 0) == 0:
+        return "🧪 *Test book* — seeded $0 / no positions yet."
+
+    lines = [
+        "🧪 *Test book* (paper, $%.0f seed)" % rep["seed"],
+        "equity *$%.0f* (ROI %+.1f%%) · cash $%.0f · deployed $%.0f"
+        % (rep["equity"], rep["roi_pct"], rep["realized_balance"], rep["deployed"]),
+        "realised $%+.2f (%d settled) · unrealised $%+.2f (MTM)"
+        % (rep["realized_pl"], rep["n_settled"], rep["unrealized_pl"]),
+    ]
+
+    # Exposure by market family (open stake at risk).
+    by_basis: Dict[str, Dict[str, float]] = {}
+    opens = store.open_bets(con)
+    for b in opens:
+        d = by_basis.setdefault(str(b["resolution_basis"]), {"n": 0, "stake": 0.0})
+        d["n"] += 1
+        d["stake"] += float(b["stake_usd"])
+    if by_basis:
+        lines.append("\n*Open exposure by market*")
+        for basis, d in sorted(by_basis.items(), key=lambda kv: -kv[1]["stake"]):
+            lines.append("  %-9s %2d  $%.0f" % (basis, d["n"], d["stake"]))
+
+    # Settled P&L by basis (performance), where any have resolved.
+    settled = {k: v for k, v in (rep.get("by_basis") or {}).items() if v.get("pl")}
+    if settled:
+        lines.append("\n*Settled P&L by market*")
+        for basis, d in sorted(settled.items(), key=lambda kv: kv[1]["pl"]):
+            lines.append("  %-9s n=%-3d $%+.2f" % (basis, d["n"], d["pl"]))
+
+    if opens:
+        lines.append("\n*Open positions* (top 12 by stake)")
+        for b in sorted(opens, key=lambda x: -float(x["stake_usd"]))[:12]:
+            lines.append("  #%-4d [%s] %-26s @%2.0f¢ $%.0f"
+                         % (b["id"], b["resolution_basis"], str(b["selection"])[:26],
+                            float(b["entry_price"]) * 100, float(b["stake_usd"])))
+    lines.append("\n_paper-only · isolated from the real ledger · marks refresh each 10-min cycle_")
+    return "\n".join(lines)
+
+
+def _paper_decisions_report(db_path: Optional[str] = None) -> str:
+    """Decision-quality (add/trim/close) of the paper book — process + outcome."""
+    import os as _os
+
+    path = db_path or _paper_book_db()
+    if not _os.path.exists(path):
+        return "🧪 *Paper decisions* — book not initialised yet."
+    try:
+        from wca.testbook import store, settle as S
+    except Exception as exc:  # pragma: no cover
+        return "🧪 *Paper decisions* — module unavailable (%s)." % exc
+    con = store.connect(path)
+    counts = {r[0]: r[1] for r in con.execute(
+        "SELECT action, COUNT(*) FROM decision_events GROUP BY action")}
+    total = sum(counts.values())
+    if not total:
+        return "🧪 *Paper decisions* — no decisions logged yet (loop seeds them)."
+    lines = ["🧪 *Paper decision quality*",
+             "%d decisions · %d add / %d trim / %d close"
+             % (total, counts.get("add", 0), counts.get("trim", 0), counts.get("close", 0)),
+             "\n*Process* (decision-time only · model-q)"]
+    proc = S.process_rollup(con)
+    for basis in sorted(proc):
+        for qs, d in sorted(proc[basis].items()):
+            lines.append("  %-9s %-12s GOG %+.3f · Δg %+.4f · capbind %.0f%% · n%d"
+                         % (basis, qs, d["mean_gog"] or 0, d["mean_delta_g"] or 0,
+                            100 * (d["cap_binding_rate"] or 0), d["n"]))
+    calib = S.calibration_rollup(con)
+    lines.append("\n*Outcome* (lagging · quarantined · validation-only)")
+    if calib["by_basis"]:
+        for basis, d in sorted(calib["by_basis"].items()):
+            gap = d["ev_calibration_gap"]
+            lines.append("  ev_gap %-9s %s [n%d%s]"
+                         % (basis, ("%+.3f" % gap) if gap is not None else "n/a",
+                            d["n"], " COLLECTING" if d["collecting"] else ""))
+    else:
+        lines.append("  ev_calibration_gap: COLLECTING")
+    lines.append("  exit vs hold: $%+.2f over %d exits%s"
+                 % (calib["exit_value_vs_hold"], calib["n_exits"],
+                    " [INSUFFICIENT]" if calib["n_exits"] < 10 else ""))
+    lines.append("\n_GOG>0 ⇒ over-Kelly there (shrink q); ev_gap>0 ⇒ model under-predicts (raise q)._")
+    return "\n".join(lines)
+
+
 def _help_text(manager: ConductorManager) -> str:
     lines = [
         "*WCA dev-conductor*",
@@ -114,6 +219,8 @@ def _help_text(manager: ConductorManager) -> str:
         "`/watch [id]` — LIVE: what each agent is doing right now",
         "`/usage` — Anthropic token spend & limits (real-time)",
         "`/prs` — open task PRs (review from your phone)",
+        "`/paper` — paper test-book: exposure + performance ($2000 paper book)",
+        "`/paperdecisions` — paper add/trim/close decision quality (process + calibration)",
         "`/report <id>` — send a task's report files (.md/.csv/.png…) back to you",
         "`/diff <id>` — summarised change + full .patch file",
         "`/merge <id>` — squash-merge a *green* task PR (admin)",
@@ -152,6 +259,7 @@ _MENU_KEYBOARD = {
          {"text": "📊 Chart", "callback_data": "chart"}],
         [{"text": "🔀 PRs", "callback_data": "prs"},
          {"text": "❤️ Health", "callback_data": "health"}],
+        [{"text": "🧪 Paper book", "callback_data": "paper"}],
     ]
 }
 
@@ -165,6 +273,8 @@ _COMMANDS = [
     {"command": "watch", "description": "live agent activity: /watch [id]"},
     {"command": "usage", "description": "Anthropic token spend & limits"},
     {"command": "prs", "description": "open task PRs"},
+    {"command": "paper", "description": "paper test-book exposure + performance"},
+    {"command": "paperdecisions", "description": "paper add/trim/close decision quality"},
     {"command": "report", "description": "send a task's report files: /report <id>"},
     {"command": "diff", "description": "summarised change + .patch: /diff <id>"},
     {"command": "merge", "description": "squash-merge a green PR: /merge <id>"},
@@ -193,6 +303,8 @@ def _view(manager: ConductorManager, name: str) -> Optional[str]:
         return manager.usage_table()
     if name == "prs":
         return manager.prs()
+    if name == "paper":
+        return _paper_book_report()
     return None
 
 
@@ -612,6 +724,10 @@ class ConductorBot:
             return self.manager.usage_table()
         if cmd == "/prs":
             return self.manager.prs()
+        if cmd in ("/paper", "/testbook"):
+            return _paper_book_report()
+        if cmd in ("/paperdecisions", "/decisions"):
+            return _paper_decisions_report()
         if cmd == "/log":
             try:
                 return self.manager.task_detail(int(arg.strip()))
