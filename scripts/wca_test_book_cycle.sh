@@ -18,10 +18,14 @@ for envf in "${WCA_TESTBOOK_ENV:-}" "$HOME/.env.testbook" "$HOME/.env.conductor"
   [ -n "$envf" ] && [ -f "$envf" ] && set -a && . "$envf" && set +a && break
 done
 
+# Use the project venv python (has requests/numpy); fall back to python3.
+PY="python3"
+[ -x "$REPO/.venv/bin/python" ] && PY="$REPO/.venv/bin/python"
+
 TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 {
   echo "================ test-book cycle $TS ================"
-  PYTHONPATH=src python3 scripts/wca_test_book.py settle
-  PYTHONPATH=src python3 scripts/wca_test_book.py trade --edge "${WCA_TESTBOOK_EDGE:-0.04}"
-  PYTHONPATH=src python3 scripts/wca_test_book.py mark
+  PYTHONPATH=src "$PY" scripts/wca_test_book.py settle
+  PYTHONPATH=src "$PY" scripts/wca_test_book.py trade --edge "${WCA_TESTBOOK_EDGE:-0.04}"
+  PYTHONPATH=src "$PY" scripts/wca_test_book.py mark
 } >> logs/test_book.log 2>&1
