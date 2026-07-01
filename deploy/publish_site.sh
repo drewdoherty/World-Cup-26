@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-# Refresh results/scores + regenerate the public site feed, then commit & push —
+# Refresh results/scores + regenerate the public site feeds, then commit & push —
 # so the live site stays current without a manual push. Driven by the
-# com.wca.publish launchd job (hourly). Safe to run repeatedly:
-#   * commits ONLY the four site feeds, and only when they actually changed
+# com.wca.publish launchd job (30 min; see WCA_INTERVAL_publish in services.env).
+# This loop is the PRIMARY refresh mechanism for the site feeds — the scheduled
+# GitHub Actions run is only a 4x/day backup (Actions crons are delayed/unreliable).
+# Safe to run repeatedly:
+#   * commits ONLY the tracked site feeds, and only when they actually changed
 #   * rebases before pushing to absorb the cloud Actions' commits (no conflicts)
 set -uo pipefail
 cd "${WCA_REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
@@ -23,6 +26,14 @@ stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 # (a cached run is ~10s; a re-sim ~3 min, dominated by the Elo+DC fit), so this is
 # cheap on most hourly runs. Live Polymarket prices + group standings refresh every run.
 "$PY" scripts/wca_advancement_data.py >/dev/null 2>&1 || true
+# arb_data.json first — wca_betrecs.py reads it as an input (guaranteed-arb rows),
+# so refresh arbs BEFORE bet_recs. Each guarded so a single failure doesn't abort
+# the publish (mirrors the || true style above).
+"$PY" scripts/wca_arb_data.py  >/dev/null 2>&1 || true
+"$PY" scripts/wca_betrecs.py   >/dev/null 2>&1 || true
+# rebuild the 8002 lilac terminal from the analytics feeds (writes site-lilac/index.html
+# + site-lilac/lilac_ledger.json; the latter is gitignored and NOT staged below).
+"$PY" scripts/wca_lilac_ledger.py --feeds site-analytics/data --template site-lilac/_template.html --out site-lilac >/dev/null 2>&1 || true
 
 # 2. stage the site feed + the cached cards; bail if nothing changed.
 #    card_latest.md / next_latest.md / model_predictions.json are committed here so
@@ -31,6 +42,7 @@ stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 #    the exact model 1X2 used by scores/exposure).
 git add site/data.json site/linemove.json site/scores_data.json site/forest_data.json site/tracking_data.json \
         site/exposure_data.json site/exposure_dashboard.json site/advancement_history.json site/advancement_data.json \
+        site/bet_recs.json site/arb_data.json site-lilac/index.html \
         data/card_latest.md data/next_latest.md data/model_predictions.json \
         data/advancement_current_vs_pretournament.json
 if git diff --cached --quiet; then
