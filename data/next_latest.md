@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-01T16:41:51 -->
+<!-- generated: 2026-07-01T19:13:51 -->
 ⚽ *Next match* — Belgium vs Senegal
 Kickoff 2026-07-01 20:00:00+00:00
 
 *Winner* (model blend)
-  Belgium         48.4%  fair 2.07  best 2.20 (Polymarket) +6.3% ✅  £26.26
-  Draw            28.0%  fair 3.58  best 3.39 (Polymarket) -5.2%
-  Senegal         23.7%  fair 4.22  best 4.08 (Polymarket) -3.4%
+  Belgium         49.9%  fair 2.00  best 2.06 (Polymarket) +2.9% ✅  £13.74
+  Draw            27.2%  fair 3.68  best 3.51 (Polymarket) -4.6%
+  Senegal         22.9%  fair 4.37  best 4.26 (Polymarket) -2.5%
   _stake = ¼-Kelly @ £2000 bankroll (+EV picks)_
 
 *Corners* (model, exp 8.7)
@@ -14,5 +14,5 @@ Kickoff 2026-07-01 20:00:00+00:00
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-1-1 13.3% | 1-0 9.3% | 2-1 8.8% | 2-0 8.6% | 0-0 7.7% | 0-1 6.4%
-  O/U 2.5: over 51.0% / under 49.0%   BTTS 54.4%
+1-1 12.9% | 1-0 9.6% | 2-1 9.0% | 2-0 8.9% | 0-0 7.5% | 0-1 6.2%
+  O/U 2.5: over 51.4% / under 48.6%   BTTS 54.2%
