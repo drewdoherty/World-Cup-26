@@ -75,6 +75,32 @@ def _load_advancement(path: str) -> Dict[str, Any]:
         return json.load(fh)
 
 
+# Knockout round windows for the fixed 2026 schedule (venues/dates are set; only
+# the teams change as results land). A KO fixture is bucketed to its round purely
+# by its calendar date, so the feed stays correct as later rounds appear in the
+# results spine — no per-round bracket resolution needed.
+_KO_WINDOWS = [
+    ("r32", datetime.date(2026, 7, 3)),
+    ("r16", datetime.date(2026, 7, 8)),
+    ("qf", datetime.date(2026, 7, 12)),
+    ("sf", datetime.date(2026, 7, 16)),
+    # 2026-07-18 is the 3rd-place play-off — intentionally not a headline stage.
+    ("final", datetime.date(2026, 7, 31)),
+]
+_KO_LABEL = {"r32": "Round of 32", "r16": "Round of 16", "qf": "Quarter-finals",
+             "sf": "Semi-finals", "final": "Final"}
+
+
+def _ko_round(d: datetime.date) -> Optional[str]:
+    """Map a knockout fixture's date to its round key, or None (e.g. 3rd-place)."""
+    for key, cutoff in _KO_WINDOWS:
+        if d <= cutoff:
+            if key == "final" and d < datetime.date(2026, 7, 19):
+                return None  # 3rd-place play-off window — skip
+            return key
+    return None
+
+
 def build(results_path: str, advancement_path: str) -> Dict[str, Any]:
     adv = _load_advancement(advancement_path)
     team_adv = {t["team"]: t.get("model", {}) for t in adv.get("teams", [])}
@@ -104,6 +130,33 @@ def build(results_path: str, advancement_path: str) -> Dict[str, Any]:
         m.update({"home": h, "away": a, "date": str(r["_d"].date()), "group": g, "ft": ft})
         group_games.append(m)
 
+    # --- knockout stages: concrete ties from the results spine (FT-accurate) ---
+    # A cross-group WC2026 fixture is a knockout tie; bucket it to its round by
+    # date and price the SAME model markets as the group rows. Rounds populate as
+    # results land (R16 teams are only known once R32 completes), so this stays
+    # accurate to the latest FT with no timed job.
+    ko_games: Dict[str, List[Dict[str, Any]]] = {k: [] for k, _ in _KO_WINDOWS}
+    ko_upcoming: Dict[str, int] = {k: 0 for k, _ in _KO_WINDOWS}
+    for _, r in wc.sort_values("_d").iterrows():
+        h, a = r["home_team"], r["away_team"]
+        gh, ga = team_group.get(h), team_group.get(a)
+        if gh and ga and gh == ga:
+            continue  # same-group => already handled as a group game
+        if pd.isna(r["_d"]):
+            continue
+        rnd = _ko_round(r["_d"].date())
+        if rnd is None:
+            continue
+        m = _market(models, h, a)
+        ft = None
+        if pd.notna(r.get("home_score")) and pd.notna(r.get("away_score")):
+            ft = f"{int(r['home_score'])}-{int(r['away_score'])}"
+        else:
+            ko_upcoming[rnd] += 1
+        m.update({"home": h, "away": a, "date": str(r["_d"].date()),
+                  "group": None, "round": _KO_LABEL[rnd], "ft": ft})
+        ko_games[rnd].append(m)
+
     # --- next stage: projected R32 qualifiers (top-2 per group standings) ---
     r32_projected = []
     for g in GROUP_LETTERS:
@@ -116,27 +169,34 @@ def build(results_path: str, advancement_path: str) -> Dict[str, Any]:
         if top2:
             r32_projected.append({"group": g, "teams": top2})
 
-    # --- by-team: upcoming games + advancement line per team ---
+    # --- by-team: all of a team's games (group + knockout) + advancement line ---
+    all_games = group_games + [g for gs in ko_games.values() for g in gs]
     by_team: Dict[str, Any] = {}
     for team, g in sorted(team_group.items()):
-        games = [
-            gg for gg in group_games if gg["home"] == team or gg["away"] == team
-        ]
+        games = [gg for gg in all_games if gg["home"] == team or gg["away"] == team]
         by_team[team] = {
             "group": g,
             "adv": {k: round(v, 3) for k, v in team_adv.get(team, {}).items()},
             "games": games,
         }
 
-    # stage availability: group is current, r32 next (projected), rest locked
+    # stage availability: 'current' = the earliest stage still holding an unplayed
+    # game; earlier stages are 'done' (clickable, all FT-in), later ones 'locked'.
+    stage_upcoming = {"group": n_upcoming, "r32": ko_upcoming["r32"], "r16": ko_upcoming["r16"],
+                      "qf": ko_upcoming["qf"], "sf": ko_upcoming["sf"], "final": ko_upcoming["final"]}
+    stage_has = {"group": bool(group_games), "r32": bool(ko_games["r32"]), "r16": bool(ko_games["r16"]),
+                 "qf": bool(ko_games["qf"]), "sf": bool(ko_games["sf"]), "final": bool(ko_games["final"])}
+    current_key = next((k for k, _ in STAGES if stage_has[k] and stage_upcoming[k] > 0), None)
     stages = []
     for key, label in STAGES:
-        if key == "group":
-            status, count = "current", n_upcoming  # badge shows upcoming remaining
-        elif key == "r32":
-            status, count = "next", len(r32_projected)
-        else:
+        if not stage_has[key]:
             status, count = "locked", 0
+        elif key == current_key:
+            status, count = "current", stage_upcoming[key]  # badge: "● N left"
+        elif stage_upcoming[key] == 0:
+            status, count = "done", 0
+        else:
+            status, count = "next", stage_upcoming[key]
         stages.append({"key": key, "label": label, "status": status, "count": count})
 
     return {
@@ -144,11 +204,17 @@ def build(results_path: str, advancement_path: str) -> Dict[str, Any]:
             "generated": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
             "n_games": len(group_games),
             "n_upcoming": n_upcoming,
+            "n_ko_games": sum(len(v) for v in ko_games.values()),
             "source": "Elo+DC scorelines · advancement reused from advancement_data.json",
         },
         "stages": stages,
         "group_games": group_games,
         "r32_projected": r32_projected,
+        "r32_games": ko_games["r32"],
+        "r16_games": ko_games["r16"],
+        "qf_games": ko_games["qf"],
+        "sf_games": ko_games["sf"],
+        "final_games": ko_games["final"],
         "by_team": by_team,
     }
 

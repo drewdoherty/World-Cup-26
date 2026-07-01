@@ -823,6 +823,15 @@ table.heat td.hl,table.heat th.hl{box-shadow:inset 0 0 0 2px rgba(109,74,208,.35
       <div class="meta" id="moneyMeta"></div>
     </div>
 
+    <div class="panel col-12" id="reconcilePanel">
+      <div class="panel-h"><span class="icn">&#127922;</span><h2>1X2 vs Monte-Carlo <span class="slash">//</span> Same Engine</h2><div class="right"><span class="lbl" id="reconcileGap"></span></div></div>
+      <div class="panel-b">
+        <div class="note" id="reconcileVerdict" style="margin-bottom:10px"></div>
+        <table class="grid" id="reconcileTable"></table>
+      </div>
+      <div class="meta" id="reconcileMeta"></div>
+    </div>
+
     <div class="panel col-12">
       <div class="panel-h"><span class="icn">&#128268;</span><h2>Pipeline <span class="slash">//</span> Five Stages</h2><div class="right"><span class="lbl">click a stage for detail</span></div></div>
       <div class="panel-b">
@@ -1832,6 +1841,22 @@ const DATA = {"meta":{"terminal":"2026-06-21 10:51:46 UTC","scores":"2026-06-21 
       '<tr class="rail pm"><td class="first">'+curTag('$')+' USD</td><td class="num">'+money('$',BC.USD.wagered)+'</td><td class="num">'+money('$',BC.USD.open_stake)+'</td><td class="num '+clsSign(BC.USD.settled_pl)+'">'+signMoney('$',BC.USD.settled_pl)+'</td></tr>'+
       '</tbody>';
     $('#moneyMeta').innerHTML=metaLine('2 pools', DATA.meta.terminal, 'ledger');
+  })();
+
+  /* 1X2 vs Monte-Carlo — same engine (reconciliation, live from feeds) */
+  (function(){
+    var R=DATA.reconcile;
+    if(!R||!R.rows||!R.rows.length){ if($('#reconcilePanel'))$('#reconcilePanel').style.display='none'; return; }
+    var e=function(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});};
+    var pct=function(v){return Math.round((v||0)*100);};
+    $('#reconcileVerdict').textContent=R.verdict;
+    $('#reconcileGap').textContent='mean |gap| '+Math.round(R.mean_abs_gap*100)+'pp · '+R.n+' ties';
+    $('#reconcileTable').innerHTML='<thead><tr><th>Knockout tie</th><th class="r">1X2 H/D/A</th><th class="r">1X2&rarr;adv</th><th class="r">MC reach</th><th class="r">gap</th></tr></thead><tbody>'+
+      R.rows.map(function(r){
+        var g=Math.round(r.gap*100); var cls=Math.abs(g)<=5?'':'warn';
+        return '<tr><td class="first">'+e(r.tie)+'</td><td class="num">'+pct(r.h)+'/'+pct(r.d)+'/'+pct(r.a)+'</td><td class="num">'+pct(r.imp)+'%</td><td class="num">'+pct(r.mc)+'%</td><td class="num '+cls+'">'+(g>0?'+':'')+g+'pp</td></tr>';
+      }).join('')+'</tbody>';
+    $('#reconcileMeta').innerHTML=metaLine(R.n+' ties', DATA.meta.adv, '1X2 (scores) vs MC (advancement)');
   })();
 
   /* =====================================================================

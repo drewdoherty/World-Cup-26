@@ -405,9 +405,10 @@
       var ftHtml = g.ft
         ? '<div class="sm-ft">' + esc(g.ft) + '</div>'
         : '<div class="sm-ft sm-ft-na"></div>';
+      var sub = g.group ? (" · Grp " + esc(g.group)) : (g.round ? (" · " + esc(g.round)) : "");
       return '<div class="sm-row' + hl + '" data-gid="' + esc(id) + '">' +
         '<div class="sm-fix"><span class="sm-tm">' + esc(g.home) + " v " + esc(g.away) +
-        '</span><span class="sm-meta">' + esc(String(g.date).slice(5)) + " · Grp " + esc(g.group) +
+        '</span><span class="sm-meta">' + esc(String(g.date).slice(5)) + sub +
         '</span></div>' +
         ftHtml +
         '<div class="sm-1x2">' + bar(g.x1x2) + '<span class="sm-n">' + pc(g.x1x2[0]) + "·" +
@@ -426,15 +427,25 @@
             byG[g].map(gameRow).join("") + "</div>";
         }).join("");
       }
-      if (state.stage === "r32") {
-        return '<div class="sm-note">Projected qualifiers (model) — actual fixtures set once the group stage finalises.</div>' +
-          '<div class="sm-projgrid">' + (d.r32_projected || []).map(function (p) {
-            return '<div class="sm-proj"><div class="sm-gh">GRP ' + esc(p.group) + "</div>" +
-              p.teams.map(function (t) {
-                return '<div class="sm-pt"><span class="sm-pos">' + t.pos + "</span>" +
-                  esc(t.team) + '<span class="sm-padv">' + pc(t.p_adv) + "% adv</span></div>";
-              }).join("") + "</div>";
-          }).join("") + "</div>";
+      var KO = { r32: "r32_games", r16: "r16_games", qf: "qf_games", sf: "sf_games", final: "final_games" };
+      if (KO[state.stage]) {
+        var games = d[KO[state.stage]] || [];
+        if (games.length) {
+          return '<div class="sm-grp"><div class="sm-gh">' +
+            esc((games[0].round || state.stage).toUpperCase()) + "</div>" +
+            games.map(gameRow).join("") + "</div>";
+        }
+        if (state.stage === "r32" && (d.r32_projected || []).length) {
+          return '<div class="sm-note">Projected qualifiers (model) — actual fixtures set once the group stage finalises.</div>' +
+            '<div class="sm-projgrid">' + d.r32_projected.map(function (p) {
+              return '<div class="sm-proj"><div class="sm-gh">GRP ' + esc(p.group) + "</div>" +
+                p.teams.map(function (t) {
+                  return '<div class="sm-pt"><span class="sm-pos">' + t.pos + "</span>" +
+                    esc(t.team) + '<span class="sm-padv">' + pc(t.p_adv) + "% adv</span></div>";
+                }).join("") + "</div>";
+            }).join("") + "</div>";
+        }
+        return '<div class="empty">' + esc(state.stage.toUpperCase()) + " — not yet reached</div>";
       }
       return '<div class="empty">' + esc(state.stage.toUpperCase()) + " — not yet reached</div>";
     }
@@ -449,9 +460,9 @@
         chip("Win group", a.group_winner) + chip("Reach R16", a.R16) +
         chip("Reach QF", a.QF) + chip("Reach final", a.Final) + "</div>";
       var games = (t.games || []).map(gameRow).join("") ||
-        '<div class="empty">No games this stage</div>';
+        '<div class="empty">No games</div>';
       return advLine + '<div class="sm-grp"><div class="sm-gh">' + esc(state.team) +
-        " — GROUP STAGE</div>" + games + "</div>";
+        " — ALL FIXTURES</div>" + games + "</div>";
     }
     function render() {
       var modes = '<div class="sm-modes">' +
