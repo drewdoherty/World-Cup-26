@@ -37,9 +37,45 @@ OVER_KELLY_BAND = 0.5     # R2: trim when marked exposure > f_target*(1+band)
 SPREAD_CAP = 0.10         # R3: exit when bid-ask spread exceeds this
 MIN_DEPTH = 0.0           # R3: exit when best-bid depth below this (0 = off)
 
+# LIVE-money sizing shown on the @worldcupdevbot BUY lines (for manual A1 bets).
+# Uses the PROJECT-WIDE Polymarket bankroll rule (wca.markets.bankroll): USD
+# accounting, bankroll = £3,000 ± realised P&L at $1.33 = £1, ¼-Kelly.
+from wca.markets import bankroll as BANK  # noqa: E402
+
+LIVE_KELLY = BANK.PM_KELLY_FRACTION       # ¼-Kelly (global rule)
+LIVE_CCY = BANK.PM_CCY                     # "$" — PM accounting is USD
+LIVE_MAX_FRAC = BANK.PM_MAX_STAKE_FRAC     # per-bet cap (4% of bankroll)
+
+
+def _live_bankroll(report):
+    """Latest live PM bankroll in USD = £3,000 ± realised P&L at $1.33 = £1."""
+    return BANK.pm_bankroll_usd(report.get("realized_pl", 0.0))
+
+
+def _existing_live_exposure(con, bankroll):
+    """Live-equivalent $ exposure of the currently-open book (for the whole-book cap).
+
+    Re-sizes each open position at the live rule from its stored belief/entry so
+    the 75% whole-book cap accounts for legs already on."""
+    total = 0.0
+    for b in store.open_bets(con):
+        q, p = b.get("model_prob"), b.get("entry_price")
+        if q is None or p is None:
+            continue
+        total += float(BANK.size_placement(q, p, bankroll, max_frac=LIVE_MAX_FRAC)["stake"])
+    return total
+
 
 def _now():
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _send_chart(con, report=None):
+    """Best-effort: render the equity/P&L curve and post it to @worldcupdevbot."""
+    from wca.testbook import chart, notify
+    rep = report if report is not None else store.report(con)
+    png = chart.render_equity_png(store.equity_series(con), seed=rep.get("seed", 0.0))
+    return notify.send_photo(png, notify.chart_caption(rep))
 
 
 def _load_model():
@@ -61,17 +97,36 @@ def cmd_trade(args):
         con, model, events, ts_utc=_now(),
         edge_threshold=args.edge, kelly_mult=args.kelly,
         max_stake_frac=args.max_stake, min_volume=args.min_volume)
+    from wca.testbook import notify
+    rep = store.report(con)
+    bankroll = _live_bankroll(rep)
+    # Whole-book 75% cap: the just-placed fills are already open, so existing
+    # (pre-pass) exposure = all-open minus this pass's new legs.
+    new_total = sum(BANK.size_placement(p["model"], p["price"], bankroll,
+                                        max_frac=LIVE_MAX_FRAC)["stake"] for p in res["placed"])
+    existing = max(0.0, _existing_live_exposure(con, bankroll) - new_total)
+    scale = BANK.book_scale(new_total, existing, bankroll)
     print("Pass @ %s: %d candidates, placed %d, skipped %d | cash $%.2f deployed $%.2f"
           % (res["ts"], res["candidates"], res["n_placed"], res["skipped"],
              res["balance"], res["deployed"]))
+    print("Live bankroll %s%.0f (£%.0f @ $%.2f %+0.0f realised) · %g×Kelly · cap %.0f%%/bet · book %.0f%% (open ~%s%.0f, scale ×%.2f)"
+          % (LIVE_CCY, bankroll, BANK.GBP_PM_BANKROLL_BASE, BANK.GBP_USD,
+             rep.get("realized_pl", 0.0), LIVE_KELLY, 100 * LIVE_MAX_FRAC,
+             100 * BANK.PM_BOOK_CAP_FRAC, LIVE_CCY, existing, scale))
     for p in res["placed"]:
-        print("  +[%s/%s] %-34s @ %.0f¢  model %.0f%%  edge %+.0f%%  $%.2f"
+        s = notify.live_sizing(p["model"], p["price"], bankroll,
+                               kelly_frac=LIVE_KELLY, max_frac=LIVE_MAX_FRAC)
+        print("  +[%s/%s] %-34s @ %.0f¢  fair %.0f%%  edge %+.0f%%  -> stake %s%.0f (%.1f%%)"
               % (p["basis"], p["market"], p["selection"][:34], p["price"] * 100,
-                 p["model"] * 100, p["edge"] * 100, p["stake"]))
-    # Ping the dev chat (@worldcupdevbot) with this pass's activity.
-    from wca.testbook import notify
-    if notify.send(notify.format_activity(res, store.report(con))):
+                 p["model"] * 100, p["edge"] * 100, LIVE_CCY,
+                 s["stake"] * scale, 100 * s["frac"] * scale))
+    # Ping the dev chat (@worldcupdevbot) with this pass's activity + P&L chart.
+    if notify.send(notify.format_activity(
+            res, rep, live_bankroll=bankroll, kelly_frac=LIVE_KELLY,
+            max_frac=LIVE_MAX_FRAC, currency=LIVE_CCY, book_scale=scale)):
         print("  (pinged @worldcupdevbot)")
+        if _send_chart(con, rep):
+            print("  (posted P&L chart)")
     return 0
 
 
@@ -112,10 +167,10 @@ def cmd_mark(args):
             continue
         rule, action, sell_shares, threshold = decision
         if action == "close":
-            store.close(con, b["id"], bid, ts)
+            realized_pl = store.close(con, b["id"], bid, ts)
             sold, stake_after = shares, 0.0
         else:
-            store.trim(con, b["id"], sell_shares, bid, ts)
+            realized_pl = store.trim(con, b["id"], sell_shares, bid, ts)
             sold, stake_after = sell_shares, max(0.0, (shares - sell_shares)) * entry
         store.log_decision(
             con, action=action, rule=rule, bet_id=b["id"], token_id=tok, fixture=b.get("fixture"),
@@ -124,11 +179,24 @@ def cmd_mark(args):
             kelly_mult=KELLY_MULT, max_stake_frac=MAX_STAKE_FRAC, entry_price=entry,
             stake_before=stake, stake_after=stake_after, shares_delta=sold,
             rule_threshold=threshold, ts_utc=ts)
-        actions.append("#%d %s/%s %.1fsh@%.0f¢" % (b["id"], rule, action, sold, bid * 100))
-    print("Marked %d open positions.%s" % (n, ("  Exit actions: " + "; ".join(actions)) if actions else ""))
+        actions.append({
+            "id": b["id"], "action": action, "rule": rule,
+            "fixture": b.get("fixture"), "selection": b.get("selection"),
+            "basis": b["resolution_basis"], "market": b.get("market_type"),
+            "entry_price": entry, "exit_price": bid, "shares_sold": sold,
+            "realized_pl": realized_pl, "stake_after": stake_after,
+            "q": float(q_t), "spread": spread})
+    print("Marked %d open positions." % n)
+    for a in actions:
+        verb = "EXIT" if a["action"] == "close" else "TRIM"
+        print("  %-4s #%-4d %-30s sold %.1fsh @ %.0f¢ (entry %.0f¢) realised $%+.2f · %s"
+              % (verb, a["id"], str(a["selection"])[:30], a["shares_sold"],
+                 a["exit_price"] * 100, a["entry_price"] * 100, a["realized_pl"], a["rule"]))
     if actions:
         from wca.testbook import notify
-        notify.send("\U0001F9EA *Test book* — %d exit action(s):\n  %s" % (len(actions), "\n  ".join(actions)))
+        rep = store.report(con)
+        if notify.send(notify.format_exits(actions, rep)):
+            _send_chart(con, rep)
     return cmd_report(args)
 
 
@@ -199,8 +267,19 @@ def cmd_settle(args):
     print("Settled: %s | P&L $%+.2f | %d still unresolved"
           % (summ["settled"], summ["pl"], summ["unresolved"]))
     from wca.testbook import notify
-    notify.send(notify.format_settlement(summ, store.report(con)))
+    rep = store.report(con)
+    if notify.send(notify.format_settlement(summ, rep)):
+        _send_chart(con, rep)
     return cmd_report(args)
+
+
+def cmd_chart(args):
+    """Render the equity/P&L curve and post it to @worldcupdevbot on demand."""
+    con = store.connect(_DB)
+    ok = _send_chart(con)
+    print("Posted P&L chart to @worldcupdevbot." if ok
+          else "Chart not sent (no matplotlib, empty book, or no bot credentials).")
+    return 0
 
 
 def cmd_equity(args):
@@ -224,6 +303,7 @@ def main(argv=None) -> int:
     s = sub.add_parser("settle"); s.set_defaults(fn=cmd_settle)
     e = sub.add_parser("equity"); e.set_defaults(fn=cmd_equity)
     d = sub.add_parser("decisions"); d.set_defaults(fn=cmd_decisions)
+    c = sub.add_parser("chart"); c.set_defaults(fn=cmd_chart)
     args = ap.parse_args(argv)
     return args.fn(args)
 

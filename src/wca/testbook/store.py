@@ -426,3 +426,52 @@ def report(con: sqlite3.Connection) -> Dict[str, object]:
         "roi_pct": (100.0 * (equity - seed) / seed) if seed else 0.0,
         "by_basis": by_basis,
     }
+
+
+def equity_series(con: sqlite3.Connection) -> List[Dict[str, object]]:
+    """Time-ordered equity curve for the P&L chart.
+
+    Equity at any time = seed + realised P&L booked so far + unrealised MTM of
+    the still-open book. We sample at the seed and at every mark cycle (each
+    cycle writes one ``marks`` row per open bet at a shared timestamp, so summing
+    that cycle's rows gives the open book's MTM). Settled bets have already left
+    the open set, so realised + unrealised never double-count.
+
+    Returns ``[{ts, equity, realized_pl, unrealized_pl}, …]`` (may be a single
+    seed point if no marks exist yet).
+    """
+    seed_row = con.execute(
+        "SELECT amount, ts_utc FROM bankroll_events WHERE kind='seed' ORDER BY id LIMIT 1").fetchone()
+    if not seed_row:
+        return []
+    seed = float(seed_row["amount"])
+    seed_ts = seed_row["ts_utc"]
+
+    settled = [(r["ts"], float(r["pl"] or 0.0)) for r in con.execute(
+        "SELECT settled_ts AS ts, settled_pl AS pl FROM paper_bets"
+        " WHERE settled_ts IS NOT NULL AND status IN ('won','lost','void','closed')"
+        " ORDER BY settled_ts")]
+
+    def realized_upto(ts: str) -> float:
+        return sum(pl for sts, pl in settled if sts is not None and sts <= ts)
+
+    cycles = con.execute(
+        "SELECT ts_utc AS ts, COALESCE(SUM(unrealized_pl), 0.0) AS unreal"
+        " FROM marks GROUP BY ts_utc ORDER BY ts_utc").fetchall()
+
+    points: List[Dict[str, object]] = [
+        {"ts": seed_ts, "equity": seed, "realized_pl": 0.0, "unrealized_pl": 0.0}]
+    if cycles:
+        for c in cycles:
+            rp = realized_upto(c["ts"])
+            up = float(c["unreal"] or 0.0)
+            points.append({"ts": c["ts"], "equity": seed + rp + up,
+                           "realized_pl": rp, "unrealized_pl": up})
+    elif settled:
+        # No MTM cycles yet — still chart realised P&L step-by-step.
+        run = 0.0
+        for sts, pl in settled:
+            run += pl
+            points.append({"ts": sts, "equity": seed + run,
+                           "realized_pl": run, "unrealized_pl": 0.0})
+    return points
