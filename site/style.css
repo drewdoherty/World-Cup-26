@@ -179,6 +179,7 @@ body {
   margin-top: 14px;
   grid-template-columns: 1fr 1fr;
   grid-template-areas:
+    "exposure    exposure"
     "venues      predictions"
     "positions   positions"
     "closed      closed"
@@ -457,6 +458,7 @@ body {
   .grid {
     grid-template-columns: 1fr;
     grid-template-areas:
+      "exposure"
       "venues"
       "predictions"
       "positions"
