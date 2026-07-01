@@ -16,6 +16,10 @@ dependencies = ["numpy", "scipy", "pandas", "requests", "pyarrow>=14"]
 # Optional cloud mirror for the archive (Cloudflare R2 / Backblaze B2 / S3).
 # Only needed when WCA_ARCHIVE_S3_* creds are configured; absent => local-only.
 cloud = ["boto3>=1.34"]
+# Shared-state DB over Turso (libSQL). Only imported by wca.db.connect() when
+# WCA_DB_URL is set (e.g. the publish-site GitHub Action); dev/test/CI run on the
+# local sqlite fallback and never need this. NOT a hard runtime dependency.
+turso = ["libsql-experimental"]
 # Test-time dependencies beyond the runtime set in `dependencies` /
 # requirements.txt. eth-account is needed by the Polymarket signing tests
 # (tests/test_pm_*); matplotlib by the Telegram usage-chart test

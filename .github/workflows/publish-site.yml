@@ -1,0 +1,115 @@
+name: Publish Site (Turso)
+
+# Cloud publish of the public site feeds, twice per hour, independent of the
+# Mac mini. This job is READ-ONLY with respect to state: it only regenerates
+# site/*.json from the shared Turso (libSQL) database and commits the changed
+# feeds. It does NOT call the odds API and does NOT write to the ledger.
+#
+# Requires two repository secrets, matching wca.db.connect():
+#   WCA_DB_URL         libsql://…            (the shared Turso database URL)
+#   WCA_DB_AUTH_TOKEN  <token>               (Turso auth token)
+# When WCA_DB_URL is absent the job no-ops gracefully (see the guard step),
+# so the workflow is safe to merge before the operator cuts over to Turso.
+
+on:
+  schedule:
+    # Every 30 minutes (top and half past the hour).
+    - cron: "0,30 * * * *"
+  workflow_dispatch:
+
+# Serialize with the other feeds-to-main jobs and with itself so two publishes
+# never race on the same push.
+concurrency:
+  group: site-data-push
+  cancel-in-progress: false
+
+jobs:
+  publish-site:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # Job-level guard: if the Turso URL secret is empty (not yet configured),
+      # exit 0 immediately so the scheduled run is a clean no-op rather than a
+      # red failure. Every later step is gated on this output.
+      - name: Check Turso is configured
+        id: guard
+        env:
+          WCA_DB_URL: ${{ secrets.WCA_DB_URL }}
+        run: |
+          if [ -z "$WCA_DB_URL" ]; then
+            echo "WCA_DB_URL secret is not set — skipping cloud publish (no-op)."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout main (full history)
+        if: steps.guard.outputs.configured == 'true'
+        uses: actions/checkout@v4.2.2
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        if: steps.guard.outputs.configured == 'true'
+        uses: actions/setup-python@v5.2.0
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        if: steps.guard.outputs.configured == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          # Pinned runtime deps, then the package (editable), then the libSQL
+          # client — only needed on this cloud path because WCA_DB_URL is set.
+          pip install -r requirements.txt
+          pip install -e .
+          pip install libsql-experimental
+
+      # Regenerate the public site feeds from the shared Turso DB. These mirror
+      # deploy/publish_site.sh EXACTLY (same scripts, same order, same one-liner
+      # for publish_dashboard_json), minus the git plumbing which is handled in
+      # the commit step below. Each generator tolerates transient failures so a
+      # single flaky feed never blocks the publish, matching the mini job.
+      - name: Regenerate site feeds from Turso
+        if: steps.guard.outputs.configured == 'true'
+        env:
+          WCA_DB_URL: ${{ secrets.WCA_DB_URL }}
+          WCA_DB_AUTH_TOKEN: ${{ secrets.WCA_DB_AUTH_TOKEN }}
+          PYTHONPATH: src
+        run: |
+          python scripts/wca_scores_data.py   >/dev/null 2>&1 || true
+          python scripts/wca_forest_data.py   >/dev/null 2>&1 || true
+          python scripts/wca_site.py          >/dev/null 2>&1 || true
+          python scripts/wca_tracking_data.py >/dev/null 2>&1 || true
+          python scripts/wca_exposure_data.py >/dev/null 2>&1 || true
+          python -c "from wca.exposure_dashboard import publish_dashboard_json; publish_dashboard_json('data/wca.db')" >/dev/null 2>&1 || true
+          python scripts/wca_advancement_history.py >/dev/null 2>&1 || true
+          python scripts/wca_advancement_data.py    >/dev/null 2>&1 || true
+
+      # Commit ONLY the regenerated site feeds. Author AND committer must be this
+      # exact GitHub-linked no-reply address or Vercel rejects the deploy.
+      - name: Commit and push changed site feeds
+        if: steps.guard.outputs.configured == 'true'
+        env:
+          GIT_AUTHOR_NAME: drewdoherty
+          GIT_AUTHOR_EMAIL: 132697109+drewdoherty@users.noreply.github.com
+          GIT_COMMITTER_NAME: drewdoherty
+          GIT_COMMITTER_EMAIL: 132697109+drewdoherty@users.noreply.github.com
+        run: |
+          git config user.name "drewdoherty"
+          git config user.email "132697109+drewdoherty@users.noreply.github.com"
+          git add site/data.json site/linemove.json site/scores_data.json site/forest_data.json \
+                  site/tracking_data.json site/exposure_data.json site/exposure_dashboard.json \
+                  site/advancement_history.json site/advancement_data.json
+          # Empty diff must not error — commit + push only when something changed.
+          git diff --cached --quiet || (
+            git commit -m "chore(site): 2x/hour cloud publish from Turso [skip ci]" &&
+            for i in 1 2 3; do
+              git pull --rebase -X theirs origin main && git push origin main && break
+              sleep $((i * 10))
+            done
+          )
