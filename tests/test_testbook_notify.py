@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from wca.testbook import notify
 
 
@@ -33,6 +35,44 @@ def test_format_activity_is_actionable_buy_with_size_and_fixture():
     assert "fair 48¢" in msg and "+16%" in msg
     # $40 at 32¢ -> 125 shares, surfaced so the manual fill size is unambiguous.
     assert "125 sh" in msg
+
+
+def test_live_sizing_quarter_kelly_and_cap():
+    # q=0.48, p=0.32 -> f*=(0.16/0.68)=0.2353; ¼-Kelly=0.0588 -> 5.88% of bankroll.
+    s = notify.live_sizing(0.48, 0.32, 3000.0)
+    assert s["f_star"] == pytest.approx(0.16 / 0.68, rel=1e-3)
+    assert s["frac"] == pytest.approx(0.25 * 0.16 / 0.68, rel=1e-3)
+    assert s["stake"] == pytest.approx(3000.0 * 0.25 * 0.16 / 0.68, rel=1e-3)
+    assert s["capped"] is False
+    # A 2% cap binds on this edge.
+    c = notify.live_sizing(0.48, 0.32, 3000.0, max_frac=0.02)
+    assert c["frac"] == pytest.approx(0.02) and c["capped"] is True
+    assert c["stake"] == pytest.approx(60.0)
+    # No edge -> zero stake.
+    assert notify.live_sizing(0.30, 0.40, 3000.0)["stake"] == 0.0
+
+
+def test_format_activity_live_bankroll_shows_kelly_stake():
+    res = {"n_placed": 1, "candidates": 4, "placed": [
+        {"basis": "advance", "fixture": "Belgium", "selection": "Belgium to reach QF",
+         "price": 0.32, "model": 0.48, "edge": 0.16, "stake": 40.0}]}
+    msg = notify.format_activity(res, live_bankroll=3168.0)
+    assert "¼-Kelly on £3,168 bankroll" in msg      # header names the live bankroll
+    assert "@ 32¢ ask · fair 48¢ · edge +16%" in msg
+    assert "stake £186" in msg                       # 3168 × 0.25 × 0.2353 ≈ 186
+    assert "5.9% of bankroll" in msg
+    assert "GBP/USD" in msg                           # FX caveat footer
+
+
+def test_format_activity_live_bankroll_flags_hot_and_caps():
+    # 12pp edge at 82¢ -> f*=0.667, ¼-Kelly=16.7% -> hot flag.
+    res = {"n_placed": 1, "candidates": 1, "placed": [
+        {"basis": "prop", "selection": "Pedri 1+ shots", "price": 0.82,
+         "model": 0.94, "edge": 0.12, "stake": 31.0}]}
+    hot = notify.format_activity(res, live_bankroll=3000.0)
+    assert "⚠ hot" in hot
+    capped = notify.format_activity(res, live_bankroll=3000.0, max_frac=0.02)
+    assert "capped" in capped and "stake £60" in capped
 
 
 def test_format_exits_explains_what_and_why():

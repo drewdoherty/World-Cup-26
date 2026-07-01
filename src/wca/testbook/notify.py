@@ -45,6 +45,34 @@ def _shares(stake, price) -> float:
         return 0.0
 
 
+def _money(ccy: str, amt) -> str:
+    try:
+        return "%s%s" % (ccy, "{:,.0f}".format(float(amt)))
+    except (TypeError, ValueError):
+        return "%s?" % ccy
+
+
+def live_sizing(q, p, bankroll: float, *, kelly_frac: float = 0.25,
+                max_frac: float = 0.0) -> Dict[str, object]:
+    """Binary-YES fractional-Kelly stake on the LIVE bankroll.
+
+    ``f* = (q - p)/(1 - p)`` (floored at 0); the recommended fraction is
+    ``kelly_frac · f*`` (¼-Kelly by default). ``max_frac > 0`` caps the fraction
+    (e.g. 0.02 = never stake more than 2% of bankroll); ``0`` = uncapped true
+    ¼-Kelly. Returns ``{stake, frac, f_star, capped}``.
+    """
+    try:
+        q, p, bk = float(q), float(p), float(bankroll)
+    except (TypeError, ValueError):
+        return {"stake": 0.0, "frac": 0.0, "f_star": 0.0, "capped": False}
+    f_star = max(0.0, (q - p) / (1.0 - p)) if 0.0 < p < 1.0 else 0.0
+    frac = kelly_frac * f_star
+    capped = False
+    if max_frac and frac > max_frac:
+        frac, capped = max_frac, True
+    return {"stake": frac * bk, "frac": frac, "f_star": f_star, "capped": capped}
+
+
 def _context(basis, fixture, selection) -> str:
     """`basis · fixture` context, dropping blanks and anything already in the selection."""
     sel = str(selection or "").lower()
@@ -62,11 +90,16 @@ def _book_line(report: Optional[Dict[str, object]]) -> Optional[str]:
 
 
 def format_activity(pass_result: Dict[str, object], report: Optional[Dict[str, object]] = None,
-                    *, max_lines: int = 8) -> Optional[str]:
+                    *, max_lines: int = 8, live_bankroll: Optional[float] = None,
+                    kelly_frac: float = 0.25, max_frac: float = 0.0, currency: str = "£",
+                    hot_frac: float = 0.10) -> Optional[str]:
     """Render a paper trade-pass summary for Telegram, or None if nothing happened.
 
-    Each placement renders as a two-line BUY instruction ready to mirror manually
-    on the A1 Polymarket account.
+    Each placement renders as a BUY instruction ready to mirror manually on the A1
+    Polymarket account. When ``live_bankroll`` is given, each line carries a
+    fractional-Kelly stake (``kelly_frac``·Kelly of the bankroll, ¼-Kelly by
+    default) with the % of bankroll; stakes above ``hot_frac`` are flagged ⚠ and
+    ``max_frac`` optionally caps them.
     """
     placed = pass_result.get("placed") or []
     n = pass_result.get("n_placed", len(placed))
@@ -81,19 +114,36 @@ def format_activity(pass_result: Dict[str, object], report: Optional[Dict[str, o
     book = _book_line(report)
     if book:
         lines.append(book)
+    klabel = "¼-Kelly" if abs(kelly_frac - 0.25) < 1e-9 else ("%g×Kelly" % kelly_frac)
     if placed:
-        lines.append("▶ *BUY on A1 Polymarket:*")
+        if live_bankroll is not None:
+            lines.append("▶ *BUY on A1 Polymarket* — %s on %s bankroll:" % (
+                klabel, _money(currency, live_bankroll)))
+        else:
+            lines.append("▶ *BUY on A1 Polymarket:*")
     for p in placed[:max_lines]:
         sel = str(p.get("selection") or "")
         ctx = _context(p.get("basis"), p.get("fixture"), sel)
-        stake = float(p.get("stake", 0) or 0)
         price = p.get("price")
         lines.append("\U0001F7E2 *BUY* %s%s" % (sel, ("  ·  " + ctx) if ctx else ""))
-        lines.append("    @ %s ask · fair %s · edge %s · $%.0f (%.0f sh)" % (
-            _cents(price), _cents(p.get("model")), _pct(p.get("edge", 0)),
-            stake, _shares(stake, price)))
+        if live_bankroll is not None:
+            lines.append("    @ %s ask · fair %s · edge %s" % (
+                _cents(price), _cents(p.get("model")), _pct(p.get("edge", 0))))
+            s = live_sizing(p.get("model"), price, live_bankroll,
+                            kelly_frac=kelly_frac, max_frac=max_frac)
+            tag = "capped" if s["capped"] else ("⚠ hot" if s["frac"] >= hot_frac else klabel)
+            lines.append("    *stake %s* · %.1f%% of bankroll (%s)" % (
+                _money(currency, s["stake"]), 100.0 * float(s["frac"]), tag))
+        else:
+            stake = float(p.get("stake", 0) or 0)
+            lines.append("    @ %s ask · fair %s · edge %s · $%.0f (%.0f sh)" % (
+                _cents(price), _cents(p.get("model")), _pct(p.get("edge", 0)),
+                stake, _shares(stake, price)))
     if n > max_lines:
         lines.append("  …and %d more (see `report`)" % (n - max_lines))
+    if live_bankroll is not None and placed:
+        lines.append("_per-bet %s (not whole-book correlation-adjusted); "
+                     "PM settles USD — apply your GBP/USD rate._" % klabel)
     return "\n".join(lines)
 
 
