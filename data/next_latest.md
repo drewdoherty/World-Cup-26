@@ -1,18 +1,18 @@
-<!-- generated: 2026-06-29T17:49:52 -->
-⚽ *Next match* — Germany vs Paraguay
-Kickoff 2026-06-29 20:30:00+00:00
+<!-- generated: 2026-07-01T01:34:46 -->
+⚽ *Next match* — England vs DR Congo
+Kickoff 2026-07-01 16:00:00+00:00
 
 *Winner* (model blend)
-  Germany         65.9%  fair 1.52  best 1.38 (Polymarket) -9.1%
-  Draw            21.1%  fair 4.74  best 5.41 (Polymarket) +14.1% ✅  £16.04
-  Paraguay        13.0%  fair 7.69  best 10.53 (Polymarket) +36.8% ✅  £19.32
+  England         75.5%  fair 1.32  best 1.31 (Polymarket) -1.3%
+  Draw            18.1%  fair 5.54  best 5.71 (Polymarket) +3.2% ✅  £3.40
+  DR Congo         6.4%  fair 15.55  best 18.18 (Polymarket) +16.9% ✅  £4.92
   _stake = ¼-Kelly @ £2000 bankroll (+EV picks)_
 
-*Corners* (model, exp 8.5)
-  O/U 8.5: over 47.9% / under 52.1%  fair 2.09 / 1.92
+*Corners* (model, exp 8.4)
+  O/U 8.5: over 46.5% / under 53.5%  fair 2.15 / 1.87
 
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-1-0 14.4% | 2-0 13.1% | 2-1 10.9% | 1-1 10.0% | 3-0 7.6% | 0-0 7.1%
-  O/U 2.5: over 49.0% / under 51.0%   BTTS 45.8%
+2-0 17.6% | 1-0 17.2% | 3-0 11.7% | 0-0 8.5% | 2-1 8.0% | 1-1 7.7%
+  O/U 2.5: over 44.9% / under 55.1%   BTTS 31.5%
