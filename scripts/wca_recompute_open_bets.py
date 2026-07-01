@@ -35,7 +35,7 @@ _SRC = os.path.join(os.path.dirname(_HERE), "src")
 if _SRC not in sys.path:
     sys.path.insert(0, _SRC)
 
-from wca.card import fit_models  # noqa: E402
+from wca.card import fit_models, DEFAULT_DC_LEVEL_TARGET  # noqa: E402
 from wca.data.results import load_results  # noqa: E402
 from wca.data.cleaning import resolve_results_path  # noqa: E402
 from wca.advancement import run_advancement  # noqa: E402
@@ -76,7 +76,13 @@ def main() -> int:
     path = resolve_results_path()
     print(f"Fitting corrected models on: {path}")
     results = load_results(path)
-    models = fit_models(results)
+    # Apply the same total-goals level anchor the live card uses
+    # (DEFAULT_DC_LEVEL_TARGET), so the serialized data/dc_params_corrected.json
+    # this script writes stays consistent with the card and is NOT reverted to
+    # the un-shifted (too-low) mu on the next recompute. Consumers of that file
+    # (wca_clv_by_bet.py, scripts/microstructure/synthetic_pricing.py) then read
+    # the recalibrated level. See docs/research/wca_alpha_2026/08_xg_and_totals.md.
+    models = fit_models(results, dc_level_target=DEFAULT_DC_LEVEL_TARGET)
     rater, dc = models.rater, models.dc
 
     Path("data/elo_ratings_corrected.json").write_text(

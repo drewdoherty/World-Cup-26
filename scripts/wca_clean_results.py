@@ -103,6 +103,20 @@ def main(argv=None) -> int:
     # 3. Rebuild cleaned CSV ---------------------------------------------
     summary = cleaning.build_cleaned()
 
+    # 3b. Derive the processed results file from the freshly-cleaned dataset.
+    # Keeps data/processed/wc2026_results.json (settle / backfill / win-rate /
+    # rigor / card-anchor consumer) in lock-step with martj42_cleaned.csv so it
+    # can no longer drift stale. Best-effort: a failure here must not abort the
+    # clean run that already rebuilt the authoritative CSV.
+    try:
+        if _HERE not in sys.path:
+            sys.path.insert(0, _HERE)
+        import wca_build_wc2026_results as build_results  # noqa: E402
+
+        build_results.main([])
+    except Exception as exc:  # noqa: BLE001 — never abort the clean on a derive error
+        print(f"WARN: processed results derive failed ({exc})", file=sys.stderr)
+
     # 4. Audit ------------------------------------------------------------
     Path(AUDIT_PATH).write_text(
         json.dumps({

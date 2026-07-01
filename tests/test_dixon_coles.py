@@ -544,3 +544,117 @@ def test_fit_scales_to_many_matches():
     assert model.fitted
     # Must complete in well under a minute.
     assert elapsed < 50.0
+
+
+# ---------------------------------------------------------------------------
+# Total-goals level recalibration (08_xg_and_totals fix).
+#
+# The raw penalised-MLE intercept ``mu`` undershoots the recent World-Cup base
+# scoring rate by ~0.4-0.5 goals/match. ``fit(level_target=T)`` / the post-fit
+# ``recalibrate_level(T)`` shift ``mu`` by a scalar so the slate mean total
+# matches ``T`` while leaving the supremacy log-ratio (raw 1X2 difference)
+# invariant. See docs/research/wca_alpha_2026/08_xg_and_totals.md.
+# ---------------------------------------------------------------------------
+
+
+def _fit_pair(level_target):
+    """Fit two identical models, one raw and one with ``level_target``."""
+    rng = np.random.default_rng(314)
+    teams, attack, defence = _make_team_params(10, rng, spread=0.5)
+    data = _simulate_matches(teams, attack, defence, mu=0.1, gamma=0.25,
+                             n_matches=4000, rng=rng, neutral_frac=0.0)
+    base = DixonColesModel(xi=0.0, reg_lambda=1e-3, min_matches=1)
+    base.fit(data["home_teams"], data["away_teams"],
+             data["home_goals"], data["away_goals"],
+             neutral=data["neutral"])
+    lifted = DixonColesModel(xi=0.0, reg_lambda=1e-3, min_matches=1)
+    lifted.fit(data["home_teams"], data["away_teams"],
+               data["home_goals"], data["away_goals"],
+               neutral=data["neutral"], level_target=level_target)
+    return teams, base, lifted
+
+
+def test_level_target_none_is_bit_identical():
+    # Regression lock: the default (level_target=None) must reproduce the raw
+    # MLE fit exactly -- the fix is opt-in and backward-compatible.
+    rng = np.random.default_rng(99)
+    teams, attack, defence = _make_team_params(8, rng, spread=0.5)
+    data = _simulate_matches(teams, attack, defence, mu=0.2, gamma=0.3,
+                             n_matches=3000, rng=rng)
+    a = DixonColesModel(xi=0.0, reg_lambda=1e-3, min_matches=1)
+    a.fit(data["home_teams"], data["away_teams"],
+          data["home_goals"], data["away_goals"], neutral=data["neutral"])
+    b = DixonColesModel(xi=0.0, reg_lambda=1e-3, min_matches=1)
+    b.fit(data["home_teams"], data["away_teams"],
+          data["home_goals"], data["away_goals"], neutral=data["neutral"],
+          level_target=None)
+    assert b.mu == pytest.approx(a.mu, abs=0.0)
+    assert b.attack == a.attack
+    assert b.defence == a.defence
+    assert b._level_target is None
+
+
+def test_level_target_hits_neutral_slate_mean_total():
+    # The recalibration anchors the NEUTRAL-venue mean total over the fitted
+    # matchups to ``level_target`` (the deployment slate -- a WC finals -- is
+    # neutral, so home advantage is excluded from the level reference).
+    target = 2.81
+    rng = np.random.default_rng(2718)
+    teams, attack, defence = _make_team_params(12, rng, spread=0.5)
+    data = _simulate_matches(teams, attack, defence, mu=0.05, gamma=0.2,
+                             n_matches=5000, rng=rng)
+    m = DixonColesModel(xi=0.0, reg_lambda=1e-3, min_matches=1)
+    m.fit(data["home_teams"], data["away_teams"],
+          data["home_goals"], data["away_goals"],
+          neutral=data["neutral"], level_target=target)
+    # Reconstruct the fitted-slate mean total at a NEUTRAL venue (gamma=0).
+    totals = []
+    for h, a in zip(data["home_teams"], data["away_teams"]):
+        lh, la = m.expected_lambdas(h, a, neutral=True, warn=False)
+        totals.append(lh + la)
+    assert float(np.mean(totals)) == pytest.approx(target, rel=1e-6)
+    assert m._level_target == pytest.approx(target)
+
+
+def test_level_shift_preserves_supremacy_log_ratio():
+    # The scalar mu shift must leave log(lambda_h/lambda_a) -- the supremacy /
+    # raw 1X2 *difference* -- invariant for every fixture.
+    teams, base, lifted = _fit_pair(2.81)
+    for h in teams[:5]:
+        for a in teams[:5]:
+            if h == a:
+                continue
+            lh0, la0 = base.expected_lambdas(h, a, neutral=True, warn=False)
+            lh1, la1 = lifted.expected_lambdas(h, a, neutral=True, warn=False)
+            assert math.log(lh1 / la1) == pytest.approx(
+                math.log(lh0 / la0), abs=1e-9
+            )
+            # Both lambdas are scaled by the same constant exp(delta_mu), so the
+            # total moves by that uniform factor (level shift, not a reshape).
+            ratio_h = lh1 / lh0
+            ratio_a = la1 / la0
+            assert ratio_h == pytest.approx(ratio_a, rel=1e-9)
+            assert (lh1 + la1) == pytest.approx(ratio_h * (lh0 + la0), rel=1e-9)
+
+
+def test_recalibrate_level_post_fit_matches_fit_flag():
+    # The post-fit recalibrate_level() primitive applies the same scalar shift
+    # as fit(level_target=...) for the same reference slate.
+    teams, base, lifted = _fit_pair(2.81)
+    fixtures = [(h, a) for h in teams for a in teams if h != a]
+    delta = base.recalibrate_level(2.81, neutral=True, fixtures=fixtures)
+    # mu moved up and the round-robin slate now averages the target.
+    tot = [sum(base.expected_lambdas(h, a, neutral=True, warn=False))
+           for h, a in fixtures]
+    assert float(np.mean(tot)) == pytest.approx(2.81, rel=1e-6)
+    assert delta > 0.0
+    assert base._level_target == pytest.approx(2.81)
+
+
+def test_level_target_serialization_roundtrip():
+    teams, base, lifted = _fit_pair(2.81)
+    restored = DixonColesModel.from_dict(lifted.to_dict())
+    assert restored._level_target == pytest.approx(2.81)
+    assert restored.mu == pytest.approx(lifted.mu)
+    # A raw model serializes level_target=None.
+    assert base.to_dict()["level_target"] is None

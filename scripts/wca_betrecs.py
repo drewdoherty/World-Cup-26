@@ -177,6 +177,78 @@ def _pm_pool(bankroll_usd: float) -> Dict[str, Any]:
     }
 
 
+def _ledger_open_count(db_path: str) -> Optional[int]:
+    """Count of ``status='open'`` rows in the live ledger; None if unreadable.
+
+    Opened read-only so a regen never mutates the runtime DB.
+    """
+    import sqlite3
+
+    if not Path(db_path).exists():
+        return None
+    try:
+        con = sqlite3.connect("file:%s?mode=ro" % db_path, uri=True)
+        try:
+            n = con.execute("SELECT COUNT(*) FROM bets WHERE status='open'").fetchone()[0]
+        finally:
+            con.close()
+        return int(n)
+    except Exception:
+        return None
+
+
+def _open_exposure(db_path: str, exposure_feed: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Open-exposure block derived from the LIVE ledger (F6).
+
+    ``n_open`` is counted straight from ``data/wca.db`` (``status='open'``) so it
+    can never drift from a stale shipped feed.  The EV / best / worst / p_profit
+    figures come from :func:`wca.exposure_dashboard.compute_dashboard_metrics`
+    (the honest, currency-coherent, ledger-driven engine).  When the runtime DB
+    is absent (CI regen from a checkout), we fall back to the exposure feed and
+    flag the source so the staleness is visible rather than silent.
+    """
+    n_live = _ledger_open_count(db_path)
+    feed = exposure_feed or {}
+    feed_metrics = feed.get("metrics") or {}
+
+    if n_live is not None:
+        metrics: Dict[str, Any] = {}
+        try:
+            from wca.exposure_dashboard import compute_dashboard_metrics
+
+            res = compute_dashboard_metrics(db_path)
+            metrics = res.get("metrics") or {}
+            # Prefer the engine's own open count (same DB); fall back to our count.
+            n_live = int(res.get("n_open_bets", n_live) or n_live)
+        except Exception:
+            metrics = {}
+        return {
+            "ev": metrics.get("ev"),
+            "best_case": metrics.get("best_case"),
+            "worst_case": metrics.get("worst_case"),
+            "best_case_usd": metrics.get("best_case_usd"),
+            "worst_case_usd": metrics.get("worst_case_usd"),
+            "p_profit": metrics.get("p_profit"),
+            "n_open": n_live,
+            "source": "ledger",
+        }
+
+    # No runtime DB — degrade to the feed, marked stale-sourced.
+    n_feed = int(
+        feed_metrics.get("n_open_bets") or feed.get("n_open_bets") or 0
+    )
+    return {
+        "ev": feed_metrics.get("ev"),
+        "best_case": feed_metrics.get("best_case"),
+        "worst_case": feed_metrics.get("worst_case"),
+        "best_case_usd": feed_metrics.get("best_case_usd"),
+        "worst_case_usd": feed_metrics.get("worst_case_usd"),
+        "p_profit": feed_metrics.get("p_profit"),
+        "n_open": n_feed,
+        "source": "feed (ledger unavailable)",
+    }
+
+
 # ---------------------------------------------------------------------------
 # Feed loaders
 # ---------------------------------------------------------------------------
@@ -628,11 +700,11 @@ def main() -> int:
     # FX
     fx_rate, fx_src = _fx_from_arb_data(arb_raw or {})
 
-    # Open exposure context
-    exp_metrics = (exposure_raw or {}).get("metrics") or {}
+    # Open exposure context — n_open / EV are derived from the LIVE ledger
+    # (F6), never from the possibly-stale shipped exposure feed.
     blind_spots_raw = (exposure_raw or {}).get("blind_spots") or []
     blind_spots = [str(bs) for bs in blind_spots_raw if isinstance(bs, str)]
-    n_open = int(exp_metrics.get("n_open_bets") or (exposure_raw or {}).get("n_open_bets") or 0)
+    open_exposure = _open_exposure(args.db, exposure_raw)
     open_fixtures: set = set()  # TODO: parse from ledger if available
 
     # Build sections
@@ -658,13 +730,7 @@ def main() -> int:
             "monitoring_only": True,
             "sportsbook_pool": sb_pool,
             "pm_pool": pm_pool_data,
-            "open_exposure": {
-                "ev": exp_metrics.get("ev"),
-                "best_case": exp_metrics.get("best_case"),
-                "worst_case": exp_metrics.get("worst_case"),
-                "p_profit": exp_metrics.get("p_profit"),
-                "n_open": n_open,
-            },
+            "open_exposure": open_exposure,
             "fx": {
                 "gbp_usd": fx_rate,
                 "source": fx_src,

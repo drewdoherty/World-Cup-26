@@ -1,0 +1,1109 @@
+{
+  "method": "seeded forward Monte Carlo with full path capture; prob_fn from fitted Elo+DC (data/advancement_models.pkl); ET/pen draw reallocation (et_skill_weight=0.5); n_sims=50000; seed=20260630",
+  "current_state": {
+    "r32_played_winners": {
+      "73": "Canada",
+      "74": "Paraguay",
+      "75": "Morocco",
+      "76": "Brazil"
+    },
+    "r32_to_play": [
+      "M77: France vs Sweden",
+      "M78: Ivory Coast vs Norway",
+      "M79: Mexico vs Ecuador",
+      "M80: England vs DR Congo",
+      "M81: United States vs Bosnia and Herzegovina",
+      "M82: Belgium vs Senegal",
+      "M83: Portugal vs Croatia",
+      "M84: Spain vs Austria",
+      "M85: Switzerland vs Algeria",
+      "M86: Argentina vs Cape Verde",
+      "M87: Colombia vs Ghana",
+      "M88: Australia vs Egypt"
+    ]
+  },
+  "remaining_ties": [
+    {
+      "round": "R32",
+      "match": 77,
+      "team_a": "France",
+      "team_b": "Sweden",
+      "p_a_advance": 0.763812,
+      "p_b_advance": 0.236188,
+      "map_pick": "France",
+      "p_map_pick": 0.763812,
+      "status": "to_play"
+    },
+    {
+      "round": "R32",
+      "match": 78,
+      "team_a": "Ivory Coast",
+      "team_b": "Norway",
+      "p_a_advance": 0.423473,
+      "p_b_advance": 0.576527,
+      "map_pick": "Norway",
+      "p_map_pick": 0.576527,
+      "status": "to_play"
+    },
+    {
+      "round": "R32",
+      "match": 79,
+      "team_a": "Mexico",
+      "team_b": "Ecuador",
+      "p_a_advance": 0.51287,
+      "p_b_advance": 0.48713,
+      "map_pick": "Mexico",
+      "p_map_pick": 0.51287,
+      "status": "to_play"
+    },
+    {
+      "round": "R32",
+      "match": 80,
+      "team_a": "England",
+      "team_b": "DR Congo",
+      "p_a_advance": 0.867239,
+      "p_b_advance": 0.132761,
+      "map_pick": "England",
+      "p_map_pick": 0.867239,
+      "status": "to_play"
+    },
+    {
+      "round": "R32",
+      "match": 81,
+      "team_a": "United States",
+      "team_b": "Bosnia and Herzegovina",
+      "p_a_advance": 0.656721,
+      "p_b_advance": 0.343279,
+      "map_pick": "United States",
+      "p_map_pick": 0.656721,
+      "status": "to_play"
+    },
+    {
+      "round": "R32",
+      "match": 82,
+      "team_a": "Belgium",
+      "team_b": "Senegal",
+      "p_a_advance": 0.670651,
+      "p_b_advance": 0.329349,
+      "map_pick": "Belgium",
+      "p_map_pick": 0.670651,
+      "status": "to_play"
+    },
+    {
+      "round": "R32",
+      "match": 83,
+      "team_a": "Portugal",
+      "team_b": "Croatia",
+      "p_a_advance": 0.633511,
+      "p_b_advance": 0.366489,
+      "map_pick": "Portugal",
+      "p_map_pick": 0.633511,
+      "status": "to_play"
+    },
+    {
+      "round": "R32",
+      "match": 84,
+      "team_a": "Spain",
+      "team_b": "Austria",
+      "p_a_advance": 0.813692,
+      "p_b_advance": 0.186308,
+      "map_pick": "Spain",
+      "p_map_pick": 0.813692,
+      "status": "to_play"
+    },
+    {
+      "round": "R32",
+      "match": 85,
+      "team_a": "Switzerland",
+      "team_b": "Algeria",
+      "p_a_advance": 0.638236,
+      "p_b_advance": 0.361764,
+      "map_pick": "Switzerland",
+      "p_map_pick": 0.638236,
+      "status": "to_play"
+    },
+    {
+      "round": "R32",
+      "match": 86,
+      "team_a": "Argentina",
+      "team_b": "Cape Verde",
+      "p_a_advance": 0.914685,
+      "p_b_advance": 0.085315,
+      "map_pick": "Argentina",
+      "p_map_pick": 0.914685,
+      "status": "to_play"
+    },
+    {
+      "round": "R32",
+      "match": 87,
+      "team_a": "Colombia",
+      "team_b": "Ghana",
+      "p_a_advance": 0.827475,
+      "p_b_advance": 0.172525,
+      "map_pick": "Colombia",
+      "p_map_pick": 0.827475,
+      "status": "to_play"
+    },
+    {
+      "round": "R32",
+      "match": 88,
+      "team_a": "Australia",
+      "team_b": "Egypt",
+      "p_a_advance": 0.533764,
+      "p_b_advance": 0.466236,
+      "map_pick": "Australia",
+      "p_map_pick": 0.533764,
+      "status": "to_play"
+    },
+    {
+      "round": "R16",
+      "match": 89,
+      "feeds_from": [
+        74,
+        77
+      ],
+      "participants": {
+        "France": {
+          "p_in_match": 0.76468,
+          "p_advance_given_in": 0.768531,
+          "p_advance_uncond": 0.58768
+        },
+        "Paraguay": {
+          "p_in_match": 1.0,
+          "p_advance_given_in": 0.29012,
+          "p_advance_uncond": 0.29012
+        },
+        "Sweden": {
+          "p_in_match": 0.23532,
+          "p_advance_given_in": 0.519293,
+          "p_advance_uncond": 0.1222
+        }
+      },
+      "map_pick": "France",
+      "p_map_pick_uncond": 0.58768,
+      "status": "downstream"
+    },
+    {
+      "round": "R16",
+      "match": 90,
+      "feeds_from": [
+        73,
+        75
+      ],
+      "participants": {
+        "Canada": {
+          "p_in_match": 1.0,
+          "p_advance_given_in": 0.33556,
+          "p_advance_uncond": 0.33556
+        },
+        "Morocco": {
+          "p_in_match": 1.0,
+          "p_advance_given_in": 0.66444,
+          "p_advance_uncond": 0.66444
+        }
+      },
+      "map_pick": "Morocco",
+      "p_map_pick_uncond": 0.66444,
+      "status": "downstream"
+    },
+    {
+      "round": "R16",
+      "match": 91,
+      "feeds_from": [
+        76,
+        78
+      ],
+      "participants": {
+        "Brazil": {
+          "p_in_match": 1.0,
+          "p_advance_given_in": 0.80058,
+          "p_advance_uncond": 0.80058
+        },
+        "Ivory Coast": {
+          "p_in_match": 0.42388,
+          "p_advance_given_in": 0.170897,
+          "p_advance_uncond": 0.07244
+        },
+        "Norway": {
+          "p_in_match": 0.57612,
+          "p_advance_given_in": 0.220405,
+          "p_advance_uncond": 0.12698
+        }
+      },
+      "map_pick": "Brazil",
+      "p_map_pick_uncond": 0.80058,
+      "status": "downstream"
+    },
+    {
+      "round": "R16",
+      "match": 92,
+      "feeds_from": [
+        79,
+        80
+      ],
+      "participants": {
+        "DR Congo": {
+          "p_in_match": 0.13024,
+          "p_advance_given_in": 0.257064,
+          "p_advance_uncond": 0.03348
+        },
+        "Ecuador": {
+          "p_in_match": 0.4884,
+          "p_advance_given_in": 0.372891,
+          "p_advance_uncond": 0.18212
+        },
+        "England": {
+          "p_in_match": 0.86976,
+          "p_advance_given_in": 0.682625,
+          "p_advance_uncond": 0.59372
+        },
+        "Mexico": {
+          "p_in_match": 0.5116,
+          "p_advance_given_in": 0.372713,
+          "p_advance_uncond": 0.19068
+        }
+      },
+      "map_pick": "England",
+      "p_map_pick_uncond": 0.59372,
+      "status": "downstream"
+    },
+    {
+      "round": "R16",
+      "match": 93,
+      "feeds_from": [
+        83,
+        84
+      ],
+      "participants": {
+        "Austria": {
+          "p_in_match": 0.1862,
+          "p_advance_given_in": 0.321053,
+          "p_advance_uncond": 0.05978
+        },
+        "Croatia": {
+          "p_in_match": 0.36552,
+          "p_advance_given_in": 0.334154,
+          "p_advance_uncond": 0.12214
+        },
+        "Portugal": {
+          "p_in_match": 0.63448,
+          "p_advance_given_in": 0.444364,
+          "p_advance_uncond": 0.28194
+        },
+        "Spain": {
+          "p_in_match": 0.8138,
+          "p_advance_given_in": 0.658811,
+          "p_advance_uncond": 0.53614
+        }
+      },
+      "map_pick": "Spain",
+      "p_map_pick_uncond": 0.53614,
+      "status": "downstream"
+    },
+    {
+      "round": "R16",
+      "match": 94,
+      "feeds_from": [
+        81,
+        82
+      ],
+      "participants": {
+        "Belgium": {
+          "p_in_match": 0.67326,
+          "p_advance_given_in": 0.722841,
+          "p_advance_uncond": 0.48666
+        },
+        "Bosnia and Herzegovina": {
+          "p_in_match": 0.3402,
+          "p_advance_given_in": 0.241681,
+          "p_advance_uncond": 0.08222
+        },
+        "Senegal": {
+          "p_in_match": 0.32674,
+          "p_advance_given_in": 0.564486,
+          "p_advance_uncond": 0.18444
+        },
+        "United States": {
+          "p_in_match": 0.6598,
+          "p_advance_given_in": 0.373871,
+          "p_advance_uncond": 0.24668
+        }
+      },
+      "map_pick": "Belgium",
+      "p_map_pick_uncond": 0.48666,
+      "status": "downstream"
+    },
+    {
+      "round": "R16",
+      "match": 95,
+      "feeds_from": [
+        86,
+        88
+      ],
+      "participants": {
+        "Argentina": {
+          "p_in_match": 0.91696,
+          "p_advance_given_in": 0.824071,
+          "p_advance_uncond": 0.75564
+        },
+        "Australia": {
+          "p_in_match": 0.53356,
+          "p_advance_given_in": 0.219132,
+          "p_advance_uncond": 0.11692
+        },
+        "Cape Verde": {
+          "p_in_match": 0.08304,
+          "p_advance_given_in": 0.336705,
+          "p_advance_uncond": 0.02796
+        },
+        "Egypt": {
+          "p_in_match": 0.46644,
+          "p_advance_given_in": 0.213275,
+          "p_advance_uncond": 0.09948
+        }
+      },
+      "map_pick": "Argentina",
+      "p_map_pick_uncond": 0.75564,
+      "status": "downstream"
+    },
+    {
+      "round": "R16",
+      "match": 96,
+      "feeds_from": [
+        85,
+        87
+      ],
+      "participants": {
+        "Algeria": {
+          "p_in_match": 0.36078,
+          "p_advance_given_in": 0.338932,
+          "p_advance_uncond": 0.12228
+        },
+        "Colombia": {
+          "p_in_match": 0.8254,
+          "p_advance_given_in": 0.652726,
+          "p_advance_uncond": 0.53876
+        },
+        "Ghana": {
+          "p_in_match": 0.1746,
+          "p_advance_given_in": 0.281214,
+          "p_advance_uncond": 0.0491
+        },
+        "Switzerland": {
+          "p_in_match": 0.63922,
+          "p_advance_given_in": 0.453459,
+          "p_advance_uncond": 0.28986
+        }
+      },
+      "map_pick": "Colombia",
+      "p_map_pick_uncond": 0.53876,
+      "status": "downstream"
+    },
+    {
+      "round": "QF",
+      "match": 97,
+      "feeds_from": [
+        89,
+        90
+      ],
+      "participants": {
+        "Canada": {
+          "p_in_match": 0.33556,
+          "p_advance_given_in": 0.26654,
+          "p_advance_uncond": 0.08944
+        },
+        "France": {
+          "p_in_match": 0.58768,
+          "p_advance_given_in": 0.736523,
+          "p_advance_uncond": 0.43284
+        },
+        "Morocco": {
+          "p_in_match": 0.66444,
+          "p_advance_given_in": 0.424779,
+          "p_advance_uncond": 0.28224
+        },
+        "Paraguay": {
+          "p_in_match": 0.29012,
+          "p_advance_given_in": 0.468634,
+          "p_advance_uncond": 0.13596
+        },
+        "Sweden": {
+          "p_in_match": 0.1222,
+          "p_advance_given_in": 0.48707,
+          "p_advance_uncond": 0.05952
+        }
+      },
+      "map_pick": "France",
+      "p_map_pick_uncond": 0.43284,
+      "status": "downstream"
+    },
+    {
+      "round": "QF",
+      "match": 98,
+      "feeds_from": [
+        93,
+        94
+      ],
+      "participants": {
+        "Austria": {
+          "p_in_match": 0.05978,
+          "p_advance_given_in": 0.447641,
+          "p_advance_uncond": 0.02676
+        },
+        "Belgium": {
+          "p_in_match": 0.48666,
+          "p_advance_given_in": 0.383142,
+          "p_advance_uncond": 0.18646
+        },
+        "Bosnia and Herzegovina": {
+          "p_in_match": 0.08222,
+          "p_advance_given_in": 0.144977,
+          "p_advance_uncond": 0.01192
+        },
+        "Croatia": {
+          "p_in_match": 0.12214,
+          "p_advance_given_in": 0.559849,
+          "p_advance_uncond": 0.06838
+        },
+        "Portugal": {
+          "p_in_match": 0.28194,
+          "p_advance_given_in": 0.67376,
+          "p_advance_uncond": 0.18996
+        },
+        "Senegal": {
+          "p_in_match": 0.18444,
+          "p_advance_given_in": 0.251247,
+          "p_advance_uncond": 0.04634
+        },
+        "Spain": {
+          "p_in_match": 0.53614,
+          "p_advance_given_in": 0.77159,
+          "p_advance_uncond": 0.41368
+        },
+        "United States": {
+          "p_in_match": 0.24668,
+          "p_advance_given_in": 0.229042,
+          "p_advance_uncond": 0.0565
+        }
+      },
+      "map_pick": "Spain",
+      "p_map_pick_uncond": 0.41368,
+      "status": "downstream"
+    },
+    {
+      "round": "QF",
+      "match": 99,
+      "feeds_from": [
+        91,
+        92
+      ],
+      "participants": {
+        "Brazil": {
+          "p_in_match": 0.80058,
+          "p_advance_given_in": 0.649054,
+          "p_advance_uncond": 0.51962
+        },
+        "DR Congo": {
+          "p_in_match": 0.03348,
+          "p_advance_given_in": 0.145161,
+          "p_advance_uncond": 0.00486
+        },
+        "Ecuador": {
+          "p_in_match": 0.18212,
+          "p_advance_given_in": 0.310784,
+          "p_advance_uncond": 0.0566
+        },
+        "England": {
+          "p_in_match": 0.59372,
+          "p_advance_given_in": 0.486458,
+          "p_advance_uncond": 0.28882
+        },
+        "Ivory Coast": {
+          "p_in_match": 0.07244,
+          "p_advance_given_in": 0.302595,
+          "p_advance_uncond": 0.02192
+        },
+        "Mexico": {
+          "p_in_match": 0.19068,
+          "p_advance_given_in": 0.310048,
+          "p_advance_uncond": 0.05912
+        },
+        "Norway": {
+          "p_in_match": 0.12698,
+          "p_advance_given_in": 0.38636,
+          "p_advance_uncond": 0.04906
+        }
+      },
+      "map_pick": "Brazil",
+      "p_map_pick_uncond": 0.51962,
+      "status": "downstream"
+    },
+    {
+      "round": "QF",
+      "match": 100,
+      "feeds_from": [
+        95,
+        96
+      ],
+      "participants": {
+        "Algeria": {
+          "p_in_match": 0.12228,
+          "p_advance_given_in": 0.248937,
+          "p_advance_uncond": 0.03044
+        },
+        "Argentina": {
+          "p_in_match": 0.75564,
+          "p_advance_given_in": 0.712826,
+          "p_advance_uncond": 0.53864
+        },
+        "Australia": {
+          "p_in_match": 0.11692,
+          "p_advance_given_in": 0.364181,
+          "p_advance_uncond": 0.04258
+        },
+        "Cape Verde": {
+          "p_in_match": 0.02796,
+          "p_advance_given_in": 0.201717,
+          "p_advance_uncond": 0.00564
+        },
+        "Colombia": {
+          "p_in_match": 0.53876,
+          "p_advance_given_in": 0.443203,
+          "p_advance_uncond": 0.23878
+        },
+        "Egypt": {
+          "p_in_match": 0.09948,
+          "p_advance_given_in": 0.363691,
+          "p_advance_uncond": 0.03618
+        },
+        "Ghana": {
+          "p_in_match": 0.0491,
+          "p_advance_given_in": 0.160896,
+          "p_advance_uncond": 0.0079
+        },
+        "Switzerland": {
+          "p_in_match": 0.28986,
+          "p_advance_given_in": 0.344442,
+          "p_advance_uncond": 0.09984
+        }
+      },
+      "map_pick": "Argentina",
+      "p_map_pick_uncond": 0.53864,
+      "status": "downstream"
+    },
+    {
+      "round": "SF",
+      "match": 101,
+      "feeds_from": [
+        97,
+        98
+      ],
+      "participants": {
+        "Austria": {
+          "p_in_match": 0.02676,
+          "p_advance_given_in": 0.383408,
+          "p_advance_uncond": 0.01026
+        },
+        "Belgium": {
+          "p_in_match": 0.18646,
+          "p_advance_given_in": 0.51078,
+          "p_advance_uncond": 0.09524
+        },
+        "Bosnia and Herzegovina": {
+          "p_in_match": 0.01192,
+          "p_advance_given_in": 0.218121,
+          "p_advance_uncond": 0.0026
+        },
+        "Canada": {
+          "p_in_match": 0.08944,
+          "p_advance_given_in": 0.230322,
+          "p_advance_uncond": 0.0206
+        },
+        "Croatia": {
+          "p_in_match": 0.06838,
+          "p_advance_given_in": 0.43463,
+          "p_advance_uncond": 0.02972
+        },
+        "France": {
+          "p_in_match": 0.43284,
+          "p_advance_given_in": 0.575039,
+          "p_advance_uncond": 0.2489
+        },
+        "Morocco": {
+          "p_in_match": 0.28224,
+          "p_advance_given_in": 0.384991,
+          "p_advance_uncond": 0.10866
+        },
+        "Paraguay": {
+          "p_in_match": 0.13596,
+          "p_advance_given_in": 0.293469,
+          "p_advance_uncond": 0.0399
+        },
+        "Portugal": {
+          "p_in_match": 0.18996,
+          "p_advance_given_in": 0.576437,
+          "p_advance_uncond": 0.1095
+        },
+        "Senegal": {
+          "p_in_match": 0.04634,
+          "p_advance_given_in": 0.377212,
+          "p_advance_uncond": 0.01748
+        },
+        "Spain": {
+          "p_in_match": 0.41368,
+          "p_advance_given_in": 0.676078,
+          "p_advance_uncond": 0.27968
+        },
+        "Sweden": {
+          "p_in_match": 0.05952,
+          "p_advance_given_in": 0.317204,
+          "p_advance_uncond": 0.01888
+        },
+        "United States": {
+          "p_in_match": 0.0565,
+          "p_advance_given_in": 0.32885,
+          "p_advance_uncond": 0.01858
+        }
+      },
+      "map_pick": "Spain",
+      "p_map_pick_uncond": 0.27968,
+      "status": "downstream"
+    },
+    {
+      "round": "SF",
+      "match": 102,
+      "feeds_from": [
+        99,
+        100
+      ],
+      "participants": {
+        "Algeria": {
+          "p_in_match": 0.03044,
+          "p_advance_given_in": 0.227989,
+          "p_advance_uncond": 0.00694
+        },
+        "Argentina": {
+          "p_in_match": 0.53864,
+          "p_advance_given_in": 0.569026,
+          "p_advance_uncond": 0.3065
+        },
+        "Australia": {
+          "p_in_match": 0.04258,
+          "p_advance_given_in": 0.252701,
+          "p_advance_uncond": 0.01076
+        },
+        "Brazil": {
+          "p_in_match": 0.51962,
+          "p_advance_given_in": 0.595243,
+          "p_advance_uncond": 0.3093
+        },
+        "Cape Verde": {
+          "p_in_match": 0.00564,
+          "p_advance_given_in": 0.148936,
+          "p_advance_uncond": 0.00084
+        },
+        "Colombia": {
+          "p_in_match": 0.23878,
+          "p_advance_given_in": 0.436804,
+          "p_advance_uncond": 0.1043
+        },
+        "DR Congo": {
+          "p_in_match": 0.00486,
+          "p_advance_given_in": 0.152263,
+          "p_advance_uncond": 0.00074
+        },
+        "Ecuador": {
+          "p_in_match": 0.0566,
+          "p_advance_given_in": 0.358304,
+          "p_advance_uncond": 0.02028
+        },
+        "Egypt": {
+          "p_in_match": 0.03618,
+          "p_advance_given_in": 0.223881,
+          "p_advance_uncond": 0.0081
+        },
+        "England": {
+          "p_in_match": 0.28882,
+          "p_advance_given_in": 0.540891,
+          "p_advance_uncond": 0.15622
+        },
+        "Ghana": {
+          "p_in_match": 0.0079,
+          "p_advance_given_in": 0.124051,
+          "p_advance_uncond": 0.00098
+        },
+        "Ivory Coast": {
+          "p_in_match": 0.02192,
+          "p_advance_given_in": 0.257299,
+          "p_advance_uncond": 0.00564
+        },
+        "Mexico": {
+          "p_in_match": 0.05912,
+          "p_advance_given_in": 0.36502,
+          "p_advance_uncond": 0.02158
+        },
+        "Norway": {
+          "p_in_match": 0.04906,
+          "p_advance_given_in": 0.324908,
+          "p_advance_uncond": 0.01594
+        },
+        "Switzerland": {
+          "p_in_match": 0.09984,
+          "p_advance_given_in": 0.319311,
+          "p_advance_uncond": 0.03188
+        }
+      },
+      "map_pick": "Brazil",
+      "p_map_pick_uncond": 0.3093,
+      "status": "downstream"
+    },
+    {
+      "round": "F",
+      "match": 104,
+      "feeds_from": [
+        101,
+        102
+      ],
+      "participants": {
+        "Algeria": {
+          "p_in_match": 0.00694,
+          "p_advance_given_in": 0.247839,
+          "p_advance_uncond": 0.00172
+        },
+        "Argentina": {
+          "p_in_match": 0.3065,
+          "p_advance_given_in": 0.611354,
+          "p_advance_uncond": 0.18738
+        },
+        "Australia": {
+          "p_in_match": 0.01076,
+          "p_advance_given_in": 0.304833,
+          "p_advance_uncond": 0.00328
+        },
+        "Austria": {
+          "p_in_match": 0.01026,
+          "p_advance_given_in": 0.239766,
+          "p_advance_uncond": 0.00246
+        },
+        "Belgium": {
+          "p_in_match": 0.09524,
+          "p_advance_given_in": 0.375892,
+          "p_advance_uncond": 0.0358
+        },
+        "Bosnia and Herzegovina": {
+          "p_in_match": 0.0026,
+          "p_advance_given_in": 0.107692,
+          "p_advance_uncond": 0.00028
+        },
+        "Brazil": {
+          "p_in_match": 0.3093,
+          "p_advance_given_in": 0.607177,
+          "p_advance_uncond": 0.1878
+        },
+        "Canada": {
+          "p_in_match": 0.0206,
+          "p_advance_given_in": 0.178641,
+          "p_advance_uncond": 0.00368
+        },
+        "Cape Verde": {
+          "p_in_match": 0.00084,
+          "p_advance_given_in": 0.166667,
+          "p_advance_uncond": 0.00014
+        },
+        "Colombia": {
+          "p_in_match": 0.1043,
+          "p_advance_given_in": 0.489166,
+          "p_advance_uncond": 0.05102
+        },
+        "Croatia": {
+          "p_in_match": 0.02972,
+          "p_advance_given_in": 0.352624,
+          "p_advance_uncond": 0.01048
+        },
+        "DR Congo": {
+          "p_in_match": 0.00074,
+          "p_advance_given_in": 0.162162,
+          "p_advance_uncond": 0.00012
+        },
+        "Ecuador": {
+          "p_in_match": 0.02028,
+          "p_advance_given_in": 0.345168,
+          "p_advance_uncond": 0.007
+        },
+        "Egypt": {
+          "p_in_match": 0.0081,
+          "p_advance_given_in": 0.249383,
+          "p_advance_uncond": 0.00202
+        },
+        "England": {
+          "p_in_match": 0.15622,
+          "p_advance_given_in": 0.538343,
+          "p_advance_uncond": 0.0841
+        },
+        "France": {
+          "p_in_match": 0.2489,
+          "p_advance_given_in": 0.518521,
+          "p_advance_uncond": 0.12906
+        },
+        "Ghana": {
+          "p_in_match": 0.00098,
+          "p_advance_given_in": 0.122449,
+          "p_advance_uncond": 0.00012
+        },
+        "Ivory Coast": {
+          "p_in_match": 0.00564,
+          "p_advance_given_in": 0.251773,
+          "p_advance_uncond": 0.00142
+        },
+        "Mexico": {
+          "p_in_match": 0.02158,
+          "p_advance_given_in": 0.352178,
+          "p_advance_uncond": 0.0076
+        },
+        "Morocco": {
+          "p_in_match": 0.10866,
+          "p_advance_given_in": 0.335542,
+          "p_advance_uncond": 0.03646
+        },
+        "Norway": {
+          "p_in_match": 0.01594,
+          "p_advance_given_in": 0.336261,
+          "p_advance_uncond": 0.00536
+        },
+        "Paraguay": {
+          "p_in_match": 0.0399,
+          "p_advance_given_in": 0.250627,
+          "p_advance_uncond": 0.01
+        },
+        "Portugal": {
+          "p_in_match": 0.1095,
+          "p_advance_given_in": 0.449315,
+          "p_advance_uncond": 0.0492
+        },
+        "Senegal": {
+          "p_in_match": 0.01748,
+          "p_advance_given_in": 0.254005,
+          "p_advance_uncond": 0.00444
+        },
+        "Spain": {
+          "p_in_match": 0.27968,
+          "p_advance_given_in": 0.569365,
+          "p_advance_uncond": 0.15924
+        },
+        "Sweden": {
+          "p_in_match": 0.01888,
+          "p_advance_given_in": 0.23411,
+          "p_advance_uncond": 0.00442
+        },
+        "Switzerland": {
+          "p_in_match": 0.03188,
+          "p_advance_given_in": 0.351317,
+          "p_advance_uncond": 0.0112
+        },
+        "United States": {
+          "p_in_match": 0.01858,
+          "p_advance_given_in": 0.22605,
+          "p_advance_uncond": 0.0042
+        }
+      },
+      "map_pick": "Brazil",
+      "p_map_pick_uncond": 0.1878,
+      "status": "downstream"
+    }
+  ],
+  "map_completion": [
+    {
+      "round": "R32",
+      "tie": "M77: France vs Sweden",
+      "pick": "France",
+      "p_pick": 0.763812,
+      "note": "single tie, to play"
+    },
+    {
+      "round": "R32",
+      "tie": "M78: Ivory Coast vs Norway",
+      "pick": "Norway",
+      "p_pick": 0.576527,
+      "note": "single tie, to play"
+    },
+    {
+      "round": "R32",
+      "tie": "M79: Mexico vs Ecuador",
+      "pick": "Mexico",
+      "p_pick": 0.51287,
+      "note": "single tie, to play"
+    },
+    {
+      "round": "R32",
+      "tie": "M80: England vs DR Congo",
+      "pick": "England",
+      "p_pick": 0.867239,
+      "note": "single tie, to play"
+    },
+    {
+      "round": "R32",
+      "tie": "M81: United States vs Bosnia and Herzegovina",
+      "pick": "United States",
+      "p_pick": 0.656721,
+      "note": "single tie, to play"
+    },
+    {
+      "round": "R32",
+      "tie": "M82: Belgium vs Senegal",
+      "pick": "Belgium",
+      "p_pick": 0.670651,
+      "note": "single tie, to play"
+    },
+    {
+      "round": "R32",
+      "tie": "M83: Portugal vs Croatia",
+      "pick": "Portugal",
+      "p_pick": 0.633511,
+      "note": "single tie, to play"
+    },
+    {
+      "round": "R32",
+      "tie": "M84: Spain vs Austria",
+      "pick": "Spain",
+      "p_pick": 0.813692,
+      "note": "single tie, to play"
+    },
+    {
+      "round": "R32",
+      "tie": "M85: Switzerland vs Algeria",
+      "pick": "Switzerland",
+      "p_pick": 0.638236,
+      "note": "single tie, to play"
+    },
+    {
+      "round": "R32",
+      "tie": "M86: Argentina vs Cape Verde",
+      "pick": "Argentina",
+      "p_pick": 0.914685,
+      "note": "single tie, to play"
+    },
+    {
+      "round": "R32",
+      "tie": "M87: Colombia vs Ghana",
+      "pick": "Colombia",
+      "p_pick": 0.827475,
+      "note": "single tie, to play"
+    },
+    {
+      "round": "R32",
+      "tie": "M88: Australia vs Egypt",
+      "pick": "Australia",
+      "p_pick": 0.533764,
+      "note": "single tie, to play"
+    },
+    {
+      "round": "R16",
+      "tie": "M89: W74 vs W77",
+      "pick": "France",
+      "p_pick": 0.769069,
+      "note": "feeder picks Paraguay / France"
+    },
+    {
+      "round": "R16",
+      "tie": "M90: W73 vs W75",
+      "pick": "Morocco",
+      "p_pick": 0.666442,
+      "note": "feeder picks Canada / Morocco"
+    },
+    {
+      "round": "R16",
+      "tie": "M91: W76 vs W78",
+      "pick": "Brazil",
+      "p_pick": 0.777725,
+      "note": "feeder picks Brazil / Norway"
+    },
+    {
+      "round": "R16",
+      "tie": "M92: W79 vs W80",
+      "pick": "England",
+      "p_pick": 0.681334,
+      "note": "feeder picks Mexico / England"
+    },
+    {
+      "round": "R16",
+      "tie": "M93: W83 vs W84",
+      "pick": "Spain",
+      "p_pick": 0.618879,
+      "note": "feeder picks Portugal / Spain"
+    },
+    {
+      "round": "R16",
+      "tie": "M94: W81 vs W82",
+      "pick": "Belgium",
+      "p_pick": 0.678515,
+      "note": "feeder picks United States / Belgium"
+    },
+    {
+      "round": "R16",
+      "tie": "M95: W86 vs W88",
+      "pick": "Argentina",
+      "p_pick": 0.819239,
+      "note": "feeder picks Argentina / Australia"
+    },
+    {
+      "round": "R16",
+      "tie": "M96: W85 vs W87",
+      "pick": "Colombia",
+      "p_pick": 0.610481,
+      "note": "feeder picks Switzerland / Colombia"
+    },
+    {
+      "round": "QF",
+      "tie": "M97: W89 vs W90",
+      "pick": "France",
+      "p_pick": 0.69157,
+      "note": "feeder picks France / Morocco"
+    },
+    {
+      "round": "QF",
+      "tie": "M98: W93 vs W94",
+      "pick": "Spain",
+      "p_pick": 0.701278,
+      "note": "feeder picks Spain / Belgium"
+    },
+    {
+      "round": "QF",
+      "tie": "M99: W91 vs W92",
+      "pick": "Brazil",
+      "p_pick": 0.570286,
+      "note": "feeder picks Brazil / England"
+    },
+    {
+      "round": "QF",
+      "tie": "M100: W95 vs W96",
+      "pick": "Argentina",
+      "p_pick": 0.642474,
+      "note": "feeder picks Argentina / Colombia"
+    },
+    {
+      "round": "SF",
+      "tie": "M101: W97 vs W98",
+      "pick": "Spain",
+      "p_pick": 0.55363,
+      "note": "feeder picks France / Spain"
+    },
+    {
+      "round": "SF",
+      "tie": "M102: W99 vs W100",
+      "pick": "Argentina",
+      "p_pick": 0.500309,
+      "note": "feeder picks Brazil / Argentina"
+    },
+    {
+      "round": "F",
+      "tie": "M104: W101 vs W102",
+      "pick": "Spain",
+      "p_pick": 0.51425,
+      "note": "feeder picks Spain / Argentina"
+    }
+  ],
+  "p_perfect_remaining_modal_path": 1.6552702e-05,
+  "p_perfect_remaining_empirical": 6e-05,
+  "n_sims": 50000,
+  "seed": 20260630
+}

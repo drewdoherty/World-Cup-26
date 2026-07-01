@@ -65,6 +65,78 @@ DEFAULT_ELO_POINTS_PER_DC_PRIOR = 400.0
 LOGGED_RESULTS_ELO_K_SCALE = 0.05
 DEFAULT_ELO_K_SCALE = 1.0
 
+# Dixon-Coles total-goals level anchor (mean goals/match) the production fit is
+# recalibrated to. The raw penalised-MLE intercept ``mu`` (fit over a 49k-match
+# corpus dominated by lower-scoring defensive internationals) implies a WC slate
+# total of ~2.34 — ~0.4-0.5 goals/match below the recent World-Cup base rate and
+# ~0.66 below the realized WC2026 rate (significant by paired t, p≈0.049). 2.81
+# is the FIFA-World-Cup-since-2010 training mean (out-of-sample, NOT the realized
+# 3.00, to avoid fitting the test sample). Applied as a scalar ``mu`` shift that
+# leaves the supremacy log-ratio / raw 1X2 difference invariant, so the blended,
+# reconciled 1X2 the card actually bets is unchanged while xG / Over / BTTS rise.
+# See docs/research/wca_alpha_2026/08_xg_and_totals.md.
+DEFAULT_DC_LEVEL_TARGET = 2.81
+
+# Reference slate for the WC total-goals level anchor: the played 2026 World Cup
+# fixtures (neutral). The bias was measured ON the WC slate, so the anchor makes
+# the model's mean expected total over THESE fixtures equal the target — NOT the
+# broad training corpus. Single source of truth shared by ``fit_models``,
+# ``scripts/wca_recompute_open_bets.py`` and ``scripts/wca_recalibrate_dc_level.py``
+# so the live card and the serialized ``data/dc_params_corrected.json`` cannot drift.
+_WC_LEVEL_FIXTURES_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "data", "processed", "wc2026_results.json",
+)
+
+
+def _wc_level_reference_fixtures(dc: "DixonColesModel") -> List[Tuple[str, str]]:
+    """Played WC2026 ``(home, away)`` pairs whose teams the model knows."""
+    import json
+
+    try:
+        with open(_WC_LEVEL_FIXTURES_PATH) as fh:
+            results = json.load(fh).get("results", [])
+    except (OSError, ValueError):
+        return []
+    fixtures: List[Tuple[str, str]] = []
+    for r in results:
+        fx = r.get("fixture", "")
+        if " vs " not in fx:
+            continue
+        home, away = (s.strip() for s in fx.split(" vs ", 1))
+        if home in dc.attack and away in dc.attack:
+            fixtures.append((home, away))
+    return fixtures
+
+
+def apply_wc_level_anchor(
+    dc: DixonColesModel, target_total: float = DEFAULT_DC_LEVEL_TARGET
+) -> Optional[float]:
+    """Anchor the Dixon-Coles total-goals level to the WC slate (shared helper).
+
+    Shifts the intercept ``mu`` so the mean expected total over the played
+    WC2026 fixtures (neutral) equals ``target_total`` — the WC-slate anchor used
+    for deployment. ``attack``/``defence``/``rho``/``home_advantage`` are
+    untouched, so the supremacy log-ratio / raw 1X2 difference is invariant; only
+    the goal level moves. Returns the applied ``Δmu``, or ``None`` if the WC
+    reference slate is unavailable — in which case the level is left un-shifted
+    and the caller keeps working (a live build is never hard-failed by a missing
+    reference file; the skip is surfaced as a ``RuntimeWarning``).
+    """
+    fixtures = _wc_level_reference_fixtures(dc)
+    if not fixtures:
+        import warnings
+
+        warnings.warn(
+            "WC level anchor skipped: no matched WC2026 reference fixtures at "
+            f"{_WC_LEVEL_FIXTURES_PATH}; Dixon-Coles total-goals level left "
+            "un-shifted.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return None
+    return dc.recalibrate_level(target_total, neutral=True, fixtures=fixtures)
+
 
 def _elo_initial_ratings_from_dc_prior(
     *,
@@ -496,6 +568,13 @@ class FittedModels:
     elo_outcome: EloOutcomeModel
     dc: DixonColesModel
     n_matches: int
+    #: Optional two-timescale opponent-adjusted goal blend (F7). Populated ONLY
+    #: when ``fit_models(goal_blend=True)`` is requested; ``None`` by default so
+    #: every existing consumer and the production staking path are unchanged. The
+    #: blend is TRACKING-ONLY / OOS-gated — it is a parallel view for later CLV
+    #: validation and is NOT wired into EV/sizing. See
+    #: :mod:`wca.models.goalblend`.
+    goal_blend: Optional["object"] = None
 
 
 # ---------------------------------------------------------------------------
@@ -528,6 +607,9 @@ def fit_models(
     elo_prior_scale: Optional[float] = None,
     elo_points_per_dc_prior: float = DEFAULT_ELO_POINTS_PER_DC_PRIOR,
     elo_k_scale: float = DEFAULT_ELO_K_SCALE,
+    dc_level_target: Optional[float] = None,
+    goal_blend: bool = False,
+    goal_blend_config: Optional["object"] = None,
 ) -> FittedModels:
     """Fit Elo (rating + outcome) and Dixon-Coles on the results history.
 
@@ -608,8 +690,46 @@ def fit_models(
         defence_prior=dfc_prior,
     )
     dc.fit_dataframe(played, reference_date=reference_date)
+    # Deployment total-goals level anchor (WC slate). ``dc_level_target`` None
+    # (default) leaves the raw penalised-MLE intercept untouched, so the fit is
+    # bit-for-bit identical to the historical default. When set (the live card +
+    # scripts/wca_recompute_open_bets.py pass DEFAULT_DC_LEVEL_TARGET=2.81), the
+    # model's mean expected total ON THE WC FIXTURES is anchored to it via a
+    # scalar ``mu`` shift; the supremacy log-ratio / raw 1X2 difference is
+    # invariant. Uses the SAME WC-slate method as
+    # scripts/wca_recalibrate_dc_level.py, so the card and the serialized
+    # data/dc_params_corrected.json stay consistent (mu≈0.389 at target 2.81).
+    # See docs/research/wca_alpha_2026/08_xg_and_totals.md §5.2.
+    if dc_level_target is not None:
+        apply_wc_level_anchor(dc, dc_level_target)
 
-    return FittedModels(rater=rater, elo_outcome=elo_outcome, dc=dc, n_matches=len(played))
+    # -- Two-timescale opponent-adjusted goal blend (F7, DEFAULT OFF) -------
+    # When ``goal_blend`` is False (default) NOTHING below runs and the returned
+    # ``FittedModels.goal_blend`` is ``None``, so every existing consumer and the
+    # production staking path are bit-identical. When opted in, a second
+    # short-half-life DC is fit on the SAME played history and convex-blended
+    # per team by credibility weight; the result is TRACKING-ONLY (a parallel
+    # view for later OOS CLV validation), never wired into EV/sizing here.
+    blend_obj = None
+    if goal_blend:
+        from wca.models.goalblend import GoalBlendConfig, build_goal_blend
+
+        cfg = goal_blend_config
+        if cfg is None:
+            # Inherit the level anchor when the long fit was anchored, so the
+            # blend's totals level matches the deployed convention.
+            cfg = GoalBlendConfig(level_target=dc_level_target)
+        blend_obj = build_goal_blend(
+            dc, played, reference_date=reference_date, config=cfg
+        )
+
+    return FittedModels(
+        rater=rater,
+        elo_outcome=elo_outcome,
+        dc=dc,
+        n_matches=len(played),
+        goal_blend=blend_obj,
+    )
 
 
 # ---------------------------------------------------------------------------

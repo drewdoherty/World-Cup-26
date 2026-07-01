@@ -49,6 +49,7 @@ jobs:
           git config user.email "bot@world-cup-alpha.local"
           git config user.name "World Cup Alpha Bot"
           git add data/raw/martj42_cleaned.csv \
+                  data/processed/wc2026_results.json \
                   data/corrections.json data/corrections_review.json data/audit.json
           git commit -m "Auto-clean: refresh martj42_cleaned dataset" || true
           for i in 1 2 3; do

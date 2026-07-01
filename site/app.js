@@ -1168,12 +1168,30 @@
     var el = $("exposure");
     if (!el || !exp || !exp.metrics) return;
     var m = exp.metrics;
-    ($("exp-ev") || {}).textContent = m.ev !== null ? money(m.ev, "GBP") : "—";
-    ($("exp-best") || {}).textContent = m.best_case !== null ? money(m.best_case, "GBP") : "—";
-    ($("exp-worst") || {}).textContent = m.worst_case !== null ? money(m.worst_case, "GBP") : "—";
-    ($("exp-pprofit") || {}).textContent = m.p_profit !== null ? pct(m.p_profit) : "—";
-    ($("exp-ploss") || {}).textContent = m.p_loss !== null ? pct(m.p_loss) : "—";
-    ($("exp-pwin50") || {}).textContent = m.p_win_50 !== null ? pct(m.p_win_50) : "—";
+    // best/worst-case are currency-coherent: GBP (sportsbook) and USD
+    // (Polymarket) are reported separately, never summed. Show both currencies
+    // when a USD figure is present so a £ label is never put on a $ number.
+    var bc = (m.by_currency && m.by_currency.GBP) ? m.by_currency.GBP : null;
+    var uc = (m.by_currency && m.by_currency.USD) ? m.by_currency.USD : null;
+    function ccy(gbpVal, usdVal) {
+      if (gbpVal === null || gbpVal === undefined) return "—";
+      var s = money(gbpVal, "GBP");
+      if (usdVal !== null && usdVal !== undefined && Math.abs(usdVal) > 1e-9) {
+        s += " + " + money(usdVal, "USD");
+      }
+      return s;
+    }
+    ($("exp-ev") || {}).textContent = m.ev !== null && m.ev !== undefined ? money(m.ev, "GBP") : "—";
+    ($("exp-best") || {}).textContent = bc ? ccy(bc.best_case, uc && uc.best_case)
+      : (m.best_case !== null && m.best_case !== undefined ? money(m.best_case, "GBP") : "—");
+    ($("exp-worst") || {}).textContent = bc ? ccy(bc.worst_case, uc && uc.worst_case)
+      : (m.worst_case !== null && m.worst_case !== undefined ? money(m.worst_case, "GBP") : "—");
+    // Win probabilities: shown only when honestly computed; "n/a" otherwise
+    // (the model can't score outright/futures/prop exposure).
+    function prob(v) { return (v !== null && v !== undefined) ? pct(v) : "n/a"; }
+    ($("exp-pprofit") || {}).textContent = prob(m.p_profit);
+    ($("exp-ploss") || {}).textContent = prob(m.p_loss);
+    ($("exp-pwin50") || {}).textContent = prob(m.p_win_50);
     var detail = $("exposure-detail");
     if (detail) {
       var note = "Portfolio exposure: " + (exp.n_open_bets || 0) + " open bets.";

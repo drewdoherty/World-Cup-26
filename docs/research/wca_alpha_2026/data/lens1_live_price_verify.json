@@ -1,0 +1,21 @@
+{
+  "lens": "1 - live price + liquidity + settlement identity",
+  "as_of": "2026-06-30",
+  "source": "Polymarket Gamma API, read-only, re-fetched per-leg from event slugs",
+  "settlement_note": "All legs are 'reach round X' / 'win the World Cup' negRisk-style markets that settle INCLUSIVE of ET/penalties. This matches the model P(reach round X) / P(Win) values. No 90-minute 3-way markets used. No settlement mismatches.",
+  "ev_convention": "gross EV/$1 = fair/ask - 1; edge_pp = fair - mid",
+  "legs": [
+    {"slug": "world-cup-winner", "team": "Brazil", "question": "Will Brazil win the 2026 FIFA World Cup?", "bestBid": 0.07, "bestAsk": 0.071, "mid": 0.0705, "fair": 0.1878, "edge_pp_mid": 11.73, "ev_pct_ask": 164.5, "liquidity": 3655818, "open": true},
+    {"slug": "world-cup-nation-to-reach-semifinals", "team": "Brazil", "bestBid": 0.33, "bestAsk": 0.34, "mid": 0.335, "fair": 0.51962, "edge_pp_mid": 18.46, "ev_pct_ask": 52.8, "liquidity": 72083, "open": true},
+    {"slug": "world-cup-nation-to-reach-quarterfinals", "team": "Belgium", "bestBid": 0.31, "bestAsk": 0.32, "mid": 0.315, "fair": 0.48666, "edge_pp_mid": 17.17, "ev_pct_ask": 52.1, "liquidity": 159551, "open": true},
+    {"slug": "world-cup-nation-to-reach-round-of-16", "team": "Bosnia and Herzegovina", "bestBid": 0.17, "bestAsk": 0.18, "mid": 0.175, "fair": 0.3402, "edge_pp_mid": 16.52, "ev_pct_ask": 89.0, "liquidity": 37109, "open": true},
+    {"slug": "world-cup-nation-to-reach-quarterfinals", "team": "Paraguay", "bestBid": 0.138, "bestAsk": 0.139, "mid": 0.1385, "fair": 0.29012, "edge_pp_mid": 15.16, "ev_pct_ask": 108.7, "liquidity": 17775, "open": true},
+    {"slug": "world-cup-nation-to-reach-quarterfinals", "team": "Brazil", "bestBid": 0.66, "bestAsk": 0.67, "mid": 0.665, "fair": 0.80058, "edge_pp_mid": 13.56, "ev_pct_ask": 19.5, "liquidity": 32465, "open": true},
+    {"slug": "world-cup-nation-to-reach-final", "team": "Brazil", "bestBid": 0.17, "bestAsk": 0.18, "mid": 0.175, "fair": 0.3093, "edge_pp_mid": 13.43, "ev_pct_ask": 71.8, "liquidity": 119620, "open": true},
+    {"slug": "world-cup-nation-to-reach-round-of-16", "team": "Sweden", "bestBid": 0.10, "bestAsk": 0.11, "mid": 0.105, "fair": 0.23532, "edge_pp_mid": 13.03, "ev_pct_ask": 113.9, "liquidity": 43952, "open": true, "note": "live mid drifted to 0.105 (cheaper than 0.11 candidate); lowest confidence, contradicts model MAP pick France"},
+    {"slug": "world-cup-nation-to-reach-round-of-16", "team": "Ecuador", "bestBid": 0.38, "bestAsk": 0.39, "mid": 0.385, "fair": 0.4884, "edge_pp_mid": 10.34, "ev_pct_ask": 25.2, "liquidity": 29938, "open": true},
+    {"slug": "world-cup-nation-to-reach-round-of-16", "team": "Australia", "bestBid": 0.43, "bestAsk": 0.44, "mid": 0.435, "fair": 0.53356, "edge_pp_mid": 9.86, "ev_pct_ask": 21.3, "liquidity": 26551, "open": true},
+    {"slug": "world-cup-nation-to-reach-round-of-16", "team": "Belgium", "bestBid": 0.58, "bestAsk": 0.59, "mid": 0.585, "fair": 0.67326, "edge_pp_mid": 8.83, "ev_pct_ask": 14.1, "liquidity": 29774, "open": true},
+    {"slug": "world-cup-nation-to-reach-final", "team": "Spain", "bestBid": 0.21, "bestAsk": 0.22, "mid": 0.215, "fair": 0.27968, "edge_pp_mid": 6.47, "ev_pct_ask": 27.1, "liquidity": 250284, "open": true}
+  ]
+}

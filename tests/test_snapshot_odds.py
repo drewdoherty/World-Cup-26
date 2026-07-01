@@ -99,15 +99,17 @@ def test_ingest_round_trip(tmp_path):
     db = tmp_path / "fresh.db"  # does not exist — table must be created
     snaps = tmp_path / "snapshots"
 
-    inserted, raw_path = cli.ingest_snapshot(
+    inserted, raw_path, jsonl_rows = cli.ingest_snapshot(
         _frame(),
         db_path=str(db),
         snapshots_dir=str(snaps),
         markets="h2h",
         regions="uk",
         now=NOW,
+        jsonl_path=str(tmp_path / "odds_hist.jsonl"),
     )
     assert inserted == 4
+    assert jsonl_rows == 4
 
     # Rows landed with the real schema in a brand-new database.
     got = read_snapshots(str(db))
@@ -131,13 +133,14 @@ def test_ingest_round_trip(tmp_path):
 def test_ingest_multi_market_name_and_skip_raw(tmp_path):
     cli = _load_cli()
     db = tmp_path / "fresh.db"
-    inserted, raw_path = cli.ingest_snapshot(
+    inserted, raw_path, _ = cli.ingest_snapshot(
         _frame(),
         db_path=str(db),
         snapshots_dir=None,
         markets="h2h,totals",
         regions="uk",
         now=NOW,
+        jsonl_path=None,
     )
     assert inserted == 4
     assert raw_path is None
@@ -149,10 +152,11 @@ def test_ingest_multi_market_name_and_skip_raw(tmp_path):
 def test_ingest_appends_not_replaces(tmp_path):
     cli = _load_cli()
     db = tmp_path / "fresh.db"
-    cli.ingest_snapshot(_frame(), str(db), None, "h2h", "uk", now=NOW)
+    cli.ingest_snapshot(_frame(), str(db), None, "h2h", "uk", now=NOW, jsonl_path=None)
     cli.ingest_snapshot(
         _frame(), str(db), None, "h2h", "uk",
         now=datetime(2026, 6, 13, 10, 0, 0, tzinfo=timezone.utc),
+        jsonl_path=None,
     )
     con = sqlite3.connect(str(db))
     try:
