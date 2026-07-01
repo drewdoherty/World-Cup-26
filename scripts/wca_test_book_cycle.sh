@@ -12,6 +12,25 @@ REPO="${WCA_REPO:-$HOME/World-Cup-26}"
 cd "$REPO" || { echo "no repo at $REPO"; exit 1; }
 mkdir -p logs
 
+# --- pause / kill switch --------------------------------------------------
+# Pause WITHOUT touching the mini: commit deploy/testbook.switch = "off" (from
+# anywhere). The mini's autopull (origin/main) brings it in and the next cycle
+# no-ops; set it back to "on" to resume. Local hands-on overrides on the mini:
+#   env WCA_TESTBOOK_OFF=1   or   a data/TESTBOOK_PAUSED kill-file.
+# When paused the whole cycle (settle/trade/mark) is skipped — no paper fills.
+_paused=""
+case "${WCA_TESTBOOK_OFF:-}" in 1|true|yes|on|TRUE|YES|ON) _paused="env WCA_TESTBOOK_OFF" ;; esac
+[ -z "$_paused" ] && [ -f "$REPO/data/TESTBOOK_PAUSED" ] && _paused="kill-file data/TESTBOOK_PAUSED"
+if [ -z "$_paused" ] && [ -f "$REPO/deploy/testbook.switch" ]; then
+  _state="$(tr -d '[:space:]' < "$REPO/deploy/testbook.switch" | tr '[:upper:]' '[:lower:]')"
+  case "$_state" in off|0|paused|no|false) _paused="deploy/testbook.switch=$_state" ;; esac
+fi
+if [ -n "$_paused" ]; then
+  echo "================ test-book cycle $(date -u +%Y-%m-%dT%H:%M:%SZ) ================" >> logs/test_book.log
+  echo "PAUSED via $_paused — skipping settle/trade/mark (no paper fills)" >> logs/test_book.log
+  exit 0
+fi
+
 # Load @worldcupdevbot credentials so the paper book can ping the dev chat.
 # Prefers a dedicated test-book env, falls back to the conductor's.
 for envf in "${WCA_TESTBOOK_ENV:-}" "$REPO/.env.testbook" "$REPO/.env.conductor" "$HOME/.env.testbook" "$HOME/.env.conductor"; do
