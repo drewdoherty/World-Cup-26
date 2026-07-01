@@ -14,7 +14,7 @@ mkdir -p logs
 
 # Load @worldcupdevbot credentials so the paper book can ping the dev chat.
 # Prefers a dedicated test-book env, falls back to the conductor's.
-for envf in "${WCA_TESTBOOK_ENV:-}" "$HOME/.env.testbook" "$HOME/.env.conductor"; do
+for envf in "${WCA_TESTBOOK_ENV:-}" "$REPO/.env.testbook" "$REPO/.env.conductor" "$HOME/.env.testbook" "$HOME/.env.conductor"; do
   [ -n "$envf" ] && [ -f "$envf" ] && set -a && . "$envf" && set +a && break
 done
 
