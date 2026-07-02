@@ -3,7 +3,8 @@
 Fits Elo + Dixon-Coles on the results history (or reuses a cached fit), runs the
 2026 World Cup Monte-Carlo simulator to get per-team stage probabilities, pulls
 the live Polymarket advancement / group-winner markets, computes fee-adjusted
-edges and quarter-Kelly stakes on the $1,310 Polymarket pool, writes the full
+edges and quarter-Kelly stakes on the global-rule Polymarket pool
+(``wca.markets.bankroll``: £3,000 ± realised P&L at $1.33/£), writes the full
 report to ``docs/research/advancement_edges.md`` and prints the top-10 edges.
 
 Usage::

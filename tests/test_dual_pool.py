@@ -48,15 +48,28 @@ def _rec(*, match="A vs B", venue="smarkets", stakes, team="A", odds=2.0,
 # ---------------------------------------------------------------------------
 
 
-def test_default_pools_shape():
+def test_default_pools_shape(monkeypatch):
+    import pytest as _pytest
+
+    # COMBINED bankroll (user, 2026-07-02): ONE £3,000 ± total realised P&L
+    # pot shared by both books at ¼-Kelly — the PM figure is the SAME total
+    # converted at $1.33/£, never an independent second pot.
     pools = default_pools()
     by_name = {p.name: p for p in pools}
-    assert by_name[GBP_POOL_NAME].bankroll == GBP_POOL_BANKROLL == 1500.0
+    assert by_name[GBP_POOL_NAME].bankroll == 3000.0
     assert by_name[GBP_POOL_NAME].currency == "GBP"
-    assert by_name[PM_POOL_NAME].bankroll == PM_POOL_BANKROLL == 1995.0
+    assert by_name[GBP_POOL_NAME].kelly_fraction == 0.25
+    assert by_name[PM_POOL_NAME].bankroll == _pytest.approx(3000.0 * 1.33)
     assert by_name[PM_POOL_NAME].currency == "USD"
-    # Both books at the chosen aggressive half-Kelly.
-    assert all(p.kelly_fraction == DUAL_POOL_KELLY_FRACTION == 0.50 for p in pools)
+    assert by_name[PM_POOL_NAME].kelly_fraction == 0.25
+
+    # Legacy equal split still available behind the kill switch.
+    monkeypatch.setenv("WCA_FULL_POOLS", "0")
+    legacy = {p.name: p for p in default_pools()}
+    assert legacy[GBP_POOL_NAME].bankroll == GBP_POOL_BANKROLL == 1500.0
+    assert legacy[PM_POOL_NAME].bankroll == PM_POOL_BANKROLL == 1995.0
+    assert all(p.kelly_fraction == DUAL_POOL_KELLY_FRACTION == 0.50
+               for p in default_pools())
 
 
 def test_pool_symbol():
@@ -97,12 +110,14 @@ def test_card_shows_each_pick_in_its_own_currency():
              stakes={GBP_POOL_NAME: 0.0, PM_POOL_NAME: 40.0}),
     ]
     out = format_ranked_card(RankedCard(picks=picks, cut=[]), pools)
-    assert "stake: gbp £30.00" in out
-    assert "stake: pm $40.00" in out
-    # Footer carries both pools with their currencies.
-    assert "gbp pool: £1500" in out
-    assert "pm pool: $1995" in out
-    assert "£1 = $1.33" in out
+    # Display convention (2026-07-02): everything is SHOWN in $ (GBP stakes at
+    # the fixed $1.33/£ rate) but each pick is still SIZED in its own pool's
+    # currency — £30 × 1.33 = $39.90, PM already $40.
+    assert "stake *$39.90*" in out
+    assert "stake *$40.00*" in out
+    # Bankroll boilerplate footer removed (user, 2026-07-02).
+    assert "Bankroll model" not in out
+    assert "actual capital" not in out
 
 
 def test_exposure_is_currency_isolated_per_pool():
@@ -130,7 +145,8 @@ def test_legacy_single_pool_still_renders():
     pool = PoolConfig(name="main", bankroll=2000.0)
     picks = [_rec(venue="smarkets", stakes={"main": 12.0})]
     out = format_ranked_card(RankedCard(picks=picks, cut=[]), pool)
-    assert "stake: main £12.00" in out
+    # £12 pool stake shown in $ at the fixed rate: 12 × 1.33 = $15.96.
+    assert "stake *$15.96*" in out
 
 
 # ---------------------------------------------------------------------------

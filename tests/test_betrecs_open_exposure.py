@@ -82,10 +82,20 @@ def test_open_exposure_falls_back_to_feed_when_db_absent(tmp_path):
     assert "feed" in block["source"]
 
 
-def test_shipped_bet_recs_open_count_is_not_stale_59():
-    """Regression guard: the committed feed must not carry the stale 59 count."""
+def test_shipped_bet_recs_open_exposure_is_structurally_sound():
+    """Regression guard on the committed feed — structure + provenance only.
+
+    The shipped feed is rewritten by BOTH the mini publish job (live ledger →
+    real count) and CI daily-card (no ledger → 0), so the exact open-bet count
+    is committer-dependent. The old ``assert n_open == 8`` pin kept the suite
+    red on every data commit (0 != 8, 77 != 8). The derivation logic is fully
+    covered by the fixture tests above; here we keep only the stale-59 guard
+    and structural checks.
+    """
     shipped = json.loads((_REPO / "site" / "bet_recs.json").read_text(encoding="utf-8"))
-    n_open = shipped["meta"]["open_exposure"]["n_open"]
+    block = shipped["meta"]["open_exposure"]
+    n_open = block["n_open"]
+    assert isinstance(n_open, int) and n_open >= 0
     assert n_open != 59, "bet_recs.json regressed to the stale 59-open-bet count"
-    # The live ledger holds 8 open bets; the shipped feed should reflect that.
-    assert n_open == 8
+    # Provenance (ledger vs feed fallback) must stay disclosed in the feed.
+    assert "source" in block

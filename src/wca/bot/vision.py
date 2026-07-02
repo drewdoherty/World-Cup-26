@@ -61,9 +61,17 @@ PROMPT = (
     '{"bets": [ {bet}, {bet}, ... ] }\n\n'
     "Each {bet} object MUST have exactly these keys:\n"
     '  "bookmaker": the sportsbook name. Infer it from any visible logo, '
-    "branding, wordmark, or distinctive brand colour (e.g. green=bet365, "
-    "blue=Sky Bet/William Hill, etc.). A Bet ID printed as 'O/<digits>/...' "
-    "indicates Betfair Sportsbook. null if you truly cannot tell.\n"
+    "branding, wordmark, or distinctive brand colour. STRONG bet365 cues: a "
+    "green theme with a 'BET BUILDER' wordmark, green circular tick "
+    "checkmarks beside each leg, and a bottom navigation bar showing "
+    "'In-Play' / 'My Bets' / 'Casino' with an account balance in a corner — "
+    "'Bet Builder' is a bet365 feature, so return \"bet365\". Other cues: "
+    "blue=Sky Bet/William Hill, a green/white 'Paddy Power' wordmark or a "
+    "'Power Price'/'PP' boost = Paddy Power, a Bet ID printed as "
+    "'O/<digits>/...' or 'I/<digits>/...' indicates Betfair Sportsbook. For a "
+    "GBP combined bet shown with bet365's green Bet-Builder styling and no "
+    "other bookmaker's wordmark visible, default to \"bet365\". null only if "
+    "you truly cannot tell.\n"
     '  "match": the event/fixture description, e.g. "England vs France". For a '
     "combined bet whose legs are ALL on the same fixture (a Bet Builder / Same "
     "Game Multi), use that one fixture. For a multi-fixture accumulator, join "

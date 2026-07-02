@@ -87,6 +87,20 @@ def _write_card(tmp_path: str, ts: str = "2026-06-11T12:00:00") -> str:
 # ---------------------------------------------------------------------------
 
 
+@pytest.fixture(autouse=True)
+def _no_live_pm(monkeypatch):
+    """Never hit the Polymarket Data API in formatting tests.
+
+    Pin the live on-chain P&L (realised 0 / unrealised -100) so the per-book
+    split and the £3,000-basis ROI are deterministic.
+    """
+    monkeypatch.setattr(
+        app, "_pm_live_usd",
+        lambda *a, **k: {"realised": 0.0, "unrealised": -100.0,
+                         "open_value": 200.0, "n_open": 2, "n_resolved": 4},
+    )
+
+
 class TestSummaryFormat:
     def test_emoji_title_present(self, tmp_path):
         db = str(tmp_path / "t.db")
@@ -108,40 +122,39 @@ class TestSummaryFormat:
         out = app.handle_summary(db)
         assert "```" in out
 
-    def test_code_block_table_headers_present(self, tmp_path):
+    def test_per_book_table_headers_present(self, tmp_path):
         db = str(tmp_path / "t.db")
         _seed(db)
         out = app.handle_summary(db)
-        assert "POOL" in out
-        assert "BANK" in out
-        assert "AT RISK" in out
-        assert "P&L" in out
+        assert "*P&L by book*" in out
+        assert "BOOK" in out
+        assert "REALISED" in out
+        assert "UNREAL'D" in out
+        assert "TOTAL" in out
 
-    # Legacy substrings from test_bot_bets.py must still hold.
-
-    def test_legacy_at_risk_open_label(self, tmp_path):
+    def test_both_books_present(self, tmp_path):
         db = str(tmp_path / "t.db")
         _seed(db)
         out = app.handle_summary(db)
-        assert "At risk (open):" in out
+        assert "Sportsbook" in out
+        assert "Polymarket" in out
 
-    def test_legacy_sportsbook_pool_line(self, tmp_path):
+    def test_roi_over_3000_basis(self, tmp_path):
         db = str(tmp_path / "t.db")
         _seed(db)
         out = app.handle_summary(db)
-        assert "sportsbook: £1000.00" in out
+        assert "ROI on £3,000:" in out
+        assert "basis £3,000 ($1,995 = £1,500)" in out
 
-    def test_legacy_polymarket_pool_line(self, tmp_path):
+    def test_realised_unrealised_split(self, tmp_path):
         db = str(tmp_path / "t.db")
         _seed(db)
         out = app.handle_summary(db)
-        assert "polymarket: $1310.00" in out
-
-    def test_legacy_at_risk_amount(self, tmp_path):
-        db = str(tmp_path / "t.db")
-        _seed(db)
-        out = app.handle_summary(db)
-        assert "at risk $22.00" in out
+        # Seed has no settled bets → realised £0/$0; PM unrealised pinned to -100.
+        assert "£+0.00" in out          # sportsbook realised + total
+        assert "$-100.00" in out        # PM unrealised
+        # Combined ROI: PM total -$100 × 0.7519 = -£75.19 / £3000 = -2.51%.
+        assert "-2.51%" in out
 
 
 # ---------------------------------------------------------------------------

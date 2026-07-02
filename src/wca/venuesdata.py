@@ -67,6 +67,11 @@ _TEAM_ALIASES = {
     "turkiye": "turkey", "türkiye": "turkey",
     "ivory coast": "cote d'ivoire", "côte d'ivoire": "cote d'ivoire",
     "iran": "iran", "ir iran": "iran",
+    # knockout-stage spellings that differ between OddsAPI and Polymarket
+    "bosnia & herzegovina": "bosnia and herzegovina",
+    "cabo verde": "cape verde", "cape verde islands": "cape verde",
+    "congo dr": "dr congo",
+    "democratic republic of congo": "dr congo", "congo democratic republic": "dr congo",
 }
 
 

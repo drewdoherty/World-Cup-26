@@ -35,6 +35,12 @@ import pandas as pd
 
 from wca.data.teamnames import canonical
 from wca.markets import devig as devig_mod
+from wca.markets.bankroll import (
+    GBP_USD,
+    PM_KELLY_FRACTION as PM_RULE_KELLY_FRACTION,
+    gbp_to_usd,
+    pm_bankroll_usd,
+)
 from wca.markets import kelly as kelly_mod
 from wca.models import venues as venues_mod
 from wca.models.dixon_coles import DixonColesModel
@@ -229,15 +235,93 @@ class PoolConfig:
 # the $1,995 pool (the 1.33 is baked into that figure), every other venue in £.
 # This REPLACES the CLV-earned-rung ladder as the stake-sizing base; the ladder
 # constants below are retained only for the informational bankroll footer.
-GBP_POOL_BANKROLL: float = 1500.0
-PM_POOL_BANKROLL: float = 1995.0
+GBP_POOL_BANKROLL: float = 1500.0   # LEGACY equal split (WCA_FULL_POOLS=0 only)
+PM_POOL_BANKROLL: float = 1995.0    # LEGACY equal split (WCA_FULL_POOLS=0 only)
 DUAL_POOL_KELLY_FRACTION: float = 0.50
 GBP_POOL_NAME = "gbp"
 PM_POOL_NAME = "pm"
 
+# COMBINED bankroll (user correction, 2026-07-02): ONE £3,000 pot of real
+# capital shared across sportsbooks AND Polymarket, adjusted by TOTAL realised
+# P&L (GBP books in £, PM in $ converted at $1.33/£), sized at ¼-Kelly of the
+# running total — expressed in £ for GBP venues and $ for Polymarket. A
+# per-venue £3,000 each would DOUBLE-COUNT the capital (the first full-pool
+# cut did exactly that and was corrected same-day). Supersedes the
+# £1,500/$1,995 equal split and the CLV-rung ladder as sizing bases.
+# Kill switch: WCA_FULL_POOLS=0 restores the legacy split.
+GBP_POOL_BASE_GBP: float = 3000.0
 
-def default_pools() -> List["PoolConfig"]:
-    """The canonical dual pool: £1,500 GBP venues + $1,995 Polymarket, 1/2-Kelly."""
+
+def _realised_settled_pl(db_path: Optional[str], polymarket: bool) -> Optional[float]:
+    """Realised settled P&L from the ledger, read-only; None if unreadable.
+
+    ``polymarket=True`` sums the PM book (USD); ``False`` sums every other
+    platform (all GBP books). ``settled_pl`` already carries the free-bet /
+    lay / cash-out accounting from the ledger store.
+    """
+    import sqlite3
+
+    if not db_path or not os.path.exists(db_path):
+        return None
+    op = "=" if polymarket else "!="
+    try:
+        con = sqlite3.connect("file:%s?mode=ro" % db_path, uri=True)
+        try:
+            row = con.execute(
+                "SELECT COALESCE(SUM(settled_pl), 0.0) FROM bets "
+                "WHERE platform %s 'polymarket' AND settled_pl IS NOT NULL" % op
+            ).fetchone()
+        finally:
+            con.close()
+        return float(row[0]) if row is not None else None
+    except Exception:
+        return None
+
+
+def combined_bankroll_gbp(db_path: Optional[str] = None):
+    """``(total_gbp, gbp_pnl_gbp, pm_pnl_usd)`` — the ONE shared bankroll.
+
+    £3,000 + realised GBP-book P&L (£) + realised PM P&L ($ → £ at $1.33/£).
+    Floored at zero. Missing/unreadable ledger contributes zero P&L.
+    """
+    gbp_pnl = _realised_settled_pl(db_path, polymarket=False) or 0.0
+    pm_pnl = _realised_settled_pl(db_path, polymarket=True) or 0.0
+    total = GBP_POOL_BASE_GBP + gbp_pnl + pm_pnl / GBP_USD
+    return max(0.0, total), gbp_pnl, pm_pnl
+
+
+def full_pools(db_path: Optional[str] = None) -> List["PoolConfig"]:
+    """ONE combined bankroll, ¼-Kelly, in £ (sportsbooks) and $ (Polymarket).
+
+    Both pools reference the SAME running total (£3,000 ± total realised P&L);
+    the PM pool is that total converted at $1.33/£ — never an independent
+    second pot. The per-pool daily/whole-book caps still apply per venue.
+    """
+    total_gbp, _, _ = combined_bankroll_gbp(db_path)
+    return [
+        PoolConfig(
+            name=GBP_POOL_NAME,
+            bankroll=total_gbp,
+            currency="GBP",
+            kelly_fraction=PM_RULE_KELLY_FRACTION,
+        ),
+        PoolConfig(
+            name=PM_POOL_NAME,
+            bankroll=gbp_to_usd(total_gbp),
+            currency="USD",
+            kelly_fraction=PM_RULE_KELLY_FRACTION,
+        ),
+    ]
+
+
+def default_pools(db_path: Optional[str] = None) -> List["PoolConfig"]:
+    """Deployable pools: FULL-POOL by default (user, 2026-07-02).
+
+    ``WCA_FULL_POOLS=0`` restores the legacy £1,500/$1,995 equal split.
+    Callers without a ledger (tests, CI) get the un-adjusted bases.
+    """
+    if os.environ.get("WCA_FULL_POOLS", "1") != "0":
+        return full_pools(db_path)
     return [
         PoolConfig(
             name=GBP_POOL_NAME, bankroll=GBP_POOL_BANKROLL, currency="GBP",
@@ -494,6 +578,8 @@ def resolve_pool_bankroll(
 
     clv_str = ("%+.4f" % clv_to_date) if clv_to_date is not None else "n/a"
 
+    full_mode = os.environ.get("WCA_FULL_POOLS", "1") != "0"
+
     if override is not None:
         bankroll = float(override)
         out_fraction = FLAT_KELLY_FRACTION
@@ -504,6 +590,23 @@ def resolve_pool_bankroll(
                 currency_symbol, bankroll, rung, currency_symbol,
                 ladder_bankroll, n_settled, next_threshold, clv_str,
                 ("; %s" % constraint_note) if constrained else "",
+            )
+        )
+    elif full_mode:
+        # COMBINED bankroll (user, 2026-07-02): £3,000 ± TOTAL realised P&L
+        # across GBP books AND Polymarket ($→£ at $1.33/£) — one shared pot,
+        # never per-venue doubling. The CLV rung is reported for reference but
+        # no longer gates the base. WCA_FULL_POOLS=0 restores the ladder.
+        bankroll, gbp_pnl, pm_pnl = combined_bankroll_gbp(db_path)
+        out_fraction = FLAT_KELLY_FRACTION
+        reason = (
+            "COMBINED-POOL %s%.0f (£%.0f %+.2f£ GBP P&L %+.2f$ PM P&L at "
+            "$%.2f/£; user 2026-07-02) — ladder rung %d (%s%.0f) for "
+            "reference; %d/%d settled-with-close, CLV %s"
+            % (
+                currency_symbol, bankroll, GBP_POOL_BASE_GBP, gbp_pnl, pm_pnl,
+                GBP_USD, rung, currency_symbol, ladder_bankroll, n_settled,
+                next_threshold, clv_str,
             )
         )
     else:
@@ -1739,6 +1842,10 @@ def format_ranked_card(
         header += ", %d indicative" % n_indicative
     header += " picks, hit-prob ranked)"
     lines.append(header)
+    lines.append(
+        "_1X2 90-minute singles only — advancement/knockout futures live on "
+        "/pm and the Action Desk._"
+    )
     lines.append("")
     if not ranked.picks:
         lines.append("_No +EV bets clear the selection rule on the current slate._")
@@ -1761,30 +1868,38 @@ def format_ranked_card(
             )
         elif r.hours_to_kickoff is not None and r.hours_to_kickoff >= FURTHER_OUT_HOURS:
             tilt = "  further-out (%.0fh) — thin/soft market" % r.hours_to_kickoff
+        px_c = (100.0 / r.best_odds) if r.best_odds and r.best_odds > 1.0 else float("nan")
+        stake_usd = stake if rp.symbol == "$" else gbp_to_usd(stake)
         lines.append(
-            "*%d. [%s] %s* — %s @ *%.2f* via *%s*\n"
-            "    model %.1f%% / mkt %.1f%%  edge *%+.1f%%*  [elo %.0f%% dc %.0f%%]\n"
-            "    stake: %s %s%.2f%s"
+            "*%d. [%s] %s* — %s (1X2 90') @ *%.1f¢* via *%s*\n"
+            "    model %.1f¢ · fair %.1f¢ · EV *%+.1f%%* · stake *$%.2f*%s"
             % (
                 i, _CATEGORY_LABEL.get(r.category, r.category.upper()),
-                r.match_desc, r.selection_team, r.best_odds, r.venue,
+                r.match_desc, r.selection_team, px_c, r.venue,
                 r.model_prob * 100, r.market_prob * 100, r.edge * 100,
-                r.elo_prob * 100, r.dc_prob * 100, rp.name, rp.symbol, stake, tilt,
+                stake_usd, tilt,
             )
         )
 
-    # CUT list (rule 2): excluded longshots, kept visible with EV + reason.
+    if ranked.picks:
+        lines.append("")
+        lines.append(
+            "_Prices in ¢ (Polymarket convention: price = implied probability, "
+            "$1 payout). £-pool stakes shown in $ at $%.2f/£ — display only; "
+            "bets settle in their native currency._" % GBP_USD
+        )
+
+    # CUT is reserved for positions to TRIM (none until a trim engine exists —
+    # Phase 1 item). Floor/minnow exclusions collapse to a single count line
+    # (user, 2026-07-02): full detail lives in the Action Desk feed's withheld
+    # section, never in the card body.
     if ranked.cut:
         lines.append("")
-        lines.append("*— CUT (excluded from staking, %d) —*" % len(ranked.cut))
-        for r in ranked.cut:
-            lines.append(
-                "  x %s — %s @ %.2f (model %.1f%%, +%.1f%% EV): %s"
-                % (
-                    r.match_desc, r.selection_team, r.best_odds,
-                    r.model_prob * 100, r.edge * 100, r.cut_reason,
-                )
-            )
+        lines.append(
+            "_excluded (not staked): %d floor/minnow longshot%s — detail in the "
+            "Action Desk withheld list_"
+            % (len(ranked.cut), "" if len(ranked.cut) == 1 else "s")
+        )
 
     # Cross-venue deployment split + whole-book exposure (rule 4), PER POOL so
     # the £ and $ books are summed and capped in their own currency (never mixed).
@@ -1822,27 +1937,12 @@ def format_ranked_card(
                         )
                     )
 
-    # Bankroll footer (rule 1): dual-pool 1/2-Kelly, each book in its own currency.
-    lines.append("")
-    lines.append("*Bankroll model (1/2-Kelly, equally split across books):*")
-    for pool in pool_list:
-        lines.append(
-            "  - %s pool: %s%.0f  (1/2-Kelly, per-bet cap %.0f%%, daily cap %.0f%%)"
-            % (
-                pool.name, pool.symbol, pool.bankroll,
-                pool.per_bet_cap * 100, pool.daily_exposure_cap * 100,
-            )
-        )
-    lines.append(
-        "  - £1 = $1.33 fixed; Polymarket sized in $ off the $%.0f pool, every "
-        "other venue in £ off the £%.0f pool." % (PM_POOL_BANKROLL, GBP_POOL_BANKROLL)
-    )
-    if bank is not None:
-        lines.append(
-            "  - actual capital (unpartitioned, ref): £%.0f" % bank.actual_capital
-        )
-        if bank.constrained:
-            lines.append("  - CONSTRAINED: %s" % bank.constraint_note)
+    # Bankroll footer removed (user, 2026-07-02): the sizing basis is carried
+    # by the pick lines + the pool reason string. Only a genuine capital
+    # constraint still surfaces — that is risk information, not boilerplate.
+    if bank is not None and bank.constrained:
+        lines.append("")
+        lines.append("  - CONSTRAINED: %s" % bank.constraint_note)
     return "\n".join(lines)
 
 

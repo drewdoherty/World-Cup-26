@@ -54,6 +54,7 @@ import pandas as pd
 
 from wca.card import BlendWeights, FittedModels, dc_probs, elo_probs, market_consensus
 from wca.data.teamnames import canonical
+from wca.markets import bankroll as pm_rule
 from wca.markets import kelly as kelly_mod
 from wca.models import venues as venues_mod
 from wca.models.structural import load_country_factors
@@ -118,10 +119,15 @@ STAGE_LABEL: Dict[str, str] = {
 # Polymarket sports taker-fee coefficient: fee per share = COEF * p * (1 - p).
 PM_TAKER_FEE_COEF: float = 0.03
 
-# Polymarket pool sizing.
-PM_POOL_BANKROLL: float = 1310.0
-PM_KELLY_FRACTION: float = 0.25
-PM_PER_BET_CAP: float = 0.05
+# Polymarket pool sizing — from the project-wide GLOBAL RULE
+# (``wca.markets.bankroll``): ¼-Kelly of £3,000 ± realised P&L at $1.33/£,
+# 4% per-bet cap. Never re-hardcode a pool figure here (the old hardcoded
+# $1,310 silently overrode the rule). This module-level bankroll is the BASE
+# pool (realised P&L unknown at import time); callers with ledger access pass
+# the P&L-adjusted figure explicitly.
+PM_POOL_BANKROLL: float = pm_rule.pm_bankroll_usd()
+PM_KELLY_FRACTION: float = pm_rule.PM_KELLY_FRACTION
+PM_PER_BET_CAP: float = pm_rule.PM_MAX_STAKE_FRAC
 
 # Default dilution of each co-host's home bonus on the venue-aware path. The
 # legacy path (venue_aware=False) ignores this and uses the full bonus.

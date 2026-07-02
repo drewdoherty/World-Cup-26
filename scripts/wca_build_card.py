@@ -255,7 +255,15 @@ def main() -> None:
         dc_level_target = float(args.dc_level_target)
     try:
         results = load_results(results_path)
-        models = fit_models(results, dc_level_target=dc_level_target)
+        # F7 goal-blend SHADOW (tracking-only, wired 2026-07-02): fit the
+        # two-timescale opponent-adjusted blend alongside the deployed DC.
+        # card.py guarantees the staking path stays bit-identical (the blend
+        # never feeds EV/sizing); its lambdas are persisted next to DC's for
+        # out-of-sample CLV comparison. Kill switch: WCA_GOAL_BLEND_SHADOW=0.
+        gb_shadow = os.environ.get("WCA_GOAL_BLEND_SHADOW", "1") != "0"
+        models = fit_models(
+            results, dc_level_target=dc_level_target, goal_blend=gb_shadow
+        )
     except Exception as exc:
         print("ERROR: model fitting failed: %s" % exc, file=sys.stderr)
         sys.exit(1)
@@ -333,11 +341,11 @@ def main() -> None:
     # card and must not re-pull/rewrite the main card, /next or predictions.
     # ------------------------------------------------------------------
     if not args.goalscorers_only:
-        # Dual-pool 1/2-Kelly (user, 2026-06-28): £1,500 GBP venues + $1,995
-        # Polymarket, equally split, each book sized in its own currency. This
-        # replaces the CLV-rung ladder as the sizing base; pool_bank is kept only
-        # for the informational footer (actual capital / any constraint note).
-        pools = default_pools()
+        # FULL-POOL sizing (user override, 2026-07-02): full sportsbook capital
+        # ± realised non-PM P&L and the PM global-rule pool ± realised PM P&L,
+        # each book sized in its own currency (WCA_FULL_POOLS=0 restores the
+        # legacy £1,500/$1,995 split). pool_bank feeds the reason line only.
+        pools = default_pools(db_path=args.db)
 
         try:
             # build_card gates +EV outcomes (with the further-out tilt baked in,
@@ -354,13 +362,10 @@ def main() -> None:
             print("ERROR: card generation failed: %s" % exc, file=sys.stderr)
             sys.exit(1)
 
-        # Scorelines (and any scorer/SGM markets) are REFERENCE-ONLY per the
-        # Phase-2 roadmap — shown with models + fair odds but never sized.
-        card_text = (
-            format_ranked_card(ranked, pools, bank=pool_bank)
-            + "\n\n*— REFERENCE, NOT SIZED (models + fair odds only) —*\n"
-            + format_scores(score_cards)
-        )
+        # Reference scorelines appendix removed from /card (user, 2026-07-02):
+        # the scoreline matrices remain available on /scores; score_cards still
+        # feeds that card below.
+        card_text = format_ranked_card(ranked, pools, bank=pool_bank)
 
         write_card(card_text, path=args.out, ts_utc=now_str)
 
@@ -376,7 +381,10 @@ def main() -> None:
             # goal-expectation lambdas (same lagged fit as the DC 1X2). They are
             # the compact sufficient statistic the correlated-exposure model
             # reconstructs the scoreline matrix from.
-            write_predictions(build_predictions(blends, now_str, dc_model=models.dc))
+            write_predictions(build_predictions(
+                blends, now_str, dc_model=models.dc,
+                gb_model=getattr(models, "goal_blend", None),
+            ))
             print("Model predictions persisted: %d fixtures" % len(blends))
         except Exception as exc:
             print("WARNING: model prediction dump failed: %s" % exc, file=sys.stderr)
