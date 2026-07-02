@@ -332,11 +332,20 @@ Today `pm/trader.py:241-259` hardcodes `dry_run=True, max_order_usd=30 (BUY),
 max_cashout_usd_per_order=100, max_daily_usd=100` with ZERO `bankroll.py` imports.
 
 Design:
-- `TradeConfig.from_bankroll(pool)`: `max_order_usd = min(per_bet_frac × pool_usd,
-  ABSOLUTE_ORDER_CEILING)`; `max_daily_usd = min(daily_frac × pool_usd,
-  ABSOLUTE_DAILY_CEILING)`. The guardrail stack order in `place_order`
-  (`trader.py:932`: funder-class refusal → per-order cap → keyword allowlist → daily
-  cap) is unchanged; only the numbers become functions of the pool.
+- **Caps stay static, versioned, fail-closed constants** — changed ONLY by a
+  human-approved PR at the stage gates below, never computed at runtime.
+  *(Amended 2026-07-02 after external review: the original design derived
+  `max_order_usd`/`max_daily_usd` from the live pool via
+  `TradeConfig.from_bankroll`. Phase 0 itself shows why that is wrong — the
+  bankroll inputs can be silently bad (FX-blended `summary()`, §7.a; forked
+  ledger history), and the safety ceiling must not be a function of a
+  possibly-wrong live number.)* `bankroll.py` instead computes a RECOMMENDED
+  cap (`min(per_bet_frac × pool_usd, ABSOLUTE_ORDER_CEILING)` etc.) that is
+  surfaced next to the effective static cap in `/ping` and each proposal DM;
+  drift between recommended and effective prompts a human to propose a stage
+  raise — never an automatic change. The guardrail stack order in
+  `place_order` (`trader.py:932`: funder-class refusal → per-order cap →
+  keyword allowlist → daily cap) is unchanged.
 - **Absolute ceilings raised only in stages, each with user sign-off:**
   Stage 0 (today): $30 order / $100 daily. Stage 1: proposed $75 / $250, gated on ≥50
   settled PM bets with non-negative aggregate execution CLV since Stage 0. Stage 2:
@@ -624,6 +633,18 @@ silent deploy failures (2), shrink the estate (3), protect the ledger (4), unify
 math (5), unlock the data in shadow (6), and only then touch sizing (7) and new markets
 (8), with the big rewrites (9) last because everything before them de-risks them.
 
+**Tournament overlay (added 2026-07-02, external-review adjudication).** The
+dependency order above stands, but the calendar does not: the World Cup is live now,
+and increments 3/5/9 would spend the remaining tournament window on estate work.
+Calendar split — **tournament track:** 0, 1, 2 (they protect live trading), 4's
+off-box replication, 6's CLOB capture + the pm_price_history stall fix (they serve
+the PRIMARY advancement-futures objective), 8-T1's totals-CLV capture prerequisite,
+plus a minimal scale-up path (staged raises of the static caps + the existing
+`exposure_corr` whole-book check, human-gated per §4.2) without waiting for the full
+§4 framework. **Post-tournament track:** 3 (branch/worktree/dead-script cleanup),
+5 (module re-layout), the full §4 framework of increment 7, and 9 (rewrites). All
+sign-off gates unchanged.
+
 | # | Increment | Contents | Prerequisite | Risk | Rollback | Gate |
 |---|---|---|---|---|---|---|
 | 0 | Green the suite + de-landmine tests | Fix `test_betrecs_open_exposure.py:91` + the 4 landmines (7.b.5); fixtures not shipped artifacts; zero production code | none | Minimal — tests only. Risk note: fixtures must not weaken real regression coverage; each keeps a structural assert | revert PR | none (explicitly allowed pre-sign-off) |
@@ -633,7 +654,7 @@ math (5), unlock the data in shadow (6), and only then touch sizing (7) and new 
 | 4 | Ledger cheap wins | Off-box replication (creds + verified restore, then continuous backup); FX-correct `summary()`; Notion retirement; bypass closure (7.a.4); THEN delete the stale dev wca.db | 1 (dev box safe first) | Money-adjacent code paths (`record_bet` routing); mitigated by the existing 36-test ledger suite + new tests per bypass | revert PR; ledger file untouched by all of it | SIGN-OFF (ledger code) |
 | 5 | Analytics consolidation + module re-layout | Canonical CLV formula/devig/exposure_corr/intel.arb (2.3); delete legacy `_portfolio_scenarios`; venue renames; package moves (2.1/2.2), one package per PR | 0; ideally after 3 | Broad import churn — the increment most likely to break feeds; per-package PRs, pytest each, feed-diff spot checks (feed values must be identical before/after for pure moves) | revert individual package PR | SIGN-OFF (touches live feed builders) |
 | 6 | Data unlocks — SHADOW MODE | `wca_clobd` daemon + `pm_ticks.db` + backfill; pm-snapshot.yml stall fix; StatsBomb weekly build; xG anchor + totals prior + sharp-book weighting as shadow candidates in clvbench; F7 tracking-only wire; F9 wire-or-delete executed | 2 (services), 5 (canonical devig) | New mini jobs + API load (CLOB rate limits — daemon backs off); ZERO staking change by construction (everything dual-written and compared) | stop daemons; revert PRs; incumbent constants untouched | SIGN-OFF (new mini services); staking flips are increment 7/8 gates |
-| 7 | Sizing scale-up | bankroll.py per-pool + correlation cap + hard floor (4.1); `TradeConfig.from_bankroll` + kill-switch (4.2); staged ceiling raises; resolve the per-pool vs global-PM-rule conflict | 4 (FX P&L feeds), 5 (exposure_corr canonical), 6 (shadow evidence) | HIGHEST — this changes real stake sizes. Staged: framework lands with Stage-0 ceilings (numerically identical to today), then each raise is its own sign-off | flip ceilings back to Stage 0 (config, not code); revert PR | **HARD SIGN-OFF** (per stage) |
+| 7 | Sizing scale-up | bankroll.py per-pool + correlation cap + hard floor (4.1); static caps + bankroll-computed recommendations + kill-switch (4.2, amended 2026-07-02); staged ceiling raises; resolve the per-pool vs global-PM-rule conflict | 4 (FX P&L feeds), 5 (exposure_corr canonical), 6 (shadow evidence) | HIGHEST — this changes real stake sizes. Staged: framework lands with Stage-0 ceilings (numerically identical to today), then each raise is its own sign-off | flip ceilings back to Stage 0 (config, not code); revert PR | **HARD SIGN-OFF** (per stage) |
 | 8 | Exotic markets, tier by tier | Totals/BTTS CLV capture in closecapture → T1 totals+BTTS live (ONE exposure/fixture) → T2 team totals pilot, DC/DNB pricing identity, AH monitoring → T3 PM term-structure + group markets, depth-gated | 6 (anchors + CLOB depth), 7 (correlation sizing) | Each market = new settlement surface; the four shipping requirements (section 5) are mandatory per market; T1 first because settlement is cleanest and the model already prices it | per-market disable (stop proposing); revert PR | SIGN-OFF per market tier |
 | 9 | Big rewrites | Event-sourced ledger with dual-write shadow + migration framework + fixtures FK (7.a.5); ONE lilac-shaped site + one publisher + freshness badges + real-time tier (7.c); Telegram v2 typed commands + richer confirmation cards (6.2/6.5) | 4, 5; site rewrite benefits from 2 | Large units — each lands behind a shadow/parallel period (ledger: projection-equality proof; site: old tree serves until parity checklist passes; bot: command registry runs behind the existing dispatcher first) | ledger: stop event writes (table authoritative throughout shadow); site: re-point Vercel at old tree; bot: revert PR | SIGN-OFF each |
 | 10 | Betfair standing decision | No build. Record section 8 in ARCHITECTURE.md; optional MacBook VPN read-relay as a 3.c input if the user wants it | — | none | — | none (decision already recorded) |
@@ -663,3 +684,52 @@ Phase 0 falsified, so no stale claim is ever re-imported from the brief.
 | `card.py build_event_references` "IS live" for correlated exposure (:53; also `02_codebase_audit.md:161`) | zero production callers — it is the third dark surface, F9 (2.5); the live correlated-exposure path is `exposure.py event_bets` | phase0 dark-features report |
 | site-analytics = 17 feeds (:78) | 16 tracked JSON in `site-analytics/data/` | phase0 sites report §1.2 |
 | dead-code delete list includes `wca_backfill_*`, `wca_canon_venues`, `wca_pm_probe`, `wca_validation_report` (:51) | `wca_backfill_accounts` + `wca_canon_venues` are importlib-executed by tests and `wca_pm_probe` is cited by live bot code (`app.py:2099`) — all three RESCUED (2.4); `wca_validation_report` is archived, not deleted | phase0 scripts manifest |
+
+---
+
+## Appendix B — External-review adjudication (2026-07-02)
+
+An independent review (GPT 5.5) of the overhaul charter was adjudicated against the
+Phase-0 evidence; these amendments were adopted. Everything else in this document
+stands as committed.
+
+1. **§4.2 amended in place** — execution caps are static, versioned, human-changed
+   constants; `bankroll.py` only computes a surfaced recommendation. Increment 7's
+   table row updated to match.
+2. **§9 tournament overlay added** — tournament vs post-tournament tracks; gates
+   unchanged.
+3. **Phase-2 implementation agents follow `AGENTS.md`** (repo root) operating rules:
+   one feature per task, duplicate pre-flight, file-overlap serialization, green tree
+   before push, sequential by default. Phase-0's parallel read-only research sat
+   outside those rules' failure domain (no PRs, no shared worktrees); implementation
+   does not.
+4. **Production-access rule:** no subagent ever receives SSH access or production
+   credentials. Live-mini facts enter the docs only via a human-run, read-only
+   sanitized snapshot (ARCHITECTURE.md Appendix A is the command list; increment 2
+   ships it as a script whose output is committed as evidence).
+5. **Incident-runbook rule:** the historical mini recovery (`git reset --hard
+   origin/main` + kickstart) is a HUMAN-ONLY runbook step and gains a mandatory
+   pre-step — archive the dirty tracked artifacts first (e.g. tar the files
+   `git status --porcelain` lists), since reset destroys them. Agents never run it.
+   Increment 2's structural fix removes the recurring need for it.
+6. **Quant scope additions to §3** (all shadow-mode, same CLV/calibration gates):
+   (a) an as-of full-slate prediction ledger — persist model probabilities for every
+   offered outcome including passed/skipped bets, extending the existing predledger,
+   so skip-value attribution stays measurable; (b) an explicit extra-time/penalties
+   goal-rate model for knockout settlement surfaces (shootout WINNERS are anchored
+   today via the runtime-downloaded shootouts.csv, `results.py:88`; extra-time
+   scoring rates are not modeled anywhere in the audited code); (c) executable-EV
+   framing for all CLOB models — depth, spread, trade flow, fill probability,
+   adverse selection; mid-price momentum alone is not an acceptance basis. Polling
+   (1-min prices-history + periodic `/book`) suffices for the shadow models; a
+   WebSocket feed is justified only if fill-probability models graduate. Queue
+   position is NOT publicly exposed by the CLOB (ARCHITECTURE.md §9.4 correction) —
+   no model may assume it.
+7. **ADRs recorded** in `docs/overhaul/ADRS.md` for the three largest calls (ledger
+   evolution, site consolidation, Betfair no-build) with alternatives and rejection
+   criteria: the event-sourced ledger and single-site consolidation are PROPOSED
+   (decided at their increment-9 gates); Betfair no-build is ACCEPTED.
+8. **`docs/ARCHITECTURE.md` superseded** — it predated Phase 0 and was missed by the
+   sweep (a Phase-0 miss, caught by the review); it is now a redirect stub to the
+   root `ARCHITECTURE.md`, and `docs/architecture/SYSTEM_MAP.md` carries an as-of
+   warning.

@@ -5,6 +5,22 @@ overhaul operating rules (`docs/FABLE_OVERHAUL_PROMPT.md` §0.6). Entries are
 grouped by date; every entry states whether production / live-money behavior
 changed.
 
+## 2026-07-02 — Phase 0 amendments: external-review adjudication (no behavior change)
+
+**Production impact: none.** Documentation only, same branch/PR as Phase 0.
+
+- Adjudicated an independent review (GPT 5.5) against the Phase-0 evidence;
+  adopted items recorded in `docs/overhaul/PHASE1_DESIGN.md` Appendix B.
+- Execution caps redesigned to static, versioned, human-changed constants
+  (never runtime-derived from bankroll); `PHASE1_DESIGN.md` §4.2 amended.
+- Added the tournament vs post-tournament track split to the sequenced plan.
+- Recorded ADRs (`docs/overhaul/ADRS.md`) for ledger evolution, site
+  consolidation, and the Betfair no-build decision.
+- Superseded the pre-existing `docs/ARCHITECTURE.md` (missed by the Phase-0
+  sweep — caught by the review) with a redirect stub; stamped
+  `docs/architecture/SYSTEM_MAP.md` with an as-of warning.
+- Corrected ARCHITECTURE.md §9.4: CLOB queue position is not publicly exposed.
+
 ## 2026-07-02 — Phase 0: inventory & source-of-truth (no behavior change)
 
 **Production impact: none.** Read-only audit; documentation only.
