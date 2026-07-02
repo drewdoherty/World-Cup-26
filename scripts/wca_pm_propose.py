@@ -597,6 +597,35 @@ def _build_scorer_proposals(
     return proposals
 
 
+def preference_sort_key(p, kick_by_match=None, now_dt=None):
+    """Proposal ordering per the desk's selection rules (user, 2026-07-02).
+
+    1. Prefer +EV MONEYLINES over longshots: model-prob buckets — >=50¢
+       first, 25-50¢ next, <25¢ (longshots) last. PM longshots have been the
+       book's proven leak (0-for-20 to date; likely-PnL rule).
+    2. Prefer FURTHER-OUT fixtures over imminent ones — further away is more
+       likely mispriced (thin early markets; see
+       docs/research/pm_preferences_backtest_2026-07-02.md).
+    3. EV descending breaks ties within a bucket.
+    """
+    import datetime as _dt
+
+    import pandas as _pd
+
+    prob = float(p.get("model_prob") or 0.0)
+    bucket = 0 if prob >= 0.5 else (1 if prob >= 0.25 else 2)
+    hours_out = 0.0
+    ts = (kick_by_match or {}).get(str(p.get("match_desc") or ""))
+    if ts:
+        try:
+            k = _pd.to_datetime(ts, utc=True).tz_convert(None)
+            ref = now_dt or _dt.datetime.utcnow()
+            hours_out = max(0.0, (k - ref).total_seconds() / 3600.0)
+        except Exception:
+            hours_out = 0.0
+    return (bucket, -hours_out, -float(p.get("ev") or 0.0))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Produce Polymarket parked-order proposals from the card."
@@ -749,9 +778,22 @@ def main() -> int:
             % (hours_since_games, args.game_interval_hours)
         )
 
-    # Props first, then games (sorted by EV within each group).
-    scorer_proposals.sort(key=lambda p: -float(p.get("ev", 0.0)))
-    game_proposals.sort(key=lambda p: -float(p.get("ev", 0.0)))
+    # Props first, then games — each group ordered by the desk's selection
+    # rules (moneylines > longshots; further-out > imminent; EV tiebreak).
+    kick_by_match: dict = {}
+    if odds_df is not None and not odds_df.empty and "commence_time" in odds_df.columns:
+        for _, _r in odds_df.iterrows():
+            _k = "%s vs %s" % (
+                str(_r.get("home_team") or "").strip(),
+                str(_r.get("away_team") or "").strip(),
+            )
+            kick_by_match.setdefault(_k, str(_r.get("commence_time") or ""))
+    scorer_proposals.sort(
+        key=lambda p: preference_sort_key(p, kick_by_match, now_dt)
+    )
+    game_proposals.sort(
+        key=lambda p: preference_sort_key(p, kick_by_match, now_dt)
+    )
     proposals = scorer_proposals + game_proposals
 
     total_size = sum(p["size_usd"] for p in proposals)
