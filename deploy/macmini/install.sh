@@ -52,6 +52,7 @@ cmd_for() {
     analytics)    printf '%s\n' "/bin/bash" "$HERE/../../scripts/wca_build_analytics.sh" ;;
     venues)       printf '%s\n' "$RUN1" venues       "$VENV_PY" scripts/wca_venues_benchmark.py --pred-db data/dev.db --odds-db data/wca.db ;;
     pm1x2snapshot) printf '%s\n' "$RUN1" pm1x2snapshot "$VENV_PY" scripts/wca_pm_1x2_snapshot.py --db data/wca.db --notify ;;
+    orderflow)    printf '%s\n' "$RUN1" orderflow    "/bin/bash" "$HERE/../../scripts/wca_orderflow_refresh.sh" ;;
     *) echo "unknown service $1" >&2; return 1 ;;
   esac
 }
@@ -87,6 +88,13 @@ install_one() { # name keepalive interval
 echo "Installing WCA services from $REPO_ROOT"
 for d in "${WCA_DAEMONS[@]}"; do install_one "$d" true 0; done
 for j in "${WCA_INTERVAL_JOBS[@]}"; do
+  # Defensive: if this checkout somehow lacks orderflow's job script (stale
+  # checkout, partial cherry-pick of the deploy wiring), skip loudly instead
+  # of installing an hourly job that exits 127 forever.
+  if [ "$j" = "orderflow" ] && [ ! -f "$REPO_ROOT/scripts/wca_orderflow_refresh.sh" ]; then
+    echo "  SKIPPED ${WCA_LABEL_PREFIX}.orderflow: scripts/wca_orderflow_refresh.sh not in this checkout (update the checkout, then re-run install.sh)"
+    continue
+  fi
   var="WCA_INTERVAL_${j}"; install_one "$j" false "${!var}"
 done
 echo "Done. Verify with:  launchctl list | grep ${WCA_LABEL_PREFIX}"

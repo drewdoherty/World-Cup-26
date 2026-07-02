@@ -179,15 +179,22 @@ def _sanitize(obj: Any) -> Any:
 # ---------------------------------------------------------------------------
 
 
-def load_db(db_path: str) -> Tuple[Dict[str, dict], List[dict], List[str], set, set]:
+def load_db(
+    db_path: str,
+) -> Tuple[Dict[str, dict], List[dict], List[str], set, set, Optional[str]]:
     """Load markets, trades (ts-sorted), truncation + backfill state. Read-only.
 
     Returns ``(markets, trades, truncated_slugs, truncated_cids,
-    backfilled_wallets)``. ``pm_ingest_log`` rows whose condition_id starts
-    with ``user:`` record per-wallet backfills (the ingester's
-    ``--backfill-leaderboards`` sweep); a wallet with a ``truncated=0`` user
-    row has had its complete in-scope history re-fetched via the per-user
-    endpoint, so its P&L is NOT partial even where it traded capped markets.
+    backfilled_wallets, last_ok_ingest_utc)``. ``pm_ingest_log`` rows whose
+    condition_id starts with ``user:`` record per-wallet backfills (the
+    ingester's ``--backfill-leaderboards`` sweep); a wallet with a
+    ``truncated=0`` user row has had its complete in-scope history re-fetched
+    via the per-user endpoint, so its P&L is NOT partial even where it traded
+    capped markets. ``last_ok_ingest_utc`` is the run_utc of the most recent
+    SUCCESSFUL market sweep (``failed=0``; user rows excluded) — the feed's
+    honest freshness stamp: ``generated_utc`` only says when this generator
+    ran, and it keeps running (by design, republishing what was captured)
+    even while the hourly ingest is failing.
     """
     uri = "file:%s?mode=ro" % db_path
     con = sqlite3.connect(uri, uri=True)
@@ -212,6 +219,7 @@ def load_db(db_path: str) -> Tuple[Dict[str, dict], List[dict], List[str], set, 
         truncated: List[str] = []
         truncated_cids: set = set()
         backfilled_wallets: set = set()
+        last_ok_ingest: Optional[str] = None
         try:
             for r in con.execute(
                 "SELECT DISTINCT condition_id FROM pm_ingest_log WHERE truncated=1"
@@ -227,11 +235,23 @@ def load_db(db_path: str) -> Tuple[Dict[str, dict], List[dict], List[str], set, 
                 "WHERE truncated=0 AND condition_id LIKE 'user:%'"
             ):
                 backfilled_wallets.add(r["condition_id"][5:].lower())
+            try:
+                row = con.execute(
+                    "SELECT MAX(run_utc) FROM pm_ingest_log "
+                    "WHERE failed=0 AND condition_id NOT LIKE 'user:%'"
+                ).fetchone()
+            except sqlite3.OperationalError:  # db predates the failed column
+                row = con.execute(
+                    "SELECT MAX(run_utc) FROM pm_ingest_log "
+                    "WHERE condition_id NOT LIKE 'user:%'"
+                ).fetchone()
+            last_ok_ingest = row[0] if row and row[0] else None
         except sqlite3.OperationalError:
             pass
     finally:
         con.close()
-    return markets, trades, sorted(set(truncated)), truncated_cids, backfilled_wallets
+    return (markets, trades, sorted(set(truncated)), truncated_cids,
+            backfilled_wallets, last_ok_ingest)
 
 
 # ---------------------------------------------------------------------------
@@ -698,7 +718,8 @@ def _cohort_agg(members: List[WalletStats]) -> dict:
 
 
 def build(db_path: str, min_trades: int, min_gross: float) -> dict:
-    markets, trades, truncated, truncated_cids, backfilled = load_db(db_path)
+    (markets, trades, truncated, truncated_cids, backfilled,
+     last_ok_ingest) = load_db(db_path)
     wallets, _prints = compute_wallets(markets, trades, truncated_cids)
     smart_ids, dumb_ids, scores, definition = build_cohorts(wallets, min_trades, min_gross)
     smart_set, dumb_set = set(smart_ids), set(dumb_ids)
@@ -894,6 +915,11 @@ def build(db_path: str, min_trades: int, min_gross: float) -> dict:
     now = datetime.now(timezone.utc).isoformat()
     feed = {
         "generated_utc": now,
+        # Honest freshness: generated_utc advances every regen (the feed is
+        # rebuilt even after a failed ingest, republishing what was captured)
+        # — this is when the CAPTURE last verifiably succeeded. None = the
+        # market sweep has never succeeded on this db.
+        "last_successful_ingest_utc": last_ok_ingest,
         "status": "measured",
         "window": window,
         "headline": headline,
@@ -941,6 +967,8 @@ def main() -> None:
 
     w = feed["window"]
     print("wrote %s" % args.out)
+    print("  last successful ingest: %s"
+          % (feed["last_successful_ingest_utc"] or "NEVER"))
     print("  window: %s -> %s | %d trades / %d wallets / %d markets / $%.0f"
           % (w["from_utc"], w["to_utc"], w["n_trades"], w["n_wallets"],
              w["n_markets"], w["usd_volume"] or 0))

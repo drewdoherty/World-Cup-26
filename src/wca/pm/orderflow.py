@@ -48,6 +48,19 @@ Design notes
   ``truncated`` in ``pm_ingest_log`` and additionally swept with the
   ``filterType=CASH&filterAmount=100/500`` large-trade filters, which reach
   deeper history for the whale cohort even when small fills are lost.
+* **Open-only mode (hourly refresh).** Trades only happen while a market is
+  OPEN; once closed the tape is frozen. Every ``pm_ingest_log`` row records
+  ``market_closed`` — the market's closed state *at sweep time* — so
+  ``run(open_only=True)`` can skip a market IFF it is closed now AND its most
+  recent log row has ``market_closed=1`` (its frozen tape already got a full
+  sweep after close). A market that flipped closed since its last sweep still
+  gets exactly one final sweep; never-swept markets always sweep. A sweep
+  that FAILS (transport error, not the offset cap) is stamped
+  ``market_closed=0`` + ``failed=1`` whatever discovery saw, so a failed
+  final sweep is retried next run instead of freezing a capture gap. Discovery
+  still runs every time (refreshes closed flags, finds newly listed events),
+  so an hourly run touches ~the open markets instead of the whole universe
+  without ever losing fills to the offset cap.
 * Never touches ``data/wca.db``. Own sqlite file, own schema, read-only on
   every Polymarket endpoint.
 """
@@ -311,7 +324,9 @@ CREATE TABLE IF NOT EXISTS pm_trades (
 CREATE INDEX IF NOT EXISTS idx_trades_cid_ts ON pm_trades(condition_id, ts);
 CREATE INDEX IF NOT EXISTS idx_trades_wallet ON pm_trades(wallet);
 CREATE TABLE IF NOT EXISTS pm_ingest_log (
-  condition_id TEXT, run_utc TEXT, n_fetched INTEGER, n_new INTEGER, truncated INTEGER
+  condition_id TEXT, run_utc TEXT, n_fetched INTEGER, n_new INTEGER, truncated INTEGER,
+  market_closed INTEGER NOT NULL DEFAULT 0,
+  failed INTEGER NOT NULL DEFAULT 0
 );
 """
 
@@ -327,6 +342,25 @@ def connect(db_path: str | Path) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(str(path), check_same_thread=False)
     con.executescript(_SCHEMA)
+    # Migration: dbs created before the open-only refresh lack the
+    # market_closed column on pm_ingest_log (CREATE IF NOT EXISTS never
+    # retrofits it). Pre-migration rows default 0 = "state at sweep time
+    # unknown / open", which safely forces one more full sweep of every
+    # closed market before the open-only skip can kick in.
+    cols = {r[1] for r in con.execute("PRAGMA table_info(pm_ingest_log)")}
+    if "market_closed" not in cols:
+        con.execute(
+            "ALTER TABLE pm_ingest_log "
+            "ADD COLUMN market_closed INTEGER NOT NULL DEFAULT 0"
+        )
+    # Migration: failed=1 marks a sweep that errored out mid-run (transport
+    # failure / bad response) — as opposed to one that merely hit the offset
+    # cap. Pre-migration rows default 0 = "believed successful", which is
+    # what they were treated as when written.
+    if "failed" not in cols:
+        con.execute(
+            "ALTER TABLE pm_ingest_log ADD COLUMN failed INTEGER NOT NULL DEFAULT 0"
+        )
     con.commit()
     return con
 
@@ -535,12 +569,22 @@ def _page_trades(
     con: sqlite3.Connection,
     condition_id: str,
     extra_params: Optional[Dict[str, Any]] = None,
-) -> Tuple[int, int, bool]:
+) -> Tuple[int, int, bool, bool]:
     """Sweep one /trades filter for *condition_id* across the offset window.
 
-    Returns ``(n_fetched, n_new, exhausted)`` — *exhausted* is False when the
-    offset-3000 ceiling was hit while full pages were still producing new rows
-    (i.e. deeper history exists but is unreachable through this filter).
+    Returns ``(n_fetched, n_new, exhausted, failed)``:
+
+    * ``exhausted`` is False when the sweep stopped short of the natural end
+      of history — either the offset-3000 ceiling was hit while full pages
+      were still producing new rows (deeper history exists but is unreachable
+      through this filter) or a request failed mid-sweep.
+    * ``failed`` is True ONLY for the transport-failure / bad-response case.
+      The distinction matters downstream: retrying a *capped* frozen tape
+      recovers nothing (``failed=False``), while retrying after an outage
+      recovers everything still in the window (``failed=True``) — so
+      :func:`ingest_trades` must not stamp a failed sweep of a closed market
+      ``market_closed=1`` (final) or the open-only skip would drop those
+      fills forever.
     """
     n_fetched = 0
     n_new = 0
@@ -555,30 +599,32 @@ def _page_trades(
         try:
             data = _get_json(DATA_API_BASE + "/trades", params=params)
         except requests.RequestException as exc:
-            # Mid-sweep failure: unswept depth may remain. Returning False
+            # Mid-sweep failure: unswept depth may remain. exhausted=False
             # makes ingest_trades flag the market truncated=1 (disclosed as
             # incomplete + CASH-swept) instead of logging a complete run —
             # a truncated=0 log here would let the incremental early-stop
             # silently skip the never-fetched deeper pages forever.
             logger.warning("trades fetch failed for %s offset %d: %s", condition_id, offset, exc)
-            return n_fetched, n_new, False
+            return n_fetched, n_new, False, True
         if not isinstance(data, list):  # {"error": ...} or unexpected shape
             logger.warning("non-list trades response for %s offset %d: %r", condition_id, offset, data)
-            return n_fetched, n_new, False  # same: do not claim completeness
+            return n_fetched, n_new, False, True  # same: do not claim completeness
         page_new = _insert_trades(con, condition_id, data)
         n_fetched += len(data)
         n_new += page_new
         time.sleep(REQUEST_SLEEP)
         if len(data) < TRADES_PAGE_LIMIT:
-            return n_fetched, n_new, True  # natural end of history
+            return n_fetched, n_new, True, False  # natural end of history
         if page_new == 0:
-            return n_fetched, n_new, True  # incremental rerun: hit known rows
+            return n_fetched, n_new, True, False  # incremental rerun: hit known rows
         if offset == TRADES_MAX_OFFSET:
-            return n_fetched, n_new, False  # ceiling hit, still finding new rows
-    return n_fetched, n_new, True  # pragma: no cover
+            return n_fetched, n_new, False, False  # ceiling hit, still finding new rows
+    return n_fetched, n_new, True, False  # pragma: no cover
 
 
-def ingest_trades(con: sqlite3.Connection, condition_id: str) -> Tuple[int, int, int]:
+def ingest_trades(
+    con: sqlite3.Connection, condition_id: str, *, market_closed: int = 0
+) -> Tuple[int, int, int]:
     """Ingest all reachable taker fills for one market.
 
     Primary unfiltered sweep first; if it exhausts the offset window while
@@ -586,24 +632,45 @@ def ingest_trades(con: sqlite3.Connection, condition_id: str) -> Tuple[int, int,
     the market is *truncated*: sweep the CASH filters to recover deeper
     large-trade history, and log ``truncated=1`` so the history is disclosed
     as incomplete rather than silently logged complete.
+
+    *market_closed* is the market's closed flag as observed by the discovery
+    pass that scheduled this sweep; it is stamped onto the ``pm_ingest_log``
+    row so open-only runs can tell "swept while still open (may have gained
+    fills since)" from "swept after close (tape frozen, capture final)".
+
+    Failure path (guaranteed-final-sweep invariant): when any sweep FAILED
+    (transport error / bad response — as opposed to merely hitting the
+    offset cap on a frozen tape) the log row is stamped ``market_closed=0``
+    and ``failed=1`` regardless of the discovery flag. A failed sweep of a
+    newly-closed market must not count as its one final sweep — the tape is
+    frozen but still readable, so the next open-only run retries it instead
+    of skipping it forever. The genuine cap-only case keeps
+    ``market_closed=1``: retrying a capped frozen tape recovers nothing.
     Returns ``(n_fetched, n_new, truncated)`` and writes a ``pm_ingest_log`` row.
     """
-    n_fetched, n_new, exhausted = _page_trades(con, condition_id)
+    n_fetched, n_new, exhausted, failed = _page_trades(con, condition_id)
     truncated = 0
     if not exhausted:
         truncated = 1
         for amount in CASH_SWEEP_AMOUNTS:
-            f, n, _ = _page_trades(
+            f, n, _, cash_failed = _page_trades(
                 con, condition_id,
                 {"filterType": "CASH", "filterAmount": amount},
             )
             n_fetched += f
             n_new += n
+            # A failed CASH fallback also forfeits "final": on a capped
+            # closed market those deep large-trade pages are only ever
+            # recovered if the next run retries.
+            failed = failed or cash_failed
     with _DB_LOCK:
         con.execute(
-            "INSERT INTO pm_ingest_log (condition_id, run_utc, n_fetched, n_new, truncated) "
-            "VALUES (?,?,?,?,?)",
-            (condition_id, _now_utc(), n_fetched, n_new, truncated),
+            "INSERT INTO pm_ingest_log "
+            "(condition_id, run_utc, n_fetched, n_new, truncated, market_closed, failed) "
+            "VALUES (?,?,?,?,?,?,?)",
+            (condition_id, _now_utc(), n_fetched, n_new, truncated,
+             1 if (market_closed and not failed) else 0,
+             1 if failed else 0),
         )
         con.commit()
     return n_fetched, n_new, truncated
@@ -741,6 +808,7 @@ def run(
     max_markets: Optional[int] = None,
     workers: int = 8,
     resume: bool = False,
+    open_only: bool = False,
 ) -> Dict[str, Any]:
     """Discover markets, upsert them, then ingest trades for each.
 
@@ -750,6 +818,20 @@ def run(
     ``pm_ingest_log`` are skipped and any orphan trades from a market that was
     mid-sweep when a previous run was killed are deleted first (the incremental
     early-stop would otherwise leave its deeper pages unswept forever).
+
+    With ``open_only=True`` (the hourly refresh mode) discovery still runs in
+    full — it refreshes the closed flags and picks up newly listed markets —
+    but a market's trade sweep is skipped IFF it is closed now AND its most
+    recent ``pm_ingest_log`` row has ``market_closed=1``: a closed market's
+    tape is frozen, so once it has received one full sweep *after* close its
+    capture is final (guaranteed-final-sweep). A market that flipped closed
+    since its last sweep (last log row ``market_closed=0``, which includes all
+    pre-migration rows) still gets exactly one final sweep; never-swept
+    markets always sweep. The invariant holds on the failure path too:
+    :func:`ingest_trades` stamps a FAILED sweep ``market_closed=0`` even when
+    discovery saw the market closed, so a final sweep that dies mid-outage is
+    retried on the next run rather than counted as final. A market can
+    therefore never gain fills we skip.
     Returns a small summary dict (counts + truncated market slugs) for the CLI.
     """
     con = connect(db_path)
@@ -769,6 +851,27 @@ def run(
         con.commit()
         todo = [m for m in todo if m["condition_id"] not in done]
         logger.info("resume: %d markets already ingested, %d to go", len(done), len(todo))
+    if open_only:
+        # Latest log row per market (max rowid = last inserted; the table is
+        # append-only). market_closed=1 there means the tape was already
+        # frozen when that sweep ran — nothing new can ever appear.
+        last_closed = dict(
+            con.execute(
+                "SELECT condition_id, market_closed FROM pm_ingest_log "
+                "WHERE rowid IN "
+                "(SELECT MAX(rowid) FROM pm_ingest_log GROUP BY condition_id)"
+            )
+        )
+        before = len(todo)
+        todo = [
+            m for m in todo
+            if not (m["closed"] and last_closed.get(m["condition_id"]) == 1)
+        ]
+        summary["skipped_closed_final"] = before - len(todo)
+        logger.info(
+            "open-only: skipping %d closed markets already final-swept, %d to ingest",
+            before - len(todo), len(todo),
+        )
     if max_markets is not None:
         todo = todo[:max_markets]
     total_fetched = 0
@@ -778,7 +881,9 @@ def run(
 
     def _one(m: Dict[str, Any]) -> None:
         nonlocal total_fetched, total_new, n_done
-        n_fetched, n_new, truncated = ingest_trades(con, m["condition_id"])
+        n_fetched, n_new, truncated = ingest_trades(
+            con, m["condition_id"], market_closed=int(m["closed"] or 0)
+        )
         with progress_lock:
             total_fetched += n_fetched
             total_new += n_new
@@ -800,3 +905,81 @@ def run(
     summary["trades_new"] = total_new
     con.close()
     return summary
+
+
+# ---------------------------------------------------------------------------
+# Freshness (ops) — is the capture actually still capturing?
+# ---------------------------------------------------------------------------
+#
+# launchd ignores the exit code of StartInterval jobs and the watchdog only
+# monitors daemons, so a permanently failing hourly ingest (API change,
+# sustained TLS block) is silent while the data-api offset window scrolls
+# match-day fills away for good. These pure helpers back the
+# ``--check-freshness`` gate in scripts/pm_orderflow_ingest.py (the Telegram
+# I/O lives in the CLI). Decision logic mirrors wca.pm1x2snapshot's stale
+# gate (not imported: that module is not on this branch).
+
+
+def _parse_utc(s: str) -> datetime:
+    """Parse the ISO-ish UTC stamps this module writes (trailing Z ok)."""
+    if s.endswith("Z"):
+        s = s[:-1] + "+00:00"
+    dt = datetime.fromisoformat(s)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
+def last_successful_sweep_utc(con: sqlite3.Connection) -> Optional[str]:
+    """UTC stamp of the most recent SUCCESSFUL market sweep, or None.
+
+    "Successful" = a ``pm_ingest_log`` market row with ``failed=0`` (rows
+    from dbs predating the ``failed`` column count as successful, which is
+    how they were treated when written). ``user:`` backfill rows are ignored
+    — they say nothing about the recurring market capture. None = the market
+    sweep has never succeeded (or never ran).
+    """
+    try:
+        row = con.execute(
+            "SELECT MAX(run_utc) FROM pm_ingest_log "
+            "WHERE failed=0 AND condition_id NOT LIKE ?",
+            (USER_LOG_PREFIX + "%",),
+        ).fetchone()
+    except sqlite3.OperationalError:  # pre-'failed'-column db, opened ro
+        row = con.execute(
+            "SELECT MAX(run_utc) FROM pm_ingest_log WHERE condition_id NOT LIKE ?",
+            (USER_LOG_PREFIX + "%",),
+        ).fetchone()
+    return row[0] if row and row[0] else None
+
+
+def seconds_since_last_successful_sweep(
+    con: sqlite3.Connection, now_iso: Optional[str] = None
+) -> Optional[float]:
+    """Seconds since the last successful market sweep; None if never."""
+    last = last_successful_sweep_utc(con)
+    if not last:
+        return None
+    now_dt = _parse_utc(now_iso) if now_iso else datetime.now(timezone.utc)
+    return max(0.0, (now_dt - _parse_utc(last)).total_seconds())
+
+
+def should_alert_stale(
+    age_secs: Optional[float],
+    last_alert_age_secs: Optional[float],
+    threshold_secs: float,
+) -> bool:
+    """Whether a freshness alert should fire now (debounced, never spammy).
+
+    * ``age_secs is None`` (never succeeded) -> always alert.
+    * Below ``threshold_secs`` -> never alert.
+    * Above threshold -> alert once, then only again once staleness has grown
+      by another full threshold (3h, then 6h, then 9h... not every cycle).
+    """
+    if age_secs is None:
+        return True
+    if age_secs < threshold_secs:
+        return False
+    if last_alert_age_secs is None:
+        return True
+    return age_secs >= last_alert_age_secs + threshold_secs
