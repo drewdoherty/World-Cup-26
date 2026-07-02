@@ -122,3 +122,65 @@ def test_bad_prices_and_draw_aliases():
     sels = sorted(r[4] for r in insert_rows)
     assert sels == ["Draw"]          # 'The Draw' canonicalised; bad prices dropped
     assert unmatched == []
+
+
+# --------------------------------------------------------------------------- #
+# Freshness / silent-stall detection (2026-07-02 postmortem: the capture
+# pipeline shipped in #109 with a CLI nobody scheduled — a full day of zero
+# rows went unnoticed).
+# --------------------------------------------------------------------------- #
+
+
+def test_seconds_since_last_snapshot_none_when_never_captured():
+    con = sqlite3.connect(":memory:")
+    con.execute(SCHEMA)
+    assert pms.seconds_since_last_snapshot(con) is None
+
+
+def test_seconds_since_last_snapshot_ignores_other_sources():
+    con = _con_with_book_fixture()  # only theoddsapi rows
+    assert pms.seconds_since_last_snapshot(con, now_iso="2026-06-20T12:00:00Z") is None
+
+
+def test_seconds_since_last_snapshot_computes_age_for_polymarket_rows():
+    con = sqlite3.connect(":memory:")
+    con.execute(SCHEMA)
+    con.execute(
+        "INSERT INTO odds_snapshots VALUES (?,?,?,?,?,?,?)",
+        ("2026-06-20T10:00:00Z", "polymarket", "M1", "h2h", "Brazil", 1.9, "{}"),
+    )
+    con.commit()
+    age = pms.seconds_since_last_snapshot(con, now_iso="2026-06-20T14:00:00Z")
+    assert age == pytest.approx(4 * 3600.0)
+
+
+def test_seconds_since_last_snapshot_takes_the_most_recent_row():
+    con = sqlite3.connect(":memory:")
+    con.execute(SCHEMA)
+    for ts in ("2026-06-20T08:00:00Z", "2026-06-20T13:30:00Z"):
+        con.execute(
+            "INSERT INTO odds_snapshots VALUES (?,?,?,?,?,?,?)",
+            (ts, "polymarket", "M1", "h2h", "Brazil", 1.9, "{}"),
+        )
+    con.commit()
+    age = pms.seconds_since_last_snapshot(con, now_iso="2026-06-20T14:00:00Z")
+    assert age == pytest.approx(0.5 * 3600.0)
+
+
+def test_should_alert_stale_never_captured_always_fires():
+    assert pms.should_alert_stale(None, None, 4 * 3600.0) is True
+    assert pms.should_alert_stale(None, 999999.0, 4 * 3600.0) is True
+
+
+def test_should_alert_stale_below_threshold_never_fires():
+    assert pms.should_alert_stale(3 * 3600.0, None, 4 * 3600.0) is False
+
+
+def test_should_alert_stale_fires_once_then_debounces():
+    threshold = 4 * 3600.0
+    # First time crossing the threshold: fires (no prior alert).
+    assert pms.should_alert_stale(4.5 * 3600.0, None, threshold) is True
+    # Same staleness window, already alerted at 4.5h: suppressed.
+    assert pms.should_alert_stale(5.0 * 3600.0, 4.5 * 3600.0, threshold) is False
+    # Staleness has grown by a full extra threshold: re-fires.
+    assert pms.should_alert_stale(8.5 * 3600.0, 4.5 * 3600.0, threshold) is True

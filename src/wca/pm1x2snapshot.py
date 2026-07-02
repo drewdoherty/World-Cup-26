@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Sequence, Tuple
 
 from wca.venuesdata import canon_team, pair_key
@@ -166,3 +167,73 @@ def snapshot(
         "n_unmatched_legs": len(unmatched),
         "unmatched_fixtures": [" vs ".join(f) for f in unmatched_fixtures],
     }
+
+
+# --------------------------------------------------------------------------- #
+# Freshness / silent-stall detection.
+#
+# 2026-07-02 postmortem: PR #109 shipped the capture pipeline above and a CLI
+# (``scripts/wca_pm_1x2_snapshot.py``) but never wired it into any scheduler
+# (no ``deploy/`` entry, no CI workflow) — a full day passed with the docstring
+# telling operators to "run on a schedule" while nothing did. The CLI also
+# degrades silently by design ("no rows fetched... nothing written", exit 0),
+# so even once scheduled a persistent zero-match/zero-fetch state would stay
+# invisible. These two gaps only close together: scheduling makes the job run;
+# this freshness check makes a run that keeps inserting nothing loud instead
+# of quiet.
+# --------------------------------------------------------------------------- #
+
+
+def _parse_utc(ts: str) -> datetime:
+    s = str(ts).strip()
+    if s.endswith("Z"):
+        s = s[:-1] + "+00:00"
+    try:
+        dt = datetime.fromisoformat(s)
+    except ValueError:
+        dt = datetime.strptime(s[:19], "%Y-%m-%dT%H:%M:%S")
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
+def seconds_since_last_snapshot(
+    con: sqlite3.Connection, now_iso: Optional[str] = None
+) -> Optional[float]:
+    """Seconds since the most recent captured Polymarket ``h2h`` snapshot.
+
+    Returns ``None`` if the source has NEVER written a row — distinct from
+    merely stale. A ``None`` result means the job either isn't scheduled or
+    has matched zero fixtures on every run; a large-but-finite result means it
+    ran, matched before, and has since gone quiet (fetch outage, PM API
+    change, or the tournament simply has no live h2h market right now).
+    """
+    row = con.execute(
+        "SELECT MAX(ts_utc) FROM odds_snapshots WHERE source='polymarket'"
+    ).fetchone()
+    last = row[0] if row else None
+    if not last:
+        return None
+    now_dt = _parse_utc(now_iso) if now_iso else datetime.now(timezone.utc)
+    return max(0.0, (now_dt - _parse_utc(last)).total_seconds())
+
+
+def should_alert_stale(
+    age_secs: Optional[float],
+    last_alert_age_secs: Optional[float],
+    threshold_secs: float,
+) -> bool:
+    """Whether a freshness alert should fire now (debounced, never spammy).
+
+    * ``age_secs is None`` (never captured a single row) -> always alert.
+    * Below ``threshold_secs`` -> never alert.
+    * Above threshold -> alert once, then only again once staleness has grown
+      by another full threshold (4h, then 8h, then 12h... not every cycle).
+    """
+    if age_secs is None:
+        return True
+    if age_secs < threshold_secs:
+        return False
+    if last_alert_age_secs is None:
+        return True
+    return age_secs >= last_alert_age_secs + threshold_secs
