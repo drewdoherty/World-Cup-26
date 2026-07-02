@@ -140,3 +140,27 @@ def test_scores_page_prefers_exact_triple():
         (fx,) = data["fixtures"]
         assert fx["approx_1x2"] is True
         assert fx["model_1x2"]["home"] == 0.0
+
+
+# ---------------------------------------------------------------------------
+# F7 goal-blend SHADOW lambdas (2026-07-02): additive, never schema-breaking.
+# ---------------------------------------------------------------------------
+
+
+class _FakeGB:
+    """Stub with the drop-in DC interface _lambdas_for relies on."""
+
+    def expected_lambdas(self, home, away, neutral=True, warn=False):
+        return 1.7, 1.2
+
+
+def test_gb_shadow_lambdas_persisted_additively():
+    payload = modelpreds.build_predictions([_blend()], NOW, gb_model=_FakeGB())
+    (fx,) = payload["fixtures"]
+    assert fx["gb_lambda_home"] == 1.7
+    assert fx["gb_lambda_away"] == 1.2
+
+
+def test_no_gb_model_keeps_schema_unchanged():
+    payload = modelpreds.build_predictions([_blend()], NOW)
+    assert "gb_lambda_home" not in payload["fixtures"][0]
