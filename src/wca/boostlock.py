@@ -85,22 +85,34 @@ def implied_leg_template(team: str, opponent: str) -> List[str]:
 def build_lock(fixture: str, team: str, opponent: str, builder_odds: float,
                lay_odds: float, back_stake: float, boost_frac: float = 0.5,
                lay_commission: float = 0.0, min_combined_odds: float = 2.0,
-               extra_leg: Optional[str] = None) -> BoostLock:
+               extra_leg: Optional[str] = None,
+               promo_max_stake: Optional[float] = None) -> BoostLock:
     """Assemble a :class:`BoostLock` for a win-anchored equivalent builder.
 
     ``extra_leg`` marks a NON-implied leg the book forced in (combo priced
     under the promo minimum, or the SGM engine pruned an implied leg) —
     the lock is then approximate and ``equivalent=False``.
+
+    ``promo_max_stake`` is the promo's max qualifying stake (boosts typically
+    cap at £5/£10): a larger requested stake is CLAMPED to it, because stake
+    above the cap earns no boost and just bleeds the lay margin.
     """
     legs = implied_leg_template(team, opponent)
     notes = ""
     equivalent = True
+    if promo_max_stake is not None and back_stake > promo_max_stake:
+        notes = (
+            "Stake clamped to the promo max %.2f (requested %.2f) — stake "
+            "above the cap earns no boost." % (promo_max_stake, back_stake)
+        )
+        back_stake = float(promo_max_stake)
     if extra_leg:
         legs.append(extra_leg)
         equivalent = False
-        notes = ("NON-implied leg added (%s): hedge is approximate — the "
-                 "builder can lose while the lay also loses if that leg fails "
-                 "on a %s win. Quantify before staking." % (extra_leg, team))
+        notes = (notes + " " if notes else "") + (
+            "NON-implied leg added (%s): hedge is approximate — the "
+            "builder can lose while the lay also loses if that leg fails "
+            "on a %s win. Quantify before staking." % (extra_leg, team))
     if builder_odds < min_combined_odds:
         notes = (notes + " " if notes else "") + (
             "Quoted combo %.2f is BELOW the promo minimum %.2f — add the "

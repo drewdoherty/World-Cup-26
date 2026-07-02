@@ -241,12 +241,14 @@ DUAL_POOL_KELLY_FRACTION: float = 0.50
 GBP_POOL_NAME = "gbp"
 PM_POOL_NAME = "pm"
 
-# FULL-POOL sizing bases (user override, 2026-07-02): the deployable pools are
-# the FULL capital per book adjusted by realised ledger P&L — sportsbook
-# £3,000 ± realised non-PM P&L (½-Kelly, its standing fraction) and the PM
-# global rule $3,990 ± realised PM P&L (¼-Kelly per wca.markets.bankroll).
-# This supersedes BOTH the £1,500/$1,995 equal split and the CLV-rung ladder
-# as sizing bases. Kill switch: WCA_FULL_POOLS=0 restores the legacy split.
+# COMBINED bankroll (user correction, 2026-07-02): ONE £3,000 pot of real
+# capital shared across sportsbooks AND Polymarket, adjusted by TOTAL realised
+# P&L (GBP books in £, PM in $ converted at $1.33/£), sized at ¼-Kelly of the
+# running total — expressed in £ for GBP venues and $ for Polymarket. A
+# per-venue £3,000 each would DOUBLE-COUNT the capital (the first full-pool
+# cut did exactly that and was corrected same-day). Supersedes the
+# £1,500/$1,995 equal split and the CLV-rung ladder as sizing bases.
+# Kill switch: WCA_FULL_POOLS=0 restores the legacy split.
 GBP_POOL_BASE_GBP: float = 3000.0
 
 
@@ -276,20 +278,36 @@ def _realised_settled_pl(db_path: Optional[str], polymarket: bool) -> Optional[f
         return None
 
 
-def full_pools(db_path: Optional[str] = None) -> List["PoolConfig"]:
-    """FULL-POOL bases ± realised P&L (user override, 2026-07-02)."""
+def combined_bankroll_gbp(db_path: Optional[str] = None):
+    """``(total_gbp, gbp_pnl_gbp, pm_pnl_usd)`` — the ONE shared bankroll.
+
+    £3,000 + realised GBP-book P&L (£) + realised PM P&L ($ → £ at $1.33/£).
+    Floored at zero. Missing/unreadable ledger contributes zero P&L.
+    """
     gbp_pnl = _realised_settled_pl(db_path, polymarket=False) or 0.0
     pm_pnl = _realised_settled_pl(db_path, polymarket=True) or 0.0
+    total = GBP_POOL_BASE_GBP + gbp_pnl + pm_pnl / GBP_USD
+    return max(0.0, total), gbp_pnl, pm_pnl
+
+
+def full_pools(db_path: Optional[str] = None) -> List["PoolConfig"]:
+    """ONE combined bankroll, ¼-Kelly, in £ (sportsbooks) and $ (Polymarket).
+
+    Both pools reference the SAME running total (£3,000 ± total realised P&L);
+    the PM pool is that total converted at $1.33/£ — never an independent
+    second pot. The per-pool daily/whole-book caps still apply per venue.
+    """
+    total_gbp, _, _ = combined_bankroll_gbp(db_path)
     return [
         PoolConfig(
             name=GBP_POOL_NAME,
-            bankroll=max(0.0, GBP_POOL_BASE_GBP + gbp_pnl),
+            bankroll=total_gbp,
             currency="GBP",
-            kelly_fraction=DUAL_POOL_KELLY_FRACTION,
+            kelly_fraction=PM_RULE_KELLY_FRACTION,
         ),
         PoolConfig(
             name=PM_POOL_NAME,
-            bankroll=max(0.0, pm_bankroll_usd(pm_pnl)),
+            bankroll=gbp_to_usd(total_gbp),
             currency="USD",
             kelly_fraction=PM_RULE_KELLY_FRACTION,
         ),
@@ -575,20 +593,19 @@ def resolve_pool_bankroll(
             )
         )
     elif full_mode:
-        # FULL-POOL override (user, 2026-07-02): size off the full sportsbook
-        # capital ± realised non-PM P&L; the CLV rung is reported for reference
-        # but no longer gates the base. WCA_FULL_POOLS=0 restores the ladder.
-        gbp_pnl = _realised_settled_pl(db_path, polymarket=False)
-        bankroll = max(0.0, float(actual_capital) + (gbp_pnl or 0.0))
+        # COMBINED bankroll (user, 2026-07-02): £3,000 ± TOTAL realised P&L
+        # across GBP books AND Polymarket ($→£ at $1.33/£) — one shared pot,
+        # never per-venue doubling. The CLV rung is reported for reference but
+        # no longer gates the base. WCA_FULL_POOLS=0 restores the ladder.
+        bankroll, gbp_pnl, pm_pnl = combined_bankroll_gbp(db_path)
         out_fraction = FLAT_KELLY_FRACTION
         reason = (
-            "FULL-POOL %s%.0f (£%.0f %+.2f realised non-PM P&L%s; user override "
-            "2026-07-02) — ladder rung %d (%s%.0f) for reference; %d/%d "
-            "settled-with-close, CLV %s"
+            "COMBINED-POOL %s%.0f (£%.0f %+.2f£ GBP P&L %+.2f$ PM P&L at "
+            "$%.2f/£; user 2026-07-02) — ladder rung %d (%s%.0f) for "
+            "reference; %d/%d settled-with-close, CLV %s"
             % (
-                currency_symbol, bankroll, actual_capital, gbp_pnl or 0.0,
-                "" if gbp_pnl is not None else ", ledger unavailable",
-                rung, currency_symbol, ladder_bankroll, n_settled,
+                currency_symbol, bankroll, GBP_POOL_BASE_GBP, gbp_pnl, pm_pnl,
+                GBP_USD, rung, currency_symbol, ladder_bankroll, n_settled,
                 next_threshold, clv_str,
             )
         )

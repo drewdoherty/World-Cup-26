@@ -51,14 +51,15 @@ def _rec(*, match="A vs B", venue="smarkets", stakes, team="A", odds=2.0,
 def test_default_pools_shape(monkeypatch):
     import pytest as _pytest
 
-    # FULL-POOL default (user, 2026-07-02): no ledger -> un-adjusted bases;
-    # GBP keeps its standing 1/2-Kelly, PM uses the global-rule 1/4-Kelly.
+    # COMBINED bankroll (user, 2026-07-02): ONE £3,000 ± total realised P&L
+    # pot shared by both books at ¼-Kelly — the PM figure is the SAME total
+    # converted at $1.33/£, never an independent second pot.
     pools = default_pools()
     by_name = {p.name: p for p in pools}
     assert by_name[GBP_POOL_NAME].bankroll == 3000.0
     assert by_name[GBP_POOL_NAME].currency == "GBP"
-    assert by_name[GBP_POOL_NAME].kelly_fraction == 0.50
-    assert by_name[PM_POOL_NAME].bankroll == _pytest.approx(3990.0)
+    assert by_name[GBP_POOL_NAME].kelly_fraction == 0.25
+    assert by_name[PM_POOL_NAME].bankroll == _pytest.approx(3000.0 * 1.33)
     assert by_name[PM_POOL_NAME].currency == "USD"
     assert by_name[PM_POOL_NAME].kelly_fraction == 0.25
 
