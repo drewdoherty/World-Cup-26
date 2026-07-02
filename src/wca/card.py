@@ -35,6 +35,7 @@ import pandas as pd
 
 from wca.data.teamnames import canonical
 from wca.markets import devig as devig_mod
+from wca.markets.bankroll import GBP_USD, gbp_to_usd
 from wca.markets import kelly as kelly_mod
 from wca.models import venues as venues_mod
 from wca.models.dixon_coles import DixonColesModel
@@ -1761,28 +1762,46 @@ def format_ranked_card(
             )
         elif r.hours_to_kickoff is not None and r.hours_to_kickoff >= FURTHER_OUT_HOURS:
             tilt = "  further-out (%.0fh) — thin/soft market" % r.hours_to_kickoff
+        px_c = (100.0 / r.best_odds) if r.best_odds and r.best_odds > 1.0 else float("nan")
+        stake_usd = stake if rp.symbol == "$" else gbp_to_usd(stake)
         lines.append(
-            "*%d. [%s] %s* — %s @ *%.2f* via *%s*\n"
-            "    model %.1f%% / mkt %.1f%%  edge *%+.1f%%*  [elo %.0f%% dc %.0f%%]\n"
-            "    stake: %s %s%.2f%s"
+            "*%d. [%s] %s* — %s (1X2 90') @ *%.1f¢* via *%s*\n"
+            "    model %.1f¢ · fair %.1f¢ · EV *%+.1f%%* · stake *$%.2f*%s"
             % (
                 i, _CATEGORY_LABEL.get(r.category, r.category.upper()),
-                r.match_desc, r.selection_team, r.best_odds, r.venue,
+                r.match_desc, r.selection_team, px_c, r.venue,
                 r.model_prob * 100, r.market_prob * 100, r.edge * 100,
-                r.elo_prob * 100, r.dc_prob * 100, rp.name, rp.symbol, stake, tilt,
+                stake_usd, tilt,
             )
         )
 
-    # CUT list (rule 2): excluded longshots, kept visible with EV + reason.
+    if ranked.picks:
+        lines.append("")
+        lines.append(
+            "_Prices in ¢ (Polymarket convention: price = implied probability, "
+            "$1 payout). £-pool stakes shown in $ at $%.2f/£ — display only; "
+            "bets settle in their native currency._" % GBP_USD
+        )
+
+    # EXCLUDED list (rule 2): floor/minnow cuts, ONE line each — nothing hidden,
+    # no essays. Back and lay recommendations both belong in the staked group
+    # above; a "CUT (positions to trim)" section renders here only when a trim
+    # engine emits exit recommendations (none exists yet — Phase 1 item).
     if ranked.cut:
         lines.append("")
-        lines.append("*— CUT (excluded from staking, %d) —*" % len(ranked.cut))
+        lines.append("*— EXCLUDED (not staked, %d) —*" % len(ranked.cut))
         for r in ranked.cut:
+            tag = (
+                "below %.0f%% prob floor" % (SELECTION_MIN_PROB * 100)
+                if r.model_prob < SELECTION_MIN_PROB
+                else "minnow rule — no cash on longshots"
+            )
             lines.append(
-                "  x %s — %s @ %.2f (model %.1f%%, +%.1f%% EV): %s"
+                "  x %s — %s @ %.1f¢ · model %.1f¢ · EV %+.1f%% — %s"
                 % (
-                    r.match_desc, r.selection_team, r.best_odds,
-                    r.model_prob * 100, r.edge * 100, r.cut_reason,
+                    r.match_desc, r.selection_team,
+                    (100.0 / r.best_odds) if r.best_odds and r.best_odds > 1.0 else float("nan"),
+                    r.model_prob * 100, r.edge * 100, tag,
                 )
             )
 
