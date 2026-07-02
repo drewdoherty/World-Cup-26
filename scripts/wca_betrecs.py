@@ -43,14 +43,21 @@ from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from wca.markets import bankroll as pm_rule  # noqa: E402  (needs src on path)
+
 # ---------------------------------------------------------------------------
 # Constants matching card.py governance
 # ---------------------------------------------------------------------------
 
 FLAT_KELLY_FRACTION: float = 0.25
 DEFAULT_BANKROLL_GBP: float = 2000.0    # rung-0 sportsbook pool
-DEFAULT_PM_BANKROLL_USD: float = 1310.0  # Polymarket pool
-PER_BET_CAP: float = 0.05               # 5% hard cap per bet
+# Polymarket pool: the GLOBAL RULE (wca.markets.bankroll) — ¼-Kelly of
+# £3,000 ± realised P&L at $1.33/£. This is the BASE (P&L-unknown) figure;
+# main() adjusts it from the live ledger when one is present. The old
+# hardcoded $1,310 silently overrode the rule.
+DEFAULT_PM_BANKROLL_USD: float = pm_rule.pm_bankroll_usd()
+PER_BET_CAP: float = 0.05               # 5% hard cap per bet (sportsbook, card governance)
+PM_PER_BET_CAP: float = pm_rule.PM_MAX_STAKE_FRAC  # 4% per bet (PM global rule)
 DAILY_EXPOSURE_CAP: float = 0.25        # 25% total daily cap
 SELECTION_MIN_PROB: float = 0.20        # hard floor on model prob
 LONGSHOT_PROB: float = 0.25             # minnow filter threshold
@@ -167,14 +174,39 @@ def _resolve_sportsbook_pool(db_path: str) -> Dict[str, Any]:
         }
 
 
-def _pm_pool(bankroll_usd: float) -> Dict[str, Any]:
+def _pm_pool(bankroll_usd: float, source: str = "base") -> Dict[str, Any]:
     return {
-        "bankroll": bankroll_usd,
-        "kelly_fraction": FLAT_KELLY_FRACTION,
-        "per_bet_cap": PER_BET_CAP,
-        "max_stake": round(bankroll_usd * PER_BET_CAP, 2),
+        "bankroll": round(float(bankroll_usd), 2),
+        "kelly_fraction": pm_rule.PM_KELLY_FRACTION,
+        "per_bet_cap": PM_PER_BET_CAP,
+        "max_stake": round(float(bankroll_usd) * PM_PER_BET_CAP, 2),
         "currency": "USD",
+        "source": source,
     }
+
+
+def _pm_realised_pnl_usd(db_path: str) -> Optional[float]:
+    """Realised Polymarket P&L (USD) from the live ledger; None if unreadable.
+
+    Opened read-only so a regen never mutates the runtime DB. ``settled_pl``
+    already reflects free-bet/lay/cash-out accounting (ledger store rules).
+    """
+    import sqlite3
+
+    if not Path(db_path).exists():
+        return None
+    try:
+        con = sqlite3.connect("file:%s?mode=ro" % db_path, uri=True)
+        try:
+            row = con.execute(
+                "SELECT COALESCE(SUM(settled_pl), 0.0) FROM bets "
+                "WHERE platform = 'polymarket' AND settled_pl IS NOT NULL"
+            ).fetchone()
+        finally:
+            con.close()
+        return float(row[0]) if row is not None else None
+    except Exception:
+        return None
 
 
 def _ledger_open_count(db_path: str) -> Optional[int]:
@@ -770,7 +802,9 @@ def main() -> int:
     ap.add_argument("--out", default="site/bet_recs.json")
     ap.add_argument("--min-edge", type=float, default=MIN_EDGE)
     ap.add_argument("--stale-model-hours", type=int, default=MODEL_STALE_HOURS)
-    ap.add_argument("--pm-bankroll", type=float, default=DEFAULT_PM_BANKROLL_USD)
+    ap.add_argument("--pm-bankroll", type=float, default=None,
+                    help="override PM pool (USD); default = global rule "
+                         "(£3,000·FX ± ledger realised P&L)")
     ap.add_argument("--predictions", default="data/model_predictions.json")
     ap.add_argument("--advancement", default="site/advancement_data.json")
     ap.add_argument("--exposure", default="site/exposure_dashboard.json")
@@ -783,7 +817,17 @@ def main() -> int:
 
     # Bankroll governance
     sb_pool = _resolve_sportsbook_pool(args.db)
-    pm_pool_data = _pm_pool(args.pm_bankroll)
+    if args.pm_bankroll is not None:
+        pm_pool_data = _pm_pool(args.pm_bankroll, source="cli-override")
+    else:
+        pm_pnl = _pm_realised_pnl_usd(args.db)
+        if pm_pnl is None:
+            pm_pool_data = _pm_pool(pm_rule.pm_bankroll_usd(), source="base (no ledger)")
+        else:
+            pm_pool_data = _pm_pool(
+                pm_rule.pm_bankroll_usd(pm_pnl),
+                source="ledger (realised $%+.2f)" % pm_pnl,
+            )
 
     # Load feeds with ages
     predictions_raw, pred_age = _load_json(args.predictions, {"fixtures": []})
