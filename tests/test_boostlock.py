@@ -58,3 +58,13 @@ def test_build_lock_flags_non_implied_leg_and_low_odds():
     assert lock.equivalent is False
     assert "NON-implied" in lock.notes and "BELOW the promo minimum" in lock.notes
     assert "APPROXIMATE" in format_lock(lock)
+
+
+def test_promo_max_stake_clamps():
+    lock = build_lock("Switzerland vs Algeria", "Switzerland", "Algeria",
+                      builder_odds=2.05, lay_odds=2.10, back_stake=50.0,
+                      promo_max_stake=10.0)
+    assert lock.back_stake == 10.0
+    assert "clamped to the promo max" in lock.notes
+    # Lock scales with the clamped stake, not the requested one.
+    assert 0 < lock.locked_profit < 3.0
