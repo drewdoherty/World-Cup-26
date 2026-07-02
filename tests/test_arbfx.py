@@ -213,13 +213,16 @@ def test_build_arb_data_no_cross_fixture_pairing():
 
 def test_no_sample_feed_committed():
     import os
-    # The placeholder sample feed must not be a tracked artifact with rows.
+    # The tracked feed must parse and carry a real ``arbs`` list. It is
+    # rewritten by live publishers, so pinning ``arbs == []`` made any REAL
+    # arb present at publish time a CI failure (data-coupled landmine —
+    # removed 2026-07-02). Fabricated-sample protection now rests on the
+    # engine tests above, not on asserting the live feed is empty.
     p = os.path.join(os.path.dirname(__file__), "..", "site", "arb_data.json")
     if os.path.exists(p):
         import json
         d = json.load(open(p))
-        # Only an honest EMPTY feed may sit in the repo (CI regenerates live).
-        assert d.get("arbs") == []
+        assert isinstance(d.get("arbs"), list)
 
 
 def test_renderer_has_empty_state():
