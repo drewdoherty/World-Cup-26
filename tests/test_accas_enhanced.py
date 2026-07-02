@@ -665,7 +665,10 @@ class TestBankrollWiring:
             site_data=str(tmp_path / "t.json"),
             mode="value",
         )
-        assert result.get("bankroll") == pytest.approx(DEFAULT_BANKROLL, rel=0.01)
+        # FULL-POOL default (user, 2026-07-02): a missing ledger resolves to the
+        # full £3,000 sportsbook base, not the old rung-0 £2,000 DEFAULT_BANKROLL.
+        from wca.card import GBP_POOL_BASE_GBP
+        assert result.get("bankroll") == pytest.approx(GBP_POOL_BASE_GBP, rel=0.01)
         assert "fallback" in result.get("bankroll_reason", "").lower() or \
                result.get("bankroll_reason") is not None
 

@@ -341,11 +341,11 @@ def main() -> None:
     # card and must not re-pull/rewrite the main card, /next or predictions.
     # ------------------------------------------------------------------
     if not args.goalscorers_only:
-        # Dual-pool 1/2-Kelly (user, 2026-06-28): £1,500 GBP venues + $1,995
-        # Polymarket, equally split, each book sized in its own currency. This
-        # replaces the CLV-rung ladder as the sizing base; pool_bank is kept only
-        # for the informational footer (actual capital / any constraint note).
-        pools = default_pools()
+        # FULL-POOL sizing (user override, 2026-07-02): full sportsbook capital
+        # ± realised non-PM P&L and the PM global-rule pool ± realised PM P&L,
+        # each book sized in its own currency (WCA_FULL_POOLS=0 restores the
+        # legacy £1,500/$1,995 split). pool_bank feeds the reason line only.
+        pools = default_pools(db_path=args.db)
 
         try:
             # build_card gates +EV outcomes (with the further-out tilt baked in,
@@ -362,13 +362,10 @@ def main() -> None:
             print("ERROR: card generation failed: %s" % exc, file=sys.stderr)
             sys.exit(1)
 
-        # Scorelines (and any scorer/SGM markets) are REFERENCE-ONLY per the
-        # Phase-2 roadmap — shown with models + fair odds but never sized.
-        card_text = (
-            format_ranked_card(ranked, pools, bank=pool_bank)
-            + "\n\n*— REFERENCE, NOT SIZED (models + fair odds only) —*\n"
-            + format_scores(score_cards)
-        )
+        # Reference scorelines appendix removed from /card (user, 2026-07-02):
+        # the scoreline matrices remain available on /scores; score_cards still
+        # feeds that card below.
+        card_text = format_ranked_card(ranked, pools, bank=pool_bank)
 
         write_card(card_text, path=args.out, ts_utc=now_str)
 

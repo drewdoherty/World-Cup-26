@@ -65,7 +65,7 @@ LOCAL_BET_RECS = os.environ.get(
 )
 
 # Hard USD cap forwarded to the mini fire (the mini clamps to its own backstop).
-MAX_USD = os.environ.get("WCA_PLACE_MAX_USD", "100")
+MAX_USD = os.environ.get("WCA_PLACE_MAX_USD", "160")
 
 SSH_TIMEOUT_SECS = int(os.environ.get("WCA_PLACE_SSH_TIMEOUT", "60"))
 
