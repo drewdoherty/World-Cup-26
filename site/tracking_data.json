@@ -1,16 +1,16 @@
 {
   "meta": {
-    "generated": "2026-07-02 10:16:40 UTC"
+    "generated": "2026-07-02 10:38:34 UTC"
   },
   "summary": {
-    "fixtures_complete": 79,
-    "model_1x2_correct": 48,
-    "market_1x2_correct": 37,
-    "model_brier": 0.456,
-    "market_brier": 0.4441,
-    "model_logloss": 0.7817,
-    "market_logloss": 0.7598,
-    "top6_hits": 42,
+    "fixtures_complete": 82,
+    "model_1x2_correct": 51,
+    "market_1x2_correct": 40,
+    "model_brier": 0.4457,
+    "market_brier": 0.432,
+    "model_logloss": 0.7678,
+    "market_logloss": 0.744,
+    "top6_hits": 44,
     "bets": {
       "settled": 131,
       "won": 42,
@@ -7896,6 +7896,318 @@
         "model": 0.481,
         "actual": false,
         "hit": true
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "Belgium vs Senegal",
+      "date": "2026-07-01",
+      "kickoff": "2026-07-01T20:00:00Z",
+      "score": "3-2",
+      "outcome": "home",
+      "home_goals": 3,
+      "away_goals": 2,
+      "card_generated": "2026-07-01 19:18:22 UTC",
+      "model_1x2": {
+        "home": 0.4991,
+        "draw": 0.2718,
+        "away": 0.2291
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.4869,
+        "draw": 0.2777,
+        "away": 0.2355
+      },
+      "market_source": "closing_devig",
+      "market_books": 19,
+      "model_pick": "home",
+      "market_pick": "home",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.4991,
+      "market_prob_outcome": 0.4869,
+      "result_edge": 0.0123,
+      "brier_model": 0.3772,
+      "brier_market": 0.3959,
+      "logloss_model": 0.6949,
+      "logloss_market": 0.7198,
+      "top_scoreline": {
+        "score": "1-1",
+        "prob": 12.9,
+        "hit": false
+      },
+      "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "1-1",
+          "prob": 12.9
+        },
+        {
+          "score": "1-0",
+          "prob": 9.6
+        },
+        {
+          "score": "2-1",
+          "prob": 9.0
+        },
+        {
+          "score": "2-0",
+          "prob": 8.9
+        },
+        {
+          "score": "0-0",
+          "prob": 7.5
+        },
+        {
+          "score": "0-1",
+          "prob": 6.2
+        }
+      ],
+      "home_standing": {
+        "team": "Belgium",
+        "group": "G",
+        "played": 3,
+        "won": 1,
+        "drawn": 2,
+        "lost": 0,
+        "gf": 6,
+        "ga": 2,
+        "gd": 4,
+        "points": 5,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Senegal",
+        "group": "I",
+        "played": 3,
+        "won": 1,
+        "drawn": 0,
+        "lost": 2,
+        "gf": 8,
+        "ga": 6,
+        "gd": 2,
+        "points": 3,
+        "position": 3
+      },
+      "ou25": {
+        "model_over": 0.514,
+        "actual_over": true,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.542,
+        "actual": true,
+        "hit": true
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "England vs DR Congo",
+      "date": "2026-07-01",
+      "kickoff": "2026-07-01T16:00:00Z",
+      "score": "2-1",
+      "outcome": "home",
+      "home_goals": 2,
+      "away_goals": 1,
+      "card_generated": "2026-07-01 14:56:08 UTC",
+      "model_1x2": {
+        "home": 0.7623,
+        "draw": 0.1759,
+        "away": 0.0618
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.7369,
+        "draw": 0.1876,
+        "away": 0.0755
+      },
+      "market_source": "closing_devig",
+      "market_books": 19,
+      "model_pick": "home",
+      "market_pick": "home",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.7623,
+      "market_prob_outcome": 0.7369,
+      "result_edge": 0.0254,
+      "brier_model": 0.0913,
+      "brier_market": 0.1101,
+      "logloss_model": 0.2714,
+      "logloss_market": 0.3053,
+      "top_scoreline": {
+        "score": "2-0",
+        "prob": 15.3,
+        "hit": false
+      },
+      "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "2-0",
+          "prob": 15.3
+        },
+        {
+          "score": "1-0",
+          "prob": 12.8
+        },
+        {
+          "score": "3-0",
+          "prob": 11.8
+        },
+        {
+          "score": "1-1",
+          "prob": 8.2
+        },
+        {
+          "score": "2-1",
+          "prob": 8.1
+        },
+        {
+          "score": "4-0",
+          "prob": 6.9
+        }
+      ],
+      "home_standing": {
+        "team": "England",
+        "group": "L",
+        "played": 3,
+        "won": 2,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 6,
+        "ga": 2,
+        "gd": 4,
+        "points": 7,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "DR Congo",
+        "group": "K",
+        "played": 3,
+        "won": 1,
+        "drawn": 1,
+        "lost": 1,
+        "gf": 4,
+        "ga": 3,
+        "gd": 1,
+        "points": 4,
+        "position": 3
+      },
+      "ou25": {
+        "model_over": 0.537,
+        "actual_over": true,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.379,
+        "actual": true,
+        "hit": false
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "United States vs Bosnia and Herzegovina",
+      "date": "2026-07-01",
+      "kickoff": "2026-07-02T00:00:00Z",
+      "score": "2-0",
+      "outcome": "home",
+      "home_goals": 2,
+      "away_goals": 0,
+      "card_generated": "2026-07-01 22:47:24 UTC",
+      "model_1x2": {
+        "home": 0.6823,
+        "draw": 0.1936,
+        "away": 0.1242
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.7025,
+        "draw": 0.188,
+        "away": 0.1095
+      },
+      "market_source": "closing_devig",
+      "market_books": 19,
+      "model_pick": "home",
+      "market_pick": "home",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.6823,
+      "market_prob_outcome": 0.7025,
+      "result_edge": -0.0203,
+      "brier_model": 0.1539,
+      "brier_market": 0.1358,
+      "logloss_model": 0.3824,
+      "logloss_market": 0.3531,
+      "top_scoreline": {
+        "score": "2-1",
+        "prob": 11.3,
+        "hit": false
+      },
+      "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "2-1",
+          "prob": 11.3
+        },
+        {
+          "score": "2-0",
+          "prob": 10.2
+        },
+        {
+          "score": "1-0",
+          "prob": 9.1
+        },
+        {
+          "score": "1-1",
+          "prob": 8.9
+        },
+        {
+          "score": "3-1",
+          "prob": 7.9
+        },
+        {
+          "score": "3-0",
+          "prob": 7.1
+        }
+      ],
+      "home_standing": {
+        "team": "United States",
+        "group": "D",
+        "played": 3,
+        "won": 2,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 8,
+        "ga": 4,
+        "gd": 4,
+        "points": 6,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Bosnia and Herzegovina",
+        "group": "B",
+        "played": 3,
+        "won": 1,
+        "drawn": 1,
+        "lost": 1,
+        "gf": 5,
+        "ga": 6,
+        "gd": -1,
+        "points": 4,
+        "position": 3
+      },
+      "ou25": {
+        "model_over": 0.635,
+        "actual_over": false,
+        "hit": false
+      },
+      "btts": {
+        "model": 0.584,
+        "actual": false,
+        "hit": false
       },
       "picks": [],
       "pending": false
