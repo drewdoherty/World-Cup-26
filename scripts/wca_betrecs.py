@@ -57,6 +57,7 @@ LONGSHOT_PROB: float = 0.25             # minnow filter threshold
 MIN_EDGE: float = 0.02                  # minimum edge gate (2pp)
 MODEL_STALE_HOURS: int = 24             # model older than this → withheld
 PRICE_STALE_SECS: int = 7200           # 2h — price age beyond which rows go withheld
+ADV_STALE_SECS: int = 6 * 3600         # 6h — advancement feed age beyond which futures are withheld
 FX_FALLBACK_GBP_USD: float = 1.27      # fallback when no FX available
 
 # PM taker fee: fee = 0.03 × p × (1 - p)
@@ -648,6 +649,12 @@ def build_advancement_futures(
     kelly_frac = pm_pool["kelly_fraction"]
     max_stake = pm_pool["max_stake"]
 
+    # Advancement futures move fast in the knockouts — teams get ELIMINATED,
+    # and a stale feed keeps recommending knocked-out sides at phantom edges
+    # (observed 2026-07-02: Bosnia still shown post-elimination on a 15h-old
+    # feed). The dedicated 6h gate is deliberately far tighter than the 24h
+    # model gate; PM advancement hygiene rule: re-run before acting.
+    adv_stale = adv_age_secs is not None and adv_age_secs > ADV_STALE_SECS
     model_stale = adv_age_secs is not None and adv_age_secs > MODEL_STALE_HOURS * 3600
 
     actionable: List[Dict[str, Any]] = []
@@ -691,8 +698,16 @@ def build_advancement_futures(
             if stake <= 0:
                 continue
 
-            stale = model_stale
-            stale_reason = "advancement model stale (>%dh)" % MODEL_STALE_HOURS if stale else None
+            stale = model_stale or adv_stale
+            if model_stale:
+                stale_reason = "advancement model stale (>%dh)" % MODEL_STALE_HOURS
+            elif adv_stale:
+                stale_reason = (
+                    "advancement feed stale (>%dh) — teams may be eliminated; "
+                    "re-run before acting" % (ADV_STALE_SECS // 3600)
+                )
+            else:
+                stale_reason = None
 
             rec = {
                 "id": "%s_%s_pm" % (team.lower().replace(" ", "_"), stage.lower()),
