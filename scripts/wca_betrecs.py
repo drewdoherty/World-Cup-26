@@ -43,20 +43,28 @@ from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from wca.markets import bankroll as pm_rule  # noqa: E402  (needs src on path)
+
 # ---------------------------------------------------------------------------
 # Constants matching card.py governance
 # ---------------------------------------------------------------------------
 
 FLAT_KELLY_FRACTION: float = 0.25
 DEFAULT_BANKROLL_GBP: float = 2000.0    # rung-0 sportsbook pool
-DEFAULT_PM_BANKROLL_USD: float = 1310.0  # Polymarket pool
-PER_BET_CAP: float = 0.05               # 5% hard cap per bet
+# Polymarket pool: the GLOBAL RULE (wca.markets.bankroll) — ¼-Kelly of
+# £3,000 ± realised P&L at $1.33/£. This is the BASE (P&L-unknown) figure;
+# main() adjusts it from the live ledger when one is present. The old
+# hardcoded $1,310 silently overrode the rule.
+DEFAULT_PM_BANKROLL_USD: float = pm_rule.pm_bankroll_usd()
+PER_BET_CAP: float = 0.05               # 5% hard cap per bet (sportsbook, card governance)
+PM_PER_BET_CAP: float = pm_rule.PM_MAX_STAKE_FRAC  # 4% per bet (PM global rule)
 DAILY_EXPOSURE_CAP: float = 0.25        # 25% total daily cap
 SELECTION_MIN_PROB: float = 0.20        # hard floor on model prob
 LONGSHOT_PROB: float = 0.25             # minnow filter threshold
 MIN_EDGE: float = 0.02                  # minimum edge gate (2pp)
 MODEL_STALE_HOURS: int = 24             # model older than this → withheld
 PRICE_STALE_SECS: int = 7200           # 2h — price age beyond which rows go withheld
+ADV_STALE_SECS: int = 6 * 3600         # 6h — advancement feed age beyond which futures are withheld
 FX_FALLBACK_GBP_USD: float = 1.27      # fallback when no FX available
 
 # PM taker fee: fee = 0.03 × p × (1 - p)
@@ -167,13 +175,110 @@ def _resolve_sportsbook_pool(db_path: str) -> Dict[str, Any]:
         }
 
 
-def _pm_pool(bankroll_usd: float) -> Dict[str, Any]:
+def _pm_pool(bankroll_usd: float, source: str = "base") -> Dict[str, Any]:
     return {
-        "bankroll": bankroll_usd,
-        "kelly_fraction": FLAT_KELLY_FRACTION,
-        "per_bet_cap": PER_BET_CAP,
-        "max_stake": round(bankroll_usd * PER_BET_CAP, 2),
+        "bankroll": round(float(bankroll_usd), 2),
+        "kelly_fraction": pm_rule.PM_KELLY_FRACTION,
+        "per_bet_cap": PM_PER_BET_CAP,
+        "max_stake": round(float(bankroll_usd) * PM_PER_BET_CAP, 2),
         "currency": "USD",
+        "source": source,
+    }
+
+
+def _pm_realised_pnl_usd(db_path: str) -> Optional[float]:
+    """Realised Polymarket P&L (USD) from the live ledger; None if unreadable.
+
+    Opened read-only so a regen never mutates the runtime DB. ``settled_pl``
+    already reflects free-bet/lay/cash-out accounting (ledger store rules).
+    """
+    import sqlite3
+
+    if not Path(db_path).exists():
+        return None
+    try:
+        con = sqlite3.connect("file:%s?mode=ro" % db_path, uri=True)
+        try:
+            row = con.execute(
+                "SELECT COALESCE(SUM(settled_pl), 0.0) FROM bets "
+                "WHERE platform = 'polymarket' AND settled_pl IS NOT NULL"
+            ).fetchone()
+        finally:
+            con.close()
+        return float(row[0]) if row is not None else None
+    except Exception:
+        return None
+
+
+def _ledger_open_count(db_path: str) -> Optional[int]:
+    """Count of ``status='open'`` rows in the live ledger; None if unreadable.
+
+    Opened read-only so a regen never mutates the runtime DB.
+    """
+    import sqlite3
+
+    if not Path(db_path).exists():
+        return None
+    try:
+        con = sqlite3.connect("file:%s?mode=ro" % db_path, uri=True)
+        try:
+            n = con.execute("SELECT COUNT(*) FROM bets WHERE status='open'").fetchone()[0]
+        finally:
+            con.close()
+        return int(n)
+    except Exception:
+        return None
+
+
+def _open_exposure(db_path: str, exposure_feed: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Open-exposure block derived from the LIVE ledger (F6).
+
+    ``n_open`` is counted straight from ``data/wca.db`` (``status='open'``) so it
+    can never drift from a stale shipped feed.  The EV / best / worst / p_profit
+    figures come from :func:`wca.exposure_dashboard.compute_dashboard_metrics`
+    (the honest, currency-coherent, ledger-driven engine).  When the runtime DB
+    is absent (CI regen from a checkout), we fall back to the exposure feed and
+    flag the source so the staleness is visible rather than silent.
+    """
+    n_live = _ledger_open_count(db_path)
+    feed = exposure_feed or {}
+    feed_metrics = feed.get("metrics") or {}
+
+    if n_live is not None:
+        metrics: Dict[str, Any] = {}
+        try:
+            from wca.exposure_dashboard import compute_dashboard_metrics
+
+            res = compute_dashboard_metrics(db_path)
+            metrics = res.get("metrics") or {}
+            # Prefer the engine's own open count (same DB); fall back to our count.
+            n_live = int(res.get("n_open_bets", n_live) or n_live)
+        except Exception:
+            metrics = {}
+        return {
+            "ev": metrics.get("ev"),
+            "best_case": metrics.get("best_case"),
+            "worst_case": metrics.get("worst_case"),
+            "best_case_usd": metrics.get("best_case_usd"),
+            "worst_case_usd": metrics.get("worst_case_usd"),
+            "p_profit": metrics.get("p_profit"),
+            "n_open": n_live,
+            "source": "ledger",
+        }
+
+    # No runtime DB — degrade to the feed, marked stale-sourced.
+    n_feed = int(
+        feed_metrics.get("n_open_bets") or feed.get("n_open_bets") or 0
+    )
+    return {
+        "ev": feed_metrics.get("ev"),
+        "best_case": feed_metrics.get("best_case"),
+        "worst_case": feed_metrics.get("worst_case"),
+        "best_case_usd": feed_metrics.get("best_case_usd"),
+        "worst_case_usd": feed_metrics.get("worst_case_usd"),
+        "p_profit": feed_metrics.get("p_profit"),
+        "n_open": n_feed,
+        "source": "feed (ledger unavailable)",
     }
 
 
@@ -212,6 +317,90 @@ def _fx_from_arb_data(arb_json: Dict[str, Any]) -> Tuple[float, str]:
     rate = meta.get("fx_usd_per_gbp") or meta.get("fx_gbp_usd") or FX_FALLBACK_GBP_USD
     src = meta.get("fx_source") or "fallback"
     return float(rate), str(src)
+
+
+# ---------------------------------------------------------------------------
+# Knockout bracket enrichment (scores_markets.json)
+#
+# Advancement (Polymarket moneyline) recs settle if the team PROGRESSES — that
+# includes extra-time and penalties. A 90-minute 1X2 rec settles only on the
+# score after 90'+stoppage, so a knockout tie that goes to ET/pens is a DRAW
+# for the 1X2 market. Now that KOs have ET+pens these are genuinely different
+# markets; we surface the team's next KO tie (opponent + 90' 1X2 split) so an
+# advancement rec is never confused with — or placed as — a 90-min result bet.
+# ---------------------------------------------------------------------------
+
+# KO round order, earliest → latest. Used to walk from the current round
+# forward when finding a team's next unplayed tie.
+_KO_ROUND_KEYS = ("r32_games", "r16_games", "qf_games", "sf_games", "final_games")
+
+
+def _next_ko_tie(team: str, scores_markets: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Find ``team``'s next *unplayed* knockout tie in the projected bracket.
+
+    Walks r32 → r16 → qf → sf → final and returns the first tie (earliest
+    round) that contains ``team`` (as home or away) and is unplayed (``ft`` is
+    None). Returns ``None`` if the team has no upcoming KO tie in the bracket
+    or ``scores_markets`` is unavailable.
+    """
+    if not scores_markets or not team:
+        return None
+    for round_key in _KO_ROUND_KEYS:
+        for tie in (scores_markets.get(round_key) or []):
+            if not isinstance(tie, dict):
+                continue
+            if tie.get("ft") is not None:
+                continue  # already played — not their next tie
+            if tie.get("home") == team or tie.get("away") == team:
+                return tie
+    return None
+
+
+def _match_1x2_for_team(team: str, tie: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Orient a tie's 90-minute 1X2 split from ``team``'s perspective.
+
+    ``x1x2`` is [P(home win 90'), P(draw), P(away win 90')]. Returns
+    {"team_win", "draw", "opp_win"} rounded to 3dp, or None if unavailable.
+    """
+    x1x2 = tie.get("x1x2")
+    if not isinstance(x1x2, (list, tuple)) or len(x1x2) < 3:
+        return None
+    home_p, draw_p, away_p = float(x1x2[0]), float(x1x2[1]), float(x1x2[2])
+    if tie.get("home") == team:
+        team_p, opp_p = home_p, away_p
+    elif tie.get("away") == team:
+        team_p, opp_p = away_p, home_p
+    else:
+        return None
+    return {
+        "team_win": round(team_p, 3),
+        "draw": round(draw_p, 3),
+        "opp_win": round(opp_p, 3),
+    }
+
+
+def _enrich_advancement_rec(rec: Dict[str, Any], scores_markets: Dict[str, Any]) -> None:
+    """Add opponent / next-KO-tie context to an advancement rec, in place.
+
+    Never raises: on any missing data the context fields are set to null so
+    the front-end shows an em-dash rather than a wrong or stale opponent.
+    """
+    rec["market_kind"] = "advancement"
+    rec["market_label"] = "Advance · incl. ET+pens"
+    # Defaults (older data / no bracket → em-dash on the page).
+    rec.setdefault("opponent", None)
+    rec.setdefault("match_round", None)
+    rec.setdefault("match_1x2", None)
+
+    tie = _next_ko_tie(rec.get("team") or "", scores_markets)
+    if not tie:
+        return
+
+    team = rec.get("team") or ""
+    opponent = tie.get("away") if tie.get("home") == team else tie.get("home")
+    rec["opponent"] = opponent
+    rec["match_round"] = tie.get("round")
+    rec["match_1x2"] = _match_1x2_for_team(team, tie)
 
 
 # ---------------------------------------------------------------------------
@@ -373,6 +562,11 @@ def build_match_singles(
                 "kickoff": kickoff,
                 "group": group,
                 "market": "1X2",
+                # 1X2 settles on the 90'+stoppage result only. In a knockout,
+                # a tie that goes to ET/pens is a DRAW for this market — this
+                # is a genuinely different bet from a PM advancement moneyline.
+                "market_kind": "result_90",
+                "market_label": "90-min 1X2 (+ stoppage)",
                 "selection": outcome,
                 "team": team,
                 "venue": "smarkets",
@@ -474,6 +668,7 @@ def build_advancement_futures(
     adv_data: Dict[str, Any],
     pm_pool: Dict[str, Any],
     adv_age_secs: Optional[int],
+    scores_markets: Optional[Dict[str, Any]] = None,
 ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     """Build advancement/futures recs from cached advancement_data.json.
 
@@ -486,10 +681,18 @@ def build_advancement_futures(
     kelly_frac = pm_pool["kelly_fraction"]
     max_stake = pm_pool["max_stake"]
 
+    # Advancement futures move fast in the knockouts — teams get ELIMINATED,
+    # and a stale feed keeps recommending knocked-out sides at phantom edges
+    # (observed 2026-07-02: Bosnia still shown post-elimination on a 15h-old
+    # feed). The dedicated 6h gate is deliberately far tighter than the 24h
+    # model gate; PM advancement hygiene rule: re-run before acting.
+    adv_stale = adv_age_secs is not None and adv_age_secs > ADV_STALE_SECS
     model_stale = adv_age_secs is not None and adv_age_secs > MODEL_STALE_HOURS * 3600
 
     actionable: List[Dict[str, Any]] = []
     withheld: List[Dict[str, Any]] = []
+
+    scores_markets = scores_markets or {}
 
     meta = adv_data.get("meta") or {}
     stages_available = set(meta.get("stages") or [])
@@ -527,8 +730,16 @@ def build_advancement_futures(
             if stake <= 0:
                 continue
 
-            stale = model_stale
-            stale_reason = "advancement model stale (>%dh)" % MODEL_STALE_HOURS if stale else None
+            stale = model_stale or adv_stale
+            if model_stale:
+                stale_reason = "advancement model stale (>%dh)" % MODEL_STALE_HOURS
+            elif adv_stale:
+                stale_reason = (
+                    "advancement feed stale (>%dh) — teams may be eliminated; "
+                    "re-run before acting" % (ADV_STALE_SECS // 3600)
+                )
+            else:
+                stale_reason = None
 
             rec = {
                 "id": "%s_%s_pm" % (team.lower().replace(" ", "_"), stage.lower()),
@@ -555,6 +766,11 @@ def build_advancement_futures(
                 "stale_reason": stale_reason,
                 "tags": ["model", "advancement", "polymarket"],
             }
+
+            # Enrich with the team's next KO tie (opponent + 90' 1X2 split) and
+            # market-kind labels so an advancement moneyline is never confused
+            # with a 90-minute 1X2 result bet. Never crashes on missing data.
+            _enrich_advancement_rec(rec, scores_markets)
 
             if stale:
                 rec["withheld_reason"] = stale_reason
@@ -601,7 +817,9 @@ def main() -> int:
     ap.add_argument("--out", default="site/bet_recs.json")
     ap.add_argument("--min-edge", type=float, default=MIN_EDGE)
     ap.add_argument("--stale-model-hours", type=int, default=MODEL_STALE_HOURS)
-    ap.add_argument("--pm-bankroll", type=float, default=DEFAULT_PM_BANKROLL_USD)
+    ap.add_argument("--pm-bankroll", type=float, default=None,
+                    help="override PM pool (USD); default = global rule "
+                         "(£3,000·FX ± ledger realised P&L)")
     ap.add_argument("--predictions", default="data/model_predictions.json")
     ap.add_argument("--advancement", default="site/advancement_data.json")
     ap.add_argument("--exposure", default="site/exposure_dashboard.json")
@@ -609,11 +827,22 @@ def main() -> int:
     ap.add_argument("--promos", default="site/promos_data.json")
     ap.add_argument("--arb-data", default="site/arb_data.json")
     ap.add_argument("--prop-cal", default="data/prop_calibration.json")
+    ap.add_argument("--scores-markets", default="site/scores_markets.json")
     args = ap.parse_args()
 
     # Bankroll governance
     sb_pool = _resolve_sportsbook_pool(args.db)
-    pm_pool_data = _pm_pool(args.pm_bankroll)
+    if args.pm_bankroll is not None:
+        pm_pool_data = _pm_pool(args.pm_bankroll, source="cli-override")
+    else:
+        pm_pnl = _pm_realised_pnl_usd(args.db)
+        if pm_pnl is None:
+            pm_pool_data = _pm_pool(pm_rule.pm_bankroll_usd(), source="base (no ledger)")
+        else:
+            pm_pool_data = _pm_pool(
+                pm_rule.pm_bankroll_usd(pm_pnl),
+                source="ledger (realised $%+.2f)" % pm_pnl,
+            )
 
     # Load feeds with ages
     predictions_raw, pred_age = _load_json(args.predictions, {"fixtures": []})
@@ -624,15 +853,18 @@ def main() -> int:
     promos_raw, promo_age = _load_json(args.promos, {})
     arb_raw, arb_age = _load_json(args.arb_data, {})
     prop_cal_raw, prop_age = _load_json(args.prop_cal, {})
+    # Projected KO bracket — for advancement-rec opponent + 90' 1X2 context.
+    # Guarded: missing/unreadable → enrichment fields simply stay null.
+    scores_markets_raw, _ = _load_json(args.scores_markets, {})
 
     # FX
     fx_rate, fx_src = _fx_from_arb_data(arb_raw or {})
 
-    # Open exposure context
-    exp_metrics = (exposure_raw or {}).get("metrics") or {}
+    # Open exposure context — n_open / EV are derived from the LIVE ledger
+    # (F6), never from the possibly-stale shipped exposure feed.
     blind_spots_raw = (exposure_raw or {}).get("blind_spots") or []
     blind_spots = [str(bs) for bs in blind_spots_raw if isinstance(bs, str)]
-    n_open = int(exp_metrics.get("n_open_bets") or (exposure_raw or {}).get("n_open_bets") or 0)
+    open_exposure = _open_exposure(args.db, exposure_raw)
     open_fixtures: set = set()  # TODO: parse from ledger if available
 
     # Build sections
@@ -646,6 +878,7 @@ def main() -> int:
     )
     adv_futures, withheld_af = build_advancement_futures(
         adv_raw or {}, pm_pool_data, adv_age_secs=adv_age,
+        scores_markets=scores_markets_raw or {},
     )
     guar_arbs, withheld_ga = build_guaranteed_arbs(arb_raw or {}, arb_age_secs=arb_age)
     withheld = withheld_ms + withheld_ep + withheld_af + withheld_ga
@@ -658,13 +891,7 @@ def main() -> int:
             "monitoring_only": True,
             "sportsbook_pool": sb_pool,
             "pm_pool": pm_pool_data,
-            "open_exposure": {
-                "ev": exp_metrics.get("ev"),
-                "best_case": exp_metrics.get("best_case"),
-                "worst_case": exp_metrics.get("worst_case"),
-                "p_profit": exp_metrics.get("p_profit"),
-                "n_open": n_open,
-            },
+            "open_exposure": open_exposure,
             "fx": {
                 "gbp_usd": fx_rate,
                 "source": fx_src,

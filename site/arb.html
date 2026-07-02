@@ -7,6 +7,86 @@
 <meta name="color-scheme" content="light">
 <title>WCA // ACTION DESK</title>
 <link rel="stylesheet" href="./arb-theme.css">
+<style>
+  /* Market-kind badges — SAFETY-CRITICAL colour coding. Advancement recs are
+     Polymarket moneylines that pay on progression (incl. ET+pens); 90-min 1X2
+     recs settle on the 90'+stoppage score only (a KO ET/pens result is a
+     DRAW). The two must never be mistaken for one another. Purple = advance,
+     blue = 90-min. Solid fills + a leading dot separate them from the muted
+     stage/venue chips. Matches the arb-badge / arb-theme token palette. */
+  .badge-mkt-adv {
+    background: var(--ll-pm);
+    color: #fff;
+    border: 1px solid var(--ll-pm);
+  }
+  .badge-mkt-90 {
+    background: var(--ll-sb);
+    color: #fff;
+    border: 1px solid var(--ll-sb);
+  }
+  .badge-mkt-adv::before,
+  .badge-mkt-90::before {
+    content: "\25CF";           /* ● leading dot */
+    margin-right: 3px;
+    font-size: 8px;
+    vertical-align: 1px;
+    opacity: 0.85;
+  }
+
+  /* 90' 1X2 split for an advancement rec's next KO tie: win / DRAW / opp.
+     The draw is emphasised because a KO draw at 90' is what pushes a tie into
+     ET/pens — the exact case where advancement and 1X2 diverge. */
+  .mk-split { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .mk-split .mk-w { color: var(--ll-pos); }
+  .mk-split .mk-o { color: var(--ll-text-dim); }
+  .mk-split .mk-d {
+    color: var(--ll-warn);
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 2px;
+  }
+  .mk-split .mk-sep { color: var(--ll-muted); margin: 0 3px; }
+
+  /* Sub-labels inside advancement <th> headers. */
+  .th-sub {
+    display: inline-block;
+    margin-left: 3px;
+    font-size: 8px;
+    font-weight: 400;
+    letter-spacing: 0.4px;
+    color: var(--ll-muted);
+    text-transform: none;
+  }
+
+  /* -------- One-click PLACE (localhost-only; JS reveals it) -------------- */
+  .wca-place-btn {
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border: 1px solid var(--ll-accent, #16c784);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--ll-accent, #16c784);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .wca-place-btn:hover:not(:disabled) { background: var(--ll-accent, #16c784); color: #04120b; }
+  .wca-place-btn:disabled { opacity: 0.55; cursor: default; }
+  .wca-place-btn.placed { border-color: var(--ll-muted); color: var(--ll-muted); }
+  .wca-place-err {
+    display: block;
+    margin-top: 3px;
+    font-size: 9px;
+    color: var(--ll-danger, #e5484d);
+    max-width: 220px;
+    white-space: normal;
+  }
+  .wca-place-note { font-size: 9px; color: var(--ll-muted); }
+</style>
 </head>
 <body>
 <div id="arb-app">
@@ -131,6 +211,7 @@
     <section class="arb-section" id="sec-singles">
       <div class="arb-section-head">
         <span class="arb-section-title">01 // Match Singles</span>
+        <span class="arb-badge badge-mkt-90" title="1X2 settles on the score after 90 minutes + stoppage only. In a knockout, a tie that goes to extra-time or penalties is a DRAW for this market.">90-MIN 1X2</span>
         <span class="arb-section-count" id="cnt-singles">0 recs</span>
         <span class="arb-section-freshness" id="age-singles"></span>
       </div>
@@ -149,6 +230,8 @@
               <th>Action</th>
               <th>Promo</th>
               <th>Source</th>
+              <!-- PLACE: localhost-only; JS reveals it via .wca-place-col -->
+              <th class="wca-place-col" hidden>Place</th>
             </tr>
           </thead>
           <tbody id="body-singles"></tbody>
@@ -181,6 +264,8 @@
               <th class="r">Stake</th>
               <th>Action</th>
               <th>Source</th>
+              <!-- PLACE: localhost-only; JS reveals it via .wca-place-col -->
+              <th class="wca-place-col" hidden>Place</th>
             </tr>
           </thead>
           <tbody id="body-props"></tbody>
@@ -197,6 +282,7 @@
     <section class="arb-section" id="sec-adv">
       <div class="arb-section-head">
         <span class="arb-section-title">03 // Advancement &amp; Futures</span>
+        <span class="arb-badge badge-mkt-adv" title="Every rec in this section is a Polymarket moneyline — it pays if the team progresses, including extra-time and penalties. This is NOT a 90-minute 1X2 bet.">ADVANCE · ET+PENS</span>
         <span class="arb-section-count" id="cnt-adv">0 recs</span>
         <span class="arb-section-freshness" id="age-adv"></span>
       </div>
@@ -205,7 +291,10 @@
           <thead>
             <tr>
               <th>Team</th>
+              <th>Market</th>
               <th>Stage</th>
+              <th>Opponent <span class="th-sub">next KO</span></th>
+              <th class="r">90&prime; 1X2 <span class="th-sub">W/D/L</span></th>
               <th class="r">Model %</th>
               <th class="r">PM Price</th>
               <th class="r">PM Fee</th>
@@ -213,6 +302,8 @@
               <th class="r">Stake ($)</th>
               <th>Action</th>
               <th>Source</th>
+              <!-- PLACE: localhost-only; JS reveals it via .wca-place-col -->
+              <th class="wca-place-col" hidden>Place</th>
             </tr>
           </thead>
           <tbody id="body-adv"></tbody>

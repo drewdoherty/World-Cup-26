@@ -94,6 +94,10 @@ jobs:
           PYTHONPATH: src
         run: |
           python scripts/wca_scores_data.py --hours-ahead 96 >> logs/scores.log 2>&1 || true
+          # Event Markets forest feed (site/forest_data.json): rebuilt with the
+          # card so the model side of the dot-plot matches the freshly built
+          # scorelines/1X2. Best-effort; never blocks the run.
+          python scripts/wca_forest_data.py --hours-ahead 96 >> logs/scores.log 2>&1 || true
 
       # NOTE: the prediction-tracking feed (site/tracking_data.json) is NOT
       # rebuilt here on purpose — it needs the ledger DB and full git history,
@@ -116,7 +120,7 @@ jobs:
                   data/model_predictions.json data/model_predictions_log.jsonl \
                   data/raw/martj42_cleaned.csv \
                   data/corrections.json data/corrections_review.json data/audit.json \
-                  site/data.json site/linemove.json site/scores_data.json site/bet_recs.json
+                  site/data.json site/linemove.json site/scores_data.json site/forest_data.json site/bet_recs.json
           git commit -m "Auto-sync: daily card + site data" || true
           # Retry around concurrent pushes (local daemons also push to main).
           # '-X theirs' keeps the freshly regenerated local copy for the

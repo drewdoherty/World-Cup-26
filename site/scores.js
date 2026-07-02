@@ -402,12 +402,18 @@
     function gameRow(g) {
       var id = gid(g);
       var hl = state.selGame === id ? " sm-hl" : "";
+      var projCls = g.projected ? " sm-proj-tie" : "";
       var ftHtml = g.ft
         ? '<div class="sm-ft">' + esc(g.ft) + '</div>'
         : '<div class="sm-ft sm-ft-na"></div>';
-      return '<div class="sm-row' + hl + '" data-gid="' + esc(id) + '">' +
+      var sub = g.group ? (" · Grp " + esc(g.group)) : (g.round ? (" · " + esc(g.round)) : "");
+      // Model-inferred pairings carry a small "proj" tag so a mixed round (some
+      // real ties, some projected) reads honestly at a glance.
+      var projTag = g.projected ? '<span class="sm-proj-tag" title="model-projected matchup">proj</span>' : "";
+      var dateTxt = g.date ? esc(String(g.date).slice(5)) : "";
+      return '<div class="sm-row' + hl + projCls + '" data-gid="' + esc(id) + '">' +
         '<div class="sm-fix"><span class="sm-tm">' + esc(g.home) + " v " + esc(g.away) +
-        '</span><span class="sm-meta">' + esc(String(g.date).slice(5)) + " · Grp " + esc(g.group) +
+        '</span><span class="sm-meta">' + dateTxt + sub + projTag +
         '</span></div>' +
         ftHtml +
         '<div class="sm-1x2">' + bar(g.x1x2) + '<span class="sm-n">' + pc(g.x1x2[0]) + "·" +
@@ -426,15 +432,37 @@
             byG[g].map(gameRow).join("") + "</div>";
         }).join("");
       }
-      if (state.stage === "r32") {
-        return '<div class="sm-note">Projected qualifiers (model) — actual fixtures set once the group stage finalises.</div>' +
-          '<div class="sm-projgrid">' + (d.r32_projected || []).map(function (p) {
-            return '<div class="sm-proj"><div class="sm-gh">GRP ' + esc(p.group) + "</div>" +
-              p.teams.map(function (t) {
-                return '<div class="sm-pt"><span class="sm-pos">' + t.pos + "</span>" +
-                  esc(t.team) + '<span class="sm-padv">' + pc(t.p_adv) + "% adv</span></div>";
-              }).join("") + "</div>";
-          }).join("") + "</div>";
+      var KO = { r32: "r32_games", r16: "r16_games", qf: "qf_games", sf: "sf_games", final: "final_games" };
+      if (KO[state.stage]) {
+        var games = d[KO[state.stage]] || [];
+        if (games.length) {
+          // Honest labelling. A round with any model-inferred matchup gets a
+          // "projected bracket" banner; R32 (matchups set, results pending) a
+          // milder note. Per-tie ".sm-proj-tie" tags the model-inferred rows.
+          var projRounds = d.projected_rounds || [];
+          var isProj = projRounds.indexOf(state.stage) >= 0 ||
+            games.some(function (g) { return g.projected; });
+          var note = "";
+          if (state.stage === "r32") {
+            note = '<div class="sm-note">Matchups set; results pending — ties are decided by the group standings, not yet played.</div>';
+          } else if (isProj) {
+            note = '<div class="sm-note sm-note-proj">Projected bracket — matchups follow the model’s most-likely path; actual ties depend on results.</div>';
+          }
+          return note + '<div class="sm-grp"><div class="sm-gh">' +
+            esc((games[0].round || state.stage).toUpperCase()) + "</div>" +
+            games.map(gameRow).join("") + "</div>";
+        }
+        if (state.stage === "r32" && (d.r32_projected || []).length) {
+          return '<div class="sm-note">Projected qualifiers (model) — actual fixtures set once the group stage finalises.</div>' +
+            '<div class="sm-projgrid">' + d.r32_projected.map(function (p) {
+              return '<div class="sm-proj"><div class="sm-gh">GRP ' + esc(p.group) + "</div>" +
+                p.teams.map(function (t) {
+                  return '<div class="sm-pt"><span class="sm-pos">' + t.pos + "</span>" +
+                    esc(t.team) + '<span class="sm-padv">' + pc(t.p_adv) + "% adv</span></div>";
+                }).join("") + "</div>";
+            }).join("") + "</div>";
+        }
+        return '<div class="empty">' + esc(state.stage.toUpperCase()) + " — not yet reached</div>";
       }
       return '<div class="empty">' + esc(state.stage.toUpperCase()) + " — not yet reached</div>";
     }
@@ -449,9 +477,9 @@
         chip("Win group", a.group_winner) + chip("Reach R16", a.R16) +
         chip("Reach QF", a.QF) + chip("Reach final", a.Final) + "</div>";
       var games = (t.games || []).map(gameRow).join("") ||
-        '<div class="empty">No games this stage</div>';
+        '<div class="empty">No games</div>';
       return advLine + '<div class="sm-grp"><div class="sm-gh">' + esc(state.team) +
-        " — GROUP STAGE</div>" + games + "</div>";
+        " — ALL FIXTURES</div>" + games + "</div>";
     }
     function render() {
       var modes = '<div class="sm-modes">' +
@@ -461,9 +489,12 @@
       if (state.mode === "stage") {
         sub = '<div class="sm-stages">' + (d.stages || []).map(function (s) {
           var cls = "sm-stab" + (s.key === state.stage ? " on" : "") +
-            (s.status === "next" ? " sm-next" : "") + (s.status === "locked" ? " sm-lock" : "");
+            (s.status === "next" ? " sm-next" : "") +
+            (s.status === "projected" ? " sm-proj-tab" : "") +
+            (s.status === "locked" ? " sm-lock" : "");
           var bdg = s.status === "current" ? '<i class="sm-bdg">● ' + s.count + " left</i>" :
-            (s.status === "next" ? '<i class="sm-bdg">▷ next</i>' : "");
+            (s.status === "next" ? '<i class="sm-bdg">▷ next</i>' :
+            (s.status === "projected" ? '<i class="sm-bdg">◇ projected</i>' : ""));
           return '<span class="' + cls + '" data-stage="' + s.key + '">' + esc(s.label) + bdg + "</span>";
         }).join("") + "</div>";
       } else {

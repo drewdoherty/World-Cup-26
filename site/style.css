@@ -1,24 +1,28 @@
 /* World Cup Alpha — trading-terminal static site.
    Pure static, no external fonts/CDNs. System monospace stack only. */
 
+/* LILAC theme — single source of truth for the whole main site. Palette taken
+ * from site-lilac/_template.html (light lilac) and harmonised with the already
+ * light-lilac arb-theme.css so every tab matches. Variable NAMES are unchanged
+ * so no JS/HTML needs touching — only the values re-skin dark -> lilac. */
 :root {
-  --bg: #0a0b0d;
-  --bg-2: #0d0f12;
-  --panel: #0e1014;
-  --panel-2: #111419;
-  --border: #1e2126;
-  --border-2: #262a31;
-  --text: #d4dae0;
-  --text-dim: #6b7480;
-  --muted: #4a525c;
-  --accent: #3fe08a;
-  --pos: #3fe08a;
-  --neg: #ff5c6c;
-  --warn: #f2c14e;
-  --sportsbook: #4ade80;
-  --polymarket: #60a5fa;
-  --kalshi: #a855f7;
-  --track: #15181d;
+  --bg: #F6F3FC;        /* page background (was #0a0b0d) */
+  --bg-2: #EDE7F8;      /* recessed surface (was #0d0f12) */
+  --panel: #FFFFFF;     /* raised panel (was #0e1014) */
+  --panel-2: #EDE7F8;   /* panel alt (was #111419) */
+  --border: #DCD3EE;    /* hairline border (was #1e2126) */
+  --border-2: #C8C3E4;  /* stronger border (was #262a31) */
+  --text: #2A2440;      /* primary text (was #d4dae0) */
+  --text-dim: #6B6488;  /* secondary text (was #6b7480) */
+  --muted: #9390B2;     /* faint text/ticks (was #4a525c) */
+  --accent: #6D4AD0;    /* signature lilac (was green #3fe08a) */
+  --pos: #1A7A4C;       /* semantic positive (was #3fe08a) */
+  --neg: #C0273A;       /* semantic negative (was #ff5c6c) */
+  --warn: #9A6A00;      /* semantic warn (was #f2c14e) */
+  --sportsbook: #2563B0;/* venue rail — blue */
+  --polymarket: #7A3FB0;/* venue rail — purple */
+  --kalshi: #0E7C7B;    /* venue rail — teal */
+  --track: #EDE7F8;     /* track/rail bg (was #15181d) */
   --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Monaco,
     Consolas, "Liberation Mono", "Courier New", monospace;
 }
@@ -38,7 +42,7 @@ html, body {
 
 body {
   background:
-    radial-gradient(1200px 600px at 80% -10%, #10151c 0%, rgba(16,21,28,0) 60%),
+    radial-gradient(1200px 600px at 80% -10%, rgba(109,74,208,0.06) 0%, rgba(109,74,208,0) 60%),
     var(--bg);
   min-height: 100vh;
 }
@@ -175,6 +179,7 @@ body {
   margin-top: 14px;
   grid-template-columns: 1fr 1fr;
   grid-template-areas:
+    "exposure    exposure"
     "venues      predictions"
     "positions   positions"
     "closed      closed"
@@ -361,9 +366,9 @@ body {
   border: 1px solid var(--border-2);
   color: var(--text-dim);
 }
-.pill.sportsbook { color: var(--sportsbook); border-color: #1d3a2a; }
-.pill.polymarket { color: var(--polymarket); border-color: #1e3a5f; }
-.pill.kalshi { color: var(--kalshi); border-color: #3b2a52; }
+.pill.sportsbook { color: var(--sportsbook); border-color: #C7D7EF; }
+.pill.polymarket { color: var(--polymarket); border-color: #DDCBEC; }
+.pill.kalshi { color: var(--kalshi); border-color: #BFE3E0; }
 
 /* ------------------------------------------------------------ Predictions */
 
@@ -453,6 +458,7 @@ body {
   .grid {
     grid-template-columns: 1fr;
     grid-template-areas:
+      "exposure"
       "venues"
       "predictions"
       "positions"
@@ -678,7 +684,7 @@ body {
   font-size: 9px; letter-spacing: 1px; padding: 4px 10px; text-transform: uppercase;
 }
 .sc-tab:hover { color: var(--text); border-color: var(--text-dim); }
-.sc-tab-active { background: var(--accent); border-color: var(--accent); color: #000; }
+.sc-tab-active { background: var(--accent); border-color: var(--accent); color: #fff; }
 .sc-coltag {
   font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
   color: var(--muted); margin-bottom: 7px; padding-bottom: 4px;
@@ -944,8 +950,8 @@ body {
   border: 1px solid var(--border-2);
   color: var(--text-dim);
 }
-.chip-in { border-color: #243650; color: var(--sportsbook); }
-.chip-out { border-color: #1f4030; color: var(--accent); }
+.chip-in { border-color: #C7D7EF; color: var(--sportsbook); }
+.chip-out { border-color: #D6C9EF; color: var(--accent); }
 
 .arch-file {
   margin-top: auto;
@@ -1156,7 +1162,7 @@ body {
    book. These rules only carry the shared chrome. */
 .pill.book {
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(42, 36, 64, 0.03);
 }
 
 /* --- charts panel --- */
@@ -1211,8 +1217,8 @@ body {
    Match the chart-canvas/tr-barsvg treatment so both fill their panel equally. */
 #calibration svg,
 #clv-pl svg { width: 100%; height: auto; display: block; }
-.tr-bar-pos { fill: var(--pos, #4ade80); opacity: 0.85; }
-.tr-bar-neg { fill: var(--neg, #f87171); opacity: 0.85; }
+.tr-bar-pos { fill: var(--pos, #1A7A4C); opacity: 0.85; }
+.tr-bar-neg { fill: var(--neg, #C0273A); opacity: 0.85; }
 .tr-bar-pos:hover, .tr-bar-neg:hover { opacity: 1; }
 /* Source dropdown on the P&L-by-bet panel. */
 .tr-select {
@@ -1257,8 +1263,8 @@ body {
 .venue-books { margin: 6px 0 2px; display: flex; flex-direction: column; gap: 3px; }
 .venue-book-row { display: flex; align-items: center; gap: 7px; font-size: 11px; }
 .book-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
-.book-name { color: var(--text-dim, #9ca3af); min-width: 110px; }
-.book-bar { flex: 1 1 auto; height: 5px; background: rgba(255,255,255,.04); border-radius: 2px; overflow: hidden; }
+.book-name { color: var(--text-dim, #6B6488); min-width: 110px; }
+.book-bar { flex: 1 1 auto; height: 5px; background: rgba(42,36,64,.06); border-radius: 2px; overflow: hidden; }
 .book-amt { white-space: nowrap; }
 
 /* ----------------------------------------- bet source / account dimensions */
@@ -1275,9 +1281,9 @@ body {
   color: var(--text-dim);
   line-height: 14px;
 }
-.src-chip.src-model { color: #4ade80; border-color: #1d3a2a; }   /* green-ish */
-.src-chip.src-offer { color: #f5b454; border-color: #4a3a1d; }   /* amber */
-.src-chip.src-punt  { color: #60a5fa; border-color: #1d2a45; }   /* blue */
+.src-chip.src-model { color: var(--pos);  border-color: #BFE0CC; }   /* green-ish */
+.src-chip.src-offer { color: var(--warn); border-color: #E7D6AE; }   /* amber */
+.src-chip.src-punt  { color: var(--sportsbook); border-color: #C7D7EF; }   /* blue */
 .pos-table td.pos-src { white-space: nowrap; }
 
 /* "A2" suffix chip on the venue pill — only emitted for account-2 rows. */
@@ -1288,8 +1294,8 @@ body {
   border-radius: 2px;
   font-size: 8px;
   letter-spacing: .5px;
-  border: 1px solid #3a3550;
-  color: #b59be0;
+  border: 1px solid var(--border-2);
+  color: var(--accent);
 }
 
 /* "SOURCE // P&L" footer line inside the venues panel. */

@@ -1,18 +1,18 @@
-<!-- generated: 2026-06-29T10:01:09 -->
-⚽ *Next match* — Brazil vs Japan
-Kickoff 2026-06-29 17:00:00+00:00
+<!-- generated: 2026-07-02T10:05:34 -->
+⚽ *Next match* — Spain vs Austria
+Kickoff 2026-07-02 19:00:00+00:00
 
 *Winner* (model blend)
-  Brazil          58.9%  fair 1.70  best 1.74 (Polymarket) +2.4% ✅  £15.93
-  Draw            24.7%  fair 4.05  best 3.92 (Polymarket) -3.1%
-  Japan           16.4%  fair 6.08  best 5.71 (Polymarket) -6.0%
-  _stake = ¼-Kelly @ £2000 bankroll (+EV picks)_
+  Spain          model 72.3¢ · mkt 74.6¢ (betfair_ex_uk)  EV -3.1%
+  Draw           model 18.1¢ · mkt 17.5¢ (Smarkets)  EV +3.3% ✅  $7.47
+  Austria        model  9.6¢ · mkt  7.7¢ (betfair_ex_uk)  EV +24.7% ✅  $21.78
+  _stake = ¼-Kelly @ £3177 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
-*Corners* (model, exp 8.5)
-  O/U 8.5: over 47.6% / under 52.4%  fair 2.10 / 1.91
+*Corners* (model, exp 9.0)
+  O/U 8.5: over 53.9¢ / under 46.1¢ (model prices)
 
 *Top goalscorers* — no scorer market available yet.
 
 *Scorelines* (top 6)
-1-0 12.7% | 2-0 12.3% | 1-1 11.5% | 0-0 9.2% | 2-1 8.4% | 3-0 7.6%
-  O/U 2.5: over 45.5% / under 54.5%   BTTS 43.3%
+2-0 12.1% | 1-0 10.3% | 2-1 10.2% | 3-0 9.1% | 1-1 8.6% | 3-1 7.6%
+  O/U 2.5: over 60.3% / under 39.7%   BTTS 50.8%

@@ -403,83 +403,148 @@ def _pool_rows(db_path: str) -> Dict[str, Dict[str, float]]:
     return pools
 
 
+# Committed dual-pool bankroll basis (user-chosen, 2026-06-30):
+#   £1,500 sportsbook  +  $1,995 Polymarket, where $1,995 == £1,500 at the
+#   $1.33/£ rate the pools were sized on, so the combined book is £3,000.
+# Not all of either pool is necessarily deposited yet; ROI is reported as
+# *total P&L over this committed £3,000*, not over realised stake.
+_GBP_BANKROLL = 1500.0
+_USD_BANKROLL = 1995.0
+_TOTAL_BANKROLL_GBP = 3000.0
+_USD_TO_GBP = _GBP_BANKROLL / _USD_BANKROLL  # 0.75188 ; i.e. $1.33 == £1
+
+
+def _pm_live_usd(fetch=None) -> Optional[Dict[str, float]]:
+    """Live on-chain P&L of Polymarket positions (both wallets), in USD.
+
+    Splits current holdings by resolution state, marking each off cost basis
+    (``size × avg_price``):
+
+    * ``realised``   — resolved (``redeemable``) positions: payout − cost. A
+      lost market marks to 0, so its whole cost is a realised loss; a won market
+      marks to its redeem value.
+    * ``unrealised`` — still-open positions: current value − cost (live MTM).
+
+    Returns realised/unrealised plus open value & counts, or ``None`` if the
+    Data API is unreachable. This is the authoritative Polymarket source: the
+    SQLite ledger drifts from the chain (resolved-but-unswept losses never get
+    booked), so ``/summary`` marks the PM book straight off the wallet rather
+    than the ledger. ``fetch`` is injectable for tests.
+    """
+    if fetch is None:
+        try:
+            from wca.pm.positions import fetch_positions as fetch
+        except Exception:
+            return None
+    wallets = (
+        "0x86b4c55a4df1fbea0f325e842434e0a537caa549",  # PM1 (manual / vl880)
+        "0xd42e35059b0615c4c7a9cf7db5427b313ebb7b31",  # PM2 (deposit wallet)
+    )
+    realised = unrealised = open_value = 0.0
+    n_open = n_resolved = 0
+    for w in wallets:
+        try:
+            rows = fetch(w, limit=500, open_only=False, timeout=8)
+        except Exception:
+            return None
+        for p in rows or []:
+            size = float(getattr(p, "size", 0.0) or 0.0)
+            value = float(getattr(p, "current_value", 0.0) or 0.0)
+            cost = size * float(getattr(p, "avg_price", 0.0) or 0.0)
+            if getattr(p, "redeemable", False):
+                realised += value - cost
+                n_resolved += 1
+            elif size > 0:
+                unrealised += value - cost
+                open_value += value
+                n_open += 1
+    return {
+        "realised": realised, "unrealised": unrealised,
+        "open_value": open_value, "n_open": n_open, "n_resolved": n_resolved,
+    }
+
+
 def handle_summary(db_path: str) -> str:
+    """Realised + unrealised P&L per book, with ROI over the £3,000 basis.
+
+    Sportsbook (GBP) realised P&L comes from the ledger's settled bets; its open
+    bets aren't exchange-traded so they carry no live mark (held at cost).
+    Polymarket (USD) is marked straight off the chain — realised from resolved
+    (redeemable) positions, unrealised from open positions' live value — because
+    the SQLite ledger under-books PM. The two books are combined in GBP at the
+    committed $1,995 = £1,500 rate, and ROI is the total P&L as a percentage of
+    the £3,000 committed bankroll.
+    """
     s = reports.summary(db_path=db_path)
+    pools = _pool_rows(db_path)
 
     def pct(v: float) -> str:
         return "N/A" if v != v else "%.2f%%" % (v * 100)
 
-    pools = _pool_rows(db_path)
+    money = lambda x: "{:,.0f}".format(x)
 
-    # Build a compact code-block table for the pool rows.
-    pool_table_rows = []
-    for v in ("sportsbook", "polymarket", "polymarket-auto", "kalshi"):
-        if v not in pools:
-            continue
-        d = pools[v]
-        sym = _VENUE_SYMBOL[v]
-        bank = d["deposited"] + d["settled_pl"]
-        at_risk = d["open"]
-        pl = d["settled_pl"]
-        pool_table_rows.append(
-            "%-15s %s%9.2f  %s%8.2f  %s%+8.2f"
-            % (v, sym, bank, sym, at_risk, sym, pl)
+    # ---- Sportsbook book: realised from the ledger (settled bets) ----------
+    sb = pools.get("sportsbook", {})
+    gbp_realised = float(sb.get("settled_pl", 0.0))
+    gbp_open = float(sb.get("open", 0.0))
+    gbp_unrealised = 0.0  # sportsbook bets are held at cost (no live market)
+
+    # ---- Polymarket book: realised + unrealised straight off the chain -----
+    # The ledger under-books PM (resolved-but-unswept losses never settle), so
+    # the PM book is marked live from the wallet, not the SQLite ledger.
+    pm = _pm_live_usd()
+    if pm:
+        usd_realised = float(pm["realised"])
+        usd_unrealised = float(pm["unrealised"])
+    else:
+        # Degraded: fall back to the ledger's realised, no live mark.
+        usd_realised = sum(
+            float(pools.get(v, {}).get("settled_pl", 0.0)) for v in ("polymarket", "polymarket-auto")
         )
+        usd_unrealised = 0.0
 
-    # Never sum across currencies: aggregate per symbol (£ pools vs $ pools).
-    by_ccy: Dict[str, Dict[str, float]] = {}
-    for v, d in pools.items():
-        sym = _VENUE_SYMBOL.get(v, "$")
-        c = by_ccy.setdefault(sym, {"open": 0.0, "settled_staked": 0.0, "settled_pl": 0.0})
-        c["open"] += d["open"]
-        c["settled_staked"] += d.get("settled_staked", 0.0)
-        c["settled_pl"] += d["settled_pl"]
+    sb_total_gbp = gbp_realised + gbp_unrealised
+    pm_total_usd = usd_realised + usd_unrealised
+    pm_total_gbp = pm_total_usd * _USD_TO_GBP
+    total_pl_gbp = sb_total_gbp + pm_total_gbp
+    roi = total_pl_gbp / _TOTAL_BANKROLL_GBP if _TOTAL_BANKROLL_GBP else float("nan")
 
-    def per_ccy(fmt: str, key: str) -> str:
-        return " / ".join(
-            fmt % (sym, by_ccy[sym][key]) for sym in ("£", "$") if sym in by_ccy
-        ) or "0.00"
-
-    def roi_per_ccy() -> str:
-        parts = []
-        for sym in ("£", "$"):
-            if sym not in by_ccy:
-                continue
-            staked = by_ccy[sym]["settled_staked"]
-            r = (by_ccy[sym]["settled_pl"] / staked) if staked else float("nan")
-            parts.append("%s %s" % (sym, pct(r)))
-        return " / ".join(parts) or "N/A"
+    def cell(sym: str, val: float, w: int = 10) -> str:
+        return ("%s%+.2f" % (sym, val)).rjust(w)
 
     lines = [
         "\U0001f4b0 *World Cup Alpha — portfolio*",
         "Bets: %d (open %d / won %d / lost %d / void %d)"
         % (s["total_bets"], s["open_bets"], s["won_bets"], s["lost_bets"], s["void_bets"]),
-        "At risk (open): %s" % per_ccy("%s%.2f", "open"),
-        "Settled staked: %s   P&L: %s" % (per_ccy("%s%.2f", "settled_staked"), per_ccy("%s%+.2f", "settled_pl")),
-        "ROI: %s   Avg CLV: %s   Beat close: %s"
-        % (roi_per_ccy(), pct(s["avg_clv"]), pct(s["pct_beat_close"])),
         "",
-        "*Bankroll by pool*",
+        "*P&L by book*",
+        "```",
+        "%-11s %10s %10s %10s" % ("BOOK", "REALISED", "UNREAL'D", "TOTAL"),
+        "%-11s %s %s %s" % ("Sportsbook", cell("£", gbp_realised), cell("£", gbp_unrealised), cell("£", sb_total_gbp)),
+        "%-11s %s %s %s" % ("Polymarket", cell("$", usd_realised), cell("$", usd_unrealised), cell("$", pm_total_usd)),
+        "```",
     ]
 
-    if pool_table_rows:
-        lines.append("```")
-        lines.append("%-15s %10s  %9s  %9s" % ("POOL", "BANK", "AT RISK", "P&L"))
-        lines.extend(pool_table_rows)
-        lines.append("```")
-
-    for v in ("sportsbook", "polymarket", "polymarket-auto", "kalshi"):
-        if v not in pools:
-            continue
-        d = pools[v]
-        sym = _VENUE_SYMBOL[v]
-        bank = d["deposited"] + d["settled_pl"]
+    if pm:
         lines.append(
-            "%s: %s%.2f (deposited %s%.2f, P&L %s%+.2f, at risk %s%.2f)"
-            % (v, sym, bank, sym, d["deposited"], sym, d["settled_pl"], sym, d["open"])
+            "Open: sportsbook £%.2f at cost · Polymarket %d live worth $%.2f (+ %d resolved)"
+            % (gbp_open, pm["n_open"], pm["open_value"], pm["n_resolved"])
         )
-    if not pools:
-        lines.append("(no pools yet — record deposits with `bankroll add`)")
+    else:
+        lines.append(
+            "Open: sportsbook £%.2f at cost · Polymarket live MTM unavailable "
+            "(realised from ledger, unrealised shown as $0)" % gbp_open
+        )
+
+    lines += [
+        "",
+        "*Combined* — basis £%s ($%s = £%s)" % (money(_TOTAL_BANKROLL_GBP), money(_USD_BANKROLL), money(_GBP_BANKROLL)),
+        "  Sportsbook  £%+.2f" % sb_total_gbp,
+        "  Polymarket  £%+.2f  ($%+.2f × %.4f)" % (pm_total_gbp, pm_total_usd, _USD_TO_GBP),
+        "  Total P&L   £%+.2f" % total_pl_gbp,
+        "*ROI on £%s: %s*" % (money(_TOTAL_BANKROLL_GBP), pct(roi)),
+        "Avg CLV: %s   Beat close: %s" % (pct(s["avg_clv"]), pct(s["pct_beat_close"])),
+    ]
     return "\n".join(lines)
 
 

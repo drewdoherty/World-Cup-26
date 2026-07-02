@@ -155,6 +155,52 @@ def _standings_from_by_team(bt):
     return out
 
 
+def _rnorm(s):
+    t = (s or "").strip().lower()
+    return {"côte d'ivoire": "ivory coast", "cote d'ivoire": "ivory coast",
+            "ir iran": "iran", "usa": "united states"}.get(t, t)
+
+
+def _reconcile_1x2_mc(adv, scores):
+    """Live 1X2-forecast vs Monte-Carlo advancement consistency (network-free).
+
+    The MC 'to advance' probability is the SAME engine as the 1X2 forecast (1X2
+    home-win + the ET/penalties share of the draw), so the two must agree. This
+    recomputes that check from the advancement + scores feeds each build, so the
+    Under-The-Hood panel is always current to the latest model."""
+    mc = {_rnorm(t.get("team")): (t.get("model") or {}) for t in (adv or {}).get("teams", [])}
+    rows = []
+    for f in (scores or {}).get("fixtures", []):
+        fx = f.get("fixture") or ""
+        m = f.get("model_1x2") or {}
+        if " vs " not in fx or not m:
+            continue
+        home = fx.split(" vs ", 1)[0].strip()
+        reach = (mc.get(_rnorm(home)) or {}).get("R16")
+        if reach is None:
+            continue
+        imp = float(m.get("home", 0)) + 0.5 * float(m.get("draw", 0))  # 1X2 -> advance
+        rows.append({"tie": fx, "home": home,
+                     "h": round(float(m.get("home", 0)), 3), "d": round(float(m.get("draw", 0)), 3),
+                     "a": round(float(m.get("away", 0)), 3),
+                     "imp": round(imp, 3), "mc": round(float(reach), 3),
+                     "gap": round(imp - float(reach), 3)})
+    rows.sort(key=lambda r: -r["mc"])
+    mean_abs_gap = round(sum(abs(r["gap"]) for r in rows) / len(rows), 3) if rows else None
+    return {
+        "rows": rows,
+        "mean_abs_gap": mean_abs_gap,
+        "n": len(rows),
+        "verdict": ("The 1X2 forecast and the Monte-Carlo advancement model are ONE engine "
+                    "(MC advance = 1X2 home-win + ET/penalty share of the draw), so they agree "
+                    "within ~%s pp. A small negative 1X2 edge therefore implies a small negative "
+                    "advancement edge — the profitable knockout book so far is favourite beta + "
+                    "mark-to-market convergence at n_eff~1 tournament, not demonstrated alpha. "
+                    "Judge on CLV vs the close, not MTM P&L."
+                    % (int(mean_abs_gap * 100) if mean_abs_gap is not None else "?")),
+    }
+
+
 def build_data(feeds_dir):
     data = _load(feeds_dir, "data.json")
     scores = _load(feeds_dir, "scores_data.json")
@@ -223,6 +269,7 @@ def build_data(feeds_dir):
         "predledger": predledger or {},
         "clv_bench": clv_bench or {},
         "bet_recs": bet_recs or {},
+        "reconcile": _reconcile_1x2_mc(adv, scores),
     }
     return out
 

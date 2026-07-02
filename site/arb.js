@@ -83,9 +83,170 @@
     return stale ? '<span class="arb-badge badge-stale">STALE</span>' : "";
   }
 
+  // Market-kind badge — SAFETY-CRITICAL. Advancement (Polymarket moneyline)
+  // pays if the team PROGRESSES, including extra-time / penalties. A 90-minute
+  // 1X2 pays only on the 90'+stoppage result, so a KO tie that goes to ET/pens
+  // is a DRAW for that market. The two are genuinely different bets now that
+  // KOs have ET+pens; the badge colours (purple = advance, blue = 90') and
+  // labels must make them impossible to confuse at a glance.
+  function marketKindBadge(kind, label) {
+    if (kind === "advancement") {
+      return '<span class="arb-badge badge-mkt-adv" title="Polymarket moneyline — pays if the team progresses, including extra-time and penalties">'
+        + esc(label || "ADVANCE · ET+PENS") + "</span>";
+    }
+    if (kind === "result_90") {
+      return '<span class="arb-badge badge-mkt-90" title="1X2 — settles on the score after 90 minutes + stoppage only. A knockout tie that goes to ET/penalties is a DRAW for this market.">'
+        + esc(label || "90-MIN 1X2") + "</span>";
+    }
+    return "";
+  }
+
+  // 90-minute 1X2 split for an advancement rec's next KO tie, from the team's
+  // perspective: "win / draw / opp" with the DRAW emphasised (a KO draw at 90'
+  // is a real, common outcome that sends the tie to ET/pens).
+  function matchSplit(m) {
+    if (!m || typeof m !== "object") return "—";
+    var w = m.team_win, d = m.draw, o = m.opp_win;
+    if (w == null && d == null && o == null) return "—";
+    function p(v) { return v == null || isNaN(+v) ? "—" : Math.round(Number(v) * 100); }
+    return '<span class="mk-split">'
+      + '<span class="mk-w" title="team win (90′)">' + p(w) + "</span>"
+      + '<span class="mk-sep">/</span>'
+      + '<span class="mk-d" title="draw at 90′ — goes to ET/pens">' + p(d) + "</span>"
+      + '<span class="mk-sep">/</span>'
+      + '<span class="mk-o" title="opponent win (90′)">' + p(o) + "</span>"
+      + "</span>";
+  }
+
   function evClass(v) {
     if (v === null || v === undefined || isNaN(+v)) return "";
     return Number(v) > 0 ? "pos bold" : (Number(v) < 0 ? "neg" : "dim");
+  }
+
+  // --------------------------------------------------------------------------
+  // One-click PLACE (localhost-only). SAFETY: this entire module is inert on
+  // any non-localhost host (Vercel), so the deployed page can never render or
+  // fire a button. Guarded so a missing config or a non-localhost load never
+  // throws.
+  // --------------------------------------------------------------------------
+
+  // True only on a genuine local dev load. Everything below short-circuits off
+  // this — the render helpers emit nothing when it is false.
+  var IS_LOCAL = (function () {
+    try {
+      var h = (location && location.hostname) || "";
+      return h === "localhost" || h === "127.0.0.1" || h === "[::1]" || h === "::1";
+    } catch (e) { return false; }
+  })();
+
+  var PLACE_ENDPOINT = "http://127.0.0.1:8010/place";
+  var PLACE_TOKEN_KEY = "wcaPlaceToken";  // localStorage key for the shared secret
+
+  function placeToken() {
+    // The shared secret the user configured (matches server WCA_PLACE_TOKEN).
+    // Prompt ONCE if unset; a cancelled prompt leaves it unset (button errors
+    // rather than firing without a secret).
+    try {
+      var t = window.localStorage.getItem(PLACE_TOKEN_KEY);
+      if (t && t.trim()) return t.trim();
+      var entered = window.prompt(
+        "One-time setup: paste the WCA place-server shared secret " +
+        "(WCA_PLACE_TOKEN). Stored locally in this browser only.");
+      if (entered && entered.trim()) {
+        window.localStorage.setItem(PLACE_TOKEN_KEY, entered.trim());
+        return entered.trim();
+      }
+    } catch (e) { /* localStorage/prompt unavailable — fall through */ }
+    return null;
+  }
+
+  function makeNonce() {
+    // Per-click idempotency token.
+    var rnd;
+    try { rnd = Math.random().toString(36).slice(2); } catch (e) { rnd = "" + Math.random(); }
+    return "web-" + Date.now() + "-" + rnd;
+  }
+
+  // Render the PLACE cell for one row. Returns "" unless local AND the row is a
+  // fireable Polymarket ADD (so 01/02 rows only get a live button when they
+  // actually carry a polymarket-venue order).
+  function placeCell(r) {
+    if (!IS_LOCAL || !r) return "";
+    var isPm = String(r.venue || "").toLowerCase() === "polymarket";
+    var isAdd = String(r.action_label || "") === "ADD";
+    if (!isPm || !isAdd || r.stale || !r.id) {
+      return '<td data-label="Place"><span class="wca-place-note">&mdash;</span></td>';
+    }
+    return '<td data-label="Place">' +
+      '<button type="button" class="wca-place-btn" data-place-id="' + esc(r.id) + '">Place</button>' +
+      "</td>";
+  }
+
+  // POST one placement to the local server. Never throws to the caller.
+  function postPlace(recId) {
+    var token = placeToken();
+    if (!token) {
+      return Promise.resolve({ ok: false, message: "no place token configured (set the shared secret)" });
+    }
+    var body = JSON.stringify({ rec_id: recId, nonce: makeNonce() });
+    return fetch(PLACE_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-WCA-Place-Token": token },
+      body: body,
+    })
+      .then(function (resp) {
+        return resp.json().catch(function () {
+          return { ok: false, message: "server returned non-JSON (HTTP " + resp.status + ")" };
+        });
+      })
+      .catch(function (e) {
+        return { ok: false, message: "place server unreachable (" + (e && e.message || e) + ")" };
+      });
+  }
+
+  // Delegated click handler wired once. Only active on localhost.
+  function wirePlace() {
+    if (!IS_LOCAL) return;
+    document.addEventListener("click", function (ev) {
+      var btn = ev.target && ev.target.closest ? ev.target.closest(".wca-place-btn") : null;
+      if (!btn || btn.disabled) return;
+      var recId = btn.getAttribute("data-place-id");
+      if (!recId) return;
+
+      // Clear any prior inline error on this cell.
+      var cell = btn.parentNode;
+      var prevErr = cell && cell.querySelector ? cell.querySelector(".wca-place-err") : null;
+      if (prevErr) prevErr.parentNode.removeChild(prevErr);
+
+      btn.disabled = true;
+      var restore = btn.textContent;
+      btn.textContent = "…";
+
+      postPlace(recId).then(function (res) {
+        if (res && res.ok) {
+          btn.textContent = res.dry_run ? "DRY ✓" : "PLACED ✓";
+          btn.classList.add("placed");
+          // keep disabled — prevents further clicks on a placed row
+          // Refresh the KPI strip / feed so exposure reflects the new order.
+          try { load(); } catch (e) { /* refresh best-effort */ }
+        } else {
+          btn.disabled = false;
+          btn.textContent = restore;
+          var msg = (res && res.message) || "place failed";
+          var span = document.createElement("span");
+          span.className = "wca-place-err";
+          span.textContent = msg;
+          if (cell) cell.appendChild(span);
+        }
+      });
+    });
+  }
+
+  // Reveal the localhost-only PLACE <th> columns (hidden by default in HTML).
+  function revealPlaceColumns() {
+    if (!IS_LOCAL) return;
+    var cols = document.querySelectorAll(".wca-place-col");
+    for (var i = 0; i < cols.length; i++) { cols[i].hidden = false; }
   }
 
   // --------------------------------------------------------------------------
@@ -183,9 +344,14 @@
       var ages = r.ages || {};
       var priceAgeTag = ageTag(ages.price_secs, 7200);
       var modelAgeTag = ageTag(ages.model_secs, 86400);
+      // 90-min result badge (older data without market_kind falls back to the
+      // plain market label so nothing throws and the cell is never blank).
+      var mktBadge = r.market_kind
+        ? marketKindBadge(r.market_kind, r.market_label)
+        : '<span class="arb-badge badge-market">' + esc(r.market || "") + "</span>";
       return "<tr>" +
         '<td data-label="Fixture">' + esc(r.fixture || "") + ' <span class="dim">' + esc(r.kickoff ? r.kickoff.slice(0, 10) : "") + "</span></td>" +
-        '<td data-label="Market"><span class="arb-badge badge-market">' + esc(r.market || "") + "</span></td>" +
+        '<td data-label="Market">' + mktBadge + "</td>" +
         '<td data-label="Selection"><strong>' + esc(r.team || r.selection || "") + "</strong></td>" +
         '<td data-label="Model %" class="r">' + pct(r.model_prob) + "</td>" +
         '<td data-label="Price" class="r num">' + priceStr(r.price) + ' <span class="dim" style="font-size:9px">' + esc(r.price_source === "devig_consensus" ? "devig" : "") + "</span>" + priceAgeTag + "</td>" +
@@ -195,6 +361,7 @@
         '<td data-label="Action">' + actionBadge(r.action_label) + "</td>" +
         '<td data-label="Promo">' + promoBadge(r.promo_status, r.promo && r.promo.name) + "</td>" +
         '<td data-label="Source">' + venueBadge(r.venue) + " " + staleBadge(r.stale) + " " + modelAgeTag + "</td>" +
+        placeCell(r) +
         "</tr>";
     }).join("");
     tbody.innerHTML = html;
@@ -224,6 +391,7 @@
         '<td data-label="Stake" class="r">' + currency(r.stake, r.currency) + "</td>" +
         '<td data-label="Action">' + actionBadge(r.action_label) + "</td>" +
         '<td data-label="Source">' + venueBadge(r.venue) + " " + staleBadge(r.stale) + "</td>" +
+        placeCell(r) +
         "</tr>";
     }).join("");
     tbody.innerHTML = html;
@@ -245,9 +413,21 @@
     var html = visible.map(function (r) {
       var ages = r.ages || {};
       var modelAge = ageTag(ages.model_secs, 86400);
+      // Market-kind badge: advancement recs are Polymarket moneylines (pay on
+      // progression, incl. ET+pens). Fall back gracefully for older data.
+      var mktBadge = marketKindBadge(r.market_kind || "advancement", r.market_label);
+      // Opponent + next-KO-tie 90' split (guard: older data has neither).
+      var opp = r.opponent
+        ? '<strong>' + esc(r.opponent) + "</strong>"
+          + (r.match_round ? ' <span class="dim">' + esc(r.match_round) + "</span>" : "")
+        : "—";
+      var split = matchSplit(r.match_1x2);
       return "<tr>" +
         '<td data-label="Team"><strong>' + esc(r.team || "") + '</strong> <span class="dim">' + esc(r.group || "") + "</span></td>" +
+        '<td data-label="Market">' + mktBadge + "</td>" +
         '<td data-label="Stage"><span class="arb-badge badge-market">' + esc(r.stage || "") + "</span></td>" +
+        '<td data-label="Opponent (next KO)">' + opp + "</td>" +
+        '<td data-label="90′ 1X2 (W/D/L)" class="r" title="model 90-minute result for the next KO tie — a draw here goes to ET/pens">' + split + "</td>" +
         '<td data-label="Model %" class="r">' + pct(r.model_prob) + "</td>" +
         '<td data-label="PM Price" class="r num">' + priceStr(r.pm_price) + "</td>" +
         '<td data-label="PM Fee" class="r dim">' + pct(r.pm_fee, 2) + "</td>" +
@@ -255,6 +435,7 @@
         '<td data-label="Stake ($)" class="r">' + usd(r.stake) + "</td>" +
         '<td data-label="Action">' + actionBadge(r.action_label) + "</td>" +
         '<td data-label="Source"><span class="arb-badge badge-pm">PM</span> ' + staleBadge(r.stale) + " " + modelAge + "</td>" +
+        placeCell(r) +
         "</tr>";
     }).join("");
     tbody.innerHTML = html;
@@ -463,13 +644,16 @@
     fetchJson("./bet_recs.json")
       .then(function (data) {
         _recs = data;
-        renderKpis(data);
-        renderSingles(data.match_singles || []);
-        renderProps(data.event_props || []);
-        renderAdv(data.advancement_futures || []);
-        renderArbs(data.guaranteed_arbs || []);
-        renderWithheld(data.withheld || []);
-        renderFooter(data);
+        // Isolate every panel: one render throwing must not blank the page or
+        // trip the global "FEED UNAVAILABLE" banner (that is reserved for an
+        // actual fetch/parse failure, handled by .catch below).
+        try { renderKpis(data); } catch (e) { console.error("renderKpis failed", e); }
+        try { renderSingles(data.match_singles || []); } catch (e) { console.error("renderSingles failed", e); }
+        try { renderProps(data.event_props || []); } catch (e) { console.error("renderProps failed", e); }
+        try { renderAdv(data.advancement_futures || []); } catch (e) { console.error("renderAdv failed", e); }
+        try { renderArbs(data.guaranteed_arbs || []); } catch (e) { console.error("renderArbs failed", e); }
+        try { renderWithheld(data.withheld || []); } catch (e) { console.error("renderWithheld failed", e); }
+        try { renderFooter(data); } catch (e) { console.error("renderFooter failed", e); }
       })
       .catch(function () {
         showNoData("BET RECS FEED UNAVAILABLE — run wca_betrecs.py to regenerate");
@@ -478,10 +662,16 @@
 
   wireFilters();
   wireDensity();
+  wirePlace();            // no-op unless localhost
+
+  function boot() {
+    revealPlaceColumns(); // no-op unless localhost
+    load();
+  }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", load);
+    document.addEventListener("DOMContentLoaded", boot);
   } else {
-    load();
+    boot();
   }
 })();

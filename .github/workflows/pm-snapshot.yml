@@ -1,14 +1,14 @@
 name: PM Price History Snapshot
 
-# Capture a Polymarket price snapshot every hour so outright/advancement markets
+# Capture a Polymarket price snapshot twice-hourly so outright/advancement markets
 # accrue a price TRAJECTORY (the only leading edge signal where CLV can't exist).
 # Reuses the advancement feed's existing model-vs-PM pairing -> no extra PM calls.
 # Mini-independent: runs in the cloud so history accrues even when the mini sleeps.
-# Writes only to data/ (the JSONL dataset), so the site Vercel ignoreCommand keeps
-# deploys scoped (no site rebuild from a price-history commit).
+# Writes to data/pm_price_history.jsonl (versioned JSONL) AND data/wca.db pm_snapshots
+# table for efficient time-series analysis. Skips site Vercel deploys via ignoreCommand.
 on:
   schedule:
-    - cron: '37 * * * *'   # hourly at :37 (offset from odds :00 and card :17)
+    - cron: '7,37 * * * *'   # twice-hourly at :07 and :37 (offset from odds :00 and card :17)
   workflow_dispatch:
 
 concurrency:
@@ -40,16 +40,48 @@ jobs:
           # If it fails (e.g. PM pairing hiccup) we still snapshot the committed feed.
           PYTHONPATH=src python scripts/wca_advancement_data.py >> logs/pm_snapshot.log 2>&1 || true
 
-      - name: Append PM price snapshot
+      - name: Append PM price snapshot (JSONL + Database)
         run: |
           PYTHONPATH=src python scripts/wca_pm_snapshot.py \
             --adv site/advancement_data.json \
-            --jsonl data/pm_price_history.jsonl >> logs/pm_snapshot.log 2>&1
+            --jsonl data/pm_price_history.jsonl \
+            --db data/wca.db >> logs/pm_snapshot.log 2>&1
 
       - name: Commit price-history dataset
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/pm_price_history.jsonl
-          git diff --cached --quiet || git commit -m "data: hourly PM price-history snapshot"
+          git diff --cached --quiet || git commit -m "data: twice-hourly PM price-history snapshot"
           git push || true
+
+      - name: Log snapshot stats
+        if: always()
+        run: |
+          echo "=== PM Snapshot Summary ===" >> logs/pm_snapshot.log
+          PYTHONPATH=src python << 'PYSCRIPT'
+import json
+import sqlite3
+from datetime import datetime, timezone
+
+with open('data/pm_price_history.jsonl', 'r') as f:
+    lines = f.readlines()
+print(f"Total snapshots in JSONL: {len(lines)}")
+
+try:
+    con = sqlite3.connect('data/wca.db')
+    cursor = con.cursor()
+    cursor.execute("SELECT COUNT(*) FROM pm_snapshots")
+    db_count = cursor.fetchone()[0]
+    print(f"Total snapshots in DB: {db_count}")
+    
+    cursor.execute("SELECT ts_utc, COUNT(*) as cnt FROM pm_snapshots GROUP BY ts_utc ORDER BY ts_utc DESC LIMIT 1")
+    latest = cursor.fetchone()
+    if latest:
+        print(f"Latest snapshot: {latest[0]} ({latest[1]} markets)")
+    
+    con.close()
+except Exception as e:
+    print(f"DB check failed: {e}")
+PYSCRIPT
+          >> logs/pm_snapshot.log 2>&1

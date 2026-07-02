@@ -33,6 +33,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 
 import pandas as pd
 
+from wca.markets.bankroll import GBP_USD, gbp_to_usd
 from wca.card import (
     OUTCOMES,
     BlendWeights,
@@ -643,6 +644,48 @@ def _goalscorer_team_blocks(card) -> List[str]:
     return out
 
 
+def _scorers_from_cache(
+    home: str, away: str, path: str = "data/goalscorers_latest.md"
+) -> List[str]:
+    """This fixture's scorer lines from the cached /goalscorers card, or [].
+
+    The dedicated goalscorers card runs on its own (slower) schedule; when the
+    fast next-match build finds no live scorer market for the fixture, the
+    cached section is better than an empty block — stamped with its own
+    generation time so staleness is never hidden.
+    """
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            text = fh.read()
+    except OSError:
+        return []
+    gen = ""
+    if "<!-- generated:" in text:
+        gen = text.split("<!-- generated:", 1)[1].split("-->", 1)[0].strip()
+    header = "*%s vs %s*" % (home, away)
+    out: List[str] = []
+    grab = False
+    for ln in text.splitlines():
+        if ln.startswith(header):
+            grab = True
+            continue
+        if grab:
+            if ln.startswith("*") and " vs " in ln:
+                break  # next fixture's section
+            if ln.strip():
+                out.append(ln)
+            elif out:
+                break
+    if not out:
+        return []
+    hdr = "*Top goalscorers* — from the cached /goalscorers card"
+    if gen:
+        hdr += " (as of %s)" % gen
+    return [hdr] + out
+
+
 def _format_goalscorers(card: NextMatchCard) -> List[str]:
     """Render the per-team top-goalscorers block (compact, phone-width)."""
     gs = card.goalscorers or {}
@@ -656,6 +699,9 @@ def _format_goalscorers(card: NextMatchCard) -> List[str]:
                     % (s.player[:18], s.best_odds, s.best_book, s.implied * 100)
                 )
             return out
+        cached = _scorers_from_cache(card.home, card.away)
+        if cached:
+            return cached
         return ["*Top goalscorers* — no scorer market available yet."]
 
     out = ["*Top goalscorers* — best book / Polymarket"]
@@ -677,35 +723,33 @@ def _format_single_next_match(card: NextMatchCard) -> str:
     staked = False
     for outcome in OUTCOMES:
         p, book, odds, edge = card.winner[outcome]
-        fair = (1.0 / p) if p > 0 else float("inf")
-        line = "  %-14s %5.1f%%  fair %.2f" % (names[outcome][:14], p * 100, fair)
+        # Polymarket convention: price = implied probability in cents, $1 payout.
+        line = "  %-14s model %4.1f¢" % (names[outcome][:14], p * 100)
         if book is not None and odds > 1.0:
             flag = " ✅" if edge >= card.min_edge else ""
-            line += "  best %.2f (%s) %+.1f%%%s" % (odds, book, edge * 100, flag)
+            line += " · mkt %4.1f¢ (%s)  EV %+.1f%%%s" % (
+                100.0 / odds, book, edge * 100, flag
+            )
             stk = kelly_mod.stake(
                 p, odds, card.bankroll, card.kelly_fraction, card.kelly_cap
             )
             if stk > 0:
-                line += "  £%.2f" % stk
+                line += "  $%.2f" % gbp_to_usd(stk)
                 staked = True
         lines.append(line)
     if staked:
         lines.append(
-            "  _stake = ¼-Kelly @ £%.0f bankroll (+EV picks)_" % card.bankroll
+            "  _stake = ¼-Kelly @ £%.0f pool, shown in $ at $%.2f/£ "
+            "(display only — settles in native currency)_"
+            % (card.bankroll, GBP_USD)
         )
 
     p_over = card.corners_p_over
     lines.append("")
     lines.append("*Corners* (model, exp %.1f)" % card.corners_mu)
     lines.append(
-        "  O/U %.1f: over %.1f%% / under %.1f%%  fair %.2f / %.2f"
-        % (
-            card.corners_line,
-            p_over * 100,
-            (1.0 - p_over) * 100,
-            (1.0 / p_over) if p_over > 0 else float("inf"),
-            (1.0 / (1.0 - p_over)) if p_over < 1 else float("inf"),
-        )
+        "  O/U %.1f: over %.1f¢ / under %.1f¢ (model prices)"
+        % (card.corners_line, p_over * 100, (1.0 - p_over) * 100)
     )
 
     lines.append("")

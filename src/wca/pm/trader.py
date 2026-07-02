@@ -239,8 +239,12 @@ class TradeConfig:
     """
 
     dry_run: bool = True
-    max_order_usd: float = 30.0
-    max_daily_usd: float = 100.0
+    # Caps raised 2026-07-02 (user instruction: "remove execution-cap stage
+    # raise") to match the full-pool sizing rule: per-order = 4% of the $3,990
+    # PM base pool; daily = ~25% of it. Still static fail-closed ceilings —
+    # any further change is a human-approved code change.
+    max_order_usd: float = 160.0
+    max_daily_usd: float = 1000.0
     # Substrings that prove World-Cup provenance.  Single-match Polymarket
     # questions ("Will X win on <date>?") carry no "world cup"/"fifa" keyword,
     # so we also accept the FIFA-World-Cup event-slug prefix ``fifwc`` that the
@@ -256,7 +260,7 @@ class TradeConfig:
     # cap rather than the risk-on per-buy cap, and is exempt from the daily BUY
     # budget. Still a hard ceiling so a fat-fingered size can't dump an
     # arbitrarily large position.
-    max_cashout_usd_per_order: float = 100.0
+    max_cashout_usd_per_order: float = 400.0
 
 
 @dataclass

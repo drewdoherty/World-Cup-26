@@ -1,0 +1,11 @@
+# TRACKING-ONLY / OOS-gated goal blend (F7). Long-DC vs two-timescale blend per-fixture lambdas for later out-of-sample CLV validation. NOT used for staking. Squad adjustment is DATA-GATED (no calibrated squad feed) => no squad nudge applied (fallback). Shrinkage knobs are chosen defaults, not yet validated on multi-tournament holdout.
+# short_half_life_years=0.5 credibility_k=10.0 level_target=2.81 squad_adjusted=False reference_date=2026-06-29
+home,away,neutral,lam_home_longDC,lam_away_longDC,lam_home_blend,lam_away_blend,total_longDC,total_blend,w_home,w_away,elo_home,elo_away
+France,Sweden,True,1.8747,0.9561,2.6393,1.1331,2.8307,3.7723,0.5153,0.506,2179.7,1802.6
+Ivory Coast,Norway,True,1.1867,1.4407,1.143,1.3273,2.6274,2.4703,0.547,0.5053,1860.1,1969.1
+Mexico,Ecuador,False,1.5673,1.19,1.1459,0.7547,2.7573,1.9006,0.5938,0.5128,2011.0,1990.8
+England,DR Congo,True,2.3426,0.5261,1.4667,0.4887,2.8687,1.9554,0.5175,0.5545,2101.8,1814.3
+United States,Bosnia and Herzegovina,False,2.0942,1.1094,2.5589,1.2111,3.2036,3.7699,0.5518,0.5028,1874.8,1688.1
+Belgium,Senegal,True,1.7701,1.0047,1.886,1.1727,2.7748,3.0587,0.5116,0.5835,1974.4,1903.5
+Portugal,Croatia,True,1.6257,1.0951,1.9134,1.003,2.7208,2.9164,0.5159,0.511,2040.9,1960.9
+Spain,Austria,True,2.2444,0.8399,1.9935,0.84,3.0843,2.8335,0.5167,0.5124,2198.9,1906.5

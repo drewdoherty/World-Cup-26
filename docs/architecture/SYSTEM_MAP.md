@@ -1,5 +1,10 @@
 # World Cup Alpha — System Map
 
+> **As-of warning (2026-07-02):** this map predates the Phase-0 overhaul audit and is
+> not maintained against it. Where it conflicts with the root
+> [`/ARCHITECTURE.md`](../../ARCHITECTURE.md) (verified @ `origin/main` `957112a`),
+> the root document wins.
+
 The deep, code-verified companion to the README's auto-generated structure flowchart.
 Every claim below is annotated with the source file (relative path) it was read from.
 Where the code disagrees with the README or `docs/ARCHITECTURE.md`, **the code is documented
