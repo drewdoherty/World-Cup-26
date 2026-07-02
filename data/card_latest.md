@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-02T12:23:04 -->
+<!-- generated: 2026-07-02T15:34:49 -->
 *World Cup Alpha — bet card* (0 staked, 3 indicative picks, hit-prob ranked)
 _1X2 90-minute singles only — advancement/knockout futures live on /pm and the Action Desk._
 
