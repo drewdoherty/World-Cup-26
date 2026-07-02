@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-02T10:27:48 -->
+<!-- generated: 2026-07-02T11:04:19 -->
 ⚽ *Next match* — Spain vs Austria
 Kickoff 2026-07-02 19:00:00+00:00
 
 *Winner* (model blend)
-  Spain          model 72.3¢ · mkt 74.6¢ (betfair_ex_uk)  EV -3.1%
-  Draw           model 18.1¢ · mkt 17.9¢ (betfair_ex_uk)  EV +1.3%  $3.18
-  Austria        model  9.6¢ · mkt  7.9¢ (Polymarket)  EV +21.4% ✅  $19.87
+  Spain          model 72.4¢ · mkt 74.6¢ (betfair_ex_uk)  EV -2.9%
+  Draw           model 18.1¢ · mkt 17.5¢ (Smarkets)  EV +3.1% ✅  $7.05
+  Austria        model  9.5¢ · mkt  7.7¢ (betfair_ex_uk)  EV +23.4% ✅  $21.15
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 9.0)
@@ -22,4 +22,4 @@ _top anytime (both teams — add squad to split + FGS)_
 
 *Scorelines* (top 6)
 2-0 12.1% | 1-0 10.2% | 2-1 10.1% | 3-0 9.1% | 1-1 8.6% | 3-1 7.6%
-  O/U 2.5: over 60.4% / under 39.6%   BTTS 50.8%
+  O/U 2.5: over 60.5% / under 39.5%   BTTS 50.8%
