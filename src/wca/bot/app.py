@@ -2440,6 +2440,11 @@ def handle_pm(db_path: str) -> str:
     if merged:
         lines.append("")
         lines.append("*Parked orders*")
+        lines.append(
+            "_ranking rule: +EV moneylines (model ≥50¢) before mid-prob, "
+            "longshots (<25¢) last; further-out fixtures before imminent — "
+            "further away is more likely mispriced. EV breaks ties._"
+        )
         for n in sorted(merged):
             lines.append("  " + format_parked_order("PM-%d" % n, merged[n]))
     else:
