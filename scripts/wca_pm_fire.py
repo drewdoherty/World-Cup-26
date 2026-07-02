@@ -63,7 +63,7 @@ if _SRC not in sys.path:
 
 # HARD ceiling on a single fire, in USD notional.  --max-usd can only LOWER
 # the effective cap, never raise it above this absolute backstop.
-ABSOLUTE_MAX_USD: float = 100.0
+ABSOLUTE_MAX_USD: float = 200.0  # raised 2026-07-02 with the full-pool sizing (was 100)
 
 # Idempotency window: a fresh fire of the SAME rec-id inside this many minutes
 # is refused even with a different nonce (guards a fast double-click / retry).

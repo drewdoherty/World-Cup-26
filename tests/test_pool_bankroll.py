@@ -22,6 +22,15 @@ import tempfile
 
 import pytest
 
+
+@pytest.fixture(autouse=True)
+def _ladder_mode(monkeypatch):
+    """These tests pin the CLV-rung LADDER mechanics, which stay intact behind
+    the 2026-07-02 FULL-POOL default (WCA_FULL_POOLS=1). Run them in ladder
+    mode explicitly; full-pool behaviour has its own tests."""
+    monkeypatch.setenv("WCA_FULL_POOLS", "0")
+
+
 from wca.card import (
     FLAT_KELLY_FRACTION,
     LADDER_BANKROLLS,
