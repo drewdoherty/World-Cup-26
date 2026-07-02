@@ -84,6 +84,90 @@
 .ms-phase li { color: var(--text-dim); font-size: 11.5px; line-height: 1.6; }
 .ms-phase-gate { margin-top: 8px; font-size: 10.5px; color: var(--warn); border-top: 1px dashed var(--border-2); padding-top: 6px; }
 
+/* ---------------- Polymarket orderflow & wallet intelligence (of-*) ------ */
+.of-root .panel { margin-top: 14px; }
+.of-caption { color: var(--muted); font-size: 11px; line-height: 1.55; margin: 0 0 10px; }
+.of-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.of-col { min-width: 0; }
+.of-col-head {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+  margin-bottom: 6px; flex-wrap: wrap;
+}
+.of-col-name { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text); }
+.of-col-name.of-smart { color: var(--pos); }
+.of-col-name.of-dumb { color: var(--neg); }
+.of-col-agg { font-size: 10.5px; color: var(--muted); font-family: var(--mono); }
+
+.of-tablewrap { overflow-x: auto; }
+.of-table td, .of-table th { white-space: nowrap; }
+.of-table td { padding: 7px 9px; }
+.of-wallet { font-family: var(--mono); color: var(--accent); cursor: help; }
+.of-wname { color: var(--text-dim); font-size: 11px; }
+.of-partial { color: var(--warn); font-size: 10px; margin-left: 2px; cursor: help; }
+.of-cat { color: var(--text-dim); font-size: 11px; }
+.of-chip {
+  display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px;
+  text-transform: uppercase; padding: 2px 6px; border-radius: 3px;
+  background: rgba(109, 74, 208, 0.10); color: var(--accent); border: 1px solid rgba(109, 74, 208, 0.25);
+}
+.of-subhead {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--text-dim); margin: 14px 0 6px;
+}
+.of-subhead:first-child { margin-top: 0; }
+
+/* Empty state (feed not generated). */
+.of-empty {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  color: var(--text-dim); font-size: 12.5px; padding: 18px 8px; text-align: center;
+}
+.of-empty code { color: var(--accent); background: var(--bg-2); padding: 1px 5px; border-radius: 3px; font-size: 11.5px; }
+.of-empty-dot {
+  flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--warn); box-shadow: 0 0 8px var(--warn);
+}
+
+/* Archetype bars. */
+.of-arch-row { display: flex; gap: 14px; align-items: flex-start; padding: 9px 2px; border-bottom: 1px solid var(--border); }
+.of-arch-row:last-child { border-bottom: 0; }
+.of-arch-lab { flex: 0 0 170px; font-size: 12px; font-weight: 600; color: var(--text); padding-top: 1px; }
+.of-arch-right { flex: 1; min-width: 0; }
+.of-bar-track { height: 12px; background: var(--track); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+.of-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--polymarket)); border-radius: 2px; }
+.of-arch-meta { font-size: 10.5px; color: var(--text-dim); font-family: var(--mono); margin-top: 5px; }
+
+/* Inline buy-pressure bar + smart/dumb split bar (matrix). */
+.of-bp { display: flex; align-items: center; gap: 7px; }
+.of-bp .ms-num { font-size: 10.5px; color: var(--text-dim); }
+.of-bp-track { flex: 0 0 56px; height: 8px; background: var(--track); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+.of-bp-fill { height: 100%; background: var(--sportsbook); }
+.of-split {
+  flex: 0 0 90px; display: flex; height: 10px; background: var(--track);
+  border: 1px solid var(--border); border-radius: 3px; overflow: hidden; cursor: help;
+}
+.of-split-smart { height: 100%; background: var(--pos); }
+.of-split-dumb { height: 100%; background: var(--neg); }
+
+/* Trade size distribution bars. */
+.of-sizes { display: flex; gap: 10px; align-items: stretch; padding: 6px 2px 0; overflow-x: auto; }
+.of-size-col { flex: 1 1 0; min-width: 66px; text-align: center; }
+.of-size-n { font-size: 11px; font-family: var(--mono); font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.of-size-barbox {
+  height: 110px; display: flex; align-items: flex-end;
+  border-bottom: 1px solid var(--border-2); background: linear-gradient(180deg, transparent, var(--bg-2));
+}
+.of-size-bar { width: 100%; background: linear-gradient(180deg, var(--accent), var(--polymarket)); border-radius: 3px 3px 0 0; min-height: 0; }
+.of-size-usd { font-size: 10px; color: var(--text-dim); font-family: var(--mono); margin-top: 4px; }
+.of-size-lab { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* Latency + honesty notes (smaller variant of ms-honesty). */
+.of-honesty { margin: 14px 0 0; }
+.of-honesty .ms-honesty-title { font-size: 11px; }
+.of-honesty li { font-size: 11px; line-height: 1.6; }
+
 @media (max-width: 860px) {
   .ms-areas { grid-template-columns: 1fr; }
+  .of-cols { grid-template-columns: 1fr; }
+  .of-arch-row { flex-direction: column; gap: 6px; }
+  .of-arch-lab { flex: none; }
 }
