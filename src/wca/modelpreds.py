@@ -64,7 +64,7 @@ def _lambdas_for(dc_model: Any, fb: Any) -> Optional[Dict[str, float]]:
 
 
 def build_predictions(
-    blends: List[Any], now_utc: str, dc_model: Any = None
+    blends: List[Any], now_utc: str, dc_model: Any = None, gb_model: Any = None
 ) -> Dict[str, Any]:
     """JSON-ready payload from ``card._iter_fixture_blends`` output.
 
@@ -78,6 +78,11 @@ def build_predictions(
     flag. These are the compact sufficient statistic the correlated-exposure
     model reconstructs the full scoreline matrix from (so the 49/121-cell matrix
     is never persisted). Older entries without lambdas stay valid.
+
+    ``gb_model`` (the F7 goal-blend, a drop-in DC with ``expected_lambdas``)
+    is optional and SHADOW-ONLY: when supplied, rows additionally carry
+    ``gb_lambda_home`` / ``gb_lambda_away`` so the blend's out-of-sample CLV
+    can be compared against the deployed DC before it ever drives sizing.
     """
     fixtures: List[Dict[str, Any]] = []
     for fb in blends:
@@ -94,6 +99,10 @@ def build_predictions(
         lambdas = _lambdas_for(dc_model, fb)
         if lambdas is not None:
             row.update(lambdas)
+        gb_lambdas = _lambdas_for(gb_model, fb)
+        if gb_lambdas is not None:
+            row["gb_lambda_home"] = gb_lambdas["lambda_home"]
+            row["gb_lambda_away"] = gb_lambdas["lambda_away"]
         fixtures.append(row)
     fixtures.sort(key=lambda f: (f["kickoff"], f["fixture"]))
     return {"meta": {"generated": now_utc}, "fixtures": fixtures}

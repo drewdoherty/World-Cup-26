@@ -255,7 +255,15 @@ def main() -> None:
         dc_level_target = float(args.dc_level_target)
     try:
         results = load_results(results_path)
-        models = fit_models(results, dc_level_target=dc_level_target)
+        # F7 goal-blend SHADOW (tracking-only, wired 2026-07-02): fit the
+        # two-timescale opponent-adjusted blend alongside the deployed DC.
+        # card.py guarantees the staking path stays bit-identical (the blend
+        # never feeds EV/sizing); its lambdas are persisted next to DC's for
+        # out-of-sample CLV comparison. Kill switch: WCA_GOAL_BLEND_SHADOW=0.
+        gb_shadow = os.environ.get("WCA_GOAL_BLEND_SHADOW", "1") != "0"
+        models = fit_models(
+            results, dc_level_target=dc_level_target, goal_blend=gb_shadow
+        )
     except Exception as exc:
         print("ERROR: model fitting failed: %s" % exc, file=sys.stderr)
         sys.exit(1)
@@ -376,7 +384,10 @@ def main() -> None:
             # goal-expectation lambdas (same lagged fit as the DC 1X2). They are
             # the compact sufficient statistic the correlated-exposure model
             # reconstructs the scoreline matrix from.
-            write_predictions(build_predictions(blends, now_str, dc_model=models.dc))
+            write_predictions(build_predictions(
+                blends, now_str, dc_model=models.dc,
+                gb_model=getattr(models, "goal_blend", None),
+            ))
             print("Model predictions persisted: %d fixtures" % len(blends))
         except Exception as exc:
             print("WARNING: model prediction dump failed: %s" % exc, file=sys.stderr)
