@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated": "2026-07-03 08:29:45 UTC",
-    "model_generated": "2026-07-03 08:25 UTC",
+    "generated": "2026-07-03 12:08:41 UTC",
+    "model_generated": "2026-07-03 09:04 UTC",
     "stages": [
       "R32",
       "R16",
@@ -10,7 +10,7 @@
       "Final",
       "win"
     ],
-    "n_pm_markets": 0
+    "n_pm_markets": 83
   },
   "teams": [
     {
@@ -34,7 +34,24 @@
         "win": 0.0353,
         "group_winner": 0.25
       },
-      "pm": {}
+      "pm": {
+        "SF": {
+          "pm": 0.355,
+          "edge_adj": 0.1445
+        },
+        "win": {
+          "pm": 0.0625,
+          "edge_adj": 0.1218
+        },
+        "Final": {
+          "pm": 0.185,
+          "edge_adj": 0.1207
+        },
+        "QF": {
+          "pm": 0.655,
+          "edge_adj": 0.1129
+        }
+      }
     },
     {
       "team": "France",
@@ -57,7 +74,24 @@
         "win": 0.0702,
         "group_winner": 0.3085
       },
-      "pm": {}
+      "pm": {
+        "Final": {
+          "pm": 0.545,
+          "edge_adj": 0.1954
+        },
+        "SF": {
+          "pm": 0.775,
+          "edge_adj": 0.1821
+        },
+        "win": {
+          "pm": 0.3325,
+          "edge_adj": 0.1459
+        },
+        "QF": {
+          "pm": 0.925,
+          "edge_adj": 0.1396
+        }
+      }
     },
     {
       "team": "Argentina",
@@ -80,7 +114,28 @@
         "win": 0.0257,
         "group_winner": 0.2246
       },
-      "pm": {}
+      "pm": {
+        "SF": {
+          "pm": 0.645,
+          "edge_adj": 0.1057
+        },
+        "Final": {
+          "pm": 0.395,
+          "edge_adj": 0.0946
+        },
+        "QF": {
+          "pm": 0.825,
+          "edge_adj": 0.0676
+        },
+        "win": {
+          "pm": 0.1925,
+          "edge_adj": 0.0184
+        },
+        "R16": {
+          "pm": 0.935,
+          "edge_adj": 0.0151
+        }
+      }
     },
     {
       "team": "Spain",
@@ -103,7 +158,24 @@
         "win": 0.0028,
         "group_winner": 0.2432
       },
-      "pm": {}
+      "pm": {
+        "QF": {
+          "pm": 0.655,
+          "edge_adj": 0.1055
+        },
+        "SF": {
+          "pm": 0.485,
+          "edge_adj": 0.0575
+        },
+        "Final": {
+          "pm": 0.225,
+          "edge_adj": 0.029
+        },
+        "win": {
+          "pm": 0.1245,
+          "edge_adj": 0.0237
+        }
+      }
     },
     {
       "team": "England",
@@ -126,7 +198,24 @@
         "win": -0.0054,
         "group_winner": 0.3265
       },
-      "pm": {}
+      "pm": {
+        "Final": {
+          "pm": 0.195,
+          "edge_adj": 0.0314
+        },
+        "QF": {
+          "pm": 0.535,
+          "edge_adj": 0.0291
+        },
+        "SF": {
+          "pm": 0.315,
+          "edge_adj": 0.0243
+        },
+        "win": {
+          "pm": 0.0715,
+          "edge_adj": 0.0061
+        }
+      }
     },
     {
       "team": "Colombia",
@@ -149,7 +238,28 @@
         "win": 0.0043,
         "group_winner": 0.6248
       },
-      "pm": {}
+      "pm": {
+        "R16": {
+          "pm": 0.795,
+          "edge_adj": 0.0244
+        },
+        "win": {
+          "pm": 0.0245,
+          "edge_adj": 0.0224
+        },
+        "SF": {
+          "pm": 0.215,
+          "edge_adj": 0.0196
+        },
+        "QF": {
+          "pm": 0.515,
+          "edge_adj": 0.0136
+        },
+        "Final": {
+          "pm": 0.1015,
+          "edge_adj": -0.0015
+        }
+      }
     },
     {
       "team": "Portugal",
@@ -172,7 +282,24 @@
         "win": -0.0144,
         "group_winner": -0.5516
       },
-      "pm": {}
+      "pm": {
+        "QF": {
+          "pm": 0.355,
+          "edge_adj": 0.0648
+        },
+        "Final": {
+          "pm": 0.135,
+          "edge_adj": 0.0292
+        },
+        "SF": {
+          "pm": 0.23,
+          "edge_adj": 0.028
+        },
+        "win": {
+          "pm": 0.0615,
+          "edge_adj": 0.0145
+        }
+      }
     },
     {
       "team": "Morocco",
@@ -195,7 +322,24 @@
         "win": 0.0201,
         "group_winner": -0.187
       },
-      "pm": {}
+      "pm": {
+        "SF": {
+          "pm": 0.1885,
+          "edge_adj": 0.0472
+        },
+        "QF": {
+          "pm": 0.725,
+          "edge_adj": 0.0456
+        },
+        "Final": {
+          "pm": 0.0815,
+          "edge_adj": 0.0115
+        },
+        "win": {
+          "pm": 0.0235,
+          "edge_adj": 0.0084
+        }
+      }
     },
     {
       "team": "Belgium",
@@ -218,7 +362,24 @@
         "win": -0.0016,
         "group_winner": 0.3825
       },
-      "pm": {}
+      "pm": {
+        "SF": {
+          "pm": 0.1205,
+          "edge_adj": 0.0628
+        },
+        "Final": {
+          "pm": 0.0425,
+          "edge_adj": 0.0401
+        },
+        "win": {
+          "pm": 0.0125,
+          "edge_adj": 0.018
+        },
+        "QF": {
+          "pm": 0.4835,
+          "edge_adj": -0.0058
+        }
+      }
     },
     {
       "team": "Mexico",
@@ -241,7 +402,24 @@
         "win": 0.0024,
         "group_winner": 0.4611
       },
-      "pm": {}
+      "pm": {
+        "SF": {
+          "pm": 0.215,
+          "edge_adj": 0.0818
+        },
+        "Final": {
+          "pm": 0.1125,
+          "edge_adj": 0.0611
+        },
+        "QF": {
+          "pm": 0.465,
+          "edge_adj": 0.06
+        },
+        "win": {
+          "pm": 0.0315,
+          "edge_adj": 0.013
+        }
+      }
     },
     {
       "team": "Switzerland",
@@ -264,7 +442,24 @@
         "win": -0.0016,
         "group_winner": 0.4745
       },
-      "pm": {}
+      "pm": {
+        "QF": {
+          "pm": 0.425,
+          "edge_adj": 0.1219
+        },
+        "Final": {
+          "pm": 0.0505,
+          "edge_adj": 0.0152
+        },
+        "SF": {
+          "pm": 0.12,
+          "edge_adj": 0.0109
+        },
+        "win": {
+          "pm": 0.0085,
+          "edge_adj": 0.0027
+        }
+      }
     },
     {
       "team": "Croatia",
@@ -310,7 +505,24 @@
         "win": 0.0009,
         "group_winner": -0.1684
       },
-      "pm": {}
+      "pm": {
+        "QF": {
+          "pm": 0.345,
+          "edge_adj": 0.1129
+        },
+        "SF": {
+          "pm": 0.175,
+          "edge_adj": 0.0841
+        },
+        "Final": {
+          "pm": 0.055,
+          "edge_adj": 0.0186
+        },
+        "win": {
+          "pm": 0.0185,
+          "edge_adj": 0.0083
+        }
+      }
     },
     {
       "team": "Paraguay",
@@ -333,7 +545,24 @@
         "win": 0.005,
         "group_winner": -0.2394
       },
-      "pm": {}
+      "pm": {
+        "QF": {
+          "pm": 0.078,
+          "edge_adj": 0.1396
+        },
+        "SF": {
+          "pm": 0.0415,
+          "edge_adj": 0.0607
+        },
+        "Final": {
+          "pm": 0.012,
+          "edge_adj": 0.0178
+        },
+        "win": {
+          "pm": 0.0015,
+          "edge_adj": 0.0056
+        }
+      }
     },
     {
       "team": "Senegal",
@@ -379,7 +608,24 @@
         "win": 0.0004,
         "group_winner": 0.6917
       },
-      "pm": {}
+      "pm": {
+        "QF": {
+          "pm": 0.505,
+          "edge_adj": 0.2494
+        },
+        "SF": {
+          "pm": 0.185,
+          "edge_adj": 0.1197
+        },
+        "Final": {
+          "pm": 0.0635,
+          "edge_adj": 0.0443
+        },
+        "win": {
+          "pm": 0.0255,
+          "edge_adj": 0.0206
+        }
+      }
     },
     {
       "team": "Canada",
@@ -402,7 +648,24 @@
         "win": 0.0023,
         "group_winner": -0.286
       },
-      "pm": {}
+      "pm": {
+        "QF": {
+          "pm": 0.285,
+          "edge_adj": 0.0354
+        },
+        "SF": {
+          "pm": 0.0405,
+          "edge_adj": 0.0285
+        },
+        "Final": {
+          "pm": 0.0125,
+          "edge_adj": 0.0031
+        },
+        "win": {
+          "pm": 0.0025,
+          "edge_adj": 0.0002
+        }
+      }
     },
     {
       "team": "Egypt",
@@ -425,7 +688,28 @@
         "win": 0.0004,
         "group_winner": -0.1689
       },
-      "pm": {}
+      "pm": {
+        "R16": {
+          "pm": 0.59,
+          "edge_adj": 0.1035
+        },
+        "SF": {
+          "pm": 0.05,
+          "edge_adj": 0.013
+        },
+        "QF": {
+          "pm": 0.115,
+          "edge_adj": 0.0047
+        },
+        "Final": {
+          "pm": 0.013,
+          "edge_adj": 0.0033
+        },
+        "win": {
+          "pm": 0.0015,
+          "edge_adj": 0.0003
+        }
+      }
     },
     {
       "team": "Australia",
@@ -448,7 +732,28 @@
         "win": -0.0002,
         "group_winner": -0.21
       },
-      "pm": {}
+      "pm": {
+        "R16": {
+          "pm": 0.415,
+          "edge_adj": 0.1035
+        },
+        "QF": {
+          "pm": 0.0515,
+          "edge_adj": 0.0672
+        },
+        "SF": {
+          "pm": 0.021,
+          "edge_adj": 0.0197
+        },
+        "Final": {
+          "pm": 0.0045,
+          "edge_adj": 0.005
+        },
+        "win": {
+          "pm": 0.0015,
+          "edge_adj": -0.0001
+        }
+      }
     },
     {
       "team": "Austria",
@@ -540,7 +845,28 @@
         "win": 0.0,
         "group_winner": -0.0384
       },
-      "pm": {}
+      "pm": {
+        "QF": {
+          "pm": 0.0665,
+          "edge_adj": 0.0151
+        },
+        "R16": {
+          "pm": 0.2,
+          "edge_adj": 0.0145
+        },
+        "SF": {
+          "pm": 0.0175,
+          "edge_adj": 0.0069
+        },
+        "Final": {
+          "pm": 0.0065,
+          "edge_adj": 0.0043
+        },
+        "win": {
+          "pm": 0.0005,
+          "edge_adj": 0.0002
+        }
+      }
     },
     {
       "team": "Cape Verde",
@@ -563,7 +889,28 @@
         "win": 0.0,
         "group_winner": -0.0244
       },
-      "pm": {}
+      "pm": {
+        "R16": {
+          "pm": 0.068,
+          "edge_adj": 0.0131
+        },
+        "SF": {
+          "pm": 0.01,
+          "edge_adj": 0.0032
+        },
+        "Final": {
+          "pm": 0.0035,
+          "edge_adj": 0.0013
+        },
+        "win": {
+          "pm": 0.0005,
+          "edge_adj": 0.0004
+        },
+        "QF": {
+          "pm": 0.0255,
+          "edge_adj": -0.002
+        }
+      }
     },
     {
       "team": "DR Congo",
@@ -701,7 +1048,12 @@
         "win": 0.0,
         "group_winner": -0.0056
       },
-      "pm": {}
+      "pm": {
+        "group_winner": {
+          "pm": 0.0005,
+          "edge_adj": 0.0005
+        }
+      }
     },
     {
       "team": "Scotland",
