@@ -19,7 +19,7 @@ import wca_betrecs as br  # noqa: E402
 
 def _adv_data():
     return {
-        "meta": {"stages": ["R16"]},
+        "meta": {"stages": ["R16"], "n_pm_markets": 31},
         "teams": [
             {
                 "team": "Testland",
@@ -65,3 +65,24 @@ def test_very_stale_feed_reports_model_staleness():
     )
     assert not actionable and len(withheld) == 1
     assert "model stale" in withheld[0]["withheld_reason"]
+
+
+def test_pm_blind_feed_is_withheld_even_when_fresh():
+    """A fresh-stamped feed built with ZERO live PM markets (network block)
+    must withhold everything — cached prices had an eliminated team actionable."""
+    data = _adv_data()
+    data["meta"]["n_pm_markets"] = 0
+    actionable, withheld = br.build_advancement_futures(
+        data, _pool(), adv_age_secs=600
+    )
+    assert not actionable and len(withheld) == 1
+    assert "NO live PM markets" in withheld[0]["withheld_reason"]
+
+
+def test_live_pm_markets_pass_the_guard():
+    data = _adv_data()
+    data["meta"]["n_pm_markets"] = 31
+    actionable, withheld = br.build_advancement_futures(
+        data, _pool(), adv_age_secs=600
+    )
+    assert len(actionable) == 1 and not withheld
