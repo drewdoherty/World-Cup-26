@@ -638,15 +638,37 @@ def rates_from_players_db(
     db_path: Optional[str] = None,
     store: Any = None,
     expected_minutes: float = 90.0,
+    events_db_path: Optional[str] = None,
 ) -> Optional[PlayerPropRates]:
-    """Build :class:`PlayerPropRates` from ``players.db`` for one player.
+    """Build :class:`PlayerPropRates` for one player — empirics first.
 
-    Reuses :class:`wca.models.betbuilder.RateStore` (the existing loader that
-    degrades to priors when the DB is absent). Returns ``None`` when the DB
-    has no real per-90 numbers for this (team, player) so the caller can fall
-    back to the share path. ``store`` may be a pre-built RateStore to avoid
-    re-opening the DB per player.
+    Resolution order (every caller inherits this; this is THE choke point):
+
+    1. ``data/player_events.db`` per-match empirics (real minutes/shots/SoT/
+       goals rows, true ``sample_minutes`` so :func:`shrink_rate` weighs the
+       evidence honestly);
+    2. the aggregate ``players.db`` via :class:`wca.models.betbuilder.RateStore`
+       (SoT-only, moderate-evidence default) — the pre-2026-07-03 behaviour;
+    3. ``None`` → the caller's structural derivation off team lambda (the
+       original 10.0 / 0.35 cascade), unchanged for players with no data.
+
+    ``store`` may be a pre-built RateStore to avoid re-opening the DB per
+    player; ``events_db_path`` overrides the per-match store location.
     """
+    # 1. Per-match empirical store (may not exist yet — degrades silently).
+    try:
+        from wca.data import player_events
+
+        emp = player_events.empirical_rates(
+            team, player,
+            db_path=events_db_path or player_events.DEFAULT_DB_PATH,
+            expected_minutes=expected_minutes)
+        if emp is not None:
+            return emp
+    except Exception:  # noqa: BLE001 — empirics must never break pricing
+        pass
+
+    # 2. Aggregate players.db (legacy path).
     from wca.models.betbuilder import RateStore
 
     rs = store if store is not None else RateStore(db_path)

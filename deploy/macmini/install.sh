@@ -51,6 +51,7 @@ cmd_for() {
     positions)    printf '%s\n' "$RUN1" positions    "$VENV_PY" scripts/wca_positions_sync.py --db data/wca.db --env .env --once ;;
     analytics)    printf '%s\n' "/bin/bash" "$HERE/../../scripts/wca_build_analytics.sh" ;;
     venues)       printf '%s\n' "$RUN1" venues       "$VENV_PY" scripts/wca_venues_benchmark.py --pred-db data/dev.db --odds-db data/wca.db ;;
+    playersdb)    printf '%s\n' "$RUN1" playersdb    "$VENV_PY" scripts/wca_players_refresh.py ;;
     pm1x2snapshot) printf '%s\n' "$RUN1" pm1x2snapshot "$VENV_PY" scripts/wca_pm_1x2_snapshot.py --db data/wca.db --notify ;;
     orderflow)    printf '%s\n' "$RUN1" orderflow    "/bin/bash" "$HERE/../../scripts/wca_orderflow_refresh.sh" ;;
     *) echo "unknown service $1" >&2; return 1 ;;
