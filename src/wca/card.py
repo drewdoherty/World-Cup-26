@@ -1842,10 +1842,6 @@ def format_ranked_card(
         header += ", %d indicative" % n_indicative
     header += " picks, hit-prob ranked)"
     lines.append(header)
-    lines.append(
-        "_1X2 90-minute singles only — advancement/knockout futures live on "
-        "/pm and the Action Desk._"
-    )
     lines.append("")
     if not ranked.picks:
         lines.append("_No +EV bets clear the selection rule on the current slate._")
@@ -1868,38 +1864,35 @@ def format_ranked_card(
             )
         elif r.hours_to_kickoff is not None and r.hours_to_kickoff >= FURTHER_OUT_HOURS:
             tilt = "  further-out (%.0fh) — thin/soft market" % r.hours_to_kickoff
-        px_c = (100.0 / r.best_odds) if r.best_odds and r.best_odds > 1.0 else float("nan")
-        stake_usd = stake if rp.symbol == "$" else gbp_to_usd(stake)
+        # Classic card line format restored (user, 2026-07-03, from the
+        # reference screenshots): decimal odds, model/mkt %, elo/dc bracket,
+        # stake in the pick's OWN pool currency. The ¢/$ Polymarket convention
+        # now lives on the /pm trade-ideas surface instead.
         lines.append(
-            "*%d. [%s] %s* — %s (1X2 90') @ *%.1f¢* via *%s*\n"
-            "    model %.1f¢ · fair %.1f¢ · EV *%+.1f%%* · stake *$%.2f*%s"
+            "*%d. [%s] %s* — %s @ *%.2f* via *%s*\n"
+            "    model %.1f%% / mkt %.1f%%  edge *%+.1f%%*  [elo %.0f%% dc %.0f%%]\n"
+            "    stake: %s %s%.2f%s"
             % (
                 i, _CATEGORY_LABEL.get(r.category, r.category.upper()),
-                r.match_desc, r.selection_team, px_c, r.venue,
+                r.match_desc, r.selection_team, r.best_odds, r.venue,
                 r.model_prob * 100, r.market_prob * 100, r.edge * 100,
-                stake_usd, tilt,
+                r.elo_prob * 100, r.dc_prob * 100, rp.name, rp.symbol, stake, tilt,
             )
         )
 
-    if ranked.picks:
-        lines.append("")
-        lines.append(
-            "_Prices in ¢ (Polymarket convention: price = implied probability, "
-            "$1 payout). £-pool stakes shown in $ at $%.2f/£ — display only; "
-            "bets settle in their native currency._" % GBP_USD
-        )
-
-    # CUT is reserved for positions to TRIM (none until a trim engine exists —
-    # Phase 1 item). Floor/minnow exclusions collapse to a single count line
-    # (user, 2026-07-02): full detail lives in the Action Desk feed's withheld
-    # section, never in the card body.
+    # CUT list (rule 2, classic format restored 2026-07-03): excluded
+    # longshots kept fully visible with EV + reason — nothing hidden.
     if ranked.cut:
         lines.append("")
-        lines.append(
-            "_excluded (not staked): %d floor/minnow longshot%s — detail in the "
-            "Action Desk withheld list_"
-            % (len(ranked.cut), "" if len(ranked.cut) == 1 else "s")
-        )
+        lines.append("*— CUT (excluded from staking, %d) —*" % len(ranked.cut))
+        for r in ranked.cut:
+            lines.append(
+                "  x %s — %s @ %.2f (model %.1f%%, %+.1f%% EV): %s"
+                % (
+                    r.match_desc, r.selection_team, r.best_odds,
+                    r.model_prob * 100, r.edge * 100, r.cut_reason,
+                )
+            )
 
     # Cross-venue deployment split + whole-book exposure (rule 4), PER POOL so
     # the £ and $ books are summed and capped in their own currency (never mixed).
