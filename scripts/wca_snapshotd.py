@@ -52,9 +52,15 @@ logger = logging.getLogger("wca.snapshotd")
 _SPORT_KEY = "soccer_fifa_world_cup"
 _REGIONS = "uk"
 # Closing lines are captured for every market we hold a position in, else no
-# CLV point. Bulk /odds supports h2h/totals; btts is per-event only (422 on
-# bulk), pulled in a second pass. Upgraded key (~19k credits) covers both.
-_MARKETS = "h2h,totals"
+# CLV point. Bulk /odds supports h2h/totals/spreads; btts is per-event only
+# (422 on bulk), pulled in a second pass. Upgraded key (~19k credits) covers
+# them. `spreads` (Asian handicap) added 2026-07-03: the AH reliability study
+# (docs/research/handicap_corners_cards_verdicts.md) found real margin skill
+# (+0.146 nats vs baseline, ~2.9 SE, n=128 held-out WC games) but ZERO captured
+# AH prices — capture must accrue through R16+ before any real money (paper
+# gate: >=50 CLV-stamped bets, positive mean CLV). Adds ~1/3 to bulk credit
+# spend; override via WCA_BULK_MARKETS if quota tightens.
+_MARKETS = os.environ.get("WCA_BULK_MARKETS", "h2h,totals,spreads")
 # Per-event markets (bulk /odds 422s on these). Override via WCA_EVENT_MARKETS
 # to widen the +EV monitoring surface (e.g. "btts,draw_no_bet").
 _EVENT_MARKETS = os.environ.get("WCA_EVENT_MARKETS", "btts")

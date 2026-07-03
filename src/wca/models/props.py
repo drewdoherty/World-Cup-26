@@ -176,7 +176,13 @@ class CornersModel:
     names-omitted legacy code path).
     """
 
-    def __init__(self, base_corners=8.97, base_goals=3.07, dispersion=157.5,
+    # Constants refit 2026-07-03 on STRICTLY 90-minute StatsBomb data
+    # (period<=2): the legacy 8.97/3.07/157.5 figures were contaminated —
+    # base_goals 3.07 counted shootout kicks as goals (true 90-min mean 2.609)
+    # and corners included ET periods (90-min mean 8.68, MoM k~86). Evidence:
+    # docs/research/handicap_corners_cards_verdicts.md. Corners remain
+    # FREE-BET-ONLY (no fixture-level skill found; no price capture).
+    def __init__(self, base_corners=8.68, base_goals=2.609, dispersion=86.0,
                  elasticity=0.30, team_priors=None, team_dispersion=None,
                  league_team_mean=None):
         if base_corners <= 0 or base_goals <= 0 or dispersion <= 0:
@@ -328,7 +334,11 @@ class CardsModel:
     method reproduces 3.41 (and today's NB) exactly.
     """
 
-    def __init__(self, base_cards=3.41, dispersion=6.9,
+    # Refit 2026-07-03 on 90-minute-only StatsBomb data (legacy 3.41/6.9 was
+    # fit on ET-contaminated matches and overpriced 4.5-overs by ~9pp; 90-min
+    # MoM: mean 3.29, k~12.4). Cards remain NO real money (no referee inputs,
+    # no price capture) — docs/research/handicap_corners_cards_verdicts.md.
+    def __init__(self, base_cards=3.29, dispersion=12.4,
                  league_foul_mean=None, foul_beta=None, ref_factor=1.0):
         if base_cards <= 0 or dispersion <= 0:
             raise ValueError("base_cards and dispersion must be > 0")
