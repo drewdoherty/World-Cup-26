@@ -1,40 +1,40 @@
 {
   "meta": {
-    "generated": "2026-07-03 12:14:10 UTC"
+    "generated": "2026-07-03 17:30:57 UTC"
   },
   "totals": {
-    "wagered": 3752.860000000002,
-    "open_stake": 1831.7000000000005,
+    "wagered": 3762.860000000002,
+    "open_stake": 1841.7000000000005,
     "settled_pl": 292.6975,
-    "n_bets": 212
+    "n_bets": 213
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 1860.36,
-      "open_stake": 765.96,
+      "wagered": 1870.36,
+      "open_stake": 775.96,
       "settled_pl": 177.09550000000002,
-      "n_bets": 156
+      "n_bets": 157
     },
     "USD": {
       "wagered": 1892.5000000000007,
-      "open_stake": 1065.7400000000002,
+      "open_stake": 1456.7961,
       "settled_pl": 115.60199999999996,
-      "n_bets": 56
+      "n_bets": 16
     }
   },
   "venues": {
     "sportsbook": {
-      "wagered": 1860.36,
-      "open_stake": 765.96,
+      "wagered": 1870.36,
+      "open_stake": 775.96,
       "settled_pl": 177.09550000000002,
-      "n_bets": 156,
+      "n_bets": 157,
       "currency": "GBP"
     },
     "polymarket": {
       "wagered": 1892.5000000000007,
-      "open_stake": 1065.7400000000002,
+      "open_stake": 1456.7961,
       "settled_pl": 115.60199999999996,
-      "n_bets": 56,
+      "n_bets": 16,
       "currency": "USD"
     },
     "kalshi": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 1683.86,
-      "open_stake": 1010.52,
+      "wagered": 1693.86,
+      "open_stake": 1020.5200000000001,
       "settled_pl": 227.09550000000002,
-      "n_bets": 133,
+      "n_bets": 134,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -64,10 +64,10 @@
   "source_summary": {
     "model": {
       "GBP": {
-        "wagered": 833.2399999999999,
-        "open_stake": 566.4600000000002,
+        "wagered": 843.2399999999999,
+        "open_stake": 576.46,
         "settled_pl": 85.89549999999997,
-        "n_bets": 54
+        "n_bets": 55
       },
       "USD": {
         "wagered": 856.04,
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "Sky Bet": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 20.0,
+      "open_stake": 10.0,
+      "settled_pl": -10.0,
+      "n_bets": 2
+    },
     "bet365": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -235,18 +243,18 @@
       "open_stake": 0.0,
       "settled_pl": -29.0,
       "n_bets": 5
-    },
-    "Sky Bet": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 10.0,
-      "open_stake": 0.0,
-      "settled_pl": -10.0,
-      "n_bets": 1
     }
   },
   "platforms_by_account": {
     "1": {
+      "Sky Bet": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 10.0,
+        "open_stake": 10.0,
+        "settled_pl": 0.0,
+        "n_bets": 1
+      },
       "bet365": {
         "venue": "sportsbook",
         "currency": "GBP",
@@ -4388,6 +4396,443 @@
   },
   "positions": [
     {
+      "id": "pm-0x8bdf55664c",
+      "ts_utc": "",
+      "match": "Will Spain reach the 2026 FIFA World Cup final?",
+      "match_id": "0x8bdf55664cb17a543fef1f43bd6aeb0aa7b7849cb31620808ce258b3e2ab136d",
+      "market": "Will Spain reach the 2026 FIFA World Cup final?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 4.168403501458942,
+      "stake": 199.9991,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 187.5,
+      "cur_price": 0.225,
+      "avg_price": 0.2399,
+      "shares": 833.3333,
+      "cash_pnl": -12.5,
+      "pct_pnl": -0.06250028125126564,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x508af22a38",
+      "ts_utc": "",
+      "match": "Will France reach the Semifinals at the 2026 FIFA World Cup?",
+      "match_id": "0x508af22a38ad600b6b7526970e26be280e4183731954b575320050735d991fa8",
+      "market": "Will France reach the Semifinals at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.9474196689386565,
+      "stake": 214.9996,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 324.43,
+      "cur_price": 0.775,
+      "avg_price": 0.5135,
+      "shares": 418.6153,
+      "cash_pnl": 109.43,
+      "pct_pnl": 0.5089776911212859,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0xa6ea855bd1",
+      "ts_utc": "",
+      "match": "Will Brazil reach the Quarterfinals at the 2026 FIFA World Cup?",
+      "match_id": "0xa6ea855bd19f78e136d6d2ebf8ca20dbeabcd123b464cbda065a0d6cf35c200f",
+      "market": "Will Brazil reach the Quarterfinals at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.985308715505261,
+      "stake": 169.9992,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 221.02,
+      "cur_price": 0.655,
+      "avg_price": 0.5037,
+      "shares": 337.4399,
+      "cash_pnl": 51.02,
+      "pct_pnl": 0.3001190593838089,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x3032cb496c",
+      "ts_utc": "",
+      "match": "Will Australia reach the Round of 16 at the 2026 FIFA World Cup?",
+      "match_id": "0x3032cb496c0e8e23460d972518d8e9007ea69907a15250f7b07458726095bb8b",
+      "market": "Will Australia reach the Round of 16 at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 2.222716159146477,
+      "stake": 150.2896,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 131.92,
+      "cur_price": 0.395,
+      "avg_price": 0.4499,
+      "shares": 333.9777,
+      "cash_pnl": -18.37,
+      "pct_pnl": -0.12223067996720997,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0xcb7bdb8560",
+      "ts_utc": "",
+      "match": "Will France reach the Quarterfinals at the 2026 FIFA World Cup?",
+      "match_id": "0xcb7bdb8560707e1770870ccb8124e13e9eb1b0c3a244ce05fd4c625d53b51dd0",
+      "market": "Will France reach the Quarterfinals at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.4823599169878448,
+      "stake": 149.9998,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 205.67,
+      "cur_price": 0.925,
+      "avg_price": 0.6746,
+      "shares": 222.3441,
+      "cash_pnl": 55.67,
+      "pct_pnl": 0.3711338281784376,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x14dc2b2815",
+      "ts_utc": "",
+      "match": "Will Portugal reach the Quarterfinals at the 2026 FIFA World Cup?",
+      "match_id": "0x14dc2b28157393f32a3a9a1827024b258156eefd4be567b8f3dc97d437e98af2",
+      "market": "Will Portugal reach the Quarterfinals at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.9234468166955183,
+      "stake": 66.9998,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 44.44,
+      "cur_price": 0.3449,
+      "avg_price": 0.5199,
+      "shares": 128.8461,
+      "cash_pnl": -22.56,
+      "pct_pnl": -0.3367174230370837,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x8c9757e6d4",
+      "ts_utc": "",
+      "match": "Colombia vs. Ghana: Team to Advance",
+      "match_id": "0x8c9757e6d49e9243a45ed4c6042d5a3e98cdcce0619495db5d377e510327b769",
+      "market": "Colombia vs. Ghana: Team to Advance",
+      "selection": "Colombia",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.2471938139186831,
+      "stake": 97.8499,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 98.24,
+      "cur_price": 0.805,
+      "avg_price": 0.8018,
+      "shares": 122.037,
+      "cash_pnl": 0.39,
+      "pct_pnl": 0.003985696459577373,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x71b9be2e45",
+      "ts_utc": "",
+      "match": "Will Australia vs. Egypt end in a draw?",
+      "match_id": "0x71b9be2e4558d3581e1023a0e0568a7a49fcca8c7f1ba1d1ca73fa1deb05e76f",
+      "market": "Will Australia vs. Egypt end in a draw?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 2.9420417769932334,
+      "stake": 39.9998,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 39.41,
+      "cur_price": 0.335,
+      "avg_price": 0.3399,
+      "shares": 117.647,
+      "cash_pnl": -0.59,
+      "pct_pnl": -0.01475007375036875,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0xe8904439c2",
+      "ts_utc": "",
+      "match": "Will Colombia reach the Round of 16 at the 2026 FIFA World Cup?",
+      "match_id": "0xe8904439c2d55bf507317bf35e9b5e34890cc17716355a45a40647916cb237fb",
+      "market": "Will Colombia reach the Round of 16 at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.680672268907563,
+      "stake": 65.4999,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 88.61,
+      "cur_price": 0.805,
+      "avg_price": 0.595,
+      "shares": 110.0741,
+      "cash_pnl": 23.11,
+      "pct_pnl": 0.3528249661449865,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x2a0e8ce7c3",
+      "ts_utc": "",
+      "match": "Will Brazil win on 2026-07-05?",
+      "match_id": "0x2a0e8ce7c309ec8015c4c721dec574ff100b0512ef412a54bb733dc5bef740dc",
+      "market": "Will Brazil win on 2026-07-05?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.9234468166955183,
+      "stake": 52.2898,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 53.8,
+      "cur_price": 0.535,
+      "avg_price": 0.5199,
+      "shares": 100.5576,
+      "cash_pnl": 1.51,
+      "pct_pnl": 0.028877524871007348,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0xb81d9a63be",
+      "ts_utc": "",
+      "match": "Will Argentina win on 2026-07-03?",
+      "match_id": "0xb81d9a63be774f9c3db1b96af4d0e869128643a29c6eb922c0d8a20137880120",
+      "market": "Will Argentina win on 2026-07-03?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.1495574203931487,
+      "stake": 79.9999,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 78.62,
+      "cur_price": 0.855,
+      "avg_price": 0.8699,
+      "shares": 91.954,
+      "cash_pnl": -1.38,
+      "pct_pnl": -0.017250021562526953,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x5ddf2373c4",
+      "ts_utc": "",
+      "match": "Will Argentina reach the Quarterfinals at the 2026 FIFA World Cup?",
+      "match_id": "0x5ddf2373c4c9d01a305666b767d768c7e85fc329df2fd6f489ea57318c8f9a20",
+      "market": "Will Argentina reach the Quarterfinals at the 2026 FIFA World Cup?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.25,
+      "stake": 70.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 72.19,
+      "cur_price": 0.825,
+      "avg_price": 0.8,
+      "shares": 87.5,
+      "cash_pnl": 2.19,
+      "pct_pnl": 0.031285714285714285,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0xc4a26ee77f",
+      "ts_utc": "",
+      "match": "Will Colombia win on 2026-07-03?",
+      "match_id": "0xc4a26ee77fc5777d5036854f3835bf7ce44b42a61e3c6325c22b444627757eca",
+      "market": "Will Colombia win on 2026-07-03?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.5625,
+      "stake": 52.15,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 55.82,
+      "cur_price": 0.685,
+      "avg_price": 0.64,
+      "shares": 81.4843,
+      "cash_pnl": 3.67,
+      "pct_pnl": 0.0703739213806328,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x99f0c39e42",
+      "ts_utc": "",
+      "match": "Will England win on 2026-07-05?",
+      "match_id": "0x99f0c39e4235d840bd25d2c229b2cda57cc087b6b8c2780f804fffeed0d0c628",
+      "market": "Will England win on 2026-07-05?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 2.461841457410143,
+      "stake": 32.8599,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 31.95,
+      "cur_price": 0.395,
+      "avg_price": 0.4062,
+      "shares": 80.878,
+      "cash_pnl": -0.91,
+      "pct_pnl": -0.027693328342447785,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x962c33d297",
+      "ts_utc": "",
+      "match": "Will Canada vs. Morocco end in a draw?",
+      "match_id": "0x962c33d297cb9720835b5e5579a3d9f8bb0e0c97429d59ee01c70bc073c18d7f",
+      "market": "Will Canada vs. Morocco end in a draw?",
+      "selection": "Yes",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 3.572704537334763,
+      "stake": 7.8599,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 7.72,
+      "cur_price": 0.275,
+      "avg_price": 0.2799,
+      "shares": 28.0714,
+      "cash_pnl": -0.14,
+      "pct_pnl": -0.017811931449509537,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": "pm-0x375409bc5e",
+      "ts_utc": "",
+      "match": "Will England win the 2026 FIFA World Cup?",
+      "match_id": "0x375409bc5eeeff961e82b479caeccc20f33d15738e5bce1186d628aa3d9dfb1f",
+      "market": "Will England win the 2026 FIFA World Cup?",
+      "selection": "No",
+      "platform": "polymarket",
+      "venue": "polymarket",
+      "account": "1",
+      "source": "manual",
+      "currency": "USD",
+      "decimal_odds": 1.1469205184080744,
+      "stake": 5.9999,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "cur_value": 6.39,
+      "cur_price": 0.9285,
+      "avg_price": 0.8719,
+      "shares": 6.8807,
+      "cash_pnl": 0.39,
+      "pct_pnl": 0.06500108335138918,
+      "notes": "live PM position (data-API)"
+    },
+    {
+      "id": 270,
+      "ts_utc": "2026-07-03T12:36:13",
+      "match": "Australia vs Egypt",
+      "match_id": "MANUAL_AUSTRALIA_VS_EGYPT",
+      "market": "Bet Builder",
+      "selection": "Team to go through -> Egypt + Player's shots on target -> Mohamed Salah - Over 0.5",
+      "platform": "Sky Bet",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "model",
+      "currency": "GBP",
+      "decimal_odds": 2.95,
+      "stake": 10.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.88; boost; Bet Builder; legs: Team to go through -> Egypt | Player's shots on target -> Mohamed Salah - Over 0.5",
+      "manual_override": null
+    },
+    {
       "id": 269,
       "ts_utc": "2026-07-02T14:29:44",
       "match": "Spain v Austria",
@@ -4553,132 +4998,6 @@
       "ev": null,
       "kelly_fraction": null,
       "notes": "screenshot ingest; currency=GBP; conf 0.88; Bet Builder; legs: Both Teams To Score -> No | Over/Under 2.5 Goals -> Over 2.5",
-      "manual_override": null
-    },
-    {
-      "id": 261,
-      "ts_utc": "2026-07-01T06:07:36Z",
-      "match": "Will United States vs. Bosnia and Herzegovina end in a draw?",
-      "match_id": "pm_recon",
-      "market": "pm_draw",
-      "selection": "Will United States vs. Bosnia and Herzegovina end in a draw? - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "punt",
-      "currency": "USD",
-      "decimal_odds": 5.1282,
-      "stake": 62.12,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "RECONCILED on-chain 2026-07-01; wallet=PM1 shares=318.5789 cur_price=0.195 cur_value=62.12; ENTRY COST APPROX (=cur_value), real cost PENDING",
-      "manual_override": null
-    },
-    {
-      "id": 260,
-      "ts_utc": "2026-07-01T06:07:36Z",
-      "match": "Will Spain reach the 2026 FIFA World Cup final?",
-      "match_id": "pm_recon",
-      "market": "pm_other",
-      "selection": "Will Spain reach the 2026 FIFA World Cup final? - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "punt",
-      "currency": "USD",
-      "decimal_odds": 5.1282,
-      "stake": 162.5,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "RECONCILED on-chain 2026-07-01; wallet=PM1 shares=833.3333 cur_price=0.195 cur_value=162.5; ENTRY COST APPROX (=cur_value), real cost PENDING",
-      "manual_override": null
-    },
-    {
-      "id": 259,
-      "ts_utc": "2026-07-01T06:07:36Z",
-      "match": "Colombia vs. Ghana: Team to Advance",
-      "match_id": "pm_recon",
-      "market": "pm_other",
-      "selection": "Colombia vs. Ghana: Team to Advance - Colombia",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "punt",
-      "currency": "USD",
-      "decimal_odds": 1.2422,
-      "stake": 17.74,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "RECONCILED on-chain 2026-07-01; wallet=PM1 shares=22.037 cur_price=0.805 cur_value=17.74; ENTRY COST APPROX (=cur_value), real cost PENDING",
-      "manual_override": null
-    },
-    {
-      "id": 258,
-      "ts_utc": "2026-07-01T06:07:36Z",
-      "match": "Will Colombia win on 2026-07-03?",
-      "match_id": "pm_recon",
-      "market": "pm_match_win",
-      "selection": "Will Colombia win on 2026-07-03? - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "punt",
-      "currency": "USD",
-      "decimal_odds": 1.5504,
-      "stake": 52.56,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "RECONCILED on-chain 2026-07-01; wallet=PM1 shares=81.4843 cur_price=0.645 cur_value=52.56; ENTRY COST APPROX (=cur_value), real cost PENDING",
-      "manual_override": null
-    },
-    {
-      "id": 257,
-      "ts_utc": "2026-07-01T06:07:36Z",
-      "match": "Will Brazil reach the Quarterfinals at the 2026 FIFA World Cup?",
-      "match_id": "pm_recon",
-      "market": "pm_qf",
-      "selection": "Will Brazil reach the Quarterfinals at the 2026 FIFA World Cup? - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "punt",
-      "currency": "USD",
-      "decimal_odds": 1.5748,
-      "stake": 214.27,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "RECONCILED on-chain 2026-07-01; wallet=PM1 shares=337.4399 cur_price=0.635 cur_value=214.27; ENTRY COST APPROX (=cur_value), real cost PENDING",
-      "manual_override": null
-    },
-    {
-      "id": 256,
-      "ts_utc": "2026-07-01T06:07:36Z",
-      "match": "Will Belgium win on 2026-07-01?",
-      "match_id": "pm_recon",
-      "market": "pm_match_win",
-      "selection": "Will Belgium win on 2026-07-01? - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "punt",
-      "currency": "USD",
-      "decimal_odds": 2.1978,
-      "stake": 72.33,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "RECONCILED on-chain 2026-07-01; wallet=PM1 shares=158.9621 cur_price=0.455 cur_value=72.33; ENTRY COST APPROX (=cur_value), real cost PENDING",
       "manual_override": null
     },
     {
@@ -5207,69 +5526,6 @@
       "manual_override": null
     },
     {
-      "id": 227,
-      "ts_utc": "2026-06-27T15:15:37Z",
-      "match": "Will USA reach the Round of 16 at the 2026 FIFA World Cup?",
-      "match_id": "pm_recon",
-      "market": "pm_r16",
-      "selection": "Will USA reach the Round of 16 at the 2026 FIFA World Cup? - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "punt",
-      "currency": "USD",
-      "decimal_odds": 1.2271,
-      "stake": 85.25,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "RECONCILED on-chain 2026-06-27; wallet=PM1 shares=104.6097 cur_price=0.8149 cur_value=85.25; ENTRY COST APPROX (=cur_value), real cost PENDING",
-      "manual_override": null
-    },
-    {
-      "id": 226,
-      "ts_utc": "2026-06-27T15:15:37Z",
-      "match": "Will France reach the Quarterfinals at the 2026 FIFA World Cup?",
-      "match_id": "pm_recon",
-      "market": "pm_qf",
-      "selection": "Will France reach the Quarterfinals at the 2026 FIFA World Cup? - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "punt",
-      "currency": "USD",
-      "decimal_odds": 1.4925,
-      "stake": 68.97,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "RECONCILED on-chain 2026-06-27; wallet=PM1 shares=102.9411 cur_price=0.67 cur_value=68.97; ENTRY COST APPROX (=cur_value), real cost PENDING",
-      "manual_override": null
-    },
-    {
-      "id": 219,
-      "ts_utc": "2026-06-27T15:15:37Z",
-      "match": "Will Argentina reach the Quarterfinals at the 2026 FIFA World Cup?",
-      "match_id": "pm_recon",
-      "market": "pm_qf",
-      "selection": "Will Argentina reach the Quarterfinals at the 2026 FIFA World Cup? - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "punt",
-      "currency": "USD",
-      "decimal_odds": 1.2658,
-      "stake": 69.12,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "RECONCILED on-chain 2026-06-27; wallet=PM1 shares=87.5 cur_price=0.79 cur_value=69.12; ENTRY COST APPROX (=cur_value), real cost PENDING",
-      "manual_override": null
-    },
-    {
       "id": 217,
       "ts_utc": "2026-06-27T14:32:12",
       "match": "Panama v England",
@@ -5690,132 +5946,6 @@
       "manual_override": null
     },
     {
-      "id": 194,
-      "ts_utc": "2026-06-26T05:27:00",
-      "match": "Ghana be eliminated in the Round of 32 of the World Cup",
-      "match_id": "0xe6ce5cf00383c92f2872822669adb65602db6b3028215175ca13481546dbbb59",
-      "market": "pm_elimination",
-      "selection": "Ghana be eliminated in the Round of 32 of the World Cup - No",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "2",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.4708,
-      "stake": 1.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "polymarket acct2 0xd42e3505; 1.5 sh @ 0.680; cost $1.00; value $0.46; pnl $-0.54; redeemable=False; reconciled 2026-06-26",
-      "manual_override": null
-    },
-    {
-      "id": 190,
-      "ts_utc": "2026-06-26T05:27:00",
-      "match": "England win the 2026 FIFA World Cup",
-      "match_id": "0x375409bc5eeeff961e82b479caeccc20f33d15738e5bce1186d628aa3d9dfb1f",
-      "market": "pm_outright_winner",
-      "selection": "England win the 2026 FIFA World Cup - No",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.1469,
-      "stake": 6.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "polymarket acct1 0x86b4c55a; 6.9 sh @ 0.872; cost $6.00; value $6.20; pnl $+0.20; redeemable=False; reconciled 2026-06-26",
-      "manual_override": null
-    },
-    {
-      "id": 172,
-      "ts_utc": "2026-06-26T05:27:00",
-      "match": "Belgium reach the Round of 16",
-      "match_id": "0x26f7aac05232d917ca3cc570afef59a88ab156a10beb0f1abddf0c7221ca5c05",
-      "market": "pm_reach_r16",
-      "selection": "Belgium reach the Round of 16 - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.7547,
-      "stake": 54.38,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "polymarket acct1 0x86b4c55a; 95.4 sh @ 0.570; cost $54.38; value $54.86; pnl $+0.48; redeemable=False; reconciled 2026-06-26",
-      "manual_override": null
-    },
-    {
-      "id": 167,
-      "ts_utc": "2026-06-26T05:27:00",
-      "match": "Colombia reach the Round of 16",
-      "match_id": "0xe8904439c2d55bf507317bf35e9b5e34890cc17716355a45a40647916cb237fb",
-      "market": "pm_reach_r16",
-      "selection": "Colombia reach the Round of 16 - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.6807,
-      "stake": 65.5,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "polymarket acct1 0x86b4c55a; 110.1 sh @ 0.595; cost $65.50; value $68.80; pnl $+3.30; redeemable=False; reconciled 2026-06-26",
-      "manual_override": null
-    },
-    {
-      "id": 165,
-      "ts_utc": "2026-06-26T05:27:00",
-      "match": "Portugal reach the Quarterfinals",
-      "match_id": "0x14dc2b28157393f32a3a9a1827024b258156eefd4be567b8f3dc97d437e98af2",
-      "market": "pm_reach_qf",
-      "selection": "Portugal reach the Quarterfinals - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 1.9234,
-      "stake": 67.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "polymarket acct1 0x86b4c55a; 128.8 sh @ 0.520; cost $67.00; value $61.20; pnl $-5.80; redeemable=False; reconciled 2026-06-26",
-      "manual_override": null
-    },
-    {
-      "id": 164,
-      "ts_utc": "2026-06-26T05:27:00",
-      "match": "France reach the Semifinals",
-      "match_id": "0x508af22a38ad600b6b7526970e26be280e4183731954b575320050735d991fa8",
-      "market": "pm_reach_sf",
-      "selection": "France reach the Semifinals - Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "model",
-      "currency": "USD",
-      "decimal_odds": 2.0,
-      "stake": 67.0,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "notes": "polymarket acct1 0x86b4c55a; 134.0 sh @ 0.500; cost $67.00; value $64.99; pnl $-2.01; redeemable=False; reconciled 2026-06-26",
-      "manual_override": null
-    },
-    {
       "id": 161,
       "ts_utc": "2026-06-25T18:51:41",
       "match": "Ecuador v Germany | Curacao v Ivory Coast",
@@ -6097,48 +6227,48 @@
         {
           "score": "1-1",
           "prob": 14.8,
-          "fair": 6.75,
-          "back": 6.88
+          "fair": 6.76,
+          "back": 6.9
         },
         {
           "score": "0-1",
-          "prob": 12.3,
-          "fair": 8.12,
-          "back": 8.28
+          "prob": 12.7,
+          "fair": 7.89,
+          "back": 8.05
         },
         {
           "score": "0-0",
-          "prob": 12.2,
-          "fair": 8.17,
-          "back": 8.33
+          "prob": 12.6,
+          "fair": 7.94,
+          "back": 8.1
         },
         {
           "score": "1-0",
-          "prob": 10.0,
-          "fair": 10.01,
-          "back": 10.21
+          "prob": 10.2,
+          "fair": 9.82,
+          "back": 10.02
         },
         {
           "score": "1-2",
           "prob": 8.0,
-          "fair": 12.48,
-          "back": 12.73
+          "fair": 12.57,
+          "back": 12.83
         },
         {
           "score": "0-2",
-          "prob": 7.1,
-          "fair": 14.1,
-          "back": 14.38
+          "prob": 7.2,
+          "fair": 13.97,
+          "back": 14.25
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 37.6,
-        "under": 62.4
+        "over": 36.6,
+        "under": 63.4
       },
-      "btts": 45.9,
-      "xg_home": 1.05,
-      "xg_away": 1.14
+      "btts": 45.0,
+      "xg_home": 1.03,
+      "xg_away": 1.13
     },
     {
       "fixture": "Argentina vs Cape Verde",
@@ -6146,87 +6276,87 @@
         {
           "score": "2-0",
           "prob": 16.2,
-          "fair": 6.19,
-          "back": 6.31
+          "fair": 6.16,
+          "back": 6.29
         },
         {
           "score": "3-0",
-          "prob": 14.0,
-          "fair": 7.15,
-          "back": 7.3
+          "prob": 14.1,
+          "fair": 7.09,
+          "back": 7.23
         },
         {
           "score": "1-0",
-          "prob": 12.1,
+          "prob": 12.2,
           "fair": 8.23,
-          "back": 8.4
+          "back": 8.39
         },
         {
           "score": "4-0",
-          "prob": 9.1,
-          "fair": 11.03,
-          "back": 11.25
+          "prob": 9.2,
+          "fair": 10.87,
+          "back": 11.09
         },
         {
           "score": "2-1",
-          "prob": 7.6,
-          "fair": 13.21,
-          "back": 13.48
+          "prob": 7.5,
+          "fair": 13.34,
+          "back": 13.61
         },
         {
           "score": "3-1",
           "prob": 6.5,
-          "fair": 15.27,
-          "back": 15.58
+          "fair": 15.35,
+          "back": 15.65
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 60.1,
-        "under": 39.9
+        "over": 60.2,
+        "under": 39.8
       },
-      "btts": 34.3,
-      "xg_home": 2.64,
-      "xg_away": 0.46
+      "btts": 33.9,
+      "xg_home": 2.66,
+      "xg_away": 0.45
     },
     {
       "fixture": "Colombia vs Ghana",
       "scores": [
         {
-          "score": "1-0",
-          "prob": 14.4,
-          "fair": 6.95,
-          "back": 7.09
-        },
-        {
           "score": "2-0",
-          "prob": 14.3,
-          "fair": 6.97,
-          "back": 7.11
+          "prob": 14.2,
+          "fair": 7.03,
+          "back": 7.17
         },
         {
-          "score": "2-1",
-          "prob": 9.7,
-          "fair": 10.27,
-          "back": 10.48
+          "score": "1-0",
+          "prob": 14.2,
+          "fair": 7.04,
+          "back": 7.18
         },
         {
           "score": "1-1",
-          "prob": 9.7,
-          "fair": 10.34,
-          "back": 10.55
+          "prob": 9.6,
+          "fair": 10.38,
+          "back": 10.59
+        },
+        {
+          "score": "2-1",
+          "prob": 9.6,
+          "fair": 10.45,
+          "back": 10.66
         },
         {
           "score": "3-0",
           "prob": 9.2,
           "fair": 10.89,
-          "back": 11.11
+          "back": 11.1
         },
         {
           "score": "0-0",
           "prob": 7.5,
-          "fair": 13.29,
-          "back": 13.55
+          "fair": 13.32,
+          "back": 13.58
         }
       ],
       "over_under": {
@@ -6234,7 +6364,7 @@
         "over": 48.9,
         "under": 51.1
       },
-      "btts": 42.1,
+      "btts": 42.0,
       "xg_home": 1.98,
       "xg_away": 0.65
     },
@@ -6243,146 +6373,146 @@
       "scores": [
         {
           "score": "0-1",
-          "prob": 16.0,
-          "fair": 6.26,
-          "back": 6.38
+          "prob": 16.1,
+          "fair": 6.19,
+          "back": 6.32
         },
         {
           "score": "1-1",
-          "prob": 12.6,
-          "fair": 7.95,
-          "back": 8.11
+          "prob": 12.5,
+          "fair": 8.02,
+          "back": 8.18
         },
         {
           "score": "0-0",
-          "prob": 11.8,
-          "fair": 8.49,
-          "back": 8.66
+          "prob": 12.0,
+          "fair": 8.34,
+          "back": 8.5
         },
         {
           "score": "0-2",
           "prob": 11.5,
-          "fair": 8.69,
-          "back": 8.87
+          "fair": 8.71,
+          "back": 8.88
         },
         {
           "score": "1-2",
-          "prob": 8.9,
-          "fair": 11.21,
-          "back": 11.43
+          "prob": 8.7,
+          "fair": 11.44,
+          "back": 11.67
         },
         {
           "score": "1-0",
-          "prob": 7.9,
-          "fair": 12.7,
-          "back": 12.95
+          "prob": 8.3,
+          "fair": 12.12,
+          "back": 12.36
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 37.0,
-        "under": 63.0
+        "over": 36.3,
+        "under": 63.7
       },
-      "btts": 40.7,
-      "xg_home": 0.76,
-      "xg_away": 1.41
+      "btts": 40.0,
+      "xg_home": 0.75,
+      "xg_away": 1.39
     },
     {
       "fixture": "Paraguay vs France",
       "scores": [
         {
           "score": "0-1",
-          "prob": 16.7,
-          "fair": 5.99,
-          "back": 6.11
+          "prob": 16.6,
+          "fair": 6.04,
+          "back": 6.16
         },
         {
           "score": "0-2",
-          "prob": 15.6,
-          "fair": 6.4,
-          "back": 6.52
+          "prob": 15.5,
+          "fair": 6.47,
+          "back": 6.6
         },
         {
           "score": "1-2",
           "prob": 11.3,
-          "fair": 8.82,
-          "back": 9.0
+          "fair": 8.87,
+          "back": 9.05
         },
         {
           "score": "0-3",
-          "prob": 9.4,
-          "fair": 10.66,
-          "back": 10.87
+          "prob": 9.3,
+          "fair": 10.79,
+          "back": 11.01
         },
         {
           "score": "1-1",
-          "prob": 7.7,
-          "fair": 12.95,
-          "back": 13.21
+          "prob": 7.9,
+          "fair": 12.61,
+          "back": 12.86
         },
         {
           "score": "1-3",
           "prob": 6.8,
-          "fair": 14.7,
-          "back": 14.99
+          "fair": 14.8,
+          "back": 15.1
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 49.7,
-        "under": 50.3
+        "over": 49.5,
+        "under": 50.5
       },
-      "btts": 41.3,
-      "xg_home": 0.61,
-      "xg_away": 2.03
+      "btts": 41.5,
+      "xg_home": 0.62,
+      "xg_away": 2.02
     },
     {
       "fixture": "Brazil vs Norway",
       "scores": [
         {
           "score": "1-1",
-          "prob": 11.4,
-          "fair": 8.74,
-          "back": 8.92
+          "prob": 11.2,
+          "fair": 8.9,
+          "back": 9.08
         },
         {
           "score": "2-0",
-          "prob": 9.6,
-          "fair": 10.37,
-          "back": 10.58
+          "prob": 9.7,
+          "fair": 10.34,
+          "back": 10.55
         },
         {
           "score": "1-0",
           "prob": 8.2,
-          "fair": 12.2,
-          "back": 12.44
+          "fair": 12.16,
+          "back": 12.4
         },
         {
           "score": "2-1",
           "prob": 8.1,
-          "fair": 12.41,
-          "back": 12.66
+          "fair": 12.38,
+          "back": 12.63
         },
         {
           "score": "3-0",
-          "prob": 7.2,
-          "fair": 13.83,
-          "back": 14.11
+          "prob": 7.3,
+          "fair": 13.78,
+          "back": 14.05
         },
         {
           "score": "0-0",
-          "prob": 6.4,
-          "fair": 15.73,
-          "back": 16.05
+          "prob": 6.2,
+          "fair": 16.07,
+          "back": 16.39
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 56.7,
-        "under": 43.3
+        "over": 56.9,
+        "under": 43.1
       },
-      "btts": 53.2,
-      "xg_home": 2.02,
+      "btts": 53.1,
+      "xg_home": 2.03,
       "xg_away": 0.96
     },
     {
@@ -6390,9 +6520,9 @@
       "scores": [
         {
           "score": "1-1",
-          "prob": 13.7,
-          "fair": 7.32,
-          "back": 7.47
+          "prob": 13.6,
+          "fair": 7.38,
+          "back": 7.52
         },
         {
           "score": "0-1",
@@ -6403,85 +6533,36 @@
         {
           "score": "1-2",
           "prob": 8.0,
-          "fair": 12.48,
-          "back": 12.73
+          "fair": 12.53,
+          "back": 12.78
         },
         {
           "score": "2-1",
           "prob": 7.7,
-          "fair": 12.98,
-          "back": 13.24
-        },
-        {
-          "score": "0-0",
-          "prob": 7.7,
-          "fair": 13.04,
-          "back": 13.3
+          "fair": 12.96,
+          "back": 13.22
         },
         {
           "score": "1-0",
           "prob": 7.6,
-          "fair": 13.22,
-          "back": 13.48
+          "fair": 13.15,
+          "back": 13.42
+        },
+        {
+          "score": "0-0",
+          "prob": 7.6,
+          "fair": 13.16,
+          "back": 13.43
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 51.2,
-        "under": 48.8
+        "over": 51.3,
+        "under": 48.7
       },
       "btts": 56.1,
       "xg_home": 1.21,
-      "xg_away": 1.53
-    },
-    {
-      "fixture": "United States vs Belgium",
-      "scores": [
-        {
-          "score": "1-1",
-          "prob": 12.2,
-          "fair": 8.23,
-          "back": 8.39
-        },
-        {
-          "score": "2-1",
-          "prob": 8.2,
-          "fair": 12.15,
-          "back": 12.39
-        },
-        {
-          "score": "2-2",
-          "prob": 7.8,
-          "fair": 12.78,
-          "back": 13.04
-        },
-        {
-          "score": "1-2",
-          "prob": 7.4,
-          "fair": 13.6,
-          "back": 13.88
-        },
-        {
-          "score": "1-0",
-          "prob": 5.5,
-          "fair": 18.34,
-          "back": 18.7
-        },
-        {
-          "score": "0-2",
-          "prob": 5.2,
-          "fair": 19.06,
-          "back": 19.44
-        }
-      ],
-      "over_under": {
-        "line": 2.5,
-        "over": 63.0,
-        "under": 37.0
-      },
-      "btts": 66.3,
-      "xg_home": 1.53,
-      "xg_away": 1.75
+      "xg_away": 1.54
     },
     {
       "fixture": "Portugal vs Spain",
@@ -6489,48 +6570,97 @@
         {
           "score": "1-1",
           "prob": 12.6,
-          "fair": 7.91,
-          "back": 8.06
+          "fair": 7.93,
+          "back": 8.09
         },
         {
           "score": "0-1",
           "prob": 10.9,
-          "fair": 9.13,
-          "back": 9.32
+          "fair": 9.2,
+          "back": 9.39
         },
         {
           "score": "1-2",
-          "prob": 10.0,
-          "fair": 9.96,
-          "back": 10.16
+          "prob": 9.9,
+          "fair": 10.09,
+          "back": 10.29
         },
         {
           "score": "0-2",
           "prob": 8.8,
-          "fair": 11.33,
-          "back": 11.55
+          "fair": 11.42,
+          "back": 11.64
         },
         {
           "score": "0-0",
           "prob": 7.6,
-          "fair": 13.15,
-          "back": 13.41
+          "fair": 13.19,
+          "back": 13.46
         },
         {
           "score": "1-0",
-          "prob": 6.4,
-          "fair": 15.73,
-          "back": 16.05
+          "prob": 6.5,
+          "fair": 15.29,
+          "back": 15.59
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 49.7,
-        "under": 50.3
+        "over": 49.6,
+        "under": 50.4
       },
-      "btts": 53.5,
-      "xg_home": 1.07,
-      "xg_away": 1.59
+      "btts": 53.4,
+      "xg_home": 1.08,
+      "xg_away": 1.58
+    },
+    {
+      "fixture": "United States vs Belgium",
+      "scores": [
+        {
+          "score": "1-1",
+          "prob": 11.8,
+          "fair": 8.5,
+          "back": 8.67
+        },
+        {
+          "score": "2-1",
+          "prob": 8.2,
+          "fair": 12.21,
+          "back": 12.46
+        },
+        {
+          "score": "2-2",
+          "prob": 7.6,
+          "fair": 13.12,
+          "back": 13.38
+        },
+        {
+          "score": "1-2",
+          "prob": 7.5,
+          "fair": 13.36,
+          "back": 13.62
+        },
+        {
+          "score": "1-0",
+          "prob": 5.4,
+          "fair": 18.44,
+          "back": 18.81
+        },
+        {
+          "score": "0-2",
+          "prob": 5.4,
+          "fair": 18.58,
+          "back": 18.96
+        }
+      ],
+      "over_under": {
+        "line": 2.5,
+        "over": 63.5,
+        "under": 36.5
+      },
+      "btts": 66.2,
+      "xg_home": 1.52,
+      "xg_away": 1.78
     }
   ]
 }
