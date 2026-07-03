@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-03 08:29:44 UTC"
+    "generated": "2026-07-03 12:16:29 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -9,13 +9,13 @@
     "p_profit": 0,
     "p_loss": 0,
     "p_big_win": 0,
-    "n_scenarios": 6561
+    "n_scenarios": 19683
   },
   "correlation": {
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0002,
+        "prob": 0.0,
         "results": [
           "Australia",
           "Argentina",
@@ -24,12 +24,13 @@
           "Paraguay",
           "Brazil",
           "Mexico",
-          "United States"
+          "United States",
+          "Portugal"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0001,
+        "prob": 0.0,
         "results": [
           "Australia",
           "Argentina",
@@ -38,39 +39,12 @@
           "Paraguay",
           "Brazil",
           "Mexico",
+          "United States",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0002,
-        "results": [
-          "Australia",
-          "Argentina",
-          "Colombia",
-          "Canada",
-          "Paraguay",
-          "Brazil",
-          "Mexico",
-          "Belgium"
-        ]
-      },
-      {
-        "pnl": 0.0,
-        "prob": 0.0002,
-        "results": [
-          "Australia",
-          "Argentina",
-          "Colombia",
-          "Canada",
-          "Paraguay",
-          "Brazil",
-          "Draw",
-          "United States"
-        ]
-      },
-      {
-        "pnl": 0.0,
         "prob": 0.0001,
         "results": [
           "Australia",
@@ -79,6 +53,37 @@
           "Canada",
           "Paraguay",
           "Brazil",
+          "Mexico",
+          "United States",
+          "Spain"
+        ]
+      },
+      {
+        "pnl": 0.0,
+        "prob": 0.0,
+        "results": [
+          "Australia",
+          "Argentina",
+          "Colombia",
+          "Canada",
+          "Paraguay",
+          "Brazil",
+          "Mexico",
+          "Draw",
+          "Portugal"
+        ]
+      },
+      {
+        "pnl": 0.0,
+        "prob": 0.0,
+        "results": [
+          "Australia",
+          "Argentina",
+          "Colombia",
+          "Canada",
+          "Paraguay",
+          "Brazil",
+          "Mexico",
           "Draw",
           "Draw"
         ]
@@ -87,7 +92,7 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0002,
+        "prob": 0.0,
         "results": [
           "Australia",
           "Argentina",
@@ -96,7 +101,23 @@
           "Paraguay",
           "Brazil",
           "Mexico",
-          "United States"
+          "United States",
+          "Portugal"
+        ]
+      },
+      {
+        "pnl": 0.0,
+        "prob": 0.0,
+        "results": [
+          "Australia",
+          "Argentina",
+          "Colombia",
+          "Canada",
+          "Paraguay",
+          "Brazil",
+          "Mexico",
+          "United States",
+          "Draw"
         ]
       },
       {
@@ -110,21 +131,8 @@
           "Paraguay",
           "Brazil",
           "Mexico",
-          "Draw"
-        ]
-      },
-      {
-        "pnl": 0.0,
-        "prob": 0.0002,
-        "results": [
-          "Australia",
-          "Argentina",
-          "Colombia",
-          "Canada",
-          "Paraguay",
-          "Brazil",
-          "Mexico",
-          "Belgium"
+          "United States",
+          "Spain"
         ]
       }
     ],
@@ -138,35 +146,15 @@
     "fixtures": [
       {
         "fixture": "Colombia vs Ghana",
-        "has_lambdas": true,
+        "has_lambdas": false,
         "n_bets": 1,
-        "lambda_home": 1.9271,
-        "lambda_away": 0.6705,
-        "ev": 0.0,
-        "best_case": 0.0,
-        "worst_case": 0.0,
-        "net_downside": 0.0,
-        "p_loss": 0,
-        "p_profit": 0,
-        "cap_abs": 150.0,
-        "over_exposed": false,
-        "headroom": 150.0
+        "note": "no lambdas persisted \u2014 legacy 1X2-only exposure used"
       },
       {
         "fixture": "Mexico vs England",
-        "has_lambdas": true,
+        "has_lambdas": false,
         "n_bets": 1,
-        "lambda_home": 1.1067,
-        "lambda_away": 1.6776,
-        "ev": 0.0,
-        "best_case": 0.0,
-        "worst_case": 0.0,
-        "net_downside": 0.0,
-        "p_loss": 0,
-        "p_profit": 0,
-        "cap_abs": 150.0,
-        "over_exposed": false,
-        "headroom": 150.0
+        "note": "no lambdas persisted \u2014 legacy 1X2-only exposure used"
       }
     ],
     "slate": {
@@ -181,11 +169,11 @@
   "fixtures": [
     {
       "fixture": "Australia vs Egypt",
-      "kickoff": "2026-07-03 18:00:00+00:00",
+      "kickoff": "2026-07-03T18:00:00+00:00",
       "results": [
         {
           "outcome": "Australia",
-          "prob": 0.312,
+          "prob": 0.3083,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -194,7 +182,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.3245,
+          "prob": 0.32,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -203,7 +191,7 @@
         },
         {
           "outcome": "Egypt",
-          "prob": 0.3635,
+          "prob": 0.3716,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -222,11 +210,11 @@
     },
     {
       "fixture": "Argentina vs Cape Verde",
-      "kickoff": "2026-07-03 22:00:00+00:00",
+      "kickoff": "2026-07-03T22:00:00+00:00",
       "results": [
         {
           "outcome": "Argentina",
-          "prob": 0.8504,
+          "prob": 0.8491,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -235,7 +223,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.1096,
+          "prob": 0.1105,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -244,7 +232,7 @@
         },
         {
           "outcome": "Cape Verde",
-          "prob": 0.04,
+          "prob": 0.0404,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -263,37 +251,47 @@
     },
     {
       "fixture": "Colombia vs Ghana",
-      "kickoff": "2026-07-04 01:30:00+00:00",
+      "kickoff": "2026-07-04T01:30:00+00:00",
       "results": [
         {
           "outcome": "Colombia",
-          "prob": 0.6897,
+          "prob": 0.6945,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
           "blindspot": true,
           "live": [],
           "plug": {
-            "available": false,
-            "note": "no live market price found for this outcome"
+            "available": true,
+            "outcome": "Colombia",
+            "best_venue": "smarkets",
+            "best_odds": 1.46,
+            "model_prob": 0.6945,
+            "ev_pct": 1.4,
+            "recommendation": "PLUG: +EV to back (1.4% edge) \u2014 fills the gap and adds value"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.209,
+          "prob": 0.2067,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
           "blindspot": true,
           "live": [],
           "plug": {
-            "available": false,
-            "note": "no live market price found for this outcome"
+            "available": true,
+            "outcome": "Draw",
+            "best_venue": "leovegas",
+            "best_odds": 4.6,
+            "model_prob": 0.2067,
+            "ev_pct": -4.9,
+            "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Ghana",
-          "prob": 0.1014,
+          "prob": 0.0988,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -321,11 +319,11 @@
     },
     {
       "fixture": "Canada vs Morocco",
-      "kickoff": "2026-07-04 17:00:00+00:00",
+      "kickoff": "2026-07-04T17:00:00+00:00",
       "results": [
         {
           "outcome": "Canada",
-          "prob": 0.1931,
+          "prob": 0.193,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -334,7 +332,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.282,
+          "prob": 0.2796,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -343,7 +341,7 @@
         },
         {
           "outcome": "Morocco",
-          "prob": 0.5249,
+          "prob": 0.5274,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -362,11 +360,11 @@
     },
     {
       "fixture": "Paraguay vs France",
-      "kickoff": "2026-07-04 21:00:00+00:00",
+      "kickoff": "2026-07-04T21:00:00+00:00",
       "results": [
         {
           "outcome": "Paraguay",
-          "prob": 0.0809,
+          "prob": 0.0812,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -375,7 +373,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.1647,
+          "prob": 0.165,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -384,7 +382,7 @@
         },
         {
           "outcome": "France",
-          "prob": 0.7544,
+          "prob": 0.7538,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -403,11 +401,11 @@
     },
     {
       "fixture": "Brazil vs Norway",
-      "kickoff": "2026-07-05 20:00:00+00:00",
+      "kickoff": null,
       "results": [
         {
           "outcome": "Brazil",
-          "prob": 0.5742,
+          "prob": 0.5745,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -416,7 +414,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2411,
+          "prob": 0.241,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -425,7 +423,7 @@
         },
         {
           "outcome": "Norway",
-          "prob": 0.1847,
+          "prob": 0.1845,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -444,11 +442,11 @@
     },
     {
       "fixture": "Mexico vs England",
-      "kickoff": "2026-07-06 00:00:00+00:00",
+      "kickoff": null,
       "results": [
         {
           "outcome": "Mexico",
-          "prob": 0.2973,
+          "prob": 0.299,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -461,7 +459,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2871,
+          "prob": 0.2875,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -474,7 +472,7 @@
         },
         {
           "outcome": "England",
-          "prob": 0.4155,
+          "prob": 0.4135,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -506,11 +504,11 @@
     },
     {
       "fixture": "United States vs Belgium",
-      "kickoff": "2026-07-07 00:00:00+00:00",
+      "kickoff": null,
       "results": [
         {
           "outcome": "United States",
-          "prob": 0.3312,
+          "prob": 0.3335,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -519,7 +517,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.276,
+          "prob": 0.2765,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -528,7 +526,7 @@
         },
         {
           "outcome": "Belgium",
-          "prob": 0.3927,
+          "prob": 0.39,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -544,23 +542,69 @@
         "worst_outcome": "United States",
         "n_blindspots": 0
       }
+    },
+    {
+      "fixture": "Portugal vs Spain",
+      "kickoff": null,
+      "results": [
+        {
+          "outcome": "Portugal",
+          "prob": 0.2402,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.2653,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Spain",
+          "prob": 0.4945,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Portugal",
+        "worst_outcome": "Portugal",
+        "n_blindspots": 0
+      }
     }
   ],
   "blindspots": [
     {
       "fixture": "Colombia vs Ghana",
       "outcome": "Colombia",
-      "prob": 0.6897,
+      "prob": 0.6945,
       "net_pnl": 0.0,
       "plug": {
-        "available": false,
-        "note": "no live market price found for this outcome"
+        "available": true,
+        "outcome": "Colombia",
+        "best_venue": "smarkets",
+        "best_odds": 1.46,
+        "model_prob": 0.6945,
+        "ev_pct": 1.4,
+        "recommendation": "PLUG: +EV to back (1.4% edge) \u2014 fills the gap and adds value"
       }
     },
     {
       "fixture": "Mexico vs England",
       "outcome": "England",
-      "prob": 0.4155,
+      "prob": 0.4135,
       "net_pnl": 0.0,
       "plug": {
         "available": false,
@@ -570,7 +614,7 @@
     {
       "fixture": "Mexico vs England",
       "outcome": "Mexico",
-      "prob": 0.2973,
+      "prob": 0.299,
       "net_pnl": 0.0,
       "plug": {
         "available": false,
@@ -580,7 +624,7 @@
     {
       "fixture": "Mexico vs England",
       "outcome": "Draw",
-      "prob": 0.2871,
+      "prob": 0.2875,
       "net_pnl": 0.0,
       "plug": {
         "available": false,
@@ -590,11 +634,16 @@
     {
       "fixture": "Colombia vs Ghana",
       "outcome": "Draw",
-      "prob": 0.209,
+      "prob": 0.2067,
       "net_pnl": 0.0,
       "plug": {
-        "available": false,
-        "note": "no live market price found for this outcome"
+        "available": true,
+        "outcome": "Draw",
+        "best_venue": "leovegas",
+        "best_odds": 4.6,
+        "model_prob": 0.2067,
+        "ev_pct": -4.9,
+        "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     }
   ],

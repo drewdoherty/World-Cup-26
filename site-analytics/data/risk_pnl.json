@@ -1,275 +1,483 @@
 {
   "meta": {
-    "generated": "2026-06-25T08:12:15Z",
+    "generated": "2026-07-03T12:16:17Z",
     "n_sims": 20000,
-    "n_open_positions": 8,
+    "n_open_positions": 81,
     "fx_rate": 0.79,
-    "fx_ts": "2026-06-25T08:12:15Z",
+    "fx_ts": "2026-07-03T12:16:17Z",
     "fx_note": "USD converted to GBP for distribution view only — per-venue tables remain faceted"
   },
   "distribution_gbp": {
-    "mean": 18.1591,
-    "median": -1.7265,
-    "p5": -127.0281,
-    "p25": -48.0265,
-    "p75": 90.81,
-    "p95": 194.6719,
-    "var95": 127.0281,
-    "cvar95": 127.4091,
-    "p_book_down": 0.5121,
-    "hard_floor": -128.19
+    "mean": 17.1149,
+    "median": -21.2099,
+    "p5": -593.6641,
+    "p25": -263.998,
+    "p75": 268.2022,
+    "p95": 752.2855,
+    "var95": 593.6641,
+    "cvar95": 718.1467,
+    "p_book_down": 0.5195,
+    "hard_floor": -1860.9546
   },
   "by_currency": {
     "GBP": {
-      "n": 6,
-      "open_stake": 95.0,
-      "ev": 11.6614
+      "n": 66,
+      "open_stake": 1029.02,
+      "ev": 18.6126
     },
     "USD": {
-      "n": 2,
-      "open_stake": 61.0,
-      "ev": 8.225
+      "n": 15,
+      "open_stake": 1065.74,
+      "ev": -1.8958
     }
   },
   "histogram": [
     {
-      "bin_lo": -128.19,
-      "bin_hi": -115.9534,
-      "count": 1299
+      "bin_lo": -1324.9652,
+      "bin_hi": -1249.8498,
+      "count": 2
     },
     {
-      "bin_lo": -115.9534,
-      "bin_hi": -103.7168,
-      "count": 599
-    },
-    {
-      "bin_lo": -103.7168,
-      "bin_hi": -91.4802,
-      "count": 594
-    },
-    {
-      "bin_lo": -91.4802,
-      "bin_hi": -79.2436,
-      "count": 232
-    },
-    {
-      "bin_lo": -79.2436,
-      "bin_hi": -67.0071,
-      "count": 340
-    },
-    {
-      "bin_lo": -67.0071,
-      "bin_hi": -54.7705,
-      "count": 215
-    },
-    {
-      "bin_lo": -54.7705,
-      "bin_hi": -42.5339,
-      "count": 3259
-    },
-    {
-      "bin_lo": -42.5339,
-      "bin_hi": -30.2973,
-      "count": 189
-    },
-    {
-      "bin_lo": -30.2973,
-      "bin_hi": -18.0607,
-      "count": 2951
-    },
-    {
-      "bin_lo": -18.0607,
-      "bin_hi": -5.8241,
-      "count": 80
-    },
-    {
-      "bin_lo": -5.8241,
-      "bin_hi": 6.4125,
-      "count": 1191
-    },
-    {
-      "bin_lo": 6.4125,
-      "bin_hi": 18.6491,
-      "count": 484
-    },
-    {
-      "bin_lo": 18.6491,
-      "bin_hi": 30.8856,
-      "count": 790
-    },
-    {
-      "bin_lo": 30.8856,
-      "bin_hi": 43.1222,
-      "count": 1229
-    },
-    {
-      "bin_lo": 43.1222,
-      "bin_hi": 55.3588,
-      "count": 496
-    },
-    {
-      "bin_lo": 55.3588,
-      "bin_hi": 67.5954,
-      "count": 705
-    },
-    {
-      "bin_lo": 67.5954,
-      "bin_hi": 79.832,
-      "count": 53
-    },
-    {
-      "bin_lo": 79.832,
-      "bin_hi": 92.0686,
-      "count": 425
-    },
-    {
-      "bin_lo": 92.0686,
-      "bin_hi": 104.3052,
-      "count": 116
-    },
-    {
-      "bin_lo": 104.3052,
-      "bin_hi": 116.5418,
-      "count": 280
-    },
-    {
-      "bin_lo": 116.5418,
-      "bin_hi": 128.7783,
-      "count": 1292
-    },
-    {
-      "bin_lo": 128.7783,
-      "bin_hi": 141.0149,
-      "count": 96
-    },
-    {
-      "bin_lo": 141.0149,
-      "bin_hi": 153.2515,
-      "count": 1190
-    },
-    {
-      "bin_lo": 153.2515,
-      "bin_hi": 165.4881,
-      "count": 14
-    },
-    {
-      "bin_lo": 165.4881,
-      "bin_hi": 177.7247,
-      "count": 516
-    },
-    {
-      "bin_lo": 177.7247,
-      "bin_hi": 189.9613,
-      "count": 199
-    },
-    {
-      "bin_lo": 189.9613,
-      "bin_hi": 202.1979,
-      "count": 479
-    },
-    {
-      "bin_lo": 202.1979,
-      "bin_hi": 214.4345,
-      "count": 177
-    },
-    {
-      "bin_lo": 214.4345,
-      "bin_hi": 226.671,
-      "count": 214
-    },
-    {
-      "bin_lo": 226.671,
-      "bin_hi": 238.9076,
-      "count": 75
-    },
-    {
-      "bin_lo": 238.9076,
-      "bin_hi": 251.1442,
-      "count": 58
-    },
-    {
-      "bin_lo": 251.1442,
-      "bin_hi": 263.3808,
-      "count": 47
-    },
-    {
-      "bin_lo": 263.3808,
-      "bin_hi": 275.6174,
-      "count": 58
-    },
-    {
-      "bin_lo": 275.6174,
-      "bin_hi": 287.854,
-      "count": 26
-    },
-    {
-      "bin_lo": 287.854,
-      "bin_hi": 300.0906,
-      "count": 11
-    },
-    {
-      "bin_lo": 300.0906,
-      "bin_hi": 312.3272,
-      "count": 7
-    },
-    {
-      "bin_lo": 312.3272,
-      "bin_hi": 324.5637,
-      "count": 9
-    },
-    {
-      "bin_lo": 324.5637,
-      "bin_hi": 336.8003,
+      "bin_lo": -1249.8498,
+      "bin_hi": -1174.7345,
       "count": 0
     },
     {
-      "bin_lo": 336.8003,
-      "bin_hi": 349.0369,
-      "count": 4
+      "bin_lo": -1174.7345,
+      "bin_hi": -1099.6192,
+      "count": 2
     },
     {
-      "bin_lo": 349.0369,
-      "bin_hi": 361.2735,
+      "bin_lo": -1099.6192,
+      "bin_hi": -1024.5039,
+      "count": 3
+    },
+    {
+      "bin_lo": -1024.5039,
+      "bin_hi": -949.3886,
+      "count": 23
+    },
+    {
+      "bin_lo": -949.3886,
+      "bin_hi": -874.2733,
+      "count": 59
+    },
+    {
+      "bin_lo": -874.2733,
+      "bin_hi": -799.158,
+      "count": 121
+    },
+    {
+      "bin_lo": -799.158,
+      "bin_hi": -724.0427,
+      "count": 194
+    },
+    {
+      "bin_lo": -724.0427,
+      "bin_hi": -648.9274,
+      "count": 270
+    },
+    {
+      "bin_lo": -648.9274,
+      "bin_hi": -573.8121,
+      "count": 444
+    },
+    {
+      "bin_lo": -573.8121,
+      "bin_hi": -498.6968,
+      "count": 656
+    },
+    {
+      "bin_lo": -498.6968,
+      "bin_hi": -423.5815,
+      "count": 837
+    },
+    {
+      "bin_lo": -423.5815,
+      "bin_hi": -348.4661,
+      "count": 1039
+    },
+    {
+      "bin_lo": -348.4661,
+      "bin_hi": -273.3508,
+      "count": 1215
+    },
+    {
+      "bin_lo": -273.3508,
+      "bin_hi": -198.2355,
+      "count": 1432
+    },
+    {
+      "bin_lo": -198.2355,
+      "bin_hi": -123.1202,
+      "count": 1578
+    },
+    {
+      "bin_lo": -123.1202,
+      "bin_hi": -48.0049,
+      "count": 1582
+    },
+    {
+      "bin_lo": -48.0049,
+      "bin_hi": 27.1104,
+      "count": 1489
+    },
+    {
+      "bin_lo": 27.1104,
+      "bin_hi": 102.2257,
+      "count": 1434
+    },
+    {
+      "bin_lo": 102.2257,
+      "bin_hi": 177.341,
+      "count": 1309
+    },
+    {
+      "bin_lo": 177.341,
+      "bin_hi": 252.4563,
+      "count": 1092
+    },
+    {
+      "bin_lo": 252.4563,
+      "bin_hi": 327.5716,
+      "count": 1012
+    },
+    {
+      "bin_lo": 327.5716,
+      "bin_hi": 402.6869,
+      "count": 774
+    },
+    {
+      "bin_lo": 402.6869,
+      "bin_hi": 477.8022,
+      "count": 656
+    },
+    {
+      "bin_lo": 477.8022,
+      "bin_hi": 552.9175,
+      "count": 591
+    },
+    {
+      "bin_lo": 552.9175,
+      "bin_hi": 628.0329,
+      "count": 526
+    },
+    {
+      "bin_lo": 628.0329,
+      "bin_hi": 703.1482,
+      "count": 442
+    },
+    {
+      "bin_lo": 703.1482,
+      "bin_hi": 778.2635,
+      "count": 336
+    },
+    {
+      "bin_lo": 778.2635,
+      "bin_hi": 853.3788,
+      "count": 252
+    },
+    {
+      "bin_lo": 853.3788,
+      "bin_hi": 928.4941,
+      "count": 174
+    },
+    {
+      "bin_lo": 928.4941,
+      "bin_hi": 1003.6094,
+      "count": 161
+    },
+    {
+      "bin_lo": 1003.6094,
+      "bin_hi": 1078.7247,
+      "count": 118
+    },
+    {
+      "bin_lo": 1078.7247,
+      "bin_hi": 1153.84,
+      "count": 72
+    },
+    {
+      "bin_lo": 1153.84,
+      "bin_hi": 1228.9553,
+      "count": 54
+    },
+    {
+      "bin_lo": 1228.9553,
+      "bin_hi": 1304.0706,
+      "count": 25
+    },
+    {
+      "bin_lo": 1304.0706,
+      "bin_hi": 1379.1859,
+      "count": 13
+    },
+    {
+      "bin_lo": 1379.1859,
+      "bin_hi": 1454.3012,
+      "count": 8
+    },
+    {
+      "bin_lo": 1454.3012,
+      "bin_hi": 1529.4166,
+      "count": 2
+    },
+    {
+      "bin_lo": 1529.4166,
+      "bin_hi": 1604.5319,
+      "count": 2
+    },
+    {
+      "bin_lo": 1604.5319,
+      "bin_hi": 1679.6472,
       "count": 1
     }
   ],
   "per_team": [
     {
-      "team": "Ecuador-Germany / Curacao-Ivory Coast / Tunisia-Netherlands / Japan-Sweden (2UP 4-fold)",
-      "ev_contribution": -0.8654
+      "team": "Will Spain reach the 2026 FIFA World Cup final?",
+      "ev_contribution": -3.9501
     },
     {
-      "team": "Portugal-Uzbekistan / England-Ghana / Colombia-DR Congo (treble)",
-      "ev_contribution": -0.1071
+      "team": "Algeria",
+      "ev_contribution": -0.6347
     },
     {
-      "team": "Belgium",
-      "ev_contribution": -0.0283
+      "team": "Austria",
+      "ev_contribution": -0.548
     },
     {
-      "team": "Iran",
-      "ev_contribution": -0.0283
+      "team": "Sweden",
+      "ev_contribution": -0.5444
     },
     {
-      "team": "Ghana eliminated R32 of the World Cup",
-      "ev_contribution": -0.0011
+      "team": "France reach the Semifinals",
+      "ev_contribution": -0.4817
+    },
+    {
+      "team": "Croatia",
+      "ev_contribution": -0.4023
+    },
+    {
+      "team": "Egypt v Iran | New Zealand v Belgium | Croatia v Ghana | Panama v England | Colombia v Portugal | DR Congo v Uzbekistan | (France match not fully visible)",
+      "ev_contribution": -0.3815
+    },
+    {
+      "team": "Morocco",
+      "ev_contribution": -0.3212
+    },
+    {
+      "team": "Netherlands",
+      "ev_contribution": -0.2885
     },
     {
       "team": "England",
-      "ev_contribution": 2.0455
+      "ev_contribution": -0.2876
+    },
+    {
+      "team": "Germany",
+      "ev_contribution": -0.2161
+    },
+    {
+      "team": "USA vs Bosnia and Herzegovina | England vs Congo DR | Spain vs Austria | Switzerland vs Algeria",
+      "ev_contribution": -0.1674
+    },
+    {
+      "team": "United States",
+      "ev_contribution": -0.1556
+    },
+    {
+      "team": "Bosnia and Herzegovina",
+      "ev_contribution": -0.1556
     },
     {
       "team": "Ghana",
-      "ev_contribution": 2.0455
+      "ev_contribution": -0.1471
     },
     {
-      "team": "2026 FIFA World Cup - Japan Round of 16",
-      "ev_contribution": 6.4988
+      "team": "Paraguay",
+      "ev_contribution": -0.132
+    },
+    {
+      "team": "Portugal reach the Quarterfinals",
+      "ev_contribution": -0.1285
+    },
+    {
+      "team": "Kane / Ramos / Kramaric S/A treble",
+      "ev_contribution": -0.1278
+    },
+    {
+      "team": "Switzerland",
+      "ev_contribution": -0.118
+    },
+    {
+      "team": "Ecuador v Germany | Curacao v Ivory Coast",
+      "ev_contribution": -0.1082
+    },
+    {
+      "team": "France",
+      "ev_contribution": -0.1036
+    },
+    {
+      "team": "Will USA reach the Round of 16 at the 2026 FIFA World Cup?",
+      "ev_contribution": -0.0768
+    },
+    {
+      "team": "Will Belgium win on 2026-07-01?",
+      "ev_contribution": -0.0754
+    },
+    {
+      "team": "Ecuador",
+      "ev_contribution": -0.0611
+    },
+    {
+      "team": "Scotland",
+      "ev_contribution": -0.0447
+    },
+    {
+      "team": "FIFA World Cup 2026 - Group K - Winner",
+      "ev_contribution": -0.0441
+    },
+    {
+      "team": "Spain",
+      "ev_contribution": -0.0313
+    },
+    {
+      "team": "Colombia vs. Ghana: Team to Advance",
+      "ev_contribution": -0.0143
+    },
+    {
+      "team": "England win the 2026 FIFA World Cup",
+      "ev_contribution": -0.0072
+    },
+    {
+      "team": "Ghana be eliminated in the Round of 32 of the World Cup",
+      "ev_contribution": 0.0034
+    },
+    {
+      "team": "Panama",
+      "ev_contribution": 0.0054
+    },
+    {
+      "team": "Ivory Coast",
+      "ev_contribution": 0.011
+    },
+    {
+      "team": "Cape Verde",
+      "ev_contribution": 0.0114
+    },
+    {
+      "team": "Saudi Arabia",
+      "ev_contribution": 0.0114
+    },
+    {
+      "team": "Curaçao",
+      "ev_contribution": 0.0129
+    },
+    {
+      "team": "Mexico",
+      "ev_contribution": 0.023
+    },
+    {
+      "team": "South Africa vs. Canada",
+      "ev_contribution": 0.0293
+    },
+    {
+      "team": "Netherlands v Morocco | Germany v Paraguay | Brazil v Japan | Belgium v Senegal",
+      "ev_contribution": 0.0514
+    },
+    {
+      "team": "DR Congo",
+      "ev_contribution": 0.0591
+    },
+    {
+      "team": "England vs Congo DR | Colombia vs Ghana | Spain vs Austria | Canada vs Morocco",
+      "ev_contribution": 0.0775
+    },
+    {
+      "team": "Ecuador vs Germany | Curacao vs Ivory Coast | Tunisia vs Netherlands | Japan vs Sweden",
+      "ev_contribution": 0.1058
+    },
+    {
+      "team": "Will Colombia win on 2026-07-03?",
+      "ev_contribution": 0.1516
+    },
+    {
+      "team": "Colombia reach the Round of 16",
+      "ev_contribution": 0.1835
+    },
+    {
+      "team": "Will France reach the Quarterfinals at the 2026 FIFA World Cup?",
+      "ev_contribution": 0.1938
+    },
+    {
+      "team": "Uzbekistan",
+      "ev_contribution": 0.3199
+    },
+    {
+      "team": "Will Argentina reach the Quarterfinals at the 2026 FIFA World Cup?",
+      "ev_contribution": 0.4345
+    },
+    {
+      "team": "Norway",
+      "ev_contribution": 0.4389
+    },
+    {
+      "team": "Belgium reach the Round of 16",
+      "ev_contribution": 0.4864
+    },
+    {
+      "team": "Will United States vs. Bosnia and Herzegovina end in a draw?",
+      "ev_contribution": 0.4907
+    },
+    {
+      "team": "Canada",
+      "ev_contribution": 0.9396
+    },
+    {
+      "team": "Brazil",
+      "ev_contribution": 0.9519
+    },
+    {
+      "team": "South Africa",
+      "ev_contribution": 0.9723
+    },
+    {
+      "team": "Japan",
+      "ev_contribution": 0.9966
+    },
+    {
+      "team": "Will Brazil reach the Quarterfinals at the 2026 FIFA World Cup?",
+      "ev_contribution": 1.2925
+    },
+    {
+      "team": "Portugal",
+      "ev_contribution": 1.3325
+    },
+    {
+      "team": "Egypt",
+      "ev_contribution": 1.5524
+    },
+    {
+      "team": "Iran",
+      "ev_contribution": 1.5524
+    },
+    {
+      "team": "Colombia",
+      "ev_contribution": 1.5876
+    },
+    {
+      "team": "Belgium",
+      "ev_contribution": 2.0154
+    },
+    {
+      "team": "Senegal",
+      "ev_contribution": 2.0154
     },
     {
       "team": "FIFA World Cup 2026 Golden Boot",
-      "ev_contribution": 8.5995
+      "ev_contribution": 8.5605
     }
   ],
-  "note": "Open book of 8 positions valued over 20000 independent simulations (numpy Generator seed=42). v1 simplification: positions are drawn INDEPENDENTLY (cross-bet correlation ignored; intra-bet legs already collapsed to one binary). Win probabilities sourced ['implied', 'model'] (implied=de-vigged-free 1/odds fallback, EV-neutral by construction — not an edge). Currencies are faceted; distribution_gbp is the ONLY cross-currency view and uses a placeholder FX rate. INSUFFICIENT SAMPLE: only 8 open positions (< 30) — treat the distribution as a band, not a precise forecast."
+  "note": "Open book of 81 positions valued over 20000 independent simulations (numpy Generator seed=42). v1 simplification: positions are drawn INDEPENDENTLY (cross-bet correlation ignored; intra-bet legs already collapsed to one binary). Win probabilities sourced ['implied', 'model', 'triple'] (implied=de-vigged-free 1/odds fallback, EV-neutral by construction — not an edge). Currencies are faceted; distribution_gbp is the ONLY cross-currency view and uses a placeholder FX rate. "
 }

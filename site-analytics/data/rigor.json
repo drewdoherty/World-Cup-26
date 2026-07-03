@@ -1,14 +1,14 @@
 {
   "meta": {
-    "generated": "2026-06-25T08:17:36Z",
-    "n": 77,
-    "n_eff": 16.0,
+    "generated": "2026-07-03T12:16:16Z",
+    "n": 212,
+    "n_eff": 21.0,
     "stage": "insufficient"
   },
   "verdict": {
     "level": "INSUFFICIENT_SAMPLE",
     "label": "Insufficient sample",
-    "reason": "n_eff=16.0 below the 25-effective-bet CLV floor; default verdict is insufficient sample",
+    "reason": "n_eff=21.0 below the 25-effective-bet CLV floor; default verdict is insufficient sample",
     "color": "grey"
   },
   "gates": [
@@ -16,16 +16,16 @@
       "id": "G0",
       "name": "Power floor (n_eff)",
       "stat": "n_eff (CLV>=25 or ROI>=100)",
-      "value": 16.0,
+      "value": 21.0,
       "threshold": "CLV n_eff>=25 or ROI n_eff>=100",
-      "pass": false,
+      "pass": true,
       "note": "effective sample after cluster deflation (match/acca)"
     },
     {
       "id": "G1",
       "name": "CLV lower bound > ROPE floor",
       "stat": "CLV 95% lower bound",
-      "value": -0.03909325743239527,
+      "value": -0.07412916242997099,
       "threshold": "> 0.005 (cost-adjusted ROPE)",
       "pass": false,
       "note": "must clear a cost-adjusted floor, not merely 0"
@@ -34,8 +34,8 @@
       "id": "G2",
       "name": "Sequential CLV significance",
       "stat": "observed z vs anytime-valid boundary",
-      "value": 0.18833810465132889,
-      "threshold": "z > 3.02 (grows with n_eff)",
+      "value": -0.6592184322534593,
+      "threshold": "z > 3.04 (grows with n_eff)",
       "pass": false,
       "note": "no fixed 1.65/1.96 cutoff \u2014 survives optional stopping"
     },
@@ -43,8 +43,8 @@
       "id": "G3",
       "name": "Beat-rate > placebo 95th pct",
       "stat": "Wilson lower bound of beat-rate",
-      "value": 0.4078517960374599,
-      "threshold": "> placebo 0.696",
+      "value": 0.3545763620443012,
+      "threshold": "> placebo 0.654",
       "pass": false,
       "note": "no-edge price-taker null, not 0.5"
     },
@@ -52,25 +52,25 @@
       "id": "G4",
       "name": "Skill vs market (paired log-loss)",
       "stat": "mean per-fixture log-loss differential",
-      "value": -0.006990555564309969,
+      "value": -0.006253630175094151,
       "threshold": "mean>0 one-sided p<0.05 (model better)",
       "pass": false,
-      "note": "outcome-anchored: a best-price artifact cannot pass this; n_fixtures=23"
+      "note": "outcome-anchored: a best-price artifact cannot pass this; n_fixtures=64"
     },
     {
       "id": "G5",
       "name": "Calibration (slope\u220b1, intercept\u220b0)",
       "stat": "logistic calibration slope",
-      "value": 1.247072854611705,
+      "value": 1.4951548825978054,
       "threshold": "slope CI\u220b1 & intercept CI\u220b0 (N>=100)",
-      "pass": null,
-      "note": "outcome-anchored; N=69 settled (need >=100)"
+      "pass": false,
+      "note": "outcome-anchored; N=192 settled (need >=100)"
     },
     {
       "id": "G6",
       "name": "Stability (no break & OOS/IS>0.5)",
       "stat": "OOS/IS ratio",
-      "value": -0.3962125624117831,
+      "value": -4.482210172712419,
       "threshold": "no break AND OOS/IS > 0.5",
       "pass": false,
       "note": "break_detected=False"
@@ -86,74 +86,74 @@
     }
   ],
   "clv_block": {
-    "mean": 0.004155843746932752,
-    "lower": -0.03909325743239527,
-    "beat_rate": 0.6086956521739131,
-    "placebo_null": 0.6956521739130435,
-    "n_eff": 16.0
+    "mean": -0.018657210731105097,
+    "lower": -0.07412916242997099,
+    "beat_rate": 0.5384615384615384,
+    "placebo_null": 0.6538461538461539,
+    "n_eff": 21.0
   },
   "skill_block": {
-    "logloss_diff": -0.006990555564309969,
-    "brier_skill": -0.016070099455880893,
-    "calibration_slope": 1.247072854611705
+    "logloss_diff": -0.006253630175094151,
+    "brier_skill": -0.013388067866248576,
+    "calibration_slope": 1.4951548825978054
   },
   "profit_block": {
-    "roi": 0.3991154726280584,
-    "roi_lo": -0.4603535656350103,
-    "sharpe": 0.05278945256051023,
-    "n": 62
+    "roi": 0.1793214887425333,
+    "roi_lo": -0.22688474974591047,
+    "sharpe": 0.07255152777313544,
+    "n": 130
   },
   "stability_block": {
     "break_detected": false,
-    "oos_is_ratio": -0.3962125624117831
+    "oos_is_ratio": -4.482210172712419
   },
   "segments": [
     {
       "key": "currency=GBP",
-      "p_raw": 0.46671814186732846,
-      "p_adj": 0.5677855904211753,
+      "p_raw": 0.7834370540811506,
+      "p_adj": 0.8462642066409266,
       "survives_fdr": false,
-      "coverage": 0.3065
+      "coverage": 0.1846
     },
     {
       "key": "currency=USD",
-      "p_raw": 0.29824750115238496,
-      "p_adj": 0.5677855904211753,
+      "p_raw": 0.38171386519688677,
+      "p_adj": 0.8462642066409266,
       "survives_fdr": false,
-      "coverage": 0.0645
+      "coverage": 0.0154
     },
     {
       "key": "market=single",
-      "p_raw": 0.41171711321875715,
-      "p_adj": 0.5677855904211753,
+      "p_raw": 0.764964826958425,
+      "p_adj": 0.8462642066409266,
       "survives_fdr": false,
-      "coverage": 0.371
+      "coverage": 0.2
     },
     {
       "key": "source=model",
-      "p_raw": 0.5677855904211753,
-      "p_adj": 0.5677855904211753,
+      "p_raw": 0.8462642066409267,
+      "p_adj": 0.8462642066409266,
       "survives_fdr": false,
-      "coverage": 0.2903
+      "coverage": 0.1615
     },
     {
       "key": "source=offer",
       "p_raw": 0.5387789270176528,
-      "p_adj": 0.5677855904211753,
+      "p_adj": 0.8462642066409266,
       "survives_fdr": false,
-      "coverage": 0.0645
+      "coverage": 0.0308
     },
     {
       "key": "source=punt",
       "p_raw": null,
       "p_adj": null,
       "survives_fdr": null,
-      "coverage": 0.0161
+      "coverage": 0.0077
     }
   ],
   "samples_to_sig": {
     "roi_n": 3860,
     "clv_n": 25,
-    "current_n_eff": 16.0
+    "current_n_eff": 21.0
   }
 }
