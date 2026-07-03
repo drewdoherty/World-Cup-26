@@ -697,6 +697,14 @@ def build_advancement_futures(
     meta = adv_data.get("meta") or {}
     stages_available = set(meta.get("stages") or [])
 
+    # PM-BLIND guard (2026-07-03): the advancement builder stamps how many
+    # LIVE Polymarket markets it matched. Zero means the feed was built from
+    # cached/stale prices (observed: the mini's Polymarket network block left
+    # a fresh-stamped feed still recommending an ELIMINATED team at an old
+    # $65.50-cap stake). Fresh timestamp + dead inputs must never look
+    # actionable — withhold everything.
+    pm_blind = not meta.get("n_pm_markets")
+
     for team_entry in (adv_data.get("teams") or []):
         team = team_entry.get("team") or ""
         group = team_entry.get("group") or ""
@@ -730,8 +738,14 @@ def build_advancement_futures(
             if stake <= 0:
                 continue
 
-            stale = model_stale or adv_stale
-            if model_stale:
+            stale = model_stale or adv_stale or pm_blind
+            if pm_blind:
+                stale_reason = (
+                    "advancement feed built with NO live PM markets "
+                    "(n_pm_markets=0 — network-blocked or PM fetch failed); "
+                    "prices/stakes are cached — re-run after the fix"
+                )
+            elif model_stale:
                 stale_reason = "advancement model stale (>%dh)" % MODEL_STALE_HOURS
             elif adv_stale:
                 stale_reason = (
