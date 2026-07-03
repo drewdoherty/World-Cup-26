@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-03 17:31:23 UTC"
+    "generated": "2026-07-03 18:07:34 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -45,7 +45,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0,
+        "prob": 0.0001,
         "results": [
           "Australia",
           "Argentina",
@@ -122,7 +122,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0,
+        "prob": 0.0001,
         "results": [
           "Australia",
           "Argentina",
@@ -175,7 +175,7 @@
   "fixtures": [
     {
       "fixture": "Australia vs Egypt",
-      "kickoff": "2026-07-03T18:00:00+00:00",
+      "kickoff": null,
       "results": [
         {
           "outcome": "Australia",
@@ -186,49 +186,34 @@
           "blindspot": true,
           "live": [],
           "plug": {
-            "available": true,
-            "outcome": "Australia",
-            "best_venue": "smarkets",
-            "best_odds": 3.85,
-            "model_prob": 0.306,
-            "ev_pct": 17.8,
-            "recommendation": "PLUG: +EV to back (17.8% edge) \u2014 fills the gap and adds value"
+            "available": false,
+            "note": "no live market price found for this outcome"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.3209,
+          "prob": 0.3214,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
           "blindspot": true,
           "live": [],
           "plug": {
-            "available": true,
-            "outcome": "Draw",
-            "best_venue": "polymarket",
-            "best_odds": 2.99,
-            "model_prob": 0.3209,
-            "ev_pct": -4.2,
-            "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
+            "available": false,
+            "note": "no live market price found for this outcome"
           }
         },
         {
           "outcome": "Egypt",
-          "prob": 0.3731,
+          "prob": 0.3726,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
           "blindspot": true,
           "live": [],
           "plug": {
-            "available": true,
-            "outcome": "Egypt",
-            "best_venue": "polymarket",
-            "best_odds": 2.47,
-            "model_prob": 0.3731,
-            "ev_pct": -7.9,
-            "recommendation": "LEAVE UNHEDGED: plugging costs 7.9% EV \u2014 take the variance"
+            "available": false,
+            "note": "no live market price found for this outcome"
           }
         }
       ],
@@ -256,7 +241,7 @@
       "results": [
         {
           "outcome": "Argentina",
-          "prob": 0.853,
+          "prob": 0.8528,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -265,7 +250,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.1098,
+          "prob": 0.1103,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -274,7 +259,7 @@
         },
         {
           "outcome": "Cape Verde",
-          "prob": 0.0371,
+          "prob": 0.0369,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -297,7 +282,7 @@
       "results": [
         {
           "outcome": "Colombia",
-          "prob": 0.6881,
+          "prob": 0.6895,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -308,14 +293,14 @@
             "outcome": "Colombia",
             "best_venue": "smarkets",
             "best_odds": 1.47,
-            "model_prob": 0.6881,
-            "ev_pct": 1.2,
-            "recommendation": "PLUG: +EV to back (1.2% edge) \u2014 fills the gap and adds value"
+            "model_prob": 0.6895,
+            "ev_pct": 1.4,
+            "recommendation": "PLUG: +EV to back (1.4% edge) \u2014 fills the gap and adds value"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.2078,
+          "prob": 0.206,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -326,14 +311,14 @@
             "outcome": "Draw",
             "best_venue": "polymarket",
             "best_odds": 4.65,
-            "model_prob": 0.2078,
-            "ev_pct": -3.3,
+            "model_prob": 0.206,
+            "ev_pct": -4.2,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Ghana",
-          "prob": 0.1041,
+          "prob": 0.1045,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -365,7 +350,7 @@
       "results": [
         {
           "outcome": "Canada",
-          "prob": 0.198,
+          "prob": 0.1979,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -383,7 +368,7 @@
         },
         {
           "outcome": "Morocco",
-          "prob": 0.5226,
+          "prob": 0.5227,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -406,7 +391,7 @@
       "results": [
         {
           "outcome": "Paraguay",
-          "prob": 0.0825,
+          "prob": 0.0837,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -424,7 +409,7 @@
         },
         {
           "outcome": "France",
-          "prob": 0.7482,
+          "prob": 0.7469,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -447,7 +432,7 @@
       "results": [
         {
           "outcome": "Brazil",
-          "prob": 0.577,
+          "prob": 0.5769,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -456,7 +441,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2367,
+          "prob": 0.2368,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -550,7 +535,7 @@
       "results": [
         {
           "outcome": "Portugal",
-          "prob": 0.2455,
+          "prob": 0.2454,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -591,7 +576,7 @@
       "results": [
         {
           "outcome": "United States",
-          "prob": 0.3317,
+          "prob": 0.3303,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -600,7 +585,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.269,
+          "prob": 0.2681,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -609,7 +594,7 @@
         },
         {
           "outcome": "Belgium",
-          "prob": 0.3993,
+          "prob": 0.4017,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -631,16 +616,16 @@
     {
       "fixture": "Colombia vs Ghana",
       "outcome": "Colombia",
-      "prob": 0.6881,
+      "prob": 0.6895,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Colombia",
         "best_venue": "smarkets",
         "best_odds": 1.47,
-        "model_prob": 0.6881,
-        "ev_pct": 1.2,
-        "recommendation": "PLUG: +EV to back (1.2% edge) \u2014 fills the gap and adds value"
+        "model_prob": 0.6895,
+        "ev_pct": 1.4,
+        "recommendation": "PLUG: +EV to back (1.4% edge) \u2014 fills the gap and adds value"
       }
     },
     {
@@ -656,31 +641,21 @@
     {
       "fixture": "Australia vs Egypt",
       "outcome": "Egypt",
-      "prob": 0.3731,
+      "prob": 0.3726,
       "net_pnl": 0.0,
       "plug": {
-        "available": true,
-        "outcome": "Egypt",
-        "best_venue": "polymarket",
-        "best_odds": 2.47,
-        "model_prob": 0.3731,
-        "ev_pct": -7.9,
-        "recommendation": "LEAVE UNHEDGED: plugging costs 7.9% EV \u2014 take the variance"
+        "available": false,
+        "note": "no live market price found for this outcome"
       }
     },
     {
       "fixture": "Australia vs Egypt",
       "outcome": "Draw",
-      "prob": 0.3209,
+      "prob": 0.3214,
       "net_pnl": 0.0,
       "plug": {
-        "available": true,
-        "outcome": "Draw",
-        "best_venue": "polymarket",
-        "best_odds": 2.99,
-        "model_prob": 0.3209,
-        "ev_pct": -4.2,
-        "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
+        "available": false,
+        "note": "no live market price found for this outcome"
       }
     },
     {
@@ -689,13 +664,8 @@
       "prob": 0.306,
       "net_pnl": 0.0,
       "plug": {
-        "available": true,
-        "outcome": "Australia",
-        "best_venue": "smarkets",
-        "best_odds": 3.85,
-        "model_prob": 0.306,
-        "ev_pct": 17.8,
-        "recommendation": "PLUG: +EV to back (17.8% edge) \u2014 fills the gap and adds value"
+        "available": false,
+        "note": "no live market price found for this outcome"
       }
     },
     {
@@ -721,15 +691,15 @@
     {
       "fixture": "Colombia vs Ghana",
       "outcome": "Draw",
-      "prob": 0.2078,
+      "prob": 0.206,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Draw",
         "best_venue": "polymarket",
         "best_odds": 4.65,
-        "model_prob": 0.2078,
-        "ev_pct": -3.3,
+        "model_prob": 0.206,
+        "ev_pct": -4.2,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     }
