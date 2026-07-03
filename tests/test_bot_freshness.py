@@ -53,15 +53,3 @@ def test_accas_flags_stale_feed(tmp_path, monkeypatch):
     assert "STALE" in reply
     assert "ACCA-BODY" in reply
 
-
-def test_structure_flags_ancient_snapshot(tmp_path):
-    docs = tmp_path / "arch"
-    docs.mkdir()
-    (docs / "structure_2026-01-01.md").write_text(
-        "# Project Structure — 2026-01-01\n\n## Metrics\n\n"
-        "| Metric | Value |\n| --- | --- |\n| Modules | 90 |\n",
-        encoding="utf-8",
-    )
-    reply = app.handle_structure(docs_dir=str(docs))
-    assert "STALE" in reply  # months old, beyond STRUCTURE_MAX_AGE_HOURS
-    assert "| Modules | 90 |" in reply

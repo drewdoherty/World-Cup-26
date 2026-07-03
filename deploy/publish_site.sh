@@ -33,7 +33,6 @@ stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 # arb_data.json first — wca_betrecs.py reads it as an input (guaranteed-arb rows),
 # so refresh arbs BEFORE bet_recs. Each guarded so a single failure doesn't abort
 # the publish (mirrors the || true style above).
-"$PY" scripts/wca_arb_data.py  >/dev/null 2>&1 || true
 "$PY" scripts/wca_betrecs.py   >/dev/null 2>&1 || true
 # Mirror the freshly-built main-site feeds into the analytics feed dir. localhost
 # :8001 reads site-analytics/data/*.json directly and the :8002 lilac terminal is
@@ -41,7 +40,7 @@ stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 # froze on 2026-06-30, leaving both stale. Copy them here (after regen, before the
 # lilac build) so 8001 + 8002 track the live data. The analytics job's OWN feeds
 # (winrate/rigor/risk_pnl/clvbench/predledger) are written there separately.
-for _f in data scores_data scores_markets bet_recs arb_data exposure_data exposure_dashboard \
+for _f in data scores_data scores_markets bet_recs exposure_data exposure_dashboard \
           tracking_data advancement_data advancement_history forest_data linemove; do
   [ -f "site/$_f.json" ] && cp "site/$_f.json" "site-analytics/data/$_f.json" 2>/dev/null || true
 done
@@ -56,7 +55,7 @@ done
 #    the exact model 1X2 used by scores/exposure).
 git add site/data.json site/linemove.json site/scores_data.json site/scores_markets.json site/forest_data.json site/tracking_data.json \
         site/exposure_data.json site/exposure_dashboard.json site/advancement_history.json site/advancement_data.json \
-        site/bet_recs.json site/arb_data.json site-lilac/index.html \
+        site/bet_recs.json site-lilac/index.html \
         data/card_latest.md data/next_latest.md data/model_predictions.json \
         data/advancement_current_vs_pretournament.json
 if git diff --cached --quiet; then
