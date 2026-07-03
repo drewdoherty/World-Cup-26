@@ -132,6 +132,7 @@ _TELEGRAM_COMMANDS = [
     {"command": "betbuilder",  "description": "Team totals + player SoT/cards/fouls model fair odds"},
     {"command": "scores",      "description": "Predicted FT scorelines per fixture"},
     {"command": "accas",       "description": "4+ leg accumulators, next 5 matches"},
+    {"command": "today",       "description": "What to place right now — recs + PM ideas + boosts"},
     {"command": "pm",          "description": "Polymarket parked orders + trader status"},
     {"command": "settle",      "description": "Settle a bet: /settle <id> <outcome> [odds]"},
     {"command": "boost",       "description": "Price a bookmaker boost vs the model"},
@@ -150,6 +151,7 @@ HELP_TEXT = (
     "/betbuilder — team totals + player SoT/cards/fouls model fair odds (model-only; sportsbook markets)\n"
     "/scores — predicted FT scorelines per fixture\n"
     "/accas [value|edge|hedge|longshot|promo] — model accas; default=low-win favourites @ modest odds (edge=high-edge underdogs)\n"
+    "/today — what to place right now (recs + PM ideas + boosts, freshness-stamped)\n"
     "/pm — Polymarket parked orders + trader status\n"
     "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
     "/boost — price a bookmaker price-boost vs the model (usage below)\n"
@@ -2369,6 +2371,112 @@ def handle_confirmation(
     return None
 
 
+def handle_today(db_path: str = "data/wca.db",
+                 recs_path: str = "site/bet_recs.json",
+                 ideas_path: str = "site/pm_ideas.json",
+                 promos_path: str = "site/promos_data.json") -> str:
+    """`/today` — the desk's on-demand betting instructions, cache-composed.
+
+    One message answering "what do I place right now?": actionable bet recs
+    (Action Desk feed), ranked PM trade ideas (moneylines→longshots,
+    further-out first), and the live boost/offer reminder — every section
+    stamped with its feed age so stale never masquerades as current. Reads
+    caches only (no live API calls in a chat handler).
+    """
+    import json as _json
+
+    def _load(path):
+        try:
+            with open(path, "r", encoding="utf-8") as fh:
+                return _json.load(fh)
+        except Exception:
+            return None
+
+    def _age_str(gen):
+        try:
+            g = str(gen).replace(" UTC", "").replace("Z", "")[:19]
+            fmt = "%Y-%m-%dT%H:%M:%S" if "T" in g else "%Y-%m-%d %H:%M:%S"
+            age_h = (datetime.now(timezone.utc).replace(tzinfo=None)
+                     - datetime.strptime(g, fmt)).total_seconds() / 3600.0
+            flag = " ⚠STALE" if age_h > 3 else ""
+            return "%.1fh old%s" % (age_h, flag)
+        except Exception:
+            return "age unknown ⚠"
+
+    lines = ["📋 *Today — betting instructions* (cache-composed; ages shown)"]
+
+    recs = _load(recs_path)
+    if recs:
+        meta = recs.get("meta") or {}
+        lines.append("")
+        lines.append("*1) Bet recs* — %s" % _age_str(meta.get("generated")))
+        n_act = 0
+        for section, label in (("match_singles", "1X2"),
+                               ("advancement_futures", "ADV"),
+                               ("event_props", "PROP")):
+            for r in (recs.get(section) or []):
+                if n_act >= 8:
+                    break
+                stake = r.get("stake")
+                lines.append(
+                    "  %d. [%s] %s — %s @ %s | EV %+.1f%% | stake %s"
+                    % (n_act + 1, label,
+                       r.get("match") or r.get("team") or "?",
+                       r.get("selection") or r.get("stage") or "?",
+                       r.get("price") or r.get("odds") or "?",
+                       100.0 * float(r.get("ev_net") or r.get("ev") or 0.0),
+                       ("$%.2f" % stake) if isinstance(stake, (int, float)) else "?"))
+                n_act += 1
+        if n_act == 0:
+            lines.append("  _no actionable recs in the current feed_")
+        wh = meta.get("withheld_count")
+        if wh:
+            lines.append("  _withheld: %s (stale/gated — see Action Desk)_" % wh)
+    else:
+        lines.append("")
+        lines.append("*1) Bet recs* — feed missing ⚠ (publish job?)")
+
+    ideas = _load(ideas_path)
+    if ideas:
+        meta = ideas.get("meta") or {}
+        rows = ideas.get("ideas") or []
+        lines.append("")
+        lines.append("*2) PM trade ideas* — %s — confirm via `Y PM-<n>` (/pm lists numbers)"
+                     % _age_str(meta.get("generated")))
+        for i, r in enumerate(rows[:6], 1):
+            lines.append(
+                "  %d. [%s] %s — %s %s @ %s¢ (model %s¢, EV %+.1f%%) $%.2f, %sh out"
+                % (i, str(r.get("bucket", "?")).upper(), r.get("match", "?"),
+                   r.get("side", "BUY"), r.get("selection", "?"),
+                   r.get("price_c", "?"), r.get("model_c", "?"),
+                   float(r.get("ev_pct") or 0.0),
+                   float(r.get("size_usd") or 0.0),
+                   r.get("hours_out", "?")))
+        if not rows:
+            note = " (game picks on interval hold)" if meta.get("games_held") else ""
+            lines.append("  _no ideas parked%s_" % note)
+    else:
+        lines.append("")
+        lines.append("*2) PM trade ideas* — feed missing ⚠ (pmpropose writes it each run)")
+
+    promos = _load(promos_path)
+    lines.append("")
+    if promos:
+        cat = promos.get("promotions") or promos.get("promos") or []
+        lines.append("*3) Boosts/offers*: %d catalogued — verify in-app (catalog is "
+                     "scrape-limited). Builder-boost locks via the boostlock engine; "
+                     "matched pairs settlement-aligned (PM advancement ≠ 90-min!)."
+                     % (len(cat) if isinstance(cat, list) else 0))
+    else:
+        lines.append("*3) Boosts/offers*: promos feed missing ⚠")
+
+    lines.append("")
+    lines.append("_Sizing: combined £3,000±P&L pool, ¼-Kelly. Rules: +EV moneylines "
+                 "over longshots; further-out preferred; no cash <25%. 1X2 = 90-min; "
+                 "advancement incl. ET/pens._")
+    return "\n".join(lines)
+
+
 def handle_pm(db_path: str) -> str:
     """`/pm` — parked Polymarket orders + trader status (configured? dry-run?).
 
@@ -2575,6 +2683,8 @@ def dispatch(text: str, db_path: str) -> str:
         parts = text.strip().split()
         mode = parts[1].lower() if len(parts) > 1 else "value"
         return handle_accas(mode=mode, db_path=db_path)
+    if cmd == "/today":
+        return handle_today(db_path)
     if cmd == "/pm":
         return handle_pm(db_path)
     if cmd == "/settle":
