@@ -99,3 +99,25 @@ def test_shipped_bet_recs_open_exposure_is_structurally_sound():
     assert n_open != 59, "bet_recs.json regressed to the stale 59-open-bet count"
     # Provenance (ledger vs feed fallback) must stay disclosed in the feed.
     assert "source" in block
+
+
+def test_main_end_to_end_with_default_args(tmp_path, monkeypatch):
+    """Regression: main() must run with DEFAULT args (pm_bankroll=None resolved
+    from the rule) and absent feeds — the 2026-07-03 publish outage was a
+    %-format on args.pm_bankroll=None that no test executed."""
+    out = tmp_path / "recs.json"
+    monkeypatch.chdir(tmp_path)  # feeds/db all absent -> tolerant paths
+    rc = br.main_with_args([
+        "--db", str(tmp_path / "missing.db"),
+        "--out", str(out),
+    ]) if hasattr(br, "main_with_args") else None
+    if rc is None:
+        import sys
+        monkeypatch.setattr(sys, "argv", ["wca_betrecs.py",
+                                          "--db", str(tmp_path / "missing.db"),
+                                          "--out", str(out)])
+        rc = br.main()
+    assert rc == 0
+    payload = json.loads(out.read_text())
+    assert payload["meta"]["pm_pool"]["bankroll"] > 0
+    assert "advancement_futures" in payload["meta"]["coverage"]
