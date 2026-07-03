@@ -55,7 +55,7 @@ done
 #    the exact model 1X2 used by scores/exposure).
 git add site/data.json site/linemove.json site/scores_data.json site/scores_markets.json site/forest_data.json site/tracking_data.json \
         site/exposure_data.json site/exposure_dashboard.json site/advancement_history.json site/advancement_data.json \
-        site/bet_recs.json site-lilac/index.html \
+        site/bet_recs.json site/pm_ideas.json site-lilac/index.html \
         data/card_latest.md data/next_latest.md data/model_predictions.json \
         data/advancement_current_vs_pretournament.json
 if git diff --cached --quiet; then

@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import json
 import os
 import sys
 from pathlib import Path
@@ -597,6 +598,35 @@ def _build_scorer_proposals(
     return proposals
 
 
+PROB_BUCKETS = ((0.50, "moneyline"), (0.25, "mid"), (0.0, "longshot"))
+
+
+def prob_bucket(model_prob):
+    """'moneyline' (>=50c) / 'mid' (25-50c) / 'longshot' (<25c)."""
+    prob = float(model_prob or 0.0)
+    for lo, name in PROB_BUCKETS:
+        if prob >= lo:
+            return name
+    return "longshot"
+
+
+def hours_out(p, kick_by_match=None, now_dt=None):
+    """Hours until the proposal's fixture kicks off (0.0 when unknown)."""
+    import datetime as _dt
+
+    import pandas as _pd
+
+    ts = (kick_by_match or {}).get(str(p.get("match_desc") or ""))
+    if not ts:
+        return 0.0
+    try:
+        k = _pd.to_datetime(ts, utc=True).tz_convert(None)
+        ref = now_dt or _dt.datetime.utcnow()
+        return max(0.0, (k - ref).total_seconds() / 3600.0)
+    except Exception:
+        return 0.0
+
+
 def preference_sort_key(p, kick_by_match=None, now_dt=None):
     """Proposal ordering per the desk's selection rules (user, 2026-07-02).
 
@@ -608,22 +638,8 @@ def preference_sort_key(p, kick_by_match=None, now_dt=None):
        docs/research/pm_preferences_backtest_2026-07-02.md).
     3. EV descending breaks ties within a bucket.
     """
-    import datetime as _dt
-
-    import pandas as _pd
-
-    prob = float(p.get("model_prob") or 0.0)
-    bucket = 0 if prob >= 0.5 else (1 if prob >= 0.25 else 2)
-    hours_out = 0.0
-    ts = (kick_by_match or {}).get(str(p.get("match_desc") or ""))
-    if ts:
-        try:
-            k = _pd.to_datetime(ts, utc=True).tz_convert(None)
-            ref = now_dt or _dt.datetime.utcnow()
-            hours_out = max(0.0, (k - ref).total_seconds() / 3600.0)
-        except Exception:
-            hours_out = 0.0
-    return (bucket, -hours_out, -float(p.get("ev") or 0.0))
+    bucket = {"moneyline": 0, "mid": 1, "longshot": 2}[prob_bucket(p.get("model_prob"))]
+    return (bucket, -hours_out(p, kick_by_match, now_dt), -float(p.get("ev") or 0.0))
 
 
 def main() -> int:
@@ -631,6 +647,8 @@ def main() -> int:
         description="Produce Polymarket parked-order proposals from the card."
     )
     parser.add_argument("--db", default="data/wca.db", help="SQLite ledger path")
+    parser.add_argument("--ideas-out", default="site/pm_ideas.json",
+                        help="ranked trade-ideas site feed (written every run)")
     parser.add_argument(
         "--hours-ahead",
         type=float,
@@ -796,6 +814,40 @@ def main() -> int:
     )
     proposals = scorer_proposals + game_proposals
 
+    # Publish the ranked ideas as a site feed (localhost:8000 Action Desk
+    # panel; staged by deploy/publish_site.sh). Written on EVERY run — an
+    # honest empty list with a fresh stamp beats a stale panel.
+    ideas = []
+    for grp, plist in (("prop", scorer_proposals), ("game", game_proposals)):
+        for gp in plist:
+            ideas.append({
+                "group": grp,
+                "match": gp.get("match_desc", ""),
+                "selection": gp.get("player") or gp.get("outcome", ""),
+                "side": gp.get("side", "BUY"),
+                "price_c": round(float(gp.get("price") or 0.0) * 100.0, 1),
+                "model_c": round(float(gp.get("model_prob") or 0.0) * 100.0, 1),
+                "ev_pct": round(float(gp.get("ev") or 0.0) * 100.0, 1),
+                "size_usd": round(float(gp.get("size_usd") or 0.0), 2),
+                "hours_out": round(hours_out(gp, kick_by_match, now_dt), 1),
+                "bucket": prob_bucket(gp.get("model_prob")),
+            })
+    try:
+        with open(args.ideas_out, "w", encoding="utf-8") as fh:
+            json.dump({
+                "meta": {
+                    "generated": now_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "ranking": "+EV moneylines > mid > longshots; "
+                               "further-out fixtures first; EV tiebreak",
+                    "games_held": bool(not push_games and args.game_interval_hours > 0),
+                    "confirm": "Y PM-<n> in @gamble1_bot fires; PM_DRY_RUN gates execution",
+                },
+                "ideas": ideas,
+            }, fh, indent=2)
+        print("Ideas feed written: %s (%d ideas)" % (args.ideas_out, len(ideas)))
+    except Exception as exc:  # noqa: BLE001 — feed is best-effort, never blocks parking
+        print("WARNING: ideas feed write failed: %s" % exc, file=sys.stderr)
+
     total_size = sum(p["size_usd"] for p in proposals)
     print(
         "Funder (maker): %s | pool $%.0f | %d proposal(s) (%d props, %d game), total $%.2f"
@@ -886,9 +938,24 @@ def main() -> int:
         message_body += "\n"
 
     if n_games:
-        message_body += "*Game picks (1X2):*\n"
+        message_body += (
+            "*Game picks (1X2)* — _ranked: +EV moneylines → mid → longshots; "
+            "further-out fixtures first (more likely mispriced); EV tiebreak_\n"
+        )
+        _headers = {
+            "moneyline": "\n*Moneylines (model ≥50¢):*",
+            "mid": "\n*Mid-probability (25–50¢):*",
+            "longshot": "\n*Longshots (<25¢) — deprioritised (0-for-12 in backtests):*",
+        }
+        _seen_bucket = None
         for i in range(n_props, n_props + n_games):
-            message_body += "\n" + parked_texts[i]
+            gp = game_proposals[i - n_props]
+            b = prob_bucket(gp.get("model_prob"))
+            if b != _seen_bucket:
+                message_body += _headers[b] + "\n"
+                _seen_bucket = b
+            h = hours_out(gp, kick_by_match, now_dt)
+            message_body += "\n" + parked_texts[i] + ("  _(%dh out)_" % round(h) if h else "")
     elif not push_games and args.game_interval_hours > 0:
         next_in = max(0.0, args.game_interval_hours - hours_since_games)
         message_body += (
