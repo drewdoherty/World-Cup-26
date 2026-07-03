@@ -916,7 +916,7 @@ def main() -> int:
                 ),
                 "advancement_futures": (
                     "Monte Carlo sim vs Polymarket advancement markets. "
-                    "PM taker fee (3%% × p × (1-p)) applied. Quarter-Kelly on PM pool ($%.0f)." % args.pm_bankroll
+                    "PM taker fee (3%% × p × (1-p)) applied. Quarter-Kelly on PM pool ($%.0f)." % pm_pool_data["bankroll"]
                 ),
                 "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty.",
             },
