@@ -109,9 +109,10 @@ def test_corners_invalid_args():
 
 def test_cards_default_mean():
     m = CardsModel()
-    # WC18+22 fit: 3.41 cards/match (2nd yellow = 1 red)
-    assert m.mean_total() == pytest.approx(3.41)
-    assert m.mean_total(1.2, 1.1, 1.15) == pytest.approx(3.41 * 1.2 * 1.1 * 1.15)
+    # 90-min-only refit (2026-07-03): 3.29 cards/match (2nd yellow = 1 red);
+    # the legacy 3.41 was ET-contaminated.
+    assert m.mean_total() == pytest.approx(3.29)
+    assert m.mean_total(1.2, 1.1, 1.15) == pytest.approx(3.29 * 1.2 * 1.1 * 1.15)
 
 
 def test_cards_over_under_sum_to_one():
@@ -319,11 +320,11 @@ def test_corners_validation_new_args():
 def test_cards_fallback_identity():
     base = CardsModel()
     same = CardsModel(ref_factor=1.0)
-    assert same.mean_total() == base.mean_total() == pytest.approx(3.41)
+    assert same.mean_total() == base.mean_total() == pytest.approx(3.29)
     for line in (2.5, 3.5, 4.5):
         assert same.prob_over(line) == base.prob_over(line)
     # New ref_factor kwarg defaults to no-op.
-    assert base.mean_total(ref_factor=None) == pytest.approx(3.41)
+    assert base.mean_total(ref_factor=None) == pytest.approx(3.29)
 
 
 def test_cards_aggression_from_fouls():
@@ -341,7 +342,7 @@ def test_cards_aggression_from_fouls():
 
 def test_cards_ref_factor_scales_mean():
     m = CardsModel()
-    assert m.mean_total(ref_factor=1.2) == pytest.approx(3.41 * 1.2)
+    assert m.mean_total(ref_factor=1.2) == pytest.approx(3.29 * 1.2)
     assert m.prob_over(3.5, ref_factor=1.3) > m.prob_over(3.5)
 
 
