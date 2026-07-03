@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-03T19:52:52 -->
+<!-- generated: 2026-07-03T21:34:40 -->
 ⚽ *Next match* — Argentina vs Cape Verde
 Kickoff 2026-07-03 22:00:00+00:00
 
 *Winner* (model blend)
-  Argentina      model 85.2¢ · mkt 85.5¢ (Polymarket)  EV -0.4%
-  Draw           model 11.0¢ · mkt 10.5¢ (Polymarket)  EV +4.9% ✅  $3.83
-  Cape Verde     model  3.8¢ · mkt  3.5¢ (Polymarket)  EV +9.7% ✅  $2.32
+  Argentina      model 85.3¢ · mkt 85.5¢ (Polymarket)  EV -0.3%
+  Draw           model 11.0¢ · mkt 10.5¢ (Polymarket)  EV +5.0% ✅  $3.87
+  Cape Verde     model  3.7¢ · mkt  3.4¢ (Polymarket)  EV +11.3% ✅  $2.60
   _stake = ¼-Kelly @ £2000 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 9.1)
