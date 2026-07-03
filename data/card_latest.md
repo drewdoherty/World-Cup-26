@@ -1,5 +1,5 @@
-<!-- generated: 2026-07-03T11:02:14 -->
-*World Cup Alpha — bet card* (0 staked, 3 indicative picks, hit-prob ranked)
+<!-- generated: 2026-07-03T13:14:20 -->
+*World Cup Alpha — bet card* (0 staked, 4 indicative picks, hit-prob ranked)
 
 _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. Wire a 2nd book (Betfair creds) or set WCA_STAKE_SINGLE_SOURCE=1 to size them._
 
@@ -9,18 +9,21 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
 *2. [FAV] Mexico vs England* — England @ *2.53* via *polymarket*
     model 41.4% / mkt 39.3%  edge *+4.7%*  [elo 29% dc 49%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
-*3. [2ND-FAV] United States vs Belgium* — Belgium @ *2.90* via *polymarket*
+*3. [DRAW] Canada vs Morocco* — Draw @ *3.64* via *polymarket*
+    model 28.1% / mkt 27.6%  edge *+2.3%*  [elo 28% dc 29%]
+    stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
+*4. [2ND-FAV] United States vs Belgium* — Belgium @ *2.90* via *polymarket*
     model 39.0% / mkt 34.7%  edge *+13.0%*  [elo 33% dc 50%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
 
 *— CUT (excluded from staking, 8) —*
   x Paraguay vs France — Paraguay @ 22.22 (model 8.1%, +80.4% EV): below 20% hit-probability floor (model 8.1%) — too unlikely to return PnL even at +80.4% EV
   x Paraguay vs France — Draw @ 8.00 (model 16.5%, +32.0% EV): below 20% hit-probability floor (model 16.5%) — too unlikely to return PnL even at +32.0% EV
-  x Australia vs Egypt — Australia @ 3.77 (model 30.8%, +16.4% EV): outright-underdog longshot (model 30.8%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +16.4% EV
-  x Canada vs Morocco — Canada @ 5.71 (model 19.3%, +10.3% EV): below 20% hit-probability floor (model 19.3%) — too unlikely to return PnL even at +10.3% EV
+  x Canada vs Morocco — Canada @ 5.71 (model 19.4%, +11.1% EV): below 20% hit-probability floor (model 19.4%) — too unlikely to return PnL even at +11.1% EV
+  x Australia vs Egypt — Australia @ 3.77 (model 30.8%, +8.2% EV): outright-underdog longshot (model 30.8%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +8.2% EV
   x Portugal vs Spain — Portugal @ 4.44 (model 24.0%, +6.8% EV): outright-underdog longshot (model 24.0%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +6.8% EV
-  x Argentina vs Cape Verde — Draw @ 9.52 (model 11.1%, +5.3% EV): below 20% hit-probability floor (model 11.1%) — too unlikely to return PnL even at +5.3% EV
-  x Argentina vs Cape Verde — Cape Verde @ 25.97 (model 4.0%, +5.0% EV): below 20% hit-probability floor (model 4.0%) — too unlikely to return PnL even at +5.0% EV
+  x Argentina vs Cape Verde — Draw @ 9.52 (model 11.0%, +4.7% EV): below 20% hit-probability floor (model 11.0%) — too unlikely to return PnL even at +4.7% EV
+  x Argentina vs Cape Verde — Cape Verde @ 25.97 (model 4.0%, +4.4% EV): below 20% hit-probability floor (model 4.0%) — too unlikely to return PnL even at +4.4% EV
   x Colombia vs Ghana — Ghana @ 10.53 (model 9.9%, +4.0% EV): below 20% hit-probability floor (model 9.9%) — too unlikely to return PnL even at +4.0% EV
 
 *— REFERENCE, NOT SIZED (models + fair odds only) —*
@@ -37,14 +40,14 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
     O/U 2.5: over 37.6% / under 62.4%   BTTS 45.9%
 
 *Argentina vs Cape Verde*
-    xG: 2.64-0.46
-    2-0  16.2%  fair 6.19 (16.2%)  back >= 6.31 (15.8%)
-    3-0  14.0%  fair 7.15 (14.0%)  back >= 7.30 (13.7%)
-    1-0  12.1%  fair 8.23 (12.1%)  back >= 8.40 (11.9%)
-    4-0  9.1%  fair 11.03 (9.1%)  back >= 11.25 (8.9%)
-    2-1  7.6%  fair 13.21 (7.6%)  back >= 13.48 (7.4%)
-    3-1  6.5%  fair 15.27 (6.5%)  back >= 15.58 (6.4%)
-    O/U 2.5: over 60.1% / under 39.9%   BTTS 34.3%
+    xG: 2.65-0.45
+    2-0  16.2%  fair 6.18 (16.2%)  back >= 6.30 (15.9%)
+    3-0  14.0%  fair 7.15 (14.0%)  back >= 7.29 (13.7%)
+    1-0  12.2%  fair 8.22 (12.2%)  back >= 8.39 (11.9%)
+    4-0  9.1%  fair 11.02 (9.1%)  back >= 11.24 (8.9%)
+    2-1  7.6%  fair 13.20 (7.6%)  back >= 13.46 (7.4%)
+    3-1  6.6%  fair 15.26 (6.6%)  back >= 15.56 (6.4%)
+    O/U 2.5: over 60.2% / under 39.8%   BTTS 34.2%
 
 *Colombia vs Ghana*
     xG: 1.98-0.65
@@ -58,13 +61,13 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
 
 *Canada vs Morocco*
     xG: 0.76-1.41
-    0-1  16.0%  fair 6.26 (16.0%)  back >= 6.38 (15.7%)
-    1-1  12.6%  fair 7.95 (12.6%)  back >= 8.11 (12.3%)
-    0-0  11.8%  fair 8.49 (11.8%)  back >= 8.66 (11.6%)
-    0-2  11.5%  fair 8.69 (11.5%)  back >= 8.87 (11.3%)
-    1-2  8.9%  fair 11.21 (8.9%)  back >= 11.43 (8.7%)
-    1-0  7.9%  fair 12.70 (7.9%)  back >= 12.95 (7.7%)
-    O/U 2.5: over 37.0% / under 63.0%   BTTS 40.7%
+    0-1  15.9%  fair 6.30 (15.9%)  back >= 6.42 (15.6%)
+    1-1  12.7%  fair 7.90 (12.7%)  back >= 8.06 (12.4%)
+    0-0  11.9%  fair 8.43 (11.9%)  back >= 8.60 (11.6%)
+    0-2  11.4%  fair 8.75 (11.4%)  back >= 8.92 (11.2%)
+    1-2  8.9%  fair 11.27 (8.9%)  back >= 11.50 (8.7%)
+    1-0  7.9%  fair 12.61 (7.9%)  back >= 12.86 (7.8%)
+    O/U 2.5: over 36.9% / under 63.1%   BTTS 40.8%
 
 *Paraguay vs France*
     xG: 0.61-2.03

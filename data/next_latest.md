@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-03T11:02:14 -->
+<!-- generated: 2026-07-03T13:14:20 -->
 ⚽ *Next match* — Australia vs Egypt
 Kickoff 2026-07-03 18:00:00+00:00
 
