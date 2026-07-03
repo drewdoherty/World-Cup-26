@@ -207,6 +207,32 @@
 
   <main id="arb-main">
 
+    <!-- ------------------------------------------------------------- PM TRADE IDEAS -->
+    <!-- Ranked exactly like the /pm Telegram digest: +EV moneylines before
+         mid-prob before longshots; further-out fixtures first; EV tiebreak.
+         Feed: site/pm_ideas.json, written by wca_pm_propose on every run.
+         Self-contained renderer (inline script at the bottom of this file) so
+         it cannot break the main bet-recs app and vice versa. -->
+    <section class="arb-section" id="sec-pm-ideas">
+      <div class="arb-section-head">
+        <span class="arb-section-title">00 // PM Trade Ideas</span>
+        <span class="arb-badge" title="Ranking: +EV moneylines (model ≥50¢) → mid (25–50¢) → longshots (<25¢, deprioritised — 0-for-12 in backtests); further-out fixtures first; EV tiebreak. Confirm with Y PM-&lt;n&gt; in @gamble1_bot.">RANKED · Y PM-n FIRES</span>
+        <span class="arb-section-count" id="cnt-pm-ideas">0 ideas</span>
+        <span class="arb-section-freshness" id="age-pm-ideas"></span>
+      </div>
+      <div class="arb-table-wrap" id="tbl-pm-ideas-wrap">
+        <table class="arb-table" id="tbl-pm-ideas">
+          <thead>
+            <tr>
+              <th>Bucket</th><th>Match</th><th>Selection</th><th>Side</th>
+              <th>Price ¢</th><th>Model ¢</th><th>EV %</th><th>Size $</th><th>Kickoff</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-pm-ideas"><tr><td colspan="9" class="dim">loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- ---------------------------------------------------------------- MATCH SINGLES -->
     <section class="arb-section" id="sec-singles">
       <div class="arb-section-head">
@@ -384,5 +410,63 @@
   </footer>
 </div>
 <script src="./arb.js"></script>
+<script>
+/* PM Trade Ideas panel — self-contained (independent of arb.js). Renders
+   site/pm_ideas.json in the exact /pm digest order the feed already carries:
+   +EV moneylines → mid → longshots; further-out first; EV tiebreak. */
+(function () {
+  var BUCKET_LABEL = { moneyline: "ML ≥ 50¢", mid: "MID 25–50¢", longshot: "LONGSHOT" };
+  var tbody = document.getElementById("tbody-pm-ideas");
+  var cnt = document.getElementById("cnt-pm-ideas");
+  var age = document.getElementById("age-pm-ideas");
+  if (!tbody) return;
+  function esc(x) {
+    return String(x == null ? "" : x).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function hoursLabel(h) {
+    if (!h && h !== 0) return "—";
+    return h >= 1 ? Math.round(h) + "h out" : "<1h";
+  }
+  fetch("pm_ideas.json", { cache: "no-store" })
+    .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(function (d) {
+      var ideas = (d && d.ideas) || [];
+      var meta = (d && d.meta) || {};
+      cnt.textContent = ideas.length + " idea" + (ideas.length === 1 ? "" : "s");
+      if (meta.generated) {
+        var ageH = Math.max(0, (Date.now() - Date.parse(meta.generated)) / 36e5);
+        age.textContent = isFinite(ageH) ? (ageH < 1 ? Math.round(ageH * 60) + "m old" : ageH.toFixed(1) + "h old") : "";
+        if (isFinite(ageH) && ageH > 1.5) age.textContent += " ⚠ STALE";
+      }
+      if (!ideas.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="dim">no ideas parked' +
+          (meta.games_held ? " (game picks on interval hold)" : "") + "</td></tr>";
+        return;
+      }
+      var rows = "";
+      ideas.forEach(function (i) {
+        var evCls = (i.ev_pct || 0) >= 0 ? "pos" : "warn";
+        rows += "<tr" + (i.bucket === "longshot" ? ' style="opacity:.55"' : "") + ">" +
+          "<td>" + esc(BUCKET_LABEL[i.bucket] || i.bucket) + "</td>" +
+          "<td>" + esc(i.match) + "</td>" +
+          "<td>" + esc(i.selection) + (i.group === "prop" ? " (anytime)" : "") + "</td>" +
+          "<td>" + esc(i.side) + "</td>" +
+          "<td>" + esc(i.price_c) + "¢</td>" +
+          "<td>" + esc(i.model_c) + "¢</td>" +
+          '<td class="' + evCls + '">' + (i.ev_pct >= 0 ? "+" : "") + esc(i.ev_pct) + "%</td>" +
+          "<td>$" + esc(i.size_usd) + "</td>" +
+          "<td>" + hoursLabel(i.hours_out) + "</td></tr>";
+      });
+      tbody.innerHTML = rows;
+    })
+    .catch(function () {
+      cnt.textContent = "feed unavailable";
+      tbody.innerHTML = '<tr><td colspan="9" class="dim">pm_ideas.json not published yet ' +
+        "(written by the next pmpropose run on the mini)</td></tr>";
+    });
+})();
+</script>
 </body>
 </html>
