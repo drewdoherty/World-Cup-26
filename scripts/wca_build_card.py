@@ -362,10 +362,14 @@ def main() -> None:
             print("ERROR: card generation failed: %s" % exc, file=sys.stderr)
             sys.exit(1)
 
-        # Reference scorelines appendix removed from /card (user, 2026-07-02):
-        # the scoreline matrices remain available on /scores; score_cards still
-        # feeds that card below.
-        card_text = format_ranked_card(ranked, pools, bank=pool_bank)
+        # Classic card layout restored (user, 2026-07-03, from the reference
+        # screenshots): scorelines appendix back (REFERENCE-ONLY, never sized);
+        # only the bankroll-model footer stays removed.
+        card_text = (
+            format_ranked_card(ranked, pools, bank=pool_bank)
+            + "\n\n*— REFERENCE, NOT SIZED (models + fair odds only) —*\n"
+            + format_scores(score_cards)
+        )
 
         write_card(card_text, path=args.out, ts_utc=now_str)
 
