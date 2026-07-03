@@ -193,6 +193,27 @@ def main(argv=None) -> int:
         "teams": teams,
         "groups": groups,
     }
+    # NEVER clobber a PM-aware feed with a PM-blind rebuild (2026-07-03): a
+    # host that cannot reach Polymarket (the mini's network block) used to
+    # overwrite a good committed feed with n_pm_markets=0, silently killing
+    # every advancement rec downstream. Same principle as the card cache's
+    # empty-result guard: bad data never replaces good data.
+    if n_pm == 0:
+        try:
+            with open(args.out, "r", encoding="utf-8") as fh:
+                existing = json.load(fh)
+            if (existing.get("meta") or {}).get("n_pm_markets"):
+                print(
+                    "%s: rebuild is PM-BLIND (n_pm_markets=0) but the existing "
+                    "feed has %s live markets — KEEPING the existing feed "
+                    "(fix PM reachability on this host, or rebuild where PM "
+                    "is reachable)."
+                    % (args.out, (existing.get("meta") or {}).get("n_pm_markets"))
+                )
+                return 0
+        except Exception:
+            pass  # no existing/unreadable feed -> write the honest blind one
+
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as fh:
         json.dump(data, fh, indent=2, ensure_ascii=False)
