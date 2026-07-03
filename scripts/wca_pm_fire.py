@@ -441,6 +441,42 @@ def fire(
         "match_desc": "%s %s (advancement)" % (rec.get("team"), rec.get("stage")),
     }
 
+    # PARK-AND-APPROVE (user, 2026-07-03 — the DEFAULT): the button never
+    # places directly any more. The fully-resolved, sized proposal is parked
+    # as PM-<n> (pm_parked table, cross-process) and DM'd to the admin, who
+    # fires it from Telegram with `Y PM-<n>` — the same human gate as daemon
+    # proposals. WCA_FIRE_MODE=direct restores the old immediate-fire path.
+    if os.environ.get("WCA_FIRE_MODE", "park").strip().lower() != "direct":
+        try:
+            from wca.bot.app import _alert_admin, push_parked_order
+            parked_text = push_parked_order(proposal)
+        except Exception as exc:  # noqa: BLE001 — park failure must refuse cleanly
+            conn.close()
+            return _fail("park-for-approval failed: %s" % exc)
+        try:
+            _record_fire(
+                conn, rec_id=rec_id, nonce=nonce, ts_utc=ts_utc,
+                dry_run=dry_run, usd=usd, size=size_shares, price=live_price,
+                token_id=str(resolved["token_id"]), order_id=None, bid=None,
+                ok=True, message="parked for TG approval: %s" % parked_text,
+            )
+        finally:
+            conn.close()
+        _alert_admin(
+            "🔔 PLACE button parked an order — reply to fire:\n%s\n"
+            "($%.2f @ %.3f, %s)\nY %s fires · N %s discards"
+            % (parked_text, usd, live_price,
+               proposal.get("match_desc") or proposal.get("label") or "",
+               parked_text.split(" ")[0], parked_text.split(" ")[0])
+        )
+        return {
+            "ok": True, "dry_run": dry_run, "order_id": None, "bid": None,
+            "usd": usd, "size": round(size_shares, 6), "price": live_price,
+            "rec_id": rec_id, "parked": True,
+            "message": "PARKED for approval — check Telegram; reply "
+                       "Y %s to fire" % parked_text.split(" ")[0],
+        }
+
     if execute_fn is None:
         from wca.bot.app import _execute_parked_order as execute_fn
 
