@@ -110,12 +110,10 @@ def test_card_shows_each_pick_in_its_own_currency():
              stakes={GBP_POOL_NAME: 0.0, PM_POOL_NAME: 40.0}),
     ]
     out = format_ranked_card(RankedCard(picks=picks, cut=[]), pools)
-    # Display convention (2026-07-02): everything is SHOWN in $ (GBP stakes at
-    # the fixed $1.33/£ rate) but each pick is still SIZED in its own pool's
-    # currency — £30 × 1.33 = $39.90, PM already $40.
-    assert "stake *$39.90*" in out
-    assert "stake *$40.00*" in out
-    # Bankroll boilerplate footer removed (user, 2026-07-02).
+    # Classic format restored (user, 2026-07-03): each pick shown in its OWN
+    # pool currency again. The bankroll-model footer stays removed.
+    assert "stake: gbp £30.00" in out
+    assert "stake: pm $40.00" in out
     assert "Bankroll model" not in out
     assert "actual capital" not in out
 
@@ -145,8 +143,7 @@ def test_legacy_single_pool_still_renders():
     pool = PoolConfig(name="main", bankroll=2000.0)
     picks = [_rec(venue="smarkets", stakes={"main": 12.0})]
     out = format_ranked_card(RankedCard(picks=picks, cut=[]), pool)
-    # £12 pool stake shown in $ at the fixed rate: 12 × 1.33 = $15.96.
-    assert "stake *$15.96*" in out
+    assert "stake: main £12.00" in out
 
 
 # ---------------------------------------------------------------------------
