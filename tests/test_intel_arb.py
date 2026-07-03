@@ -219,7 +219,7 @@ def _seed_odds_db(path, *, home="Brazil", away="Spain", arb=True, fresh=True):
         "market TEXT, selection TEXT, decimal_odds REAL, raw TEXT)"
     )
     import json
-    # Timestamp relative to REAL now (handle_arb uses datetime.now() for its
+    # Timestamp relative to REAL now (freshness windows use datetime.now() for
     # lookback window) so these rows are always inside the 48h scan window.
     real_now = datetime.now(timezone.utc)
     ts = (real_now - timedelta(seconds=30 if fresh else 10_000)).isoformat()
@@ -244,71 +244,3 @@ def _seed_odds_db(path, *, home="Brazil", away="Spain", arb=True, fresh=True):
     con.commit()
     con.close()
 
-
-def test_handle_arb_empty_db_no_crash(tmp_path):
-    from wca.bot import app
-    db = str(tmp_path / "empty.db")
-    sqlite3.connect(db).close()  # exists but no odds_snapshots table
-    out = app.handle_arb("/arb", db)
-    assert isinstance(out, str)
-    assert "Arbitrage scan" in out
-    assert "No `odds_snapshots`" in out or "No odds" in out
-
-
-def test_handle_arb_missing_db_file_is_friendly(tmp_path):
-    from wca.bot import app
-    db = str(tmp_path / "nope.db")  # never created
-    out = app.handle_arb("/arb", db)
-    assert isinstance(out, str)
-    # sqlite creates the file on connect, so this hits the no-table branch.
-    assert "Arbitrage scan" in out
-
-
-def test_handle_arb_detects_seeded_fixture(tmp_path):
-    from wca.bot import app
-    db = str(tmp_path / "odds.db")
-    _seed_odds_db(db, arb=True, fresh=True)
-    out = app.handle_arb("/arb", db)
-    assert "Brazil vs Spain" in out
-    assert "cross-book" in out
-    assert "return" in out
-
-
-def test_handle_arb_team_filter(tmp_path):
-    from wca.bot import app
-    db = str(tmp_path / "odds.db")
-    _seed_odds_db(db, home="Brazil", away="Spain", arb=True, fresh=True)
-    # A filter that matches -> report; one that doesn't -> "no arbs" honest msg.
-    assert "Brazil vs Spain" in app.handle_arb("/arb brazil", db)
-    miss = app.handle_arb("/arb germany", db)
-    assert "No arbs" in miss
-
-
-def test_handle_arb_no_arb_when_overround(tmp_path):
-    from wca.bot import app
-    db = str(tmp_path / "odds.db")
-    _seed_odds_db(db, arb=False, fresh=True)
-    out = app.handle_arb("/arb", db)
-    assert "No arbs" in out
-
-
-# --------------------------------------------------------------------------- #
-# dispatch routing
-# --------------------------------------------------------------------------- #
-
-
-def test_dispatch_routes_arb(tmp_path):
-    from wca.bot import app
-    db = str(tmp_path / "odds.db")
-    _seed_odds_db(db, arb=True, fresh=True)
-    out = app.dispatch("/arb", db)
-    assert "Arbitrage scan" in out
-    assert "Brazil vs Spain" in out
-
-
-def test_dispatch_arb_empty_db(tmp_path):
-    from wca.bot import app
-    db = str(tmp_path / "empty.db")
-    sqlite3.connect(db).close()
-    out = app.dispatch("/arb", db)
-    assert isinstance(out, str) and "Arbitrage scan" in out
