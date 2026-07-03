@@ -203,7 +203,7 @@ class TestFX:
 
     def test_pm_futures_currency_usd(self):
         """Advancement futures carry USD currency."""
-        adv = {"meta": {"generated": "2099-12-31 20:00:00 UTC", "stages": ["QF"]}, "teams": [
+        adv = {"meta": {"generated": "2099-12-31 20:00:00 UTC", "stages": ["QF"], "n_pm_markets": 12}, "teams": [
             {"team": "TestTeam", "group": "A",
              "model": {"QF": 0.60},
              "pm": {"QF": {"pm": 0.45, "edge_adj": 0.10}},
@@ -269,7 +269,7 @@ class TestPromoAndStaleGates:
 
     def test_stale_advancement_withheld(self):
         """Advancement futures with stale age go to withheld."""
-        adv = {"meta": {"generated": "2020-01-01 00:00:00 UTC", "stages": ["QF"]}, "teams": [
+        adv = {"meta": {"generated": "2020-01-01 00:00:00 UTC", "stages": ["QF"], "n_pm_markets": 12}, "teams": [
             {"team": "OldTeam", "group": "A",
              "model": {"QF": 0.60},
              "pm": {"QF": {"pm": 0.45, "edge_adj": 0.10}},
@@ -417,7 +417,7 @@ class TestUnsupportedProps:
 class TestAdvancementFutures:
     def _adv_data(self, pm_price: float = 0.40, model_prob: float = 0.55) -> Dict:
         return {
-            "meta": {"generated": "2099-12-31 20:00:00 UTC", "stages": ["QF"]},
+            "meta": {"generated": "2099-12-31 20:00:00 UTC", "stages": ["QF"], "n_pm_markets": 12},
             "teams": [{
                 "team": "TeamX",
                 "group": "A",
