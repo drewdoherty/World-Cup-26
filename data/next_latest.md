@@ -1,25 +1,25 @@
-<!-- generated: 2026-07-04T20:25:07 -->
-⚽ *Next match* — Paraguay vs France
-Kickoff 2026-07-04 21:00:00+00:00
+<!-- generated: 2026-07-04T21:01:59 -->
+⚽ *Next match* — Brazil vs Norway
+Kickoff 2026-07-05 20:00:00+00:00
 
 *Winner* (model blend)
-  Paraguay       model  8.7¢ · mkt  4.5¢ (Polymarket)  EV +93.6% ✅  $47.86
-  Draw           model 17.3¢ · mkt 13.5¢ (Polymarket)  EV +28.3% ✅  $47.85
-  France         model 74.0¢ · mkt 82.0¢ (betfair_ex_uk)  EV -9.8%
+  Brazil         model 57.9¢ · mkt 53.2¢ (betfair_ex_uk)  EV +8.8% ✅  $108.68
+  Draw           model 23.7¢ · mkt 26.3¢ (betfair_ex_uk)  EV -9.9%
+  Norway         model 18.4¢ · mkt 20.5¢ (Polymarket)  EV -10.2%
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
-*Corners* (model, exp 8.6)
-  O/U 8.5: over 48.7¢ / under 51.3¢ (model prices)
+*Corners* (model, exp 9.2)
+  O/U 8.5: over 55.7¢ / under 44.3¢ (model prices)
 
-*Top goalscorers* — from the cached /goalscorers card (as of 2026-07-04T11:16:36)
+*Top goalscorers* — from the cached /goalscorers card (as of 2026-07-04T20:40:27)
 _top anytime (both teams — add squad to split + FGS)_
-  Kylian Mbappe         1.61 (Betfair)  imp 62%
-  Jean-Philippe Mateta  2.20 (William Hill)  imp 45%
-  Marcus Thuram         2.25 (William Hill)  imp 44%
-  Ousmane Dembele       2.58 (Betfair)  imp 39%
-  Rayan Cherki          3.00 (Betfair)  imp 33%
-  Michael Olise         3.05 (Betfair)  imp 33%
+  Erling Braut Haaland  2.56 (Betfair)  imp 39%
+  Neymar                2.62 (William Hill)  imp 38%
+  Igor Thiago Nascimen  2.70 (William Hill)  imp 37%
+  Raphael Dias Belloli  2.80 (William Hill)  imp 36%
+  Vinicius Junior       2.84 (Betfair)  imp 35%
+  Endrick Felipe Morei  3.00 (Betfair)  imp 33%
 
 *Scorelines* (top 6)
-0-1 16.4% | 0-2 15.3% | 1-2 11.2% | 0-3 9.2% | 1-1 8.1% | 1-3 6.7%
-  O/U 2.5: over 49.3% / under 50.7%   BTTS 41.7%
+1-1 11.3% | 2-0 9.7% | 1-0 8.3% | 2-1 8.1% | 3-0 7.3% | 0-0 6.2%
+  O/U 2.5: over 56.9% / under 43.1%   BTTS 53.1%
