@@ -1,26 +1,25 @@
-<!-- generated: 2026-07-03T17:57:18 -->
-⚽ *Next match* — Australia vs Egypt
-Kickoff 2026-07-03 18:00:00+00:00
+<!-- generated: 2026-07-04T05:00:38 -->
+⚽ *Next match* — Canada vs Morocco
+Kickoff 2026-07-04 17:00:00+00:00
 
 *Winner* (model blend)
-  Australia      model 30.9¢ · mkt 25.6¢ (matchbook)  EV +20.7% ✅  $77.38
-  Draw           model 32.6¢ · mkt 34.5¢ (leovegas)  EV -5.4%
-  Egypt          model 36.4¢ · mkt 38.2¢ (betfair_ex_uk)  EV -4.6%
+  Canada         model 20.4¢ · mkt 18.5¢ (betfair_ex_uk)  EV +10.2% ✅  $25.22
+  Draw           model 28.5¢ · mkt 28.5¢ (Polymarket)  EV +0.0%  $0.14
+  Morocco        model 51.1¢ · mkt 52.5¢ (Polymarket)  EV -2.7%
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.2)
-  O/U 8.5: over 44.1¢ / under 55.9¢ (model prices)
+  O/U 8.5: over 43.4¢ / under 56.6¢ (model prices)
 
 *Top goalscorers* — from the cached /goalscorers card (as of 2026-07-03T17:29:08)
-_Australia_
-  Nestory Irankunda  (0.23 g/g)  ⭐ most likely
-    Any  bk 4.90 (Betfair) / PM 5.13 | model 11.13 -56%
-    1st  bk 10.00 (Betfair) / PM -- | model 26.09 -62%
-  Cristian Volpato  (0.13 g/g)
-    Any  bk 8.20 (Betfair) / PM -- | model 18.40 -55%
-    1st  bk 19.50 (Betfair) / PM -- | model 43.96 -56%
-_basis: goals/game = market-implied xG/game (-ln(1-anytime prob)); no per-player 2026 goal counts are tracked; 10 market player(s) not in squad lists; no PM 1+ goals market: Cristian Volpato; Polymarket has no per-player first-goalscorer market; stake = ¼-Kelly vs best book where the player-level model (StatsBomb npxg-share × DC λ) shows +EV_
+_top anytime (both teams — add squad to split + FGS)_
+  Ayoub El Kaabi        2.88 (William Hill)  imp 35%
+  Soufiane Rahimi       2.88 (William Hill)  imp 35%
+  Ismael Saibari        2.96 (Betfair)  imp 34%
+  Mohamed Amine Sbai    3.75 (William Hill)  imp 27%
+  Brahim Diaz           3.80 (Betfair)  imp 26%
+  Jonathan David        4.90 (Betfair)  imp 20%
 
 *Scorelines* (top 6)
-1-1 15.0% | 0-0 12.8% | 0-1 12.4% | 1-0 10.3% | 1-2 7.8% | 0-2 7.0%
-  O/U 2.5: over 36.5% / under 63.5%   BTTS 45.1%
+0-1 15.8% | 1-1 12.7% | 0-0 12.2% | 0-2 11.2% | 1-2 8.5% | 1-0 8.5%
+  O/U 2.5: over 36.0% / under 64.0%   BTTS 40.2%
