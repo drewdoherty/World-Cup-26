@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-04T14:01:59 -->
+<!-- generated: 2026-07-04T15:34:18 -->
 *World Cup Alpha — bet card* (0 staked, 3 indicative picks, hit-prob ranked)
 
 _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. Wire a 2nd book (Betfair creds) or set WCA_STAKE_SINGLE_SOURCE=1 to size them._
@@ -10,27 +10,27 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
     model 41.4% / mkt 39.3%  edge *+4.9%*  [elo 29% dc 50%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
 *3. [FAV] United States vs Belgium* — Belgium @ *2.67* via *polymarket*
-    model 40.5% / mkt 37.3%  edge *+8.1%*  [elo 33% dc 49%]
+    model 40.3% / mkt 37.0%  edge *+7.6%*  [elo 33% dc 49%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
 
 *— CUT (excluded from staking, 4) —*
-  x Paraguay vs France — Paraguay @ 22.22 (model 8.2%, +82.4% EV): below 20% hit-probability floor (model 8.2%) — too unlikely to return PnL even at +82.4% EV
-  x Paraguay vs France — Draw @ 8.00 (model 16.6%, +32.5% EV): below 20% hit-probability floor (model 16.6%) — too unlikely to return PnL even at +32.5% EV
-  x Canada vs Morocco — Canada @ 6.06 (model 18.5%, +5.9% EV): below 20% hit-probability floor (model 18.5%) — too unlikely to return PnL even at +5.9% EV
+  x Paraguay vs France — Paraguay @ 22.22 (model 8.2%, +41.2% EV): below 20% hit-probability floor (model 8.2%) — too unlikely to return PnL even at +41.2% EV
+  x Paraguay vs France — Draw @ 8.00 (model 16.6%, +16.3% EV): below 20% hit-probability floor (model 16.6%) — too unlikely to return PnL even at +16.3% EV
+  x Canada vs Morocco — Canada @ 6.06 (model 18.8%, +6.9% EV): below 20% hit-probability floor (model 18.8%) — too unlikely to return PnL even at +6.9% EV
   x Portugal vs Spain — Portugal @ 4.26 (model 24.4%, +3.7% EV): outright-underdog longshot (model 24.4%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +3.7% EV
 
 *— REFERENCE, NOT SIZED (models + fair odds only) —*
 *World Cup Alpha — scorelines* (8 fixtures)
 
 *Canada vs Morocco*
-    xG: 0.74-1.42
-    0-1  16.1%  fair 6.21 (16.1%)  back >= 6.34 (15.8%)
-    1-1  12.7%  fair 7.85 (12.7%)  back >= 8.01 (12.5%)
-    0-0  12.0%  fair 8.35 (12.0%)  back >= 8.51 (11.7%)
-    0-2  11.6%  fair 8.60 (11.6%)  back >= 8.77 (11.4%)
-    1-2  9.0%  fair 11.17 (9.0%)  back >= 11.39 (8.8%)
-    1-0  7.6%  fair 13.22 (7.6%)  back >= 13.49 (7.4%)
-    O/U 2.5: over 36.8% / under 63.2%   BTTS 40.7%
+    xG: 0.75-1.41
+    0-1  15.9%  fair 6.29 (15.9%)  back >= 6.42 (15.6%)
+    1-1  12.9%  fair 7.75 (12.9%)  back >= 7.90 (12.7%)
+    0-0  12.1%  fair 8.24 (12.1%)  back >= 8.40 (11.9%)
+    0-2  11.5%  fair 8.71 (11.5%)  back >= 8.89 (11.3%)
+    1-2  8.8%  fair 11.31 (8.8%)  back >= 11.54 (8.7%)
+    1-0  7.7%  fair 13.01 (7.7%)  back >= 13.27 (7.5%)
+    O/U 2.5: over 36.7% / under 63.3%   BTTS 40.8%
 
 *Paraguay vs France*
     xG: 0.62-2.02
@@ -63,14 +63,14 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
     O/U 2.5: over 51.6% / under 48.4%   BTTS 56.4%
 
 *United States vs Belgium*
-    xG: 1.51-1.79
-    1-1  12.0%  fair 8.32 (12.0%)  back >= 8.48 (11.8%)
-    2-1  7.9%  fair 12.71 (7.9%)  back >= 12.97 (7.7%)
-    2-2  7.8%  fair 12.79 (7.8%)  back >= 13.05 (7.7%)
-    1-2  7.6%  fair 13.08 (7.6%)  back >= 13.35 (7.5%)
-    0-2  5.4%  fair 18.49 (5.4%)  back >= 18.86 (5.3%)
-    0-1  5.2%  fair 19.38 (5.2%)  back >= 19.77 (5.1%)
-    O/U 2.5: over 63.4% / under 36.6%   BTTS 66.5%
+    xG: 1.52-1.78
+    1-1  11.9%  fair 8.37 (11.9%)  back >= 8.54 (11.7%)
+    2-1  8.0%  fair 12.56 (8.0%)  back >= 12.81 (7.8%)
+    2-2  7.8%  fair 12.88 (7.8%)  back >= 13.14 (7.6%)
+    1-2  7.6%  fair 13.15 (7.6%)  back >= 13.41 (7.5%)
+    0-2  5.4%  fair 18.59 (5.4%)  back >= 18.96 (5.3%)
+    1-0  5.2%  fair 19.18 (5.2%)  back >= 19.57 (5.1%)
+    O/U 2.5: over 63.5% / under 36.5%   BTTS 66.5%
 
 *Portugal vs Spain*
     xG: 1.09-1.60
@@ -93,11 +93,11 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
     O/U 2.5: over 50.4% / under 49.6%   BTTS 41.6%
 
 *Switzerland vs Colombia*
-    xG: 1.07-1.43
-    1-1  13.9%  fair 7.21 (13.9%)  back >= 7.35 (13.6%)
-    0-1  10.5%  fair 9.49 (10.5%)  back >= 9.68 (10.3%)
-    0-0  9.2%  fair 10.87 (9.2%)  back >= 11.09 (9.0%)
-    1-2  8.7%  fair 11.56 (8.7%)  back >= 11.79 (8.5%)
-    0-2  8.2%  fair 12.19 (8.2%)  back >= 12.43 (8.0%)
-    1-0  8.0%  fair 12.51 (8.0%)  back >= 12.76 (7.8%)
+    xG: 1.07-1.44
+    1-1  13.9%  fair 7.18 (13.9%)  back >= 7.33 (13.6%)
+    0-1  10.6%  fair 9.47 (10.6%)  back >= 9.66 (10.4%)
+    0-0  9.2%  fair 10.84 (9.2%)  back >= 11.05 (9.0%)
+    1-2  8.7%  fair 11.53 (8.7%)  back >= 11.76 (8.5%)
+    0-2  8.2%  fair 12.16 (8.2%)  back >= 12.40 (8.1%)
+    1-0  7.9%  fair 12.61 (7.9%)  back >= 12.86 (7.8%)
     O/U 2.5: over 45.6% / under 54.4%   BTTS 51.3%
