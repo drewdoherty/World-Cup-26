@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-04 09:39:43 UTC"
+    "generated": "2026-07-04 11:56:37 UTC"
   },
   "fixtures": [
     {
@@ -8,70 +8,70 @@
       "scores": [
         {
           "score": "0-1",
-          "prob": 16.0,
-          "fair": 6.27,
+          "prob": 16.2,
+          "fair": 6.16,
           "pm_prob": 14.5
         },
         {
           "score": "1-1",
           "prob": 12.8,
-          "fair": 7.79,
+          "fair": 7.84,
           "pm_prob": 14.5
         },
         {
           "score": "0-0",
           "prob": 12.3,
-          "fair": 8.11,
+          "fair": 8.16,
           "pm_prob": 8.5
         },
         {
           "score": "0-2",
-          "prob": 11.4,
-          "fair": 8.75,
+          "prob": 11.6,
+          "fair": 8.6,
           "pm_prob": 11.5
         },
         {
           "score": "1-2",
-          "prob": 8.7,
-          "fair": 11.55,
+          "prob": 8.8,
+          "fair": 11.35,
           "pm_prob": 11.5
         },
         {
           "score": "1-0",
-          "prob": 8.1,
-          "fair": 12.42,
+          "prob": 7.7,
+          "fair": 12.91,
           "pm_prob": 6.5
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 36.1,
-        "under": 63.9
+        "over": 36.2,
+        "under": 63.8
       },
-      "btts": 40.3,
+      "btts": 40.2,
       "model_1x2": {
-        "home": 0.193138,
-        "draw": 0.287537,
-        "away": 0.519325
+        "home": 0.185737,
+        "draw": 0.285712,
+        "away": 0.52855
       },
       "approx_1x2": false,
       "venues": [
         {
           "venue": "polymarket",
           "selection_prices": {
-            "home": 5.7143,
+            "home": 6.0606,
             "draw": 3.5088,
-            "away": 1.8692
+            "away": 1.8018
           },
           "implied": {
-            "home": 0.17499956250109375,
+            "home": 0.165000165000165,
             "draw": 0.28499772001823986,
-            "away": 0.5349882302589343
+            "away": 0.555000555000555
           },
           "edge_vs_model": {
-            "home": 0.10364847340000005,
-            "draw": 0.008909825599999976,
-            "away": -0.0292777099999999
+            "home": 0.12567766219999998,
+            "draw": 0.0025062656000001127,
+            "away": -0.047658610000000046
           }
         }
       ],
@@ -84,7 +84,7 @@
           "score": "0-1",
           "prob": 16.6,
           "fair": 6.02,
-          "pm_prob": 12.5
+          "pm_prob": 11.5
         },
         {
           "score": "0-2",
@@ -446,6 +446,154 @@
         }
       ],
       "kickoff": "2026-07-06T19:00:00+00:00"
+    },
+    {
+      "fixture": "Argentina vs Egypt",
+      "scores": [
+        {
+          "score": "2-0",
+          "prob": 14.6,
+          "fair": 6.83,
+          "pm_prob": 16.0
+        },
+        {
+          "score": "1-0",
+          "prob": 14.1,
+          "fair": 7.07,
+          "pm_prob": 16.0
+        },
+        {
+          "score": "3-0",
+          "prob": 9.8,
+          "fair": 10.23,
+          "pm_prob": 10.0
+        },
+        {
+          "score": "2-1",
+          "prob": 9.5,
+          "fair": 10.52,
+          "pm_prob": 10.0
+        },
+        {
+          "score": "1-1",
+          "prob": 9.0,
+          "fair": 11.14,
+          "pm_prob": 8.5
+        },
+        {
+          "score": "0-0",
+          "prob": 7.0,
+          "fair": 14.26,
+          "pm_prob": 7.0
+        }
+      ],
+      "over_under": {
+        "line": 2.5,
+        "over": 50.2,
+        "under": 49.8
+      },
+      "btts": 41.3,
+      "model_1x2": {
+        "home": 0.712532,
+        "draw": 0.191984,
+        "away": 0.095484
+      },
+      "approx_1x2": false,
+      "venues": [
+        {
+          "venue": "polymarket",
+          "selection_prices": {
+            "home": 1.3986,
+            "draw": 5.1282,
+            "away": 10.5263
+          },
+          "implied": {
+            "home": 0.7150007150007149,
+            "draw": 0.19500019500019503,
+            "away": 0.09500014250021374
+          },
+          "edge_vs_model": {
+            "home": -0.0034527447999999072,
+            "draw": -0.015467651200000154,
+            "away": 0.0050932292000001045
+          }
+        }
+      ],
+      "kickoff": "2026-07-07T16:00:00+00:00"
+    },
+    {
+      "fixture": "Switzerland vs Colombia",
+      "scores": [
+        {
+          "score": "1-1",
+          "prob": 13.9,
+          "fair": 7.21,
+          "pm_prob": 14.5
+        },
+        {
+          "score": "0-1",
+          "prob": 10.5,
+          "fair": 9.48,
+          "pm_prob": 12.5
+        },
+        {
+          "score": "0-0",
+          "prob": 9.2,
+          "fair": 10.89,
+          "pm_prob": 10.0
+        },
+        {
+          "score": "1-2",
+          "prob": 8.6,
+          "fair": 11.56,
+          "pm_prob": 8.5
+        },
+        {
+          "score": "0-2",
+          "prob": 8.2,
+          "fair": 12.19,
+          "pm_prob": 8.5
+        },
+        {
+          "score": "1-0",
+          "prob": 8.0,
+          "fair": 12.48,
+          "pm_prob": 9.5
+        }
+      ],
+      "over_under": {
+        "line": 2.5,
+        "over": 45.6,
+        "under": 54.4
+      },
+      "btts": 51.3,
+      "model_1x2": {
+        "home": 0.271918,
+        "draw": 0.291322,
+        "away": 0.43676
+      },
+      "approx_1x2": false,
+      "venues": [
+        {
+          "venue": "polymarket",
+          "selection_prices": {
+            "home": 3.6364,
+            "draw": 3.2787,
+            "away": 2.2989
+          },
+          "implied": {
+            "home": 0.2749972500274997,
+            "draw": 0.3049989325037362,
+            "away": 0.4349906477010744
+          },
+          "edge_vs_model": {
+            "home": -0.011197384799999988,
+            "draw": -0.04484255859999986,
+            "away": 0.004067564000000079
+          }
+        }
+      ],
+      "kickoff": "2026-07-07T20:00:00+00:00"
     }
   ]
 }

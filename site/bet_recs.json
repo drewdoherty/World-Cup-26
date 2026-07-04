@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-04 11:47:41 UTC",
+    "generated": "2026-07-04 11:56:46 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3134.784372180451,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 371,
-      "advancement_secs": 32,
+      "model_secs": 494,
+      "advancement_secs": 22040,
       "price_secs": null,
-      "promo_secs": 4276,
+      "promo_secs": 4821,
       "exposure_secs": null
     },
     "coverage": {
@@ -50,8 +50,8 @@
       "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($4034).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
-    "actionable_count": 17,
-    "withheld_count": 16
+    "actionable_count": 3,
+    "withheld_count": 30
   },
   "match_singles": [
     {
@@ -83,8 +83,8 @@
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 371,
-        "price_secs": 371,
+        "model_secs": 494,
+        "price_secs": 494,
         "exposure_secs": null
       },
       "stale": false,
@@ -124,8 +124,8 @@
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 371,
-        "price_secs": 371,
+        "model_secs": 494,
+        "price_secs": 494,
         "exposure_secs": null
       },
       "stale": false,
@@ -165,8 +165,8 @@
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 371,
-        "price_secs": 371,
+        "model_secs": 494,
+        "price_secs": 494,
         "exposure_secs": null
       },
       "stale": false,
@@ -179,540 +179,7 @@
     }
   ],
   "event_props": [],
-  "advancement_futures": [
-    {
-      "id": "belgium_qf_pm",
-      "team": "Belgium",
-      "group": "G",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.6858,
-      "pm_price": 0.5,
-      "pm_fee": 0.0075,
-      "price": 1.9704,
-      "edge_adj": 0.1773,
-      "ev_net": 0.1783,
-      "stake": 161.38,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 32,
-        "price_secs": 32
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "United States",
-      "match_round": "Round of 16",
-      "match_1x2": {
-        "team_win": 0.5,
-        "draw": 0.269,
-        "opp_win": 0.231
-      }
-    },
-    {
-      "id": "brazil_sf_pm",
-      "team": "Brazil",
-      "group": "C",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.492,
-      "pm_price": 0.355,
-      "pm_fee": 0.0069,
-      "price": 2.7634,
-      "edge_adj": 0.1251,
-      "ev_net": 0.1301,
-      "stake": 161.38,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 32,
-        "price_secs": 32
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Norway",
-      "match_round": "Round of 16",
-      "match_1x2": {
-        "team_win": 0.596,
-        "draw": 0.239,
-        "opp_win": 0.165
-      }
-    },
-    {
-      "id": "england_qf_pm",
-      "team": "England",
-      "group": "L",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.6725,
-      "pm_price": 0.535,
-      "pm_fee": 0.0075,
-      "price": 1.8434,
-      "edge_adj": 0.125,
-      "ev_net": 0.13,
-      "stake": 161.38,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 32,
-        "price_secs": 32
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Mexico",
-      "match_round": "Round of 16",
-      "match_1x2": {
-        "team_win": 0.471,
-        "draw": 0.287,
-        "opp_win": 0.242
-      }
-    },
-    {
-      "id": "brazil_final_pm",
-      "team": "Brazil",
-      "group": "C",
-      "stage": "Final",
-      "market": "advancement",
-      "selection": "reach_Final",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.3024,
-      "pm_price": 0.18,
-      "pm_fee": 0.0044,
-      "price": 5.4222,
-      "edge_adj": 0.1078,
-      "ev_net": 0.118,
-      "stake": 145.9,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 32,
-        "price_secs": 32
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Norway",
-      "match_round": "Round of 16",
-      "match_1x2": {
-        "team_win": 0.596,
-        "draw": 0.239,
-        "opp_win": 0.165
-      }
-    },
-    {
-      "id": "brazil_win_pm",
-      "team": "Brazil",
-      "group": "C",
-      "stage": "win",
-      "market": "advancement",
-      "selection": "reach_win",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1744,
-      "pm_price": 0.0625,
-      "pm_fee": 0.0018,
-      "price": 15.5623,
-      "edge_adj": 0.1096,
-      "ev_net": 0.1101,
-      "stake": 118.72,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 32,
-        "price_secs": 32
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Norway",
-      "match_round": "Round of 16",
-      "match_1x2": {
-        "team_win": 0.596,
-        "draw": 0.239,
-        "opp_win": 0.165
-      }
-    },
-    {
-      "id": "brazil_qf_pm",
-      "team": "Brazil",
-      "group": "C",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.7796,
-      "pm_price": 0.665,
-      "pm_fee": 0.0067,
-      "price": 1.4888,
-      "edge_adj": 0.103,
-      "ev_net": 0.1079,
-      "stake": 161.38,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 32,
-        "price_secs": 32
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Norway",
-      "match_round": "Round of 16",
-      "match_1x2": {
-        "team_win": 0.596,
-        "draw": 0.239,
-        "opp_win": 0.165
-      }
-    },
-    {
-      "id": "belgium_sf_pm",
-      "team": "Belgium",
-      "group": "G",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.2351,
-      "pm_price": 0.1445,
-      "pm_fee": 0.0037,
-      "price": 6.7472,
-      "edge_adj": 0.0854,
-      "ev_net": 0.0869,
-      "stake": 102.89,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 32,
-        "price_secs": 32
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "United States",
-      "match_round": "Round of 16",
-      "match_1x2": {
-        "team_win": 0.5,
-        "draw": 0.269,
-        "opp_win": 0.231
-      }
-    },
-    {
-      "id": "belgium_final_pm",
-      "team": "Belgium",
-      "group": "G",
-      "stage": "Final",
-      "market": "advancement",
-      "selection": "reach_Final",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1035,
-      "pm_price": 0.0375,
-      "pm_fee": 0.0011,
-      "price": 25.9183,
-      "edge_adj": 0.0644,
-      "ev_net": 0.0649,
-      "stake": 68.1,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 32,
-        "price_secs": 32
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "United States",
-      "match_round": "Round of 16",
-      "match_1x2": {
-        "team_win": 0.5,
-        "draw": 0.269,
-        "opp_win": 0.231
-      }
-    },
-    {
-      "id": "switzerland_qf_pm",
-      "team": "Switzerland",
-      "group": "B",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.4644,
-      "pm_price": 0.405,
-      "pm_fee": 0.0072,
-      "price": 2.4258,
-      "edge_adj": 0.0471,
-      "ev_net": 0.0522,
-      "stake": 89.53,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 32,
-        "price_secs": 32
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Algeria",
-      "match_round": "Round of 32",
-      "match_1x2": {
-        "team_win": 0.491,
-        "draw": 0.272,
-        "opp_win": 0.237
-      }
-    },
-    {
-      "id": "spain_final_pm",
-      "team": "Spain",
-      "group": "H",
-      "stage": "Final",
-      "market": "advancement",
-      "selection": "reach_Final",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.2847,
-      "pm_price": 0.235,
-      "pm_fee": 0.0054,
-      "price": 4.1599,
-      "edge_adj": 0.0392,
-      "ev_net": 0.0443,
-      "stake": 58.83,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 32,
-        "price_secs": 32
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Austria",
-      "match_round": "Round of 32",
-      "match_1x2": {
-        "team_win": 0.692,
-        "draw": 0.196,
-        "opp_win": 0.113
-      }
-    },
-    {
-      "id": "spain_win_pm",
-      "team": "Spain",
-      "group": "H",
-      "stage": "win",
-      "market": "advancement",
-      "selection": "reach_win",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1651,
-      "pm_price": 0.1225,
-      "pm_fee": 0.0032,
-      "price": 7.9539,
-      "edge_adj": 0.0389,
-      "ev_net": 0.0394,
-      "stake": 45.43,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 32,
-        "price_secs": 32
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Austria",
-      "match_round": "Round of 32",
-      "match_1x2": {
-        "team_win": 0.692,
-        "draw": 0.196,
-        "opp_win": 0.113
-      }
-    },
-    {
-      "id": "switzerland_sf_pm",
-      "team": "Switzerland",
-      "group": "B",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1737,
-      "pm_price": 0.133,
-      "pm_fee": 0.0035,
-      "price": 7.3282,
-      "edge_adj": 0.0332,
-      "ev_net": 0.0372,
-      "stake": 43.5,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 32,
-        "price_secs": 32
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Algeria",
-      "match_round": "Round of 32",
-      "match_1x2": {
-        "team_win": 0.491,
-        "draw": 0.272,
-        "opp_win": 0.237
-      }
-    },
-    {
-      "id": "portugal_qf_pm",
-      "team": "Portugal",
-      "group": "K",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.3841,
-      "pm_price": 0.345,
-      "pm_fee": 0.0068,
-      "price": 2.8427,
-      "edge_adj": 0.0273,
-      "ev_net": 0.0323,
-      "stake": 50.29,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 32,
-        "price_secs": 32
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Croatia",
-      "match_round": "Round of 32",
-      "match_1x2": {
-        "team_win": 0.472,
-        "draw": 0.281,
-        "opp_win": 0.246
-      }
-    },
-    {
-      "id": "belgium_win_pm",
-      "team": "Belgium",
-      "group": "G",
-      "stage": "win",
-      "market": "advancement",
-      "selection": "reach_win",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.0391,
-      "pm_price": 0.0115,
-      "pm_fee": 0.0003,
-      "price": 84.4521,
-      "edge_adj": 0.0267,
-      "ev_net": 0.0273,
-      "stake": 27.82,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 32,
-        "price_secs": 32
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "United States",
-      "match_round": "Round of 16",
-      "match_1x2": {
-        "team_win": 0.5,
-        "draw": 0.269,
-        "opp_win": 0.231
-      }
-    }
-  ],
+  "advancement_futures": [],
   "guaranteed_arbs": [],
   "withheld": [
     {
@@ -723,10 +190,10 @@
       "market": "1X2",
       "selection": "home",
       "team": "Canada",
-      "model_prob": 0.1939,
-      "price": 5.609,
-      "edge": 0.0156,
-      "ev_net": 0.0876,
+      "model_prob": 0.1857,
+      "price": 6.1145,
+      "edge": 0.0222,
+      "ev_net": 0.1357,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 19% < floor 20%",
@@ -813,10 +280,10 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.194,
-      "price": 5.1155,
+      "model_prob": 0.192,
+      "price": 5.1678,
       "edge": -0.0015,
-      "ev_net": -0.0076,
+      "ev_net": -0.0079,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 19% < floor 20%",
@@ -831,13 +298,13 @@
       "market": "1X2",
       "selection": "away",
       "team": "Egypt",
-      "model_prob": 0.0936,
-      "price": 11.2176,
-      "edge": 0.0045,
-      "ev_net": 0.0501,
+      "model_prob": 0.0955,
+      "price": 10.6799,
+      "edge": 0.0019,
+      "ev_net": 0.0198,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "model_prob 9% < floor 20%",
+      "withheld_reason": "model_prob 10% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
@@ -966,6 +433,552 @@
         "scorer",
         "unsupported"
       ]
+    },
+    {
+      "id": "brazil_sf_pm",
+      "team": "Brazil",
+      "group": "C",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.492,
+      "pm_price": 0.355,
+      "pm_fee": 0.0069,
+      "price": 2.7634,
+      "edge_adj": 0.1251,
+      "ev_net": 0.1301,
+      "stake": 159.6,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 22040,
+        "price_secs": 22040
+      },
+      "stale": true,
+      "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Norway",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.596,
+        "draw": 0.239,
+        "opp_win": 0.165
+      },
+      "withheld_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting"
+    },
+    {
+      "id": "brazil_win_pm",
+      "team": "Brazil",
+      "group": "C",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1744,
+      "pm_price": 0.0625,
+      "pm_fee": 0.0018,
+      "price": 15.5623,
+      "edge_adj": 0.1096,
+      "ev_net": 0.1101,
+      "stake": 117.41,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 22040,
+        "price_secs": 22040
+      },
+      "stale": true,
+      "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Norway",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.596,
+        "draw": 0.239,
+        "opp_win": 0.165
+      },
+      "withheld_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting"
+    },
+    {
+      "id": "brazil_final_pm",
+      "team": "Brazil",
+      "group": "C",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.3024,
+      "pm_price": 0.185,
+      "pm_fee": 0.0045,
+      "price": 5.2764,
+      "edge_adj": 0.1078,
+      "ev_net": 0.1129,
+      "stake": 138.92,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 22040,
+        "price_secs": 22040
+      },
+      "stale": true,
+      "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Norway",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.596,
+        "draw": 0.239,
+        "opp_win": 0.165
+      },
+      "withheld_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting"
+    },
+    {
+      "id": "brazil_qf_pm",
+      "team": "Brazil",
+      "group": "C",
+      "stage": "QF",
+      "market": "advancement",
+      "selection": "reach_QF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.7796,
+      "pm_price": 0.665,
+      "pm_fee": 0.0067,
+      "price": 1.4888,
+      "edge_adj": 0.103,
+      "ev_net": 0.1079,
+      "stake": 159.6,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 22040,
+        "price_secs": 22040
+      },
+      "stale": true,
+      "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Norway",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.596,
+        "draw": 0.239,
+        "opp_win": 0.165
+      },
+      "withheld_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting"
+    },
+    {
+      "id": "spain_final_pm",
+      "team": "Spain",
+      "group": "H",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.2847,
+      "pm_price": 0.235,
+      "pm_fee": 0.0054,
+      "price": 4.1599,
+      "edge_adj": 0.0392,
+      "ev_net": 0.0443,
+      "stake": 58.18,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 22040,
+        "price_secs": 22040
+      },
+      "stale": true,
+      "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Austria",
+      "match_round": "Round of 32",
+      "match_1x2": {
+        "team_win": 0.692,
+        "draw": 0.196,
+        "opp_win": 0.113
+      },
+      "withheld_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting"
+    },
+    {
+      "id": "spain_win_pm",
+      "team": "Spain",
+      "group": "H",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1651,
+      "pm_price": 0.1235,
+      "pm_fee": 0.0032,
+      "price": 7.8897,
+      "edge_adj": 0.0378,
+      "ev_net": 0.0384,
+      "stake": 43.81,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 22040,
+        "price_secs": 22040
+      },
+      "stale": true,
+      "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Austria",
+      "match_round": "Round of 32",
+      "match_1x2": {
+        "team_win": 0.692,
+        "draw": 0.196,
+        "opp_win": 0.113
+      },
+      "withheld_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting"
+    },
+    {
+      "id": "england_qf_pm",
+      "team": "England",
+      "group": "L",
+      "stage": "QF",
+      "market": "advancement",
+      "selection": "reach_QF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.6725,
+      "pm_price": 0.535,
+      "pm_fee": 0.0075,
+      "price": 1.8434,
+      "edge_adj": 0.125,
+      "ev_net": 0.13,
+      "stake": 159.6,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 22040,
+        "price_secs": 22040
+      },
+      "stale": true,
+      "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Mexico",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.471,
+        "draw": 0.287,
+        "opp_win": 0.242
+      },
+      "withheld_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting"
+    },
+    {
+      "id": "portugal_qf_pm",
+      "team": "Portugal",
+      "group": "K",
+      "stage": "QF",
+      "market": "advancement",
+      "selection": "reach_QF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.3841,
+      "pm_price": 0.345,
+      "pm_fee": 0.0068,
+      "price": 2.8427,
+      "edge_adj": 0.0273,
+      "ev_net": 0.0323,
+      "stake": 49.74,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 22040,
+        "price_secs": 22040
+      },
+      "stale": true,
+      "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Croatia",
+      "match_round": "Round of 32",
+      "match_1x2": {
+        "team_win": 0.472,
+        "draw": 0.281,
+        "opp_win": 0.246
+      },
+      "withheld_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting"
+    },
+    {
+      "id": "belgium_qf_pm",
+      "team": "Belgium",
+      "group": "G",
+      "stage": "QF",
+      "market": "advancement",
+      "selection": "reach_QF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.6858,
+      "pm_price": 0.499,
+      "pm_fee": 0.0075,
+      "price": 1.9743,
+      "edge_adj": 0.1743,
+      "ev_net": 0.1793,
+      "stake": 159.6,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 22040,
+        "price_secs": 22040
+      },
+      "stale": true,
+      "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "United States",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.5,
+        "draw": 0.269,
+        "opp_win": 0.231
+      },
+      "withheld_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting"
+    },
+    {
+      "id": "belgium_sf_pm",
+      "team": "Belgium",
+      "group": "G",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.2351,
+      "pm_price": 0.141,
+      "pm_fee": 0.0036,
+      "price": 6.914,
+      "edge_adj": 0.0894,
+      "ev_net": 0.0905,
+      "stake": 105.5,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 22040,
+        "price_secs": 22040
+      },
+      "stale": true,
+      "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "United States",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.5,
+        "draw": 0.269,
+        "opp_win": 0.231
+      },
+      "withheld_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting"
+    },
+    {
+      "id": "belgium_final_pm",
+      "team": "Belgium",
+      "group": "G",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1035,
+      "pm_price": 0.04,
+      "pm_fee": 0.0012,
+      "price": 24.3002,
+      "edge_adj": 0.0613,
+      "ev_net": 0.0623,
+      "stake": 64.86,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 22040,
+        "price_secs": 22040
+      },
+      "stale": true,
+      "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "United States",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.5,
+        "draw": 0.269,
+        "opp_win": 0.231
+      },
+      "withheld_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting"
+    },
+    {
+      "id": "belgium_win_pm",
+      "team": "Belgium",
+      "group": "G",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0391,
+      "pm_price": 0.0115,
+      "pm_fee": 0.0003,
+      "price": 84.4521,
+      "edge_adj": 0.0267,
+      "ev_net": 0.0273,
+      "stake": 27.52,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 22040,
+        "price_secs": 22040
+      },
+      "stale": true,
+      "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "United States",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.5,
+        "draw": 0.269,
+        "opp_win": 0.231
+      },
+      "withheld_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting"
+    },
+    {
+      "id": "switzerland_qf_pm",
+      "team": "Switzerland",
+      "group": "B",
+      "stage": "QF",
+      "market": "advancement",
+      "selection": "reach_QF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.4644,
+      "pm_price": 0.405,
+      "pm_fee": 0.0072,
+      "price": 2.4258,
+      "edge_adj": 0.0471,
+      "ev_net": 0.0522,
+      "stake": 88.54,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 22040,
+        "price_secs": 22040
+      },
+      "stale": true,
+      "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Algeria",
+      "match_round": "Round of 32",
+      "match_1x2": {
+        "team_win": 0.491,
+        "draw": 0.272,
+        "opp_win": 0.237
+      },
+      "withheld_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting"
+    },
+    {
+      "id": "switzerland_sf_pm",
+      "team": "Switzerland",
+      "group": "B",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1737,
+      "pm_price": 0.1295,
+      "pm_fee": 0.0034,
+      "price": 7.5255,
+      "edge_adj": 0.0403,
+      "ev_net": 0.0408,
+      "stake": 46.96,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 22040,
+        "price_secs": 22040
+      },
+      "stale": true,
+      "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Algeria",
+      "match_round": "Round of 32",
+      "match_1x2": {
+        "team_win": 0.491,
+        "draw": 0.272,
+        "opp_win": 0.237
+      },
+      "withheld_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting"
     }
   ]
 }

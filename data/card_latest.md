@@ -1,5 +1,5 @@
-<!-- generated: 2026-07-04T11:41:30 -->
-*World Cup Alpha — bet card* (3 staked picks, hit-prob ranked)
+<!-- generated: 2026-07-04T11:48:32 -->
+*World Cup Alpha — bet card* (0 staked, 3 indicative picks, hit-prob ranked)
 
 *1. [FAV] Brazil vs Norway* — Brazil @ *1.87* via *smarkets*
     model 57.8% / mkt 52.8%  edge *+8.1%*  [elo 54% dc 69%]
@@ -11,29 +11,24 @@
     model 40.7% / mkt 37.3%  edge *+9.1%*  [elo 33% dc 50%]
     stake: gbp £42.26  further-out (60h) — thin/soft market
 
-*— CUT (excluded from staking, 5) —*
-  x Paraguay vs France — Paraguay @ 22.22 (model 8.5%, +88.1% EV): below 20% hit-probability floor (model 8.5%) — too unlikely to return PnL even at +88.1% EV
-  x Paraguay vs France — Draw @ 8.00 (model 16.8%, +34.0% EV): below 20% hit-probability floor (model 16.8%) — too unlikely to return PnL even at +34.0% EV
-  x Canada vs Morocco — Canada @ 6.06 (model 19.4%, +8.8% EV): below 20% hit-probability floor (model 19.4%) — too unlikely to return PnL even at +8.8% EV
-  x Portugal vs Spain — Portugal @ 4.44 (model 24.4%, +8.4% EV): outright-underdog longshot (model 24.4%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +8.4% EV
-  x Argentina vs Egypt — Egypt @ 11.00 (model 9.4%, +3.0% EV): below 20% hit-probability floor (model 9.4%) — too unlikely to return PnL even at +3.0% EV
-
-*Venue split (gbp):* betfair £42.26  smarkets £73.06
-
-*Venue split (pm):* polymarket $33.88
+*— CUT (excluded from staking, 4) —*
+  x Paraguay vs France — Paraguay @ 22.22 (model 8.1%, +81.1% EV): below 20% hit-probability floor (model 8.1%) — too unlikely to return PnL even at +81.1% EV
+  x Paraguay vs France — Draw @ 8.00 (model 16.5%, +31.9% EV): below 20% hit-probability floor (model 16.5%) — too unlikely to return PnL even at +31.9% EV
+  x Portugal vs Spain — Portugal @ 4.44 (model 24.0%, +6.8% EV): outright-underdog longshot (model 24.0%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +6.8% EV
+  x Canada vs Morocco — Canada @ 6.06 (model 18.6%, +6.3% EV): below 20% hit-probability floor (model 18.6%) — too unlikely to return PnL even at +6.3% EV
 
 *— REFERENCE, NOT SIZED (models + fair odds only) —*
 *World Cup Alpha — scorelines* (8 fixtures)
 
 *Canada vs Morocco*
-    xG: 0.75-1.41
-    0-1  15.9%  fair 6.29 (15.9%)  back >= 6.42 (15.6%)
-    1-1  12.6%  fair 7.96 (12.6%)  back >= 8.12 (12.3%)
-    0-0  11.9%  fair 8.40 (11.9%)  back >= 8.57 (11.7%)
-    0-2  11.5%  fair 8.67 (11.5%)  back >= 8.84 (11.3%)
-    1-2  8.8%  fair 11.41 (8.8%)  back >= 11.64 (8.6%)
-    1-0  8.0%  fair 12.47 (8.0%)  back >= 12.72 (7.9%)
-    O/U 2.5: over 36.8% / under 63.2%   BTTS 40.4%
+    xG: 0.74-1.41
+    0-1  16.2%  fair 6.16 (16.2%)  back >= 6.28 (15.9%)
+    1-1  12.8%  fair 7.84 (12.8%)  back >= 7.99 (12.5%)
+    0-0  12.3%  fair 8.16 (12.3%)  back >= 8.32 (12.0%)
+    0-2  11.6%  fair 8.60 (11.6%)  back >= 8.77 (11.4%)
+    1-2  8.8%  fair 11.35 (8.8%)  back >= 11.57 (8.6%)
+    1-0  7.7%  fair 12.91 (7.7%)  back >= 13.17 (7.6%)
+    O/U 2.5: over 36.2% / under 63.8%   BTTS 40.2%
 
 *Paraguay vs France*
     xG: 0.62-2.02
@@ -66,41 +61,31 @@
     O/U 2.5: over 51.5% / under 48.5%   BTTS 56.3%
 
 *Portugal vs Spain*
-    xG: 1.09-1.60
-    1-1  12.6%  fair 7.93 (12.6%)  back >= 8.09 (12.4%)
-    0-1  10.7%  fair 9.37 (10.7%)  back >= 9.56 (10.5%)
-    1-2  10.0%  fair 10.03 (10.0%)  back >= 10.23 (9.8%)
-    0-2  8.7%  fair 11.51 (8.7%)  back >= 11.74 (8.5%)
-    0-0  7.4%  fair 13.44 (7.4%)  back >= 13.71 (7.3%)
-    1-0  6.3%  fair 15.77 (6.3%)  back >= 16.08 (6.2%)
-    O/U 2.5: over 50.3% / under 49.7%   BTTS 54.0%
-
-*United States vs Belgium*
-    xG: 1.51-1.79
-    1-1  11.8%  fair 8.48 (11.8%)  back >= 8.65 (11.6%)
-    2-1  8.0%  fair 12.45 (8.0%)  back >= 12.70 (7.9%)
-    2-2  7.6%  fair 13.12 (7.6%)  back >= 13.38 (7.5%)
-    1-2  7.6%  fair 13.14 (7.6%)  back >= 13.40 (7.5%)
-    0-2  5.5%  fair 18.33 (5.5%)  back >= 18.70 (5.3%)
-    1-0  5.3%  fair 18.84 (5.3%)  back >= 19.22 (5.2%)
-    O/U 2.5: over 63.4% / under 36.6%   BTTS 66.2%
+    xG: 1.08-1.60
+    1-1  12.6%  fair 7.92 (12.6%)  back >= 8.08 (12.4%)
+    0-1  10.8%  fair 9.24 (10.8%)  back >= 9.43 (10.6%)
+    1-2  10.0%  fair 9.96 (10.0%)  back >= 10.16 (9.8%)
+    0-2  8.8%  fair 11.40 (8.8%)  back >= 11.62 (8.6%)
+    0-0  7.5%  fair 13.35 (7.5%)  back >= 13.62 (7.3%)
+    1-0  6.3%  fair 15.90 (6.3%)  back >= 16.22 (6.2%)
+    O/U 2.5: over 50.1% / under 49.9%   BTTS 53.8%
 
 *Argentina vs Egypt*
-    xG: 2.04-0.63
-    2-0  14.7%  fair 6.82 (14.7%)  back >= 6.95 (14.4%)
-    1-0  14.3%  fair 7.00 (14.3%)  back >= 7.14 (14.0%)
-    3-0  9.7%  fair 10.31 (9.7%)  back >= 10.52 (9.5%)
-    2-1  9.6%  fair 10.41 (9.6%)  back >= 10.62 (9.4%)
-    1-1  9.1%  fair 11.02 (9.1%)  back >= 11.24 (8.9%)
-    0-0  7.1%  fair 14.11 (7.1%)  back >= 14.39 (7.0%)
-    O/U 2.5: over 49.9% / under 50.1%   BTTS 41.4%
+    xG: 2.05-0.63
+    2-0  14.6%  fair 6.83 (14.6%)  back >= 6.96 (14.4%)
+    1-0  14.1%  fair 7.07 (14.1%)  back >= 7.21 (13.9%)
+    3-0  9.8%  fair 10.23 (9.8%)  back >= 10.43 (9.6%)
+    2-1  9.5%  fair 10.52 (9.5%)  back >= 10.73 (9.3%)
+    1-1  9.0%  fair 11.14 (9.0%)  back >= 11.36 (8.8%)
+    0-0  7.0%  fair 14.26 (7.0%)  back >= 14.54 (6.9%)
+    O/U 2.5: over 50.2% / under 49.8%   BTTS 41.3%
 
 *Switzerland vs Colombia*
     xG: 1.07-1.43
-    1-1  13.8%  fair 7.23 (13.8%)  back >= 7.37 (13.6%)
-    0-1  10.6%  fair 9.48 (10.6%)  back >= 9.67 (10.3%)
-    0-0  9.2%  fair 10.88 (9.2%)  back >= 11.10 (9.0%)
-    1-2  8.6%  fair 11.59 (8.6%)  back >= 11.83 (8.5%)
-    0-2  8.2%  fair 12.18 (8.2%)  back >= 12.42 (8.0%)
-    1-0  8.1%  fair 12.39 (8.1%)  back >= 12.64 (7.9%)
-    O/U 2.5: over 45.6% / under 54.4%   BTTS 51.2%
+    1-1  13.9%  fair 7.21 (13.9%)  back >= 7.36 (13.6%)
+    0-1  10.5%  fair 9.48 (10.5%)  back >= 9.67 (10.3%)
+    0-0  9.2%  fair 10.89 (9.2%)  back >= 11.11 (9.0%)
+    1-2  8.6%  fair 11.56 (8.6%)  back >= 11.79 (8.5%)
+    0-2  8.2%  fair 12.19 (8.2%)  back >= 12.43 (8.0%)
+    1-0  8.0%  fair 12.48 (8.0%)  back >= 12.73 (7.9%)
+    O/U 2.5: over 45.6% / under 54.4%   BTTS 51.3%
