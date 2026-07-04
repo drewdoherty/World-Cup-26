@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-04 17:10:12 UTC"
+    "generated": "2026-07-04 20:06:54 UTC"
   },
   "totals": {
     "wagered": 3762.860000000002,
@@ -17,9 +17,9 @@
     },
     "USD": {
       "wagered": 1892.5000000000007,
-      "open_stake": 1475.7661,
+      "open_stake": 1467.9062000000001,
       "settled_pl": 115.60199999999996,
-      "n_bets": 13
+      "n_bets": 12
     }
   },
   "venues": {
@@ -32,9 +32,9 @@
     },
     "polymarket": {
       "wagered": 1892.5000000000007,
-      "open_stake": 1475.7661,
+      "open_stake": 1467.9062000000001,
       "settled_pl": 115.60199999999996,
-      "n_bets": 13,
+      "n_bets": 12,
       "currency": "USD"
     },
     "kalshi": {
@@ -4413,12 +4413,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 195.83,
-      "cur_price": 0.235,
+      "cur_value": 191.67,
+      "cur_price": 0.23,
       "avg_price": 0.2399,
       "shares": 833.3333,
-      "cash_pnl": -4.17,
-      "pct_pnl": -0.020850093825422213,
+      "cash_pnl": -8.33,
+      "pct_pnl": -0.041650187425843414,
       "notes": "live PM position (data-API)"
     },
     {
@@ -4491,12 +4491,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 161.44,
-      "cur_price": 0.5044,
+      "cur_value": 160.16,
+      "cur_price": 0.5004,
       "avg_price": 0.5042,
       "shares": 320.0689,
-      "cash_pnl": 0.06,
-      "pct_pnl": 0.0003717939740871993,
+      "cash_pnl": -1.22,
+      "pct_pnl": -0.007559810806439719,
       "notes": "live PM position (data-API)"
     },
     {
@@ -4569,12 +4569,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 205.67,
-      "cur_price": 0.925,
+      "cur_value": 207.89,
+      "cur_price": 0.935,
       "avg_price": 0.6746,
       "shares": 222.3441,
-      "cash_pnl": 55.67,
-      "pct_pnl": 0.3711338281784376,
+      "cash_pnl": 57.89,
+      "pct_pnl": 0.38593384791179725,
       "notes": "live PM position (data-API)"
     },
     {
@@ -4682,32 +4682,6 @@
       "notes": "live PM position (data-API)"
     },
     {
-      "id": "pm-0x962c33d297",
-      "ts_utc": "",
-      "match": "Will Canada vs. Morocco end in a draw?",
-      "match_id": "0x962c33d297cb9720835b5e5579a3d9f8bb0e0c97429d59ee01c70bc073c18d7f",
-      "market": "Will Canada vs. Morocco end in a draw?",
-      "selection": "Yes",
-      "platform": "polymarket",
-      "venue": "polymarket",
-      "account": "1",
-      "source": "manual",
-      "currency": "USD",
-      "decimal_odds": 3.572704537334763,
-      "stake": 7.8599,
-      "model_prob": null,
-      "market_prob_devig": null,
-      "ev": null,
-      "kelly_fraction": null,
-      "cur_value": 8.56,
-      "cur_price": 0.305,
-      "avg_price": 0.2799,
-      "shares": 28.0714,
-      "cash_pnl": 0.7,
-      "pct_pnl": 0.08905965724754768,
-      "notes": "live PM position (data-API)"
-    },
-    {
       "id": "pm-0x375409bc5e",
       "ts_utc": "",
       "match": "Will England win the 2026 FIFA World Cup?",
@@ -4725,12 +4699,12 @@
       "market_prob_devig": null,
       "ev": null,
       "kelly_fraction": null,
-      "cur_value": 6.41,
-      "cur_price": 0.9315,
+      "cur_value": 6.42,
+      "cur_price": 0.9325,
       "avg_price": 0.8719,
       "shares": 6.8807,
-      "cash_pnl": 0.41,
-      "pct_pnl": 0.06833447224120401,
+      "cash_pnl": 0.42,
+      "pct_pnl": 0.07000116668611144,
       "notes": "live PM position (data-API)"
     },
     {
@@ -6144,98 +6118,49 @@
   "dropped_open_bets": [],
   "predictions": [
     {
-      "fixture": "Canada vs Morocco",
-      "scores": [
-        {
-          "score": "0-1",
-          "prob": 15.9,
-          "fair": 6.3,
-          "back": 6.42
-        },
-        {
-          "score": "1-1",
-          "prob": 12.9,
-          "fair": 7.74,
-          "back": 7.9
-        },
-        {
-          "score": "0-0",
-          "prob": 12.4,
-          "fair": 8.05,
-          "back": 8.21
-        },
-        {
-          "score": "0-2",
-          "prob": 11.3,
-          "fair": 8.85,
-          "back": 9.03
-        },
-        {
-          "score": "1-2",
-          "prob": 8.6,
-          "fair": 11.63,
-          "back": 11.86
-        },
-        {
-          "score": "1-0",
-          "prob": 8.2,
-          "fair": 12.2,
-          "back": 12.45
-        }
-      ],
-      "over_under": {
-        "line": 2.5,
-        "over": 35.9,
-        "under": 64.1
-      },
-      "btts": 40.3,
-      "xg_home": 0.75,
-      "xg_away": 1.38
-    },
-    {
       "fixture": "Paraguay vs France",
       "scores": [
         {
           "score": "0-1",
           "prob": 16.5,
-          "fair": 6.06,
-          "back": 6.18
+          "fair": 6.07,
+          "back": 6.19
         },
         {
           "score": "0-2",
           "prob": 15.4,
-          "fair": 6.49,
-          "back": 6.62
+          "fair": 6.5,
+          "back": 6.63
         },
         {
           "score": "1-2",
           "prob": 11.2,
-          "fair": 8.9,
-          "back": 9.08
+          "fair": 8.91,
+          "back": 9.09
         },
         {
           "score": "0-3",
           "prob": 9.2,
-          "fair": 10.82,
-          "back": 11.04
+          "fair": 10.83,
+          "back": 11.05
         },
         {
           "score": "1-1",
           "prob": 8.0,
-          "fair": 12.55,
-          "back": 12.8
+          "fair": 12.48,
+          "back": 12.73
         },
         {
           "score": "1-3",
           "prob": 6.7,
-          "fair": 14.84,
-          "back": 15.14
+          "fair": 14.86,
+          "back": 15.16
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 49.5,
-        "under": 50.5
+        "over": 49.4,
+        "under": 50.6
       },
       "btts": 41.6,
       "xg_home": 0.62,
@@ -6248,36 +6173,36 @@
           "score": "1-1",
           "prob": 11.2,
           "fair": 8.94,
-          "back": 9.12
+          "back": 9.11
         },
         {
           "score": "2-0",
           "prob": 9.7,
-          "fair": 10.33,
+          "fair": 10.32,
           "back": 10.53
         },
         {
           "score": "1-0",
           "prob": 8.2,
           "fair": 12.14,
-          "back": 12.39
+          "back": 12.38
         },
         {
           "score": "2-1",
           "prob": 8.1,
-          "fair": 12.36,
-          "back": 12.61
+          "fair": 12.35,
+          "back": 12.6
         },
         {
           "score": "3-0",
           "prob": 7.3,
-          "fair": 13.76,
-          "back": 14.03
+          "fair": 13.75,
+          "back": 14.02
         },
         {
           "score": "0-0",
           "prob": 6.2,
-          "fair": 16.14,
+          "fair": 16.13,
           "back": 16.46
         }
       ],
@@ -6295,9 +6220,9 @@
       "scores": [
         {
           "score": "1-1",
-          "prob": 13.6,
+          "prob": 13.5,
           "fair": 7.38,
-          "back": 7.52
+          "back": 7.53
         },
         {
           "score": "0-1",
@@ -6314,20 +6239,20 @@
         {
           "score": "2-1",
           "prob": 7.7,
-          "fair": 12.94,
-          "back": 13.19
+          "fair": 12.92,
+          "back": 13.18
         },
         {
           "score": "1-0",
           "prob": 7.6,
-          "fair": 13.13,
-          "back": 13.39
+          "fair": 13.12,
+          "back": 13.38
         },
         {
           "score": "0-0",
           "prob": 7.6,
-          "fair": 13.16,
-          "back": 13.43
+          "fair": 13.18,
+          "back": 13.44
         }
       ],
       "over_under": {
@@ -6335,7 +6260,7 @@
         "over": 51.3,
         "under": 48.7
       },
-      "btts": 56.1,
+      "btts": 56.0,
       "xg_home": 1.21,
       "xg_away": 1.54
     },
@@ -6345,8 +6270,8 @@
         {
           "score": "1-1",
           "prob": 12.6,
-          "fair": 7.95,
-          "back": 8.11
+          "fair": 7.91,
+          "back": 8.07
         },
         {
           "score": "0-1",
@@ -6364,25 +6289,25 @@
           "score": "0-2",
           "prob": 8.7,
           "fair": 11.45,
-          "back": 11.68
+          "back": 11.67
         },
         {
           "score": "0-0",
           "prob": 7.6,
-          "fair": 13.23,
-          "back": 13.49
+          "fair": 13.16,
+          "back": 13.42
         },
         {
           "score": "1-0",
           "prob": 6.6,
-          "fair": 15.16,
-          "back": 15.47
+          "fair": 15.25,
+          "back": 15.56
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 49.7,
-        "under": 50.3
+        "over": 49.6,
+        "under": 50.4
       },
       "btts": 53.4,
       "xg_home": 1.08,
@@ -6400,32 +6325,32 @@
         {
           "score": "2-1",
           "prob": 8.1,
-          "fair": 12.38,
-          "back": 12.62
+          "fair": 12.32,
+          "back": 12.56
         },
         {
           "score": "2-2",
           "prob": 7.6,
           "fair": 13.12,
-          "back": 13.39
+          "back": 13.38
         },
         {
           "score": "1-2",
-          "prob": 7.6,
-          "fair": 13.21,
-          "back": 13.47
+          "prob": 7.5,
+          "fair": 13.26,
+          "back": 13.53
         },
         {
           "score": "0-2",
           "prob": 5.4,
-          "fair": 18.38,
-          "back": 18.75
+          "fair": 18.45,
+          "back": 18.82
         },
         {
           "score": "1-0",
           "prob": 5.4,
-          "fair": 18.68,
-          "back": 19.06
+          "fair": 18.6,
+          "back": 18.97
         }
       ],
       "over_under": {
@@ -6433,9 +6358,9 @@
         "over": 63.5,
         "under": 36.5
       },
-      "btts": 66.1,
+      "btts": 66.2,
       "xg_home": 1.51,
-      "xg_away": 1.79
+      "xg_away": 1.78
     },
     {
       "fixture": "Argentina vs Egypt",
@@ -6443,46 +6368,46 @@
         {
           "score": "2-0",
           "prob": 14.9,
-          "fair": 6.72,
-          "back": 6.85
+          "fair": 6.7,
+          "back": 6.84
         },
         {
           "score": "1-0",
           "prob": 14.5,
-          "fair": 6.9,
-          "back": 7.03
+          "fair": 6.88,
+          "back": 7.02
         },
         {
           "score": "3-0",
           "prob": 9.9,
-          "fair": 10.14,
-          "back": 10.34
+          "fair": 10.12,
+          "back": 10.32
         },
         {
           "score": "2-1",
           "prob": 9.4,
-          "fair": 10.67,
-          "back": 10.88
+          "fair": 10.64,
+          "back": 10.86
         },
         {
           "score": "1-1",
-          "prob": 9.1,
-          "fair": 11.04,
-          "back": 11.26
+          "prob": 9.0,
+          "fair": 11.11,
+          "back": 11.33
         },
         {
           "score": "0-0",
           "prob": 7.3,
-          "fair": 13.65,
-          "back": 13.93
+          "fair": 13.74,
+          "back": 14.02
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 49.2,
-        "under": 50.8
+        "over": 49.3,
+        "under": 50.7
       },
-      "btts": 40.4,
+      "btts": 40.3,
       "xg_home": 2.03,
       "xg_away": 0.61
     },
@@ -6493,13 +6418,13 @@
           "score": "1-1",
           "prob": 13.8,
           "fair": 7.22,
-          "back": 7.36
+          "back": 7.37
         },
         {
           "score": "0-1",
           "prob": 10.5,
           "fair": 9.53,
-          "back": 9.73
+          "back": 9.72
         },
         {
           "score": "0-0",

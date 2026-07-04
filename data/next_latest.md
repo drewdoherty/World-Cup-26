@@ -1,25 +1,25 @@
-<!-- generated: 2026-07-04T16:44:11 -->
-⚽ *Next match* — Canada vs Morocco
-Kickoff 2026-07-04 17:00:00+00:00
+<!-- generated: 2026-07-04T19:48:18 -->
+⚽ *Next match* — Paraguay vs France
+Kickoff 2026-07-04 21:00:00+00:00
 
 *Winner* (model blend)
-  Canada         model 19.6¢ · mkt 18.2¢ (betfair_ex_uk)  EV +8.1% ✅  $19.47
-  Draw           model 28.9¢ · mkt 29.4¢ (betfair_ex_uk)  EV -1.6%
-  Morocco        model 51.4¢ · mkt 52.5¢ (Polymarket)  EV -2.1%
+  Paraguay       model  8.5¢ · mkt  4.3¢ (Smarkets)  EV +95.4% ✅  $47.08
+  Draw           model 17.1¢ · mkt 13.2¢ (Smarkets)  EV +30.1% ✅  $49.44
+  France         model 74.4¢ · mkt 82.0¢ (coral)  EV -9.2%
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
-*Corners* (model, exp 8.2)
-  O/U 8.5: over 43.4¢ / under 56.6¢ (model prices)
+*Corners* (model, exp 8.6)
+  O/U 8.5: over 48.7¢ / under 51.3¢ (model prices)
 
 *Top goalscorers* — from the cached /goalscorers card (as of 2026-07-04T11:16:36)
 _top anytime (both teams — add squad to split + FGS)_
-  Ayoub El Kaabi        3.05 (Betfair)  imp 33%
-  Ismael Saibari        3.20 (Betfair)  imp 31%
-  Soufiane Rahimi       3.20 (Betfair)  imp 31%
-  Brahim Diaz           4.10 (Betfair)  imp 24%
-  Mohamed Amine Sbai    4.60 (Betfair)  imp 22%
-  Ayoube Amaimouni-Ech  5.00 (Betfair)  imp 20%
+  Kylian Mbappe         1.61 (Betfair)  imp 62%
+  Jean-Philippe Mateta  2.20 (William Hill)  imp 45%
+  Marcus Thuram         2.25 (William Hill)  imp 44%
+  Ousmane Dembele       2.58 (Betfair)  imp 39%
+  Rayan Cherki          3.00 (Betfair)  imp 33%
+  Michael Olise         3.05 (Betfair)  imp 33%
 
 *Scorelines* (top 6)
-0-1 15.9% | 1-1 12.9% | 0-0 12.4% | 0-2 11.3% | 1-2 8.6% | 1-0 8.2%
-  O/U 2.5: over 35.9% / under 64.1%   BTTS 40.3%
+0-1 16.5% | 0-2 15.4% | 1-2 11.2% | 0-3 9.2% | 1-1 8.0% | 1-3 6.7%
+  O/U 2.5: over 49.4% / under 50.6%   BTTS 41.6%
