@@ -1,14 +1,14 @@
 {
-  "generated_utc": "2026-07-04T09:10:28.669428+00:00",
-  "last_successful_ingest_utc": "2026-07-04T09:09:54Z",
+  "generated_utc": "2026-07-04T10:11:55.656534+00:00",
+  "last_successful_ingest_utc": "2026-07-04T10:11:26Z",
   "status": "measured",
   "window": {
     "from_utc": "2025-06-09T15:37:11+00:00",
-    "to_utc": "2026-07-04T09:09:37+00:00",
-    "n_trades": 1971987,
-    "n_wallets": 180544,
-    "n_markets": 1300,
-    "usd_volume": 1138753491.65,
+    "to_utc": "2026-07-04T10:10:40+00:00",
+    "n_trades": 1975884,
+    "n_wallets": 180881,
+    "n_markets": 1303,
+    "usd_volume": 1139271258.54,
     "truncated_markets": [
       "fifwc-alg-aut-2026-06-27-alg",
       "fifwc-alg-aut-2026-06-27-aut",
@@ -354,17 +354,17 @@
   "headline": [
     {
       "label": "Taker USD volume",
-      "value": "$1,138,753,492 across 1971987 fills / 1300 markets",
+      "value": "$1,139,271,259 across 1975884 fills / 1303 markets",
       "caveat": "Taker side only — maker flow and identities unobserved."
     },
     {
       "label": "Smart cohort ROI",
-      "value": "+39.3% (3028 wallets, $190,803,200 gross)",
+      "value": "+39.2% (3031 wallets, $191,010,883 gross)",
       "caveat": "In-sample selection — the cohort is picked BY performance."
     },
     {
       "label": "Dumb cohort ROI",
-      "value": "-59.7% (3028 wallets, $97,436,766 gross)",
+      "value": "-59.7% (3031 wallets, $97,482,552 gross)",
       "caveat": "Same in-sample caveat; small samples, fade with care."
     },
     {
@@ -384,16 +384,16 @@
     }
   ],
   "cohorts": {
-    "definition": "Qualifying wallets: >=5 trades AND >=$200 gross USD (n=30281). Score = z(ROI) + z(informedness_cents), z-scored within the qualifying set (wallets with null informedness contribute 0 to that term). Smart = top max(10, n/10) wallets by score, dumb = bottom, both capped at n/2 so the cohorts stay disjoint (k=3028 here). ROI includes mark-to-market on open positions at last trade price. In-sample, WC-only.",
+    "definition": "Qualifying wallets: >=5 trades AND >=$200 gross USD (n=30318). Score = z(ROI) + z(informedness_cents), z-scored within the qualifying set (wallets with null informedness contribute 0 to that term). Smart = top max(10, n/10) wallets by score, dumb = bottom, both capped at n/2 so the cohorts stay disjoint (k=3031 here). ROI includes mark-to-market on open positions at last trade price. In-sample, WC-only.",
     "smart": {
-      "n_wallets": 3028,
-      "gross_usd": 190803199.96,
-      "roi": 0.3927
+      "n_wallets": 3031,
+      "gross_usd": 191010882.68,
+      "roi": 0.3921
     },
     "dumb": {
-      "n_wallets": 3028,
-      "gross_usd": 97436765.98,
-      "roi": -0.5971
+      "n_wallets": 3031,
+      "gross_usd": 97482551.57,
+      "roi": -0.597
     }
   },
   "leaderboards": {
@@ -565,9 +565,9 @@
         "gross_usd": 1491633.07,
         "avg_usd": 15868.44,
         "realized_pnl": 1032669.98,
-        "mtm_pnl": 9550.38,
-        "total_pnl": 1042220.36,
-        "roi": 0.6987,
+        "mtm_pnl": 5950.38,
+        "total_pnl": 1038620.36,
+        "roi": 0.6963,
         "win_rate": 0.7778,
         "informedness_cents": 30.79,
         "archetype": "whale_sharp",
@@ -581,11 +581,11 @@
         "gross_usd": 2509749.28,
         "avg_usd": 32594.15,
         "realized_pnl": 996760.9,
-        "mtm_pnl": -1973.22,
-        "total_pnl": 994787.67,
-        "roi": 0.3964,
+        "mtm_pnl": -8257.6,
+        "total_pnl": 988503.3,
+        "roi": 0.3939,
         "win_rate": 0.65,
-        "informedness_cents": 21.49,
+        "informedness_cents": 21.33,
         "archetype": "whale_sharp",
         "top_category": "match_1x2",
         "partial_history": true
@@ -613,9 +613,9 @@
         "gross_usd": 3241871.97,
         "avg_usd": 31171.85,
         "realized_pnl": 896404.07,
-        "mtm_pnl": -6811.72,
-        "total_pnl": 889592.35,
-        "roi": 0.2744,
+        "mtm_pnl": -13502.35,
+        "total_pnl": 882901.72,
+        "roi": 0.2723,
         "win_rate": 0.575,
         "informedness_cents": 7.51,
         "archetype": "whale_sharp",
@@ -889,8 +889,8 @@
         "gross_usd": 75239462.02,
         "avg_usd": 2029.55,
         "realized_pnl": 1577308.9,
-        "mtm_pnl": 10602.85,
-        "total_pnl": 1587911.75,
+        "mtm_pnl": 11151.7,
+        "total_pnl": 1588460.6,
         "roi": 0.0211,
         "win_rate": 0.5038,
         "informedness_cents": 0.31,
@@ -905,9 +905,9 @@
         "gross_usd": 35427491.08,
         "avg_usd": 40350.22,
         "realized_pnl": 171568.95,
-        "mtm_pnl": 3829.42,
-        "total_pnl": 175398.37,
-        "roi": 0.005,
+        "mtm_pnl": 3279.21,
+        "total_pnl": 174848.16,
+        "roi": 0.0049,
         "win_rate": 0.5803,
         "informedness_cents": -0.56,
         "archetype": "whale_sharp",
@@ -917,15 +917,15 @@
       {
         "wallet": "0xe9076a87c5ed90ef16e6fe6529c943baeca0cff6",
         "name": "suntori",
-        "trades": 101184,
-        "gross_usd": 24875674.43,
-        "avg_usd": 245.85,
-        "realized_pnl": -916331.05,
-        "mtm_pnl": -20109.54,
-        "total_pnl": -936440.59,
-        "roi": -0.0376,
-        "win_rate": 0.583,
-        "informedness_cents": -0.68,
+        "trades": 101448,
+        "gross_usd": 24980153.15,
+        "avg_usd": 246.24,
+        "realized_pnl": -915848.21,
+        "mtm_pnl": -19746.65,
+        "total_pnl": -935594.86,
+        "roi": -0.0375,
+        "win_rate": 0.5827,
+        "informedness_cents": -0.67,
         "archetype": "whale_underwater",
         "top_category": "match_1x2",
         "partial_history": true
@@ -937,8 +937,8 @@
         "gross_usd": 20822980.13,
         "avg_usd": 5857.38,
         "realized_pnl": 2027592.27,
-        "mtm_pnl": 192.22,
-        "total_pnl": 2027784.49,
+        "mtm_pnl": 208.63,
+        "total_pnl": 2027800.9,
         "roi": 0.0974,
         "win_rate": 0.5496,
         "informedness_cents": 5.22,
@@ -949,15 +949,15 @@
       {
         "wallet": "0x84cfffc3f16dcc353094de30d4a45226eccd2f63",
         "name": "mooseborzoi",
-        "trades": 30861,
-        "gross_usd": 14137621.1,
-        "avg_usd": 458.11,
+        "trades": 30967,
+        "gross_usd": 14145630.66,
+        "avg_usd": 456.8,
         "realized_pnl": -677201.4,
-        "mtm_pnl": 17023.96,
-        "total_pnl": -660177.44,
+        "mtm_pnl": 16819.73,
+        "total_pnl": -660381.67,
         "roi": -0.0467,
         "win_rate": 0.4984,
-        "informedness_cents": -0.47,
+        "informedness_cents": -0.46,
         "archetype": "whale_underwater",
         "top_category": "match_1x2",
         "partial_history": true
@@ -1130,7 +1130,7 @@
         "n_first_mover": 202,
         "jump_share": 0.0511,
         "avg_usd": 424.74,
-        "total_pnl": -936440.59,
+        "total_pnl": -935594.86,
         "partial_history": true
       },
       {
@@ -1139,7 +1139,7 @@
         "n_first_mover": 185,
         "jump_share": 0.0468,
         "avg_usd": 96.96,
-        "total_pnl": 39373.44,
+        "total_pnl": 39209.9,
         "partial_history": true
       },
       {
@@ -1148,7 +1148,7 @@
         "n_first_mover": 154,
         "jump_share": 0.039,
         "avg_usd": 34.5,
-        "total_pnl": 7379.6,
+        "total_pnl": 7467.54,
         "partial_history": true
       },
       {
@@ -1157,7 +1157,7 @@
         "n_first_mover": 128,
         "jump_share": 0.0324,
         "avg_usd": 118.11,
-        "total_pnl": 26594.59,
+        "total_pnl": 26914.62,
         "partial_history": true
       },
       {
@@ -1184,7 +1184,7 @@
         "n_first_mover": 87,
         "jump_share": 0.022,
         "avg_usd": 28.36,
-        "total_pnl": 7110.67,
+        "total_pnl": 7082.09,
         "partial_history": true
       },
       {
@@ -1220,7 +1220,7 @@
         "n_first_mover": 71,
         "jump_share": 0.018,
         "avg_usd": 120.19,
-        "total_pnl": -8908.83,
+        "total_pnl": -8793.61,
         "partial_history": true
       },
       {
@@ -1229,7 +1229,7 @@
         "n_first_mover": 71,
         "jump_share": 0.018,
         "avg_usd": 74.38,
-        "total_pnl": -11062.87,
+        "total_pnl": -10903.28,
         "partial_history": true
       },
       {
@@ -1256,7 +1256,7 @@
         "n_first_mover": 62,
         "jump_share": 0.0157,
         "avg_usd": 24.2,
-        "total_pnl": 10160.58,
+        "total_pnl": 10502.21,
         "partial_history": true
       }
     ]
@@ -1266,115 +1266,115 @@
       "key": "whale_sharp",
       "label": "Whale (sharp)",
       "description": ">=$10k gross USD and positive ROI",
-      "n_wallets": 2597,
-      "gross_usd": 611365541.73,
-      "usd_share": 0.5369,
-      "median_trade_usd": 79.0,
-      "roi": 0.1515
+      "n_wallets": 2602,
+      "gross_usd": 611333882.96,
+      "usd_share": 0.5366,
+      "median_trade_usd": 79.15,
+      "roi": 0.1514
     },
     {
       "key": "whale_underwater",
       "label": "Whale (underwater)",
       "description": ">=$10k gross USD, flat-or-negative ROI",
-      "n_wallets": 4385,
-      "gross_usd": 435648450.7,
-      "usd_share": 0.3826,
-      "median_trade_usd": 35.03,
-      "roi": -0.1914
+      "n_wallets": 4386,
+      "gross_usd": 436140438.62,
+      "usd_share": 0.3828,
+      "median_trade_usd": 34.96,
+      "roi": -0.1913
     },
     {
       "key": "scalper_mm",
       "label": "Scalper / MM-like",
       "description": ">=100 trades, balanced buy/sell flow (35-65% buy USD), median trade <$100",
-      "n_wallets": 217,
-      "gross_usd": 475047.1,
+      "n_wallets": 218,
+      "gross_usd": 485416.65,
       "usd_share": 0.0004,
-      "median_trade_usd": 2.17,
-      "roi": -0.0275
+      "median_trade_usd": 2.2,
+      "roi": -0.028
     },
     {
       "key": "sniper",
       "label": "Sniper",
       "description": "<20 trades, median trade >=$250, positive 24h informedness",
-      "n_wallets": 2456,
-      "gross_usd": 9810894.19,
+      "n_wallets": 2468,
+      "gross_usd": 9848535.25,
       "usd_share": 0.0086,
-      "median_trade_usd": 547.78,
-      "roi": 0.0947
+      "median_trade_usd": 546.49,
+      "roi": 0.0937
     },
     {
       "key": "longshot_lottery",
       "label": "Longshot lottery",
       "description": ">=60% of BUY USD at price <= $0.15",
-      "n_wallets": 35148,
-      "gross_usd": 7345741.25,
-      "usd_share": 0.0065,
-      "median_trade_usd": 4.81,
-      "roi": -0.2688
+      "n_wallets": 35136,
+      "gross_usd": 7335989.83,
+      "usd_share": 0.0064,
+      "median_trade_usd": 4.8,
+      "roi": -0.2701
     },
     {
       "key": "favorite_grinder",
       "label": "Favorite grinder",
       "description": ">=60% of BUY USD at price >= $0.80",
-      "n_wallets": 47599,
-      "gross_usd": 42037031.1,
+      "n_wallets": 47669,
+      "gross_usd": 42054610.31,
       "usd_share": 0.0369,
-      "median_trade_usd": 16.07,
+      "median_trade_usd": 15.79,
       "roi": -0.0219
     },
     {
       "key": "retail_tourist",
       "label": "Retail tourist",
       "description": "<10 trades and <$500 gross USD",
-      "n_wallets": 66908,
-      "gross_usd": 3971541.95,
+      "n_wallets": 67120,
+      "gross_usd": 3981323.18,
       "usd_share": 0.0035,
-      "median_trade_usd": 5.19,
-      "roi": -0.1575
+      "median_trade_usd": 5.18,
+      "roi": -0.1569
     },
     {
       "key": "regular",
       "label": "Regular",
       "description": "everything else",
-      "n_wallets": 21234,
-      "gross_usd": 28099243.63,
+      "n_wallets": 21282,
+      "gross_usd": 28091061.74,
       "usd_share": 0.0247,
       "median_trade_usd": 5.88,
-      "roi": -0.1391
+      "roi": -0.1389
     }
   ],
   "category_matrix": [
     {
       "category": "match_1x2",
       "label": "Match (1X2)",
-      "n_trades": 1192926,
-      "usd": 917976330.11,
-      "n_wallets": 113050,
-      "avg_trade_usd": 769.52,
-      "smart_usd_share": 0.2024,
+      "n_trades": 1195071,
+      "usd": 918366243.67,
+      "n_wallets": 113273,
+      "avg_trade_usd": 768.46,
+      "smart_usd_share": 0.2025,
       "dumb_usd_share": 0.1034,
       "buy_pressure": 0.8335
     },
     {
       "category": "winner",
       "label": "Tournament Winner",
-      "n_trades": 357612,
-      "usd": 187330314.26,
-      "n_wallets": 56949,
-      "avg_trade_usd": 523.84,
+      "n_trades": 359159,
+      "usd": 187443104.45,
+      "n_wallets": 57135,
+      "avg_trade_usd": 521.89,
       "smart_usd_share": 0.0191,
-      "dumb_usd_share": 0.0109,
+      "dumb_usd_share": 0.011,
       "buy_pressure": 0.5601
     },
     {
       "category": "other_future",
       "label": "Other Futures",
-      "n_trades": 139763,
-      "usd": 9384247.77,
-      "n_wallets": 15635,
-      "avg_trade_usd": 67.14,
+      "n_trades": 139816,
+      "usd": 9385095.48,
+      "n_wallets": 15646,
+      "avg_trade_usd": 67.12,
       "smart_usd_share": 0.0254,
-      "dumb_usd_share": 0.0092,
+      "dumb_usd_share": 0.0093,
       "buy_pressure": 0.798
     },
     {
@@ -1384,7 +1384,7 @@
       "usd": 8938448.03,
       "n_wallets": 17564,
       "avg_trade_usd": 81.62,
-      "smart_usd_share": 0.0424,
+      "smart_usd_share": 0.0426,
       "dumb_usd_share": 0.0129,
       "buy_pressure": 0.8071
     },
@@ -1395,7 +1395,7 @@
       "usd": 5368198.53,
       "n_wallets": 7408,
       "avg_trade_usd": 90.25,
-      "smart_usd_share": 0.05,
+      "smart_usd_share": 0.0498,
       "dumb_usd_share": 0.0233,
       "buy_pressure": 0.8174
     },
@@ -1413,72 +1413,72 @@
     {
       "category": "advancement_qf",
       "label": "Reach Quarterfinals",
-      "n_trades": 26352,
-      "usd": 2439767.74,
-      "n_wallets": 4785,
-      "avg_trade_usd": 92.58,
-      "smart_usd_share": 0.0646,
+      "n_trades": 26407,
+      "usd": 2441131.74,
+      "n_wallets": 4811,
+      "avg_trade_usd": 92.44,
+      "smart_usd_share": 0.0662,
       "dumb_usd_share": 0.0105,
       "buy_pressure": 0.8569
     },
     {
       "category": "advancement_final",
       "label": "Reach Final",
-      "n_trades": 26083,
-      "usd": 2383621.32,
-      "n_wallets": 5253,
-      "avg_trade_usd": 91.39,
-      "smart_usd_share": 0.0208,
-      "dumb_usd_share": 0.005,
-      "buy_pressure": 0.8244
+      "n_trades": 26130,
+      "usd": 2392619.57,
+      "n_wallets": 5272,
+      "avg_trade_usd": 91.57,
+      "smart_usd_share": 0.0235,
+      "dumb_usd_share": 0.0049,
+      "buy_pressure": 0.8247
     },
     {
       "category": "advancement_sf",
       "label": "Reach Semifinals",
-      "n_trades": 19834,
-      "usd": 1462080.14,
-      "n_wallets": 3977,
+      "n_trades": 19884,
+      "usd": 1465933.32,
+      "n_wallets": 3994,
       "avg_trade_usd": 73.72,
-      "smart_usd_share": 0.046,
+      "smart_usd_share": 0.0477,
       "dumb_usd_share": 0.0068,
-      "buy_pressure": 0.7943
+      "buy_pressure": 0.7948
     }
   ],
   "size_distribution": [
     {
       "bucket": "<$10",
-      "n": 863131,
-      "usd": 2921361.49
+      "n": 865429,
+      "usd": 2933215.84
     },
     {
       "bucket": "$10–50",
-      "n": 400552,
-      "usd": 9537400.62
+      "n": 401570,
+      "usd": 9559597.9
     },
     {
       "bucket": "$50–250",
-      "n": 332751,
-      "usd": 42477366.26
+      "n": 333162,
+      "usd": 42521506.08
     },
     {
       "bucket": "$250–1k",
-      "n": 223043,
-      "usd": 126165063.7
+      "n": 223146,
+      "usd": 126221172.2
     },
     {
       "bucket": "$1k–5k",
-      "n": 121266,
-      "usd": 245144973.73
+      "n": 121318,
+      "usd": 245246412.76
     },
     {
       "bucket": "$5k–25k",
-      "n": 25424,
-      "usd": 255414780.34
+      "n": 25436,
+      "usd": 255548197.2
     },
     {
       "bucket": ">$25k",
-      "n": 5820,
-      "usd": 457092545.51
+      "n": 5823,
+      "usd": 457241156.56
     }
   ],
   "latency": {
