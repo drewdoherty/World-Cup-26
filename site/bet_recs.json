@@ -1,35 +1,35 @@
 {
   "meta": {
-    "generated": "2026-07-04 05:50:13 UTC",
+    "generated": "2026-07-04 09:39:51 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
-      "bankroll": 3134.784372180451,
+      "bankroll": 3000.0,
       "rung": 0,
       "kelly_fraction": 0.25,
       "per_bet_cap": 0.05,
-      "max_stake": 156.74,
-      "n_settled": 25,
-      "clv_to_date": 0.0034241984860852435,
-      "reason": "COMBINED-POOL \u00a33135 (\u00a33000 +101.34\u00a3 GBP P&L +44.49$ PM P&L at $1.33/\u00a3; user 2026-07-02) \u2014 ladder rung 0 (\u00a32000) for reference; 25/50 settled-with-close, CLV +0.0034",
+      "max_stake": 150.0,
+      "n_settled": 0,
+      "clv_to_date": null,
+      "reason": "COMBINED-POOL \u00a33000 (\u00a33000 +0.00\u00a3 GBP P&L +0.00$ PM P&L at $1.33/\u00a3; user 2026-07-02) \u2014 ladder rung 0 (\u00a32000) for reference; 0/50 settled-with-close, CLV n/a",
       "currency": "GBP",
       "source": "ledger"
     },
     "pm_pool": {
-      "bankroll": 4034.49,
+      "bankroll": 3990.0,
       "kelly_fraction": 0.25,
       "per_bet_cap": 0.04,
-      "max_stake": 161.38,
+      "max_stake": 159.6,
       "currency": "USD",
-      "source": "ledger (realised $+44.49)"
+      "source": "ledger (realised $+0.00)"
     },
     "open_exposure": {
       "ev": 0.0,
       "best_case": 0.0,
       "worst_case": 0.0,
       "best_case_usd": 0.0,
-      "worst_case_usd": -1.0,
+      "worst_case_usd": 0.0,
       "p_profit": null,
-      "n_open": 2,
+      "n_open": 0,
       "source": "ledger"
     },
     "fx": {
@@ -38,20 +38,20 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 2539,
-      "advancement_secs": 47,
+      "model_secs": 306,
+      "advancement_secs": 13825,
       "price_secs": null,
-      "promo_secs": 66835,
+      "promo_secs": 80613,
       "exposure_secs": null
     },
     "coverage": {
       "match_singles": "1X2 from blended model (10%% Elo + 30%% DC + 60%% market) vs de-vigged consensus. Price = market-implied (no best-price pull). Top-3 per fixture by net EV. BTTS/totals: withheld \u2014 no live book price.",
       "event_props": "Corners/cards: calibrated but withheld \u2014 no live sportsbook price snapshot. Player scorer: withheld \u2014 player xG-share not yet wired.",
-      "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($4034).",
+      "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($3990).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
     "actionable_count": 17,
-    "withheld_count": 16
+    "withheld_count": 14
   },
   "match_singles": [
     {
@@ -66,25 +66,25 @@
       "team": "Brazil",
       "venue": "smarkets",
       "currency": "GBP",
-      "model_prob": 0.5785,
-      "price": 1.889,
+      "model_prob": 0.5825,
+      "price": 1.8759,
       "price_source": "devig_consensus",
-      "edge": 0.0491,
+      "edge": 0.0495,
       "ev_net": 0.0928,
-      "stake": 81.81,
+      "stake": 79.46,
       "action_label": "ADD",
       "current_exposure": {
         "fixture_open": false
       },
       "proposed_risk": {
-        "stake": 81.81,
-        "max_loss": 81.81
+        "stake": 79.46,
+        "max_loss": 79.46
       },
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 2539,
-        "price_secs": 2539,
+        "model_secs": 306,
+        "price_secs": 306,
         "exposure_secs": null
       },
       "stale": false,
@@ -107,25 +107,25 @@
       "team": "Belgium",
       "venue": "smarkets",
       "currency": "GBP",
-      "model_prob": 0.4083,
-      "price": 2.6763,
+      "model_prob": 0.4078,
+      "price": 2.679,
       "price_source": "devig_consensus",
-      "edge": 0.0347,
-      "ev_net": 0.0928,
-      "stake": 43.37,
+      "edge": 0.0345,
+      "ev_net": 0.0926,
+      "stake": 41.35,
       "action_label": "ADD",
       "current_exposure": {
         "fixture_open": false
       },
       "proposed_risk": {
-        "stake": 43.37,
-        "max_loss": 43.37
+        "stake": 41.35,
+        "max_loss": 41.35
       },
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 2539,
-        "price_secs": 2539,
+        "model_secs": 306,
+        "price_secs": 306,
         "exposure_secs": null
       },
       "stale": false,
@@ -148,25 +148,25 @@
       "team": "England",
       "venue": "smarkets",
       "currency": "GBP",
-      "model_prob": 0.4159,
-      "price": 2.545,
+      "model_prob": 0.4147,
+      "price": 2.5428,
       "price_source": "devig_consensus",
-      "edge": 0.023,
-      "ev_net": 0.0585,
-      "stake": 29.66,
+      "edge": 0.0214,
+      "ev_net": 0.0544,
+      "stake": 26.46,
       "action_label": "ADD",
       "current_exposure": {
         "fixture_open": false
       },
       "proposed_risk": {
-        "stake": 29.66,
-        "max_loss": 29.66
+        "stake": 26.46,
+        "max_loss": 26.46
       },
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 2539,
-        "price_secs": 2539,
+        "model_secs": 306,
+        "price_secs": 306,
         "exposure_secs": null
       },
       "stale": false,
@@ -195,11 +195,11 @@
       "price": 1.9743,
       "edge_adj": 0.1743,
       "ev_net": 0.1793,
-      "stake": 161.38,
+      "stake": 159.6,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 47,
-        "price_secs": 47
+        "model_secs": 13825,
+        "price_secs": 13825
       },
       "stale": false,
       "stale_reason": null,
@@ -233,11 +233,11 @@
       "price": 2.7634,
       "edge_adj": 0.1251,
       "ev_net": 0.1301,
-      "stake": 161.38,
+      "stake": 159.6,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 47,
-        "price_secs": 47
+        "model_secs": 13825,
+        "price_secs": 13825
       },
       "stale": false,
       "stale_reason": null,
@@ -271,11 +271,11 @@
       "price": 1.8434,
       "edge_adj": 0.125,
       "ev_net": 0.13,
-      "stake": 161.38,
+      "stake": 159.6,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 47,
-        "price_secs": 47
+        "model_secs": 13825,
+        "price_secs": 13825
       },
       "stale": false,
       "stale_reason": null,
@@ -309,11 +309,11 @@
       "price": 5.2764,
       "edge_adj": 0.1078,
       "ev_net": 0.1129,
-      "stake": 140.47,
+      "stake": 138.92,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 47,
-        "price_secs": 47
+        "model_secs": 13825,
+        "price_secs": 13825
       },
       "stale": false,
       "stale_reason": null,
@@ -347,11 +347,11 @@
       "price": 15.5623,
       "edge_adj": 0.1096,
       "ev_net": 0.1101,
-      "stake": 118.72,
+      "stake": 117.41,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 47,
-        "price_secs": 47
+        "model_secs": 13825,
+        "price_secs": 13825
       },
       "stale": false,
       "stale_reason": null,
@@ -385,11 +385,11 @@
       "price": 1.4888,
       "edge_adj": 0.103,
       "ev_net": 0.1079,
-      "stake": 161.38,
+      "stake": 159.6,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 47,
-        "price_secs": 47
+        "model_secs": 13825,
+        "price_secs": 13825
       },
       "stale": false,
       "stale_reason": null,
@@ -423,11 +423,11 @@
       "price": 6.914,
       "edge_adj": 0.0894,
       "ev_net": 0.0905,
-      "stake": 106.68,
+      "stake": 105.5,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 47,
-        "price_secs": 47
+        "model_secs": 13825,
+        "price_secs": 13825
       },
       "stale": false,
       "stale_reason": null,
@@ -461,11 +461,11 @@
       "price": 24.3002,
       "edge_adj": 0.0613,
       "ev_net": 0.0623,
-      "stake": 65.58,
+      "stake": 64.86,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 47,
-        "price_secs": 47
+        "model_secs": 13825,
+        "price_secs": 13825
       },
       "stale": false,
       "stale_reason": null,
@@ -499,11 +499,11 @@
       "price": 2.4258,
       "edge_adj": 0.0471,
       "ev_net": 0.0522,
-      "stake": 89.53,
+      "stake": 88.54,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 47,
-        "price_secs": 47
+        "model_secs": 13825,
+        "price_secs": 13825
       },
       "stale": false,
       "stale_reason": null,
@@ -537,11 +537,11 @@
       "price": 4.1599,
       "edge_adj": 0.0392,
       "ev_net": 0.0443,
-      "stake": 58.83,
+      "stake": 58.18,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 47,
-        "price_secs": 47
+        "model_secs": 13825,
+        "price_secs": 13825
       },
       "stale": false,
       "stale_reason": null,
@@ -575,11 +575,11 @@
       "price": 7.5255,
       "edge_adj": 0.0403,
       "ev_net": 0.0408,
-      "stake": 47.48,
+      "stake": 46.96,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 47,
-        "price_secs": 47
+        "model_secs": 13825,
+        "price_secs": 13825
       },
       "stale": false,
       "stale_reason": null,
@@ -613,11 +613,11 @@
       "price": 7.8897,
       "edge_adj": 0.0378,
       "ev_net": 0.0384,
-      "stake": 44.3,
+      "stake": 43.81,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 47,
-        "price_secs": 47
+        "model_secs": 13825,
+        "price_secs": 13825
       },
       "stale": false,
       "stale_reason": null,
@@ -651,11 +651,11 @@
       "price": 2.8427,
       "edge_adj": 0.0273,
       "ev_net": 0.0323,
-      "stake": 50.29,
+      "stake": 49.74,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 47,
-        "price_secs": 47
+        "model_secs": 13825,
+        "price_secs": 13825
       },
       "stale": false,
       "stale_reason": null,
@@ -689,11 +689,11 @@
       "price": 84.4521,
       "edge_adj": 0.0267,
       "ev_net": 0.0273,
-      "stake": 27.82,
+      "stake": 27.52,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 47,
-        "price_secs": 47
+        "model_secs": 13825,
+        "price_secs": 13825
       },
       "stale": false,
       "stale_reason": null,
@@ -723,13 +723,13 @@
       "market": "1X2",
       "selection": "home",
       "team": "Canada",
-      "model_prob": 0.2036,
-      "price": 5.202,
-      "edge": 0.0114,
-      "ev_net": 0.0591,
+      "model_prob": 0.1931,
+      "price": 5.6856,
+      "edge": 0.0173,
+      "ev_net": 0.0981,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "longshot filter: prob 20% < 25% (minnow risk)",
+      "withheld_reason": "model_prob 19% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
@@ -741,10 +741,10 @@
       "market": "1X2",
       "selection": "home",
       "team": "Paraguay",
-      "model_prob": 0.0816,
-      "price": 22.8493,
+      "model_prob": 0.0815,
+      "price": 22.8838,
       "edge": 0.0378,
-      "ev_net": 0.8643,
+      "ev_net": 0.8649,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 8% < floor 20%",
@@ -759,13 +759,13 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.1676,
-      "price": 7.8164,
-      "edge": 0.0396,
-      "ev_net": 0.3098,
+      "model_prob": 0.1649,
+      "price": 8.0913,
+      "edge": 0.0413,
+      "ev_net": 0.3342,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "model_prob 17% < floor 20%",
+      "withheld_reason": "model_prob 16% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
@@ -777,13 +777,13 @@
       "market": "1X2",
       "selection": "away",
       "team": "Norway",
-      "model_prob": 0.186,
-      "price": 4.6291,
-      "edge": -0.03,
-      "ev_net": -0.1391,
+      "model_prob": 0.1776,
+      "price": 4.914,
+      "edge": -0.0259,
+      "ev_net": -0.1273,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "model_prob 19% < floor 20%",
+      "withheld_reason": "model_prob 18% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
@@ -795,49 +795,13 @@
       "market": "1X2",
       "selection": "home",
       "team": "Portugal",
-      "model_prob": 0.2439,
-      "price": 4.335,
-      "edge": 0.0132,
-      "ev_net": 0.0574,
+      "model_prob": 0.2403,
+      "price": 4.4749,
+      "edge": 0.0168,
+      "ev_net": 0.0753,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "longshot filter: prob 24% < 25% (minnow risk)",
-      "stale": false,
-      "stale_reason": null
-    },
-    {
-      "id": "argentina_vs_egypt_draw_1x2",
-      "fixture": "Argentina vs Egypt",
-      "kickoff": "2026-07-07 16:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "selection": "draw",
-      "team": "Draw",
-      "model_prob": 0.19,
-      "price": 5.2622,
-      "edge": -0.0,
-      "ev_net": -0.0002,
-      "stake": 0.0,
-      "currency": "GBP",
-      "withheld_reason": "model_prob 19% < floor 20%",
-      "stale": false,
-      "stale_reason": null
-    },
-    {
-      "id": "argentina_vs_egypt_away_1x2",
-      "fixture": "Argentina vs Egypt",
-      "kickoff": "2026-07-07 16:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "selection": "away",
-      "team": "Egypt",
-      "model_prob": 0.0943,
-      "price": 10.7654,
-      "edge": 0.0014,
-      "ev_net": 0.0154,
-      "stake": 0.0,
-      "currency": "GBP",
-      "withheld_reason": "model_prob 9% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
