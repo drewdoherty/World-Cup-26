@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-04T19:48:18 -->
+<!-- generated: 2026-07-04T20:25:07 -->
 ⚽ *Next match* — Paraguay vs France
 Kickoff 2026-07-04 21:00:00+00:00
 
 *Winner* (model blend)
-  Paraguay       model  8.5¢ · mkt  4.3¢ (Smarkets)  EV +95.4% ✅  $47.08
-  Draw           model 17.1¢ · mkt 13.2¢ (Smarkets)  EV +30.1% ✅  $49.44
-  France         model 74.4¢ · mkt 82.0¢ (coral)  EV -9.2%
+  Paraguay       model  8.7¢ · mkt  4.5¢ (Polymarket)  EV +93.6% ✅  $47.86
+  Draw           model 17.3¢ · mkt 13.5¢ (Polymarket)  EV +28.3% ✅  $47.85
+  France         model 74.0¢ · mkt 82.0¢ (betfair_ex_uk)  EV -9.8%
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.6)
@@ -21,5 +21,5 @@ _top anytime (both teams — add squad to split + FGS)_
   Michael Olise         3.05 (Betfair)  imp 33%
 
 *Scorelines* (top 6)
-0-1 16.5% | 0-2 15.4% | 1-2 11.2% | 0-3 9.2% | 1-1 8.0% | 1-3 6.7%
-  O/U 2.5: over 49.4% / under 50.6%   BTTS 41.6%
+0-1 16.4% | 0-2 15.3% | 1-2 11.2% | 0-3 9.2% | 1-1 8.1% | 1-3 6.7%
+  O/U 2.5: over 49.3% / under 50.7%   BTTS 41.7%
