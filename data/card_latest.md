@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-04T22:15:14 -->
+<!-- generated: 2026-07-04T23:18:00 -->
 *World Cup Alpha — bet card* (0 staked, 3 indicative picks, hit-prob ranked)
 
 _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. Wire a 2nd book (Betfair creds) or set WCA_STAKE_SINGLE_SOURCE=1 to size them._
