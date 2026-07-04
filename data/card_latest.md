@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-04T19:40:18 -->
+<!-- generated: 2026-07-04T21:15:32 -->
 *World Cup Alpha — bet card* (0 staked, 3 indicative picks, hit-prob ranked)
 
 _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. Wire a 2nd book (Betfair creds) or set WCA_STAKE_SINGLE_SOURCE=1 to size them._
@@ -13,23 +13,11 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
     model 40.3% / mkt 37.0%  edge *+7.6%*  [elo 33% dc 49%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
 
-*— CUT (excluded from staking, 3) —*
-  x Paraguay vs France — Paraguay @ 22.22 (model 8.2%, +41.2% EV): below 20% hit-probability floor (model 8.2%) — too unlikely to return PnL even at +41.2% EV
-  x Paraguay vs France — Draw @ 7.41 (model 17.2%, +13.6% EV): below 20% hit-probability floor (model 17.2%) — too unlikely to return PnL even at +13.6% EV
+*— CUT (excluded from staking, 1) —*
   x Portugal vs Spain — Portugal @ 4.26 (model 24.4%, +3.7% EV): outright-underdog longshot (model 24.4%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +3.7% EV
 
 *— REFERENCE, NOT SIZED (models + fair odds only) —*
-*World Cup Alpha — scorelines* (7 fixtures)
-
-*Paraguay vs France*
-    xG: 0.62-2.01
-    0-1  16.6%  fair 6.01 (16.6%)  back >= 6.13 (16.3%)
-    0-2  15.5%  fair 6.46 (15.5%)  back >= 6.59 (15.2%)
-    1-2  11.3%  fair 8.83 (11.3%)  back >= 9.00 (11.1%)
-    0-3  9.2%  fair 10.86 (9.2%)  back >= 11.07 (9.0%)
-    1-1  8.0%  fair 12.44 (8.0%)  back >= 12.69 (7.9%)
-    1-3  6.7%  fair 14.83 (6.7%)  back >= 15.12 (6.6%)
-    O/U 2.5: over 49.3% / under 50.7%   BTTS 41.6%
+*World Cup Alpha — scorelines* (6 fixtures)
 
 *Brazil vs Norway*
     xG: 2.05-0.96
@@ -73,20 +61,20 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
 
 *Argentina vs Egypt*
     xG: 2.05-0.63
-    2-0  14.6%  fair 6.87 (14.6%)  back >= 7.00 (14.3%)
-    1-0  14.1%  fair 7.12 (14.1%)  back >= 7.26 (13.8%)
-    3-0  9.7%  fair 10.30 (9.7%)  back >= 10.50 (9.5%)
-    2-1  9.6%  fair 10.45 (9.6%)  back >= 10.66 (9.4%)
-    1-1  9.0%  fair 11.10 (9.0%)  back >= 11.32 (8.8%)
-    0-0  7.0%  fair 14.36 (7.0%)  back >= 14.65 (6.8%)
-    O/U 2.5: over 50.4% / under 49.6%   BTTS 41.6%
+    2-0  14.5%  fair 6.89 (14.5%)  back >= 7.03 (14.2%)
+    1-0  14.0%  fair 7.14 (14.0%)  back >= 7.29 (13.7%)
+    3-0  9.7%  fair 10.33 (9.7%)  back >= 10.54 (9.5%)
+    2-1  9.5%  fair 10.48 (9.5%)  back >= 10.69 (9.4%)
+    1-1  9.2%  fair 10.86 (9.2%)  back >= 11.08 (9.0%)
+    0-0  7.1%  fair 14.06 (7.1%)  back >= 14.34 (7.0%)
+    O/U 2.5: over 50.2% / under 49.8%   BTTS 41.7%
 
 *Switzerland vs Colombia*
     xG: 1.07-1.44
-    1-1  14.0%  fair 7.16 (14.0%)  back >= 7.30 (13.7%)
-    0-1  10.6%  fair 9.45 (10.6%)  back >= 9.64 (10.4%)
-    0-0  9.3%  fair 10.80 (9.3%)  back >= 11.02 (9.1%)
-    1-2  8.7%  fair 11.50 (8.7%)  back >= 11.73 (8.5%)
-    0-2  8.2%  fair 12.13 (8.2%)  back >= 12.37 (8.1%)
-    1-0  7.9%  fair 12.70 (7.9%)  back >= 12.96 (7.7%)
-    O/U 2.5: over 45.6% / under 54.4%   BTTS 51.3%
+    1-1  14.2%  fair 7.06 (14.2%)  back >= 7.20 (13.9%)
+    0-1  10.5%  fair 9.49 (10.5%)  back >= 9.68 (10.3%)
+    0-0  9.4%  fair 10.65 (9.4%)  back >= 10.87 (9.2%)
+    1-2  8.7%  fair 11.56 (8.7%)  back >= 11.79 (8.5%)
+    0-2  8.2%  fair 12.19 (8.2%)  back >= 12.43 (8.0%)
+    1-0  7.8%  fair 12.79 (7.8%)  back >= 13.05 (7.7%)
+    O/U 2.5: over 45.4% / under 54.6%   BTTS 51.4%
