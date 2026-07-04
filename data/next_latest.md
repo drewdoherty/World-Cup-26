@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-04T21:01:59 -->
+<!-- generated: 2026-07-04T21:38:53 -->
 ⚽ *Next match* — Brazil vs Norway
 Kickoff 2026-07-05 20:00:00+00:00
 
 *Winner* (model blend)
-  Brazil         model 57.9¢ · mkt 53.2¢ (betfair_ex_uk)  EV +8.8% ✅  $108.68
-  Draw           model 23.7¢ · mkt 26.3¢ (betfair_ex_uk)  EV -9.9%
-  Norway         model 18.4¢ · mkt 20.5¢ (Polymarket)  EV -10.2%
+  Brazil         model 57.9¢ · mkt 53.2¢ (betfair_ex_uk)  EV +8.8% ✅  $108.43
+  Draw           model 23.7¢ · mkt 26.3¢ (matchbook)  EV -9.8%
+  Norway         model 18.4¢ · mkt 20.5¢ (Polymarket)  EV -10.3%
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 9.2)
@@ -21,5 +21,5 @@ _top anytime (both teams — add squad to split + FGS)_
   Endrick Felipe Morei  3.00 (Betfair)  imp 33%
 
 *Scorelines* (top 6)
-1-1 11.3% | 2-0 9.7% | 1-0 8.3% | 2-1 8.1% | 3-0 7.3% | 0-0 6.2%
+1-1 11.3% | 2-0 9.7% | 1-0 8.2% | 2-1 8.1% | 3-0 7.3% | 0-0 6.2%
   O/U 2.5: over 56.9% / under 43.1%   BTTS 53.1%
