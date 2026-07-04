@@ -1,0 +1,83 @@
+# jupyter bet — research parameters (copy to config.yaml and edit).
+# Every key maps 1:1 to lib.config.Params; unknown keys raise.
+
+# Model prob minus market implied prob, pre-cost  [sensible: 0.00–0.10]
+min_edge_raw: 0.02
+
+# Edge after fees and expected slippage  [sensible: 0.00–0.08]
+min_edge_net: 0.01
+
+# Flat PM fee rate (0 for most WC markets)  [sensible: 0–0.02]
+pm_fee_rate: 0.0
+
+# PM taker fee = coeff·p·(1−p) where charged  [sensible: 0–0.05]
+pm_taker_fee_coeff: 0.03
+
+# GBP exchange commission on net winnings  [sensible: 0.00 (Smarkets promo)–0.06 (Betfair)]
+exchange_commission: 0.02
+
+# Expected fill = mid + this × half-spread  [sensible: 0 (fill at mid)–1 (fill at touch)]
+slippage_frac_of_spread: 0.5
+
+# Reject quotes with ask−bid above this (prob units)  [sensible: 0.02–0.15]
+max_spread: 0.06
+
+# Min $ executable within slippage cap  [sensible: 10–500]
+min_depth_usd: 50.0
+
+# Max price move walking the book for our size  [sensible: 0.005–0.03]
+max_slippage: 0.01
+
+# Quote older than this is stale → reject  [sensible: 300–14400]
+staleness_max_s: 3600
+
+# Cross-venue match score floor  [sensible: 0.7–1.0]
+min_match_confidence: 0.9
+
+# Kickoff mismatch tolerated when matching  [sensible: 1–6]
+kickoff_tolerance_h: 3.0
+
+# pm_mid | microprice | last_trade | vwap_1h | book_devig | model  [sensible: categorical]
+fair_value_method: pm_mid
+
+# shin | multiplicative | power (wca.markets.devig)  [sensible: categorical]
+devig_method: shin
+
+# Required convergence marks (h before kickoff)  [sensible: (48,24,0) fixed by spec]
+window_hours: [48, 24, 0]
+
+# Optional extra marks  [sensible: subset of (72,12,6,3,1)]
+extra_window_hours: [72, 12, 6, 3, 1]
+
+# Snapshot must sit within ± this of a mark  [sensible: 5–120]
+window_tolerance_min: 30
+
+# Min n before a stat is reported as a finding  [sensible: 10–200]
+min_sample: 30
+
+# Fraction of full Kelly (production 0.25)  [sensible: 0.05–0.5]
+kelly_fraction: 0.25
+
+# Hard per-order cap (production $160)  [sensible: 10–160 (>160 needs human code change)]
+stake_cap_usd: 160.0
+
+# Max bankroll fraction on one event  [sensible: 0.05–0.5]
+exposure_cap_frac: 0.25
+
+# Stake multiplier for correlated same-event legs  [sensible: 0–1]
+correlation_haircut: 0.5
+
+# Locked ROI floor after all costs  [sensible: 0.001–0.03]
+arb_min_profit_frac: 0.005
+
+# Cash value of £1 free bet when matched  [sensible: 0.5–0.8]
+freebet_conversion: 0.7
+
+# Allow closing-price (ex-post) columns — benchmark cells only  [sensible: False in any decision path]
+allow_expost: false
+
+# True = read cached raw/parquet only, no network  [sensible: bool]
+offline: false
+
+# Odds API credit budget per notebook run  [sensible: 0–500]
+max_credits: 25
