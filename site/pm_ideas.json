@@ -1,9 +1,118 @@
 {
   "meta": {
-    "generated": "2026-07-04T13:25:11Z",
+    "generated": "2026-07-04T13:58:44Z",
     "ranking": "+EV moneylines > mid > longshots; further-out fixtures first; EV tiebreak",
-    "games_held": true,
+    "games_held": false,
     "confirm": "Y PM-<n> in @gamble1_bot fires; PM_DRY_RUN gates execution"
   },
-  "ideas": []
+  "ideas": [
+    {
+      "group": "game",
+      "match": "Brazil vs Norway",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 54.0,
+      "model_c": 56.7,
+      "ev_pct": 5.0,
+      "size_usd": 30.0,
+      "hours_out": 30.0,
+      "bucket": "moneyline"
+    },
+    {
+      "group": "game",
+      "match": "Portugal vs Spain",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 27.0,
+      "model_c": 27.2,
+      "ev_pct": 0.9,
+      "size_usd": 2.02,
+      "hours_out": 53.0,
+      "bucket": "mid"
+    },
+    {
+      "group": "game",
+      "match": "Mexico vs England",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 40.0,
+      "model_c": 40.9,
+      "ev_pct": 2.2,
+      "size_usd": 9.02,
+      "hours_out": 34.0,
+      "bucket": "mid"
+    },
+    {
+      "group": "game",
+      "match": "United States vs Belgium",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 38.0,
+      "model_c": 40.2,
+      "ev_pct": 5.7,
+      "size_usd": 21.68,
+      "hours_out": 0.0,
+      "bucket": "mid"
+    },
+    {
+      "group": "game",
+      "match": "Argentina vs Egypt",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 20.0,
+      "model_c": 20.3,
+      "ev_pct": 1.3,
+      "size_usd": 2.08,
+      "hours_out": 74.0,
+      "bucket": "longshot"
+    },
+    {
+      "group": "game",
+      "match": "Portugal vs Spain",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 24.0,
+      "model_c": 24.4,
+      "ev_pct": 1.5,
+      "size_usd": 3.06,
+      "hours_out": 53.0,
+      "bucket": "longshot"
+    },
+    {
+      "group": "game",
+      "match": "Paraguay vs France",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 5.0,
+      "model_c": 8.5,
+      "ev_pct": 69.4,
+      "size_usd": 22.84,
+      "hours_out": 7.0,
+      "bucket": "longshot"
+    },
+    {
+      "group": "game",
+      "match": "Paraguay vs France",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 13.0,
+      "model_c": 17.9,
+      "ev_pct": 37.9,
+      "size_usd": 30.0,
+      "hours_out": 7.0,
+      "bucket": "longshot"
+    },
+    {
+      "group": "game",
+      "match": "Canada vs Morocco",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 17.0,
+      "model_c": 19.0,
+      "ev_pct": 11.5,
+      "size_usd": 14.73,
+      "hours_out": 3.0,
+      "bucket": "longshot"
+    }
+  ]
 }
