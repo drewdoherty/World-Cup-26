@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-04 14:32:47 UTC",
+    "generated": "2026-07-04 16:35:14 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 1113,
-      "advancement_secs": 2404,
+      "model_secs": 8460,
+      "advancement_secs": 1,
       "price_secs": null,
-      "promo_secs": 98189,
+      "promo_secs": 105536,
       "exposure_secs": null
     },
     "coverage": {
@@ -50,7 +50,7 @@
       "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($4106).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
-    "actionable_count": 23,
+    "actionable_count": 24,
     "withheld_count": 16
   },
   "match_singles": [
@@ -83,8 +83,8 @@
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 1113,
-        "price_secs": 1113,
+        "model_secs": 8460,
+        "price_secs": 8460,
         "exposure_secs": null
       },
       "stale": false,
@@ -124,8 +124,8 @@
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 1113,
-        "price_secs": 1113,
+        "model_secs": 8460,
+        "price_secs": 8460,
         "exposure_secs": null
       },
       "stale": false,
@@ -165,8 +165,8 @@
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 1113,
-        "price_secs": 1113,
+        "model_secs": 8460,
+        "price_secs": 8460,
         "exposure_secs": null
       },
       "stale": false,
@@ -193,13 +193,13 @@
       "pm_price": 0.502,
       "pm_fee": 0.0075,
       "price": 1.9627,
-      "edge_adj": 0.1753,
+      "edge_adj": 0.1743,
       "ev_net": 0.1763,
       "stake": 164.22,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -213,9 +213,9 @@
       "opponent": "United States",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.501,
-        "draw": 0.268,
-        "opp_win": 0.231
+        "team_win": 0.499,
+        "draw": 0.269,
+        "opp_win": 0.232
       }
     },
     {
@@ -228,16 +228,16 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.224,
-      "pm_price": 0.068,
-      "pm_fee": 0.0019,
-      "price": 14.3059,
-      "edge_adj": 0.152,
-      "ev_net": 0.1541,
+      "pm_price": 0.072,
+      "pm_fee": 0.002,
+      "price": 13.5127,
+      "edge_adj": 0.1479,
+      "ev_net": 0.15,
       "stake": 164.22,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -252,8 +252,8 @@
       "match_round": "Round of 16",
       "match_1x2": {
         "team_win": 0.137,
-        "draw": 0.235,
-        "opp_win": 0.628
+        "draw": 0.236,
+        "opp_win": 0.627
       }
     },
     {
@@ -274,8 +274,8 @@
       "stake": 164.22,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -312,8 +312,8 @@
       "stake": 164.22,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -327,9 +327,9 @@
       "opponent": "Mexico",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.471,
-        "draw": 0.286,
-        "opp_win": 0.242
+        "team_win": 0.468,
+        "draw": 0.287,
+        "opp_win": 0.244
       }
     },
     {
@@ -350,46 +350,8 @@
       "stake": 142.95,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Norway",
-      "match_round": "Round of 16",
-      "match_1x2": {
-        "team_win": 0.597,
-        "draw": 0.239,
-        "opp_win": 0.165
-      }
-    },
-    {
-      "id": "brazil_win_pm",
-      "team": "Brazil",
-      "group": "C",
-      "stage": "win",
-      "market": "advancement",
-      "selection": "reach_win",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1751,
-      "pm_price": 0.0645,
-      "pm_fee": 0.0018,
-      "price": 15.0806,
-      "edge_adj": 0.1083,
-      "ev_net": 0.1088,
-      "stake": 119.59,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -426,8 +388,46 @@
       "stake": 164.22,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Norway",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.597,
+        "draw": 0.239,
+        "opp_win": 0.165
+      }
+    },
+    {
+      "id": "brazil_win_pm",
+      "team": "Brazil",
+      "group": "C",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1751,
+      "pm_price": 0.0665,
+      "pm_fee": 0.0019,
+      "price": 14.6279,
+      "edge_adj": 0.1062,
+      "ev_net": 0.1067,
+      "stake": 117.59,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -456,16 +456,16 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.2351,
-      "pm_price": 0.144,
+      "pm_price": 0.1435,
       "pm_fee": 0.0037,
-      "price": 6.7706,
+      "price": 6.7941,
       "edge_adj": 0.0864,
-      "ev_net": 0.0874,
-      "stake": 105.26,
+      "ev_net": 0.0879,
+      "stake": 105.81,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -479,9 +479,47 @@
       "opponent": "United States",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.501,
-        "draw": 0.268,
-        "opp_win": 0.231
+        "team_win": 0.499,
+        "draw": 0.269,
+        "opp_win": 0.232
+      }
+    },
+    {
+      "id": "belgium_final_pm",
+      "team": "Belgium",
+      "group": "G",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.11,
+      "pm_price": 0.0335,
+      "pm_fee": 0.001,
+      "price": 29.0096,
+      "edge_adj": 0.073,
+      "ev_net": 0.0755,
+      "stake": 80.29,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 1,
+        "price_secs": 1
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "United States",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.499,
+        "draw": 0.269,
+        "opp_win": 0.232
       }
     },
     {
@@ -494,16 +532,16 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.1061,
-      "pm_price": 0.0265,
-      "pm_fee": 0.0008,
-      "price": 36.665,
-      "edge_adj": 0.0783,
-      "ev_net": 0.0788,
-      "stake": 83.18,
+      "pm_price": 0.0345,
+      "pm_fee": 0.001,
+      "price": 28.1696,
+      "edge_adj": 0.0701,
+      "ev_net": 0.0706,
+      "stake": 75.13,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -518,46 +556,8 @@
       "match_round": "Round of 16",
       "match_1x2": {
         "team_win": 0.137,
-        "draw": 0.235,
-        "opp_win": 0.628
-      }
-    },
-    {
-      "id": "belgium_final_pm",
-      "team": "Belgium",
-      "group": "G",
-      "stage": "Final",
-      "market": "advancement",
-      "selection": "reach_Final",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.11,
-      "pm_price": 0.0345,
-      "pm_fee": 0.001,
-      "price": 28.1696,
-      "edge_adj": 0.0709,
-      "ev_net": 0.0745,
-      "stake": 79.28,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "United States",
-      "match_round": "Round of 16",
-      "match_1x2": {
-        "team_win": 0.501,
-        "draw": 0.268,
-        "opp_win": 0.231
+        "draw": 0.236,
+        "opp_win": 0.627
       }
     },
     {
@@ -578,8 +578,8 @@
       "stake": 73.11,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -595,7 +595,7 @@
       "match_1x2": {
         "team_win": 0.47,
         "draw": 0.281,
-        "opp_win": 0.248
+        "opp_win": 0.249
       }
     },
     {
@@ -616,8 +616,8 @@
       "stake": 91.1,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -631,9 +631,47 @@
       "opponent": "Colombia",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.286,
+        "team_win": 0.281,
+        "draw": 0.297,
+        "opp_win": 0.423
+      }
+    },
+    {
+      "id": "morocco_sf_pm",
+      "team": "Morocco",
+      "group": "C",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.2418,
+      "pm_price": 0.1855,
+      "pm_fee": 0.0045,
+      "price": 5.2623,
+      "edge_adj": 0.0462,
+      "ev_net": 0.0518,
+      "stake": 65.6,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 1,
+        "price_secs": 1
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Canada",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.492,
         "draw": 0.296,
-        "opp_win": 0.418
+        "opp_win": 0.212
       }
     },
     {
@@ -646,16 +684,16 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.3326,
-      "pm_price": 0.275,
-      "pm_fee": 0.006,
-      "price": 3.559,
-      "edge_adj": 0.0466,
-      "ev_net": 0.0516,
-      "stake": 73.69,
+      "pm_price": 0.285,
+      "pm_fee": 0.0061,
+      "price": 3.4351,
+      "edge_adj": 0.0364,
+      "ev_net": 0.0415,
+      "stake": 60.07,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -669,9 +707,9 @@
       "opponent": "Morocco",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.214,
-        "draw": 0.297,
-        "opp_win": 0.489
+        "team_win": 0.212,
+        "draw": 0.296,
+        "opp_win": 0.492
       }
     },
     {
@@ -684,16 +722,16 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.1701,
-      "pm_price": 0.1255,
+      "pm_price": 0.1265,
       "pm_fee": 0.0033,
-      "price": 7.7644,
-      "edge_adj": 0.0408,
-      "ev_net": 0.0413,
-      "stake": 48.67,
+      "price": 7.7033,
+      "edge_adj": 0.0398,
+      "ev_net": 0.0403,
+      "stake": 47.52,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -709,7 +747,7 @@
       "match_1x2": {
         "team_win": 0.47,
         "draw": 0.281,
-        "opp_win": 0.248
+        "opp_win": 0.249
       }
     },
     {
@@ -722,16 +760,16 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.1737,
-      "pm_price": 0.1295,
-      "pm_fee": 0.0034,
-      "price": 7.5255,
-      "edge_adj": 0.0403,
-      "ev_net": 0.0408,
-      "stake": 48.32,
+      "pm_price": 0.133,
+      "pm_fee": 0.0035,
+      "price": 7.3282,
+      "edge_adj": 0.0332,
+      "ev_net": 0.0372,
+      "stake": 44.26,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -745,47 +783,9 @@
       "opponent": "Colombia",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.286,
-        "draw": 0.296,
-        "opp_win": 0.418
-      }
-    },
-    {
-      "id": "morocco_sf_pm",
-      "team": "Morocco",
-      "group": "C",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.2418,
-      "pm_price": 0.1975,
-      "pm_fee": 0.0048,
-      "price": 4.9443,
-      "edge_adj": 0.039,
-      "ev_net": 0.0395,
-      "stake": 50.88,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Canada",
-      "match_round": "Round of 16",
-      "match_1x2": {
-        "team_win": 0.489,
+        "team_win": 0.281,
         "draw": 0.297,
-        "opp_win": 0.214
+        "opp_win": 0.423
       }
     },
     {
@@ -806,8 +806,8 @@
       "stake": 51.18,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -821,7 +821,7 @@
       "opponent": "Spain",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.248,
+        "team_win": 0.249,
         "draw": 0.281,
         "opp_win": 0.47
       }
@@ -844,8 +844,8 @@
       "stake": 29.25,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -859,9 +859,9 @@
       "opponent": "United States",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.501,
-        "draw": 0.268,
-        "opp_win": 0.231
+        "team_win": 0.499,
+        "draw": 0.269,
+        "opp_win": 0.232
       }
     },
     {
@@ -882,8 +882,8 @@
       "stake": 27.88,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -897,9 +897,47 @@
       "opponent": "Morocco",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.214,
-        "draw": 0.297,
-        "opp_win": 0.489
+        "team_win": 0.212,
+        "draw": 0.296,
+        "opp_win": 0.492
+      }
+    },
+    {
+      "id": "england_win_pm",
+      "team": "England",
+      "group": "L",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0916,
+      "pm_price": 0.0655,
+      "pm_fee": 0.0018,
+      "price": 14.8508,
+      "edge_adj": 0.0238,
+      "ev_net": 0.0243,
+      "stake": 26.7,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 1,
+        "price_secs": 1
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Mexico",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.468,
+        "draw": 0.287,
+        "opp_win": 0.244
       }
     },
     {
@@ -912,16 +950,16 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.0289,
-      "pm_price": 0.0065,
+      "pm_price": 0.007,
       "pm_fee": 0.0002,
-      "price": 149.3935,
-      "edge_adj": 0.0196,
-      "ev_net": 0.0222,
-      "stake": 22.95,
+      "price": 138.7245,
+      "edge_adj": 0.0207,
+      "ev_net": 0.0217,
+      "stake": 22.43,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2404,
-        "price_secs": 2404
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -936,8 +974,8 @@
       "match_round": "Round of 16",
       "match_1x2": {
         "team_win": 0.137,
-        "draw": 0.235,
-        "opp_win": 0.628
+        "draw": 0.236,
+        "opp_win": 0.627
       }
     }
   ],
