@@ -25,6 +25,12 @@ LOGS="$REPO_ROOT/logs"
 # shellcheck source=/dev/null
 source "$HERE/services.env"
 
+# Register the 'freshest' git merge driver (.gitattributes references it by
+# name; git does not read driver commands from .gitattributes itself). Fixes
+# the recurring class of conflicts when two builders race the same
+# daemon-rebuilt data file. Idempotent — safe to re-run.
+bash "$REPO_ROOT/scripts/wca_install_merge_driver.sh"
+
 [ -x "$VENV_PY" ] || { echo "ERROR: venv not found at $VENV_PY — create it first."; exit 1; }
 mkdir -p "$AGENTS" "$LOGS" "$REPO_ROOT/data/backups"
 chmod +x "$RUN1" "$HERE"/*.sh 2>/dev/null || true

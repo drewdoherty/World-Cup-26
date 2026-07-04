@@ -1,0 +1,18 @@
+# Daemon/CI-rebuilt data artifacts: a text-level merge conflict on these is
+# meaningless (the whole file is regenerated every run) — resolve by keeping
+# whichever build is FRESHER, via scripts/wca_merge_freshest.py. This is a
+# scoped mitigation for the recurring "two builders raced this file" conflict
+# class (2026-07-04); see that script's docstring for why it's this and not
+# the bigger untrack-from-git change.
+#
+# Contributors: run `bash scripts/wca_install_merge_driver.sh` once (adds the
+# driver to this repo's local .git/config; git does not read driver commands
+# from .gitattributes itself for security reasons).
+site/bet_recs.json merge=freshest
+site/advancement_data.json merge=freshest
+site/pm_ideas.json merge=freshest
+data/card_latest.md merge=freshest
+data/next_latest.md merge=freshest
+data/goalscorers_latest.md merge=freshest
+data/model_predictions.json merge=freshest
+data/model_predictions_log.jsonl merge=freshest
