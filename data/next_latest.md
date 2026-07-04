@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-04T14:14:14 -->
+<!-- generated: 2026-07-04T16:44:11 -->
 ⚽ *Next match* — Canada vs Morocco
 Kickoff 2026-07-04 17:00:00+00:00
 
 *Winner* (model blend)
-  Canada         model 19.0¢ · mkt 16.1¢ (betfair_ex_uk)  EV +17.9% ✅  $37.42
-  Draw           model 27.9¢ · mkt 27.4¢ (Smarkets)  EV +1.9%  $7.70
-  Morocco        model 53.1¢ · mkt 56.2¢ (matchbook)  EV -5.5%
+  Canada         model 19.6¢ · mkt 18.2¢ (betfair_ex_uk)  EV +8.1% ✅  $19.47
+  Draw           model 28.9¢ · mkt 29.4¢ (betfair_ex_uk)  EV -1.6%
+  Morocco        model 51.4¢ · mkt 52.5¢ (Polymarket)  EV -2.1%
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.2)
@@ -21,5 +21,5 @@ _top anytime (both teams — add squad to split + FGS)_
   Ayoube Amaimouni-Ech  5.00 (Betfair)  imp 20%
 
 *Scorelines* (top 6)
-0-1 16.4% | 1-1 12.5% | 0-0 12.0% | 0-2 11.7% | 1-2 8.9% | 1-0 7.9%
-  O/U 2.5: over 36.3% / under 63.7%   BTTS 40.0%
+0-1 15.9% | 1-1 12.9% | 0-0 12.4% | 0-2 11.3% | 1-2 8.6% | 1-0 8.2%
+  O/U 2.5: over 35.9% / under 64.1%   BTTS 40.3%

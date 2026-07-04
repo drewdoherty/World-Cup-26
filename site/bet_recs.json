@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-04 16:35:14 UTC",
+    "generated": "2026-07-04 17:11:17 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 8460,
-      "advancement_secs": 1,
+      "model_secs": 1626,
+      "advancement_secs": 2164,
       "price_secs": null,
-      "promo_secs": 105536,
+      "promo_secs": 107699,
       "exposure_secs": null
     },
     "coverage": {
@@ -55,47 +55,6 @@
   },
   "match_singles": [
     {
-      "id": "brazil_vs_norway_home_1x2",
-      "fixture": "Brazil vs Norway",
-      "kickoff": "2026-07-05 20:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "market_kind": "result_90",
-      "market_label": "90-min 1X2 (+ stoppage)",
-      "selection": "home",
-      "team": "Brazil",
-      "venue": "smarkets",
-      "currency": "GBP",
-      "model_prob": 0.5765,
-      "price": 1.901,
-      "price_source": "devig_consensus",
-      "edge": 0.0505,
-      "ev_net": 0.0959,
-      "stake": 86.87,
-      "action_label": "ADD",
-      "current_exposure": {
-        "fixture_open": false
-      },
-      "proposed_risk": {
-        "stake": 86.87,
-        "max_loss": 86.87
-      },
-      "promo": null,
-      "promo_status": null,
-      "ages": {
-        "model_secs": 8460,
-        "price_secs": 8460,
-        "exposure_secs": null
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "1X2",
-        "devig_price"
-      ]
-    },
-    {
       "id": "united_states_vs_belgium_away_1x2",
       "fixture": "United States vs Belgium",
       "kickoff": "2026-07-07 00:00:00+00:00",
@@ -107,25 +66,66 @@
       "team": "Belgium",
       "venue": "smarkets",
       "currency": "GBP",
-      "model_prob": 0.4077,
-      "price": 2.6835,
+      "model_prob": 0.4061,
+      "price": 2.7034,
       "price_source": "devig_consensus",
-      "edge": 0.0351,
-      "ev_net": 0.0941,
-      "stake": 45.61,
+      "edge": 0.0362,
+      "ev_net": 0.0978,
+      "stake": 46.83,
       "action_label": "ADD",
       "current_exposure": {
         "fixture_open": false
       },
       "proposed_risk": {
-        "stake": 45.61,
-        "max_loss": 45.61
+        "stake": 46.83,
+        "max_loss": 46.83
       },
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 8460,
-        "price_secs": 8460,
+        "model_secs": 1626,
+        "price_secs": 1626,
+        "exposure_secs": null
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "1X2",
+        "devig_price"
+      ]
+    },
+    {
+      "id": "brazil_vs_norway_home_1x2",
+      "fixture": "Brazil vs Norway",
+      "kickoff": "2026-07-05 20:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "market_kind": "result_90",
+      "market_label": "90-min 1X2 (+ stoppage)",
+      "selection": "home",
+      "team": "Brazil",
+      "venue": "smarkets",
+      "currency": "GBP",
+      "model_prob": 0.5778,
+      "price": 1.8934,
+      "price_source": "devig_consensus",
+      "edge": 0.0496,
+      "ev_net": 0.0939,
+      "stake": 85.8,
+      "action_label": "ADD",
+      "current_exposure": {
+        "fixture_open": false
+      },
+      "proposed_risk": {
+        "stake": 85.8,
+        "max_loss": 85.8
+      },
+      "promo": null,
+      "promo_status": null,
+      "ages": {
+        "model_secs": 1626,
+        "price_secs": 1626,
         "exposure_secs": null
       },
       "stale": false,
@@ -148,25 +148,25 @@
       "team": "England",
       "venue": "smarkets",
       "currency": "GBP",
-      "model_prob": 0.4152,
-      "price": 2.5522,
+      "model_prob": 0.4163,
+      "price": 2.5404,
       "price_source": "devig_consensus",
-      "edge": 0.0234,
-      "ev_net": 0.0598,
-      "stake": 31.43,
+      "edge": 0.0227,
+      "ev_net": 0.0577,
+      "stake": 30.55,
       "action_label": "ADD",
       "current_exposure": {
         "fixture_open": false
       },
       "proposed_risk": {
-        "stake": 31.43,
-        "max_loss": 31.43
+        "stake": 30.55,
+        "max_loss": 30.55
       },
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 8460,
-        "price_secs": 8460,
+        "model_secs": 1626,
+        "price_secs": 1626,
         "exposure_secs": null
       },
       "stale": false,
@@ -198,8 +198,8 @@
       "stake": 164.22,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -213,9 +213,9 @@
       "opponent": "United States",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.499,
-        "draw": 0.269,
-        "opp_win": 0.232
+        "team_win": 0.501,
+        "draw": 0.268,
+        "opp_win": 0.231
       }
     },
     {
@@ -236,8 +236,8 @@
       "stake": 164.22,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -252,8 +252,8 @@
       "match_round": "Round of 16",
       "match_1x2": {
         "team_win": 0.137,
-        "draw": 0.236,
-        "opp_win": 0.627
+        "draw": 0.235,
+        "opp_win": 0.628
       }
     },
     {
@@ -274,8 +274,8 @@
       "stake": 164.22,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -312,8 +312,8 @@
       "stake": 164.22,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -327,9 +327,9 @@
       "opponent": "Mexico",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.468,
-        "draw": 0.287,
-        "opp_win": 0.244
+        "team_win": 0.471,
+        "draw": 0.286,
+        "opp_win": 0.242
       }
     },
     {
@@ -350,8 +350,8 @@
       "stake": 142.95,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -388,8 +388,8 @@
       "stake": 164.22,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -426,8 +426,8 @@
       "stake": 117.59,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -464,8 +464,8 @@
       "stake": 105.81,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -479,9 +479,9 @@
       "opponent": "United States",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.499,
-        "draw": 0.269,
-        "opp_win": 0.232
+        "team_win": 0.501,
+        "draw": 0.268,
+        "opp_win": 0.231
       }
     },
     {
@@ -502,8 +502,8 @@
       "stake": 80.29,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -517,9 +517,9 @@
       "opponent": "United States",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.499,
-        "draw": 0.269,
-        "opp_win": 0.232
+        "team_win": 0.501,
+        "draw": 0.268,
+        "opp_win": 0.231
       }
     },
     {
@@ -540,8 +540,8 @@
       "stake": 75.13,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -556,8 +556,8 @@
       "match_round": "Round of 16",
       "match_1x2": {
         "team_win": 0.137,
-        "draw": 0.236,
-        "opp_win": 0.627
+        "draw": 0.235,
+        "opp_win": 0.628
       }
     },
     {
@@ -578,8 +578,8 @@
       "stake": 73.11,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -595,7 +595,7 @@
       "match_1x2": {
         "team_win": 0.47,
         "draw": 0.281,
-        "opp_win": 0.249
+        "opp_win": 0.248
       }
     },
     {
@@ -616,8 +616,8 @@
       "stake": 91.1,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -631,9 +631,9 @@
       "opponent": "Colombia",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.281,
-        "draw": 0.297,
-        "opp_win": 0.423
+        "team_win": 0.286,
+        "draw": 0.296,
+        "opp_win": 0.418
       }
     },
     {
@@ -654,8 +654,8 @@
       "stake": 65.6,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -669,9 +669,9 @@
       "opponent": "Canada",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.492,
-        "draw": 0.296,
-        "opp_win": 0.212
+        "team_win": 0.489,
+        "draw": 0.297,
+        "opp_win": 0.214
       }
     },
     {
@@ -692,8 +692,8 @@
       "stake": 60.07,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -707,9 +707,9 @@
       "opponent": "Morocco",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.212,
-        "draw": 0.296,
-        "opp_win": 0.492
+        "team_win": 0.214,
+        "draw": 0.297,
+        "opp_win": 0.489
       }
     },
     {
@@ -730,8 +730,8 @@
       "stake": 47.52,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -747,7 +747,7 @@
       "match_1x2": {
         "team_win": 0.47,
         "draw": 0.281,
-        "opp_win": 0.249
+        "opp_win": 0.248
       }
     },
     {
@@ -768,8 +768,8 @@
       "stake": 44.26,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -783,9 +783,9 @@
       "opponent": "Colombia",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.281,
-        "draw": 0.297,
-        "opp_win": 0.423
+        "team_win": 0.286,
+        "draw": 0.296,
+        "opp_win": 0.418
       }
     },
     {
@@ -806,8 +806,8 @@
       "stake": 51.18,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -821,7 +821,7 @@
       "opponent": "Spain",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.249,
+        "team_win": 0.248,
         "draw": 0.281,
         "opp_win": 0.47
       }
@@ -844,8 +844,8 @@
       "stake": 29.25,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -859,9 +859,9 @@
       "opponent": "United States",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.499,
-        "draw": 0.269,
-        "opp_win": 0.232
+        "team_win": 0.501,
+        "draw": 0.268,
+        "opp_win": 0.231
       }
     },
     {
@@ -882,8 +882,8 @@
       "stake": 27.88,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -897,9 +897,9 @@
       "opponent": "Morocco",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.212,
-        "draw": 0.296,
-        "opp_win": 0.492
+        "team_win": 0.214,
+        "draw": 0.297,
+        "opp_win": 0.489
       }
     },
     {
@@ -920,8 +920,8 @@
       "stake": 26.7,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -935,9 +935,9 @@
       "opponent": "Mexico",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.468,
-        "draw": 0.287,
-        "opp_win": 0.244
+        "team_win": 0.471,
+        "draw": 0.286,
+        "opp_win": 0.242
       }
     },
     {
@@ -958,8 +958,8 @@
       "stake": 22.43,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 2164,
+        "price_secs": 2164
       },
       "stale": false,
       "stale_reason": null,
@@ -974,8 +974,8 @@
       "match_round": "Round of 16",
       "match_1x2": {
         "team_win": 0.137,
-        "draw": 0.236,
-        "opp_win": 0.627
+        "draw": 0.235,
+        "opp_win": 0.628
       }
     }
   ],
@@ -989,13 +989,13 @@
       "market": "1X2",
       "selection": "home",
       "team": "Canada",
-      "model_prob": 0.1902,
-      "price": 5.8845,
-      "edge": 0.0203,
-      "ev_net": 0.1193,
+      "model_prob": 0.1965,
+      "price": 5.5428,
+      "edge": 0.0161,
+      "ev_net": 0.0891,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "model_prob 19% < floor 20%",
+      "withheld_reason": "model_prob 20% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
@@ -1007,13 +1007,13 @@
       "market": "1X2",
       "selection": "home",
       "team": "Paraguay",
-      "model_prob": 0.083,
-      "price": 21.7108,
-      "edge": 0.0369,
-      "ev_net": 0.8013,
+      "model_prob": 0.085,
+      "price": 20.1971,
+      "edge": 0.0355,
+      "ev_net": 0.7176,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "model_prob 8% < floor 20%",
+      "withheld_reason": "model_prob 9% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
@@ -1025,10 +1025,10 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.1684,
-      "price": 7.7336,
-      "edge": 0.0391,
-      "ev_net": 0.3023,
+      "model_prob": 0.1701,
+      "price": 7.5628,
+      "edge": 0.0379,
+      "ev_net": 0.2868,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 17% < floor 20%",
@@ -1043,10 +1043,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Norway",
-      "model_prob": 0.1874,
-      "price": 4.5796,
-      "edge": -0.031,
-      "ev_net": -0.1418,
+      "model_prob": 0.1864,
+      "price": 4.6131,
+      "edge": -0.0303,
+      "ev_net": -0.14,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 19% < floor 20%",
@@ -1061,13 +1061,13 @@
       "market": "1X2",
       "selection": "home",
       "team": "Portugal",
-      "model_prob": 0.2447,
-      "price": 4.3113,
-      "edge": 0.0127,
-      "ev_net": 0.0549,
+      "model_prob": 0.2475,
+      "price": 4.2267,
+      "edge": 0.0109,
+      "ev_net": 0.046,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "longshot filter: prob 24% < 25% (minnow risk)",
+      "withheld_reason": "longshot filter: prob 25% < 25% (minnow risk)",
       "stale": false,
       "stale_reason": null
     },
@@ -1079,10 +1079,10 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.1935,
-      "price": 5.1038,
-      "edge": -0.0024,
-      "ev_net": -0.0123,
+      "model_prob": 0.1949,
+      "price": 5.0442,
+      "edge": -0.0033,
+      "ev_net": -0.0168,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 19% < floor 20%",
@@ -1097,10 +1097,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Egypt",
-      "model_prob": 0.0915,
-      "price": 11.3365,
-      "edge": 0.0033,
-      "ev_net": 0.0374,
+      "model_prob": 0.0923,
+      "price": 11.1711,
+      "edge": 0.0028,
+      "ev_net": 0.031,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 9% < floor 20%",
