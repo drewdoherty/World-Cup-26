@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-05T11:15:07 -->
+<!-- generated: 2026-07-05T12:44:44 -->
 ⚽ *Next match* — Brazil vs Norway
 Kickoff 2026-07-05 20:00:00+00:00
 
 *Winner* (model blend)
-  Brazil         model 58.5¢ · mkt 54.5¢ (Polymarket)  EV +7.3% ✅  $58.06
-  Draw           model 23.9¢ · mkt 26.5¢ (Polymarket)  EV -10.0%
-  Norway         model 17.7¢ · mkt 20.5¢ (Polymarket)  EV -13.8%
+  Brazil         model 58.7¢ · mkt 54.5¢ (Polymarket)  EV +7.7% ✅  $61.43
+  Draw           model 24.0¢ · mkt 26.5¢ (Polymarket)  EV -9.3%
+  Norway         model 17.3¢ · mkt 19.5¢ (Polymarket)  EV -11.5%
   _stake = ¼-Kelly @ £2000 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 9.2)
@@ -21,5 +21,5 @@ _top anytime (both teams — add squad to split + FGS)_
   Matheus Cunha         3.55 (Betfair)  imp 28%
 
 *Scorelines* (top 6)
-1-1 11.3% | 2-0 9.7% | 2-1 8.2% | 1-0 8.1% | 3-0 7.3% | 3-1 6.2%
+1-1 11.4% | 2-0 9.7% | 2-1 8.2% | 1-0 8.2% | 3-0 7.3% | 3-1 6.2%
   O/U 2.5: over 57.5% / under 42.5%   BTTS 53.6%
