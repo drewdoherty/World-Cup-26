@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-05T22:15:43 -->
+<!-- generated: 2026-07-05T23:32:15 -->
 ⚽ *Next match* — Mexico vs England
 Kickoff 2026-07-06 00:00:00+00:00
 
