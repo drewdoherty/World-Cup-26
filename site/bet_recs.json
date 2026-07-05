@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-05 02:00:04 UTC",
+    "generated": "2026-07-05 02:34:59 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 2419,
+      "model_secs": 2299,
       "advancement_secs": 1,
       "price_secs": null,
-      "promo_secs": 139426,
+      "promo_secs": 141521,
       "exposure_secs": null
     },
     "coverage": {
@@ -66,25 +66,25 @@
       "team": "Belgium",
       "venue": "smarkets",
       "currency": "GBP",
-      "model_prob": 0.4036,
-      "price": 2.7342,
+      "model_prob": 0.4033,
+      "price": 2.7374,
       "price_source": "devig_consensus",
-      "edge": 0.0378,
-      "ev_net": 0.1034,
-      "stake": 48.66,
+      "edge": 0.038,
+      "ev_net": 0.104,
+      "stake": 48.85,
       "action_label": "ADD",
       "current_exposure": {
         "fixture_open": false
       },
       "proposed_risk": {
-        "stake": 48.66,
-        "max_loss": 48.66
+        "stake": 48.85,
+        "max_loss": 48.85
       },
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 2419,
-        "price_secs": 2419,
+        "model_secs": 2299,
+        "price_secs": 2299,
         "exposure_secs": null
       },
       "stale": false,
@@ -107,25 +107,25 @@
       "team": "Brazil",
       "venue": "smarkets",
       "currency": "GBP",
-      "model_prob": 0.583,
-      "price": 1.8624,
+      "model_prob": 0.5832,
+      "price": 1.8618,
       "price_source": "devig_consensus",
-      "edge": 0.0461,
-      "ev_net": 0.0858,
-      "stake": 81.23,
+      "edge": 0.046,
+      "ev_net": 0.0857,
+      "stake": 81.16,
       "action_label": "ADD",
       "current_exposure": {
         "fixture_open": false
       },
       "proposed_risk": {
-        "stake": 81.23,
-        "max_loss": 81.23
+        "stake": 81.16,
+        "max_loss": 81.16
       },
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 2419,
-        "price_secs": 2419,
+        "model_secs": 2299,
+        "price_secs": 2299,
         "exposure_secs": null
       },
       "stale": false,
@@ -149,7 +149,7 @@
       "venue": "smarkets",
       "currency": "GBP",
       "model_prob": 0.4171,
-      "price": 2.5326,
+      "price": 2.5327,
       "price_source": "devig_consensus",
       "edge": 0.0222,
       "ev_net": 0.0563,
@@ -165,8 +165,8 @@
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 2419,
-        "price_secs": 2419,
+        "model_secs": 2299,
+        "price_secs": 2299,
         "exposure_secs": null
       },
       "stale": false,
@@ -190,11 +190,11 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.6858,
-      "pm_price": 0.4995,
+      "pm_price": 0.502,
       "pm_fee": 0.0075,
-      "price": 1.9724,
-      "edge_adj": 0.1753,
-      "ev_net": 0.1788,
+      "price": 1.9627,
+      "edge_adj": 0.1713,
+      "ev_net": 0.1763,
       "stake": 164.22,
       "action_label": "ADD",
       "ages": {
@@ -371,44 +371,6 @@
       }
     },
     {
-      "id": "brazil_qf_pm",
-      "team": "Brazil",
-      "group": "C",
-      "stage": "QF",
-      "market": "advancement",
-      "selection": "reach_QF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.7796,
-      "pm_price": 0.685,
-      "pm_fee": 0.0065,
-      "price": 1.4462,
-      "edge_adj": 0.0832,
-      "ev_net": 0.0881,
-      "stake": 164.22,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 1,
-        "price_secs": 1
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Norway",
-      "match_round": "Round of 16",
-      "match_1x2": {
-        "team_win": 0.597,
-        "draw": 0.239,
-        "opp_win": 0.165
-      }
-    },
-    {
       "id": "belgium_sf_pm",
       "team": "Belgium",
       "group": "G",
@@ -444,6 +406,44 @@
         "team_win": 0.501,
         "draw": 0.268,
         "opp_win": 0.231
+      }
+    },
+    {
+      "id": "brazil_qf_pm",
+      "team": "Brazil",
+      "group": "C",
+      "stage": "QF",
+      "market": "advancement",
+      "selection": "reach_QF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.7796,
+      "pm_price": 0.69,
+      "pm_fee": 0.0064,
+      "price": 1.4359,
+      "edge_adj": 0.0733,
+      "ev_net": 0.0832,
+      "stake": 164.22,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 1,
+        "price_secs": 1
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Norway",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.597,
+        "draw": 0.239,
+        "opp_win": 0.165
       }
     },
     {
@@ -646,12 +646,12 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.1701,
-      "pm_price": 0.1265,
+      "pm_price": 0.1255,
       "pm_fee": 0.0033,
-      "price": 7.7033,
-      "edge_adj": 0.0398,
-      "ev_net": 0.0403,
-      "stake": 47.52,
+      "price": 7.7644,
+      "edge_adj": 0.0408,
+      "ev_net": 0.0413,
+      "stake": 48.67,
       "action_label": "ADD",
       "ages": {
         "model_secs": 1,
@@ -837,10 +837,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Norway",
-      "model_prob": 0.1806,
-      "price": 4.8311,
+      "model_prob": 0.1805,
+      "price": 4.8327,
       "edge": -0.0264,
-      "ev_net": -0.1277,
+      "ev_net": -0.1276,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 18% < floor 20%",
@@ -855,10 +855,10 @@
       "market": "1X2",
       "selection": "home",
       "team": "Portugal",
-      "model_prob": 0.2451,
-      "price": 4.2976,
-      "edge": 0.0124,
-      "ev_net": 0.0535,
+      "model_prob": 0.246,
+      "price": 4.2722,
+      "edge": 0.0119,
+      "ev_net": 0.0508,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "longshot filter: prob 25% < 25% (minnow risk)",
@@ -873,10 +873,10 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.1938,
-      "price": 5.0903,
-      "edge": -0.0026,
-      "ev_net": -0.0133,
+      "model_prob": 0.1944,
+      "price": 5.0648,
+      "edge": -0.003,
+      "ev_net": -0.0152,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 19% < floor 20%",
@@ -891,10 +891,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Egypt",
-      "model_prob": 0.0945,
-      "price": 10.7325,
-      "edge": 0.0013,
-      "ev_net": 0.0141,
+      "model_prob": 0.0946,
+      "price": 10.7118,
+      "edge": 0.0012,
+      "ev_net": 0.0133,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 9% < floor 20%",

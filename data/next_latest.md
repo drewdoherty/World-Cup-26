@@ -1,9 +1,9 @@
-<!-- generated: 2026-07-05T01:19:45 -->
+<!-- generated: 2026-07-05T01:56:40 -->
 ⚽ *Next match* — Brazil vs Norway
 Kickoff 2026-07-05 20:00:00+00:00
 
 *Winner* (model blend)
-  Brazil         model 58.3¢ · mkt 53.5¢ (Polymarket)  EV +9.0% ✅  $112.14
+  Brazil         model 58.3¢ · mkt 53.8¢ (betfair_ex_uk)  EV +8.5% ✅  $106.84
   Draw           model 23.6¢ · mkt 26.3¢ (betfair_ex_uk)  EV -10.2%
   Norway         model 18.1¢ · mkt 20.4¢ (betfair_ex_uk)  EV -11.5%
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
