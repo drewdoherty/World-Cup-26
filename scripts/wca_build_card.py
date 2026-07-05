@@ -381,6 +381,26 @@ def main() -> None:
             from wca.modelpreds import build_predictions, write_predictions
 
             blends = fixture_blends(models, odds_df, fixtures_meta)
+
+            # SHADOW-ONLY (P6 totals-lambda-prior, docs/HANDOFF_2026-07-03.md
+            # §4): best-effort load of the latest totals O/U ladder per match
+            # from the local odds_snapshots store, so build_predictions can log
+            # a market-implied lambda + blend next to the deployed DC lambda.
+            # Never blocks or breaks the card build: any failure (missing DB,
+            # locked file, empty table) degenerates to "no totals prior logged"
+            # for this build, exactly like a missing gb_model.
+            totals_quotes_by_match = {}
+            try:
+                from wca.models.totals_prior import load_totals_quotes_by_match
+
+                totals_quotes_by_match = load_totals_quotes_by_match(args.db)
+            except Exception as totals_exc:
+                print(
+                    "WARNING: totals-prior quote load failed (shadow log skipped): %s"
+                    % totals_exc,
+                    file=sys.stderr,
+                )
+
             # Pass the fitted DC model so each row also carries the per-fixture
             # goal-expectation lambdas (same lagged fit as the DC 1X2). They are
             # the compact sufficient statistic the correlated-exposure model
@@ -388,6 +408,7 @@ def main() -> None:
             write_predictions(build_predictions(
                 blends, now_str, dc_model=models.dc,
                 gb_model=getattr(models, "goal_blend", None),
+                totals_quotes_by_match=totals_quotes_by_match,
             ))
             print("Model predictions persisted: %d fixtures" % len(blends))
         except Exception as exc:
