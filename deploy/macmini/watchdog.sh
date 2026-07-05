@@ -13,6 +13,20 @@
 # It is READ-ONLY: it never restarts, loads, or mutates anything — diagnosis
 # only, so it can never make an outage worse. It is wired as the 'watchdog'
 # StartInterval job in services.env (every 5 min by default).
+#
+# GIT-BEHIND CHECK (P5 / PHASE1_DESIGN.md §9 increment 2)
+#   autopull.sh runs `git pull --rebase --autostash` every 5 min but is
+#   otherwise silent: a network blip, a rebase conflict (it aborts and exits 0
+#   — see autopull.sh), or the job simply not firing all leave the mini stuck
+#   on an old commit with fresh data/code sitting un-applied on origin/main
+#   and nobody told. The visible symptom is stale data with no alert (this
+#   already happened once: a 25h-stale Scores/Bracket page went unnoticed
+#   until a screenshot showed wrong results). This check does its own
+#   READ-ONLY `git fetch` + `git rev-list --count HEAD..origin/main` and
+#   alerts once the repo has been measured behind on ${GIT_BEHIND_STRIKES}
+#   consecutive samples (default 2, ~10 min at the 5-min cadence) — long
+#   enough to ride out a normal in-flight autopull cycle without false-
+#   positiving on it. It never fetches/rebases/resets on its own.
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$HERE/../.." && pwd)"
@@ -27,6 +41,7 @@ touch "$STATE"
 
 STALE_LOG_SECS="${WCA_WATCHDOG_STALE_LOG_SECS:-3600}"  # daemon log silent >1h ⇒ suspect-hung
 STRIKES="${WCA_WATCHDOG_STRIKES:-2}"                   # consecutive bad samples before alerting
+GIT_BEHIND_STRIKES="${WCA_WATCHDOG_GIT_BEHIND_STRIKES:-2}"  # consecutive behind-samples before alerting (~10 min @ 5-min cadence)
 
 # --- Telegram (best-effort; bounded; never blocks the watchdog) -------------
 # Reuse the live bot's creds from .env (the channel the operator already watches).
@@ -90,6 +105,38 @@ for d in "${WCA_DAEMONS[@]}"; do
     [ "$prev" -ge "$STRIKES" ] && alerts+=("• ${label}: ✅ recovered")
   fi
 done
+
+# --- Git-behind check (read-only: fetch + rev-list only, never pull/reset) --
+# A failed fetch (network blip) is treated the SAME as "behind" for strike
+# purposes — either way we can't confirm the repo is current, and a fetch
+# that keeps failing is exactly the kind of silent staleness this exists to
+# catch. Only a successful fetch showing zero behind resets the strike.
+GIT_BEHIND_LABEL="git.behind"
+prev_gb="$(read_strikes "$GIT_BEHIND_LABEL")"; prev_gb="${prev_gb:-0}"
+behind_count=""
+fetch_ok=1
+if git fetch --quiet origin main 2>/dev/null; then
+  fetch_ok=0
+  behind_count="$(git rev-list --count HEAD..origin/main 2>/dev/null || echo "")"
+fi
+
+if [ "$fetch_ok" -ne 0 ] || { [ -n "$behind_count" ] && [ "$behind_count" -gt 0 ] 2>/dev/null; }; then
+  cur_gb=$(( prev_gb + 1 ))
+  new_state+=("$GIT_BEHIND_LABEL $cur_gb")
+  # Alert once, exactly when we cross the strike threshold (no per-run spam);
+  # re-alert (without resetting the strike count) if it keeps growing so a
+  # widening gap doesn't go silent after the first ping.
+  if [ "$cur_gb" -eq "$GIT_BEHIND_STRIKES" ] || { [ "$cur_gb" -gt "$GIT_BEHIND_STRIKES" ] && [ $(( (cur_gb - GIT_BEHIND_STRIKES) % GIT_BEHIND_STRIKES )) -eq 0 ]; }; then
+    if [ "$fetch_ok" -ne 0 ]; then
+      alerts+=("• ${GIT_BEHIND_LABEL}: git fetch failed for ${cur_gb} consecutive checks — can't confirm repo is current (network? auth?)")
+    else
+      alerts+=("• ${GIT_BEHIND_LABEL}: local repo is ${behind_count} commit(s) behind origin/main for ${cur_gb} consecutive checks — autopull may be stuck/failing (check logs/autopull.log)")
+    fi
+  fi
+else
+  new_state+=("$GIT_BEHIND_LABEL 0")
+  [ "$prev_gb" -ge "$GIT_BEHIND_STRIKES" ] && alerts+=("• ${GIT_BEHIND_LABEL}: ✅ recovered (repo is up to date with origin/main)")
+fi
 
 # Rewrite state atomically.
 : > "$STATE.tmp"
