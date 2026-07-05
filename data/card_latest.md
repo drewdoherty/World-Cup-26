@@ -1,62 +1,53 @@
-<!-- generated: 2026-07-05T18:18:13 -->
+<!-- generated: 2026-07-05T20:32:32 -->
 *World Cup Alpha — bet card* (0 staked, 3 indicative picks, hit-prob ranked)
 
 _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. Wire a 2nd book (Betfair creds) or set WCA_STAKE_SINGLE_SOURCE=1 to size them._
 
-*1. [FAV] Brazil vs Norway* — Brazil @ *1.83* via *polymarket*
-    model 58.7% / mkt 54.3%  edge *+3.9%*  [elo 54% dc 69%]
+*1. [FAV] Mexico vs England* — England @ *2.67* via *polymarket*
+    model 40.5% / mkt 37.7%  edge *+4.0%*  [elo 29% dc 50%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
-*2. [FAV] Mexico vs England* — England @ *2.60* via *polymarket*
-    model 41.1% / mkt 38.7%  edge *+3.4%*  [elo 29% dc 50%]
+*2. [FAV] United States vs Belgium* — Belgium @ *2.74* via *polymarket*
+    model 40.1% / mkt 36.3%  edge *+9.9%*  [elo 33% dc 50%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
-*3. [2ND-FAV] United States vs Belgium* — Belgium @ *2.90* via *polymarket*
-    model 38.7% / mkt 34.0%  edge *+12.2%*  [elo 33% dc 50%]
+*3. [DRAW] France vs Morocco* — Draw @ *4.08* via *polymarket*
+    model 25.7% / mkt 24.3%  edge *+4.7%*  [elo 25% dc 29%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
 
-*— CUT (excluded from staking, 1) —*
-  x Portugal vs Spain — Portugal @ 4.26 (model 24.3%, +3.6% EV): outright-underdog longshot (model 24.3%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +3.6% EV
+*— CUT (excluded from staking, 2) —*
+  x France vs Morocco — Morocco @ 6.90 (model 16.6%, +14.3% EV): below 20% hit-probability floor (model 16.6%) — too unlikely to return PnL even at +14.3% EV
+  x Portugal vs Spain — Portugal @ 4.26 (model 24.5%, +4.3% EV): outright-underdog longshot (model 24.5%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +4.3% EV
 
 *— REFERENCE, NOT SIZED (models + fair odds only) —*
 *World Cup Alpha — scorelines* (6 fixtures)
 
-*Brazil vs Norway*
-    xG: 2.06-0.95
-    1-1  11.4%  fair 8.78 (11.4%)  back >= 8.96 (11.2%)
-    2-0  9.7%  fair 10.31 (9.7%)  back >= 10.51 (9.5%)
-    2-1  8.2%  fair 12.19 (8.2%)  back >= 12.43 (8.0%)
-    1-0  8.2%  fair 12.23 (8.2%)  back >= 12.48 (8.0%)
-    3-0  7.3%  fair 13.61 (7.3%)  back >= 13.89 (7.2%)
-    3-1  6.2%  fair 16.09 (6.2%)  back >= 16.42 (6.1%)
-    O/U 2.5: over 57.5% / under 42.5%   BTTS 53.6%
-
 *Mexico vs England*
-    xG: 1.22-1.53
+    xG: 1.23-1.52
     1-1  13.7%  fair 7.30 (13.7%)  back >= 7.44 (13.4%)
-    0-1  8.0%  fair 12.56 (8.0%)  back >= 12.81 (7.8%)
-    1-2  7.9%  fair 12.63 (7.9%)  back >= 12.89 (7.8%)
-    2-1  7.8%  fair 12.89 (7.8%)  back >= 13.15 (7.6%)
+    2-1  7.9%  fair 12.64 (7.9%)  back >= 12.89 (7.8%)
+    0-1  7.8%  fair 12.75 (7.8%)  back >= 13.00 (7.7%)
+    1-2  7.8%  fair 12.82 (7.8%)  back >= 13.08 (7.6%)
+    1-0  7.7%  fair 12.96 (7.7%)  back >= 13.22 (7.6%)
     0-0  7.6%  fair 13.13 (7.6%)  back >= 13.39 (7.5%)
-    1-0  7.6%  fair 13.22 (7.6%)  back >= 13.48 (7.4%)
     O/U 2.5: over 51.4% / under 48.6%   BTTS 56.4%
 
 *United States vs Belgium*
-    xG: 1.55-1.75
-    1-1  11.7%  fair 8.57 (11.7%)  back >= 8.74 (11.4%)
-    2-1  8.6%  fair 11.68 (8.6%)  back >= 11.91 (8.4%)
-    2-2  7.6%  fair 13.19 (7.6%)  back >= 13.45 (7.4%)
-    1-2  7.2%  fair 13.81 (7.2%)  back >= 14.08 (7.1%)
-    1-0  5.6%  fair 17.71 (5.6%)  back >= 18.06 (5.5%)
-    0-2  5.2%  fair 19.33 (5.2%)  back >= 19.71 (5.1%)
-    O/U 2.5: over 63.6% / under 36.4%   BTTS 66.3%
+    xG: 1.52-1.78
+    1-1  11.8%  fair 8.51 (11.8%)  back >= 8.68 (11.5%)
+    2-1  8.2%  fair 12.24 (8.2%)  back >= 12.49 (8.0%)
+    2-2  7.6%  fair 13.09 (7.6%)  back >= 13.35 (7.5%)
+    1-2  7.5%  fair 13.33 (7.5%)  back >= 13.59 (7.4%)
+    1-0  5.4%  fair 18.56 (5.4%)  back >= 18.93 (5.3%)
+    0-2  5.4%  fair 18.65 (5.4%)  back >= 19.03 (5.3%)
+    O/U 2.5: over 63.5% / under 36.5%   BTTS 66.3%
 
 *Portugal vs Spain*
-    xG: 1.09-1.60
-    1-1  12.5%  fair 7.99 (12.5%)  back >= 8.15 (12.3%)
-    0-1  10.7%  fair 9.34 (10.7%)  back >= 9.53 (10.5%)
-    1-2  10.0%  fair 10.03 (10.0%)  back >= 10.23 (9.8%)
-    0-2  8.8%  fair 11.43 (8.8%)  back >= 11.66 (8.6%)
-    0-0  7.4%  fair 13.53 (7.4%)  back >= 13.80 (7.2%)
-    1-0  6.4%  fair 15.70 (6.4%)  back >= 16.01 (6.2%)
+    xG: 1.09-1.59
+    1-1  12.6%  fair 7.94 (12.6%)  back >= 8.09 (12.4%)
+    0-1  10.6%  fair 9.42 (10.6%)  back >= 9.60 (10.4%)
+    1-2  9.9%  fair 10.11 (9.9%)  back >= 10.31 (9.7%)
+    0-2  8.7%  fair 11.52 (8.7%)  back >= 11.75 (8.5%)
+    0-0  7.4%  fair 13.44 (7.4%)  back >= 13.71 (7.3%)
+    1-0  6.4%  fair 15.58 (6.4%)  back >= 15.89 (6.3%)
     O/U 2.5: over 50.3% / under 49.7%   BTTS 53.9%
 
 *Argentina vs Egypt*
@@ -78,3 +69,13 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
     0-2  8.1%  fair 12.33 (8.1%)  back >= 12.58 (7.9%)
     1-0  7.9%  fair 12.63 (7.9%)  back >= 12.88 (7.8%)
     O/U 2.5: over 45.2% / under 54.8%   BTTS 51.4%
+
+*France vs Morocco*
+    xG: 1.51-0.72
+    1-0  17.1%  fair 5.86 (17.1%)  back >= 5.98 (16.7%)
+    2-0  12.5%  fair 8.01 (12.5%)  back >= 8.17 (12.2%)
+    1-1  11.6%  fair 8.60 (11.6%)  back >= 8.77 (11.4%)
+    0-0  10.6%  fair 9.47 (10.6%)  back >= 9.66 (10.4%)
+    2-1  9.8%  fair 10.16 (9.8%)  back >= 10.36 (9.6%)
+    0-1  6.6%  fair 15.08 (6.6%)  back >= 15.39 (6.5%)
+    O/U 2.5: over 38.8% / under 61.2%   BTTS 40.9%

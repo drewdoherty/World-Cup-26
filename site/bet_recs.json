@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-05 18:26:33 UTC",
+    "generated": "2026-07-05 20:40:57 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3000.0,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 500,
-      "advancement_secs": 27073,
+      "model_secs": 505,
+      "advancement_secs": 35137,
       "price_secs": null,
-      "promo_secs": 27337,
+      "promo_secs": 35401,
       "exposure_secs": null
     },
     "coverage": {
@@ -50,7 +50,7 @@
       "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($3990).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
-    "actionable_count": 3,
+    "actionable_count": 2,
     "withheld_count": 34
   },
   "match_singles": [
@@ -66,66 +66,25 @@
       "team": "Belgium",
       "venue": "smarkets",
       "currency": "GBP",
-      "model_prob": 0.3872,
-      "price": 2.9414,
+      "model_prob": 0.4012,
+      "price": 2.7526,
       "price_source": "devig_consensus",
-      "edge": 0.0473,
-      "ev_net": 0.139,
-      "stake": 53.71,
+      "edge": 0.0379,
+      "ev_net": 0.1044,
+      "stake": 44.69,
       "action_label": "ADD",
       "current_exposure": {
         "fixture_open": false
       },
       "proposed_risk": {
-        "stake": 53.71,
-        "max_loss": 53.71
+        "stake": 44.69,
+        "max_loss": 44.69
       },
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 500,
-        "price_secs": 500,
-        "exposure_secs": null
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "1X2",
-        "devig_price"
-      ]
-    },
-    {
-      "id": "brazil_vs_norway_home_1x2",
-      "fixture": "Brazil vs Norway",
-      "kickoff": "2026-07-05 20:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "market_kind": "result_90",
-      "market_label": "90-min 1X2 (+ stoppage)",
-      "selection": "home",
-      "team": "Brazil",
-      "venue": "smarkets",
-      "currency": "GBP",
-      "model_prob": 0.587,
-      "price": 1.8414,
-      "price_source": "devig_consensus",
-      "edge": 0.044,
-      "ev_net": 0.0809,
-      "stake": 72.14,
-      "action_label": "ADD",
-      "current_exposure": {
-        "fixture_open": false
-      },
-      "proposed_risk": {
-        "stake": 72.14,
-        "max_loss": 72.14
-      },
-      "promo": null,
-      "promo_status": null,
-      "ages": {
-        "model_secs": 500,
-        "price_secs": 500,
+        "model_secs": 505,
+        "price_secs": 505,
         "exposure_secs": null
       },
       "stale": false,
@@ -148,25 +107,25 @@
       "team": "England",
       "venue": "smarkets",
       "currency": "GBP",
-      "model_prob": 0.4114,
-      "price": 2.5844,
+      "model_prob": 0.4054,
+      "price": 2.6534,
       "price_source": "devig_consensus",
-      "edge": 0.0245,
-      "ev_net": 0.0632,
-      "stake": 29.92,
+      "edge": 0.0285,
+      "ev_net": 0.0756,
+      "stake": 34.29,
       "action_label": "ADD",
       "current_exposure": {
         "fixture_open": false
       },
       "proposed_risk": {
-        "stake": 29.92,
-        "max_loss": 29.92
+        "stake": 34.29,
+        "max_loss": 34.29
       },
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 500,
-        "price_secs": 500,
+        "model_secs": 505,
+        "price_secs": 505,
         "exposure_secs": null
       },
       "stale": false,
@@ -183,24 +142,6 @@
   "guaranteed_arbs": [],
   "withheld": [
     {
-      "id": "brazil_vs_norway_away_1x2",
-      "fixture": "Brazil vs Norway",
-      "kickoff": "2026-07-05 20:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "selection": "away",
-      "team": "Norway",
-      "model_prob": 0.1725,
-      "price": 5.1676,
-      "edge": -0.021,
-      "ev_net": -0.1084,
-      "stake": 0.0,
-      "currency": "GBP",
-      "withheld_reason": "model_prob 17% < floor 20%",
-      "stale": false,
-      "stale_reason": null
-    },
-    {
       "id": "portugal_vs_spain_home_1x2",
       "fixture": "Portugal vs Spain",
       "kickoff": "2026-07-06 19:00:00+00:00",
@@ -208,13 +149,13 @@
       "market": "1X2",
       "selection": "home",
       "team": "Portugal",
-      "model_prob": 0.2434,
-      "price": 4.3406,
-      "edge": 0.013,
-      "ev_net": 0.0563,
+      "model_prob": 0.2452,
+      "price": 4.2834,
+      "edge": 0.0117,
+      "ev_net": 0.0503,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "longshot filter: prob 24% < 25% (minnow risk)",
+      "withheld_reason": "longshot filter: prob 25% < 25% (minnow risk)",
       "stale": false,
       "stale_reason": null
     },
@@ -251,6 +192,24 @@
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 9% < floor 20%",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "france_vs_morocco_away_1x2",
+      "fixture": "France vs Morocco",
+      "kickoff": "2026-07-09 20:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "away",
+      "team": "Morocco",
+      "model_prob": 0.1657,
+      "price": 6.9653,
+      "edge": 0.0221,
+      "ev_net": 0.154,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "model_prob 17% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
@@ -454,8 +413,8 @@
       "stake": 159.6,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -493,8 +452,8 @@
       "stake": 138.92,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -532,8 +491,8 @@
       "stake": 110.11,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -571,8 +530,8 @@
       "stake": 159.6,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -610,8 +569,8 @@
       "stake": 70.58,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -649,8 +608,8 @@
       "stake": 42.69,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -688,8 +647,8 @@
       "stake": 159.6,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -727,8 +686,8 @@
       "stake": 23.38,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -766,8 +725,8 @@
       "stake": 30.34,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -805,8 +764,8 @@
       "stake": 64.27,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -844,8 +803,8 @@
       "stake": 35.09,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -883,8 +842,8 @@
       "stake": 159.6,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -922,8 +881,8 @@
       "stake": 101.76,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -961,8 +920,8 @@
       "stake": 68.84,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -1000,8 +959,8 @@
       "stake": 25.49,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -1039,8 +998,8 @@
       "stake": 103.83,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -1078,8 +1037,8 @@
       "stake": 60.22,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 27073,
-        "price_secs": 27073
+        "model_secs": 35137,
+        "price_secs": 35137
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
