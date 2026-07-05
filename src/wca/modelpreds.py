@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 LATEST_PATH = "data/model_predictions.json"
 LOG_PATH = "data/model_predictions_log.jsonl"
@@ -63,8 +63,52 @@ def _lambdas_for(dc_model: Any, fb: Any) -> Optional[Dict[str, float]]:
     }
 
 
+def _totals_prior_for(
+    lambdas: Optional[Dict[str, float]],
+    match_id: str,
+    totals_quotes_by_match: Optional[Mapping[str, Sequence[Any]]],
+) -> Optional[Dict[str, Any]]:
+    """Totals-market-implied lambda + blend for one fixture, or ``None``.
+
+    SHADOW-ONLY (P6 quant-ladder item #1, ``docs/HANDOFF_2026-07-03.md`` §4):
+    de-vigs the fixture's Over/Under totals ladder into an implied total-goals
+    lambda (:mod:`wca.models.totals_prior`) and blends it with the deployed DC
+    lambda. Returns ``None`` whenever there is no DC lambda to blend against or
+    no quotes lookup was supplied at all, so older callers / entries are
+    completely unaffected (mirrors the ``gb_lambda_*`` additive pattern).
+    """
+    if lambdas is None or not totals_quotes_by_match:
+        return None
+    quotes = totals_quotes_by_match.get(match_id)
+    if not quotes:
+        return None
+    try:
+        from wca.models.totals_prior import compute_totals_prior
+
+        result = compute_totals_prior(
+            lambdas["lambda_home"], lambdas["lambda_away"], quotes
+        )
+    except Exception:
+        return None
+    return {
+        "tl_lambda_market_total": (
+            round(result.lambda_market_total, 6)
+            if result.lambda_market_total is not None
+            else None
+        ),
+        "tl_n_market_quotes": result.n_market_quotes,
+        "tl_weight_market": round(result.weight_market, 6),
+        "tl_lambda_blend_home": round(result.lambda_blend_home, 6),
+        "tl_lambda_blend_away": round(result.lambda_blend_away, 6),
+    }
+
+
 def build_predictions(
-    blends: List[Any], now_utc: str, dc_model: Any = None, gb_model: Any = None
+    blends: List[Any],
+    now_utc: str,
+    dc_model: Any = None,
+    gb_model: Any = None,
+    totals_quotes_by_match: Optional[Mapping[str, Sequence[Any]]] = None,
 ) -> Dict[str, Any]:
     """JSON-ready payload from ``card._iter_fixture_blends`` output.
 
@@ -83,13 +127,25 @@ def build_predictions(
     is optional and SHADOW-ONLY: when supplied, rows additionally carry
     ``gb_lambda_home`` / ``gb_lambda_away`` so the blend's out-of-sample CLV
     can be compared against the deployed DC before it ever drives sizing.
+
+    ``totals_quotes_by_match`` (``{match_id: [TotalsQuote, ...]}``) is optional
+    and SHADOW-ONLY (P6 totals-lambda-prior): when supplied and a DC lambda is
+    available for the fixture, rows additionally carry
+    ``tl_lambda_market_total`` (the de-vigged totals-market-implied total-goals
+    lambda; ``None`` if the ladder had no usable complete O/U pair),
+    ``tl_n_market_quotes`` (how many quotes fed it), ``tl_weight_market`` (the
+    credibility weight actually applied) and ``tl_lambda_blend_home`` /
+    ``tl_lambda_blend_away`` (the blended lambda, model shrunk toward the
+    market). See :mod:`wca.models.totals_prior` for the exact de-vig/blend
+    method. NOT consumed by any pricing or sizing path in this change.
     """
     fixtures: List[Dict[str, Any]] = []
     for fb in blends:
+        match_id = str(fb.fx.get("event_id", ""))
         row: Dict[str, Any] = {
             "generated": now_utc,
             "fixture": "%s vs %s" % (fb.home, fb.away),
-            "match_id": str(fb.fx.get("event_id", "")),
+            "match_id": match_id,
             "kickoff": str(fb.fx.get("commence_time", "")),
             "model": _triple(fb.blended),
             "elo": _triple(fb.elo_map),
@@ -103,6 +159,9 @@ def build_predictions(
         if gb_lambdas is not None:
             row["gb_lambda_home"] = gb_lambdas["lambda_home"]
             row["gb_lambda_away"] = gb_lambdas["lambda_away"]
+        totals_prior = _totals_prior_for(lambdas, match_id, totals_quotes_by_match)
+        if totals_prior is not None:
+            row.update(totals_prior)
         fixtures.append(row)
     fixtures.sort(key=lambda f: (f["kickoff"], f["fixture"]))
     return {"meta": {"generated": now_utc}, "fixtures": fixtures}
@@ -192,5 +251,36 @@ def load_lambdas(path: str = LATEST_PATH) -> Dict[str, Dict[str, float]]:
             out[str(name)] = {
                 "lambda_home": float(lam_h),
                 "lambda_away": float(lam_a),
+            }
+    return out
+
+
+def load_totals_prior(path: str = LATEST_PATH) -> Dict[str, Dict[str, Optional[float]]]:
+    """Map fixture string -> the totals-lambda-prior shadow fields, if present.
+
+    SHADOW-ONLY reader (mirrors :func:`load_lambdas`): only fixtures whose row
+    actually carries ``tl_lambda_blend_home`` / ``tl_lambda_blend_away`` are
+    returned (older entries, or entries built without a totals-quotes lookup,
+    are simply absent — no fabrication, no crash). Intended for CLV/OOS
+    comparison tooling, not for any live pricing or sizing path.
+    """
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    out: Dict[str, Dict[str, Optional[float]]] = {}
+    for fx in data.get("fixtures", []):
+        name = fx.get("fixture")
+        lam_h = fx.get("tl_lambda_blend_home")
+        lam_a = fx.get("tl_lambda_blend_away")
+        if not name:
+            continue
+        if isinstance(lam_h, (int, float)) and isinstance(lam_a, (int, float)):
+            out[str(name)] = {
+                "tl_lambda_market_total": fx.get("tl_lambda_market_total"),
+                "tl_n_market_quotes": fx.get("tl_n_market_quotes"),
+                "tl_weight_market": fx.get("tl_weight_market"),
+                "tl_lambda_blend_home": float(lam_h),
+                "tl_lambda_blend_away": float(lam_a),
             }
     return out
