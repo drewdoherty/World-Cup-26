@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-05T14:54:25 -->
+<!-- generated: 2026-07-05T16:29:46 -->
 ⚽ *Next match* — Brazil vs Norway
 Kickoff 2026-07-05 20:00:00+00:00
 
