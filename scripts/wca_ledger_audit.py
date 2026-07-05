@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import os
 import sqlite3
 import sys
 from pathlib import Path
@@ -47,9 +48,56 @@ from wca.ledger import store  # noqa: E402
 # Markets we will NOT auto-settle (kept here only for the report label).
 _AUTO_NOTE = "1X2/match-result only; all other markets -> manual"
 
+# Freshness gate: refuse to auto-settle from a results source whose mtime is
+# older than this. A stale source (e.g. the martj42_cleaned refresh job
+# didn't run) silently leaves recently-concluded games "open" rather than
+# erroring loudly -- see memory wca-settle-stale-results-source.md for the
+# 2-3 day staleness this is guarding against. Same style as the advancement
+# feed's max-age gate (scripts/wca_advancement_data.py::_mtime_hours).
+DEFAULT_MAX_AGE_HOURS = 24.0
+
+
+class StaleResultsError(RuntimeError):
+    """Raised when the results source is older than the freshness gate allows."""
+
 
 def _now_iso() -> str:
     return datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+
+
+def results_age_hours(results_path: str) -> Optional[float]:
+    """Hours since ``results_path`` was last modified, or ``None`` if missing."""
+    if not os.path.exists(results_path):
+        return None
+    mtime = datetime.datetime.fromtimestamp(
+        os.path.getmtime(results_path), datetime.timezone.utc
+    )
+    now = datetime.datetime.now(datetime.timezone.utc)
+    return (now - mtime).total_seconds() / 3600.0
+
+
+def check_results_freshness(
+    results_path: str, max_age_hours: float = DEFAULT_MAX_AGE_HOURS
+) -> float:
+    """Raise :class:`StaleResultsError` if ``results_path`` is missing or stale.
+
+    Returns the age in hours on success so callers can log it. This is a
+    fail-closed guard: settling real-money bets off a stale results file
+    should error loudly, never happen silently.
+    """
+    age = results_age_hours(results_path)
+    if age is None:
+        raise StaleResultsError(
+            "results source %r does not exist -- refusing to settle" % results_path
+        )
+    if age > max_age_hours:
+        raise StaleResultsError(
+            "results source %r is %.1fh old (max allowed %.1fh) -- refusing to "
+            "settle from a stale source. Refresh martj42_cleaned.csv (see "
+            "scripts/wca_clean_results.py) before re-running."
+            % (results_path, age, max_age_hours)
+        )
+    return age
 
 
 # -- results lookup -------------------------------------------------------
@@ -241,6 +289,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     p.add_argument("--skip-closes", action="store_true", help="skip the closing_odds/clv backfill pass")
     p.add_argument("--since", default="2026-06-01",
                    help="ignore results before this date (excludes pre-tournament history)")
+    p.add_argument("--max-age-hours", type=float, default=DEFAULT_MAX_AGE_HOURS,
+                   help="refuse to settle if --results is older than this many hours "
+                        "(fail-closed freshness gate; default 24h)")
+    p.add_argument("--skip-freshness-check", action="store_true",
+                   help="bypass the freshness gate (dangerous -- may settle from a "
+                        "stale source; only for offline/test use)")
     args = p.parse_args(argv)
 
     def log(msg: str) -> None:
@@ -249,6 +303,19 @@ def main(argv: Optional[List[str]] = None) -> int:
     mode = "APPLY (writing)" if args.apply else "DRY-RUN (no changes)"
     log("== WCA ledger audit — %s ==" % mode)
     log("db=%s  results=%s" % (args.db, args.results))
+
+    if args.skip_freshness_check:
+        log("WARNING: --skip-freshness-check set -- freshness gate bypassed")
+    else:
+        try:
+            age = check_results_freshness(args.results, args.max_age_hours)
+        except StaleResultsError as exc:
+            log("ERROR: %s" % exc)
+            log("Refusing to settle from a stale/missing source. Pass "
+                "--skip-freshness-check to override (not recommended for live money).")
+            return 1
+        log("results source is %.1fh old (max allowed %.1fh) -- fresh, proceeding"
+            % (age, args.max_age_hours))
 
     if args.apply:
         bak = backup_db(args.db, args.backup_dir)
