@@ -1,14 +1,14 @@
 {
   "meta": {
-    "generated": "2026-07-05 08:52:07 UTC"
+    "generated": "2026-07-05 10:50:56 UTC"
   },
   "sites": [
     {
       "name": "Paddy Power",
       "kind": "book",
       "scrape": {
-        "status": "ok",
-        "last_seen": "2026-07-05T07:51:12"
+        "status": "blocked",
+        "last_seen": "2026-07-05T10:50:52"
       },
       "ongoing": [
         {
@@ -45,7 +45,7 @@
       "kind": "book",
       "scrape": {
         "status": "blocked",
-        "last_seen": "2026-07-05T07:51:12"
+        "last_seen": "2026-07-05T10:50:52"
       },
       "ongoing": [
         {
@@ -87,7 +87,7 @@
       "kind": "book",
       "scrape": {
         "status": "blocked",
-        "last_seen": "2026-07-05T07:51:12"
+        "last_seen": "2026-07-05T10:50:52"
       },
       "ongoing": [
         {
@@ -124,7 +124,7 @@
       "kind": "book",
       "scrape": {
         "status": "ok",
-        "last_seen": "2026-07-05T07:51:12"
+        "last_seen": "2026-07-05T10:50:52"
       },
       "ongoing": [],
       "boosts": []
@@ -133,8 +133,8 @@
       "name": "William Hill",
       "kind": "book",
       "scrape": {
-        "status": "error",
-        "last_seen": "2026-07-05T07:51:12"
+        "status": "blocked",
+        "last_seen": "2026-07-05T10:50:52"
       },
       "ongoing": [
         {
@@ -176,7 +176,7 @@
       "kind": "book",
       "scrape": {
         "status": "ok",
-        "last_seen": "2026-07-05T07:51:12"
+        "last_seen": "2026-07-05T10:50:52"
       },
       "ongoing": [],
       "boosts": []
@@ -186,7 +186,7 @@
       "kind": "book",
       "scrape": {
         "status": "blocked",
-        "last_seen": "2026-07-05T07:51:12"
+        "last_seen": "2026-07-05T10:50:52"
       },
       "ongoing": [],
       "boosts": []
@@ -196,7 +196,7 @@
       "kind": "book",
       "scrape": {
         "status": "blocked",
-        "last_seen": "2026-07-05T07:51:12"
+        "last_seen": "2026-07-05T10:50:52"
       },
       "ongoing": [],
       "boosts": []
@@ -206,7 +206,7 @@
       "kind": "exchange",
       "scrape": {
         "status": "blocked",
-        "last_seen": "2026-07-05T07:51:12"
+        "last_seen": "2026-07-05T10:50:52"
       },
       "ongoing": [],
       "boosts": []
@@ -216,7 +216,7 @@
       "kind": "exchange",
       "scrape": {
         "status": "ok",
-        "last_seen": "2026-07-05T07:51:12"
+        "last_seen": "2026-07-05T10:50:52"
       },
       "ongoing": [],
       "boosts": []
@@ -225,8 +225,8 @@
       "name": "Betfair Exchange",
       "kind": "exchange",
       "scrape": {
-        "status": "ok",
-        "last_seen": "2026-07-05T07:51:12"
+        "status": "blocked",
+        "last_seen": "2026-07-05T10:50:52"
       },
       "ongoing": [
         {
@@ -257,13 +257,33 @@
       "kind": "prediction_market",
       "scrape": {
         "status": "blocked",
-        "last_seen": "2026-07-05T07:51:12"
+        "last_seen": "2026-07-05T10:50:52"
       },
       "ongoing": [],
       "boosts": []
     }
   ],
   "signup_offers": [
+    {
+      "site": "BC.Game",
+      "offer": "Up to 360% match across first 4 deposits. High wagering — only worth it for active turnover.",
+      "min_odds": "",
+      "min_stake": "",
+      "free_bet_value": "up to 360% match",
+      "expiry": "—",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "Bet UK",
+      "offer": "Bet £10, get £40 in free bets (2x£10 Bet Builder + 2x£10 sports). Shares platform/T&Cs with BetMGM — expect linked-account checks if both claimed.",
+      "min_odds": "",
+      "min_stake": "£10",
+      "free_bet_value": "£40",
+      "expiry": "7 days",
+      "promo_code": "None",
+      "url": ""
+    },
     {
       "site": "Bet365",
       "offer": "Bet £10, get £30 in free bets (valid 7 days). No current promo code confirmed — do not apply BETMAX (unverified). Min odds 1/5 (1.20).",
@@ -275,12 +295,122 @@
       "url": ""
     },
     {
+      "site": "BetMGM",
+      "offer": "Bet £10, get £40 in free bets (2x£10 Bet Builder + 2x£10 sports). Excludes virtuals/esports.",
+      "min_odds": "1/1",
+      "min_stake": "£10",
+      "free_bet_value": "£40",
+      "expiry": "7 days",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "Betano",
+      "offer": "Bet £10, get £20 football free bets + 3x 200% profit boosts.",
+      "min_odds": "1/1",
+      "min_stake": "£10",
+      "free_bet_value": "£20 + boosts",
+      "expiry": "14 days",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "Betfair",
+      "offer": "Bet £10, get £30 in free multi/acca bets (3x£10). Sportsbook only — acca-only free bets extract lower.",
+      "min_odds": "evens",
+      "min_stake": "£10",
+      "free_bet_value": "£30",
+      "expiry": "30 days",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "Betfred",
+      "offer": "Bet £10, get £50 in free bets (£30 sports + £20 acca/Bet Builder). Debit card only.",
+      "min_odds": "evens",
+      "min_stake": "£10",
+      "free_bet_value": "£50",
+      "expiry": "7 days",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "Betway",
+      "offer": "Bet £10, get £40 in free bet tokens (4x£10). Pre-event only, debit card.",
+      "min_odds": "2.0",
+      "min_stake": "£10",
+      "free_bet_value": "£40",
+      "expiry": "7 days",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "BoyleSports",
+      "offer": "Bet £10, get £40 (£30 sports free bets + £10 casino).",
+      "min_odds": "",
+      "min_stake": "£10",
+      "free_bet_value": "£40",
+      "expiry": "7 days",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "Cloudbet",
+      "offer": "Welcome up to $2,500: 10% rakeback + daily cash drops, paid as CASH with NO rollover. Value scales with deposit/turnover.",
+      "min_odds": "",
+      "min_stake": "",
+      "free_bet_value": "up to $2,500 (cash rakeback)",
+      "expiry": "30 days",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "Coral",
+      "offer": "Bet £5, get £30 in free bets. Shares platform with Ladbrokes (Entain).",
+      "min_odds": "",
+      "min_stake": "£5",
+      "free_bet_value": "£30",
+      "expiry": "7 days",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "Easybet",
+      "offer": "Bet £20, get £30 (4x£5 predictions + £10 exchange). Debit card only.",
+      "min_odds": "",
+      "min_stake": "£20",
+      "free_bet_value": "£30",
+      "expiry": "72 hours",
+      "promo_code": "YES30",
+      "url": ""
+    },
+    {
+      "site": "Kalshi",
+      "offer": "$10–$15 trading bonus + $25 referral both sides. US-only (CFTC) — very likely geoblocked from Bahrain; verify access first.",
+      "min_odds": "",
+      "min_stake": "",
+      "free_bet_value": "$10–$25",
+      "expiry": "—",
+      "promo_code": "GRINDERS / CBSSPORTS",
+      "url": ""
+    },
+    {
       "site": "Ladbrokes",
       "offer": "Bet £10, get £50 in free bets (new customers)",
       "min_odds": "1/2",
       "min_stake": "£10",
       "free_bet_value": "£50",
       "expiry": "30 days",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "Midnite",
+      "offer": "Bet £10, get £30 in free bets. Claim within 14 days of signup.",
+      "min_odds": "1/1",
+      "min_stake": "£10",
+      "free_bet_value": "£30",
+      "expiry": "7 days",
       "promo_code": "None",
       "url": ""
     },
@@ -305,6 +435,46 @@
       "url": ""
     },
     {
+      "site": "Parimatch",
+      "offer": "Bet £10, get £30 in free bets (6x£5).",
+      "min_odds": "2.0",
+      "min_stake": "£10",
+      "free_bet_value": "£30",
+      "expiry": "—",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "Polymarket",
+      "offer": "Deposit $20, get $50 trading bonus. Onchain prediction market — Bahrain-accessible; already core to the model. Verify current promo code before use.",
+      "min_odds": "",
+      "min_stake": "",
+      "free_bet_value": "$50",
+      "expiry": "—",
+      "promo_code": "CBSSPORTS (verify)",
+      "url": ""
+    },
+    {
+      "site": "QuinnBet",
+      "offer": "Get 50% of day-1 net losses back as a free bet, up to £50. Min 3 bets on different events, £10+.",
+      "min_odds": "evens",
+      "min_stake": "£10",
+      "free_bet_value": "up to £50 (cashback)",
+      "expiry": "—",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "SBK",
+      "offer": "Bet £20, get £40 in free bets (credited within 48h). Min deposit £10.",
+      "min_odds": "2.0",
+      "min_stake": "£5",
+      "free_bet_value": "£40",
+      "expiry": "48 hours",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
       "site": "Sky Bet",
       "offer": "Bet £10, get £50 in free bets. Promotion runs 1 June–19 July 2026. E-wallets (Neteller/Skrill) excluded.",
       "min_odds": "1/1",
@@ -321,6 +491,26 @@
       "min_stake": "£10",
       "free_bet_value": "Up to £60 over tournament",
       "expiry": "Until 17 June 2026, 21:00",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "SpreadEx",
+      "offer": "Up to £100 in free bets (spread betting — fiddly to extract, lower priority).",
+      "min_odds": "",
+      "min_stake": "",
+      "free_bet_value": "up to £100",
+      "expiry": "—",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "Tote",
+      "offer": "Bet £10, get £40 in free bets.",
+      "min_odds": "",
+      "min_stake": "£10",
+      "free_bet_value": "£40",
+      "expiry": "—",
       "promo_code": "None",
       "url": ""
     },
@@ -353,6 +543,26 @@
       "expiry": "30 days",
       "promo_code": "None",
       "url": ""
+    },
+    {
+      "site": "kwiff",
+      "offer": "Bet £10, get £40 in free bets (4x£10, various). Cashout excluded; claim within 5 days.",
+      "min_odds": "2.0",
+      "min_stake": "£10",
+      "free_bet_value": "£40",
+      "expiry": "7 days",
+      "promo_code": "None",
+      "url": ""
+    },
+    {
+      "site": "talkSPORT BET",
+      "offer": "Bet £10, get up to £40 in free bets + boost tokens.",
+      "min_odds": "",
+      "min_stake": "£10",
+      "free_bet_value": "up to £40",
+      "expiry": "7 days",
+      "promo_code": "None",
+      "url": ""
     }
   ],
   "watchlist": [
@@ -373,14 +583,14 @@
   "scrape_health": [
     {
       "site": "Paddy Power",
-      "status": "ok",
-      "http_status": 200,
-      "last_ok_utc": "2026-07-05T07:51:12"
+      "status": "blocked",
+      "http_status": 403,
+      "last_ok_utc": ""
     },
     {
       "site": "Sky Bet",
       "status": "blocked",
-      "http_status": 200,
+      "http_status": 403,
       "last_ok_utc": ""
     },
     {
@@ -393,30 +603,30 @@
       "site": "Virgin Bet",
       "status": "ok",
       "http_status": 200,
-      "last_ok_utc": "2026-07-05T07:51:12"
+      "last_ok_utc": "2026-07-05T10:50:52"
     },
     {
       "site": "William Hill",
-      "status": "error",
-      "http_status": 404,
+      "status": "blocked",
+      "http_status": 403,
       "last_ok_utc": ""
     },
     {
       "site": "Ladbrokes",
       "status": "ok",
       "http_status": 200,
-      "last_ok_utc": "2026-07-05T07:51:12"
+      "last_ok_utc": "2026-07-05T10:50:52"
     },
     {
       "site": "Unibet",
       "status": "blocked",
       "http_status": 200,
-      "last_ok_utc": "2026-07-04T18:22:12"
+      "last_ok_utc": ""
     },
     {
       "site": "Betfair Sportsbook",
       "status": "blocked",
-      "http_status": 200,
+      "http_status": 403,
       "last_ok_utc": ""
     },
     {
@@ -429,19 +639,19 @@
       "site": "Matchbook",
       "status": "ok",
       "http_status": 200,
-      "last_ok_utc": "2026-07-05T07:51:12"
+      "last_ok_utc": "2026-07-05T10:50:52"
     },
     {
       "site": "Betfair Exchange",
-      "status": "ok",
-      "http_status": 200,
-      "last_ok_utc": "2026-07-05T07:51:12"
+      "status": "blocked",
+      "http_status": 403,
+      "last_ok_utc": ""
     },
     {
       "site": "Polymarket",
       "status": "blocked",
       "http_status": 200,
-      "last_ok_utc": "2026-06-22T22:08:17"
+      "last_ok_utc": ""
     }
   ]
 }
