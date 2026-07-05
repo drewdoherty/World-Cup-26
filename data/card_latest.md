@@ -1,13 +1,13 @@
-<!-- generated: 2026-07-05T12:44:44 -->
+<!-- generated: 2026-07-05T14:54:25 -->
 *World Cup Alpha — bet card* (0 staked, 3 indicative picks, hit-prob ranked)
 
 _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. Wire a 2nd book (Betfair creds) or set WCA_STAKE_SINGLE_SOURCE=1 to size them._
 
 *1. [FAV] Brazil vs Norway* — Brazil @ *1.83* via *polymarket*
-    model 58.7% / mkt 54.3%  edge *+7.7%*  [elo 54% dc 69%]
+    model 58.7% / mkt 54.3%  edge *+3.9%*  [elo 54% dc 69%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
 *2. [FAV] Mexico vs England* — England @ *2.53* via *polymarket*
-    model 41.7% / mkt 39.7%  edge *+5.7%*  [elo 29% dc 50%]
+    model 41.5% / mkt 39.3%  edge *+5.1%*  [elo 29% dc 50%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
 *3. [FAV] United States vs Belgium* — Belgium @ *2.74* via *polymarket*
     model 40.3% / mkt 36.7%  edge *+10.5%*  [elo 33% dc 50%]
@@ -31,12 +31,12 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
 
 *Mexico vs England*
     xG: 1.21-1.54
-    1-1  13.7%  fair 7.30 (13.7%)  back >= 7.44 (13.4%)
-    0-1  8.1%  fair 12.38 (8.1%)  back >= 12.63 (7.9%)
-    1-2  8.0%  fair 12.45 (8.0%)  back >= 12.70 (7.9%)
-    0-0  7.6%  fair 13.13 (7.6%)  back >= 13.39 (7.5%)
-    2-1  7.6%  fair 13.16 (7.6%)  back >= 13.42 (7.5%)
-    1-0  7.4%  fair 13.49 (7.4%)  back >= 13.76 (7.3%)
+    1-1  13.6%  fair 7.34 (13.6%)  back >= 7.49 (13.3%)
+    0-1  8.0%  fair 12.45 (8.0%)  back >= 12.70 (7.9%)
+    1-2  8.0%  fair 12.52 (8.0%)  back >= 12.77 (7.8%)
+    2-1  7.7%  fair 12.97 (7.7%)  back >= 13.23 (7.6%)
+    0-0  7.6%  fair 13.22 (7.6%)  back >= 13.48 (7.4%)
+    1-0  7.5%  fair 13.30 (7.5%)  back >= 13.57 (7.4%)
     O/U 2.5: over 51.5% / under 48.5%   BTTS 56.4%
 
 *United States vs Belgium*
