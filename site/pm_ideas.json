@@ -1,9 +1,70 @@
 {
   "meta": {
-    "generated": "2026-07-05T00:56:35Z",
+    "generated": "2026-07-05T01:30:09Z",
     "ranking": "+EV moneylines > mid > longshots; further-out fixtures first; EV tiebreak",
-    "games_held": true,
+    "games_held": false,
     "confirm": "Y PM-<n> in @gamble1_bot fires; PM_DRY_RUN gates execution"
   },
-  "ideas": []
+  "ideas": [
+    {
+      "group": "game",
+      "match": "Brazil vs Norway",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 54.0,
+      "model_c": 57.3,
+      "ev_pct": 6.0,
+      "size_usd": 30.0,
+      "hours_out": 18.5,
+      "bucket": "moneyline"
+    },
+    {
+      "group": "game",
+      "match": "Portugal vs Spain",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 27.0,
+      "model_c": 27.3,
+      "ev_pct": 1.1,
+      "size_usd": 2.46,
+      "hours_out": 41.5,
+      "bucket": "mid"
+    },
+    {
+      "group": "game",
+      "match": "Mexico vs England",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 40.0,
+      "model_c": 41.0,
+      "ev_pct": 2.4,
+      "size_usd": 10.12,
+      "hours_out": 22.5,
+      "bucket": "mid"
+    },
+    {
+      "group": "game",
+      "match": "United States vs Belgium",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 38.0,
+      "model_c": 39.7,
+      "ev_pct": 4.4,
+      "size_usd": 16.89,
+      "hours_out": 0.0,
+      "bucket": "mid"
+    },
+    {
+      "group": "game",
+      "match": "Portugal vs Spain",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 24.0,
+      "model_c": 24.4,
+      "ev_pct": 1.7,
+      "size_usd": 3.43,
+      "hours_out": 41.5,
+      "bucket": "longshot"
+    }
+  ]
 }
