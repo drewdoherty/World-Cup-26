@@ -103,9 +103,42 @@ def _canon(name: str) -> str:
     return aliases.get(n, n)
 
 
-def load_results(path):
+def load_shootouts(path):
+    """Map frozenset{canon teamA, canon teamB} -> pens winner, knockout era.
+
+    A 90-minute draw in a knockout tie goes to extra time then penalties;
+    the base results CSV only carries the 90-min score, so a drawn knockout
+    match is otherwise unresolved. This is a SEPARATE source (martj42
+    shootouts.csv, fetched via wca.data.results.download_shootouts) — never
+    fabricated. Graceful if absent (script still runs, those ties just stay
+    as "Winner M##" placeholders until the shootout data is available).
+    """
+    out = {}
+    if not path or not os.path.exists(path):
+        return out
+    try:
+        with open(path, newline="", encoding="utf-8") as fh:
+            for r in csv.DictReader(fh):
+                d = (r.get("date") or "")[:10]
+                if d < "2026-06-28":
+                    continue
+                h, a, w = r.get("home_team"), r.get("away_team"), r.get("winner")
+                if not (h and a and w):
+                    continue
+                out[frozenset((_canon(h), _canon(a)))] = w
+    except OSError:
+        pass
+    return out
+
+
+def load_results(path, shootouts_path=None):
     """Map frozenset{canon teamA, canon teamB} -> winner team name, for knockout-
-    era matches (>= 2026-06-28) that have a decided score. Graceful if absent."""
+    era matches (>= 2026-06-28) that have a decided score. Graceful if absent.
+
+    A 90-minute draw defers to ``shootouts_path`` (see :func:`load_shootouts`)
+    for the real pens winner; if that source doesn't have the match either,
+    the tie is left unresolved rather than guessed.
+    """
     out = {}
     if not path or not os.path.exists(path):
         return out
@@ -123,11 +156,16 @@ def load_results(path):
                     hs, as_ = int(float(hs)), int(float(as_))
                 except (TypeError, ValueError):
                     continue
+                key = frozenset((_canon(h), _canon(a)))
                 if hs == as_:
-                    continue  # draw: winner decided by ET/pens — leave unresolved
-                out[frozenset((_canon(h), _canon(a)))] = h if hs > as_ else a
+                    continue  # draw: resolved below via shootouts, if available
+                out[key] = h if hs > as_ else a
     except OSError:
         pass
+    if shootouts_path:
+        shootouts = load_shootouts(shootouts_path)
+        for key, winner in shootouts.items():
+            out.setdefault(key, winner)  # 90-min score (if any) always wins first
     return out
 
 
@@ -217,12 +255,16 @@ def main(argv=None):
     ap.add_argument("--ics", default=os.path.join(here, "World_Cup_2026_Calendar_Bahrain.ics"))
     ap.add_argument("--results", default=os.path.join(here, "data/raw/martj42_cleaned.csv"),
                     help="results CSV to auto-fill R16+ winners (optional)")
+    ap.add_argument("--shootouts", default=os.path.join(here, "data/raw/shootouts.csv"),
+                    help="penalty-shootout winners for knockout draws (optional; "
+                         "fetch via `python -c \"from wca.data.results import "
+                         "download_shootouts; download_shootouts()\"`)")
     ap.add_argument("--stamp", default="20260628T120000Z", help="DTSTAMP (UTC) for this revision")
     args = ap.parse_args(argv)
 
     existing = open(args.ics, encoding="utf-8").read() if os.path.exists(args.ics) else ""
     group = keep_group_events(existing)
-    results = load_results(args.results)
+    results = load_results(args.results, shootouts_path=args.shootouts)
     ko = knockout_vevents(results, args.stamp)
 
     header = "\n".join([

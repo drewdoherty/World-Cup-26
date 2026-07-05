@@ -82,6 +82,13 @@ cash-out; fire backstop $200) — changing them is a human-approved code change.
 - Telegram: ops/trades via @gamble1_bot; code via @WorldCupDev conductor
   (never places bets). Progress pings go to the TELEGRAM_CHAT_ID chat.
 
+## Session handoffs
+
+Current state-of-play + ranked work queue: `docs/HANDOFF_2026-07-03.md`
+(branch map, environment topology incl. the PM network block + VPN/LAN
+trade-off, live watch-items, /task templates). Conductor agents: read it
+before starting any task.
+
 ## Standing decisions
 
 - Betfair execution: NO-BUILD (ADR-003). Read-only CLV reference at most;
