@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-05T20:32:32 -->
+<!-- generated: 2026-07-05T22:15:43 -->
 ⚽ *Next match* — Mexico vs England
 Kickoff 2026-07-06 00:00:00+00:00
 
 *Winner* (model blend)
-  Mexico         model 30.6¢ · mkt 31.5¢ (Polymarket)  EV -2.9%
-  Draw           model 28.9¢ · mkt 30.5¢ (Polymarket)  EV -5.3%
-  England        model 40.5¢ · mkt 37.5¢ (Polymarket)  EV +8.1% ✅  $32.31
+  Mexico         model 30.4¢ · mkt 31.5¢ (Polymarket)  EV -3.5%
+  Draw           model 29.3¢ · mkt 31.5¢ (Polymarket)  EV -7.0%
+  England        model 40.3¢ · mkt 37.5¢ (Polymarket)  EV +7.5% ✅  $30.01
   _stake = ¼-Kelly @ £2000 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.9)
@@ -21,5 +21,5 @@ _top anytime (both teams — add squad to split + FGS)_
   Armando Gonzalez Alb  4.00 (Betfair)  imp 25%
 
 *Scorelines* (top 6)
-1-1 13.7% | 2-1 7.9% | 0-1 7.8% | 1-2 7.8% | 1-0 7.7% | 0-0 7.6%
-  O/U 2.5: over 51.4% / under 48.6%   BTTS 56.4%
+1-1 13.9% | 2-1 7.9% | 0-1 7.8% | 1-2 7.8% | 0-0 7.7% | 1-0 7.7%
+  O/U 2.5: over 51.3% / under 48.7%   BTTS 56.5%
