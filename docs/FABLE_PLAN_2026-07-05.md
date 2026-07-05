@@ -27,17 +27,26 @@ diverge, re-verify against `origin/main` before acting.
   from cash (no live book-price feed exists for corners/cards). launchd
   `propcal` job config added but **NOT activated** — needs a human to run
   `bash deploy/macmini/install.sh` on the mini.
-- **P5 (partial) — watchdog git-behind alert.** PR pending review (branch
-  `feat/watchdog-git-behind-alert`) — extends `com.wca.watchdog` to detect
-  and alert when the mini falls behind `origin/main` by more than ~10 min,
-  reusing the existing admin-alert path. Scoped deliberately narrow: this
-  does NOT touch the daemon-artifact-untracking question (§3 below).
-- **P6 (partial) — totals→λ prior, SHADOW ONLY.** PR pending review (branch
-  `feat/totals-lambda-prior-shadow`) — de-vigs the OddsAPI totals O/U quote
-  into an implied goal expectation, blends with the model's own DC lambda,
-  logs both side-by-side. **Not wired into live pricing/sizing** — that
-  graduation is a separate decision gated on an out-of-sample CLV
-  comparison, per CLAUDE.md's shadow-first rule.
+- **P5 (partial) — watchdog git-behind alert.** PR #168, merged. Extends
+  `com.wca.watchdog` with a read-only `git fetch` + `rev-list --count` check
+  each 5-min cycle, alerting through the existing Telegram `notify()` path
+  once the mini has measured behind `origin/main` for 2 consecutive samples
+  (~10 min — long enough to ride out a normal in-flight autopull). Never
+  fetches/rebases/resets on its own. Scoped deliberately narrow: does NOT
+  touch the daemon-artifact-untracking question (§3 below). Noted in review:
+  a latent unrelated bash 3.2 `set -u` empty-array bug was found but not
+  fixed (out of scope for this PR) — worth a human's attention separately.
+- **P6 (partial) — totals→λ prior, SHADOW ONLY.** PR #169, merged. Confirmed
+  135,746 totals + 25,924 BTTS rows sitting in `odds_snapshots` unread before
+  this (per project memory's "~160k unused" claim). New
+  `src/wca/models/totals_prior.py` de-vigs the O/U ladder, inverts it to a
+  market-implied total-goals λ, and blends with the model's DC λ using the
+  same credibility-weight form already established by the F7 blend
+  (`goalblend.credibility_weight`, `k=9` chosen by analogy — not empirically
+  fit, flagged honestly in the PR). Logged additively as `tl_lambda_*` fields,
+  read-only/best-effort in `wca_build_card.py`. **Not wired into live
+  pricing/sizing** — graduation is a separate decision gated on an
+  out-of-sample CLV comparison, per CLAUDE.md's shadow-first rule.
 
 **Process note, read before repeating this pattern**: the P4 agent was
 authorized to self-merge under narrow conditions (display-only, no
