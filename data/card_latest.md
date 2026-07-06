@@ -1,16 +1,13 @@
-<!-- generated: 2026-07-05T23:32:15 -->
-*World Cup Alpha — bet card* (0 staked, 3 indicative picks, hit-prob ranked)
+<!-- generated: 2026-07-06T04:43:03 -->
+*World Cup Alpha — bet card* (0 staked, 2 indicative picks, hit-prob ranked)
 
 _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. Wire a 2nd book (Betfair creds) or set WCA_STAKE_SINGLE_SOURCE=1 to size them._
 
-*1. [FAV] Mexico vs England* — England @ *2.67* via *polymarket*
-    model 40.3% / mkt 37.3%  edge *+3.8%*  [elo 29% dc 50%]
-    stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
-*2. [FAV] United States vs Belgium* — Belgium @ *2.74* via *polymarket*
-    model 40.1% / mkt 36.3%  edge *+9.9%*  [elo 33% dc 50%]
-    stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
-*3. [DRAW] France vs Morocco* — Draw @ *4.08* via *polymarket*
+*1. [DRAW] France vs Morocco* — Draw @ *4.08* via *polymarket*
     model 25.7% / mkt 24.3%  edge *+4.7%*  [elo 25% dc 29%]
+    stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
+*2. [2ND-FAV] United States vs Belgium* — Belgium @ *2.82* via *polymarket*
+    model 39.5% / mkt 35.3%  edge *+11.3%*  [elo 33% dc 50%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
 
 *— CUT (excluded from staking, 2) —*
@@ -18,26 +15,16 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
   x Portugal vs Spain — Portugal @ 4.26 (model 24.5%, +4.3% EV): outright-underdog longshot (model 24.5%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +4.3% EV
 
 *— REFERENCE, NOT SIZED (models + fair odds only) —*
-*World Cup Alpha — scorelines* (6 fixtures)
-
-*Mexico vs England*
-    xG: 1.23-1.52
-    1-1  13.9%  fair 7.19 (13.9%)  back >= 7.34 (13.6%)
-    2-1  7.9%  fair 12.72 (7.9%)  back >= 12.97 (7.7%)
-    0-1  7.8%  fair 12.82 (7.8%)  back >= 13.07 (7.6%)
-    1-2  7.8%  fair 12.89 (7.8%)  back >= 13.15 (7.6%)
-    0-0  7.7%  fair 12.95 (7.7%)  back >= 13.21 (7.6%)
-    1-0  7.7%  fair 13.04 (7.7%)  back >= 13.30 (7.5%)
-    O/U 2.5: over 51.3% / under 48.7%   BTTS 56.5%
+*World Cup Alpha — scorelines* (5 fixtures)
 
 *United States vs Belgium*
-    xG: 1.52-1.78
+    xG: 1.53-1.77
     1-1  11.8%  fair 8.51 (11.8%)  back >= 8.68 (11.5%)
-    2-1  8.2%  fair 12.24 (8.2%)  back >= 12.49 (8.0%)
+    2-1  8.3%  fair 12.02 (8.3%)  back >= 12.26 (8.2%)
     2-2  7.6%  fair 13.09 (7.6%)  back >= 13.35 (7.5%)
-    1-2  7.5%  fair 13.33 (7.5%)  back >= 13.59 (7.4%)
-    1-0  5.4%  fair 18.56 (5.4%)  back >= 18.93 (5.3%)
-    0-2  5.4%  fair 18.65 (5.4%)  back >= 19.03 (5.3%)
+    1-2  7.4%  fair 13.53 (7.4%)  back >= 13.80 (7.2%)
+    1-0  5.5%  fair 18.23 (5.5%)  back >= 18.59 (5.4%)
+    0-2  5.3%  fair 18.94 (5.3%)  back >= 19.31 (5.2%)
     O/U 2.5: over 63.5% / under 36.5%   BTTS 66.3%
 
 *Portugal vs Spain*
