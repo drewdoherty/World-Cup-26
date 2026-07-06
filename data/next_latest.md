@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-06T19:08:27 -->
+<!-- generated: 2026-07-06T21:03:33 -->
 ⚽ *Next match* — United States vs Belgium
 Kickoff 2026-07-07 00:00:00+00:00
 
