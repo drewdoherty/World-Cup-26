@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-07 08:03:07 UTC",
+    "generated": "2026-07-07 08:38:03 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -25,11 +25,11 @@
     "open_exposure": {
       "ev": 0.14,
       "best_case": 0.0,
-      "worst_case": -775.96,
+      "worst_case": -795.96,
       "best_case_usd": 0.0,
       "worst_case_usd": -1065.74,
       "p_profit": null,
-      "n_open": 82,
+      "n_open": 84,
       "source": "ledger"
     },
     "fx": {
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 908,
+      "model_secs": 806,
       "advancement_secs": 1,
       "price_secs": null,
-      "promo_secs": 70524,
+      "promo_secs": 72620,
       "exposure_secs": null
     },
     "coverage": {
@@ -51,7 +51,7 @@
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
     "actionable_count": 5,
-    "withheld_count": 11
+    "withheld_count": 9
   },
   "match_singles": [
     {
@@ -66,25 +66,25 @@
       "team": "Spain",
       "venue": "smarkets",
       "currency": "GBP",
-      "model_prob": 0.6266,
-      "price": 1.6865,
+      "model_prob": 0.6274,
+      "price": 1.6869,
       "price_source": "devig_consensus",
-      "edge": 0.0337,
-      "ev_net": 0.0568,
-      "stake": 67.47,
+      "edge": 0.0346,
+      "ev_net": 0.0583,
+      "stake": 69.26,
       "action_label": "ADD",
       "current_exposure": {
         "fixture_open": false
       },
       "proposed_risk": {
-        "stake": 67.47,
-        "max_loss": 67.47
+        "stake": 69.26,
+        "max_loss": 69.26
       },
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 908,
-        "price_secs": 908,
+        "model_secs": 806,
+        "price_secs": 806,
         "exposure_secs": null
       },
       "stale": false,
@@ -108,12 +108,12 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.3156,
-      "pm_price": 0.23,
+      "pm_price": 0.2285,
       "pm_fee": 0.0053,
-      "price": 4.2497,
-      "edge_adj": 0.0793,
-      "ev_net": 0.0803,
-      "stake": 107.77,
+      "price": 4.2774,
+      "edge_adj": 0.0813,
+      "ev_net": 0.0818,
+      "stake": 109.59,
       "action_label": "ADD",
       "ages": {
         "model_secs": 1,
@@ -261,10 +261,10 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.1921,
-      "price": 5.2082,
-      "edge": 0.0001,
-      "ev_net": 0.0004,
+      "model_prob": 0.1896,
+      "price": 5.2856,
+      "edge": 0.0004,
+      "ev_net": 0.002,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 19% < floor 20%",
@@ -279,10 +279,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Egypt",
-      "model_prob": 0.0902,
-      "price": 12.1352,
-      "edge": 0.0078,
-      "ev_net": 0.0945,
+      "model_prob": 0.0886,
+      "price": 12.2436,
+      "edge": 0.0069,
+      "ev_net": 0.0848,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 9% < floor 20%",
@@ -297,10 +297,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Morocco",
-      "model_prob": 0.1682,
+      "model_prob": 0.1678,
       "price": 6.7952,
-      "edge": 0.0211,
-      "ev_net": 0.1432,
+      "edge": 0.0206,
+      "ev_net": 0.1399,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 17% < floor 20%",
@@ -315,71 +315,15 @@
       "market": "1X2",
       "selection": "away",
       "team": "Belgium",
-      "model_prob": 0.1568,
-      "price": 5.9745,
-      "edge": -0.0106,
-      "ev_net": -0.0635,
+      "model_prob": 0.1564,
+      "price": 5.976,
+      "edge": -0.0109,
+      "ev_net": -0.0654,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 16% < floor 20%",
       "stale": false,
       "stale_reason": null
-    },
-    {
-      "id": "portugal_vs_spain_corners",
-      "fixture": "Portugal vs Spain",
-      "market": "corners",
-      "selection": "corners over 8.5",
-      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
-      "stale": true,
-      "stale_reason": "price snapshot absent or older than 2h",
-      "tags": [
-        "model",
-        "prop",
-        "no_price"
-      ]
-    },
-    {
-      "id": "portugal_vs_spain_cards",
-      "fixture": "Portugal vs Spain",
-      "market": "cards",
-      "selection": "cards over 2.5",
-      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
-      "stale": true,
-      "stale_reason": "price snapshot absent or older than 2h",
-      "tags": [
-        "model",
-        "prop",
-        "no_price"
-      ]
-    },
-    {
-      "id": "united_states_vs_belgium_corners",
-      "fixture": "United States vs Belgium",
-      "market": "corners",
-      "selection": "corners over 8.5",
-      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
-      "stale": true,
-      "stale_reason": "price snapshot absent or older than 2h",
-      "tags": [
-        "model",
-        "prop",
-        "no_price"
-      ]
-    },
-    {
-      "id": "united_states_vs_belgium_cards",
-      "fixture": "United States vs Belgium",
-      "market": "cards",
-      "selection": "cards over 2.5",
-      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
-      "stale": true,
-      "stale_reason": "price snapshot absent or older than 2h",
-      "tags": [
-        "model",
-        "prop",
-        "no_price"
-      ]
     },
     {
       "id": "argentina_vs_egypt_corners",
@@ -398,6 +342,34 @@
     {
       "id": "argentina_vs_egypt_cards",
       "fixture": "Argentina vs Egypt",
+      "market": "cards",
+      "selection": "cards over 2.5",
+      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
+      "stale": true,
+      "stale_reason": "price snapshot absent or older than 2h",
+      "tags": [
+        "model",
+        "prop",
+        "no_price"
+      ]
+    },
+    {
+      "id": "switzerland_vs_colombia_corners",
+      "fixture": "Switzerland vs Colombia",
+      "market": "corners",
+      "selection": "corners over 8.5",
+      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
+      "stale": true,
+      "stale_reason": "price snapshot absent or older than 2h",
+      "tags": [
+        "model",
+        "prop",
+        "no_price"
+      ]
+    },
+    {
+      "id": "switzerland_vs_colombia_cards",
+      "fixture": "Switzerland vs Colombia",
       "market": "cards",
       "selection": "cards over 2.5",
       "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
