@@ -1,35 +1,35 @@
 {
   "meta": {
-    "generated": "2026-07-07 12:19:56 UTC",
+    "generated": "2026-07-07 12:43:02 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
-      "bankroll": 3000.0,
+      "bankroll": 3264.014296992481,
       "rung": 0,
       "kelly_fraction": 0.25,
       "per_bet_cap": 0.05,
-      "max_stake": 150.0,
-      "n_settled": 0,
-      "clv_to_date": null,
-      "reason": "COMBINED-POOL \u00a33000 (\u00a33000 +0.00\u00a3 GBP P&L +0.00$ PM P&L at $1.33/\u00a3; user 2026-07-02) \u2014 ladder rung 0 (\u00a32000) for reference; 0/50 settled-with-close, CLV n/a",
+      "max_stake": 163.2,
+      "n_settled": 27,
+      "clv_to_date": -0.018335811964298322,
+      "reason": "COMBINED-POOL \u00a33264 (\u00a33000 +177.10\u00a3 GBP P&L +115.60$ PM P&L at $1.33/\u00a3; user 2026-07-02) \u2014 ladder rung 0 (\u00a32000) for reference; 27/50 settled-with-close, CLV -0.0183",
       "currency": "GBP",
       "source": "ledger"
     },
     "pm_pool": {
-      "bankroll": 3990.0,
+      "bankroll": 4105.6,
       "kelly_fraction": 0.25,
       "per_bet_cap": 0.04,
-      "max_stake": 159.6,
+      "max_stake": 164.22,
       "currency": "USD",
-      "source": "ledger (realised $+0.00)"
+      "source": "ledger (realised $+115.60)"
     },
     "open_exposure": {
-      "ev": 0.0,
+      "ev": 0.14,
       "best_case": 0.0,
-      "worst_case": 0.0,
+      "worst_case": -795.96,
       "best_case_usd": 0.0,
-      "worst_case_usd": 0.0,
+      "worst_case_usd": -1065.74,
       "p_profit": null,
-      "n_open": 0,
+      "n_open": 85,
       "source": "ledger"
     },
     "fx": {
@@ -38,16 +38,16 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 493,
-      "advancement_secs": 703,
+      "model_secs": 1879,
+      "advancement_secs": 1,
       "price_secs": null,
-      "promo_secs": 3005,
+      "promo_secs": 4391,
       "exposure_secs": null
     },
     "coverage": {
       "match_singles": "1X2 from blended model (10%% Elo + 30%% DC + 60%% market) vs de-vigged consensus. Price = market-implied (no best-price pull). Top-3 per fixture by net EV. BTTS/totals: withheld \u2014 no live book price.",
       "event_props": "Corners/cards: calibrated but withheld \u2014 no live sportsbook price snapshot. Player scorer: withheld \u2014 player xG-share not yet wired.",
-      "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($3990).",
+      "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($4106).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
     "actionable_count": 4,
@@ -71,11 +71,11 @@
       "price": 4.3149,
       "edge_adj": 0.0833,
       "ev_net": 0.0838,
-      "stake": 108.86,
+      "stake": 112.02,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 703,
-        "price_secs": 703
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -109,11 +109,11 @@
       "price": 9.986,
       "edge_adj": 0.0401,
       "ev_net": 0.0407,
-      "stake": 45.07,
+      "stake": 46.38,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 703,
-        "price_secs": 703
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -147,11 +147,11 @@
       "price": 10.8761,
       "edge_adj": 0.0286,
       "ev_net": 0.0292,
-      "stake": 32.03,
+      "stake": 32.96,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 703,
-        "price_secs": 703
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -185,11 +185,11 @@
       "price": 13.4197,
       "edge_adj": 0.0229,
       "ev_net": 0.0234,
-      "stake": 25.2,
+      "stake": 25.93,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 703,
-        "price_secs": 703
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,

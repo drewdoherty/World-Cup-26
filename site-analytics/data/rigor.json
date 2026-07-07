@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated": "2026-07-05T08:11:40Z",
-    "n": 213,
+    "generated": "2026-07-07T12:12:54Z",
+    "n": 216,
     "n_eff": 21.0,
     "stage": "insufficient"
   },
@@ -52,19 +52,19 @@
       "id": "G4",
       "name": "Skill vs market (paired log-loss)",
       "stat": "mean per-fixture log-loss differential",
-      "value": -0.006253630175094151,
+      "value": -0.006397770991156219,
       "threshold": "mean>0 one-sided p<0.05 (model better)",
       "pass": false,
-      "note": "outcome-anchored: a best-price artifact cannot pass this; n_fixtures=64"
+      "note": "outcome-anchored: a best-price artifact cannot pass this; n_fixtures=73"
     },
     {
       "id": "G5",
       "name": "Calibration (slope\u220b1, intercept\u220b0)",
       "stat": "logistic calibration slope",
-      "value": 1.4951548825978054,
+      "value": 1.5406881400791532,
       "threshold": "slope CI\u220b1 & intercept CI\u220b0 (N>=100)",
       "pass": false,
-      "note": "outcome-anchored; N=192 settled (need >=100)"
+      "note": "outcome-anchored; N=219 settled (need >=100)"
     },
     {
       "id": "G6",
@@ -93,9 +93,9 @@
     "n_eff": 21.0
   },
   "skill_block": {
-    "logloss_diff": -0.006253630175094151,
-    "brier_skill": -0.013388067866248576,
-    "calibration_slope": 1.4951548825978054
+    "logloss_diff": -0.006397770991156219,
+    "brier_skill": -0.013017193992125753,
+    "calibration_slope": 1.5406881400791532
   },
   "profit_block": {
     "roi": 0.1793214887425333,

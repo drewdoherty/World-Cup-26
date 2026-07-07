@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-07 07:27:07 UTC"
+    "generated": "2026-07-07 12:07:50 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -15,7 +15,7 @@
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0698,
+        "prob": 0.0647,
         "results": [
           "Argentina",
           "Switzerland",
@@ -25,7 +25,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0241,
+        "prob": 0.0266,
         "results": [
           "Argentina",
           "Switzerland",
@@ -35,7 +35,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0177,
+        "prob": 0.0204,
         "results": [
           "Argentina",
           "Switzerland",
@@ -45,7 +45,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0311,
+        "prob": 0.0288,
         "results": [
           "Argentina",
           "Switzerland",
@@ -55,7 +55,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0107,
+        "prob": 0.0118,
         "results": [
           "Argentina",
           "Switzerland",
@@ -67,7 +67,7 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0698,
+        "prob": 0.0647,
         "results": [
           "Argentina",
           "Switzerland",
@@ -77,7 +77,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0241,
+        "prob": 0.0266,
         "results": [
           "Argentina",
           "Switzerland",
@@ -87,7 +87,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0177,
+        "prob": 0.0204,
         "results": [
           "Argentina",
           "Switzerland",
@@ -120,7 +120,7 @@
       "results": [
         {
           "outcome": "Argentina",
-          "prob": 0.7175,
+          "prob": 0.7193,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -129,7 +129,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.192,
+          "prob": 0.1921,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -138,7 +138,7 @@
         },
         {
           "outcome": "Egypt",
-          "prob": 0.0905,
+          "prob": 0.0887,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -161,7 +161,7 @@
       "results": [
         {
           "outcome": "Switzerland",
-          "prob": 0.2703,
+          "prob": 0.2696,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -170,7 +170,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2962,
+          "prob": 0.298,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -179,7 +179,7 @@
         },
         {
           "outcome": "Colombia",
-          "prob": 0.4335,
+          "prob": 0.4324,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -202,7 +202,7 @@
       "results": [
         {
           "outcome": "France",
-          "prob": 0.5755,
+          "prob": 0.5761,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -220,7 +220,7 @@
         },
         {
           "outcome": "Morocco",
-          "prob": 0.1682,
+          "prob": 0.1678,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -243,7 +243,7 @@
       "results": [
         {
           "outcome": "Spain",
-          "prob": 0.6256,
+          "prob": 0.5795,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -252,7 +252,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.216,
+          "prob": 0.2377,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -261,7 +261,7 @@
         },
         {
           "outcome": "Belgium",
-          "prob": 0.1584,
+          "prob": 0.1829,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -861,6 +861,33 @@
       "free": false,
       "odds": 2.95,
       "match": "Australia vs Egypt"
+    },
+    {
+      "type": "Bet Builder",
+      "selection": "Both Teams to Score -> Both Teams to Score + Double Chance -> Switzerland or Draw + Player Shots on Target -> Luis Diaz: 1+ Shots on Target",
+      "stake": 20.0,
+      "profit": 55.0,
+      "free": false,
+      "odds": 3.75,
+      "match": "Switzerland v Colombia"
+    },
+    {
+      "type": "Bet Builder",
+      "selection": "Result/Both Teams to Score -> Argentina & No + To Score at Any Time -> Lionel Messi to Score",
+      "stake": 5.0,
+      "profit": 10.0,
+      "free": true,
+      "odds": 3.0,
+      "match": "Argentina v Egypt"
+    },
+    {
+      "type": "Accumulator",
+      "selection": "Match Odds -> Colombia + Match Odds -> France + Match Odds -> Spain",
+      "stake": 10.0,
+      "profit": 46.6,
+      "free": true,
+      "odds": 5.66,
+      "match": "Switzerland v Colombia | France v Morocco | Spain v Belgium"
     }
   ]
 }

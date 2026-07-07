@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-07 07:27:33 UTC",
+    "generated": "2026-07-07 12:08:14 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -25,11 +25,11 @@
     "open_exposure": {
       "ev": 0.14,
       "best_case": 0.0,
-      "worst_case": -775.96,
+      "worst_case": -795.96,
       "best_case_usd": 0.0,
       "worst_case_usd": -1065.74,
       "p_profit": null,
-      "n_open": 82,
+      "n_open": 85,
       "source": "ledger"
     },
     "fx": {
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 1081,
+      "model_secs": 2417,
       "advancement_secs": 1,
       "price_secs": null,
-      "promo_secs": 160597,
+      "promo_secs": 2303,
       "exposure_secs": null
     },
     "coverage": {
@@ -50,52 +50,10 @@
       "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($4106).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
-    "actionable_count": 5,
-    "withheld_count": 17
+    "actionable_count": 4,
+    "withheld_count": 9
   },
-  "match_singles": [
-    {
-      "id": "spain_vs_belgium_home_1x2",
-      "fixture": "Spain vs Belgium",
-      "kickoff": "2026-07-10 19:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "market_kind": "result_90",
-      "market_label": "90-min 1X2 (+ stoppage)",
-      "selection": "home",
-      "team": "Spain",
-      "venue": "smarkets",
-      "currency": "GBP",
-      "model_prob": 0.6256,
-      "price": 1.6913,
-      "price_source": "devig_consensus",
-      "edge": 0.0343,
-      "ev_net": 0.0581,
-      "stake": 68.53,
-      "action_label": "ADD",
-      "current_exposure": {
-        "fixture_open": false
-      },
-      "proposed_risk": {
-        "stake": 68.53,
-        "max_loss": 68.53
-      },
-      "promo": null,
-      "promo_status": null,
-      "ages": {
-        "model_secs": 1081,
-        "price_secs": 1081,
-        "exposure_secs": null
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "1X2",
-        "devig_price"
-      ]
-    }
-  ],
+  "match_singles": [],
   "event_props": [],
   "advancement_futures": [
     {
@@ -108,12 +66,12 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.3156,
-      "pm_price": 0.2215,
-      "pm_fee": 0.0052,
-      "price": 4.4116,
-      "edge_adj": 0.0884,
-      "ev_net": 0.0889,
-      "stake": 118.03,
+      "pm_price": 0.2265,
+      "pm_fee": 0.0053,
+      "price": 4.3149,
+      "edge_adj": 0.0833,
+      "ev_net": 0.0838,
+      "stake": 112.02,
       "action_label": "ADD",
       "ages": {
         "model_secs": 1,
@@ -131,9 +89,9 @@
       "opponent": "France",
       "match_round": "Quarter-finals",
       "match_1x2": {
-        "team_win": 0.193,
-        "draw": 0.284,
-        "opp_win": 0.524
+        "team_win": 0.192,
+        "draw": 0.283,
+        "opp_win": 0.525
       }
     },
     {
@@ -146,12 +104,12 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.1408,
-      "pm_price": 0.1005,
-      "pm_fee": 0.0027,
-      "price": 9.6888,
-      "edge_adj": 0.0371,
-      "ev_net": 0.0376,
-      "stake": 43.02,
+      "pm_price": 0.0975,
+      "pm_fee": 0.0026,
+      "price": 9.986,
+      "edge_adj": 0.0401,
+      "ev_net": 0.0407,
+      "stake": 46.38,
       "action_label": "ADD",
       "ages": {
         "model_secs": 1,
@@ -169,9 +127,9 @@
       "opponent": "Colombia",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.283,
+        "team_win": 0.284,
         "draw": 0.297,
-        "opp_win": 0.42
+        "opp_win": 0.419
       }
     },
     {
@@ -184,12 +142,12 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.1211,
-      "pm_price": 0.0905,
-      "pm_fee": 0.0025,
-      "price": 10.7562,
-      "edge_adj": 0.0276,
-      "ev_net": 0.0281,
-      "stake": 31.83,
+      "pm_price": 0.0895,
+      "pm_fee": 0.0024,
+      "price": 10.8761,
+      "edge_adj": 0.0286,
+      "ev_net": 0.0292,
+      "stake": 32.96,
       "action_label": "ADD",
       "ages": {
         "model_secs": 1,
@@ -207,9 +165,9 @@
       "opponent": "France",
       "match_round": "Quarter-finals",
       "match_1x2": {
-        "team_win": 0.193,
-        "draw": 0.284,
-        "opp_win": 0.524
+        "team_win": 0.192,
+        "draw": 0.283,
+        "opp_win": 0.525
       }
     },
     {
@@ -242,12 +200,12 @@
       ],
       "market_kind": "advancement",
       "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "United States",
-      "match_round": "Round of 16",
+      "opponent": "Spain",
+      "match_round": "Quarter-finals",
       "match_1x2": {
-        "team_win": 0.499,
-        "draw": 0.269,
-        "opp_win": 0.232
+        "team_win": 0.193,
+        "draw": 0.249,
+        "opp_win": 0.559
       }
     }
   ],
@@ -261,10 +219,10 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.192,
-      "price": 5.2095,
-      "edge": 0.0001,
-      "ev_net": 0.0005,
+      "model_prob": 0.1921,
+      "price": 5.2177,
+      "edge": 0.0004,
+      "ev_net": 0.0022,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 19% < floor 20%",
@@ -279,10 +237,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Egypt",
-      "model_prob": 0.0905,
-      "price": 12.0635,
-      "edge": 0.0076,
-      "ev_net": 0.0916,
+      "model_prob": 0.0887,
+      "price": 12.5055,
+      "edge": 0.0087,
+      "ev_net": 0.1089,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 9% < floor 20%",
@@ -297,10 +255,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Morocco",
-      "model_prob": 0.1682,
-      "price": 6.7952,
-      "edge": 0.0211,
-      "ev_net": 0.1432,
+      "model_prob": 0.1678,
+      "price": 6.7902,
+      "edge": 0.0205,
+      "ev_net": 0.1392,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 17% < floor 20%",
@@ -315,127 +273,15 @@
       "market": "1X2",
       "selection": "away",
       "team": "Belgium",
-      "model_prob": 0.1584,
-      "price": 5.8768,
-      "edge": -0.0117,
-      "ev_net": -0.0689,
+      "model_prob": 0.1829,
+      "price": 6.0464,
+      "edge": 0.0175,
+      "ev_net": 0.1056,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "model_prob 16% < floor 20%",
+      "withheld_reason": "model_prob 18% < floor 20%",
       "stale": false,
       "stale_reason": null
-    },
-    {
-      "id": "brazil_vs_norway_corners",
-      "fixture": "Brazil vs Norway",
-      "market": "corners",
-      "selection": "corners over 8.5",
-      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
-      "stale": true,
-      "stale_reason": "price snapshot absent or older than 2h",
-      "tags": [
-        "model",
-        "prop",
-        "no_price"
-      ]
-    },
-    {
-      "id": "brazil_vs_norway_cards",
-      "fixture": "Brazil vs Norway",
-      "market": "cards",
-      "selection": "cards over 2.5",
-      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
-      "stale": true,
-      "stale_reason": "price snapshot absent or older than 2h",
-      "tags": [
-        "model",
-        "prop",
-        "no_price"
-      ]
-    },
-    {
-      "id": "mexico_vs_england_corners",
-      "fixture": "Mexico vs England",
-      "market": "corners",
-      "selection": "corners over 8.5",
-      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
-      "stale": true,
-      "stale_reason": "price snapshot absent or older than 2h",
-      "tags": [
-        "model",
-        "prop",
-        "no_price"
-      ]
-    },
-    {
-      "id": "mexico_vs_england_cards",
-      "fixture": "Mexico vs England",
-      "market": "cards",
-      "selection": "cards over 2.5",
-      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
-      "stale": true,
-      "stale_reason": "price snapshot absent or older than 2h",
-      "tags": [
-        "model",
-        "prop",
-        "no_price"
-      ]
-    },
-    {
-      "id": "portugal_vs_spain_corners",
-      "fixture": "Portugal vs Spain",
-      "market": "corners",
-      "selection": "corners over 8.5",
-      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
-      "stale": true,
-      "stale_reason": "price snapshot absent or older than 2h",
-      "tags": [
-        "model",
-        "prop",
-        "no_price"
-      ]
-    },
-    {
-      "id": "portugal_vs_spain_cards",
-      "fixture": "Portugal vs Spain",
-      "market": "cards",
-      "selection": "cards over 2.5",
-      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
-      "stale": true,
-      "stale_reason": "price snapshot absent or older than 2h",
-      "tags": [
-        "model",
-        "prop",
-        "no_price"
-      ]
-    },
-    {
-      "id": "united_states_vs_belgium_corners",
-      "fixture": "United States vs Belgium",
-      "market": "corners",
-      "selection": "corners over 8.5",
-      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
-      "stale": true,
-      "stale_reason": "price snapshot absent or older than 2h",
-      "tags": [
-        "model",
-        "prop",
-        "no_price"
-      ]
-    },
-    {
-      "id": "united_states_vs_belgium_cards",
-      "fixture": "United States vs Belgium",
-      "market": "cards",
-      "selection": "cards over 2.5",
-      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
-      "stale": true,
-      "stale_reason": "price snapshot absent or older than 2h",
-      "tags": [
-        "model",
-        "prop",
-        "no_price"
-      ]
     },
     {
       "id": "argentina_vs_egypt_corners",
