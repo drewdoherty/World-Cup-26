@@ -86,6 +86,33 @@
     white-space: normal;
   }
   .wca-place-note { font-size: 9px; color: var(--ll-muted); }
+
+  /* -------- Advancement Edge Desk (SHADOW-ONLY) panel ------------------- */
+  .ed-banner {
+    padding: 6px 10px;
+    font-size: 10px;
+    line-height: 1.5;
+    border-bottom: 1px solid var(--ll-border, #333);
+  }
+  .ed-banner .warn { color: var(--ll-warn); }
+  .ed-banner .pos { color: var(--ll-pos); }
+  .ed-caveats { margin: 2px 0 0; padding-left: 16px; color: var(--ll-text-dim); }
+  .ed-chip {
+    display: inline-block;
+    margin: 0 2px 1px 0;
+    padding: 0 4px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    border-radius: 3px;
+    border: 1px solid var(--ll-border, #333);
+    cursor: help;
+    white-space: nowrap;
+  }
+  .ed-chip.pass { color: var(--ll-pos); border-color: var(--ll-pos); }
+  .ed-chip.fail { color: var(--ll-danger, #e5484d); border-color: var(--ll-danger, #e5484d); }
+  .ed-verdict-cand { color: var(--ll-pos); font-weight: 700; }
+  .ed-verdict-dnt { color: var(--ll-muted); }
 </style>
 </head>
 <body>
@@ -341,6 +368,44 @@
       </div>
     </section>
 
+    <!-- ------------------------------------------------------- ADVANCEMENT EDGE DESK (SHADOW) -->
+    <!-- SHADOW-ONLY decision-support: site/edge_desk.json joins advancement_data +
+         bet_recs + pm_ideas + orderflow with explicit pass/fail gates. No verdict
+         here is a trade instruction; nothing is wired to execution. Rendered in
+         feed order (selection-rule buckets) — NO client re-sorting. Self-contained
+         renderer (inline script at the bottom of this file), same pattern as the
+         00 // PM Trade Ideas panel. -->
+    <section class="arb-section" id="sec-edge-desk">
+      <div class="arb-section-head">
+        <span class="arb-section-title">03A // Advancement Edge Desk</span>
+        <span class="arb-badge badge-mkt-adv" title="Settles on advancement incl. extra time + penalties — NOT 90-min 1X2.">ADVANCE · ET+PENS</span>
+        <span class="arb-badge" title="Shadow feed only: verdicts are SHADOW_CANDIDATE or DO_NOT_TRADE — never a trade instruction. Live money stays blocked by the CLV/history gate (no price capture + CLV stamping for PM advancement yet).">SHADOW-ONLY · NO ORDERS</span>
+        <span class="arb-section-count" id="cnt-edge-desk">0 rows</span>
+        <span class="arb-section-freshness" id="age-edge-desk"></span>
+      </div>
+      <div class="ed-banner" id="ed-banner">loading&hellip;</div>
+      <div class="arb-table-wrap" id="tbl-edge-desk-wrap">
+        <table class="arb-table" id="tbl-edge-desk">
+          <thead>
+            <tr>
+              <th>Team</th>
+              <th>Stage</th>
+              <th>Side</th>
+              <th>Bucket</th>
+              <th class="r">Model %</th>
+              <th class="r">PM ¢</th>
+              <th class="r">Edge</th>
+              <th class="r">Rec stake $</th>
+              <th>Flow</th>
+              <th>Gates</th>
+              <th>Verdict</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-edge-desk"><tr><td colspan="11" class="dim">loading&hellip;</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- ---------------------------------------------------------------- GUARANTEED ARBS -->
     <section class="arb-section" id="sec-arbs">
       <div class="arb-section-head">
@@ -465,6 +530,93 @@
       cnt.textContent = "feed unavailable";
       tbody.innerHTML = '<tr><td colspan="9" class="dim">pm_ideas.json not published yet ' +
         "(written by the next pmpropose run on the mini)</td></tr>";
+    });
+})();
+</script>
+<script>
+/* Advancement Edge Desk panel — self-contained (independent of arb.js).
+   Renders site/edge_desk.json EXACTLY in feed order (selection-rule buckets:
+   moneyline → mid → longshot, edge desc) — no client re-sorting. SHADOW-ONLY:
+   verdicts are never trade instructions and nothing here can place an order. */
+(function () {
+  var tbody = document.getElementById("tbody-edge-desk");
+  var cnt = document.getElementById("cnt-edge-desk");
+  var age = document.getElementById("age-edge-desk");
+  var banner = document.getElementById("ed-banner");
+  if (!tbody) return;
+  function esc(x) {
+    return String(x == null ? "" : x).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function pct(p) { return p == null ? "—" : (p * 100).toFixed(1) + "%"; }
+  function cents(p) { return p == null ? "—" : Math.round(p * 100) + "¢"; }
+  var GATE_ORDER = ["freshness", "price_present", "edge_positive", "min_prob_cash", "clv_history"];
+  var GATE_SHORT = { freshness: "FRESH", price_present: "PRICE", edge_positive: "EDGE",
+                     min_prob_cash: "≥25¢", clv_history: "CLV" };
+  fetch("edge_desk.json", { cache: "no-store" })
+    .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(function (d) {
+      var rows = (d && d.rows) || [];
+      var meta = (d && d.meta) || {};
+      var fresh = (d && d.freshness) || {};
+      cnt.textContent = rows.length + " rows · " + (meta.n_candidates || 0) + " shadow candidates";
+      if (meta.generated_at) {
+        var ageH = Math.max(0, (Date.now() - Date.parse(meta.generated_at)) / 36e5);
+        age.textContent = isFinite(ageH) ? (ageH < 1 ? Math.round(ageH * 60) + "m old" : ageH.toFixed(1) + "h old") : "";
+      }
+      var caveats = meta.caveats || [];
+      var bhtml = "<strong>SHADOW-ONLY</strong> — decision-support; no verdict is a trade instruction. " +
+        'Freshness gate: <span class="' + (fresh.pass ? "pos" : "warn") + '">' +
+        (fresh.pass ? "PASS" : "FAIL") + "</span> · " +
+        '<span class="warn">CLV/history gate BLOCKED feed-wide</span> (no PM advancement price capture + CLV stamping yet).';
+      if (caveats.length) {
+        bhtml += '<details><summary style="cursor:pointer">' + caveats.length +
+          " caveats</summary><ul class=\"ed-caveats\">" +
+          caveats.map(function (c) { return "<li>" + esc(c) + "</li>"; }).join("") +
+          "</ul></details>";
+      }
+      banner.innerHTML = bhtml;
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="11" class="dim">no undecided advancement legs in the feed</td></tr>';
+        return;
+      }
+      var html = "";
+      rows.forEach(function (r) {
+        var gates = r.gates || {};
+        var chips = GATE_ORDER.map(function (g) {
+          var gate = gates[g];
+          if (!gate) return "";
+          return '<span class="ed-chip ' + (gate.pass ? "pass" : "fail") + '" title="' +
+            esc(g + (gate.reason ? ": " + gate.reason : ": pass")) + '">' +
+            esc(GATE_SHORT[g] || g) + (gate.pass ? " ✓" : " ✗") + "</span>";
+        }).join("");
+        var flow = r.orderflow || {};
+        var flowTxt = flow.buy_pressure == null ? "—"
+          : Math.round(flow.buy_pressure * 100) + "% buy" + (flow.hot ? " · HOT" : "");
+        var cand = r.verdict === "SHADOW_CANDIDATE";
+        html += "<tr" + (cand ? "" : ' style="opacity:.6"') + ">" +
+          "<td>" + esc(r.team) + "</td>" +
+          "<td>" + esc(r.stage) + "</td>" +
+          "<td" + (r.side === "NO" ? ' class="warn"' : "") + " title=\"" + esc(r.side_note || "") + "\">" + esc(r.side || "—") + "</td>" +
+          "<td>" + esc(r.bucket) + "</td>" +
+          '<td class="r" title="' + esc(r.model_source || "") + '">' + pct(r.model_prob) + "</td>" +
+          '<td class="r" title="' + esc(r.pm_price_source || r.pm_price_reason || "") + '">' + cents(r.pm_price) + "</td>" +
+          '<td class="r ' + (r.edge_adj > 0 ? "pos" : "warn") + '" title="' + esc(r.edge_source || "") + '">' +
+            (r.edge_adj == null ? "—" : (r.edge_adj >= 0 ? "+" : "") + (r.edge_adj * 100).toFixed(1) + "%") + "</td>" +
+          '<td class="r">' + (r.bet_rec && r.bet_rec.stake != null ? "$" + esc(r.bet_rec.stake) : "—") + "</td>" +
+          '<td title="taker-side context only — never overrides the edge gate">' + esc(flowTxt) + "</td>" +
+          "<td>" + chips + "</td>" +
+          '<td class="' + (cand ? "ed-verdict-cand" : "ed-verdict-dnt") + '" title="' +
+            esc((r.verdict_reasons || []).join(" | ")) + '">' +
+            (cand ? "SHADOW CAND." : "DO NOT TRADE") + "</td></tr>";
+      });
+      tbody.innerHTML = html;
+    })
+    .catch(function () {
+      cnt.textContent = "feed unavailable";
+      banner.textContent = "edge_desk.json not published yet (generated by scripts/wca_edge_desk.py in the publish loop).";
+      tbody.innerHTML = '<tr><td colspan="11" class="dim">edge_desk.json not published yet</td></tr>';
     });
 })();
 </script>
