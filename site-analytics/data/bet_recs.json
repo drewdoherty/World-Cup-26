@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-07 15:04:01 UTC",
+    "generated": "2026-07-07 18:04:57 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 1938,
+      "model_secs": 1801,
       "advancement_secs": 1,
       "price_secs": null,
-      "promo_secs": 12850,
+      "promo_secs": 23706,
       "exposure_secs": null
     },
     "coverage": {
@@ -51,7 +51,7 @@
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
     "actionable_count": 1,
-    "withheld_count": 12
+    "withheld_count": 10
   },
   "match_singles": [],
   "event_props": [],
@@ -66,12 +66,12 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.3156,
-      "pm_price": 0.2275,
-      "pm_fee": 0.0053,
-      "price": 4.296,
-      "edge_adj": 0.0823,
-      "ev_net": 0.0828,
-      "stake": 110.81,
+      "pm_price": 0.2245,
+      "pm_fee": 0.0052,
+      "price": 4.3531,
+      "edge_adj": 0.0854,
+      "ev_net": 0.0859,
+      "stake": 114.43,
       "action_label": "ADD",
       "ages": {
         "model_secs": 1,
@@ -98,42 +98,6 @@
   "guaranteed_arbs": [],
   "withheld": [
     {
-      "id": "argentina_vs_egypt_draw_1x2",
-      "fixture": "Argentina vs Egypt",
-      "kickoff": "2026-07-07 16:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "selection": "draw",
-      "team": "Draw",
-      "model_prob": 0.1929,
-      "price": 5.1808,
-      "edge": -0.0001,
-      "ev_net": -0.0007,
-      "stake": 0.0,
-      "currency": "GBP",
-      "withheld_reason": "model_prob 19% < floor 20%",
-      "stale": false,
-      "stale_reason": null
-    },
-    {
-      "id": "argentina_vs_egypt_away_1x2",
-      "fixture": "Argentina vs Egypt",
-      "kickoff": "2026-07-07 16:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "selection": "away",
-      "team": "Egypt",
-      "model_prob": 0.086,
-      "price": 13.2503,
-      "edge": 0.0105,
-      "ev_net": 0.1392,
-      "stake": 0.0,
-      "currency": "GBP",
-      "withheld_reason": "model_prob 9% < floor 20%",
-      "stale": false,
-      "stale_reason": null
-    },
-    {
       "id": "france_vs_morocco_away_1x2",
       "fixture": "France vs Morocco",
       "kickoff": "2026-07-09 20:00:00+00:00",
@@ -141,13 +105,13 @@
       "market": "1X2",
       "selection": "away",
       "team": "Morocco",
-      "model_prob": 0.1672,
-      "price": 6.835,
-      "edge": 0.0209,
-      "ev_net": 0.1428,
+      "model_prob": 0.1648,
+      "price": 7.0231,
+      "edge": 0.0225,
+      "ev_net": 0.1577,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "model_prob 17% < floor 20%",
+      "withheld_reason": "model_prob 16% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
@@ -159,10 +123,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Belgium",
-      "model_prob": 0.1812,
-      "price": 6.1522,
-      "edge": 0.0186,
-      "ev_net": 0.1145,
+      "model_prob": 0.1808,
+      "price": 6.1719,
+      "edge": 0.0188,
+      "ev_net": 0.1161,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 18% < floor 20%",
@@ -270,19 +234,19 @@
       "withheld_reason": "model-prob longshot (10% < 25%) \u2014 no cash (free-bet/lottery only)"
     },
     {
-      "id": "switzerland_sf_pm",
-      "team": "Switzerland",
-      "group": "B",
-      "stage": "SF",
+      "id": "egypt_qf_pm",
+      "team": "Egypt",
+      "group": "G",
+      "stage": "QF",
       "market": "advancement",
-      "selection": "reach_SF",
+      "selection": "reach_QF",
       "venue": "polymarket",
       "currency": "USD",
-      "model_prob": 0.1408,
-      "pm_price": 0.0975,
-      "ev_net": 0.0407,
+      "model_prob": 0.0852,
+      "pm_price": 0.025,
+      "ev_net": 0.0595,
       "stake": 0.0,
-      "withheld_reason": "model-prob longshot (14% < 25%) \u2014 no cash (free-bet/lottery only)"
+      "withheld_reason": "model-prob longshot (9% < 25%) \u2014 no cash (free-bet/lottery only)"
     }
   ]
 }

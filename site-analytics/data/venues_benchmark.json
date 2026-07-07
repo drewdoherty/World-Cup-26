@@ -134,7 +134,7 @@
   },
   "coverage": {
     "n_fixtures": 62,
-    "n_obs": 1594,
+    "n_obs": 1606,
     "n_venues": 21,
     "venues": [
       "888sport",
@@ -164,63 +164,63 @@
     "note": "secondary, all-available ranking \u2014 each venue uses its own set of fixtures, so these are NOT directly comparable; the common-support leaderboard above is the only fair ranking",
     "venues": [
       {
-        "mean_distance": 0.042659,
+        "mean_distance": 0.042314,
         "n_fixtures": 13,
-        "n_obs": 367,
+        "n_obs": 379,
         "venue": "polymarket"
       },
       {
-        "mean_distance": 0.047164,
+        "mean_distance": 0.047017,
         "n_fixtures": 62,
-        "n_obs": 1592,
+        "n_obs": 1604,
         "venue": "Ladbrokes"
       },
       {
-        "mean_distance": 0.047292,
+        "mean_distance": 0.047162,
         "n_fixtures": 62,
-        "n_obs": 1592,
+        "n_obs": 1604,
         "venue": "Betfred"
       },
       {
-        "mean_distance": 0.047386,
+        "mean_distance": 0.047228,
         "n_fixtures": 62,
-        "n_obs": 1592,
+        "n_obs": 1604,
         "venue": "Coral"
       },
       {
-        "mean_distance": 0.04779,
+        "mean_distance": 0.047659,
         "n_fixtures": 62,
-        "n_obs": 1592,
+        "n_obs": 1604,
         "venue": "888sport"
       },
       {
-        "mean_distance": 0.047952,
+        "mean_distance": 0.04782,
         "n_fixtures": 62,
-        "n_obs": 1592,
-        "venue": "William Hill"
-      },
-      {
-        "mean_distance": 0.047978,
-        "n_fixtures": 62,
-        "n_obs": 1592,
+        "n_obs": 1604,
         "venue": "Unibet"
       },
       {
-        "mean_distance": 0.048134,
+        "mean_distance": 0.047822,
         "n_fixtures": 62,
-        "n_obs": 1586,
+        "n_obs": 1604,
+        "venue": "William Hill"
+      },
+      {
+        "mean_distance": 0.048,
+        "n_fixtures": 62,
+        "n_obs": 1598,
         "venue": "BoyleSports"
       },
       {
-        "mean_distance": 0.048545,
+        "mean_distance": 0.048396,
         "n_fixtures": 62,
-        "n_obs": 1592,
+        "n_obs": 1604,
         "venue": "Betway"
       },
       {
-        "mean_distance": 0.048774,
+        "mean_distance": 0.048614,
         "n_fixtures": 62,
-        "n_obs": 1592,
+        "n_obs": 1604,
         "venue": "LeoVegas"
       },
       {
@@ -230,63 +230,63 @@
         "venue": "Betfair Sportsbook"
       },
       {
-        "mean_distance": 0.049596,
+        "mean_distance": 0.049473,
         "n_fixtures": 62,
-        "n_obs": 1592,
+        "n_obs": 1604,
         "venue": "Matchbook"
       },
       {
-        "mean_distance": 0.049736,
+        "mean_distance": 0.049611,
         "n_fixtures": 62,
-        "n_obs": 1592,
+        "n_obs": 1604,
         "venue": "Betfair"
       },
       {
-        "mean_distance": 0.049843,
+        "mean_distance": 0.049716,
         "n_fixtures": 62,
-        "n_obs": 1592,
+        "n_obs": 1604,
         "venue": "Smarkets"
       },
       {
-        "mean_distance": 0.049946,
+        "mean_distance": 0.049799,
         "n_fixtures": 62,
-        "n_obs": 1592,
+        "n_obs": 1604,
         "venue": "BetVictor"
       },
       {
-        "mean_distance": 0.05079,
+        "mean_distance": 0.050658,
         "n_fixtures": 62,
-        "n_obs": 1592,
+        "n_obs": 1604,
         "venue": "Sky Bet"
       },
       {
-        "mean_distance": 0.050827,
+        "mean_distance": 0.050686,
         "n_fixtures": 62,
-        "n_obs": 1592,
+        "n_obs": 1604,
         "venue": "Paddy Power"
       },
       {
-        "mean_distance": 0.050875,
+        "mean_distance": 0.050722,
         "n_fixtures": 62,
-        "n_obs": 1594,
+        "n_obs": 1606,
         "venue": "Grosvenor"
       },
       {
-        "mean_distance": 0.050942,
+        "mean_distance": 0.050799,
         "n_fixtures": 62,
-        "n_obs": 1594,
+        "n_obs": 1606,
         "venue": "Casumo"
       },
       {
-        "mean_distance": 0.050997,
+        "mean_distance": 0.050852,
         "n_fixtures": 62,
-        "n_obs": 1594,
+        "n_obs": 1606,
         "venue": "Virgin Bet"
       },
       {
-        "mean_distance": 0.051027,
+        "mean_distance": 0.050881,
         "n_fixtures": 62,
-        "n_obs": 1592,
+        "n_obs": 1604,
         "venue": "LiveScore Bet"
       }
     ]
@@ -431,6 +431,14 @@
       "n_obs": 1594,
       "n_venues": 21,
       "verdict": "insufficient \u2014 no common support across venues"
+    },
+    {
+      "closest": null,
+      "generated": "2026-07-07T17:13:02Z",
+      "n_fixtures": 62,
+      "n_obs": 1606,
+      "n_venues": 21,
+      "verdict": "insufficient \u2014 no common support across venues"
     }
   ],
   "hypotheses": [
@@ -539,7 +547,7 @@
   },
   "meta": {
     "freshness_limit_h": 6.0,
-    "generated": "2026-07-07T15:12:28Z",
+    "generated": "2026-07-07T17:13:02Z",
     "model_variant": "blend(elo0.30/dc0.70 + market) \u2014 ex-market for ranking",
     "n_boot": 2000,
     "primary": "ex_market vs mae",
