@@ -1,5 +1,5 @@
-<!-- generated: 2026-07-06T22:40:58 -->
-*World Cup Alpha — bet card* (0 staked, 3 indicative picks, hit-prob ranked)
+<!-- generated: 2026-07-07T01:10:18 -->
+*World Cup Alpha — bet card* (0 staked, 2 indicative picks, hit-prob ranked)
 
 _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. Wire a 2nd book (Betfair creds) or set WCA_STAKE_SINGLE_SOURCE=1 to size them._
 
@@ -9,9 +9,6 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
 *2. [DRAW] France vs Morocco* — Draw @ *4.08* via *polymarket*
     model 25.6% / mkt 24.3%  edge *+4.4%*  [elo 25% dc 28%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
-*3. [2ND-FAV] United States vs Belgium* — Belgium @ *2.90* via *polymarket*
-    model 38.9% / mkt 34.3%  edge *+6.4%*  [elo 33% dc 50%]
-    stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
 
 *— CUT (excluded from staking, 3) —*
   x France vs Morocco — Morocco @ 6.90 (model 16.3%, +12.8% EV): below 20% hit-probability floor (model 16.3%) — too unlikely to return PnL even at +12.8% EV
@@ -19,17 +16,7 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
   x Switzerland vs Colombia — Switzerland @ 3.77 (model 27.0%, +2.0% EV): outright-underdog longshot (model 27.0%) — no cash on minnows (likely-PnL rule); free-bet/lottery pool only, +2.0% EV
 
 *— REFERENCE, NOT SIZED (models + fair odds only) —*
-*World Cup Alpha — scorelines* (4 fixtures)
-
-*United States vs Belgium*
-    xG: 1.55-1.76
-    1-1  11.7%  fair 8.52 (11.7%)  back >= 8.69 (11.5%)
-    2-1  8.5%  fair 11.82 (8.5%)  back >= 12.05 (8.3%)
-    2-2  7.6%  fair 13.07 (7.6%)  back >= 13.34 (7.5%)
-    1-2  7.3%  fair 13.74 (7.3%)  back >= 14.02 (7.1%)
-    1-0  5.5%  fair 18.15 (5.5%)  back >= 18.51 (5.4%)
-    0-2  5.2%  fair 19.32 (5.2%)  back >= 19.70 (5.1%)
-    O/U 2.5: over 63.7% / under 36.3%   BTTS 66.5%
+*World Cup Alpha — scorelines* (3 fixtures)
 
 *Argentina vs Egypt*
     xG: 2.04-0.62
