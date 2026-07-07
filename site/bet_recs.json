@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-07 21:38:58 UTC",
+    "generated": "2026-07-07 22:15:18 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 1456,
-      "advancement_secs": 1,
+      "model_secs": 1393,
+      "advancement_secs": 0,
       "price_secs": null,
-      "promo_secs": 36547,
+      "promo_secs": 38727,
       "exposure_secs": null
     },
     "coverage": {
@@ -50,8 +50,8 @@
       "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($4106).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
-    "actionable_count": 6,
-    "withheld_count": 12
+    "actionable_count": 7,
+    "withheld_count": 10
   },
   "match_singles": [],
   "event_props": [],
@@ -74,8 +74,8 @@
       "stake": 113.56,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 0,
+        "price_secs": 0
       },
       "stale": false,
       "stale_reason": null,
@@ -92,6 +92,44 @@
         "team_win": 0.505,
         "draw": 0.276,
         "opp_win": 0.22
+      }
+    },
+    {
+      "id": "colombia_qf_pm",
+      "team": "Colombia",
+      "group": "K",
+      "stage": "QF",
+      "market": "advancement",
+      "selection": "reach_QF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.5962,
+      "pm_price": 0.565,
+      "pm_fee": 0.0074,
+      "price": 1.7471,
+      "edge_adj": 0.0089,
+      "ev_net": 0.0238,
+      "stake": 57.19,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 0,
+        "price_secs": 0
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Switzerland",
+      "match_round": "Round of 16",
+      "match_1x2": {
+        "team_win": 0.419,
+        "draw": 0.297,
+        "opp_win": 0.284
       }
     },
     {
@@ -112,8 +150,8 @@
       "stake": 80.45,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 0,
+        "price_secs": 0
       },
       "stale": false,
       "stale_reason": null,
@@ -150,8 +188,8 @@
       "stake": 71.0,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 0,
+        "price_secs": 0
       },
       "stale": false,
       "stale_reason": null,
@@ -188,8 +226,8 @@
       "stake": 110.57,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 0,
+        "price_secs": 0
       },
       "stale": false,
       "stale_reason": null,
@@ -226,8 +264,8 @@
       "stake": 72.4,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 0,
+        "price_secs": 0
       },
       "stale": false,
       "stale_reason": null,
@@ -256,16 +294,16 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.2512,
-      "pm_price": 0.205,
-      "pm_fee": 0.0049,
-      "price": 4.7644,
+      "pm_price": 0.2,
+      "pm_fee": 0.0048,
+      "price": 4.8828,
       "edge_adj": 0.0159,
-      "ev_net": 0.0413,
-      "stake": 53.67,
+      "ev_net": 0.0464,
+      "stake": 59.89,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 0,
+        "price_secs": 0
       },
       "stale": false,
       "stale_reason": null,
@@ -295,10 +333,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Morocco",
-      "model_prob": 0.1654,
-      "price": 6.9746,
-      "edge": 0.0221,
-      "ev_net": 0.1538,
+      "model_prob": 0.1655,
+      "price": 6.9709,
+      "edge": 0.022,
+      "ev_net": 0.1535,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 17% < floor 20%",
@@ -313,10 +351,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Belgium",
-      "model_prob": 0.1804,
-      "price": 6.2022,
-      "edge": 0.0191,
-      "ev_net": 0.1187,
+      "model_prob": 0.1806,
+      "price": 6.1883,
+      "edge": 0.019,
+      "ev_net": 0.1175,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 18% < floor 20%",
@@ -403,8 +441,8 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.1853,
-      "pm_price": 0.1525,
-      "ev_net": 0.0289,
+      "pm_price": 0.1575,
+      "ev_net": 0.0238,
       "stake": 0.0,
       "withheld_reason": "model-prob longshot (19% < 25%) \u2014 no cash (free-bet/lottery only)"
     },
@@ -437,36 +475,6 @@
       "ev_net": 0.0599,
       "stake": 0.0,
       "withheld_reason": "model-prob longshot (13% < 25%) \u2014 no cash (free-bet/lottery only)"
-    },
-    {
-      "id": "morocco_final_pm",
-      "team": "Morocco",
-      "group": "C",
-      "stage": "Final",
-      "market": "advancement",
-      "selection": "reach_Final",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1038,
-      "pm_price": 0.077,
-      "ev_net": 0.0247,
-      "stake": 0.0,
-      "withheld_reason": "model-prob longshot (10% < 25%) \u2014 no cash (free-bet/lottery only)"
-    },
-    {
-      "id": "switzerland_sf_pm",
-      "team": "Switzerland",
-      "group": "B",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1403,
-      "pm_price": 0.084,
-      "ev_net": 0.054,
-      "stake": 0.0,
-      "withheld_reason": "model-prob longshot (14% < 25%) \u2014 no cash (free-bet/lottery only)"
     }
   ]
 }
