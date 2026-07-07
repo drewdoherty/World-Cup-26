@@ -1,16 +1,16 @@
 {
   "meta": {
-    "generated": "2026-07-05 08:43:24 UTC"
+    "generated": "2026-07-07 07:26:53 UTC"
   },
   "summary": {
-    "fixtures_complete": 85,
-    "model_1x2_correct": 54,
-    "market_1x2_correct": 43,
-    "model_brier": 0.4388,
-    "market_brier": 0.4242,
-    "model_logloss": 0.7591,
-    "market_logloss": 0.7343,
-    "top6_hits": 47,
+    "fixtures_complete": 90,
+    "model_1x2_correct": 58,
+    "market_1x2_correct": 47,
+    "model_brier": 0.428,
+    "market_brier": 0.4116,
+    "model_logloss": 0.7443,
+    "market_logloss": 0.7172,
+    "top6_hits": 50,
     "bets": {
       "settled": 131,
       "won": 42,
@@ -8523,95 +8523,543 @@
       },
       "picks": [],
       "pending": false
+    },
+    {
+      "fixture": "Argentina vs Cape Verde",
+      "date": "2026-07-03",
+      "kickoff": "2026-07-03T22:00:00Z",
+      "score": "3-2",
+      "outcome": "home",
+      "home_goals": 3,
+      "away_goals": 2,
+      "card_generated": "2026-07-03 18:03:16 UTC",
+      "model_1x2": {
+        "home": 0.8525,
+        "draw": 0.1102,
+        "away": 0.0373
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.8382,
+        "draw": 0.1161,
+        "away": 0.0457
+      },
+      "market_source": "closing_devig",
+      "market_books": 19,
+      "model_pick": "home",
+      "market_pick": "home",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.8525,
+      "market_prob_outcome": 0.8382,
+      "result_edge": 0.0143,
+      "brier_model": 0.0353,
+      "brier_market": 0.0417,
+      "logloss_model": 0.1596,
+      "logloss_market": 0.1765,
+      "top_scoreline": {
+        "score": "2-0",
+        "prob": 16.2,
+        "hit": false
+      },
+      "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "2-0",
+          "prob": 16.2
+        },
+        {
+          "score": "3-0",
+          "prob": 14.1
+        },
+        {
+          "score": "1-0",
+          "prob": 12.2
+        },
+        {
+          "score": "4-0",
+          "prob": 9.2
+        },
+        {
+          "score": "2-1",
+          "prob": 7.5
+        },
+        {
+          "score": "3-1",
+          "prob": 6.5
+        }
+      ],
+      "home_standing": {
+        "team": "Argentina",
+        "group": "J",
+        "played": 3,
+        "won": 3,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 8,
+        "ga": 1,
+        "gd": 7,
+        "points": 9,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Cape Verde",
+        "group": "H",
+        "played": 3,
+        "won": 0,
+        "drawn": 3,
+        "lost": 0,
+        "gf": 2,
+        "ga": 2,
+        "gd": 0,
+        "points": 3,
+        "position": 2
+      },
+      "ou25": {
+        "model_over": 0.602,
+        "actual_over": true,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.339,
+        "actual": true,
+        "hit": false
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "Australia vs Egypt",
+      "date": "2026-07-03",
+      "kickoff": "2026-07-03T18:00:00Z",
+      "score": "1-1",
+      "outcome": "draw",
+      "home_goals": 1,
+      "away_goals": 1,
+      "card_generated": "2026-07-03T17:57:18",
+      "model_1x2": {
+        "home": 0.3094,
+        "draw": 0.3264,
+        "away": 0.3642
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.2681,
+        "draw": 0.3371,
+        "away": 0.3948
+      },
+      "market_source": "closing_devig",
+      "market_books": 19,
+      "model_pick": "away",
+      "market_pick": "away",
+      "model_correct": false,
+      "market_correct": false,
+      "model_prob_outcome": 0.3264,
+      "market_prob_outcome": 0.3371,
+      "result_edge": -0.0107,
+      "brier_model": 0.6822,
+      "brier_market": 0.6672,
+      "logloss_model": 1.1197,
+      "logloss_market": 1.0874,
+      "top_scoreline": {
+        "score": "1-1",
+        "prob": 15.0,
+        "hit": true
+      },
+      "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "1-1",
+          "prob": 15.0
+        },
+        {
+          "score": "0-0",
+          "prob": 12.8
+        },
+        {
+          "score": "0-1",
+          "prob": 12.4
+        },
+        {
+          "score": "1-0",
+          "prob": 10.3
+        },
+        {
+          "score": "1-2",
+          "prob": 7.8
+        },
+        {
+          "score": "0-2",
+          "prob": 7.0
+        }
+      ],
+      "home_standing": {
+        "team": "Australia",
+        "group": "D",
+        "played": 3,
+        "won": 1,
+        "drawn": 1,
+        "lost": 1,
+        "gf": 2,
+        "ga": 2,
+        "gd": 0,
+        "points": 4,
+        "position": 2
+      },
+      "away_standing": {
+        "team": "Egypt",
+        "group": "G",
+        "played": 3,
+        "won": 1,
+        "drawn": 2,
+        "lost": 0,
+        "gf": 5,
+        "ga": 3,
+        "gd": 2,
+        "points": 5,
+        "position": 2
+      },
+      "ou25": {
+        "model_over": 0.365,
+        "actual_over": false,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.451,
+        "actual": true,
+        "hit": false
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "Colombia vs Ghana",
+      "date": "2026-07-03",
+      "kickoff": "2026-07-04T01:30:00Z",
+      "score": "1-0",
+      "outcome": "home",
+      "home_goals": 1,
+      "away_goals": 0,
+      "card_generated": "2026-07-03 18:03:16 UTC",
+      "model_1x2": {
+        "home": 0.6912,
+        "draw": 0.2051,
+        "away": 0.1037
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.6645,
+        "draw": 0.2217,
+        "away": 0.1138
+      },
+      "market_source": "closing_devig",
+      "market_books": 19,
+      "model_pick": "home",
+      "market_pick": "home",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.6912,
+      "market_prob_outcome": 0.6645,
+      "result_edge": 0.0267,
+      "brier_model": 0.1482,
+      "brier_market": 0.1746,
+      "logloss_model": 0.3693,
+      "logloss_market": 0.4087,
+      "top_scoreline": {
+        "score": "2-0",
+        "prob": 14.2,
+        "hit": false
+      },
+      "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "2-0",
+          "prob": 14.2
+        },
+        {
+          "score": "1-0",
+          "prob": 14.2
+        },
+        {
+          "score": "1-1",
+          "prob": 9.6
+        },
+        {
+          "score": "2-1",
+          "prob": 9.6
+        },
+        {
+          "score": "3-0",
+          "prob": 9.2
+        },
+        {
+          "score": "0-0",
+          "prob": 7.5
+        }
+      ],
+      "home_standing": {
+        "team": "Colombia",
+        "group": "K",
+        "played": 3,
+        "won": 2,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 4,
+        "ga": 1,
+        "gd": 3,
+        "points": 7,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Ghana",
+        "group": "L",
+        "played": 3,
+        "won": 1,
+        "drawn": 1,
+        "lost": 1,
+        "gf": 2,
+        "ga": 2,
+        "gd": 0,
+        "points": 4,
+        "position": 3
+      },
+      "ou25": {
+        "model_over": 0.489,
+        "actual_over": false,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.42,
+        "actual": false,
+        "hit": true
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "Canada vs Morocco",
+      "date": "2026-07-04",
+      "kickoff": "2026-07-04T17:00:00Z",
+      "score": "0-3",
+      "outcome": "away",
+      "home_goals": 0,
+      "away_goals": 3,
+      "card_generated": "2026-07-04T16:44:11",
+      "model_1x2": {
+        "home": 0.1965,
+        "draw": 0.2894,
+        "away": 0.5141
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.1892,
+        "draw": 0.2899,
+        "away": 0.5208
+      },
+      "market_source": "closing_devig",
+      "market_books": 19,
+      "model_pick": "away",
+      "market_pick": "away",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.5141,
+      "market_prob_outcome": 0.5208,
+      "result_edge": -0.0068,
+      "brier_model": 0.3585,
+      "brier_market": 0.3495,
+      "logloss_model": 0.6654,
+      "logloss_market": 0.6523,
+      "top_scoreline": {
+        "score": "0-1",
+        "prob": 15.9,
+        "hit": false
+      },
+      "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "0-1",
+          "prob": 15.9
+        },
+        {
+          "score": "1-1",
+          "prob": 12.9
+        },
+        {
+          "score": "0-0",
+          "prob": 12.4
+        },
+        {
+          "score": "0-2",
+          "prob": 11.3
+        },
+        {
+          "score": "1-2",
+          "prob": 8.6
+        },
+        {
+          "score": "1-0",
+          "prob": 8.2
+        }
+      ],
+      "home_standing": {
+        "team": "Canada",
+        "group": "B",
+        "played": 3,
+        "won": 1,
+        "drawn": 1,
+        "lost": 1,
+        "gf": 8,
+        "ga": 3,
+        "gd": 5,
+        "points": 4,
+        "position": 2
+      },
+      "away_standing": {
+        "team": "Morocco",
+        "group": "C",
+        "played": 3,
+        "won": 2,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 6,
+        "ga": 3,
+        "gd": 3,
+        "points": 7,
+        "position": 2
+      },
+      "ou25": {
+        "model_over": 0.359,
+        "actual_over": true,
+        "hit": false
+      },
+      "btts": {
+        "model": 0.403,
+        "actual": false,
+        "hit": true
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "Paraguay vs France",
+      "date": "2026-07-04",
+      "kickoff": "2026-07-04T21:00:00Z",
+      "score": "0-1",
+      "outcome": "away",
+      "home_goals": 0,
+      "away_goals": 1,
+      "card_generated": "2026-07-04 20:39:11 UTC",
+      "model_1x2": {
+        "home": 0.0871,
+        "draw": 0.1731,
+        "away": 0.7397
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.0621,
+        "draw": 0.1478,
+        "away": 0.7901
+      },
+      "market_source": "closing_devig",
+      "market_books": 19,
+      "model_pick": "away",
+      "market_pick": "away",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.7397,
+      "market_prob_outcome": 0.7901,
+      "result_edge": -0.0504,
+      "brier_model": 0.1053,
+      "brier_market": 0.0697,
+      "logloss_model": 0.3015,
+      "logloss_market": 0.2356,
+      "top_scoreline": {
+        "score": "0-1",
+        "prob": 16.4,
+        "hit": true
+      },
+      "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "0-1",
+          "prob": 16.4
+        },
+        {
+          "score": "0-2",
+          "prob": 15.3
+        },
+        {
+          "score": "1-2",
+          "prob": 11.2
+        },
+        {
+          "score": "0-3",
+          "prob": 9.2
+        },
+        {
+          "score": "1-1",
+          "prob": 8.1
+        },
+        {
+          "score": "1-3",
+          "prob": 6.7
+        }
+      ],
+      "home_standing": {
+        "team": "Paraguay",
+        "group": "D",
+        "played": 3,
+        "won": 1,
+        "drawn": 1,
+        "lost": 1,
+        "gf": 2,
+        "ga": 4,
+        "gd": -2,
+        "points": 4,
+        "position": 3
+      },
+      "away_standing": {
+        "team": "France",
+        "group": "I",
+        "played": 3,
+        "won": 3,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 10,
+        "ga": 2,
+        "gd": 8,
+        "points": 9,
+        "position": 1
+      },
+      "ou25": {
+        "model_over": 0.493,
+        "actual_over": false,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.417,
+        "actual": false,
+        "hit": true
+      },
+      "picks": [],
+      "pending": false
     }
   ],
   "pending": [
     {
-      "fixture": "Brazil vs Norway",
-      "date": null,
-      "kickoff": "2026-07-05T20:00:00+00:00",
-      "model_1x2": {
-        "home": 0.5861,
-        "draw": 0.2354,
-        "away": 0.1785
-      },
-      "model_source": "card_build",
-      "model_pick": "home",
-      "top_scoreline": {
-        "score": "1-1",
-        "prob": 11.2
-      },
-      "picks": [],
-      "pending": true
-    },
-    {
-      "fixture": "Mexico vs England",
-      "date": null,
-      "kickoff": "2026-07-06T00:00:00+00:00",
-      "model_1x2": {
-        "home": 0.2954,
-        "draw": 0.2879,
-        "away": 0.4167
-      },
-      "model_source": "card_build",
-      "model_pick": "away",
-      "top_scoreline": {
-        "score": "1-1",
-        "prob": 13.7
-      },
-      "picks": [],
-      "pending": true
-    },
-    {
-      "fixture": "Portugal vs Spain",
-      "date": null,
-      "kickoff": "2026-07-06T19:00:00+00:00",
-      "model_1x2": {
-        "home": 0.2445,
-        "draw": 0.2635,
-        "away": 0.492
-      },
-      "model_source": "card_build",
-      "model_pick": "away",
-      "top_scoreline": {
-        "score": "1-1",
-        "prob": 12.6
-      },
-      "picks": [],
-      "pending": true
-    },
-    {
-      "fixture": "United States vs Belgium",
-      "date": null,
-      "kickoff": "2026-07-07T00:00:00+00:00",
-      "model_1x2": {
-        "home": 0.3322,
-        "draw": 0.2669,
-        "away": 0.401
-      },
-      "model_source": "card_build",
-      "model_pick": "away",
-      "top_scoreline": {
-        "score": "1-1",
-        "prob": 11.7
-      },
-      "picks": [],
-      "pending": true
-    },
-    {
       "fixture": "Argentina vs Egypt",
       "date": null,
-      "kickoff": null,
+      "kickoff": "2026-07-07T16:00:00+00:00",
       "model_1x2": {
-        "home": 0.7125,
-        "draw": 0.1951,
-        "away": 0.0924
+        "home": 0.7175,
+        "draw": 0.192,
+        "away": 0.0905
       },
       "model_source": "card_build",
       "model_pick": "home",
       "top_scoreline": {
         "score": "2-0",
-        "prob": 14.9
+        "prob": 14.7
       },
       "picks": [],
       "pending": true
@@ -8619,17 +9067,53 @@
     {
       "fixture": "Switzerland vs Colombia",
       "date": null,
-      "kickoff": null,
+      "kickoff": "2026-07-07T20:00:00+00:00",
       "model_1x2": {
-        "home": 0.2685,
-        "draw": 0.2954,
-        "away": 0.436
+        "home": 0.2703,
+        "draw": 0.2962,
+        "away": 0.4335
       },
       "model_source": "card_build",
       "model_pick": "away",
       "top_scoreline": {
         "score": "1-1",
         "prob": 14.1
+      },
+      "picks": [],
+      "pending": true
+    },
+    {
+      "fixture": "France vs Morocco",
+      "date": null,
+      "kickoff": null,
+      "model_1x2": {
+        "home": 0.5755,
+        "draw": 0.2562,
+        "away": 0.1682
+      },
+      "model_source": "card_build",
+      "model_pick": "home",
+      "top_scoreline": {
+        "score": "1-0",
+        "prob": 17.1
+      },
+      "picks": [],
+      "pending": true
+    },
+    {
+      "fixture": "Spain vs Belgium",
+      "date": null,
+      "kickoff": null,
+      "model_1x2": {
+        "home": 0.6256,
+        "draw": 0.216,
+        "away": 0.1584
+      },
+      "model_source": "card_build",
+      "model_pick": "home",
+      "top_scoreline": {
+        "score": "1-1",
+        "prob": 9.5
       },
       "picks": [],
       "pending": true
