@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-07T10:51:13 -->
+<!-- generated: 2026-07-07T11:27:57 -->
 ⚽ *Next match* — Argentina vs Egypt
 Kickoff 2026-07-07 16:00:00+00:00
 
 *Winner* (model blend)
-  Argentina      model 72.0¢ · mkt 72.5¢ (matchbook)  EV -0.7%
-  Draw           model 19.3¢ · mkt 19.5¢ (Polymarket)  EV -1.2%
-  Egypt          model  8.8¢ · mkt  8.0¢ (betfair_ex_uk)  EV +9.6% ✅  $9.05
+  Argentina      model 71.9¢ · mkt 72.5¢ (matchbook)  EV -0.7%
+  Draw           model 19.2¢ · mkt 19.2¢ (Smarkets)  EV -0.1%
+  Egypt          model  8.9¢ · mkt  8.0¢ (betfair_ex_uk)  EV +10.8% ✅  $10.23
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.7)
