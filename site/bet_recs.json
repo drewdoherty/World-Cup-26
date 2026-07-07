@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-07 09:47:52 UTC",
+    "generated": "2026-07-07 10:23:07 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 605,
-      "advancement_secs": 0,
+      "model_secs": 525,
+      "advancement_secs": 1,
       "price_secs": null,
-      "promo_secs": 76809,
+      "promo_secs": 78924,
       "exposure_secs": null
     },
     "coverage": {
@@ -66,25 +66,25 @@
       "team": "Spain",
       "venue": "smarkets",
       "currency": "GBP",
-      "model_prob": 0.6301,
-      "price": 1.6739,
+      "model_prob": 0.6303,
+      "price": 1.6729,
       "price_source": "devig_consensus",
-      "edge": 0.0327,
-      "ev_net": 0.0548,
-      "stake": 66.32,
+      "edge": 0.0326,
+      "ev_net": 0.0545,
+      "stake": 66.1,
       "action_label": "ADD",
       "current_exposure": {
         "fixture_open": false
       },
       "proposed_risk": {
-        "stake": 66.32,
-        "max_loss": 66.32
+        "stake": 66.1,
+        "max_loss": 66.1
       },
       "promo": null,
       "promo_status": null,
       "ages": {
-        "model_secs": 605,
-        "price_secs": 605,
+        "model_secs": 525,
+        "price_secs": 525,
         "exposure_secs": null
       },
       "stale": false,
@@ -108,16 +108,16 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.3156,
-      "pm_price": 0.2285,
+      "pm_price": 0.2275,
       "pm_fee": 0.0053,
-      "price": 4.2774,
+      "price": 4.296,
       "edge_adj": 0.0813,
-      "ev_net": 0.0818,
-      "stake": 109.59,
+      "ev_net": 0.0828,
+      "stake": 110.81,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 0,
-        "price_secs": 0
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -146,16 +146,16 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.1408,
-      "pm_price": 0.1005,
+      "pm_price": 0.0995,
       "pm_fee": 0.0027,
-      "price": 9.6888,
+      "price": 9.7859,
       "edge_adj": 0.0371,
-      "ev_net": 0.0376,
-      "stake": 43.02,
+      "ev_net": 0.0386,
+      "stake": 44.14,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 0,
-        "price_secs": 0
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -192,8 +192,8 @@
       "stake": 32.96,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 0,
-        "price_secs": 0
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -230,8 +230,8 @@
       "stake": 25.93,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 0,
-        "price_secs": 0
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -261,10 +261,10 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.1903,
-      "price": 5.2517,
-      "edge": -0.0001,
-      "ev_net": -0.0005,
+      "model_prob": 0.1899,
+      "price": 5.2725,
+      "edge": 0.0002,
+      "ev_net": 0.0011,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 19% < floor 20%",
@@ -279,10 +279,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Egypt",
-      "model_prob": 0.086,
-      "price": 12.9242,
-      "edge": 0.0086,
-      "ev_net": 0.1118,
+      "model_prob": 0.0884,
+      "price": 12.3054,
+      "edge": 0.0071,
+      "ev_net": 0.0873,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 9% < floor 20%",
@@ -298,9 +298,9 @@
       "selection": "away",
       "team": "Morocco",
       "model_prob": 0.1677,
-      "price": 6.7997,
-      "edge": 0.0206,
-      "ev_net": 0.1403,
+      "price": 6.8029,
+      "edge": 0.0207,
+      "ev_net": 0.1406,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 17% < floor 20%",
@@ -315,10 +315,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Belgium",
-      "model_prob": 0.1564,
-      "price": 5.9731,
-      "edge": -0.011,
-      "ev_net": -0.0655,
+      "model_prob": 0.156,
+      "price": 6.0008,
+      "edge": -0.0107,
+      "ev_net": -0.064,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 16% < floor 20%",
