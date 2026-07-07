@@ -1,15 +1,15 @@
-<!-- generated: 2026-07-07T08:24:37 -->
+<!-- generated: 2026-07-07T08:46:05 -->
 ⚽ *Next match* — Argentina vs Egypt
 Kickoff 2026-07-07 16:00:00+00:00
 
 *Winner* (model blend)
-  Argentina      model 72.2¢ · mkt 72.5¢ (matchbook)  EV -0.4%
-  Draw           model 19.0¢ · mkt 19.2¢ (Smarkets)  EV -1.4%
-  Egypt          model  8.9¢ · mkt  8.0¢ (betfair_ex_uk)  EV +10.8% ✅  $10.15
-  _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
+  Argentina      model 71.8¢ · mkt 72.5¢ (Polymarket)  EV -1.0%
+  Draw           model 19.3¢ · mkt 19.5¢ (Polymarket)  EV -1.3%
+  Egypt          model  9.0¢ · mkt  8.5¢ (Polymarket)  EV +5.5% ✅  $3.37
+  _stake = ¼-Kelly @ £2000 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.7)
-  O/U 8.5: over 50.3¢ / under 49.7¢ (model prices)
+  O/U 8.5: over 50.1¢ / under 49.9¢ (model prices)
 
 *Top goalscorers* — from the cached /goalscorers card (as of 2026-07-07T07:46:03)
 _top anytime (both teams — add squad to split + FGS)_
@@ -21,5 +21,5 @@ _top anytime (both teams — add squad to split + FGS)_
   Nicolas Paz Martinez  3.50 (William Hill)  imp 29%
 
 *Scorelines* (top 6)
-2-0 14.8% | 1-0 14.3% | 3-0 9.9% | 2-1 9.7% | 1-1 8.9% | 0-0 6.9%
-  O/U 2.5: over 50.4% / under 49.6%   BTTS 41.3%
+2-0 14.8% | 1-0 14.4% | 3-0 9.8% | 2-1 9.6% | 1-1 9.0% | 0-0 7.1%
+  O/U 2.5: over 49.9% / under 50.1%   BTTS 41.1%
