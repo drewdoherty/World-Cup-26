@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated": "2026-07-06 12:03:25 UTC",
+    "generated": "2026-07-07 08:01:52 UTC",
     "method": "CornersModel/CardsModel (src/wca/models/props.py), refit 2026-07-03 on 90-minute-only StatsBomb WC18+22 data; team priors from wca.data.matchevents.load_priors() when data/processed/prop_priors.csv is present, else hard-coded league fallbacks.",
-    "n_fixtures": 3,
+    "n_fixtures": 2,
     "n_team_priors": 1,
     "corners_lines": [
       8.5,
@@ -18,51 +18,33 @@
   },
   "fixtures": [
     {
-      "fixture": "Portugal vs Spain",
-      "kickoff": "2026-07-06 19:00:00+00:00",
-      "lambda_home": 1.1628,
-      "lambda_away": 1.5387,
-      "corners": {
-        "mean": 9.063,
-        "o8.5_fair_over": 1.832,
-        "o9.5_fair_over": 2.379,
-        "o10.5_fair_over": 3.258
-      },
-      "cards": {
-        "mean": 3.29,
-        "o2.5_fair_over": 1.645,
-        "o3.5_fair_over": 2.443,
-        "o4.5_fair_over": 4.016
-      }
-    },
-    {
-      "fixture": "United States vs Belgium",
-      "kickoff": "2026-07-07 00:00:00+00:00",
-      "lambda_home": 1.4072,
-      "lambda_away": 1.9587,
-      "corners": {
-        "mean": 9.749,
-        "o8.5_fair_over": 1.594,
-        "o9.5_fair_over": 1.98,
-        "o10.5_fair_over": 2.584
-      },
-      "cards": {
-        "mean": 3.29,
-        "o2.5_fair_over": 1.645,
-        "o3.5_fair_over": 2.443,
-        "o4.5_fair_over": 4.016
-      }
-    },
-    {
       "fixture": "Argentina vs Egypt",
       "kickoff": "2026-07-07 16:00:00+00:00",
-      "lambda_home": 2.0096,
-      "lambda_away": 0.6494,
+      "lambda_home": 1.9997,
+      "lambda_away": 0.653,
       "corners": {
-        "mean": 9.02,
-        "o8.5_fair_over": 1.851,
-        "o9.5_fair_over": 2.41,
-        "o10.5_fair_over": 3.312
+        "mean": 9.013,
+        "o8.5_fair_over": 1.854,
+        "o9.5_fair_over": 2.415,
+        "o10.5_fair_over": 3.32
+      },
+      "cards": {
+        "mean": 3.29,
+        "o2.5_fair_over": 1.645,
+        "o3.5_fair_over": 2.443,
+        "o4.5_fair_over": 4.016
+      }
+    },
+    {
+      "fixture": "Switzerland vs Colombia",
+      "kickoff": "2026-07-07 20:00:00+00:00",
+      "lambda_home": 1.0519,
+      "lambda_away": 1.4689,
+      "corners": {
+        "mean": 8.877,
+        "o8.5_fair_over": 1.915,
+        "o9.5_fair_over": 2.518,
+        "o10.5_fair_over": 3.5
       },
       "cards": {
         "mean": 3.29,
