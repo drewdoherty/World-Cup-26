@@ -182,9 +182,22 @@
           var v = (pmObj && pmObj.edge_adj != null) ? Number(pmObj.edge_adj) : null;
           txt = v === null ? '<span style="color:var(--muted)">&middot;</span>'
             : (v >= 0 ? "+" : "") + (v * 100).toFixed(1);
-          cbg = bg(v);
+          // edge_adj is the fee-adjusted edge of the SIDE the proposer would
+          // take (back when model >= mid, fade when model < mid), so a
+          // positive value does NOT mean "back". Colour by SIDE (green back /
+          // orange fade — same convention as kelly mode); sign-colouring here
+          // made a +14pt FADE render green and read as "back it".
+          var eSide = (v === null || mp == null || qmid == null) ? null
+            : (mp >= qmid ? "back" : "fade");
+          if (v === null) { cbg = "transparent"; }
+          else if (v < 0 || !eSide) { cbg = bg(-Math.abs(v)); }
+          else {
+            var ei = Math.min(1, Math.abs(v) / 0.15) * 0.8 + 0.06;
+            cbg = (eSide === "back" ? "rgba(63,224,138," : "rgba(224,96,63,") + ei.toFixed(2) + ")";
+          }
           title = (v === null) ? "no PM market"
-            : "fee-adj edge " + (v >= 0 ? "+" : "") + (v * 100).toFixed(1) + " pts";
+            : (eSide ? eSide + " · " : "") + "fee-adj edge " +
+              (v >= 0 ? "+" : "") + (v * 100).toFixed(1) + " pts";
           if (ls && v !== null) title += " · <25c model prob — no cash";
         }
         // Dim <25c longshot cells so the eye reads them as no-cash / display-only.
