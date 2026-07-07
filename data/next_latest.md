@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-07T18:48:10 -->
+<!-- generated: 2026-07-07T19:24:44 -->
 ⚽ *Next match* — Switzerland vs Colombia
 Kickoff 2026-07-07 20:00:00+00:00
 
 *Winner* (model blend)
-  Switzerland    model 27.2¢ · mkt 26.0¢ (matchbook)  EV +4.7% ✅  $17.77
-  Colombia       model 42.9¢ · mkt 41.5¢ (Polymarket)  EV +3.3% ✅  $25.47
-  Draw           model 29.9¢ · mkt 31.2¢ (betvictor)  EV -4.2%
+  Switzerland    model 27.0¢ · mkt 26.0¢ (matchbook)  EV +4.0% ✅  $15.05
+  Colombia       model 42.3¢ · mkt 41.0¢ (betfair_ex_uk)  EV +3.3% ✅  $24.60
+  Draw           model 30.7¢ · mkt 33.3¢ (betfair_ex_uk)  EV -8.0%
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.6)
@@ -21,5 +21,5 @@ _top anytime (both teams — add squad to split + FGS)_
   Cedric Itten          4.40 (Betfair)  imp 23%
 
 *Scorelines* (top 6)
-1-1 14.3% | 0-1 10.4% | 0-0 9.4% | 1-2 8.6% | 0-2 8.0% | 1-0 7.9%
-  O/U 2.5: over 45.4% / under 54.6%   BTTS 51.6%
+1-1 14.6% | 0-1 10.2% | 0-0 9.6% | 1-2 8.5% | 0-2 7.9% | 1-0 7.9%
+  O/U 2.5: over 45.2% / under 54.8%   BTTS 51.8%
