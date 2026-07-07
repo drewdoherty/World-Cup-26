@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-07T16:58:18 -->
+<!-- generated: 2026-07-07T17:34:56 -->
 ⚽ *Next match* — Switzerland vs Colombia
 Kickoff 2026-07-07 20:00:00+00:00
 
 *Winner* (model blend)
-  Switzerland    model 27.0¢ · mkt 26.3¢ (Smarkets)  EV +2.5% ✅  $9.68
-  Colombia       model 43.2¢ · mkt 42.4¢ (betfair_ex_uk)  EV +2.0%  $15.87
-  Draw           model 29.8¢ · mkt 31.2¢ (betvictor)  EV -4.6%
+  Colombia       model 43.2¢ · mkt 42.0¢ (matchbook)  EV +2.8% ✅  $21.69
+  Switzerland    model 27.0¢ · mkt 26.5¢ (Polymarket)  EV +1.9%  $7.25
+  Draw           model 29.8¢ · mkt 31.2¢ (betvictor)  EV -4.5%
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.6)
