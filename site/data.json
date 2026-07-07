@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-07-07 08:02:21 UTC"
+    "generated": "2026-07-07T08:34:18"
   },
   "totals": {
-    "wagered": 3762.860000000002,
-    "open_stake": 1841.7000000000005,
+    "wagered": 3782.8600000000015,
+    "open_stake": 1861.7000000000005,
     "settled_pl": 292.6975,
-    "n_bets": 213
+    "n_bets": 214
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 1870.36,
-      "open_stake": 775.96,
+      "wagered": 1890.3599999999997,
+      "open_stake": 795.96,
       "settled_pl": 177.09550000000002,
-      "n_bets": 157
+      "n_bets": 158
     },
     "USD": {
       "wagered": 1892.5000000000007,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 1870.36,
-      "open_stake": 775.96,
+      "wagered": 1890.3599999999997,
+      "open_stake": 795.96,
       "settled_pl": 177.09550000000002,
-      "n_bets": 157,
+      "n_bets": 158,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 1693.86,
-      "open_stake": 1020.5200000000001,
+      "wagered": 1713.86,
+      "open_stake": 1040.52,
       "settled_pl": 227.09550000000002,
-      "n_bets": 134,
+      "n_bets": 135,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,20 @@
     }
   },
   "source_summary": {
+    "punt": {
+      "GBP": {
+        "wagered": 527.06,
+        "open_stake": 219.5,
+        "settled_pl": -53.47000000000001,
+        "n_bets": 47
+      },
+      "USD": {
+        "wagered": 1036.46,
+        "open_stake": 804.8600000000001,
+        "settled_pl": 82.73999999999995,
+        "n_bets": 30
+      }
+    },
     "model": {
       "GBP": {
         "wagered": 843.2399999999999,
@@ -84,20 +98,6 @@
         "n_bets": 53
       }
     },
-    "punt": {
-      "GBP": {
-        "wagered": 507.06,
-        "open_stake": 199.5,
-        "settled_pl": -53.47000000000001,
-        "n_bets": 46
-      },
-      "USD": {
-        "wagered": 1036.46,
-        "open_stake": 804.8600000000001,
-        "settled_pl": 82.73999999999995,
-        "n_bets": 30
-      }
-    },
     "hedge": {
       "GBP": {
         "wagered": 22.0,
@@ -108,6 +108,14 @@
     }
   },
   "platforms": {
+    "bet365": {
+      "venue": "sportsbook",
+      "currency": "GBP",
+      "wagered": 253.0,
+      "open_stake": 201.0,
+      "settled_pl": 51.61,
+      "n_bets": 25
+    },
     "Sky Bet": {
       "venue": "sportsbook",
       "currency": "GBP",
@@ -115,14 +123,6 @@
       "open_stake": 10.0,
       "settled_pl": -10.0,
       "n_bets": 2
-    },
-    "bet365": {
-      "venue": "sportsbook",
-      "currency": "GBP",
-      "wagered": 233.0,
-      "open_stake": 181.0,
-      "settled_pl": 51.61,
-      "n_bets": 24
     },
     "Betfair Sportsbook": {
       "venue": "sportsbook",
@@ -247,6 +247,14 @@
   },
   "platforms_by_account": {
     "1": {
+      "bet365": {
+        "venue": "sportsbook",
+        "currency": "GBP",
+        "wagered": 253.0,
+        "open_stake": 201.0,
+        "settled_pl": 51.61,
+        "n_bets": 25
+      },
       "Sky Bet": {
         "venue": "sportsbook",
         "currency": "GBP",
@@ -254,14 +262,6 @@
         "open_stake": 10.0,
         "settled_pl": 0.0,
         "n_bets": 1
-      },
-      "bet365": {
-        "venue": "sportsbook",
-        "currency": "GBP",
-        "wagered": 233.0,
-        "open_stake": 181.0,
-        "settled_pl": 51.61,
-        "n_bets": 24
       },
       "Betfair Sportsbook": {
         "venue": "sportsbook",
@@ -4492,12 +4492,33 @@
       "ev": null,
       "kelly_fraction": null,
       "cur_value": 5.89,
-      "cur_price": 0.8555,
+      "cur_price": 0.8565,
       "avg_price": 0.8719,
       "shares": 6.8807,
       "cash_pnl": -0.11,
       "pct_pnl": -0.018333638893981565,
       "notes": "live PM position (data-API)"
+    },
+    {
+      "id": 271,
+      "ts_utc": "2026-07-07T08:34:18",
+      "match": "Switzerland v Colombia",
+      "match_id": "MANUAL_SWITZERLAND_V_COLOMBIA",
+      "market": "Bet Builder",
+      "selection": "Both Teams to Score -> Both Teams to Score + Double Chance -> Switzerland or Draw + Player Shots on Target -> Luis Diaz: 1+ Shots on Target",
+      "platform": "bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "punt",
+      "currency": "GBP",
+      "decimal_odds": 3.75,
+      "stake": 20.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.97; boost; Bet Builder; legs: Both Teams to Score -> Both Teams to Score | Double Chance -> Switzerland or Draw | Player Shots on Target -> Luis Diaz: 1+ Shots on Target",
+      "manual_override": null
     },
     {
       "id": 270,
@@ -5914,39 +5935,39 @@
       "scores": [
         {
           "score": "2-0",
-          "prob": 14.7,
-          "fair": 6.82,
-          "back": 6.95
+          "prob": 14.8,
+          "fair": 6.75,
+          "back": 6.89
         },
         {
           "score": "1-0",
           "prob": 14.3,
-          "fair": 7.01,
-          "back": 7.15
-        },
-        {
-          "score": "2-1",
-          "prob": 9.8,
-          "fair": 10.23,
-          "back": 10.43
+          "fair": 6.99,
+          "back": 7.13
         },
         {
           "score": "3-0",
+          "prob": 9.9,
+          "fair": 10.13,
+          "back": 10.33
+        },
+        {
+          "score": "2-1",
           "prob": 9.7,
-          "fair": 10.31,
-          "back": 10.51
+          "fair": 10.34,
+          "back": 10.55
         },
         {
           "score": "1-1",
-          "prob": 9.0,
-          "fair": 11.1,
-          "back": 11.33
+          "prob": 8.9,
+          "fair": 11.27,
+          "back": 11.5
         },
         {
           "score": "0-0",
           "prob": 6.9,
-          "fair": 14.45,
-          "back": 14.74
+          "fair": 14.5,
+          "back": 14.79
         }
       ],
       "over_under": {
@@ -5954,9 +5975,9 @@
         "over": 50.4,
         "under": 49.6
       },
-      "btts": 41.8,
-      "xg_home": 2.06,
-      "xg_away": 0.63
+      "btts": 41.3,
+      "xg_home": 2.07,
+      "xg_away": 0.62
     },
     {
       "fixture": "Switzerland vs Colombia",
@@ -5970,41 +5991,41 @@
         {
           "score": "0-1",
           "prob": 10.5,
-          "fair": 9.56,
-          "back": 9.75
+          "fair": 9.52,
+          "back": 9.71
         },
         {
           "score": "0-0",
-          "prob": 9.3,
-          "fair": 10.72,
-          "back": 10.94
+          "prob": 9.4,
+          "fair": 10.65,
+          "back": 10.86
         },
         {
           "score": "1-2",
           "prob": 8.6,
-          "fair": 11.6,
-          "back": 11.83
+          "fair": 11.65,
+          "back": 11.88
         },
         {
           "score": "0-2",
-          "prob": 8.1,
-          "fair": 12.34,
-          "back": 12.58
+          "prob": 8.2,
+          "fair": 12.25,
+          "back": 12.5
         },
         {
           "score": "1-0",
-          "prob": 7.9,
-          "fair": 12.64,
-          "back": 12.89
+          "prob": 8.0,
+          "fair": 12.57,
+          "back": 12.82
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 45.5,
-        "under": 54.5
+        "over": 45.3,
+        "under": 54.7
       },
-      "btts": 51.5,
-      "xg_home": 1.08,
+      "btts": 51.3,
+      "xg_home": 1.07,
       "xg_away": 1.43
     },
     {
@@ -6012,98 +6033,98 @@
       "scores": [
         {
           "score": "1-0",
-          "prob": 17.1,
-          "fair": 5.84,
-          "back": 5.95
+          "prob": 16.9,
+          "fair": 5.93,
+          "back": 6.05
         },
         {
           "score": "2-0",
-          "prob": 12.5,
-          "fair": 8.03,
-          "back": 8.19
+          "prob": 12.4,
+          "fair": 8.04,
+          "back": 8.21
         },
         {
           "score": "1-1",
           "prob": 11.6,
-          "fair": 8.62,
-          "back": 8.8
+          "fair": 8.61,
+          "back": 8.78
         },
         {
           "score": "0-0",
-          "prob": 10.6,
-          "fair": 9.43,
-          "back": 9.62
+          "prob": 10.4,
+          "fair": 9.59,
+          "back": 9.78
         },
         {
           "score": "2-1",
           "prob": 9.8,
-          "fair": 10.18,
-          "back": 10.39
+          "fair": 10.15,
+          "back": 10.36
         },
         {
           "score": "0-1",
           "prob": 6.7,
-          "fair": 14.82,
-          "back": 15.12
+          "fair": 15.02,
+          "back": 15.32
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 38.6,
-        "under": 61.4
+        "over": 39.2,
+        "under": 60.8
       },
-      "btts": 40.7,
-      "xg_home": 1.5,
-      "xg_away": 0.72
+      "btts": 41.2,
+      "xg_home": 1.52,
+      "xg_away": 0.73
     },
     {
       "fixture": "Spain vs Belgium",
       "scores": [
         {
           "score": "1-1",
-          "prob": 9.6,
-          "fair": 10.47,
-          "back": 10.68
+          "prob": 9.5,
+          "fair": 10.55,
+          "back": 10.76
         },
         {
           "score": "2-1",
-          "prob": 9.2,
-          "fair": 10.9,
-          "back": 11.11
+          "prob": 9.1,
+          "fair": 10.98,
+          "back": 11.2
         },
         {
           "score": "2-0",
-          "prob": 8.2,
-          "fair": 12.21,
-          "back": 12.46
+          "prob": 8.1,
+          "fair": 12.38,
+          "back": 12.63
         },
         {
           "score": "3-1",
-          "prob": 7.3,
-          "fair": 13.63,
-          "back": 13.9
+          "prob": 7.4,
+          "fair": 13.6,
+          "back": 13.88
         },
         {
           "score": "3-0",
           "prob": 6.5,
-          "fair": 15.27,
-          "back": 15.58
+          "fair": 15.33,
+          "back": 15.64
         },
         {
           "score": "1-0",
-          "prob": 6.4,
-          "fair": 15.56,
-          "back": 15.87
+          "prob": 6.3,
+          "fair": 15.92,
+          "back": 16.24
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 67.3,
-        "under": 32.7
+        "over": 67.7,
+        "under": 32.3
       },
-      "btts": 62.4,
-      "xg_home": 2.35,
-      "xg_away": 1.13
+      "btts": 62.8,
+      "xg_home": 2.37,
+      "xg_away": 1.14
     }
   ]
 }
