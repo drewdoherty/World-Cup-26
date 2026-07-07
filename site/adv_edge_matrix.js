@@ -27,6 +27,29 @@
   // fractional-Kelly + cap in src/wca/markets/kelly.py.
   var PM_KELLY_FRAC = 0.25, PM_CAP = 0.05, PM_POOL = 1310;
 
+  // Canonical desk selection rule (src/wca/selection.py). The cash floor is a
+  // strict model prob < 0.25 — <25c sides are free-bet/lottery only, NEVER
+  // cash, so their recommended stake is 0. Mirror of longshot_no_cash().
+  var LONGSHOT_PROB = 0.25;
+  // Deeper knockout stage = the "further-out" secondary key (mirror of
+  // advancement._STAGE_FURTHER_OUT): group_winner nearest, Win furthest out.
+  var STAGE_OUT = { group_winner: 0, R32: 1, R16: 2, QF: 3, SF: 4, Final: 5, win: 6 };
+  // Model-prob bucket -> sort rank (moneyline > mid > longshot), mirror of
+  // selection.bucket_rank. Prefer the server-computed `bucket` tag; fall back
+  // to recomputing from the model prob when an older feed lacks it.
+  function bucketRank(bkt, modelProb) {
+    var b = bkt;
+    if (b == null && modelProb != null) {
+      var p = Number(modelProb);
+      b = (p >= 0.50) ? "moneyline" : (p >= LONGSHOT_PROB ? "mid" : "longshot");
+    }
+    return b === "moneyline" ? 0 : (b === "mid" ? 1 : 2);
+  }
+  function isLongshot(bkt, modelProb) {
+    if (bkt != null) return bkt === "longshot";
+    return modelProb != null && Number(modelProb) < LONGSHOT_PROB;
+  }
+
   // Quarter-Kelly stake (fraction of the $1,310 PM pool, capped at 5%) for the
   // value side of a team's advancement market, sized off the feed's `edge_adj`
   // — the proposer's fee- AND spread-adjusted edge for the side it would take,
@@ -46,6 +69,10 @@
     var m = Number(model);
     var side = (m >= Number(pm)) ? "back" : "fade";
     var sideProb = (side === "back") ? m : (1 - m);   // win prob of the side bought
+    // Canonical cash floor (selection.longshot_no_cash): a side the model
+    // rates < 0.25 is a longshot — free-bet/lottery only, NEVER cash — so the
+    // recommended stake is 0 regardless of the fee-adjusted edge.
+    if (sideProb < LONGSHOT_PROB) return { side: side, frac: 0, noCash: true };
     var cost = sideProb - ea;                          // executable cost baked into edge_adj
     if (cost <= 0 || cost >= 1) return { side: side, frac: 0 };
     var full = ea / (1 - cost);
@@ -59,7 +86,36 @@
     var teams = (d.teams || []).filter(function (t) {
       return t.model && (Number(t.model.win) || 0) > 0.003;
     });
-    teams.sort(function (a, b) { return (Number(b.model.win) || 0) - (Number(a.model.win) || 0); });
+    // Representative canonical key per team-row (src/wca/selection.py ordering):
+    // its strongest opportunity — best (lowest) model-prob bucket across stages,
+    // then deepest "further-out" stage at that bucket, then largest fee-adj edge.
+    // Falls back to win-prob only when a team has no priceable stage.
+    function tupLess(a, b) {  // lexicographic numeric tuple <
+      for (var i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return a[i] < b[i];
+      }
+      return false;
+    }
+    function teamKey(t) {
+      var model = t.model || {}, bkt = t.bucket || {}, pm = t.pm || {};
+      var best = null;  // [bucketRank, -stageOut, -edge]
+      Object.keys(STAGE_OUT).forEach(function (st) {
+        var mp = model[st];
+        if (mp == null) return;
+        var br = bucketRank(bkt[st], mp);
+        var ea = (pm[st] && pm[st].edge_adj != null) ? Number(pm[st].edge_adj) : -1;
+        var cand = [br, -(STAGE_OUT[st] || 0), -ea];
+        if (best === null || tupLess(cand, best)) best = cand;
+      });
+      return best || [3, 0, 0];
+    }
+    teams.forEach(function (t) { t._key = teamKey(t); });
+    teams.sort(function (a, b) {
+      for (var i = 0; i < 3; i++) {
+        if (a._key[i] !== b._key[i]) return a._key[i] - b._key[i];
+      }
+      return (Number(b.model.win) || 0) - (Number(a.model.win) || 0);
+    });
     teams = teams.slice(0, 18);
     if (!teams.length) { el.innerHTML = '<div class="empty">No advancement data yet</div>'; return; }
     var stages = [["group_winner", "Grp"], ["R32", "R32"], ["R16", "R16"], ["QF", "QF"],
@@ -93,16 +149,29 @@
       h += '<div class="et">' + esc(t.team) + "</div>";
       stages.forEach(function (s) {
         var pmObj = t.pm ? t.pm[s[0]] : null;
+        var mp = (t.model && t.model[s[0]] != null) ? Number(t.model[s[0]]) : null;
+        var bkt = (t.bucket && t.bucket[s[0]] != null) ? t.bucket[s[0]] : null;
+        // No-cash <25c longshot flag — keyed off the prob of the SIDE that would
+        // actually be taken (mirrors server-side longshot_no_cash on sim_prob):
+        // back = buy Yes (model prob) when model >= mid, else fade = buy No
+        // (1 - model prob). When there's no PM market, fall back to the reach
+        // (Yes) bucket tag so a bare model longshot still greys.
+        var qmid = (pmObj && pmObj.pm != null) ? Number(pmObj.pm) : null;
+        var sideProb = mp;
+        if (mp != null && qmid != null && mp < qmid) sideProb = 1 - mp;
+        var ls = (qmid != null) ? isLongshot(null, sideProb) : isLongshot(bkt, mp);
         var cbg, txt, title;
         if (kellyMode) {
           var q = (pmObj && pmObj.pm != null) ? Number(pmObj.pm) : null;
-          var p = (t.model && t.model[s[0]] != null) ? Number(t.model[s[0]]) : null;
+          var p = mp;
           var ea = (pmObj && pmObj.edge_adj != null) ? Number(pmObj.edge_adj) : null;
           var k = advKelly(p, q, ea);
-          if (!k.side) {
+          if (!k.side || k.frac <= 0) {
             txt = '<span style="color:var(--muted)">&middot;</span>';
             cbg = "transparent";
-            title = (q == null) ? "no PM market" : "no edge beyond the fee";
+            title = (q == null) ? "no PM market"
+              : (k.noCash ? "<25c model prob — no cash (free-bet/lottery only)"
+                          : "no edge beyond the fee");
           } else {
             txt = (k.frac * 100).toFixed(1);
             cbg = kbg(k.side, k.frac);
@@ -116,8 +185,12 @@
           cbg = bg(v);
           title = (v === null) ? "no PM market"
             : "fee-adj edge " + (v >= 0 ? "+" : "") + (v * 100).toFixed(1) + " pts";
+          if (ls && v !== null) title += " · <25c model prob — no cash";
         }
-        h += '<div class="ec" style="background:' + cbg + '" title="' +
+        // Dim <25c longshot cells so the eye reads them as no-cash / display-only.
+        var lsStyle = (ls ? ";opacity:0.42" : "");
+        h += '<div class="ec' + (ls ? " adv-longshot" : "") + '" style="background:' +
+          cbg + lsStyle + '" title="' +
           esc(t.team + " · " + s[1] + " — " + title) + '">' + txt + "</div>";
       });
     });

@@ -36,6 +36,12 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
+from wca.selection import (
+    LONGSHOT_PROB,
+    bucket_rank,
+    hours_out as _sel_hours_out,
+    longshot_no_cash,
+)
 from wca.snapshot_freshness import (
     DEFAULT_MAX_AGE_HOURS as _SNAPSHOT_MAX_AGE_HOURS,
     check_snapshot_freshness as _check_snapshot_freshness,
@@ -54,7 +60,11 @@ PLAYER_PROP_TODO = (
 #: Exchange commission haircut on effective price (6% until July).
 COMMISSION = {"betfair_ex_uk": 0.06, "smarkets": 0.06, "matchbook": 0.06}
 
-LONGSHOT_PROB = 0.12
+# LONGSHOT_PROB is the canonical 0.25 cash floor, imported from wca.selection
+# (user 2026-07-07). It REPLACES the old accas-local 0.12 threshold: legs the
+# model rates 0.12-0.25 that used to be staged for cash are now no-cash
+# longshots (free-bet / lottery only). LONGSHOT_ODDS keeps the belt-and-braces
+# raw-price guard for degenerate high-odds legs.
 LONGSHOT_ODDS = 9.0
 
 #: Low-win default: keep combined product in modest ~2-8x band.
@@ -101,10 +111,18 @@ class Leg:
     book: str
     edge: float           # model_prob * eff_odds - 1 (commission-adjusted)
     is_moneyline: bool
+    commence_time: str = ""   # fixture kickoff (ISO/UTC) for the further-out key
 
     @property
     def is_longshot(self) -> bool:
         return self.model_prob < LONGSHOT_PROB or self.odds > LONGSHOT_ODDS
+
+    @property
+    def hours_out(self) -> float:
+        """Continuous hours to kickoff (0.0 unknown) — canonical secondary key."""
+        if not self.commence_time:
+            return 0.0
+        return _sel_hours_out({"match_desc": "_"}, {"_": self.commence_time})
 
 
 @dataclass
@@ -789,9 +807,14 @@ def assemble_accas(
     legs = [L for L in legs
             if _leg_passes_gate(L, exposure, bankroll, kelly_fraction)[0]]
 
-    # Longshot policy
+    # Longshot policy (canonical, wca.selection). Only the explicit "longshot"
+    # mode (free-bet / lottery book) may include <25c legs; every CASH mode
+    # drops them via longshot_no_cash — this is where the old 0.12-0.25 legs
+    # that used to be staged for cash now stop. LONGSHOT_ODDS still guards
+    # degenerate high-odds prices (kept in Leg.is_longshot).
     if mode != "longshot":
-        legs = [L for L in legs if not L.is_longshot]
+        legs = [L for L in legs
+                if not longshot_no_cash(L.model_prob) and not L.is_longshot]
     if not legs:
         return []
 
@@ -800,12 +823,12 @@ def assemble_accas(
         max_combined_odds = VALUE_MAX_COMBINED
 
     def rank_key(L: Leg):
+        # Canonical desk ordering (wca.selection; user 2026-07-07): model-prob
+        # bucket first (moneyline > mid > longshot — replaces the old market-TYPE
+        # is_moneyline flag), then further-out fixtures, then EV; portfolio
+        # concentration stays as the final tie-break.
         conc = _leg_concentration(L, exposure)
-        if mode == "hedge":
-            return (conc, not L.is_moneyline, -L.edge)
-        if not low_win:
-            return (not L.is_moneyline, -L.edge, conc)
-        return (not L.is_moneyline, -L.model_prob, -L.edge, conc)
+        return (bucket_rank(L.model_prob), -L.hours_out, -L.edge, conc)
 
     legs = sorted(legs, key=rank_key)
 
@@ -1404,6 +1427,8 @@ def load_fixtures(
         btts = f.get("btts")
         fixtures.append({
             "fixture": name,
+            # Kickoff (ISO/UTC) for the canonical further-out selection key.
+            "commence_time": f.get("kickoff") or f.get("commence_time") or "",
             "model_1x2": model_1x2.get(ftok) or _pct_to_frac(f.get("model_1x2") or {}),
             "best_1x2": best,
             "over_under": {
@@ -1513,6 +1538,15 @@ def build_accas(
                                   players_path=players_path)
     legs += candidate_prop_legs(fixtures, snap, lambdas, min_edge=min_edge)
 
+    # Stamp each leg's kickoff (the canonical further-out selection key) from the
+    # fixtures feed, keyed by fixture name — the candidate builders don't carry
+    # commence_time on the Leg itself.
+    _kick = {fx.get("fixture") or "": (fx.get("commence_time") or "")
+             for fx in fixtures}
+    for L in legs:
+        if not L.commence_time:
+            L.commence_time = _kick.get(L.fixture, "")
+
     # Promo mode: load DB offers (fallback to templates)
     db_offers, promo_audit, promo_required = _load_db_offers(db_path)
     promo_offers = db_offers if db_offers else OFFER_TEMPLATES
@@ -1524,8 +1558,17 @@ def build_accas(
             legs, exposure, mode=mode,
             bankroll=resolved_bankroll, kelly_fraction=kf)
 
-    # Sort by net EV descending
-    accas.sort(key=lambda a: a.edge, reverse=True)
+    # Cross-acca ranking: canonical desk key on the representative (anchor) leg
+    # — model-prob bucket, then further-out fixture, then EV (wca.selection;
+    # user 2026-07-07). The anchor is the first leg (already ranked first within
+    # the acca). Accas with no legs fall back to their combined edge only.
+    def _acca_key(a: Acca) -> Tuple[int, float, float]:
+        anchor = a.legs[0] if a.legs else None
+        if anchor is None:
+            return (3, 0.0, -float(a.edge or 0.0))
+        return (bucket_rank(anchor.model_prob), -anchor.hours_out, -float(a.edge or 0.0))
+
+    accas.sort(key=_acca_key)
 
     # PM alternatives for the top recommendations
     pm_alts = _load_pm_alternatives(db_path, legs[:20])

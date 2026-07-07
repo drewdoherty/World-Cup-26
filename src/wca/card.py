@@ -47,6 +47,7 @@ from wca.models.dixon_coles import DixonColesModel
 from wca.models.elo import EloOutcomeModel, EloRater
 from wca.models.props import CardsModel, CornersModel
 from wca.models.scores import ScorelineCard, scoreline_card
+from wca.selection import bucket_rank, longshot_no_cash
 
 # 1X2 outcome order used throughout: home, draw, away.
 OUTCOMES = ("home", "draw", "away")
@@ -1657,12 +1658,20 @@ class RankedCard:
 def _cut_reason(rec: Recommendation) -> Optional[str]:
     """Why a +EV rec should be CUT from the STAKED picks (rule 2), or ``None``.
 
-    Selection rule (memory: feedback-likely-pnl-no-minnows): keep EV as a gate
-    but make hit-probability primary. Two cuts:
+    Canonical selection rule (:mod:`wca.selection`; user 2026-07-07). Two cuts:
 
-    * below the hard probability floor — too unlikely to return PnL; and
-    * an outright-underdog "mispriced-minnow" longshot below
-      :data:`LONGSHOT_PROB` — these lose ~90% of the time even when +EV.
+    * below the hard probability floor (:data:`SELECTION_MIN_PROB`) — too
+      unlikely to return PnL; and
+    * a MODEL-probability longshot below :data:`wca.selection.LONGSHOT_PROB`
+      (0.25) — no cash on <25c sides even when +EV (they lose ~90% of the time;
+      free-bet / lottery only).
+
+    REPLACE ruling (2026-07-07): "longshot" is now defined PURELY by
+    ``longshot_no_cash(model_prob)`` — the strict ``model < 0.25`` floor. This
+    retires the older 2026-06-29 market-category cut (``rec.category ==
+    "longshot"``): a market outsider the model rates 25-49% is now a STAKEABLE
+    MID and is NOT cut here. ``rec.category`` survives only as a cosmetic
+    display label (FAV / 2ND-FAV) and no longer drives the cash-cut predicate.
     """
     if rec.model_prob < SELECTION_MIN_PROB:
         return (
@@ -1670,13 +1679,12 @@ def _cut_reason(rec: Recommendation) -> Optional[str]:
             "to return PnL even at +%.1f%% EV"
             % (SELECTION_MIN_PROB * 100, rec.model_prob * 100, rec.edge * 100)
         )
-    if rec.category == "longshot":
-        # Category-based cut (user, 2026-06-29): NO cash on outright-underdog
-        # longshots regardless of exact probability — they lose far more often
-        # than not even when +EV. The likely-PnL rule routes these to the
-        # free-bet / lottery pool only, never the cash card.
+    if longshot_no_cash(rec.model_prob):
+        # Model-prob longshot (<25c): NO cash even when +EV — they lose ~90% of
+        # the time. Routed to the free-bet / lottery pool only, never the cash
+        # card. (Canonical: wca.selection.longshot_no_cash; REPLACE ruling.)
         return (
-            "outright-underdog longshot (model %.1f%%) — no cash on minnows "
+            "model-prob longshot (%.1f%% < 25%%) — no cash on <25c sides "
             "(likely-PnL rule); free-bet/lottery pool only, +%.1f%% EV"
             % (rec.model_prob * 100, rec.edge * 100)
         )
@@ -1684,13 +1692,21 @@ def _cut_reason(rec: Recommendation) -> Optional[str]:
 
 
 def rank_card(recs: Sequence[Recommendation]) -> RankedCard:
-    """Apply the selection rule (rule 2) to gated recs: rank and cut.
+    """Apply the canonical selection rule (:mod:`wca.selection`) to gated recs.
 
-    HIT PROBABILITY is the primary sort key, then model probability, then edge:
-    favourites and structural draws rank first, second-favourites next, and
-    only short, high-probability longshots survive at all — outright-underdog
-    mispriced minnows are CUT (kept visible with their EV + reason). Stakes on
-    cut recs are zeroed so a downstream sizer can't accidentally deploy them.
+    Ranking key ``(bucket_rank, -hours_to_kickoff, -edge)`` (user 2026-07-07):
+
+    1. **MODEL-prob bucket** (moneyline >=0.50 / mid 0.25-0.50 / longshot
+       <0.25) — a higher bucket ALWAYS ranks above a lower one, regardless of
+       EV. (Longshots below the cut floor never reach here; those in the
+       0.20-0.25 band that survive the floor still sort last.)
+    2. **Further-out fixtures first** — raw continuous ``hours_to_kickoff``,
+       descending (thin/soft early markets are more likely mispriced).
+    3. **EV** breaks ties ONLY, within the same bucket + further-out tier.
+
+    ``rec.category`` (FAV / 2ND-FAV / structural_draw) is no longer part of the
+    sort key — it survives as a cosmetic display label only (REPLACE ruling).
+    Cut recs have their stakes zeroed so a downstream sizer cannot deploy them.
     """
     picks: List[Recommendation] = []
     cut: List[Recommendation] = []
@@ -1706,9 +1722,9 @@ def rank_card(recs: Sequence[Recommendation]) -> RankedCard:
 
     picks.sort(
         key=lambda r: (
-            _CATEGORY_PRIORITY.get(r.category, 9),  # hit-probability bucket
-            -r.model_prob,                          # then higher prob first
-            -r.edge,                                # EV breaks ties only
+            bucket_rank(r.model_prob),               # model-prob bucket (primary)
+            -(r.hours_to_kickoff or 0.0),            # further-out fixtures first
+            -r.edge,                                 # EV breaks ties only
         )
     )
     cut.sort(key=lambda r: -r.edge)  # show the most-tempting (highest EV) first

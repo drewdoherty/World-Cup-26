@@ -22,6 +22,8 @@ from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from wca.selection import bucket_rank, longshot_no_cash  # noqa: E402
+
 
 def _load_dotenv(path: str = ".env") -> None:
     p = Path(path)
@@ -201,18 +203,23 @@ def main() -> int:
                                  "book": "polymarket", "edge": edge})
                 break
 
-    rows.sort(key=lambda r: r["edge"], reverse=True)
+    # Canonical desk ordering (wca.selection; user 2026-07-07): model-prob
+    # bucket first (moneyline > mid > longshot), then edge within a bucket.
+    rows.sort(key=lambda r: (bucket_rank(r["model_p"]), -r["edge"]))
     print("\n%-16s %-34s %-26s %7s %7s %7s  %s" %
           ("MARKET", "FIXTURE", "SELECTION", "MODEL", "PRICE", "EDGE", "BOOK"))
     for r in rows:
         if r["edge"] < -0.10:
             continue
         star = " *" if r["edge"] >= MIN_EDGE else ""
+        # <25c model prob -> longshot, no cash (free-bet/lottery only).
+        dagger = " †" if longshot_no_cash(r["model_p"]) else ""
         price = ("%.3f" % r["price"]) if r["price"] < 1 else ("%.2f" % r["price"])
-        print("%-16s %-34s %-26s %6.1f%% %7s %+6.1f%%  %s%s" %
+        print("%-16s %-34s %-26s %6.1f%% %7s %+6.1f%%  %s%s%s" %
               (r["market"], r["fixture"][:34], r["selection"][:26],
-               r["model_p"] * 100, price, r["edge"] * 100, r["book"], star))
-    print("\n* = clears %.0f%% edge floor   quota remaining: %s" % (MIN_EDGE * 100, quota.remaining))
+               r["model_p"] * 100, price, r["edge"] * 100, r["book"], star, dagger))
+    print("\n* = clears %.0f%% edge floor   † = <25c longshot (no cash — "
+          "free-bet/lottery only)   quota remaining: %s" % (MIN_EDGE * 100, quota.remaining))
     return 0
 
 

@@ -160,6 +160,11 @@ def calibration_summary(rows: Sequence[EdgeRow], *, lo: float = 0.02,
     live = filter_live(rows, lo=lo, hi=hi)
     by_cat = aggregate_category_bias(rows)
     by_cat_live = aggregate_category_bias(live)
+    # CALIBRATION, NOT SELECTION: ``top_edges`` ranks by absolute edge to surface
+    # the biggest model-vs-market gaps for CALIBRATION diagnostics — it is NOT a
+    # trade-idea / rec feed, so it deliberately does NOT apply the canonical desk
+    # selection rule (wca.selection) bucket ordering or the <25c cash floor. Do
+    # not mistake this list for a sized-bet ranking.
     top = sorted(live, key=lambda r: r.abs_edge, reverse=True)
     return {
         "n_rows": len(rows),

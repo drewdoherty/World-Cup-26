@@ -117,28 +117,65 @@ class TestSelectionRule:
         assert len(ranked.cut) == 1
         assert "floor" in ranked.cut[0].cut_reason.lower()
 
-    def test_all_longshots_cut_from_cash(self):
-        """Category-based cut (user, 2026-06-29): NO cash on outright-underdog
-        longshots regardless of probability — even one well above LONGSHOT_PROB
-        is routed to the free-bet/lottery pool, never the cash card."""
-        short = _rec(
+    def test_longshot_cut_is_model_prob_not_market_category(self):
+        """REPLACE ruling (user 2026-07-07): "longshot" is now defined PURELY
+        by MODEL prob < 0.25 (``wca.selection.longshot_no_cash``), which retires
+        the older 2026-06-29 market-category cut. So:
+
+        * a MARKET outsider (``category="longshot"``) the model rates ABOVE 0.25
+          is now a STAKEABLE MID and is NOT cut for being a longshot; while
+        * any side the model rates BELOW 0.25 IS cut, regardless of its market
+          category.
+        """
+        # Market-category longshot but model prob 0.30 -> stakeable MID now.
+        stakeable = _rec(
             selection="away", team="Live", odds=3.2,
             model_prob=LONGSHOT_PROB + 0.05, edge=0.04, category="longshot",
         )
-        ranked = rank_card([short])
+        ranked = rank_card([stakeable])
+        assert [r.selection_team for r in ranked.picks] == ["Live"]
+        assert ranked.cut == []
+
+        # Model prob below the 0.25 floor -> cut as a no-cash longshot even
+        # though its market category is a (short-priced) "favourite".
+        dog = _rec(
+            selection="away", team="Dog", odds=5.0,
+            model_prob=LONGSHOT_PROB - 0.01, edge=0.04, category="favourite",
+        )
+        ranked = rank_card([dog])
         assert ranked.picks == []
-        assert [r.selection_team for r in ranked.cut] == ["Live"]
+        assert [r.selection_team for r in ranked.cut] == ["Dog"]
         cut = ranked.cut[0]
         assert "longshot" in cut.cut_reason.lower()
         assert all(v == 0.0 for v in cut.stakes.values())
 
-    def test_ranking_order_fav_draw_secondfav(self):
+    def test_ranking_order_by_bucket_then_edge(self):
+        """Canonical ordering (wca.selection; user 2026-07-07):
+        ``(bucket_rank, -hours_out, -edge)`` — market CATEGORY no longer feeds
+        the sort (REPLACE ruling). With no hours set:
+
+        * ``Fav`` (model 0.55) is the only ``moneyline`` -> ranks first;
+        * ``2nd`` (0.35) and ``Draw`` (0.28) are both ``mid`` -> EV breaks the
+          tie, so the higher-EV ``2nd`` (0.10) ranks above ``Draw`` (0.03).
+
+        (Under the OLD market-category sort this was ["Fav", "Draw", "2nd"]
+        because ``structural_draw`` out-ranked ``second_favourite``; the new
+        rule uses model-prob buckets + EV instead.)
+        """
         fav = _rec(team="Fav", model_prob=0.55, edge=0.03, category="favourite")
         draw = _rec(team="Draw", selection="draw", model_prob=0.28, edge=0.03,
                     category="structural_draw")
         second = _rec(team="2nd", model_prob=0.35, edge=0.10, category="second_favourite")
         ranked = rank_card([second, draw, fav])
-        assert [r.selection_team for r in ranked.picks] == ["Fav", "Draw", "2nd"]
+        assert [r.selection_team for r in ranked.picks] == ["Fav", "2nd", "Draw"]
+
+    def test_ranking_further_out_before_edge_within_bucket(self):
+        """Within a bucket, further-out fixtures rank before higher EV
+        (secondary key beats the tertiary EV tie-break)."""
+        near = _rec(team="Near", model_prob=0.55, edge=0.20, h2k=2.0)
+        far = _rec(team="Far", model_prob=0.55, edge=0.05, h2k=120.0)
+        ranked = rank_card([near, far])
+        assert [r.selection_team for r in ranked.picks] == ["Far", "Near"]
 
     def test_classify_outcome_buckets(self):
         mkt = {"home": 0.55, "draw": 0.27, "away": 0.18}

@@ -47,6 +47,7 @@ from wca.card import (
 from wca.markets import kelly as kelly_mod
 from wca.models.props import CornersModel
 from wca.models.scores import ScorelineCard, scoreline_card
+from wca.selection import bucket_rank, longshot_no_cash
 
 DEFAULT_CORNERS_LINE = 8.5
 ANYTIME_SCORER_MARKET = "player_goal_scorer_anytime"
@@ -570,11 +571,17 @@ def _model_suffix(
     if book_odds and book_odds > 1.0:
         edge = model_p * book_odds - 1.0
         s += " %+.0f%%" % (edge * 100)
-        stk = kelly_mod.stake(
-            model_p, book_odds, card.bankroll, card.kelly_fraction, card.kelly_cap
-        )
-        if stk > 0:
-            s += " £%.2f" % stk
+        # Canonical cash floor (wca.selection.longshot_no_cash): anytime-scorer
+        # legs are structurally <25c model prob — free-bet / lottery only, never
+        # cash. Show the model fair + edge for reference, but never a cash stake.
+        if longshot_no_cash(model_p):
+            s += " (<25¢ — no cash)"
+        else:
+            stk = kelly_mod.stake(
+                model_p, book_odds, card.bankroll, card.kelly_fraction, card.kelly_cap
+            )
+            if stk > 0:
+                s += " £%.2f" % stk
     return s
 
 
@@ -721,7 +728,19 @@ def _format_single_next_match(card: NextMatchCard) -> str:
     ]
     names = {"home": card.home, "draw": "Draw", "away": card.away}
     staked = False
-    for outcome in OUTCOMES:
+    # Canonical selection rule (wca.selection; user 2026-07-07): order the three
+    # 1X2 outcomes by model-prob bucket first, then EV within a bucket (a single
+    # fixture, so the further-out key is constant). A <25c model-prob outcome is
+    # a longshot — free-bet / lottery only — so its cash Kelly stake is gated to
+    # zero here (still DISPLAYED, dimmed, for reference).
+    ordered = sorted(
+        OUTCOMES,
+        key=lambda o: (
+            bucket_rank(card.winner[o][0]),
+            -float(card.winner[o][3] or 0.0),
+        ),
+    )
+    for outcome in ordered:
         p, book, odds, edge = card.winner[outcome]
         # Polymarket convention: price = implied probability in cents, $1 payout.
         line = "  %-14s model %4.1f¢" % (names[outcome][:14], p * 100)
@@ -730,12 +749,15 @@ def _format_single_next_match(card: NextMatchCard) -> str:
             line += " · mkt %4.1f¢ (%s)  EV %+.1f%%%s" % (
                 100.0 / odds, book, edge * 100, flag
             )
-            stk = kelly_mod.stake(
-                p, odds, card.bankroll, card.kelly_fraction, card.kelly_cap
-            )
-            if stk > 0:
-                line += "  $%.2f" % gbp_to_usd(stk)
-                staked = True
+            if longshot_no_cash(p):
+                line += "  (<25¢ — no cash)"
+            else:
+                stk = kelly_mod.stake(
+                    p, odds, card.bankroll, card.kelly_fraction, card.kelly_cap
+                )
+                if stk > 0:
+                    line += "  $%.2f" % gbp_to_usd(stk)
+                    staked = True
         lines.append(line)
     if staked:
         lines.append(
@@ -838,7 +860,13 @@ def build_goalscorer_card(
     Kelly stakes follow the same rules as :func:`build_goalscorers`.
     """
     blends = _iter_fixture_blends(models, odds_df, fixtures_meta, weights, host_nations)
-    blends = sorted(blends, key=lambda fb: str(fb.fx["commence_time"]))[:top_k_fixtures]
+    # Canonical selection rule (wca.selection): FURTHER-OUT fixtures first (thin
+    # early markets are more likely mispriced), so the top_k cap keeps the most
+    # likely-mispriced fixtures. NOTE this is the /goalscorers card — distinct
+    # from the /next SCHEDULE (select_next_blends), which stays soonest-first.
+    blends = sorted(
+        blends, key=lambda fb: str(fb.fx["commence_time"]), reverse=True
+    )[:top_k_fixtures]
     # Resolve the Polymarket events list once and reuse it across fixtures.
     if pm_lookup and pm_events is None:
         try:

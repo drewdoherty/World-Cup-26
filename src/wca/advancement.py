@@ -58,6 +58,7 @@ from wca.markets import bankroll as pm_rule
 from wca.markets import kelly as kelly_mod
 from wca.models import venues as venues_mod
 from wca.models.structural import load_country_factors
+from wca.selection import bucket_rank, longshot_no_cash, prob_bucket
 from wca.sim.tournament2026 import GROUP_LETTERS, Result, TournamentSimulator
 
 # ---------------------------------------------------------------------------
@@ -93,6 +94,20 @@ HOST_NATIONS: Tuple[str, ...] = ("United States", "Mexico", "Canada")
 
 # Stage ordering used for reporting / monotonicity, best (easiest) first.
 STAGE_ORDER: Tuple[str, ...] = ("R32", "R16", "QF", "SF", "F", "win")
+
+# "Further-out" ordering for the canonical selection rule's SECONDARY key
+# (wca.selection): a deeper knockout stage is the analogue of a further-out
+# fixture (Final/Win > SF > QF > R16 > R32 > group-winner). Higher = further
+# out; the sort uses ``-stage_further_out`` so deeper stages rank first within
+# a model-prob bucket. GW (group winner) is the nearest-term market.
+_STAGE_FURTHER_OUT: Dict[str, int] = {
+    "GW": 0, "R32": 1, "R16": 2, "QF": 3, "SF": 4, "F": 5, "win": 6,
+}
+
+
+def stage_further_out(stage: str) -> int:
+    """Deeper-stage rank for the selection rule's further-out secondary key."""
+    return _STAGE_FURTHER_OUT.get(str(stage), 0)
 
 # Polymarket advancement-event title -> sim stage label.
 # Group-winner events are handled separately (one event per group letter).
@@ -657,6 +672,16 @@ class AdvancementEdge:
     def edge_pct(self) -> float:
         return self.fee_adj_edge * 100.0
 
+    @property
+    def bucket(self) -> str:
+        """Model-prob bucket of the SIDE (wca.selection): moneyline/mid/longshot."""
+        return prob_bucket(self.sim_prob)
+
+    @property
+    def no_cash(self) -> bool:
+        """True when the SIDE is a <25c longshot — free-bet/lottery only, no cash."""
+        return longshot_no_cash(self.sim_prob)
+
 
 def _fee_adjusted_kelly_stake(
     sim_prob: float,
@@ -674,7 +699,15 @@ def _fee_adjusted_kelly_stake(
     the effective decimal odds are ``1 / (price + fee)``. We size with the
     project's standard fractional-Kelly + cap on those effective odds at the
     *fee-adjusted* win probability.
+
+    Canonical cash floor (:func:`wca.selection.longshot_no_cash`; user
+    2026-07-07): a side the model rates ``< 0.25`` is a longshot — NO cash,
+    free-bet / lottery only — so the stake is forced to 0.0 here regardless of
+    the fee-adjusted edge.
     """
+    if longshot_no_cash(sim_prob):
+        # <25c model prob: free-bet/lottery only, never cash — stake 0.
+        return 0.0
     cost = float(price) + float(fee)
     if cost <= 0.0 or cost >= 1.0:
         return 0.0
@@ -840,10 +873,24 @@ def compare_to_polymarket(
             "fee_adj_edge": e.fee_adj_edge,
             "fee_adj_ev_per_dollar": e.fee_adj_ev_per_dollar,
             "stake": e.stake,
+            # Canonical selection tags (wca.selection): the SIDE's model-prob
+            # bucket and the <25c no-cash flag, so downstream (site tables,
+            # adv_edge_matrix.js) can group / grey by bucket without recomputing.
+            "bucket": e.bucket,
+            "no_cash": e.no_cash,
         }
         for e in edges
     ]
     df = pd.DataFrame(rows)
     if not df.empty:
-        df = df.sort_values("fee_adj_edge", ascending=False).reset_index(drop=True)
+        # Canonical desk ordering (wca.selection; user 2026-07-07):
+        #   1. model-prob bucket (moneyline > mid > longshot), ALWAYS;
+        #   2. further-out first — deeper knockout stage (stage_further_out desc);
+        #   3. fee-adjusted edge breaks ties within a bucket + stage tier.
+        df["_bucket_rank"] = df["sim_prob"].map(bucket_rank)
+        df["_stage_out"] = df["stage"].map(stage_further_out)
+        df = df.sort_values(
+            by=["_bucket_rank", "_stage_out", "fee_adj_edge"],
+            ascending=[True, False, False],
+        ).drop(columns=["_bucket_rank", "_stage_out"]).reset_index(drop=True)
     return df

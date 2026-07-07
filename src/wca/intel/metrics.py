@@ -20,6 +20,8 @@ import statistics
 from typing import Dict, List, Optional, Sequence
 
 from wca.markets import devig, kelly
+from wca.markets.bankroll import PM_KELLY_FRACTION
+from wca.selection import longshot_no_cash
 from wca.intel.registry import commission_for, venue_colour, venue_for
 
 
@@ -120,7 +122,7 @@ def consensus_probs(latest: Dict[str, List[Dict[str, object]]],
 def build_market_metrics(latest: Dict[str, List[Dict[str, object]]], *,
                          model: Optional[Dict[str, float]] = None,
                          bankroll: Optional[float] = None,
-                         fraction: float = 0.25, cap: float = 0.05,
+                         fraction: Optional[float] = None, cap: float = 0.05,
                          method: str = "shin") -> List[Dict[str, object]]:
     """Per-selection metrics for a complete market.
 
@@ -128,7 +130,15 @@ def build_market_metrics(latest: Dict[str, List[Dict[str, object]]], *,
     (selection -> prob) is supplied, also ``model_prob``, ``ev_vs_model`` (edge at
     the best available, commission-adjusted for the best venue), and — with a
     ``bankroll`` — the ¼-Kelly ``kelly_stake`` at that price.
+
+    ``fraction`` defaults to :data:`wca.markets.bankroll.PM_KELLY_FRACTION` (the
+    ONE Kelly fraction) rather than a hard-coded 0.25 — that literal collided
+    numerically with the 0.25 model-prob longshot floor. A selection the model
+    rates ``< 0.25`` is a longshot (:func:`wca.selection.longshot_no_cash`) —
+    free-bet / lottery only — so its ``kelly_stake`` is 0 (``no_cash`` flagged).
     """
+    if fraction is None:
+        fraction = PM_KELLY_FRACTION
     consensus = consensus_probs(latest, method=method)
     out: List[Dict[str, object]] = []
     for sel, quotes in latest.items():
@@ -145,7 +155,12 @@ def build_market_metrics(latest: Dict[str, List[Dict[str, object]]], *,
             m["model_prob"] = p
             m["ev_vs_model"] = kelly.edge(p, net_o)
             if bankroll:
-                m["kelly_stake"] = kelly.stake(p, net_o, float(bankroll),
-                                               fraction=fraction, cap=cap)
+                if longshot_no_cash(p):
+                    # <25c model prob -> no cash (free-bet/lottery only).
+                    m["kelly_stake"] = 0.0
+                    m["no_cash"] = True
+                else:
+                    m["kelly_stake"] = kelly.stake(p, net_o, float(bankroll),
+                                                   fraction=fraction, cap=cap)
         out.append(m)
     return out
