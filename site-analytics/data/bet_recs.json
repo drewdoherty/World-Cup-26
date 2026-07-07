@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-07 12:08:14 UTC",
+    "generated": "2026-07-07 15:04:01 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 2417,
+      "model_secs": 1938,
       "advancement_secs": 1,
       "price_secs": null,
-      "promo_secs": 2303,
+      "promo_secs": 12850,
       "exposure_secs": null
     },
     "coverage": {
@@ -50,8 +50,8 @@
       "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($4106).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
-    "actionable_count": 4,
-    "withheld_count": 9
+    "actionable_count": 1,
+    "withheld_count": 12
   },
   "match_singles": [],
   "event_props": [],
@@ -66,12 +66,12 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.3156,
-      "pm_price": 0.2265,
+      "pm_price": 0.2275,
       "pm_fee": 0.0053,
-      "price": 4.3149,
-      "edge_adj": 0.0833,
-      "ev_net": 0.0838,
-      "stake": 112.02,
+      "price": 4.296,
+      "edge_adj": 0.0823,
+      "ev_net": 0.0828,
+      "stake": 110.81,
       "action_label": "ADD",
       "ages": {
         "model_secs": 1,
@@ -92,120 +92,6 @@
         "team_win": 0.192,
         "draw": 0.283,
         "opp_win": 0.525
-      }
-    },
-    {
-      "id": "switzerland_sf_pm",
-      "team": "Switzerland",
-      "group": "B",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1408,
-      "pm_price": 0.0975,
-      "pm_fee": 0.0026,
-      "price": 9.986,
-      "edge_adj": 0.0401,
-      "ev_net": 0.0407,
-      "stake": 46.38,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 1,
-        "price_secs": 1
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Colombia",
-      "match_round": "Round of 16",
-      "match_1x2": {
-        "team_win": 0.284,
-        "draw": 0.297,
-        "opp_win": 0.419
-      }
-    },
-    {
-      "id": "morocco_final_pm",
-      "team": "Morocco",
-      "group": "C",
-      "stage": "Final",
-      "market": "advancement",
-      "selection": "reach_Final",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.1211,
-      "pm_price": 0.0895,
-      "pm_fee": 0.0024,
-      "price": 10.8761,
-      "edge_adj": 0.0286,
-      "ev_net": 0.0292,
-      "stake": 32.96,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 1,
-        "price_secs": 1
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "France",
-      "match_round": "Quarter-finals",
-      "match_1x2": {
-        "team_win": 0.192,
-        "draw": 0.283,
-        "opp_win": 0.525
-      }
-    },
-    {
-      "id": "belgium_final_pm",
-      "team": "Belgium",
-      "group": "G",
-      "stage": "Final",
-      "market": "advancement",
-      "selection": "reach_Final",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.0979,
-      "pm_price": 0.0725,
-      "pm_fee": 0.002,
-      "price": 13.4197,
-      "edge_adj": 0.0229,
-      "ev_net": 0.0234,
-      "stake": 25.93,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 1,
-        "price_secs": 1
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Spain",
-      "match_round": "Quarter-finals",
-      "match_1x2": {
-        "team_win": 0.193,
-        "draw": 0.249,
-        "opp_win": 0.559
       }
     }
   ],
@@ -219,10 +105,10 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.1921,
-      "price": 5.2177,
-      "edge": 0.0004,
-      "ev_net": 0.0022,
+      "model_prob": 0.1929,
+      "price": 5.1808,
+      "edge": -0.0001,
+      "ev_net": -0.0007,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 19% < floor 20%",
@@ -237,10 +123,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Egypt",
-      "model_prob": 0.0887,
-      "price": 12.5055,
-      "edge": 0.0087,
-      "ev_net": 0.1089,
+      "model_prob": 0.086,
+      "price": 13.2503,
+      "edge": 0.0105,
+      "ev_net": 0.1392,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 9% < floor 20%",
@@ -255,10 +141,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Morocco",
-      "model_prob": 0.1678,
-      "price": 6.7902,
-      "edge": 0.0205,
-      "ev_net": 0.1392,
+      "model_prob": 0.1672,
+      "price": 6.835,
+      "edge": 0.0209,
+      "ev_net": 0.1428,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 17% < floor 20%",
@@ -273,10 +159,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Belgium",
-      "model_prob": 0.1829,
-      "price": 6.0464,
-      "edge": 0.0175,
-      "ev_net": 0.1056,
+      "model_prob": 0.1812,
+      "price": 6.1522,
+      "edge": 0.0186,
+      "ev_net": 0.1145,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 18% < floor 20%",
@@ -352,6 +238,51 @@
         "scorer",
         "unsupported"
       ]
+    },
+    {
+      "id": "morocco_final_pm",
+      "team": "Morocco",
+      "group": "C",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1211,
+      "pm_price": 0.0895,
+      "ev_net": 0.0292,
+      "stake": 0.0,
+      "withheld_reason": "model-prob longshot (12% < 25%) \u2014 no cash (free-bet/lottery only)"
+    },
+    {
+      "id": "belgium_final_pm",
+      "team": "Belgium",
+      "group": "G",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0979,
+      "pm_price": 0.0715,
+      "ev_net": 0.0244,
+      "stake": 0.0,
+      "withheld_reason": "model-prob longshot (10% < 25%) \u2014 no cash (free-bet/lottery only)"
+    },
+    {
+      "id": "switzerland_sf_pm",
+      "team": "Switzerland",
+      "group": "B",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1408,
+      "pm_price": 0.0975,
+      "ev_net": 0.0407,
+      "stake": 0.0,
+      "withheld_reason": "model-prob longshot (14% < 25%) \u2014 no cash (free-bet/lottery only)"
     }
   ]
 }
