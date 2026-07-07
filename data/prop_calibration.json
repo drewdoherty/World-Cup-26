@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated": "2026-07-05 09:16:17 UTC",
+    "generated": "2026-07-06 12:03:25 UTC",
     "method": "CornersModel/CardsModel (src/wca/models/props.py), refit 2026-07-03 on 90-minute-only StatsBomb WC18+22 data; team priors from wca.data.matchevents.load_priors() when data/processed/prop_priors.csv is present, else hard-coded league fallbacks.",
-    "n_fixtures": 6,
+    "n_fixtures": 3,
     "n_team_priors": 1,
     "corners_lines": [
       8.5,
@@ -18,51 +18,15 @@
   },
   "fixtures": [
     {
-      "fixture": "Brazil vs Norway",
-      "kickoff": "2026-07-05 20:00:00+00:00",
-      "lambda_home": 2.2524,
-      "lambda_away": 0.8356,
-      "corners": {
-        "mean": 9.462,
-        "o8.5_fair_over": 1.683,
-        "o9.5_fair_over": 2.127,
-        "o10.5_fair_over": 2.831
-      },
-      "cards": {
-        "mean": 3.29,
-        "o2.5_fair_over": 1.645,
-        "o3.5_fair_over": 2.443,
-        "o4.5_fair_over": 4.016
-      }
-    },
-    {
-      "fixture": "Mexico vs England",
-      "kickoff": "2026-07-06 00:00:00+00:00",
-      "lambda_home": 1.1047,
-      "lambda_away": 1.6822,
-      "corners": {
-        "mean": 9.151,
-        "o8.5_fair_over": 1.796,
-        "o9.5_fair_over": 2.318,
-        "o10.5_fair_over": 3.154
-      },
-      "cards": {
-        "mean": 3.29,
-        "o2.5_fair_over": 1.645,
-        "o3.5_fair_over": 2.443,
-        "o4.5_fair_over": 4.016
-      }
-    },
-    {
       "fixture": "Portugal vs Spain",
       "kickoff": "2026-07-06 19:00:00+00:00",
-      "lambda_home": 1.1311,
-      "lambda_away": 1.5206,
+      "lambda_home": 1.1628,
+      "lambda_away": 1.5387,
       "corners": {
-        "mean": 9.012,
-        "o8.5_fair_over": 1.854,
-        "o9.5_fair_over": 2.416,
-        "o10.5_fair_over": 3.322
+        "mean": 9.063,
+        "o8.5_fair_over": 1.832,
+        "o9.5_fair_over": 2.379,
+        "o10.5_fair_over": 3.258
       },
       "cards": {
         "mean": 3.29,
@@ -74,13 +38,13 @@
     {
       "fixture": "United States vs Belgium",
       "kickoff": "2026-07-07 00:00:00+00:00",
-      "lambda_home": 1.3915,
-      "lambda_away": 1.9561,
+      "lambda_home": 1.4072,
+      "lambda_away": 1.9587,
       "corners": {
-        "mean": 9.73,
-        "o8.5_fair_over": 1.6,
-        "o9.5_fair_over": 1.989,
-        "o10.5_fair_over": 2.599
+        "mean": 9.749,
+        "o8.5_fair_over": 1.594,
+        "o9.5_fair_over": 1.98,
+        "o10.5_fair_over": 2.584
       },
       "cards": {
         "mean": 3.29,
@@ -92,31 +56,13 @@
     {
       "fixture": "Argentina vs Egypt",
       "kickoff": "2026-07-07 16:00:00+00:00",
-      "lambda_home": 1.9879,
-      "lambda_away": 0.6299,
+      "lambda_home": 2.0096,
+      "lambda_away": 0.6494,
       "corners": {
-        "mean": 8.977,
-        "o8.5_fair_over": 1.869,
-        "o9.5_fair_over": 2.441,
-        "o10.5_fair_over": 3.366
-      },
-      "cards": {
-        "mean": 3.29,
-        "o2.5_fair_over": 1.645,
-        "o3.5_fair_over": 2.443,
-        "o4.5_fair_over": 4.016
-      }
-    },
-    {
-      "fixture": "Switzerland vs Colombia",
-      "kickoff": "2026-07-07 20:00:00+00:00",
-      "lambda_home": 1.0659,
-      "lambda_away": 1.4662,
-      "corners": {
-        "mean": 8.889,
-        "o8.5_fair_over": 1.909,
-        "o9.5_fair_over": 2.509,
-        "o10.5_fair_over": 3.484
+        "mean": 9.02,
+        "o8.5_fair_over": 1.851,
+        "o9.5_fair_over": 2.41,
+        "o10.5_fair_over": 3.312
       },
       "cards": {
         "mean": 3.29,
