@@ -1,25 +1,25 @@
-<!-- generated: 2026-07-05T11:06:24 -->
-⚽ *Next match* — Brazil vs Norway
-Kickoff 2026-07-05 20:00:00+00:00
+<!-- generated: 2026-07-07T07:09:32 -->
+⚽ *Next match* — Argentina vs Egypt
+Kickoff 2026-07-07 16:00:00+00:00
 
 *Winner* (model blend)
-  Brazil         model 58.1¢ · mkt 53.5¢ (betfair_ex_uk)  EV +8.6% ✅  $107.60
-  Draw           model 23.7¢ · mkt 26.0¢ (matchbook)  EV -8.9%
-  Norway         model 18.3¢ · mkt 20.5¢ (Polymarket)  EV -11.0%
+  Argentina      model 71.7¢ · mkt 72.5¢ (betfair_ex_uk)  EV -1.0%
+  Draw           model 19.2¢ · mkt 19.2¢ (Smarkets)  EV -0.1%
+  Egypt          model  9.0¢ · mkt  8.3¢ (betfair_ex_uk)  EV +8.6% ✅  $8.47
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
-*Corners* (model, exp 9.2)
-  O/U 8.5: over 55.7¢ / under 44.3¢ (model prices)
+*Corners* (model, exp 8.7)
+  O/U 8.5: over 50.2¢ / under 49.8¢ (model prices)
 
 *Top goalscorers* — from the cached /goalscorers card (as of 2026-07-05T06:02:39)
 _top anytime (both teams — add squad to split + FGS)_
-  Erling Braut Haaland  2.50 (Betfair)  imp 40%
-  Igor Thiago Nascimen  2.60 (William Hill)  imp 38%
-  Vinicius Junior       2.88 (Betfair)  imp 35%
-  Endrick Felipe Morei  3.00 (Betfair)  imp 33%
-  Neymar                3.00 (Betfair)  imp 33%
-  Matheus Cunha         3.55 (Betfair)  imp 28%
+  Lionel Messi          1.73 (William Hill)  imp 58%
+  Julian Alvarez        2.38 (William Hill)  imp 42%
+  Lautaro Martinez      2.40 (Betfair)  imp 42%
+  Jose Manuel Alberto   2.62 (William Hill)  imp 38%
+  Giuliano Simeone      3.75 (William Hill)  imp 27%
+  Nicolas Paz Martinez  3.75 (William Hill)  imp 27%
 
 *Scorelines* (top 6)
-1-1 11.2% | 2-0 9.7% | 1-0 8.3% | 2-1 8.3% | 3-0 7.2% | 0-0 6.2%
-  O/U 2.5: over 57.1% / under 42.9%   BTTS 53.4%
+2-0 14.7% | 1-0 14.3% | 2-1 9.8% | 3-0 9.7% | 1-1 9.0% | 0-0 6.9%
+  O/U 2.5: over 50.4% / under 49.6%   BTTS 41.8%

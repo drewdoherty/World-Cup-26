@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-05 11:29:51 UTC"
+    "generated": "2026-07-07 07:17:12 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -139,7 +139,7 @@
   "fixtures": [
     {
       "fixture": "Brazil vs Norway",
-      "kickoff": "2026-07-05T20:00:00+00:00",
+      "kickoff": null,
       "results": [
         {
           "outcome": "Brazil",
@@ -180,7 +180,7 @@
     },
     {
       "fixture": "Mexico vs England",
-      "kickoff": "2026-07-06T00:00:00+00:00",
+      "kickoff": null,
       "results": [
         {
           "outcome": "Mexico",
@@ -191,13 +191,8 @@
           "blindspot": true,
           "live": [],
           "plug": {
-            "available": true,
-            "outcome": "Mexico",
-            "best_venue": "polymarket",
-            "best_odds": 3.39,
-            "model_prob": 0.2969,
-            "ev_pct": 0.6,
-            "recommendation": "PLUG: +EV to back (0.6% edge) \u2014 fills the gap and adds value"
+            "available": false,
+            "note": "no live market price found for this outcome"
           }
         },
         {
@@ -209,13 +204,8 @@
           "blindspot": true,
           "live": [],
           "plug": {
-            "available": true,
-            "outcome": "Draw",
-            "best_venue": "smarkets",
-            "best_odds": 3.3,
-            "model_prob": 0.2869,
-            "ev_pct": -5.3,
-            "recommendation": "LEAVE UNHEDGED: plugging costs 5.3% EV \u2014 take the variance"
+            "available": false,
+            "note": "no live market price found for this outcome"
           }
         },
         {
@@ -227,13 +217,8 @@
           "blindspot": true,
           "live": [],
           "plug": {
-            "available": true,
-            "outcome": "England",
-            "best_venue": "polymarket",
-            "best_odds": 2.53,
-            "model_prob": 0.4163,
-            "ev_pct": 5.4,
-            "recommendation": "PLUG: +EV to back (5.4% edge) \u2014 fills the gap and adds value"
+            "available": false,
+            "note": "no live market price found for this outcome"
           }
         }
       ],
@@ -257,7 +242,7 @@
     },
     {
       "fixture": "Portugal vs Spain",
-      "kickoff": "2026-07-06T19:00:00+00:00",
+      "kickoff": null,
       "results": [
         {
           "outcome": "Portugal",
@@ -298,7 +283,7 @@
     },
     {
       "fixture": "United States vs Belgium",
-      "kickoff": "2026-07-07T00:00:00+00:00",
+      "kickoff": null,
       "results": [
         {
           "outcome": "United States",
@@ -339,7 +324,7 @@
     },
     {
       "fixture": "Argentina vs Egypt",
-      "kickoff": null,
+      "kickoff": "2026-07-07T16:00:00+00:00",
       "results": [
         {
           "outcome": "Argentina",
@@ -380,7 +365,7 @@
     },
     {
       "fixture": "Switzerland vs Colombia",
-      "kickoff": null,
+      "kickoff": "2026-07-07T20:00:00+00:00",
       "results": [
         {
           "outcome": "Switzerland",
@@ -427,13 +412,8 @@
       "prob": 0.4163,
       "net_pnl": 0.0,
       "plug": {
-        "available": true,
-        "outcome": "England",
-        "best_venue": "polymarket",
-        "best_odds": 2.53,
-        "model_prob": 0.4163,
-        "ev_pct": 5.4,
-        "recommendation": "PLUG: +EV to back (5.4% edge) \u2014 fills the gap and adds value"
+        "available": false,
+        "note": "no live market price found for this outcome"
       }
     },
     {
@@ -442,13 +422,8 @@
       "prob": 0.2969,
       "net_pnl": 0.0,
       "plug": {
-        "available": true,
-        "outcome": "Mexico",
-        "best_venue": "polymarket",
-        "best_odds": 3.39,
-        "model_prob": 0.2969,
-        "ev_pct": 0.6,
-        "recommendation": "PLUG: +EV to back (0.6% edge) \u2014 fills the gap and adds value"
+        "available": false,
+        "note": "no live market price found for this outcome"
       }
     },
     {
@@ -457,13 +432,8 @@
       "prob": 0.2869,
       "net_pnl": 0.0,
       "plug": {
-        "available": true,
-        "outcome": "Draw",
-        "best_venue": "smarkets",
-        "best_odds": 3.3,
-        "model_prob": 0.2869,
-        "ev_pct": -5.3,
-        "recommendation": "LEAVE UNHEDGED: plugging costs 5.3% EV \u2014 take the variance"
+        "available": false,
+        "note": "no live market price found for this outcome"
       }
     }
   ],
