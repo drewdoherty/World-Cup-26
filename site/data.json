@@ -1,19 +1,19 @@
 {
   "meta": {
-    "generated": "2026-07-07T08:34:18"
+    "generated": "2026-07-07T08:34:41"
   },
   "totals": {
-    "wagered": 3782.8600000000015,
+    "wagered": 3787.8600000000015,
     "open_stake": 1861.7000000000005,
     "settled_pl": 292.6975,
-    "n_bets": 214
+    "n_bets": 215
   },
   "totals_by_currency": {
     "GBP": {
-      "wagered": 1890.3599999999997,
+      "wagered": 1895.3599999999997,
       "open_stake": 795.96,
       "settled_pl": 177.09550000000002,
-      "n_bets": 158
+      "n_bets": 159
     },
     "USD": {
       "wagered": 1892.5000000000007,
@@ -24,10 +24,10 @@
   },
   "venues": {
     "sportsbook": {
-      "wagered": 1890.3599999999997,
+      "wagered": 1895.3599999999997,
       "open_stake": 795.96,
       "settled_pl": 177.09550000000002,
-      "n_bets": 158,
+      "n_bets": 159,
       "currency": "GBP"
     },
     "polymarket": {
@@ -45,10 +45,10 @@
       "currency": "USD"
     },
     "sportsbook_1": {
-      "wagered": 1713.86,
-      "open_stake": 1040.52,
+      "wagered": 1718.8599999999997,
+      "open_stake": 1045.52,
       "settled_pl": 227.09550000000002,
-      "n_bets": 135,
+      "n_bets": 136,
       "currency": "GBP",
       "label": "Sportsbook 1"
     },
@@ -62,6 +62,14 @@
     }
   },
   "source_summary": {
+    "offer": {
+      "GBP": {
+        "wagered": 503.06,
+        "open_stake": 268.06,
+        "settled_pl": 156.67,
+        "n_bets": 54
+      }
+    },
     "punt": {
       "GBP": {
         "wagered": 527.06,
@@ -90,14 +98,6 @@
         "n_bets": 26
       }
     },
-    "offer": {
-      "GBP": {
-        "wagered": 498.06,
-        "open_stake": 263.06,
-        "settled_pl": 156.67,
-        "n_bets": 53
-      }
-    },
     "hedge": {
       "GBP": {
         "wagered": 22.0,
@@ -111,10 +111,10 @@
     "bet365": {
       "venue": "sportsbook",
       "currency": "GBP",
-      "wagered": 253.0,
-      "open_stake": 201.0,
+      "wagered": 258.0,
+      "open_stake": 206.0,
       "settled_pl": 51.61,
-      "n_bets": 25
+      "n_bets": 26
     },
     "Sky Bet": {
       "venue": "sportsbook",
@@ -250,10 +250,10 @@
       "bet365": {
         "venue": "sportsbook",
         "currency": "GBP",
-        "wagered": 253.0,
-        "open_stake": 201.0,
+        "wagered": 258.0,
+        "open_stake": 206.0,
         "settled_pl": 51.61,
-        "n_bets": 25
+        "n_bets": 26
       },
       "Sky Bet": {
         "venue": "sportsbook",
@@ -4498,6 +4498,27 @@
       "cash_pnl": -0.11,
       "pct_pnl": -0.018333638893981565,
       "notes": "live PM position (data-API)"
+    },
+    {
+      "id": 272,
+      "ts_utc": "2026-07-07T08:34:41",
+      "match": "Argentina v Egypt",
+      "match_id": "MANUAL_ARGENTINA_V_EGYPT",
+      "market": "Bet Builder",
+      "selection": "Result/Both Teams to Score -> Argentina & No + To Score at Any Time -> Lionel Messi to Score",
+      "platform": "bet365",
+      "venue": "sportsbook",
+      "account": "1",
+      "source": "offer",
+      "currency": "GBP",
+      "decimal_odds": 3.0,
+      "stake": 5.0,
+      "model_prob": null,
+      "market_prob_devig": null,
+      "ev": null,
+      "kelly_fraction": null,
+      "notes": "screenshot ingest; currency=GBP; conf 0.95; Bet Builder; legs: Result/Both Teams to Score -> Argentina & No | To Score at Any Time -> Lionel Messi to Score; SNR",
+      "manual_override": null
     },
     {
       "id": 271,
