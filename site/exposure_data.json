@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-07 22:49:46 UTC"
+    "generated": "2026-07-07 23:24:30 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -15,43 +15,43 @@
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0718,
+        "prob": 0.0722,
         "results": [
           "France",
-          "Norway",
-          "Spain"
+          "Spain",
+          "Norway"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0296,
+        "prob": 0.0854,
         "results": [
           "France",
-          "Norway",
+          "Spain",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0224,
+        "prob": 0.1785,
         "results": [
           "France",
-          "Norway",
-          "Belgium"
+          "Spain",
+          "England"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0866,
+        "prob": 0.0297,
         "results": [
           "France",
           "Draw",
-          "Spain"
+          "Norway"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0357,
+        "prob": 0.0351,
         "results": [
           "France",
           "Draw",
@@ -62,29 +62,29 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0718,
+        "prob": 0.0722,
         "results": [
           "France",
-          "Norway",
-          "Spain"
+          "Spain",
+          "Norway"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0296,
+        "prob": 0.0854,
         "results": [
           "France",
-          "Norway",
+          "Spain",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0224,
+        "prob": 0.1785,
         "results": [
           "France",
-          "Norway",
-          "Belgium"
+          "Spain",
+          "England"
         ]
       }
     ],
@@ -119,7 +119,7 @@
       "results": [
         {
           "outcome": "France",
-          "prob": 0.5833,
+          "prob": 0.5791,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -128,7 +128,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2537,
+          "prob": 0.2551,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -137,7 +137,7 @@
         },
         {
           "outcome": "Morocco",
-          "prob": 0.163,
+          "prob": 0.1658,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -155,12 +155,53 @@
       }
     },
     {
+      "fixture": "Spain vs Belgium",
+      "kickoff": null,
+      "results": [
+        {
+          "outcome": "Spain",
+          "prob": 0.5803,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.2388,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Belgium",
+          "prob": 0.1809,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Spain",
+        "worst_outcome": "Spain",
+        "n_blindspots": 0
+      }
+    },
+    {
       "fixture": "Norway vs England",
       "kickoff": null,
       "results": [
         {
           "outcome": "Norway",
-          "prob": 0.2121,
+          "prob": 0.2148,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -173,7 +214,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2559,
+          "prob": 0.2541,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -186,7 +227,7 @@
         },
         {
           "outcome": "England",
-          "prob": 0.532,
+          "prob": 0.5311,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -215,54 +256,13 @@
         "worst_outcome": "Norway",
         "n_blindspots": 3
       }
-    },
-    {
-      "fixture": "Spain vs Belgium",
-      "kickoff": null,
-      "results": [
-        {
-          "outcome": "Spain",
-          "prob": 0.5804,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Draw",
-          "prob": 0.2389,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        },
-        {
-          "outcome": "Belgium",
-          "prob": 0.1807,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": false,
-          "live": []
-        }
-      ],
-      "events": [],
-      "summary": {
-        "max_win": 0.0,
-        "stake_at_risk": 0,
-        "best_outcome": "Spain",
-        "worst_outcome": "Spain",
-        "n_blindspots": 0
-      }
     }
   ],
   "blindspots": [
     {
       "fixture": "Norway vs England",
       "outcome": "England",
-      "prob": 0.532,
+      "prob": 0.5311,
       "net_pnl": 0.0,
       "plug": {
         "available": false,
@@ -272,7 +272,7 @@
     {
       "fixture": "Norway vs England",
       "outcome": "Draw",
-      "prob": 0.2559,
+      "prob": 0.2541,
       "net_pnl": 0.0,
       "plug": {
         "available": false,
@@ -282,7 +282,7 @@
     {
       "fixture": "Norway vs England",
       "outcome": "Norway",
-      "prob": 0.2121,
+      "prob": 0.2148,
       "net_pnl": 0.0,
       "plug": {
         "available": false,
