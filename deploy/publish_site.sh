@@ -34,9 +34,11 @@ stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 # so refresh arbs BEFORE bet_recs. Each guarded so a single failure doesn't abort
 # the publish (mirrors the || true style above).
 "$PY" scripts/wca_betrecs.py   >/dev/null 2>&1 || true
-# edge_desk.json (SHADOW-ONLY Advancement Edge Desk) joins the four feeds
-# refreshed above (advancement_data, bet_recs, pm_ideas, orderflow) — so it
-# must run AFTER them. Offline + read-only; never touches ledger or execution.
+# advancement_edge_desk.json (SHADOW-ONLY Advancement Edge Desk) joins the five
+# feeds refreshed above (advancement_data, bet_recs, scores_markets, pm_ideas,
+# orderflow) — so it must run AFTER them. Offline + read-only; never touches
+# ledger or execution. (Renamed from edge_desk.json pre-merge; no alias needed —
+# the Action Desk panel and this wiring moved with it in the same PR.)
 "$PY" scripts/wca_edge_desk.py >/dev/null 2>&1 || true
 # Mirror the freshly-built main-site feeds into the analytics feed dir. localhost
 # :8001 reads site-analytics/data/*.json directly and the :8002 lilac terminal is
@@ -68,8 +70,9 @@ git add site/data.json site/linemove.json site/scores_data.json site/scores_mark
 # would turn every publish into a silent "no site changes" no-op and freeze
 # the whole live site. Guarded separately so a missing file just skips it.
 [ -f site/microstructure/orderflow.json ] && git add site/microstructure/orderflow.json || true
-# edge_desk.json guarded the same way (missing file must not 128 the whole add).
-[ -f site/edge_desk.json ] && git add site/edge_desk.json || true
+# advancement_edge_desk.json guarded the same way (missing file must not 128
+# the whole add).
+[ -f site/advancement_edge_desk.json ] && git add site/advancement_edge_desk.json || true
 if git diff --cached --quiet; then
   echo "$(stamp) publish: no site changes"; exit 0
 fi

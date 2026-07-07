@@ -3,17 +3,18 @@
     "generated": "2026-07-07 09:00:00 UTC",
     "model_generated": "2026-07-07 07:20 UTC",
     "stages": ["R32", "R16", "QF", "SF", "Final", "win"],
-    "n_pm_markets": 5
+    "n_pm_markets": 10
   },
   "teams": [
     {
       "team": "Morocco",
       "group": "C",
-      "model": {"R32": 1.0, "R16": 1.0, "QF": 1.0, "SF": 0.55, "Final": 0.121, "win": 0.05, "group_winner": 0.0},
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 1.0, "SF": 0.55, "Final": 0.121, "win": 0.05, "group_winner": 0.35},
       "delta": {"SF": 0.1, "Final": 0.05, "win": 0.01},
       "pm": {
         "SF": {"pm": 0.44, "edge_adj": 0.1026},
-        "Final": {"pm": 0.09, "edge_adj": 0.0285}
+        "Final": {"pm": 0.09, "edge_adj": 0.0285},
+        "group_winner": {"pm": 0.3, "edge_adj": 0.041}
       }
     },
     {
@@ -39,6 +40,51 @@
       "delta": {"SF": 0.04},
       "pm": {
         "SF": {"pm": 0.1005, "edge_adj": 0.0371}
+      }
+    },
+    {
+      "team": "Nordland",
+      "group": "E",
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 1.0, "SF": 0.45, "Final": 0.2, "win": 0.08, "group_winner": 0.0},
+      "delta": {"SF": 0.02},
+      "pm": {
+        "SF": {"pm": 0.5, "edge_adj": 0.0428}
+      }
+    },
+    {
+      "team": "Bergland",
+      "group": "B",
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 0.62, "SF": 0.52, "Final": 0.3, "win": 0.12, "group_winner": 0.0},
+      "delta": {"SF": 0.03},
+      "pm": {
+        "SF": {"pm": 0.42, "edge_adj": 0.08}
+      }
+    },
+    {
+      "team": "Midland",
+      "group": "F",
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 1.0, "SF": 0.58, "Final": 0.31, "win": 0.14, "group_winner": 0.0},
+      "delta": {"SF": 0.01},
+      "pm": {
+        "SF": {"pm": 0.555, "edge_adj": 0.015}
+      }
+    },
+    {
+      "team": "Coldland",
+      "group": "G",
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 1.0, "SF": 0.3, "Final": 0.11, "win": 0.03, "group_winner": 0.0},
+      "delta": {"SF": -0.02},
+      "pm": {
+        "SF": {"pm": 0.33, "edge_adj": -0.011}
+      }
+    },
+    {
+      "team": "Doneland",
+      "group": "H",
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 1.0, "SF": 0.45, "Final": 0.19, "win": 0.07, "group_winner": 1.0},
+      "delta": {},
+      "pm": {
+        "QF": {"pm": 0.97, "edge_adj": 0.0209}
       }
     },
     {

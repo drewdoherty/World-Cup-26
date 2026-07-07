@@ -2,8 +2,8 @@
   "meta": {
     "generated": "2026-07-07 09:05:00 UTC",
     "monitoring_only": true,
-    "actionable_count": 2,
-    "withheld_count": 0
+    "actionable_count": 3,
+    "withheld_count": 3
   },
   "match_singles": [],
   "event_props": [],
@@ -51,8 +51,69 @@
       "stale_reason": null,
       "market_kind": "advancement",
       "market_label": "Advance · incl. ET+pens"
+    },
+    {
+      "id": "doneland_qf_pm",
+      "team": "Doneland",
+      "group": "H",
+      "stage": "QF",
+      "market": "advancement",
+      "selection": "reach_QF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 1.0,
+      "pm_price": 0.97,
+      "pm_fee": 0.0009,
+      "price": 1.0309,
+      "edge_adj": 0.0209,
+      "ev_net": 0.0212,
+      "stake": 50.0,
+      "action_label": "ADD",
+      "stale": false,
+      "stale_reason": null,
+      "market_kind": "advancement",
+      "market_label": "Advance · incl. ET+pens"
     }
   ],
   "guaranteed_arbs": [],
-  "withheld": []
+  "withheld": [
+    {
+      "id": "france_vs_morocco_away_1x2",
+      "fixture": "France vs Morocco",
+      "kickoff": "2026-07-09 20:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "away",
+      "team": "Morocco",
+      "model_prob": 0.1635,
+      "price": 6.9653,
+      "edge": 0.0199,
+      "ev_net": 0.1388,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "model_prob 16% < floor 20%",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "switzerland_vs_colombia_corners",
+      "fixture": "Switzerland vs Colombia",
+      "market": "corners",
+      "selection": "corners over 8.5",
+      "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
+      "stale": true,
+      "stale_reason": "price snapshot absent or older than 2h",
+      "tags": ["model", "prop", "no_price"]
+    },
+    {
+      "id": "scorer_props_all",
+      "fixture": "ALL",
+      "market": "anytime_scorer",
+      "selection": "—",
+      "withheld_reason": "player xG-share + penalty-taker injection not yet wired (no real inputs)",
+      "stale": false,
+      "stale_reason": null,
+      "tags": ["model", "scorer", "unsupported"]
+    }
+  ]
 }
