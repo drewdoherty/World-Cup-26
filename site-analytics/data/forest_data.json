@@ -1,92 +1,8 @@
 {
   "meta": {
-    "generated": "2026-07-07 18:03:54 UTC"
+    "generated": "2026-07-07 22:14:29 UTC"
   },
   "fixtures": [
-    {
-      "fixture": "Switzerland vs Colombia",
-      "rows": [
-        {
-          "section": "1X2"
-        },
-        {
-          "label": "Home",
-          "model": 0.269906,
-          "market": 0.26499894000423996
-        },
-        {
-          "label": "Draw",
-          "model": 0.298335,
-          "market": 0.315000315000315
-        },
-        {
-          "label": "Away",
-          "model": 0.431759,
-          "market": 0.4250074376301585
-        },
-        {
-          "section": "O/U 2.5 Goals"
-        },
-        {
-          "label": "Over",
-          "model": 0.455,
-          "market": null
-        },
-        {
-          "label": "Under",
-          "model": 0.545,
-          "market": null
-        },
-        {
-          "section": "BTTS"
-        },
-        {
-          "label": "Yes",
-          "model": 0.516,
-          "market": null
-        },
-        {
-          "label": "No",
-          "model": 0.484,
-          "market": null
-        },
-        {
-          "section": "Top Scorelines (model & market)"
-        },
-        {
-          "label": "1-1",
-          "model": 0.142,
-          "market": 0.155
-        },
-        {
-          "label": "0-1",
-          "model": 0.105,
-          "market": 0.125
-        },
-        {
-          "label": "0-0",
-          "model": 0.094,
-          "market": 0.105
-        },
-        {
-          "label": "1-2",
-          "model": 0.086,
-          "market": 0.095
-        },
-        {
-          "label": "0-2",
-          "model": 0.081,
-          "market": 0.085
-        },
-        {
-          "label": "1-0",
-          "model": 0.079,
-          "market": 0.095
-        }
-      ],
-      "kickoff": "2026-07-07T20:00:00+00:00",
-      "has_market": true
-    },
     {
       "fixture": "France vs Morocco",
       "rows": [
@@ -95,18 +11,18 @@
         },
         {
           "label": "Home",
-          "model": 0.580642,
-          "market": null
+          "model": 0.579357,
+          "market": 0.625
         },
         {
           "label": "Draw",
-          "model": 0.254517,
-          "market": null
+          "model": 0.255163,
+          "market": 0.24500196001568014
         },
         {
           "label": "Away",
-          "model": 0.164841,
-          "market": null
+          "model": 0.16548,
+          "market": 0.14499898500710495
         },
         {
           "section": "O/U 2.5 Goals"
@@ -140,35 +56,36 @@
         {
           "label": "1-0",
           "model": 0.172,
-          "market": null
+          "market": 0.135
         },
         {
           "label": "2-0",
-          "model": 0.126,
-          "market": null
+          "model": 0.125,
+          "market": 0.115
         },
         {
           "label": "1-1",
-          "model": 0.115,
-          "market": null
+          "model": 0.11599999999999999,
+          "market": 0.115
         },
         {
           "label": "0-0",
           "model": 0.105,
-          "market": null
+          "market": 0.075
         },
         {
           "label": "2-1",
           "model": 0.099,
-          "market": null
+          "market": 0.105
         },
         {
           "label": "0-1",
           "model": 0.066,
-          "market": null
+          "market": 0.055
         }
       ],
-      "has_market": false
+      "kickoff": "2026-07-09T20:00:00+00:00",
+      "has_market": true
     },
     {
       "fixture": "Spain vs Belgium",
@@ -178,17 +95,17 @@
         },
         {
           "label": "Home",
-          "model": 0.580616,
+          "model": 0.581181,
           "market": null
         },
         {
           "label": "Draw",
-          "model": 0.238544,
+          "model": 0.238236,
           "market": null
         },
         {
           "label": "Away",
-          "model": 0.180841,
+          "model": 0.180583,
           "market": null
         },
         {
@@ -248,6 +165,89 @@
         {
           "label": "3-0",
           "model": 0.057999999999999996,
+          "market": null
+        }
+      ],
+      "has_market": false
+    },
+    {
+      "fixture": "Norway vs England",
+      "rows": [
+        {
+          "section": "1X2"
+        },
+        {
+          "label": "Home",
+          "model": 0.218944,
+          "market": null
+        },
+        {
+          "label": "Draw",
+          "model": 0.253792,
+          "market": null
+        },
+        {
+          "label": "Away",
+          "model": 0.527263,
+          "market": null
+        },
+        {
+          "section": "O/U 2.5 Goals"
+        },
+        {
+          "label": "Over",
+          "model": 0.49700000000000005,
+          "market": null
+        },
+        {
+          "label": "Under",
+          "model": 0.503,
+          "market": null
+        },
+        {
+          "section": "BTTS"
+        },
+        {
+          "label": "Yes",
+          "model": 0.505,
+          "market": null
+        },
+        {
+          "label": "No",
+          "model": 0.495,
+          "market": null
+        },
+        {
+          "section": "Top Scorelines (model & market)"
+        },
+        {
+          "label": "1-1",
+          "model": 0.121,
+          "market": null
+        },
+        {
+          "label": "0-1",
+          "model": 0.105,
+          "market": null
+        },
+        {
+          "label": "0-2",
+          "model": 0.099,
+          "market": null
+        },
+        {
+          "label": "1-2",
+          "model": 0.08900000000000001,
+          "market": null
+        },
+        {
+          "label": "0-0",
+          "model": 0.077,
+          "market": null
+        },
+        {
+          "label": "1-0",
+          "model": 0.067,
           "market": null
         }
       ],
