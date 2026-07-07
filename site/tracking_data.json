@@ -1,15 +1,15 @@
 {
   "meta": {
-    "generated": "2026-07-07 07:26:53 UTC"
+    "generated": "2026-07-07 08:02:26 UTC"
   },
   "summary": {
-    "fixtures_complete": 90,
-    "model_1x2_correct": 58,
-    "market_1x2_correct": 47,
-    "model_brier": 0.428,
-    "market_brier": 0.4116,
-    "model_logloss": 0.7443,
-    "market_logloss": 0.7172,
+    "fixtures_complete": 92,
+    "model_1x2_correct": 59,
+    "market_1x2_correct": 48,
+    "model_brier": 0.4373,
+    "market_brier": 0.422,
+    "model_logloss": 0.7587,
+    "market_logloss": 0.7329,
     "top6_hits": 50,
     "bets": {
       "settled": 131,
@@ -9043,6 +9043,214 @@
       },
       "picks": [],
       "pending": false
+    },
+    {
+      "fixture": "Brazil vs Norway",
+      "date": "2026-07-05",
+      "kickoff": "2026-07-05T20:00:00Z",
+      "score": "1-2",
+      "outcome": "away",
+      "home_goals": 1,
+      "away_goals": 2,
+      "card_generated": "2026-07-05 11:26:00 UTC",
+      "model_1x2": {
+        "home": 0.587,
+        "draw": 0.2404,
+        "away": 0.1725
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.5299,
+        "draw": 0.2584,
+        "away": 0.2118
+      },
+      "market_source": "closing_devig",
+      "market_books": 19,
+      "model_pick": "home",
+      "market_pick": "home",
+      "model_correct": false,
+      "market_correct": false,
+      "model_prob_outcome": 0.1725,
+      "market_prob_outcome": 0.2118,
+      "result_edge": -0.0392,
+      "brier_model": 1.0871,
+      "brier_market": 0.9689,
+      "logloss_model": 1.7571,
+      "logloss_market": 1.5523,
+      "top_scoreline": {
+        "score": "1-1",
+        "prob": 11.2,
+        "hit": false
+      },
+      "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "1-1",
+          "prob": 11.2
+        },
+        {
+          "score": "2-0",
+          "prob": 9.7
+        },
+        {
+          "score": "1-0",
+          "prob": 8.3
+        },
+        {
+          "score": "2-1",
+          "prob": 8.3
+        },
+        {
+          "score": "3-0",
+          "prob": 7.2
+        },
+        {
+          "score": "0-0",
+          "prob": 6.2
+        }
+      ],
+      "home_standing": {
+        "team": "Brazil",
+        "group": "C",
+        "played": 3,
+        "won": 2,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 7,
+        "ga": 1,
+        "gd": 6,
+        "points": 7,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Norway",
+        "group": "I",
+        "played": 3,
+        "won": 2,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 8,
+        "ga": 7,
+        "gd": 1,
+        "points": 6,
+        "position": 2
+      },
+      "ou25": {
+        "model_over": 0.571,
+        "actual_over": true,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.534,
+        "actual": true,
+        "hit": true
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "Mexico vs England",
+      "date": "2026-07-05",
+      "kickoff": "2026-07-06T00:00:00Z",
+      "score": "2-3",
+      "outcome": "away",
+      "home_goals": 2,
+      "away_goals": 3,
+      "card_generated": "2026-07-05 11:26:00 UTC",
+      "model_1x2": {
+        "home": 0.304,
+        "draw": 0.2928,
+        "away": 0.4032
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.304,
+        "draw": 0.3029,
+        "away": 0.3931
+      },
+      "market_source": "closing_devig",
+      "market_books": 19,
+      "model_pick": "away",
+      "market_pick": "away",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.4032,
+      "market_prob_outcome": 0.3931,
+      "result_edge": 0.0101,
+      "brier_model": 0.5343,
+      "brier_market": 0.5525,
+      "logloss_model": 0.9083,
+      "logloss_market": 0.9337,
+      "top_scoreline": {
+        "score": "1-1",
+        "prob": 13.6,
+        "hit": false
+      },
+      "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "1-1",
+          "prob": 13.6
+        },
+        {
+          "score": "0-1",
+          "prob": 8.0
+        },
+        {
+          "score": "1-2",
+          "prob": 8.0
+        },
+        {
+          "score": "2-1",
+          "prob": 7.7
+        },
+        {
+          "score": "0-0",
+          "prob": 7.6
+        },
+        {
+          "score": "1-0",
+          "prob": 7.5
+        }
+      ],
+      "home_standing": {
+        "team": "Mexico",
+        "group": "A",
+        "played": 3,
+        "won": 3,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 6,
+        "ga": 0,
+        "gd": 6,
+        "points": 9,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "England",
+        "group": "L",
+        "played": 3,
+        "won": 2,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 6,
+        "ga": 2,
+        "gd": 4,
+        "points": 7,
+        "position": 1
+      },
+      "ou25": {
+        "model_over": 0.516,
+        "actual_over": true,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.564,
+        "actual": true,
+        "hit": true
+      },
+      "picks": [],
+      "pending": false
     }
   ],
   "pending": [
@@ -9051,9 +9259,9 @@
       "date": null,
       "kickoff": "2026-07-07T16:00:00+00:00",
       "model_1x2": {
-        "home": 0.7175,
-        "draw": 0.192,
-        "away": 0.0905
+        "home": 0.7177,
+        "draw": 0.1921,
+        "away": 0.0902
       },
       "model_source": "card_build",
       "model_pick": "home",
@@ -9069,9 +9277,9 @@
       "date": null,
       "kickoff": "2026-07-07T20:00:00+00:00",
       "model_1x2": {
-        "home": 0.2703,
-        "draw": 0.2962,
-        "away": 0.4335
+        "home": 0.2705,
+        "draw": 0.2967,
+        "away": 0.4327
       },
       "model_source": "card_build",
       "model_pick": "away",
@@ -9105,15 +9313,15 @@
       "date": null,
       "kickoff": null,
       "model_1x2": {
-        "home": 0.6256,
-        "draw": 0.216,
-        "away": 0.1584
+        "home": 0.6266,
+        "draw": 0.2166,
+        "away": 0.1568
       },
       "model_source": "card_build",
       "model_pick": "home",
       "top_scoreline": {
         "score": "1-1",
-        "prob": 9.5
+        "prob": 9.6
       },
       "picks": [],
       "pending": true
