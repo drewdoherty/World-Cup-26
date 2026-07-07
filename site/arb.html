@@ -86,6 +86,50 @@
     white-space: normal;
   }
   .wca-place-note { font-size: 9px; color: var(--ll-muted); }
+
+  /* -------- Advancement Edge Desk (SHADOW-ONLY) panel ------------------- */
+  .ed-banner {
+    padding: 6px 10px;
+    font-size: 10px;
+    line-height: 1.5;
+    border-bottom: 1px solid var(--ll-border, #333);
+  }
+  .ed-banner .warn { color: var(--ll-warn); }
+  .ed-banner .pos { color: var(--ll-pos); }
+  .ed-caveats { margin: 2px 0 0; padding-left: 16px; color: var(--ll-text-dim); }
+  .ed-chip {
+    display: inline-block;
+    margin: 0 2px 1px 0;
+    padding: 0 4px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    border-radius: 3px;
+    border: 1px solid var(--ll-border, #333);
+    cursor: help;
+    white-space: nowrap;
+  }
+  .ed-chip.pass { color: var(--ll-pos); border-color: var(--ll-pos); }
+  .ed-chip.fail { color: var(--ll-danger, #e5484d); border-color: var(--ll-danger, #e5484d); }
+  /* 4-label verdict chips: SHADOW_ADD green / WATCH amber / WITHHOLD grey /
+     DO_NOT_TRADE red. Labels are NEVER trade instructions. */
+  .ed-verdict {
+    display: inline-block;
+    padding: 0 5px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    border-radius: 3px;
+    border: 1px solid;
+    cursor: help;
+    white-space: nowrap;
+  }
+  .ed-verdict-add { color: var(--ll-pos); border-color: var(--ll-pos); }
+  .ed-verdict-watch { color: var(--ll-warn); border-color: var(--ll-warn); }
+  .ed-verdict-withhold { color: var(--ll-muted); border-color: var(--ll-muted); }
+  .ed-verdict-dnt { color: var(--ll-danger, #e5484d); border-color: var(--ll-danger, #e5484d); }
+  .ed-settle-1x2 { color: var(--ll-warn); font-size: 9px; white-space: nowrap; }
+  .ed-settle-adv { color: var(--ll-text-dim); font-size: 9px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -341,6 +385,47 @@
       </div>
     </section>
 
+    <!-- ------------------------------------------------------- ADVANCEMENT EDGE DESK (SHADOW) -->
+    <!-- SHADOW-ONLY decision-support: site/advancement_edge_desk.json joins
+         advancement_data + bet_recs + scores_markets + pm_ideas + orderflow with
+         explicit pass/fail gates. Verdicts are SHADOW_ADD / WATCH / WITHHOLD /
+         DO_NOT_TRADE — none is a trade instruction; nothing is wired to
+         execution. Rendered in feed order (selection-rule buckets) — NO client
+         re-sorting. Self-contained renderer (inline script at the bottom of this
+         file), same pattern as the 00 // PM Trade Ideas panel. -->
+    <section class="arb-section" id="sec-edge-desk">
+      <div class="arb-section-head">
+        <span class="arb-section-title">03A // Advancement Edge Desk</span>
+        <span class="arb-badge badge-mkt-adv" title="PM advancement includes ET+pens; 1X2 is 90 minutes only — every row carries its own settlement basis in the Settles column.">ADVANCE · ET+PENS</span>
+        <span class="arb-badge" title="Shadow feed only: verdicts are SHADOW_ADD / WATCH / WITHHOLD / DO_NOT_TRADE — never a trade instruction. Live money stays blocked feed-wide by the CLV/history gate (durable PM/odds price history is stale/missing; price/CLV capture must be restored first).">SHADOW-ONLY · NO ORDERS</span>
+        <span class="arb-section-count" id="cnt-edge-desk">0 rows</span>
+        <span class="arb-section-freshness" id="age-edge-desk"></span>
+      </div>
+      <div class="ed-banner" id="ed-banner">loading&hellip;</div>
+      <div class="arb-table-wrap" id="tbl-edge-desk-wrap">
+        <table class="arb-table" id="tbl-edge-desk">
+          <thead>
+            <tr>
+              <th>Team</th>
+              <th>Mkt</th>
+              <th>Side</th>
+              <th>Bucket</th>
+              <th class="r">Model %</th>
+              <th class="r">PM ¢</th>
+              <th class="r">Edge</th>
+              <th class="r">Rec stake $</th>
+              <th>Next KO</th>
+              <th>Flow</th>
+              <th>Settles</th>
+              <th>Gates</th>
+              <th>Verdict</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-edge-desk"><tr><td colspan="13" class="dim">loading&hellip;</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- ---------------------------------------------------------------- GUARANTEED ARBS -->
     <section class="arb-section" id="sec-arbs">
       <div class="arb-section-head">
@@ -465,6 +550,156 @@
       cnt.textContent = "feed unavailable";
       tbody.innerHTML = '<tr><td colspan="9" class="dim">pm_ideas.json not published yet ' +
         "(written by the next pmpropose run on the mini)</td></tr>";
+    });
+})();
+</script>
+<script>
+/* Advancement Edge Desk panel — self-contained (independent of arb.js).
+   Renders site/advancement_edge_desk.json EXACTLY in feed order (selection-rule
+   buckets: moneyline → mid → longshot; further-out stage first; edge tiebreak;
+   decided legs + withheld near-misses after the actionable tier) — no client
+   re-sorting. SHADOW-ONLY: the verdicts (SHADOW_ADD / WATCH / WITHHOLD /
+   DO_NOT_TRADE) are never trade instructions and nothing here can place an
+   order. */
+(function () {
+  var tbody = document.getElementById("tbody-edge-desk");
+  var cnt = document.getElementById("cnt-edge-desk");
+  var age = document.getElementById("age-edge-desk");
+  var banner = document.getElementById("ed-banner");
+  if (!tbody) return;
+  function esc(x) {
+    return String(x == null ? "" : x).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function pct(p) { return p == null ? "—" : (p * 100).toFixed(1) + "%"; }
+  function cents(p) { return p == null ? "—" : Math.round(p * 100) + "¢"; }
+  var GATE_ORDER = ["freshness", "price_present", "edge", "settlement", "projection",
+                    "orderflow", "side_attribution", "min_prob_cash", "clv_history"];
+  var GATE_SHORT = { freshness: "FRESH", price_present: "PRICE", edge: "EDGE",
+                     settlement: "SETTL", projection: "PROJ", orderflow: "FLOW",
+                     side_attribution: "SIDE", min_prob_cash: "≥25%", clv_history: "CLV" };
+  var VERDICT_CLASS = { SHADOW_ADD: "ed-verdict-add", WATCH: "ed-verdict-watch",
+                        WITHHOLD: "ed-verdict-withhold", DO_NOT_TRADE: "ed-verdict-dnt" };
+  fetch("advancement_edge_desk.json", { cache: "no-store" })
+    .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(function (d) {
+      var rows = (d && d.rows) || [];
+      var meta = (d && d.meta) || {};
+      var fresh = (d && d.freshness) || {};
+      var byV = meta.n_by_verdict || {};
+      cnt.textContent = rows.length + " rows · " + (byV.SHADOW_ADD || 0) + " shadow-add · " +
+        (byV.WATCH || 0) + " watch · " + (byV.WITHHOLD || 0) + " withheld · " +
+        (byV.DO_NOT_TRADE || 0) + " no-trade";
+      if (meta.generated_at) {
+        var ageH = Math.max(0, (Date.now() - Date.parse(meta.generated_at)) / 36e5);
+        age.textContent = isFinite(ageH) ? (ageH < 1 ? Math.round(ageH * 60) + "m old" : ageH.toFixed(1) + "h old") : "";
+      }
+      var caveats = meta.caveats || [];
+      // Model-stamp freshness is surfaced SEPARATELY from the wrapper stamp:
+      // the sim cache behind model probs can be hours older than the publish.
+      var modelBit = meta.advancement_model_generated
+        ? ("Model sim: " + esc(meta.advancement_model_generated) +
+           (meta.advancement_model_age_hours != null
+             ? ' (<span class="' + (meta.advancement_model_age_hours > 14 ? "warn" : "pos") + '">' +
+               meta.advancement_model_age_hours.toFixed(1) + "h old</span>)"
+             : "") + " · ")
+        : '<span class="warn">Model sim stamp MISSING</span> · ';
+      var bhtml = "<strong>SHADOW-ONLY</strong> — decision-support; no verdict is a trade instruction. " +
+        modelBit +
+        'Freshness gate: <span class="' + (fresh.pass ? "pos" : "warn") + '">' +
+        (fresh.pass ? "PASS" : "FAIL") + "</span> · " +
+        '<span class="warn">CLV/history gate BLOCKED feed-wide</span> (durable PM/odds price ' +
+        "history stale/missing — restore price/CLV capture before ANY real-money upgrade). " +
+        esc(meta.settlement_basis || "PM advancement includes ET+pens; 1X2 is 90 minutes only") + ".";
+      if (caveats.length) {
+        bhtml += '<details><summary style="cursor:pointer">' + caveats.length +
+          " caveats (incl. orderflow honesty notes, verbatim)</summary><ul class=\"ed-caveats\">" +
+          caveats.map(function (c) { return "<li>" + esc(c) + "</li>"; }).join("") +
+          "</ul></details>";
+      }
+      banner.innerHTML = bhtml;
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="13" class="dim">no candidates in the feed</td></tr>';
+        return;
+      }
+      var html = "";
+      rows.forEach(function (r) {
+        var gates = r.gates || {};
+        var chips = GATE_ORDER.map(function (g) {
+          var gate = gates[g];
+          if (!gate) return "";
+          return '<span class="ed-chip ' + (gate.pass ? "pass" : "fail") + '" title="' +
+            esc(g + ": " + (gate.reason || gate.note || "pass")) + '">' +
+            esc(GATE_SHORT[g] || g) + (gate.pass ? " ✓" : " ✗") + "</span>";
+        }).join("");
+        var flow = r.orderflow || {};
+        var flowTxt = flow.buy_pressure == null ? "—"
+          : Math.round(flow.buy_pressure * 100) + "% buy" + (flow.hot ? " · HOT" : "");
+        var flowTitle = "category-level taker-side context only — never overrides the edge gate" +
+          (flow.category ? " · cat=" + flow.category : "") +
+          (flow.smart_usd_share != null ? " · smart " + (flow.smart_usd_share * 100).toFixed(1) + "%" : "") +
+          (flow.dumb_usd_share != null ? " / dumb " + (flow.dumb_usd_share * 100).toFixed(1) + "%" : "") +
+          (flow.avg_trade_usd != null ? " · avg $" + flow.avg_trade_usd : "");
+        // Next-KO context: the stage-deciding tie when known, else the next
+        // unplayed KO game. PROJ pairings are model projections, not fixtures.
+        var ko = r.knockout_context || {};
+        var tie = ko.deciding_tie || ko.next_match;
+        var koTxt = "—", koTitle = ko.deciding_tie_reason || ko.next_match_reason || "";
+        if (tie) {
+          koTxt = (tie.opponent ? "vs " + tie.opponent : tie.home + "–" + tie.away) +
+            (tie.round ? " · " + tie.round.replace("Quarter-finals", "QF")
+              .replace("Semi-finals", "SF").replace("Round of 16", "R16")
+              .replace("Round of 32", "R32") : "") +
+            (tie.date ? " " + tie.date.slice(5) : "") +
+            (tie.ft ? " · FT " + tie.ft : "") +
+            " · " + (tie.tie_status === "real" ? "REAL" : "PROJ");
+          var split = tie.model_split_90min;
+          koTitle = (ko.deciding_tie ? "stage-deciding tie" : "next KO game") +
+            (split && split.team_win != null
+              ? " · 90-min model split (1X2_90min, context only): win " + pct(split.team_win) +
+                " / draw " + pct(split.draw) + " / lose " + pct(split.opp_win)
+              : "") +
+            (tie.top_scoreline ? " · top scoreline " + tie.top_scoreline +
+              (tie.top_scoreline_prob != null ? " (" + pct(tie.top_scoreline_prob) + ")" : "") : "");
+        }
+        var isAdv = r.market === "advancement";
+        var settleTxt = isAdv ? "ADV · ET+pens"
+          : (r.market === "1X2" ? "1X2 · 90min" : esc(r.market) + " · book");
+        var vClass = VERDICT_CLASS[r.verdict] || "ed-verdict-dnt";
+        var active = r.verdict === "SHADOW_ADD" || r.verdict === "WATCH";
+        html += "<tr" + (active ? "" : ' style="opacity:.6"') + ">" +
+          "<td" + (r.withheld_reason ? ' title="withheld: ' + esc(r.withheld_reason) + '"' : "") + ">" +
+            esc(r.team) + "</td>" +
+          '<td title="' + esc(r.market_label || "") + '">' + esc(r.stage || r.market) + "</td>" +
+          "<td" + (r.side === "NO" || r.side_confidence === "uncertain" ? ' class="warn"' : "") +
+            " title=\"" + esc(r.side_note || "") + "\">" +
+            esc(r.side || "—") + (r.side_confidence === "uncertain" ? "?" : "") + "</td>" +
+          "<td>" + esc(r.bucket || "—") + "</td>" +
+          '<td class="r" title="' + esc(r.model_source || "") + '">' + pct(r.model_prob) + "</td>" +
+          '<td class="r" title="' + esc(r.pm_price_source || (r.book_price_decimal != null ?
+            "book decimal " + r.book_price_decimal + " — " + (r.book_price_source || "") : "")) + '">' +
+            (r.pm_price != null ? cents(r.pm_price)
+              : (r.book_price_decimal != null ? "@" + r.book_price_decimal : "—")) + "</td>" +
+          '<td class="r ' + (r.edge_adj > 0 || r.book_edge > 0 ? "pos" : "warn") + '" title="' +
+            esc(r.edge_source || r.book_edge_source || "") + '">' +
+            (r.edge_adj != null ? ((r.edge_adj >= 0 ? "+" : "") + (r.edge_adj * 100).toFixed(1) + "%")
+              : (r.book_edge != null ? ((r.book_edge >= 0 ? "+" : "") + (r.book_edge * 100).toFixed(1) + "% bk") : "—")) + "</td>" +
+          '<td class="r">' + (r.bet_rec && r.bet_rec.stake != null ? "$" + esc(r.bet_rec.stake) : "—") + "</td>" +
+          '<td title="' + esc(koTitle) + '">' + esc(koTxt) + "</td>" +
+          '<td title="' + esc(flowTitle) + '">' + esc(flowTxt) + "</td>" +
+          '<td class="' + (isAdv ? "ed-settle-adv" : "ed-settle-1x2") + '" title="' +
+            esc(r.settlement_basis || "") + '">' + settleTxt + "</td>" +
+          "<td>" + chips + "</td>" +
+          '<td><span class="ed-verdict ' + vClass + '" title="' +
+            esc((r.verdict_reasons || []).join(" | ")) + '">' + esc(r.verdict) + "</span></td></tr>";
+      });
+      tbody.innerHTML = html;
+    })
+    .catch(function () {
+      cnt.textContent = "feed unavailable";
+      banner.textContent = "advancement_edge_desk.json not published yet (generated by scripts/wca_edge_desk.py in the publish loop).";
+      tbody.innerHTML = '<tr><td colspan="13" class="dim">advancement_edge_desk.json not published yet</td></tr>';
     });
 })();
 </script>

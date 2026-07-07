@@ -1,0 +1,45 @@
+{
+  "generated_utc": "2026-07-07T08:45:00+00:00",
+  "last_successful_ingest_utc": "2026-07-07T08:44:00Z",
+  "status": "measured",
+  "window": {
+    "from_utc": "2025-06-09T15:37:11+00:00",
+    "to_utc": "2026-07-07T08:44:00+00:00",
+    "n_trades": 1000000,
+    "n_wallets": 90000,
+    "n_markets": 900,
+    "usd_volume": 500000000.0,
+    "truncated_markets": [
+      "will-brazil-win-the-2026-fifa-world-cup",
+      "fifwc-mar-fra-2026-07-10-mar",
+      "fifwc-mar-fra-2026-07-10-fra"
+    ]
+  },
+  "headline": [],
+  "cohorts": {
+    "definition": "fixture",
+    "smart": {"n_wallets": 100, "gross_usd": 1000000.0, "roi": 0.2},
+    "dumb": {"n_wallets": 100, "gross_usd": 900000.0, "roi": -0.3}
+  },
+  "leaderboards": {"smart": [], "dumb": [], "whales": [], "first_movers": []},
+  "archetypes": [],
+  "category_matrix": [
+    {"category": "match_1x2", "label": "Match (1X2)", "n_trades": 500000, "usd": 300000000.0, "n_wallets": 80000, "avg_trade_usd": 600.0, "smart_usd_share": 0.17, "dumb_usd_share": 0.11, "buy_pressure": 0.83},
+    {"category": "advancement_sf", "label": "Reach Semifinals", "n_trades": 24758, "usd": 1920263.4, "n_wallets": 4000, "avg_trade_usd": 77.6, "smart_usd_share": 0.0402, "dumb_usd_share": 0.009, "buy_pressure": 0.7997},
+    {"category": "advancement_qf", "label": "Reach Quarterfinals", "n_trades": 31000, "usd": 2500000.0, "n_wallets": 5000, "avg_trade_usd": 80.6, "smart_usd_share": 0.05, "dumb_usd_share": 0.01, "buy_pressure": 0.95},
+    {"category": "advancement_final", "label": "Reach Final", "n_trades": 12000, "usd": 900000.0, "n_wallets": 2500, "avg_trade_usd": 75.0, "smart_usd_share": 0.03, "dumb_usd_share": 0.012, "buy_pressure": 0.61},
+    {"category": "winner", "label": "Tournament Winner", "n_trades": 435019, "usd": 205060671.05, "n_wallets": 68477, "avg_trade_usd": 471.38, "smart_usd_share": 0.0225, "dumb_usd_share": 0.0158, "buy_pressure": 0.5692},
+    {"category": "group_winner", "label": "Group Winner", "n_trades": 8000, "usd": 400000.0, "n_wallets": 1500, "avg_trade_usd": 50.0, "smart_usd_share": 0.02, "dumb_usd_share": 0.015, "buy_pressure": 0.62}
+  ],
+  "size_distribution": [],
+  "latency": {
+    "n_jumps": 189,
+    "by_category": [
+      {"category": "advancement_qf", "n_jumps": 189, "median_reprice_s": 0.0, "p90_reprice_s": 198.0, "median_move_cents": 8.94, "first30s_usd_share": 0.8796}
+    ]
+  },
+  "honesty_notes": [
+    "Taker-side data only: maker identities are never seen.",
+    "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects — treat as descriptive, not as a copy-trade signal."
+  ]
+}

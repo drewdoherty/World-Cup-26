@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "generated": "2026-07-07 09:00:00 UTC",
+    "model_generated": "2026-07-07 07:20 UTC",
+    "stages": ["R32", "R16", "QF", "SF", "Final", "win"],
+    "n_pm_markets": 10
+  },
+  "teams": [
+    {
+      "team": "Morocco",
+      "group": "C",
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 1.0, "SF": 0.55, "Final": 0.121, "win": 0.05, "group_winner": 0.35},
+      "delta": {"SF": 0.1, "Final": 0.05, "win": 0.01},
+      "pm": {
+        "SF": {"pm": 0.44, "edge_adj": 0.1026},
+        "Final": {"pm": 0.09, "edge_adj": 0.0285},
+        "group_winner": {"pm": 0.3, "edge_adj": 0.041}
+      }
+    },
+    {
+      "team": "Brazil",
+      "group": "C",
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 0.7735, "SF": 0.4845, "Final": 0.2924, "win": 0.1637, "group_winner": 1.0},
+      "delta": {"QF": 0.2, "SF": 0.1},
+      "pm": {}
+    },
+    {
+      "team": "Colombia",
+      "group": "K",
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 0.5982, "SF": 0.31, "Final": 0.14, "win": 0.06, "group_winner": 0.0},
+      "delta": {"QF": -0.01},
+      "pm": {
+        "QF": {"pm": 0.605, "edge_adj": -0.0054}
+      }
+    },
+    {
+      "team": "Switzerland",
+      "group": "B",
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 1.0, "SF": 0.1408, "Final": 0.05, "win": 0.01, "group_winner": 0.0},
+      "delta": {"SF": 0.04},
+      "pm": {
+        "SF": {"pm": 0.1005, "edge_adj": 0.0371}
+      }
+    },
+    {
+      "team": "Nordland",
+      "group": "E",
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 1.0, "SF": 0.45, "Final": 0.2, "win": 0.08, "group_winner": 0.0},
+      "delta": {"SF": 0.02},
+      "pm": {
+        "SF": {"pm": 0.5, "edge_adj": 0.0428}
+      }
+    },
+    {
+      "team": "Bergland",
+      "group": "B",
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 0.62, "SF": 0.52, "Final": 0.3, "win": 0.12, "group_winner": 0.0},
+      "delta": {"SF": 0.03},
+      "pm": {
+        "SF": {"pm": 0.42, "edge_adj": 0.08}
+      }
+    },
+    {
+      "team": "Midland",
+      "group": "F",
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 1.0, "SF": 0.58, "Final": 0.31, "win": 0.14, "group_winner": 0.0},
+      "delta": {"SF": 0.01},
+      "pm": {
+        "SF": {"pm": 0.555, "edge_adj": 0.015}
+      }
+    },
+    {
+      "team": "Coldland",
+      "group": "G",
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 1.0, "SF": 0.3, "Final": 0.11, "win": 0.03, "group_winner": 0.0},
+      "delta": {"SF": -0.02},
+      "pm": {
+        "SF": {"pm": 0.33, "edge_adj": -0.011}
+      }
+    },
+    {
+      "team": "Doneland",
+      "group": "H",
+      "model": {"R32": 1.0, "R16": 1.0, "QF": 1.0, "SF": 0.45, "Final": 0.19, "win": 0.07, "group_winner": 1.0},
+      "delta": {},
+      "pm": {
+        "QF": {"pm": 0.97, "edge_adj": 0.0209}
+      }
+    },
+    {
+      "team": "Eliminatia",
+      "group": "K",
+      "model": {"R32": 1.0, "R16": 0.0, "QF": 0.0, "SF": 0.0, "Final": 0.0, "win": 0.0, "group_winner": 0.0},
+      "delta": {},
+      "pm": {}
+    }
+  ],
+  "groups": {
+    "B": [
+      {"pos": 1, "team": "Switzerland", "p": 3, "w": 2, "d": 1, "l": 0, "gf": 5, "ga": 2, "gd": 3, "pts": 7},
+      {"pos": 2, "team": "Bergland", "p": 3, "w": 1, "d": 1, "l": 1, "gf": 3, "ga": 3, "gd": 0, "pts": 4},
+      {"pos": 3, "team": "Coastalia", "p": 3, "w": 1, "d": 0, "l": 2, "gf": 2, "ga": 4, "gd": -2, "pts": 3},
+      {"pos": 4, "team": "Plainsland", "p": 3, "w": 0, "d": 2, "l": 1, "gf": 1, "ga": 2, "gd": -1, "pts": 2}
+    ],
+    "C": [
+      {"pos": 1, "team": "Brazil", "p": 3, "w": 3, "d": 0, "l": 0, "gf": 7, "ga": 1, "gd": 6, "pts": 9},
+      {"pos": 2, "team": "Morocco", "p": 2, "w": 1, "d": 1, "l": 0, "gf": 3, "ga": 1, "gd": 2, "pts": 4},
+      {"pos": 3, "team": "Tieland", "p": 2, "w": 1, "d": 1, "l": 0, "gf": 3, "ga": 1, "gd": 2, "pts": 4},
+      {"pos": 4, "team": "Eliminatia", "p": 3, "w": 0, "d": 0, "l": 3, "gf": 0, "ga": 10, "gd": -10, "pts": 0}
+    ]
+  }
+}
