@@ -1,16 +1,16 @@
 {
   "meta": {
-    "generated": "2026-07-07 10:22:24 UTC"
+    "generated": "2026-07-07 10:57:22 UTC"
   },
   "summary": {
-    "fixtures_complete": 92,
-    "model_1x2_correct": 59,
-    "market_1x2_correct": 48,
-    "model_brier": 0.4373,
-    "market_brier": 0.422,
-    "model_logloss": 0.7587,
-    "market_logloss": 0.7329,
-    "top6_hits": 50,
+    "fixtures_complete": 94,
+    "model_1x2_correct": 61,
+    "market_1x2_correct": 50,
+    "model_brier": 0.4383,
+    "market_brier": 0.4242,
+    "model_logloss": 0.7604,
+    "market_logloss": 0.7365,
+    "top6_hits": 51,
     "bets": {
       "settled": 131,
       "won": 42,
@@ -9246,6 +9246,214 @@
       },
       "btts": {
         "model": 0.564,
+        "actual": true,
+        "hit": true
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "Portugal vs Spain",
+      "date": "2026-07-06",
+      "kickoff": "2026-07-06T19:00:00Z",
+      "score": "0-1",
+      "outcome": "away",
+      "home_goals": 0,
+      "away_goals": 1,
+      "card_generated": "2026-07-05 11:26:00 UTC",
+      "model_1x2": {
+        "home": 0.2397,
+        "draw": 0.271,
+        "away": 0.4893
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.2383,
+        "draw": 0.2629,
+        "away": 0.4988
+      },
+      "market_source": "closing_devig",
+      "market_books": 19,
+      "model_pick": "away",
+      "market_pick": "away",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.4893,
+      "market_prob_outcome": 0.4988,
+      "result_edge": -0.0095,
+      "brier_model": 0.3917,
+      "brier_market": 0.377,
+      "logloss_model": 0.7148,
+      "logloss_market": 0.6955,
+      "top_scoreline": {
+        "score": "1-1",
+        "prob": 12.6,
+        "hit": false
+      },
+      "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "1-1",
+          "prob": 12.6
+        },
+        {
+          "score": "0-1",
+          "prob": 10.8
+        },
+        {
+          "score": "1-2",
+          "prob": 10.0
+        },
+        {
+          "score": "0-2",
+          "prob": 8.7
+        },
+        {
+          "score": "0-0",
+          "prob": 7.5
+        },
+        {
+          "score": "1-0",
+          "prob": 6.4
+        }
+      ],
+      "home_standing": {
+        "team": "Portugal",
+        "group": "K",
+        "played": 3,
+        "won": 1,
+        "drawn": 2,
+        "lost": 0,
+        "gf": 6,
+        "ga": 1,
+        "gd": 5,
+        "points": 5,
+        "position": 2
+      },
+      "away_standing": {
+        "team": "Spain",
+        "group": "H",
+        "played": 3,
+        "won": 2,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 5,
+        "ga": 0,
+        "gd": 5,
+        "points": 7,
+        "position": 1
+      },
+      "ou25": {
+        "model_over": 0.5,
+        "actual_over": false,
+        "hit": false
+      },
+      "btts": {
+        "model": 0.537,
+        "actual": false,
+        "hit": false
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "United States vs Belgium",
+      "date": "2026-07-06",
+      "kickoff": "2026-07-07T00:00:00Z",
+      "score": "1-4",
+      "outcome": "away",
+      "home_goals": 1,
+      "away_goals": 4,
+      "card_generated": "2026-07-05 11:26:00 UTC",
+      "model_1x2": {
+        "home": 0.3427,
+        "draw": 0.2683,
+        "away": 0.389
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.3561,
+        "draw": 0.2828,
+        "away": 0.3611
+      },
+      "market_source": "closing_devig",
+      "market_books": 19,
+      "model_pick": "away",
+      "market_pick": "away",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.389,
+      "market_prob_outcome": 0.3611,
+      "result_edge": 0.028,
+      "brier_model": 0.5627,
+      "brier_market": 0.615,
+      "logloss_model": 0.9441,
+      "logloss_market": 1.0187,
+      "top_scoreline": {
+        "score": "1-1",
+        "prob": 11.7,
+        "hit": false
+      },
+      "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "1-1",
+          "prob": 11.7
+        },
+        {
+          "score": "2-1",
+          "prob": 8.2
+        },
+        {
+          "score": "2-2",
+          "prob": 7.6
+        },
+        {
+          "score": "1-2",
+          "prob": 7.5
+        },
+        {
+          "score": "1-0",
+          "prob": 5.3
+        },
+        {
+          "score": "0-2",
+          "prob": 5.3
+        }
+      ],
+      "home_standing": {
+        "team": "United States",
+        "group": "D",
+        "played": 3,
+        "won": 2,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 8,
+        "ga": 4,
+        "gd": 4,
+        "points": 6,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Belgium",
+        "group": "G",
+        "played": 3,
+        "won": 1,
+        "drawn": 2,
+        "lost": 0,
+        "gf": 6,
+        "ga": 2,
+        "gd": 4,
+        "points": 5,
+        "position": 1
+      },
+      "ou25": {
+        "model_over": 0.639,
+        "actual_over": true,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.665,
         "actual": true,
         "hit": true
       },

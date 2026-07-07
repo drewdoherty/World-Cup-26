@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-07 10:23:07 UTC",
+    "generated": "2026-07-07 10:58:02 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 525,
+      "model_secs": 409,
       "advancement_secs": 1,
       "price_secs": null,
-      "promo_secs": 78924,
+      "promo_secs": 81019,
       "exposure_secs": null
     },
     "coverage": {
@@ -50,52 +50,10 @@
       "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($4106).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
-    "actionable_count": 5,
-    "withheld_count": 9
+    "actionable_count": 4,
+    "withheld_count": 10
   },
-  "match_singles": [
-    {
-      "id": "spain_vs_belgium_home_1x2",
-      "fixture": "Spain vs Belgium",
-      "kickoff": "2026-07-10 19:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "market_kind": "result_90",
-      "market_label": "90-min 1X2 (+ stoppage)",
-      "selection": "home",
-      "team": "Spain",
-      "venue": "smarkets",
-      "currency": "GBP",
-      "model_prob": 0.6303,
-      "price": 1.6729,
-      "price_source": "devig_consensus",
-      "edge": 0.0326,
-      "ev_net": 0.0545,
-      "stake": 66.1,
-      "action_label": "ADD",
-      "current_exposure": {
-        "fixture_open": false
-      },
-      "proposed_risk": {
-        "stake": 66.1,
-        "max_loss": 66.1
-      },
-      "promo": null,
-      "promo_status": null,
-      "ages": {
-        "model_secs": 525,
-        "price_secs": 525,
-        "exposure_secs": null
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "1X2",
-        "devig_price"
-      ]
-    }
-  ],
+  "match_singles": [],
   "event_props": [],
   "advancement_futures": [
     {
@@ -108,12 +66,12 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.3156,
-      "pm_price": 0.2275,
+      "pm_price": 0.2265,
       "pm_fee": 0.0053,
-      "price": 4.296,
-      "edge_adj": 0.0813,
-      "ev_net": 0.0828,
-      "stake": 110.81,
+      "price": 4.3149,
+      "edge_adj": 0.0833,
+      "ev_net": 0.0838,
+      "stake": 112.02,
       "action_label": "ADD",
       "ages": {
         "model_secs": 1,
@@ -132,8 +90,8 @@
       "match_round": "Quarter-finals",
       "match_1x2": {
         "team_win": 0.192,
-        "draw": 0.282,
-        "opp_win": 0.526
+        "draw": 0.283,
+        "opp_win": 0.525
       }
     },
     {
@@ -169,9 +127,9 @@
       "opponent": "Colombia",
       "match_round": "Round of 16",
       "match_1x2": {
-        "team_win": 0.281,
+        "team_win": 0.284,
         "draw": 0.297,
-        "opp_win": 0.422
+        "opp_win": 0.419
       }
     },
     {
@@ -208,8 +166,8 @@
       "match_round": "Quarter-finals",
       "match_1x2": {
         "team_win": 0.192,
-        "draw": 0.282,
-        "opp_win": 0.526
+        "draw": 0.283,
+        "opp_win": 0.525
       }
     },
     {
@@ -242,12 +200,12 @@
       ],
       "market_kind": "advancement",
       "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "United States",
-      "match_round": "Round of 16",
+      "opponent": "Spain",
+      "match_round": "Quarter-finals",
       "match_1x2": {
-        "team_win": 0.496,
-        "draw": 0.27,
-        "opp_win": 0.233
+        "team_win": 0.193,
+        "draw": 0.249,
+        "opp_win": 0.559
       }
     }
   ],
@@ -261,10 +219,10 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.1899,
-      "price": 5.2725,
-      "edge": 0.0002,
-      "ev_net": 0.0011,
+      "model_prob": 0.1927,
+      "price": 5.1904,
+      "edge": 0.0,
+      "ev_net": 0.0001,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 19% < floor 20%",
@@ -279,10 +237,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Egypt",
-      "model_prob": 0.0884,
-      "price": 12.3054,
-      "edge": 0.0071,
-      "ev_net": 0.0873,
+      "model_prob": 0.0877,
+      "price": 12.7727,
+      "edge": 0.0094,
+      "ev_net": 0.1198,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 9% < floor 20%",
@@ -298,12 +256,30 @@
       "selection": "away",
       "team": "Morocco",
       "model_prob": 0.1677,
-      "price": 6.8029,
-      "edge": 0.0207,
-      "ev_net": 0.1406,
+      "price": 6.7956,
+      "edge": 0.0205,
+      "ev_net": 0.1396,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 17% < floor 20%",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "spain_vs_belgium_draw_1x2",
+      "fixture": "Spain vs Belgium",
+      "kickoff": "2026-07-10 19:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "draw",
+      "team": "Draw",
+      "model_prob": 0.2368,
+      "price": 4.2279,
+      "edge": 0.0003,
+      "ev_net": 0.0012,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "longshot filter: prob 24% < 25% (minnow risk)",
       "stale": false,
       "stale_reason": null
     },
@@ -315,13 +291,13 @@
       "market": "1X2",
       "selection": "away",
       "team": "Belgium",
-      "model_prob": 0.156,
-      "price": 6.0008,
-      "edge": -0.0107,
-      "ev_net": -0.064,
+      "model_prob": 0.1831,
+      "price": 6.0294,
+      "edge": 0.0173,
+      "ev_net": 0.1042,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "model_prob 16% < floor 20%",
+      "withheld_reason": "model_prob 18% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
