@@ -42,6 +42,17 @@ def _parse(ts: Optional[str]) -> Optional[datetime]:
         return None
 
 
+def _neg_ko(ts: Optional[str]) -> float:
+    """Sort key that puts FURTHER-OUT kickoffs first (canonical secondary key).
+
+    Returns the negated epoch seconds so a later kickoff sorts before an earlier
+    one; unknown / unparseable kickoffs return 0.0 and are pushed last by the
+    caller's leading unknown-flag term.
+    """
+    d = _parse(ts)
+    return -d.timestamp() if d else 0.0
+
+
 def _latest_per_selection(snaps: Sequence[MarketSnapshot]) -> Dict[str, List[Dict[str, object]]]:
     """Newest snapshot per (selection, venue) for one market, in store-row shape."""
     by_sv: Dict[tuple, MarketSnapshot] = {}
@@ -120,7 +131,7 @@ def _market_history(group: Sequence[MarketSnapshot], selections: Sequence[str]) 
 def build_feed(snaps: Sequence[MarketSnapshot], *, now_utc: str,
                fixture_meta: Optional[Dict[str, Dict[str, object]]] = None,
                models: Optional[Dict[str, Dict[str, Dict[str, float]]]] = None,
-               bankroll: Optional[float] = None, fraction: float = 0.25,
+               bankroll: Optional[float] = None, fraction: Optional[float] = None,
                cap: float = 0.05, stale_s: float = DEFAULT_STALE_S) -> Dict[str, object]:
     """Build the full market-intelligence feed dict.
 
@@ -128,6 +139,13 @@ def build_feed(snaps: Sequence[MarketSnapshot], *, now_utc: str,
     pure callers pass a fixed value). ``fixture_meta`` maps fixture_id ->
     {home, away, ko_utc}. ``models`` maps fixture_id -> market_type -> {selection:
     prob} to overlay model EV / Kelly where available.
+
+    ``fraction`` defaults to the ONE Kelly fraction
+    (:data:`wca.markets.bankroll.PM_KELLY_FRACTION`) — passed straight through to
+    :func:`wca.intel.metrics.build_market_metrics`, which also applies the
+    canonical <25c longshot no-cash gate. Fixtures are ordered FURTHER-OUT first
+    (the canonical selection rule's secondary key: thin early markets are more
+    likely mispriced).
     """
     fixture_meta = fixture_meta or {}
     models = models or {}
@@ -170,7 +188,10 @@ def build_feed(snaps: Sequence[MarketSnapshot], *, now_utc: str,
             "ko_utc": meta.get("ko_utc"), "markets": m_out,
         })
 
-    fixtures.sort(key=lambda f: (f.get("ko_utc") or "~", f.get("fixture_id") or ""))
+    # Canonical selection rule (wca.selection): FURTHER-OUT fixtures first (thin
+    # early markets are more likely mispriced). Unknown kickoffs sort last.
+    fixtures.sort(key=lambda f: (f.get("ko_utc") is None or not f.get("ko_utc"),
+                                 _neg_ko(f.get("ko_utc")), f.get("fixture_id") or ""))
     return {
         "generated_at": now_utc,
         "venues": venue_legend(),

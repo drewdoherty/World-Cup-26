@@ -175,11 +175,16 @@ def main(argv=None) -> int:
     for r in recs:
         t = r["team"]
         model = {st: r.get(col) for st, col in _COL.items()}
+        # Canonical model-prob bucket per stage (wca.selection): drives the
+        # server-side no-cash gate + greying in adv_edge_matrix.js so the client
+        # never has to re-derive the <25c longshot floor.
+        bucket = {st: adv.prob_bucket(model.get(st)) for st in model}
         delta = {st: r[col + "_delta"] for st, col in _COL.items()
                  if (col + "_delta") in r}
         teams.append({
             "team": t, "group": r.get("group"),
-            "model": model, "delta": (delta or None), "pm": pm.get(t, {}),
+            "model": model, "bucket": bucket, "delta": (delta or None),
+            "pm": pm.get(t, {}),
         })
     teams.sort(key=lambda x: -(x["model"].get("win") or 0.0))
 

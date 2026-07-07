@@ -24,11 +24,30 @@ cash-out; fire backstop $200) — changing them is a human-approved code change.
 
 ## Selection rules (encoded, do not regress)
 
-- **+EV moneylines over longshots**: model ≥50¢ first, 25–50¢ next, <25¢ last.
-  No cash on <25% longshots (likely-PnL rule; longshot "edges" went 0-for-12
-  in backtests — `docs/research/pm_preferences_backtest_2026-07-02.md`).
-- **Further-out fixtures over imminent** (more likely mispriced) — ordering
-  preference, not a gate; encoded in `wca_pm_propose.preference_sort_key`.
+**The rule lives in ONE place: `src/wca/selection.py`.** Every bet-ranking /
+selection / sizing surface imports it (`bucket_rank`, `longshot_no_cash`,
+`hours_out`, `preference_sort_key`); it is a **human-approved-change file** like
+the execution caps — editing `PROB_BUCKETS` / `LONGSHOT_PROB` /
+`preference_sort_key` moves ALL real-money orderings at once. Full spec + the
+per-surface compliance table: `docs/SELECTION_RULES.md`.
+
+Canonical rule (user-confirmed 2026-07-07), key `(bucket_rank, -hours_out, -ev)`:
+- **Bucket by MODEL prob (PRIMARY)**: moneyline `≥0.50` / mid `0.25–0.50` /
+  longshot `<0.25` (inclusive lower bounds). A higher bucket ALWAYS ranks above
+  a lower one, regardless of EV.
+- **Further-out fixtures first (SECONDARY)**: raw continuous hours-to-kickoff,
+  descending (thin early markets are more likely mispriced) — never bucketed.
+- **EV breaks ties ONLY (tertiary)**, within the same bucket + further-out tier.
+- **No cash on longshots (`<0.25` model)**: strict floor — free-bet/lottery only
+  (stake forced to 0, flagged, may still be DISPLAYED dimmed). `longshot_no_cash`
+  is applied at the SIZING step, kept SEPARATE from the sort so a surface can
+  show a longshot dimmed while sizing it at zero.
+- **REPLACE ruling (2026-07-07)**: "longshot" is now defined PURELY by model
+  prob `<0.25`. This RETIRES the older 2026-06-29 "cut all market
+  outright-underdogs regardless of prob" decision — a market outsider the model
+  rates 25–49% is now a STAKEABLE MID. The market-relative FAV/2ND-FAV/longshot
+  categories (`card.classify_outcome` / `_CATEGORY_PRIORITY`) survive ONLY as
+  cosmetic DISPLAY labels; they no longer feed the sort key or the cash-cut.
 - Killed as −EV leaks (do NOT resurrect for cash): correct score, scorer
   props, un-boosted SGMs. Boost-hedged SGMs are different: `wca.boostlock`.
 - Whole-book: size ALL bets together; worst case respects the hard cash floor.

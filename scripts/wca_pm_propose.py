@@ -598,48 +598,16 @@ def _build_scorer_proposals(
     return proposals
 
 
-PROB_BUCKETS = ((0.50, "moneyline"), (0.25, "mid"), (0.0, "longshot"))
-
-
-def prob_bucket(model_prob):
-    """'moneyline' (>=50c) / 'mid' (25-50c) / 'longshot' (<25c)."""
-    prob = float(model_prob or 0.0)
-    for lo, name in PROB_BUCKETS:
-        if prob >= lo:
-            return name
-    return "longshot"
-
-
-def hours_out(p, kick_by_match=None, now_dt=None):
-    """Hours until the proposal's fixture kicks off (0.0 when unknown)."""
-    import datetime as _dt
-
-    import pandas as _pd
-
-    ts = (kick_by_match or {}).get(str(p.get("match_desc") or ""))
-    if not ts:
-        return 0.0
-    try:
-        k = _pd.to_datetime(ts, utc=True).tz_convert(None)
-        ref = now_dt or _dt.datetime.utcnow()
-        return max(0.0, (k - ref).total_seconds() / 3600.0)
-    except Exception:
-        return 0.0
-
-
-def preference_sort_key(p, kick_by_match=None, now_dt=None):
-    """Proposal ordering per the desk's selection rules (user, 2026-07-02).
-
-    1. Prefer +EV MONEYLINES over longshots: model-prob buckets — >=50¢
-       first, 25-50¢ next, <25¢ (longshots) last. PM longshots have been the
-       book's proven leak (0-for-20 to date; likely-PnL rule).
-    2. Prefer FURTHER-OUT fixtures over imminent ones — further away is more
-       likely mispriced (thin early markets; see
-       docs/research/pm_preferences_backtest_2026-07-02.md).
-    3. EV descending breaks ties within a bucket.
-    """
-    bucket = {"moneyline": 0, "mid": 1, "longshot": 2}[prob_bucket(p.get("model_prob"))]
-    return (bucket, -hours_out(p, kick_by_match, now_dt), -float(p.get("ev") or 0.0))
+# The desk selection rule lives in ONE place: wca.selection. It was extracted
+# verbatim from this file (2026-07-07) so this reference surface is byte-for-byte
+# unchanged; every other bet-ranking/selection/sizing surface imports the same
+# module so the rule can never drift again. See docs/SELECTION_RULES.md.
+from wca.selection import (  # noqa: E402
+    PROB_BUCKETS,
+    hours_out,
+    preference_sort_key,
+    prob_bucket,
+)
 
 
 def main() -> int:

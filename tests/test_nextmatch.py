@@ -456,12 +456,21 @@ class TestGoalscorerCard:
     def test_build_orders_and_degrades_without_scorers(self):
         # No per-event scorer odds -> each fixture degrades to market-less, but
         # the multi-fixture iteration + kickoff ordering still hold.
+        #
+        # Canonical selection rule (wca.selection; user 2026-07-07): the
+        # /goalscorers card now orders FURTHER-OUT fixtures first (thin early
+        # markets are more likely mispriced), so the top_k cap keeps the
+        # distant fixtures. This is DISTINCT from the /next SCHEDULE, which is
+        # definitionally soonest-first (see test_picks_earliest_kickoff). Under
+        # the OLD soonest-first order cards[0] was Alpha vs Bravo (2026-06-11);
+        # now it is the later Charlie vs Delta (2026-06-12).
         cards = build_goalscorer_card(
             self._models(), _synthetic_odds(), _synthetic_fixtures_meta(),
             {}, top_k_fixtures=3, pm_lookup=False,
         )
         assert 1 <= len(cards) <= 3
-        assert (cards[0].home, cards[0].away) == ("Alpha", "Bravo")  # earliest KO
+        assert (cards[0].home, cards[0].away) == ("Charlie", "Delta")  # furthest-out KO
+        assert cards[0].commence_time == "2026-06-12T18:00:00Z"
         assert not (cards[0].goalscorers.get("home") or cards[0].goalscorers.get("away"))
 
     def test_format_renders_headers_and_model_stake(self):

@@ -44,6 +44,7 @@ from wca.data import polymarket as P            # noqa: E402
 from wca.data.teamnames import canonical        # noqa: E402
 from wca.models import playerprops as PPM        # noqa: E402
 from wca.models.scorers import load_player_overrides, PlayerParams  # noqa: E402
+from wca.selection import bucket_rank, longshot_no_cash  # noqa: E402
 
 _SCORES = os.path.join(_ROOT, "site", "scores_data.json")
 _PLAYERS_JSON = os.path.join(_ROOT, "data", "players.json")
@@ -212,7 +213,11 @@ def cmd_price(args) -> int:
         return 0
 
     rows = [r for r in rows if r.edge >= args.min_edge]
-    rows.sort(key=lambda r: r.edge, reverse=True)
+    # Canonical desk ordering (wca.selection; user 2026-07-07): model-prob bucket
+    # first, then edge. Scorer props are structurally <25c model prob, so they
+    # are DECISION-SUPPORT ONLY (no cash — free-bet/lottery); the flag below and
+    # the header note make that explicit.
+    rows.sort(key=lambda r: (bucket_rank(r.model_prob), -r.edge))
     rows = rows[: args.top]
 
     if args.json:
@@ -229,12 +234,15 @@ def cmd_price(args) -> int:
     print("lambda %s=%.2f %s=%.2f (source=%s)  |  edge>=%.0f%%  top %d"
           % (home, lambda_home, away, lambda_away, lam_src,
              args.min_edge * 100, args.top))
+    print("_scorer props are <25c model prob -> DECISION-SUPPORT ONLY / no cash "
+          "(free-bet/lottery only, per the desk selection rule; † flags each)_")
     print("%-22s %-16s %-3s  %6s %6s %6s   %-18s" %
           ("player", "market", "k+", "model", "PM", "edge", "rate/min src"))
     print("-" * 92)
     for r in rows:
-        print("%-22s %-16s %-3s  %5.0f%% %5.0f%% %+5.0f%%   %s/%s"
-              % (r.player[:22], r.market_type, "%d+" % r.threshold,
+        dagger = " †" if longshot_no_cash(r.model_prob) else "  "
+        print("%-20s%s %-16s %-3s  %5.0f%% %5.0f%% %+5.0f%%   %s/%s"
+              % (r.player[:20], dagger, r.market_type, "%d+" % r.threshold,
                  r.model_prob * 100, r.pm_price * 100, r.edge * 100,
                  r.rate_source, r.minutes_source))
     print("\nNOTE: edges are dominated by lineup/minutes uncertainty (no live "

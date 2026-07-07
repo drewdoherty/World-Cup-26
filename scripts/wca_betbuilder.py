@@ -29,6 +29,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from wca import cardcache  # noqa: E402
 from wca.models.betbuilder import RateStore, fixture_betbuilder  # noqa: E402
 from wca.models.scorers import load_player_overrides  # noqa: E402
+from wca.selection import hours_out as _sel_hours_out  # noqa: E402
 
 
 def _load_fixtures(preds_json: str):
@@ -89,7 +90,16 @@ def main() -> None:
     args = ap.parse_args()
 
     generated = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
-    fixtures = _load_fixtures(args.preds)[: args.max_fixtures]
+    # Canonical selection rule (wca.selection): FURTHER-OUT fixtures first, so the
+    # --max-fixtures cap drops the imminent (thin-edge) fixtures, not the distant
+    # (more-likely-mispriced) ones. `_load_fixtures` tuples carry kickoff at [4].
+    # (Betbuilder emits fair odds only — no stakes here — so this is ordering, not
+    # sizing; its scorer/prop legs are structurally <25c decision-support/no-cash.)
+    fixtures = sorted(
+        _load_fixtures(args.preds),
+        key=lambda fx: _sel_hours_out({"match_desc": "_"}, {"_": fx[4]}),
+        reverse=True,
+    )[: args.max_fixtures]
     overrides = load_player_overrides(args.players)
     store = RateStore(args.players_db if os.path.exists(args.players_db) else None)
 

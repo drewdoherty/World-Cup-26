@@ -6,6 +6,7 @@ from wca.accas import (
     Leg, Offer, candidate_legs, build_exposure, assemble_accas,
     build_promo_accas, format_accas, _is_finished, _kelly_fraction,
 )
+from wca.selection import longshot_no_cash
 
 
 # --------------------------------------------------------------------------
@@ -83,13 +84,18 @@ def test_one_leg_per_match():
 
 
 def test_moneyline_first_ordering():
-    # Alpha has a moneyline +EV AND a derivative +EV; anchor must be the moneyline.
+    # Canonical ordering (wca.selection; user 2026-07-07): the acca is anchored
+    # on the highest model-prob BUCKET leg (bucket_rank), NOT the market-TYPE
+    # is_moneyline flag. Alpha home (model 0.50) is a moneyline-bucket leg, so it
+    # anchors ahead of any lower-bucket derivative on the same fixture.
+    from wca.selection import bucket_rank
     snap = {accas._fixture_token("Alpha vs Bravo"): {("totals", "Over 2.5"): (1.99, "bk")}}
     legs = candidate_legs(_fixtures(), snap, min_edge=0.02)
     a = assemble_accas(legs, mode="value", min_legs=2)
     assert a, "expected at least one acca"
     alpha_leg = next(l for l in a[0].legs if l.fixture == "Alpha vs Bravo")
-    assert alpha_leg.is_moneyline
+    # Anchor sits in the top (moneyline) model-prob bucket.
+    assert bucket_rank(alpha_leg.model_prob) == 0
 
 
 def test_longshot_skipped_in_value_used_in_longshot():
@@ -273,15 +279,21 @@ def test_lowwin_modest_combined_odds_never_a_lottery():
 
 
 def test_lowwin_no_longshot_draw_stack():
-    # The pathological case: every fixture has a fat-edge draw/underdog. Low-win
-    # must NOT assemble them; the old edge-max ("edge" mode) does.
+    # The pathological case: every fixture has a fat-edge draw/underdog. Under
+    # the canonical selection rule (wca.selection; REPLACE ruling 2026-07-07)
+    # EVERY cash mode now buckets by model prob and drops <25c longshots — so
+    # neither low-win NOR edge mode stacks the fat-edge draws/underdogs any more.
+    # (The old "edge" mode edge-maxed over them — e.g. it built a Draw@8.5 +
+    #  Hounds@6.5 acca from sub-25c legs; that leak is retired.)
     legs = candidate_legs(_lowwin_fixtures(), {}, min_edge=0.0, include_events=False)
     low = assemble_accas(legs, mode="value", min_legs=2)
     assert not any(l.selection == "Draw" or l.odds >= 5.0
                    for a in low for l in a.legs)
+    assert not any(longshot_no_cash(l.model_prob) for a in low for l in a.legs)
     edge = assemble_accas(legs, mode="edge", min_legs=2)
-    # legacy edge-max happily stacks the high-edge longshots
-    assert any(l.odds >= 5.0 for a in edge for l in a.legs)
+    # Canonical: cash "edge" mode no longer stacks the high-odds <25c longshots
+    # (this is the behavior the REPLACE ruling deliberately changes).
+    assert not any(longshot_no_cash(l.model_prob) for a in edge for l in a.legs)
 
 
 def test_lowwin_legs_still_positive_ev():

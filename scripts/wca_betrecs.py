@@ -44,6 +44,11 @@ from typing import Any, Dict, List, Optional, Tuple
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from wca.markets import bankroll as pm_rule  # noqa: E402  (needs src on path)
+from wca.selection import (  # noqa: E402  — canonical desk selection rule
+    bucket_rank,
+    hours_out as _sel_hours_out,
+    longshot_no_cash,
+)
 
 # ---------------------------------------------------------------------------
 # Constants matching card.py governance
@@ -103,6 +108,32 @@ def _age_secs(ts_str: Optional[str]) -> Optional[int]:
         except ValueError:
             continue
     return None
+
+
+def _hours_out(kickoff: Optional[str]) -> float:
+    """Continuous hours until ``kickoff`` (0.0 when unknown/past).
+
+    Adapter over :func:`wca.selection.hours_out` (the canonical secondary
+    selection key) for betrecs' per-rec ``kickoff`` strings — further-out
+    fixtures sort first (thin/soft early markets are more likely mispriced).
+    """
+    if not kickoff:
+        return 0.0
+    return _sel_hours_out({"match_desc": "_"}, {"_": kickoff})
+
+
+def _singles_sort_key(rec: Dict[str, Any]) -> Tuple[int, float, float]:
+    """Canonical desk ordering for 1X2 single recs (wca.selection).
+
+    ``(bucket_rank(model_prob), -hours_out, -ev_net)`` — model-prob bucket
+    first (moneyline > mid > longshot, regardless of EV), further-out fixtures
+    next, EV descending as the tie-break.
+    """
+    return (
+        bucket_rank(rec.get("model_prob")),
+        -_hours_out(rec.get("kickoff")),
+        -float(rec.get("ev_net") or 0.0),
+    )
 
 
 def _pm_fee(p: float) -> float:
@@ -593,15 +624,17 @@ def build_match_singles(
             }
             recs_this_fixture.append(rec)
 
-        # Top-3 per fixture by ev_net
-        recs_this_fixture.sort(key=lambda r: r["ev_net"], reverse=True)
+        # Top-3 per fixture by the canonical desk key (wca.selection):
+        # model-prob bucket, then further-out fixture, then EV as tie-break.
+        recs_this_fixture.sort(key=_singles_sort_key)
         for rec in recs_this_fixture[:3]:
             actionable.append(rec)
         for rec in recs_this_fixture[3:]:
             rec["withheld_reason"] = "top-3 per fixture cap"
             withheld.append(rec)
 
-    actionable.sort(key=lambda r: r["ev_net"], reverse=True)
+    # Cross-fixture ranking: same canonical key (bucket, -hours_out, -ev_net).
+    actionable.sort(key=_singles_sort_key)
     return actionable, withheld
 
 
@@ -731,6 +764,24 @@ def build_advancement_futures(
             if ev < MIN_EDGE:
                 continue
 
+            # Canonical cash floor (wca.selection.longshot_no_cash; user
+            # 2026-07-07): a <25c model-prob advancement side is free-bet /
+            # lottery only — never cash — so it is withheld from the actionable
+            # feed even when +EV. (These sub-25c futures used to size a capped
+            # cash stake here; the REPLACE ruling zeroes them.)
+            if longshot_no_cash(p_model):
+                withheld.append({
+                    "id": "%s_%s_pm" % (team.lower().replace(" ", "_"), stage.lower()),
+                    "team": team, "group": group, "stage": stage,
+                    "market": "advancement", "selection": "reach_%s" % stage,
+                    "venue": "polymarket", "currency": "USD",
+                    "model_prob": round(p_model, 4), "pm_price": round(pm_price, 4),
+                    "ev_net": round(ev, 4), "stake": 0.0,
+                    "withheld_reason": "model-prob longshot (%.0f%% < 25%%) — no cash "
+                                       "(free-bet/lottery only)" % (p_model * 100),
+                })
+                continue
+
             price = 1.0 / net_cost if net_cost > 0 else 0.0
             stake = _kelly_stake(p_model, price, bankroll, kelly_frac, PER_BET_CAP)
             stake = min(stake, max_stake)
@@ -792,9 +843,21 @@ def build_advancement_futures(
             else:
                 actionable.append(rec)
 
-    # Sort: descending EV, then by stage
-    _stage_order = {"QF": 0, "SF": 1, "Final": 2, "win": 3, "R16": 4, "R32": 5}
-    actionable.sort(key=lambda r: (-r["ev_net"], _stage_order.get(r["stage"], 9)))
+    # Canonical desk ordering (wca.selection; user 2026-07-07):
+    #   1. model-prob bucket (moneyline > mid > longshot), ALWAYS;
+    #   2. further-out first — deeper knockout stage (higher = further out);
+    #   3. EV descending breaks ties within a bucket + stage tier.
+    # `_stage_further_out` is the inverse of the old nearest-first `_stage_order`:
+    # group_winner is the nearest-term market, Win the furthest out.
+    _stage_further_out = {
+        "group_winner": 0, "R32": 1, "R16": 2, "QF": 3, "SF": 4,
+        "Final": 5, "win": 6,
+    }
+    actionable.sort(key=lambda r: (
+        bucket_rank(r["model_prob"]),
+        -_stage_further_out.get(r["stage"], 0),
+        -r["ev_net"],
+    ))
     return actionable, withheld
 
 

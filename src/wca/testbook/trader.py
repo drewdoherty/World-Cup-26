@@ -30,6 +30,7 @@ from typing import Dict, List, Optional, Sequence
 
 from wca.data.polymarket import _parse_json_array
 from wca.data.teamnames import canonical
+from wca.selection import bucket_rank, longshot_no_cash
 from wca.testbook import store
 # Reuse the store's pure decision math so the sizing and the decision scorer can
 # never diverge (spec INV-1). kelly_fraction stays importable as trader.kelly_fraction.
@@ -435,11 +436,21 @@ def run_paper_pass(con, model: Dict[str, object], pm_events: Sequence[Dict[str, 
     suspicious = [c for c in cands if c.edge > max_edge]
     cands = [c for c in cands if edge_threshold <= c.edge <= max_edge
              and min_price <= c.price <= max_price]
-    cands.sort(key=lambda c: c.edge, reverse=True)
+    # Canonical desk ordering (wca.selection; user 2026-07-07): model-prob
+    # bucket first (moneyline > mid > longshot), then edge within a bucket — a
+    # <25c longshot must never out-rank a moneyline on raw edge.
+    cands.sort(key=lambda c: (bucket_rank(c.model_prob), -c.edge))
 
     placed, skipped = [], 0
     for c in cands:
         if c.token_id in held:
+            skipped += 1
+            continue
+        # Canonical cash floor (longshot_no_cash): a <25c model-prob side is
+        # free-bet / lottery only — never cash — so the paper-trader stakes it
+        # at zero (skipped) even when its edge is in range. This is where the
+        # auto-scanner's old "size Kelly on any in-range edge" leak stops.
+        if longshot_no_cash(c.model_prob):
             skipped += 1
             continue
         f = kelly_fraction(c.model_prob, c.price) * kelly_mult
