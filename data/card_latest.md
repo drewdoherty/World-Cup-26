@@ -1,27 +1,27 @@
-<!-- generated: 2026-07-08T18:49:57 -->
+<!-- generated: 2026-07-08T20:39:18 -->
 *World Cup Alpha — bet card* (0 staked, 1 indicative picks, hit-prob ranked)
 
 _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. Wire a 2nd book (Betfair creds) or set WCA_STAKE_SINGLE_SOURCE=1 to size them._
 
 *1. [DRAW] France vs Morocco* — Draw @ *4.08* via *polymarket*
-    model 25.9% / mkt 24.6%  edge *+5.8%*  [elo 25% dc 29%]
+    model 25.8% / mkt 24.3%  edge *+5.1%*  [elo 25% dc 29%]
     stake: pm $0.00  INDICATIVE — single-source, no cross-venue confirmation (not staked)
 
 *— CUT (excluded from staking, 2) —*
-  x France vs Morocco — Morocco @ 7.41 (model 16.1%, +19.4% EV): below 20% hit-probability floor (model 16.1%) — too unlikely to return PnL even at +19.4% EV
+  x France vs Morocco — Morocco @ 7.41 (model 16.0%, +18.5% EV): below 20% hit-probability floor (model 16.0%) — too unlikely to return PnL even at +18.5% EV
   x Spain vs Belgium — Belgium @ 6.06 (model 18.0%, +9.1% EV): below 20% hit-probability floor (model 18.0%) — too unlikely to return PnL even at +9.1% EV
 
 *— REFERENCE, NOT SIZED (models + fair odds only) —*
 *World Cup Alpha — scorelines* (4 fixtures)
 
 *France vs Morocco*
-    xG: 1.50-0.71
-    1-0  17.5%  fair 5.72 (17.5%)  back >= 5.83 (17.1%)
-    2-0  12.6%  fair 7.93 (12.6%)  back >= 8.09 (12.4%)
-    1-1  11.7%  fair 8.56 (11.7%)  back >= 8.73 (11.5%)
-    0-0  10.9%  fair 9.20 (10.9%)  back >= 9.39 (10.7%)
-    2-1  9.8%  fair 10.16 (9.8%)  back >= 10.37 (9.6%)
-    0-1  6.5%  fair 15.29 (6.5%)  back >= 15.60 (6.4%)
+    xG: 1.51-0.70
+    1-0  17.6%  fair 5.69 (17.6%)  back >= 5.80 (17.2%)
+    2-0  12.7%  fair 7.89 (12.7%)  back >= 8.05 (12.4%)
+    1-1  11.6%  fair 8.62 (11.6%)  back >= 8.79 (11.4%)
+    0-0  10.8%  fair 9.26 (10.8%)  back >= 9.45 (10.6%)
+    2-1  9.9%  fair 10.11 (9.9%)  back >= 10.31 (9.7%)
+    0-1  6.5%  fair 15.41 (6.5%)  back >= 15.72 (6.4%)
     O/U 2.5: over 38.1% / under 61.9%   BTTS 40.3%
 
 *Norway vs England*
