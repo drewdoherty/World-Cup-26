@@ -22,6 +22,7 @@ from __future__ import annotations
 import datetime
 import json
 import logging
+import re
 from typing import Any, Dict, List, Optional
 
 from wca import exposure
@@ -37,6 +38,29 @@ _USD_PLATFORMS = {"polymarket"}
 
 _DEFAULT_PREDS_PATH = "data/model_predictions.json"
 
+# Knockout stage NESTING order (earliest/shallowest first) — mirrors
+# wca.advancement.STAGE_ORDER / NESTED_PATH_STAGES (the sizing-side fix, #183:
+# apply_path_exposure_caps, which caps PRE-bet PM stakes at feed-build time).
+# Reaching a later stage is a strict subset of reaching every earlier one, so
+# a team's ledger rows across these stages are NOT independently losable —
+# see _advancement_team_stage below. This module is the LEDGER-side analogue:
+# #183 fixes sizing for candidate recs before a bet is placed; once a bet is
+# open in data/wca.db this dashboard's worst_case independently summed every
+# nested rung's stake as if it were separately losable — the same correlation
+# bug, one layer later. #183 does not touch this file.
+_KO_STAGE_NEST_ORDER: tuple = ("R32", "R16", "QF", "SF", "FINAL", "WIN")
+_KO_STAGE_RANK: Dict[str, int] = {s: i for i, s in enumerate(_KO_STAGE_NEST_ORDER)}
+
+# ledger selection strings for advancement bets are "reach_<STAGE>" (see
+# scripts/wca_betrecs.py build_advancement_futures / wca_pm_fire.py); match_desc
+# is "<Team> <Stage> (advancement)" for Action-Desk-fired orders. Both are
+# parsed defensively — if either doesn't match, the bet is left OUT of the
+# nested-path grouping and falls back to being treated independently.
+_SELECTION_STAGE_RE = re.compile(r"reach_([A-Za-z0-9]+)", re.IGNORECASE)
+_MATCH_DESC_TEAM_STAGE_RE = re.compile(
+    r"^(?P<team>.+?)\s+(?P<stage>R32|R16|QF|SF|Final|Win)\b", re.IGNORECASE
+)
+
 
 def _currency_for(platform: Any) -> str:
     return "USD" if str(platform or "").strip().lower() in _USD_PLATFORMS else "GBP"
@@ -47,19 +71,69 @@ def _is_free(source: Any) -> bool:
     return str(source or "").strip().lower() == "offer"
 
 
+def _advancement_team_stage(bet: Dict[str, Any]) -> Optional[tuple]:
+    """Return ``(team, stage_rank)`` for an advancement bet, or ``None``.
+
+    Only ``market == "advancement"`` rows are candidates. The stage comes from
+    ``selection`` (``"reach_<STAGE>"``, the canonical form written by
+    build_advancement_futures / the PM fire path); the team comes from
+    ``match_desc`` (``"<Team> <Stage> (advancement)"``, written by
+    wca_pm_fire.py / wca.bot.app for Action-Desk-fired orders). Returns
+    ``None`` (never grouped) whenever either can't be confidently parsed —
+    the caller then treats the bet independently, exactly as before this fix,
+    which is the SAFE default (never overstates nor understates a bet the
+    aggregator can't identify).
+    """
+    if str(bet.get("market") or "").strip().lower() != "advancement":
+        return None
+    sel = str(bet.get("selection") or "")
+    m_stage = _SELECTION_STAGE_RE.search(sel)
+    if not m_stage:
+        return None
+    stage = m_stage.group(1).strip().upper()
+    if stage not in _KO_STAGE_RANK:
+        return None
+    match_desc = str(bet.get("match_desc") or "")
+    m_team = _MATCH_DESC_TEAM_STAGE_RE.match(match_desc.strip())
+    if not m_team:
+        return None
+    team = m_team.group("team").strip()
+    if not team:
+        return None
+    return (team, _KO_STAGE_RANK[stage])
+
+
 def _currency_best_worst(bets: List[Dict[str, Any]]) -> Dict[str, Dict[str, float]]:
     """Per-currency best/worst-case bounds, never mixing GBP and USD.
 
     best_case: every favourite (model prob > 0.5) wins → sum of profits.
     worst_case: every real-money underdog (prob <= 0.5) loses → sum of stakes
-    (free bets lose £0).  These are loose per-bet bounds (the honest joint
-    distribution lives in ``p_profit``/``p_loss``), but each is computed within a
-    single currency so the number is coherent.
+    (free bets lose £0), EXCEPT that advancement bets on the SAME team across
+    NESTED knockout stages (reach SF ⊂ reach Final ⊂ ... — see
+    _advancement_team_stage / _KO_STAGE_NEST_ORDER) are NOT independently
+    losable: a team eliminated before its earliest recommended rung loses
+    every one of those rungs TOGETHER, on the same result. Their joint
+    worst-case contribution is therefore the MAX single stake among that
+    team's nested rungs, not the SUM (summing double/triple-counts one
+    correlated elimination as if it were several independent ones — the same
+    correlation bug fixed pre-bet, at PM-sizing time, by #183
+    (wca.advancement.apply_path_exposure_caps); this is the LEDGER-side
+    analogue for bets already open in data/wca.db).
+
+    These are still loose per-bet(-group) bounds (the honest joint
+    distribution lives in ``p_profit``/``p_loss``), but each is computed within
+    a single currency so the number is coherent.
     """
     out: Dict[str, Dict[str, float]] = {
         "GBP": {"best_case": 0.0, "worst_case": 0.0},
         "USD": {"best_case": 0.0, "worst_case": 0.0},
     }
+    # Nested advancement underdog stakes, grouped by (currency, team); each
+    # value collects every nested-stage stake for that team so the group's
+    # worst-case contribution can be capped at the max rung afterwards instead
+    # of summed rung-by-rung.
+    nested_group_stakes: Dict[tuple, List[float]] = {}
+
     for b in bets:
         cur = _currency_for(b.get("platform"))
         stake = float(b.get("stake") or 0.0)
@@ -69,7 +143,22 @@ def _currency_best_worst(bets: List[Dict[str, Any]]) -> Dict[str, Dict[str, floa
         if prob > 0.5:
             out[cur]["best_case"] += stake * (odds - 1.0)
         elif not _is_free(b.get("source")):
-            out[cur]["worst_case"] -= stake
+            team_stage = _advancement_team_stage(b)
+            if team_stage is not None:
+                team, _stage_rank = team_stage
+                nested_group_stakes.setdefault((cur, team), []).append(stake)
+            else:
+                out[cur]["worst_case"] -= stake
+
+    # Nested groups: the joint worst case for perfectly-correlated nested
+    # rungs is the largest single rung's stake, not the sum across rungs. A
+    # team with only ONE advancement bet open (len == 1) is unaffected —
+    # max() of a single-element list equals that element's own stake, so this
+    # is a strict superset of the old per-bet behaviour (invariance for
+    # single-rung teams).
+    for (cur, _team), stakes in nested_group_stakes.items():
+        out[cur]["worst_case"] -= max(stakes)
+
     for cur in out:
         out[cur]["best_case"] = round(out[cur]["best_case"], 2)
         out[cur]["worst_case"] = round(out[cur]["worst_case"], 2)
