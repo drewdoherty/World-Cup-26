@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-08 09:54:57 UTC",
+    "generated": "2026-07-08 10:29:56 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 877,
+      "model_secs": 1526,
       "advancement_secs": 1,
       "price_secs": null,
-      "promo_secs": 80706,
+      "promo_secs": 82805,
       "exposure_secs": null
     },
     "coverage": {
@@ -51,7 +51,7 @@
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
     "actionable_count": 5,
-    "withheld_count": 10
+    "withheld_count": 12
   },
   "match_singles": [],
   "event_props": [],
@@ -218,12 +218,12 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.3086,
-      "pm_price": 0.2545,
+      "pm_price": 0.254,
       "pm_fee": 0.0057,
-      "price": 3.8433,
+      "price": 3.8508,
       "edge_adj": 0.0479,
-      "ev_net": 0.0484,
-      "stake": 67.16,
+      "ev_net": 0.0489,
+      "stake": 67.82,
       "action_label": "ADD",
       "ages": {
         "model_secs": 1,
@@ -257,13 +257,13 @@
       "market": "1X2",
       "selection": "away",
       "team": "Morocco",
-      "model_prob": 0.1659,
-      "price": 6.9653,
-      "edge": 0.0223,
-      "ev_net": 0.1557,
+      "model_prob": 0.1617,
+      "price": 7.1158,
+      "edge": 0.0212,
+      "ev_net": 0.151,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "model_prob 17% < floor 20%",
+      "withheld_reason": "model_prob 16% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
@@ -275,13 +275,31 @@
       "market": "1X2",
       "selection": "away",
       "team": "Belgium",
-      "model_prob": 0.1801,
-      "price": 6.2247,
-      "edge": 0.0194,
-      "ev_net": 0.1209,
+      "model_prob": 0.1821,
+      "price": 6.0836,
+      "edge": 0.0178,
+      "ev_net": 0.1081,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 18% < floor 20%",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "argentina_vs_switzerland_away_1x2",
+      "fixture": "Argentina vs Switzerland",
+      "kickoff": "2026-07-12 01:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "away",
+      "team": "Switzerland",
+      "model_prob": 0.17,
+      "price": 6.0401,
+      "edge": 0.0044,
+      "ev_net": 0.0267,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "model_prob 17% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
@@ -399,6 +417,21 @@
       "ev_net": 0.0619,
       "stake": 0.0,
       "withheld_reason": "model-prob longshot (13% < 25%) \u2014 no cash (free-bet/lottery only)"
+    },
+    {
+      "id": "morocco_final_pm",
+      "team": "Morocco",
+      "group": "C",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1038,
+      "pm_price": 0.0785,
+      "ev_net": 0.0231,
+      "stake": 0.0,
+      "withheld_reason": "model-prob longshot (10% < 25%) \u2014 no cash (free-bet/lottery only)"
     }
   ]
 }
