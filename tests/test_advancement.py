@@ -6,6 +6,7 @@ matching logic is fed hand-built event fixtures (including name variants).
 """
 from __future__ import annotations
 
+import json
 import math
 import os
 from typing import Dict, List
@@ -28,6 +29,8 @@ from wca.advancement import (
     _no_ask,
     _yes_mid,
     compare_to_polymarket,
+    knockout_state_staleness,
+    load_played_knockout_results,
     make_prob_fn,
     pm_taker_fee,
 )
@@ -271,11 +274,35 @@ def test_make_prob_fn_falls_back_without_market(tiny_models):
         tiny_models,
         weights=BlendWeights(elo=0.5, dc=0.5, market=0.0),
     )
-    # Knockout pairings are generated and have no tradable 1X2 market, so even
-    # a market-only requested blend must fall back deterministically to Elo+DC.
-    assert market_only("Mexico", "South Africa", True) == pytest.approx(
-        model_only("Mexico", "South Africa", True)
+    # Pairings with no tradable 1X2 market (here: Canada/Qatar is not in the
+    # odds frame) must fall back deterministically to Elo+DC — group AND
+    # knockout alike.
+    for knockout in (False, True):
+        assert market_only("Canada", "Qatar", knockout) == pytest.approx(
+            model_only("Canada", "Qatar", knockout)
+        )
+
+
+def test_make_prob_fn_market_anchors_knockout_pairs(tiny_models):
+    """Regression (2026-07-08): KO fixtures with a live 1X2 book must be anchored.
+
+    ``make_prob_fn`` used to hard-drop the market for every ``knockout=True``
+    call, so the ENTIRE post-group sim ran on the Elo/DC fallback even when the
+    R16/QF pairing had a complete tradable book — measured worse than the blend
+    on the played KO ties. The 90' 1X2 consensus is exactly what the simulator
+    needs (its ET/pens model resolves draws downstream).
+    """
+    odds_df = _odds_df_fixture()
+    expected = _market_consensus_lookup(odds_df)[("Mexico", "South Africa")]
+    prob_fn = make_prob_fn(
+        tiny_models,
+        odds_df=odds_df,
+        weights=BlendWeights(elo=0.0, dc=0.0, market=1.0),
     )
+    assert prob_fn("Mexico", "South Africa", True) == pytest.approx(expected)
+    # Both orientations of the pair key resolve to the same (swapped) market.
+    rev_expected = (expected[2], expected[1], expected[0])
+    assert prob_fn("South Africa", "Mexico", True) == pytest.approx(rev_expected)
 
 
 # ---------------------------------------------------------------------------
@@ -446,6 +473,28 @@ def test_pm_stage_event_titles_cover_all_stages():
     assert set(PM_STAGE_EVENTS.values()) == {"R32", "R16", "QF", "SF", "F", "win"}
 
 
+def test_compare_drops_resolved_markets():
+    """Regression (2026-07-08): YES quotes pinned at >=0.98 / <=0.02 are RESOLVED.
+
+    A settled market has no tradable edge — a sim conditioned on lagging
+    results 'disagrees' with the 0.99 quote and used to size the phantom.
+    Only the genuinely live quote may survive the comparison.
+    """
+    sim_df = _sim_df_fixture()
+    pm_events = [
+        {
+            "title": "World Cup: Nation To Reach Round of 16",
+            "markets": [
+                _mkt("USA", 0.985, 0.995),     # resolved YES (~0.99) -> dropped
+                _mkt("DR Congo", 0.005, 0.015),  # resolved NO (~0.01) -> dropped
+                _mkt("Turkiye", 0.34, 0.36),   # live -> kept
+            ],
+        }
+    ]
+    out = compare_to_polymarket(sim_df, pm_events)
+    assert set(out["team"]) == {"Turkey"}
+
+
 def test_compare_matches_titles_with_surrounding_whitespace():
     """Live Polymarket titles can carry trailing/leading spaces.
 
@@ -467,3 +516,192 @@ def test_compare_matches_titles_with_surrounding_whitespace():
     # Mexico sim win = 0.02 -> NO side pays with prob 0.98, bought ~0.95.
     assert row["side"] == "NO"
     assert row["sim_prob"] == pytest.approx(0.98)
+
+
+# ---------------------------------------------------------------------------
+# Knockout pinning: freshest-results union + drawn-tie resolution.
+# ---------------------------------------------------------------------------
+
+_EMPTY_SHOOTOUTS = pd.DataFrame(
+    columns=["date", "home_team", "away_team", "winner"]
+)
+
+
+def _ko_csv(tmp_path, rows) -> str:
+    """Minimal cleaned-results CSV; rows = (date, home, away, hs, as) tuples.
+
+    ``None`` scores model the 1-3 day results-CSV lag (a scheduled/unrecorded
+    fixture row, exactly how martj42 carries the future KO bracket).
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "date": d, "home_team": h, "away_team": a,
+                "home_score": hs, "away_score": as_,
+                "tournament": "FIFA World Cup", "city": "X",
+                "country": "Y", "neutral": True,
+            }
+            for d, h, a, hs, as_ in rows
+        ]
+    )
+    path = tmp_path / "results.csv"
+    df.to_csv(path, index=False)
+    return str(path)
+
+
+def _results_json(tmp_path, rows) -> str:
+    """Freshest-feed JSON (data/processed/wc2026_results.json schema)."""
+    path = tmp_path / "wc2026_results.json"
+    path.write_text(json.dumps({"results": rows}), encoding="utf-8")
+    return str(path)
+
+
+def test_ko_pinning_unions_freshest_results_json(tmp_path):
+    """Regression (2026-07-08): a played tie in results.json but NA in the CSV
+    must be pinned — the lagging CSV alone published USA P(QF)=0.317 after its
+    Jul-6 elimination."""
+    csv = _ko_csv(
+        tmp_path,
+        [("2026-07-06", "United States", "Belgium", None, None)],  # CSV lag
+    )
+    rj = _results_json(
+        tmp_path,
+        [{"date": "2026-07-06", "fixture": "United States vs Belgium",
+          "score": "1-4", "outcome": "away",
+          "kickoff_utc": "2026-07-07T00:00:00Z"}],
+    )
+    out = load_played_knockout_results(
+        results_path=csv, shootouts_df=_EMPTY_SHOOTOUTS, results_json_path=rj
+    )
+    assert out == {frozenset(("United States", "Belgium")): "Belgium"}
+
+
+def test_ko_pinning_csv_only_still_works(tmp_path):
+    csv = _ko_csv(tmp_path, [("2026-07-06", "United States", "Belgium", 1, 4)])
+    rj = str(tmp_path / "missing.json")  # freshest feed absent -> CSV alone
+    out = load_played_knockout_results(
+        results_path=csv, shootouts_df=_EMPTY_SHOOTOUTS, results_json_path=rj
+    )
+    assert out == {frozenset(("United States", "Belgium")): "Belgium"}
+
+
+def test_ko_pinning_drawn_tie_uses_results_json_outcome(tmp_path):
+    """Regression (2026-07-08, the Egypt failure mode): a drawn KO tie whose
+    shootout row is missing must still pin when the freshest feed's ``outcome``
+    names the advancing side — Egypt showed P(R16)=0.4708 after WINNING its
+    Jul-3 shootout because the drawn tie was silently skipped. (The current
+    builder emits ``draw`` for drawn ties, so this fallback is dormant today;
+    the schema is exercised here so a side-marking feed pins without a code
+    change.)"""
+    csv = _ko_csv(tmp_path, [("2026-07-03", "Australia", "Egypt", 1, 1)])
+    rj = _results_json(
+        tmp_path,
+        [{"date": "2026-07-03", "fixture": "Australia vs Egypt",
+          "score": "1-1", "outcome": "away"}],  # advancing side: Egypt
+    )
+    out = load_played_knockout_results(
+        results_path=csv, shootouts_df=_EMPTY_SHOOTOUTS, results_json_path=rj
+    )
+    assert out == {frozenset(("Australia", "Egypt")): "Egypt"}
+
+
+def test_ko_pinning_drawn_tie_without_winner_evidence_is_skipped(tmp_path):
+    """A drawn tie with NO shootout row and NO advancing-side marker stays
+    unpinned — the loader must never invent a winner (the state-freshness gate
+    withholds the teams instead)."""
+    csv = _ko_csv(tmp_path, [("2026-07-03", "Australia", "Egypt", 1, 1)])
+    rj = _results_json(
+        tmp_path,
+        [{"date": "2026-07-03", "fixture": "Australia vs Egypt",
+          "score": "1-1", "outcome": "draw"}],  # 90' outcome only
+    )
+    out = load_played_knockout_results(
+        results_path=csv, shootouts_df=_EMPTY_SHOOTOUTS, results_json_path=rj
+    )
+    assert out == {}
+
+
+def test_ko_pinning_drawn_tie_prefers_shootout_record(tmp_path):
+    """The recorded shootout is the primary source for a drawn tie; the
+    freshest feed's outcome marker is only the fallback."""
+    csv = _ko_csv(tmp_path, [("2026-07-03", "Australia", "Egypt", 1, 1)])
+    rj = _results_json(
+        tmp_path,
+        [{"date": "2026-07-03", "fixture": "Australia vs Egypt",
+          "score": "1-1", "outcome": "away"}],
+    )
+    shootouts = pd.DataFrame(
+        [{"date": pd.Timestamp("2026-07-03"), "home_team": "Australia",
+          "away_team": "Egypt", "winner": "Egypt"}]
+    )
+    out = load_played_knockout_results(
+        results_path=csv, shootouts_df=shootouts, results_json_path=rj
+    )
+    assert out == {frozenset(("Australia", "Egypt")): "Egypt"}
+
+
+# ---------------------------------------------------------------------------
+# State-freshness gate: kicked-off-but-unpinned ties flag their teams.
+# ---------------------------------------------------------------------------
+
+_NOW = pd.Timestamp("2026-07-08T12:00:00")
+
+
+def test_state_staleness_flags_unpinned_played_tie(tmp_path):
+    """A played KO tie missing from the sim's conditioning set makes BOTH
+    participants state-stale (drawn-unpinnable Egypt case)."""
+    csv = _ko_csv(tmp_path, [("2026-07-03", "Australia", "Egypt", 1, 1)])
+    rj = str(tmp_path / "missing.json")
+    flags = knockout_state_staleness(
+        {}, results_path=csv, results_json_path=rj, now=_NOW
+    )
+    assert set(flags) == {"Australia", "Egypt"}
+    assert "state-stale" in flags["Egypt"]
+    assert "Australia vs Egypt" in flags["Egypt"]
+
+
+def test_state_staleness_flags_pastdated_na_row(tmp_path):
+    """CSV-lag case: a scheduled row (NA score) dated strictly before today has
+    kicked off — if unpinned, its teams are stale (USA post-elimination case)."""
+    csv = _ko_csv(
+        tmp_path,
+        [
+            ("2026-07-06", "United States", "Belgium", None, None),  # lagging
+            ("2026-07-09", "France", "Morocco", None, None),         # future
+            ("2026-07-08", "Norway", "England", None, None),         # today: no
+        ],
+    )
+    rj = str(tmp_path / "missing.json")
+    flags = knockout_state_staleness(
+        {}, results_path=csv, results_json_path=rj, now=_NOW
+    )
+    assert set(flags) == {"United States", "Belgium"}
+
+
+def test_state_staleness_respects_pinned_set_and_json_rows(tmp_path):
+    """Pinned ties never flag; a played row known only to the freshest JSON
+    feed still flags when unpinned."""
+    csv = _ko_csv(tmp_path, [("2026-07-06", "United States", "Belgium", 1, 4)])
+    rj = _results_json(
+        tmp_path,
+        [{"date": "2026-07-07", "fixture": "Argentina vs Egypt",
+          "score": "3-2", "outcome": "home",
+          "kickoff_utc": "2026-07-07T16:00:00Z"}],
+    )
+    pinned = {frozenset(("United States", "Belgium")): "Belgium"}
+    flags = knockout_state_staleness(
+        pinned, results_path=csv, results_json_path=rj, now=_NOW
+    )
+    # The pinned CSV tie is settled; the JSON-only Argentina tie is not.
+    assert set(flags) == {"Argentina", "Egypt"}
+
+
+def test_state_staleness_unknown_pins_fail_closed(tmp_path):
+    """``pinned=None`` (legacy cache, sim conditioning unknown) is treated as
+    empty — fail closed, never fail actionable."""
+    csv = _ko_csv(tmp_path, [("2026-07-06", "United States", "Belgium", 1, 4)])
+    rj = str(tmp_path / "missing.json")
+    flags = knockout_state_staleness(
+        None, results_path=csv, results_json_path=rj, now=_NOW
+    )
+    assert set(flags) == {"United States", "Belgium"}
