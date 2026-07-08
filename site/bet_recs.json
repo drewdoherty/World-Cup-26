@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-08 01:44:01 UTC",
+    "generated": "2026-07-08 02:18:41 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 761,
+      "model_secs": 649,
       "advancement_secs": 1,
       "price_secs": null,
-      "promo_secs": 51250,
+      "promo_secs": 53330,
       "exposure_secs": null
     },
     "coverage": {
@@ -51,7 +51,7 @@
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
     "actionable_count": 5,
-    "withheld_count": 12
+    "withheld_count": 11
   },
   "match_singles": [],
   "event_props": [],
@@ -257,10 +257,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Morocco",
-      "model_prob": 0.1656,
-      "price": 6.9632,
-      "edge": 0.022,
-      "ev_net": 0.1529,
+      "model_prob": 0.1657,
+      "price": 6.956,
+      "edge": 0.0219,
+      "ev_net": 0.1524,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 17% < floor 20%",
@@ -293,10 +293,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Switzerland",
-      "model_prob": 0.1717,
-      "price": 5.8423,
-      "edge": 0.0005,
-      "ev_net": 0.003,
+      "model_prob": 0.1714,
+      "price": 5.8601,
+      "edge": 0.0007,
+      "ev_net": 0.0043,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 17% < floor 20%",
@@ -383,8 +383,8 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.1853,
-      "pm_price": 0.1585,
-      "ev_net": 0.0228,
+      "pm_price": 0.1575,
+      "ev_net": 0.0238,
       "stake": 0.0,
       "withheld_reason": "model-prob longshot (19% < 25%) \u2014 no cash (free-bet/lottery only)"
     },
@@ -398,8 +398,8 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.0565,
-      "pm_price": 0.0245,
-      "ev_net": 0.0313,
+      "pm_price": 0.0235,
+      "ev_net": 0.0323,
       "stake": 0.0,
       "withheld_reason": "model-prob longshot (6% < 25%) \u2014 no cash (free-bet/lottery only)"
     },
@@ -417,21 +417,6 @@
       "ev_net": 0.0609,
       "stake": 0.0,
       "withheld_reason": "model-prob longshot (13% < 25%) \u2014 no cash (free-bet/lottery only)"
-    },
-    {
-      "id": "colombia_win_pm",
-      "team": "Colombia",
-      "group": "K",
-      "stage": "win",
-      "market": "advancement",
-      "selection": "reach_win",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.0481,
-      "pm_price": 0.0005,
-      "ev_net": 0.0476,
-      "stake": 0.0,
-      "withheld_reason": "model-prob longshot (5% < 25%) \u2014 no cash (free-bet/lottery only)"
     }
   ]
 }
