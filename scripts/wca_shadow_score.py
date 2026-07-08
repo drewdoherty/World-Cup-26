@@ -9,8 +9,12 @@ For every shadow family present it computes paired Brier + log-loss against the
 deployed blend, with n, bootstrap 90% CIs on the paired diff, a group/knockout
 split, and a PROMOTE / KILL / COLLECTING decision (n>=30 gate). The 1X2 shadows
 (``mw90`` / ``shrink``) are recomputed over ALL historical settled fixtures; the
-goal-lambda shadows (``gb`` / ``tl``) settle a total-goals over/under market
-only where their lambdas were logged.
+goal-lambda shadow families are DISCOVERED dynamically from whatever
+``<prefix>_lambda_home`` / ``<prefix>_lambda_away`` (or ``..._blend_home/away``)
+keys are actually present in the log (currently ``gb`` and ``tl`` — a future
+dual-write is picked up automatically, no code change needed) and each settles
+a total-goals over/under market plus a BTTS Brier and mean signed goal-lambda
+bias, only where their lambdas were logged.
 
 Idempotent and fast (<30s) — trivially cronable. NOTE: registering it as a
 launchd job on the Mac mini is a human step (``bash deploy/macmini/install.sh``
@@ -120,6 +124,23 @@ def render_print(scoreboard: Mapping[str, Any]) -> str:
                 r["decision"],
             )
         )
+        btts = r.get("btts")
+        bias = r.get("goal_bias")
+        if btts is not None or bias is not None:
+            btts_ci = (
+                "[%s,%s]" % (_fmt(btts["brier_ci_lo"], 3), _fmt(btts["brier_ci_hi"], 3))
+                if btts else "   -   "
+            )
+            lines.append(
+                "         %-7s %4s  btts_brierΔ=%s ci=%-19s  bias(shadow/live)=%s/%s"
+                % (
+                    "btts/bias", (btts["n"] if btts else "-"),
+                    _fmt(btts["brier_diff"], 4) if btts else "   -   ",
+                    btts_ci,
+                    _fmt(bias["mean_shadow"], 3) if bias else "   -   ",
+                    _fmt(bias["mean_live"], 3) if bias else "   -   ",
+                )
+            )
     return "\n".join(lines)
 
 
