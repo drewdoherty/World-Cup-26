@@ -96,7 +96,17 @@ def _run_sim():
 
 
 def _pm_by_team_stage(sim_df):
-    """``{team: {stage: {pm, edge_adj}}}`` from the live Polymarket markets."""
+    """``{team: {stage: {pm, edge_adj, side, ask}}}`` from the live PM markets.
+
+    ``pm`` is the YES mid; ``edge_adj`` is the fee-adjusted edge of whichever
+    side (YES/NO) the sim favours — so ``side`` names that side explicitly and
+    ``ask`` is the executable buy price of that side that ``edge_adj`` was
+    computed against (``AdvancementEdge.pm_price``). Without ``side`` a
+    consumer must re-derive it from sign(model - mid), which mis-attributes
+    against a stale-print mid (the Edge Desk's HIGH-2
+    ``side_attribution_uncertain`` guard existed for exactly that) — emit it
+    at the source instead. Additive fields: pm/edge_adj are unchanged.
+    """
     try:
         pm_events = polymarket.find_world_cup_markets(include_closed=False)
         edges = adv.compare_to_polymarket(sim_df, pm_events)
@@ -113,6 +123,8 @@ def _pm_by_team_stage(sim_df):
         out.setdefault(str(e["team"]), {})[st] = {
             "pm": round(float(e["pm_yes_mid"]), 4),
             "edge_adj": round(float(e["fee_adj_edge"]), 4),
+            "side": str(e["side"]),
+            "ask": round(float(e["pm_price"]), 4),
         }
     return out, int(len(edges))
 

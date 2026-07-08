@@ -2477,12 +2477,96 @@ def handle_today(db_path: str = "data/wca.db",
     return "\n".join(lines)
 
 
-def handle_pm(db_path: str) -> str:
+# SHADOW-only edge-desk feed shown (read-only) at the bottom of /pm.
+EDGE_DESK_PATH = "site/advancement_edge_desk.json"
+EDGE_DESK_MAX_AGE_HOURS = 6.0
+_EDGE_DESK_MAX_ROWS = 8
+
+
+def _edge_desk_section(path: str = EDGE_DESK_PATH,
+                       now: Optional[datetime] = None) -> List[str]:
+    """Read-only 'EDGE DESK (SHADOW)' lines for /pm from the committed feed.
+
+    STRICTLY non-executable: no ``PM-<n>`` tokens, no Y-able ids — every row
+    is labelled ``shadow`` and the CLV-blocker caveat rides on the section
+    (live-money gate: no price capture + CLV stamping = no real money).
+    Renders SHADOW_ADD rows in FEED ORDER (the feed is pre-sorted
+    moneyline→mid→longshot, further-out stage first — never re-sorted here)
+    plus a count of the non-SHADOW verdicts. A missing or stale (>6h) feed
+    yields one honest line, never an error.
+    """
+    import json as _json
+
+    header = "*EDGE DESK (SHADOW)* — read-only, nothing here is placeable"
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            feed = _json.load(fh)
+    except Exception:
+        return ["", header,
+                "  _feed missing (%s) — scripts/wca_edge_desk.py writes it_"
+                % path]
+
+    meta = feed.get("meta") or {}
+    age_h = None
+    try:
+        g = str(meta.get("generated_at") or "")
+        g = g.replace(" UTC", "").replace("Z", "")[:19]
+        fmt = "%Y-%m-%dT%H:%M:%S" if "T" in g else "%Y-%m-%d %H:%M:%S"
+        ref = (now or datetime.now(timezone.utc)).replace(tzinfo=None)
+        age_h = (ref - datetime.strptime(g, fmt)).total_seconds() / 3600.0
+    except Exception:
+        age_h = None
+    # Fail closed: unparseable, stale (>6h) AND future-dated (beyond 15-min
+    # clock skew) stamps all hide the rows behind one honest line.
+    if age_h is None or age_h > EDGE_DESK_MAX_AGE_HOURS or age_h < -0.25:
+        age_txt = ("age unknown" if age_h is None
+                   else "future-dated stamp — fail closed" if age_h < 0
+                   else "%.1fh old > %.0fh" % (age_h, EDGE_DESK_MAX_AGE_HOURS))
+        return ["", header,
+                "  _feed stale (%s) — not shown; rebuild scripts/wca_edge_desk.py_"
+                % age_txt]
+
+    lines = ["", header]
+    rows = feed.get("rows") or []
+    shadow = [r for r in rows if r.get("verdict") == "SHADOW_ADD"]
+    # Feed order is already bucket-grouped (moneylines → mid → longshots),
+    # further-out stage first — render as-is, bucket tag shown per row.
+    for r in shadow[:_EDGE_DESK_MAX_ROWS]:
+        try:
+            model_c = "%.0f" % (float(r.get("model_prob")) * 100.0)
+            pm_c = "%.0f" % (float(r.get("pm_price")) * 100.0)
+            edge_c = "%+.1f" % (float(r.get("edge_adj")) * 100.0)
+        except (TypeError, ValueError):
+            model_c = pm_c = "?"
+            edge_c = "?"
+        settle = ("settles on group stage" if r.get("stage") == "group_winner"
+                  else "incl. ET+pens")
+        lines.append(
+            "  shadow [%s] %s %s — model %s¢ / PM %s¢, edge %s¢ — %s"
+            % (str(r.get("bucket", "?")).upper(), r.get("team", "?"),
+               r.get("stage", "?"), model_c, pm_c, edge_c, settle))
+    if not shadow:
+        lines.append("  _no SHADOW_ADD rows in the current feed_")
+    counts = meta.get("n_by_verdict") or {}
+    lines.append("  watch %s · withhold %s · do-not-trade %s (full desk: %s)"
+                 % (counts.get("WATCH", "?"), counts.get("WITHHOLD", "?"),
+                    counts.get("DO_NOT_TRADE", "?"), path))
+    lines.append(
+        "  _shadow-only: advancement price/CLV capture missing — live money "
+        "BLOCKED (live-money gate). Feed %.1fh old; freshness %s._"
+        % (age_h, "PASS" if (feed.get("freshness") or {}).get("pass")
+           else "FAIL"))
+    return lines
+
+
+def handle_pm(db_path: str, edge_desk_path: str = EDGE_DESK_PATH) -> str:
     """`/pm` — parked Polymarket orders + trader status (configured? dry-run?).
 
     Shows the in-process parked-order queue, whether a private key is
-    configured, the dry-run flag, and today's Polymarket spend if a
-    ``pm_order_log`` table exists in the ledger.
+    configured, the dry-run flag, today's Polymarket spend if a
+    ``pm_order_log`` table exists in the ledger, and — read-only, explicitly
+    non-executable — the SHADOW edge-desk labels from
+    ``site/advancement_edge_desk.json`` when that feed is fresh (<6h).
     """
     lines = ["\U0001f4c8 *Polymarket*"]
 
@@ -2516,6 +2600,7 @@ def handle_pm(db_path: str) -> str:
     else:
         lines.append("")
         lines.append("No parked orders.")
+    lines.extend(_edge_desk_section(edge_desk_path))
     return "\n".join(lines)
 
 

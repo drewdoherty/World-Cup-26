@@ -103,6 +103,7 @@ analogue for advancement). "Cash floor" = `longshot_no_cash` gates the stake.
 | Player props CLI | `scripts/wca_player_props.py` | ✅ | — | flag (`†`) | Scorer props are structurally <25c → decision-support/no-cash. |
 | Betbuilder CLI | `scripts/wca_betbuilder.py` | — | ✅ | (no stakes) | Fixtures sorted further-out BEFORE `--max-fixtures` truncation. |
 | Advancement matrix (client) | `site/adv_edge_matrix.js` | ✅ | ✅ (stage depth) | ✅ | Drives off the server-computed `bucket` tag; greys/flags <25c cells; `advKelly` returns 0 on <25c. |
+| Edge desk (SHADOW) | `scripts/wca_edge_desk.py` | ✅ | ✅ (stage depth) | ✅ (longshots capped at WATCH) | SHADOW-only decision feed, no stakes; imports `prob_bucket`/`PROB_BUCKETS`/`longshot_no_cash`/`LONGSHOT_PROB`; consumers render feed order. |
 
 ### Exempt (deliberately NOT wired)
 

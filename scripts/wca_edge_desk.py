@@ -32,6 +32,11 @@ Hard rules encoded here (do not regress):
   ``settlement_basis`` ("PM advancement includes ET+pens; 1X2 is 90 minutes
   only") and every embedded 90-minute number (knockout-context splits,
   related /pm ideas, withheld 1X2 near-misses) is tagged ``1X2_90min``.
+* Traded side: the feed's explicit ``pm[stage].side`` is preferred when
+  present (``side_source: "feed"``); for pre-side feeds the side is derived
+  from sign(model - mid) and VERIFIED — an ``edge_adj`` the quoted mid cannot
+  justify caps the row at WATCH (``side_attribution_uncertain``,
+  ``side_source: "derived"``).
 * Every numeric field is copied from a named source-feed field (``*_source``
   strings); when an input is missing the field is ``null`` plus a reason —
   never a guess. Aggregates state their n. No fabricated joins: wallet
@@ -79,32 +84,36 @@ if _SRC not in sys.path:
 # mode in the pipeline (see src/wca/data/teamnames.py).
 from wca.data.teamnames import canonical  # noqa: E402
 
+# Canonical selection rule, IMPORTED from src/wca/selection.py — the ONE place
+# the rule lives (human-approved-change file; CLAUDE.md selection rules).
+# moneyline >=50c > mid 25-50c > longshot <25c; strict <25c cash floor. This
+# closes the PR #170 follow-up that replicated the thresholds while the
+# selection-module PR (#171) was still concurrent. wca.selection is light
+# (stdlib-only at import; pandas is lazy inside hours_out), so the desk stays
+# a no-heavy-deps offline script.
+from wca.selection import (  # noqa: E402
+    LONGSHOT_PROB,
+    PROB_BUCKETS,
+    longshot_no_cash,
+    prob_bucket,
+)
+
+# Edge gate threshold: betrecs' live actionable-rec threshold (2pp
+# fee-adjusted), IMPORTED from its defining module (scripts/wca_betrecs.py is
+# import-light: stdlib + wca.markets.bankroll + wca.selection, no pandas).
+# Rows with 0 < edge <= MIN_EDGE_ADJ are near-threshold: informative, WATCH
+# only. There is no shared constants home for MIN_EDGE beyond betrecs itself —
+# importing beats replicating; inventing a new location is out of scope.
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
+from wca_betrecs import MIN_EDGE as MIN_EDGE_ADJ  # noqa: E402
+
 SCHEMA_VERSION = 2
 
-# Canonical selection-rule buckets, REPLICATED VERBATIM from
-# scripts/wca_pm_propose.py::PROB_BUCKETS (moneyline >=50c > mid 25-50c >
-# longshot <25c; CLAUDE.md selection rules). Replicated rather than imported
-# because a concurrent PR introduces src/wca/selection.py as the shared home
-# for these thresholds and this branch must not touch the wca_pm_propose code
-# path. FOLLOW-UP (tracked in the PR body): switch to
-# ``from wca.selection import prob_bucket`` once that module lands on main.
-PROB_BUCKETS = ((0.50, "moneyline"), (0.25, "mid"), (0.0, "longshot"))
-_BUCKET_RANK = {"moneyline": 0, "mid": 1, "longshot": 2}
-
-
-def prob_bucket(model_prob):
-    """'moneyline' (>=50c) / 'mid' (25-50c) / 'longshot' (<25c)."""
-    prob = float(model_prob or 0.0)
-    for lo, name in PROB_BUCKETS:
-        if prob >= lo:
-            return name
-    return "longshot"
-
-
-# Edge gate threshold, REPLICATED from scripts/wca_betrecs.py::MIN_EDGE — the
-# current live threshold for actionable recs (2pp fee-adjusted). Rows with
-# 0 < edge <= MIN_EDGE_ADJ are near-threshold: informative, WATCH only.
-MIN_EDGE_ADJ = 0.02
+# Bucket display rank derived from the canonical PROB_BUCKETS ordering
+# (moneyline 0 > mid 1 > longshot 2); unknown/None buckets sort last (rank 3
+# supplied at the call site).
+_BUCKET_RANK = {name: rank for rank, (_lo, name) in enumerate(PROB_BUCKETS)}
 
 # Polymarket sports taker-fee coefficient, REPLICATED from
 # src/wca/advancement.py::pm_taker_fee (fee per share = 0.03 * p * (1 - p);
@@ -372,10 +381,15 @@ def _gate(passed, reason=None, note=None):
 def _side_attribution(model_prob, pm_price, edge_adj):
     """Derive the traded side and verify the attribution is defensible.
 
-    ``advancement_data`` emits the BETTER-SIDE (YES or NO, ask-based)
-    fee-adjusted edge as ``edge_adj`` but drops the side column
-    (wca.advancement.AdvancementEdge keeps it; _pm_by_team_stage doesn't emit
-    it), and its ``pm`` value is the YES mid — which silently falls back to
+    FALLBACK ONLY for pre-side feeds: advancement_data emits an explicit
+    ``side`` (+ executable ``ask``) per pm entry since 2026-07-07 and the
+    build loop prefers it (``side_source: "feed"``); this derivation runs
+    only when that field is absent (``side_source: "derived"``).
+
+    Older ``advancement_data`` builds emit the BETTER-SIDE (YES or NO,
+    ask-based) fee-adjusted edge as ``edge_adj`` but drop the side column
+    (wca.advancement.AdvancementEdge keeps it; _pm_by_team_stage didn't emit
+    it), and the ``pm`` value is the YES mid — which silently falls back to
     the stale last print (priceMap) when bestBid/bestAsk are missing. The desk
     re-implies side = YES iff model >= pm, but that attribution can be WRONG
     against a stale-print "mid" (concrete: priceMap Yes=0.50 stale,
@@ -391,8 +405,7 @@ def _side_attribution(model_prob, pm_price, edge_adj):
     ``mid_edge <= 0`` OR ``edge_adj`` exceeds ``mid_edge`` by more than
     SIDE_ATTRIBUTION_EPS, the buy price behind edge_adj diverges from the
     quote beyond the fee band -> attribution is UNCERTAIN and the row is
-    capped at WATCH (never SHADOW_ADD). Long-term fix (PR follow-up):
-    advancement_data should emit ``side`` + price basis.
+    capped at WATCH (never SHADOW_ADD).
     """
     side = "YES" if model_prob >= pm_price else "NO"
     position_prob = round(model_prob if side == "YES" else 1.0 - model_prob, 4)
@@ -756,9 +769,9 @@ def _bet_rec_block(br):
 
 
 def _build_adv_row(team, team_row, stage, *, origin, model_prob, pm_price,
-                   edge_adj, pm_src, edge_src, side_info, br, advancement,
-                   scores_markets, pm_ideas, orderflow, flow_baseline,
-                   freshness):
+                   edge_adj, pm_src, edge_src, side_info, side_source, br,
+                   advancement, scores_markets, pm_ideas, orderflow,
+                   flow_baseline, freshness):
     side, position_prob, side_confidence, side_reason = side_info
     bucket = prob_bucket(position_prob if position_prob is not None
                          else model_prob)
@@ -804,10 +817,12 @@ def _build_adv_row(team, team_row, stage, *, origin, model_prob, pm_price,
     gates["side_attribution"] = _gate(side_confidence != "uncertain",
                                       side_reason)
     gates["min_prob_cash"] = _gate(
-        bucket != "longshot",
-        "longshot_no_cash: position pays out at model %s < 25%% — no cash on "
+        not longshot_no_cash(position_prob if position_prob is not None
+                             else model_prob),
+        "longshot_no_cash: position pays out at model %s < %.0f%% — no cash on "
         "longshots (likely-PnL rule; 0-for-12 in backtests)"
-        % ("%.0f%%" % (position_prob * 100) if position_prob is not None else "?"))
+        % ("%.0f%%" % (position_prob * 100) if position_prob is not None
+           else "?", LONGSHOT_PROB * 100))
     gates["clv_history"] = _gate(False, CLV_BLOCKER_REASON)
 
     if decided:
@@ -851,7 +866,10 @@ def _build_adv_row(team, team_row, stage, *, origin, model_prob, pm_price,
         "edge_source": edge_src,
         "side": side,
         "side_confidence": side_confidence,
-        "side_note": (side_reason if side_confidence == "uncertain" else
+        "side_source": side_source,
+        "side_note": ("explicit side emitted by advancement_data "
+                      "(pm[stage].side)" if side_source == "feed" else
+                      side_reason if side_confidence == "uncertain" else
                       "explicit YES buy from bet_recs"
                       if side_confidence == "explicit"
                       else "derived from sign(model - pm_yes_mid): "
@@ -914,10 +932,12 @@ def _build_withheld_row(w, *, scores_markets, freshness):
                                       "context not applicable"),
         "side_attribution": _gate(True, note="book selection — no PM side to "
                                              "attribute"),
-        "min_prob_cash": _gate(bucket is not None and bucket != "longshot",
-                               "longshot_no_cash: model %s < 25%%"
+        "min_prob_cash": _gate(model_prob is not None
+                               and not longshot_no_cash(model_prob),
+                               "longshot_no_cash: model %s < %.0f%%"
                                % ("%.0f%%" % (model_prob * 100)
-                                  if model_prob is not None else "?")),
+                                  if model_prob is not None else "?",
+                                  LONGSHOT_PROB * 100)),
         "clv_history": _gate(False, CLV_BLOCKER_REASON),
     }
     return {
@@ -949,6 +969,7 @@ def _build_withheld_row(w, *, scores_markets, freshness):
         "ev_net": w.get("ev_net"),
         "side": None,
         "side_confidence": None,
+        "side_source": None,
         "side_note": None,
         "position_prob": model_prob,
         "position_prob_source": "= model_prob (book selection)",
@@ -1072,17 +1093,36 @@ def build_feed(advancement, bet_recs, pm_ideas, orderflow, scores_markets, *,
             pm_price = quote.get("pm")
             edge_adj = quote.get("edge_adj")
             br = bet_rec_idx.get((team, stage))
-            side_info = _side_attribution(prob, pm_price, edge_adj)
+            # Prefer the feed's EXPLICIT traded side (advancement_data emits
+            # ``side: "YES"|"NO"`` per pm entry since 2026-07-07) — no
+            # derivation, no stale-print ambiguity. The sign-derivation +
+            # uncertainty guard below survives ONLY as the fallback for
+            # pre-side feeds (anything else, incl. malformed values, falls
+            # back and is verified rather than trusted).
+            feed_side = quote.get("side")
+            if feed_side in ("YES", "NO"):
+                side_source = "feed"
+                side_info = (feed_side,
+                             round(prob if feed_side == "YES"
+                                   else 1.0 - prob, 4),
+                             "explicit", None)
+                edge_src = ("advancement_data.teams[%s].pm[%s].edge_adj "
+                            "(fee-adjusted edge of the feed-emitted side)"
+                            % (team, stage))
+            else:
+                side_source = "derived"
+                side_info = _side_attribution(prob, pm_price, edge_adj)
+                edge_src = ("advancement_data.teams[%s].pm[%s].edge_adj "
+                            "(better-side fee-adjusted edge; side NOT emitted "
+                            "by the feed)" % (team, stage))
             seen.add((team, stage))
             rows.append(_build_adv_row(
                 team, team_row, stage, origin="advancement_data",
                 model_prob=prob, pm_price=pm_price, edge_adj=edge_adj,
                 pm_src="advancement_data.teams[%s].pm[%s].pm (YES mid)"
                        % (team, stage),
-                edge_src="advancement_data.teams[%s].pm[%s].edge_adj "
-                         "(better-side fee-adjusted edge; side NOT emitted "
-                         "by the feed)" % (team, stage),
-                side_info=side_info, br=br, **common))
+                edge_src=edge_src,
+                side_info=side_info, side_source=side_source, br=br, **common))
     for (team, stage), br in sorted(bet_rec_idx.items()):
         if (team, stage) in seen:
             continue
@@ -1097,7 +1137,7 @@ def build_feed(advancement, bet_recs, pm_ideas, orderflow, scores_markets, *,
             pm_src="bet_recs.advancement_futures[%s].pm_price" % br.get("id"),
             edge_src="bet_recs.advancement_futures[%s].edge_adj (YES buy)"
                      % br.get("id"),
-            side_info=side_info, br=br, **common))
+            side_info=side_info, side_source="bet_recs", br=br, **common))
 
     n_withheld_excluded = 0
     for w in (bet_recs or {}).get("withheld") or []:
@@ -1128,8 +1168,9 @@ def build_feed(advancement, bet_recs, pm_ideas, orderflow, scores_markets, *,
         caveats.append(
             "side attribution UNCERTAIN on n=%d rows (edge_adj cannot be "
             "justified by the quoted YES mid — likely stale-print fallback); "
-            "capped at WATCH. Durable fix: advancement_data should emit the "
-            "traded side." % uncertain_rows)
+            "capped at WATCH. These rows lack the explicit pm[stage].side "
+            "field (pre-side advancement_data build) — regenerate "
+            "advancement_data where PM is reachable." % uncertain_rows)
 
     return {
         "meta": {
@@ -1156,15 +1197,14 @@ def build_feed(advancement, bet_recs, pm_ideas, orderflow, scores_markets, *,
                    ADV_MODEL_MAX_AGE_S}),
             "edge_gate": {
                 "min_edge_adj": MIN_EDGE_ADJ,
-                "source": "replicated from scripts/wca_betrecs.py MIN_EDGE "
+                "source": "imported from scripts/wca_betrecs.py MIN_EDGE "
                           "(current live actionable threshold)",
             },
             "selection_rule": {
                 "prob_buckets": [list(b) for b in PROB_BUCKETS],
-                "source": "replicated verbatim from scripts/wca_pm_propose.py "
-                          "PROB_BUCKETS",
-                "follow_up": "switch to the wca.selection import once the "
-                             "concurrent selection-module PR lands on main",
+                "source": "imported from wca.selection (src/wca/selection.py "
+                          "— canonical selection rule, human-approved-change "
+                          "file)",
             },
             "orderflow_hot": flow_baseline,
             "ordering": ("bucket on the MODEL prob that the position pays out "
