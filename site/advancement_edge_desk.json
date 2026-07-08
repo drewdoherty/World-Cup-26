@@ -12,37 +12,37 @@
     "pass": true,
     "reason": null,
     "source": "site/advancement_data.json",
-    "stamp": "2026-07-07 23:59:35 UTC"
+    "stamp": "2026-07-08 00:34:24 UTC"
    },
    {
-    "age_secs": 0.0,
+    "age_secs": 1.0,
     "max_age_secs": 10800,
     "name": "bet_recs",
     "pass": true,
     "reason": null,
     "source": "site/bet_recs.json",
-    "stamp": "2026-07-07 23:59:36 UTC"
+    "stamp": "2026-07-08 00:34:24 UTC"
    },
    {
-    "age_secs": 70.0,
+    "age_secs": 71.0,
     "max_age_secs": 10800,
     "name": "scores_markets",
     "pass": true,
     "reason": null,
     "source": "site/scores_markets.json",
-    "stamp": "2026-07-07 23:58:26 UTC"
+    "stamp": "2026-07-08 00:33:14 UTC"
    },
    {
-    "age_secs": 2120.0,
+    "age_secs": 2200.0,
     "max_age_secs": 21600,
     "name": "pm_ideas",
     "pass": true,
     "reason": null,
     "source": "site/pm_ideas.json",
-    "stamp": "2026-07-07T23:24:16Z"
+    "stamp": "2026-07-07T23:57:45Z"
    },
    {
-    "age_secs": 1028.5,
+    "age_secs": 3117.5,
     "max_age_secs": 86400,
     "name": "orderflow",
     "pass": true,
@@ -51,7 +51,7 @@
     "stamp": "2026-07-07T23:42:27.453177+00:00"
    },
    {
-    "age_secs": 14796.0,
+    "age_secs": 16885.0,
     "max_age_secs": 50400,
     "name": "advancement_model",
     "pass": true,
@@ -72,7 +72,7 @@
   "pass": true
  },
  "meta": {
-  "advancement_model_age_hours": 4.11,
+  "advancement_model_age_hours": 4.69,
   "advancement_model_generated": "2026-07-07 19:53 UTC",
   "caveats": [
    "SHADOW-ONLY: decision-support feed; no verdict here is a trade instruction and nothing is wired to execution.",
@@ -97,7 +97,7 @@
    "site/pm_ideas.json": 21600,
    "site/scores_markets.json": 10800
   },
-  "generated_at": "2026-07-07T23:59:36Z",
+  "generated_at": "2026-07-08T00:34:25Z",
   "n_advancement_legs_without_pm_quote": 11,
   "n_by_verdict": {
    "DO_NOT_TRADE": 1,
@@ -138,11 +138,11 @@
   "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
   "shadow_only": true,
   "sources": {
-   "site/advancement_data.json": "2026-07-07 23:59:35 UTC",
-   "site/bet_recs.json": "2026-07-07 23:59:36 UTC",
+   "site/advancement_data.json": "2026-07-08 00:34:24 UTC",
+   "site/bet_recs.json": "2026-07-08 00:34:24 UTC",
    "site/microstructure/orderflow.json": "2026-07-07T23:42:27.453177+00:00",
-   "site/pm_ideas.json": "2026-07-07T23:24:16Z",
-   "site/scores_markets.json": "2026-07-07 23:58:26 UTC"
+   "site/pm_ideas.json": "2026-07-07T23:57:45Z",
+   "site/scores_markets.json": "2026-07-08 00:33:14 UTC"
   },
   "verdict_enum": [
    "SHADOW_ADD",
@@ -161,7 +161,7 @@
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.1319,
+   "edge_adj": 0.1329,
    "edge_source": "advancement_data.teams[France].pm[win].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -270,36 +270,13 @@
     "usd": 214278229.21
    },
    "origin": "advancement_data",
-   "pm_price": 0.3305,
+   "pm_price": 0.3315,
    "pm_price_source": "advancement_data.teams[France].pm[win].pm (YES mid)",
    "position_prob": 0.8085,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "mid",
-      "ev_pct": 5.9,
-      "match": "France vs Morocco",
-      "model_c": 26.5,
-      "price_c": 25.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 12.34
-     },
-     {
-      "bucket": "longshot",
-      "ev_pct": 10.2,
-      "match": "France vs Morocco",
-      "model_c": 16.5,
-      "price_c": 15.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 11.26
-     }
-    ],
-    "n": 2,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -316,7 +293,7 @@
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.0293,
+   "edge_adj": 0.0283,
    "edge_source": "advancement_data.teams[Norway].pm[win].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -425,7 +402,7 @@
     "usd": 214278229.21
    },
    "origin": "advancement_data",
-   "pm_price": 0.0605,
+   "pm_price": 0.0595,
    "pm_price_source": "advancement_data.teams[Norway].pm[win].pm (YES mid)",
    "position_prob": 0.971,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -868,31 +845,8 @@
    "position_prob": 0.6507,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "mid",
-      "ev_pct": 5.9,
-      "match": "France vs Morocco",
-      "model_c": 26.5,
-      "price_c": 25.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 12.34
-     },
-     {
-      "bucket": "longshot",
-      "ev_pct": 10.2,
-      "match": "France vs Morocco",
-      "model_c": 16.5,
-      "price_c": 15.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 11.26
-     }
-    ],
-    "n": 2,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -909,7 +863,7 @@
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.0876,
+   "edge_adj": 0.0776,
    "edge_source": "advancement_data.teams[Argentina].pm[Final].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -1038,7 +992,7 @@
     "usd": 3426175.58
    },
    "origin": "advancement_data",
-   "pm_price": 0.4205,
+   "pm_price": 0.415,
    "pm_price_source": "advancement_data.teams[Argentina].pm[Final].pm (YES mid)",
    "position_prob": 0.6749,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -1061,7 +1015,7 @@
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.0292,
+   "edge_adj": 0.034,
    "edge_source": "advancement_data.teams[Norway].pm[Final].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -1170,7 +1124,7 @@
     "usd": 3426175.58
    },
    "origin": "advancement_data",
-   "pm_price": 0.1415,
+   "pm_price": 0.1445,
    "pm_price_source": "advancement_data.teams[Norway].pm[Final].pm (YES mid)",
    "position_prob": 0.8957,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -1193,7 +1147,7 @@
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.0218,
+   "edge_adj": 0.0277,
    "edge_source": "advancement_data.teams[Switzerland].pm[Final].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -1302,7 +1256,7 @@
     "usd": 3426175.58
    },
    "origin": "advancement_data",
-   "pm_price": 0.0745,
+   "pm_price": 0.081,
    "pm_price_source": "advancement_data.teams[Switzerland].pm[Final].pm (YES mid)",
    "position_prob": 0.9499,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -1325,7 +1279,7 @@
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.108,
+   "edge_adj": 0.109,
    "edge_source": "advancement_data.teams[Switzerland].pm[SF].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -1434,7 +1388,7 @@
     "usd": 2071463.99
    },
    "origin": "advancement_data",
-   "pm_price": 0.2565,
+   "pm_price": 0.2575,
    "pm_price_source": "advancement_data.teams[Switzerland].pm[SF].pm (YES mid)",
    "position_prob": 0.8597,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -2223,20 +2177,8 @@
    "position_prob": 0.2554,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 7.0,
-      "match": "Spain vs Belgium",
-      "model_c": 18.2,
-      "price_c": 17.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 8.97
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -2395,20 +2337,8 @@
    "position_prob": 0.4154,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 7.0,
-      "match": "Spain vs Belgium",
-      "model_c": 18.2,
-      "price_c": 17.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 8.97
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -2554,7 +2484,7 @@
     "usd": 3426175.58
    },
    "origin": "advancement_data",
-   "pm_price": 0.37,
+   "pm_price": 0.375,
    "pm_price_source": "advancement_data.teams[England].pm[Final].pm (YES mid)",
    "position_prob": 0.3861,
    "position_prob_source": "= model_prob",
@@ -2737,7 +2667,7 @@
   {
    "bet_rec": null,
    "bucket": "mid",
-   "edge_adj": 0.1828,
+   "edge_adj": 0.1626,
    "edge_source": "advancement_data.teams[Argentina].pm[SF].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -2866,7 +2796,7 @@
     "usd": 2071463.99
    },
    "origin": "advancement_data",
-   "pm_price": 0.745,
+   "pm_price": 0.725,
    "pm_price_source": "advancement_data.teams[Argentina].pm[SF].pm (YES mid)",
    "position_prob": 0.4486,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -3031,31 +2961,8 @@
    "position_prob": 0.3127,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "mid",
-      "ev_pct": 5.9,
-      "match": "France vs Morocco",
-      "model_c": 26.5,
-      "price_c": 25.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 12.34
-     },
-     {
-      "bucket": "longshot",
-      "ev_pct": 10.2,
-      "match": "France vs Morocco",
-      "model_c": 16.5,
-      "price_c": 15.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 11.26
-     }
-    ],
-    "n": 2,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -3206,31 +3113,8 @@
    "position_prob": 0.3127,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "mid",
-      "ev_pct": 5.9,
-      "match": "France vs Morocco",
-      "model_c": 26.5,
-      "price_c": 25.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 12.34
-     },
-     {
-      "bucket": "longshot",
-      "ev_pct": 10.2,
-      "match": "France vs Morocco",
-      "model_c": 16.5,
-      "price_c": 15.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 11.26
-     }
-    ],
-    "n": 2,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -3389,20 +3273,8 @@
    "position_prob": 0.3086,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 7.0,
-      "match": "Spain vs Belgium",
-      "model_c": 18.2,
-      "price_c": 17.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 8.97
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -3419,7 +3291,7 @@
   {
    "bet_rec": null,
    "bucket": "mid",
-   "edge_adj": 0.0327,
+   "edge_adj": 0.0428,
    "edge_source": "advancement_data.teams[Spain].pm[SF].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -3548,25 +3420,13 @@
     "usd": 2071463.99
    },
    "origin": "advancement_data",
-   "pm_price": 0.74,
+   "pm_price": 0.745,
    "pm_price_source": "advancement_data.teams[Spain].pm[SF].pm (YES mid)",
    "position_prob": 0.3086,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 7.0,
-      "match": "Spain vs Belgium",
-      "model_c": 18.2,
-      "price_c": 17.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 8.97
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -3830,20 +3690,8 @@
    "position_prob": 0.0565,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 7.0,
-      "match": "Spain vs Belgium",
-      "model_c": 18.2,
-      "price_c": 17.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 8.97
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -3861,7 +3709,7 @@
   {
    "bet_rec": null,
    "bucket": "longshot",
-   "edge_adj": 0.0223,
+   "edge_adj": 0.0243,
    "edge_source": "advancement_data.teams[England].pm[win].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -3970,7 +3818,7 @@
     "usd": 214278229.21
    },
    "origin": "advancement_data",
-   "pm_price": 0.1585,
+   "pm_price": 0.1565,
    "pm_price_source": "advancement_data.teams[England].pm[win].pm (YES mid)",
    "position_prob": 0.1853,
    "position_prob_source": "= model_prob",
@@ -4108,31 +3956,8 @@
    "position_prob": 0.0412,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "mid",
-      "ev_pct": 5.9,
-      "match": "France vs Morocco",
-      "model_c": 26.5,
-      "price_c": 25.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 12.34
-     },
-     {
-      "bucket": "longshot",
-      "ev_pct": 10.2,
-      "match": "France vs Morocco",
-      "model_c": 16.5,
-      "price_c": 15.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 11.26
-     }
-    ],
-    "n": 2,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -4398,20 +4223,8 @@
    "position_prob": 0.1313,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 7.0,
-      "match": "Spain vs Belgium",
-      "model_c": 18.2,
-      "price_c": 17.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 8.97
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -4429,7 +4242,7 @@
   {
    "bet_rec": null,
    "bucket": "longshot",
-   "edge_adj": 0.0124,
+   "edge_adj": 0.0144,
    "edge_source": "advancement_data.teams[Morocco].pm[Final].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -4439,7 +4252,7 @@
     "edge": {
      "note": "threshold 0.02 replicated from scripts/wca_betrecs.py MIN_EDGE",
      "pass": false,
-     "reason": "near_threshold_edge: +0.0124 inside the 0.02 actionable threshold (scripts/wca_betrecs.py MIN_EDGE)"
+     "reason": "near_threshold_edge: +0.0144 inside the 0.02 actionable threshold (scripts/wca_betrecs.py MIN_EDGE)"
     },
     "freshness": {
      "pass": true,
@@ -4538,36 +4351,13 @@
     "usd": 3426175.58
    },
    "origin": "advancement_data",
-   "pm_price": 0.0875,
+   "pm_price": 0.0865,
    "pm_price_source": "advancement_data.teams[Morocco].pm[Final].pm (YES mid)",
    "position_prob": 0.1038,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "mid",
-      "ev_pct": 5.9,
-      "match": "France vs Morocco",
-      "model_c": 26.5,
-      "price_c": 25.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 12.34
-     },
-     {
-      "bucket": "longshot",
-      "ev_pct": 10.2,
-      "match": "France vs Morocco",
-      "model_c": 16.5,
-      "price_c": 15.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 11.26
-     }
-    ],
-    "n": 2,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -4578,7 +4368,7 @@
    "team": "Morocco",
    "verdict": "WATCH",
    "verdict_reasons": [
-    "near_threshold_edge: fee-adjusted edge +0.0124 is inside the 0.02 actionable threshold (scripts/wca_betrecs.py MIN_EDGE)",
+    "near_threshold_edge: fee-adjusted edge +0.0144 is inside the 0.02 actionable threshold (scripts/wca_betrecs.py MIN_EDGE)",
     "longshot_no_cash: position pays out at model 10% < 25% \u2014 no cash on longshots (likely-PnL rule; 0-for-12 in backtests)",
     "projected_tie: no tie featuring Morocco in scores_markets.sf_games \u2014 the projected bracket's modal path does not reach this stage; tie context unknown (treated as projected by the projection gate)"
    ]
@@ -4699,7 +4489,7 @@
    "bet_rec": null,
    "book_edge": 0.0218,
    "book_edge_source": "bet_recs.withheld[france_vs_morocco_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 6.9442,
+   "book_price_decimal": 6.9434,
    "book_price_source": "bet_recs.withheld[france_vs_morocco_away_1x2].price (decimal book odds)",
    "bucket": "longshot",
    "edge_adj": null,
