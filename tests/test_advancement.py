@@ -588,8 +588,11 @@ def test_ko_pinning_csv_only_still_works(tmp_path):
 def test_ko_pinning_drawn_tie_uses_results_json_outcome(tmp_path):
     """Regression (2026-07-08, the Egypt failure mode): a drawn KO tie whose
     shootout row is missing must still pin when the freshest feed's ``outcome``
-    names the advancing side — Egypt showed P(R16)=0.469 after WINNING its
-    Jul-3 shootout because the drawn tie was silently skipped."""
+    names the advancing side — Egypt showed P(R16)=0.4708 after WINNING its
+    Jul-3 shootout because the drawn tie was silently skipped. (The current
+    builder emits ``draw`` for drawn ties, so this fallback is dormant today;
+    the schema is exercised here so a side-marking feed pins without a code
+    change.)"""
     csv = _ko_csv(tmp_path, [("2026-07-03", "Australia", "Egypt", 1, 1)])
     rj = _results_json(
         tmp_path,

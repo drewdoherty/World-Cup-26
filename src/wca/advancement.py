@@ -279,9 +279,9 @@ def make_prob_fn(
         # 1X2 books, and the 90-minute 1X2 is exactly what the simulator needs
         # here (the ET/pens path is resolved downstream by the sim's ET model).
         # The old ``None if knockout`` guard silently ran the ENTIRE post-group
-        # tournament on the Elo/DC-only fallback — measured worse than the
-        # blend on the 22 played KO ties (log-loss 0.7465 model-only vs 0.7270
-        # blend). Both pair orientations are stored in the lookup.
+        # tournament on the Elo/DC-only fallback — measured worse on the 22
+        # played KO ties (log-loss 0.7465 model-only vs 0.7190 market, n=22).
+        # Both pair orientations are stored in the lookup.
         mkt = market_lookup.get((a, b))
         if mkt is None:
             p_a = fallback_elo * e_h + fallback_dc * d_h
@@ -496,7 +496,11 @@ def load_played_knockout_results(
       the fixture date);
     * a drawn 90-minute result with **no** shootout record but whose
       results-JSON ``outcome`` field names a side (``home``/``away`` despite the
-      drawn scoreline — the feed's marker for the advancing side) -> that side;
+      drawn scoreline) -> that side. NOTE: the current builder
+      (``scripts/wca_build_wc2026_results.py``) computes ``outcome`` from the
+      score, so drawn ties carry ``"draw"`` today and this fallback is dormant —
+      it exists so a feed that marks the advancing side pins without a code
+      change; a drawn tie with neither source stays unpinned;
     * otherwise the tie is *skipped* (it cannot be pinned — leaving it unfixed
       keeps the sim from inventing a winner it has no basis for; the
       state-freshness gate, :func:`knockout_state_staleness`, then withholds the
@@ -603,7 +607,7 @@ def knockout_state_staleness(
     :func:`load_played_knockout_results` at sim time) means every advancement
     probability for BOTH participants is phantom: the sim re-simulates a tie
     reality has already decided (USA showed P(QF)=0.317 after its Jul-6
-    elimination; Egypt P(R16)=0.469 after winning its Jul-3 shootout). Such
+    elimination; Egypt P(R16)=0.4708 after winning its Jul-3 shootout). Such
     teams must be WITHHELD from actionable surfaces, not repriced.
 
     Kicked-off detection (no fabrication, evidence only):

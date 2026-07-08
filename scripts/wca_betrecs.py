@@ -752,7 +752,7 @@ def build_advancement_futures(
         # on any team whose knockout tie has kicked off but is NOT pinned in
         # the sim's conditioning set — its stage probabilities are phantom
         # (USA showed P(QF)=0.317 after its Jul-6 elimination; Egypt
-        # P(R16)=0.469 after winning its Jul-3 shootout). Withhold, never size.
+        # P(R16)=0.4708 after winning its Jul-3 shootout). Withhold, never size.
         state_reason = team_entry.get("state_stale_reason")
 
         for stage, pm_info in (pm_data.items() if isinstance(pm_data, dict) else []):
