@@ -533,11 +533,22 @@ def assemble_feed(
     coverage = arm_a["coverage"]
     venues_all = coverage["venues"]
 
+    # allow_relaxed_support: a single chronically-thin venue (a fresh addition,
+    # or Polymarket before it had its own captured price series) can collapse
+    # the strict all-venues intersection to zero even when the rest of the
+    # field shares deep common support. Relaxing to the largest subset of
+    # >=MIN_VENUES_FOR_RANKING venues with real common support (see
+    # wca.venuesbench.best_common_support_subset) lets a ranking actually
+    # emit instead of "insufficient" every run; the dropped venues are always
+    # reported (leaderboard["venues_dropped"]) — never a silent swap — and the
+    # strict "insufficient" verdict still applies if even a relaxed search
+    # can't clear the minimums.
     primary_panel = panels[PRIMARY_COMPARATOR][PRIMARY_METRIC]
     leaderboard = vb.rank_venues(primary_panel, venues_all, metric=PRIMARY_METRIC,
-                                 n_boot=n_boot, seed=seed)
+                                 n_boot=n_boot, seed=seed, allow_relaxed_support=True)
     lobo_board = vb.rank_venues(arm_a["lobo"][PRIMARY_METRIC], venues_all,
-                                metric=PRIMARY_METRIC, n_boot=n_boot, seed=seed)
+                                metric=PRIMARY_METRIC, n_boot=n_boot, seed=seed,
+                                allow_relaxed_support=True)
 
     # Secondary ALL-AVAILABLE ranking: each venue scored over whatever obs it has
     # a fresh quote for. NOT directly comparable across venues (different obs) —

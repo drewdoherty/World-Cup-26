@@ -459,9 +459,75 @@ def bh_fdr(pvals: Sequence[Optional[float]], alpha: float = 0.05) -> List[Option
 #: Below this many common-support fixture-blocks, no winner is declarable.
 MIN_COMMON_FIXTURES = 10
 
+#: Minimum number of venues a relaxed common-support subset must retain.
+#: Below this, "ranking" a pair-or-two of venues isn't a leaderboard. Chosen to
+#: match the desk's actual venue count (21 OddsAPI books + Polymarket): dropping
+#: a handful of chronically-thin venues (e.g. a fresh addition, or Polymarket
+#: pre-orderflow) should still leave a real leaderboard across the rest.
+MIN_VENUES_FOR_RANKING = 6
+
+
+def best_common_support_subset(
+    panel: Dict[str, Dict[str, float]], venues: Sequence[str], *,
+    min_venues: int = MIN_VENUES_FOR_RANKING,
+) -> List[str]:
+    """Largest-common-support venue subset with at least ``min_venues`` members.
+
+    Requiring ALL venues to quote every observation (:func:`common_support`) is
+    the honest PRIMARY definition of comparability, but a single chronically
+    thin venue (a fresh addition, or Polymarket before its own price series
+    existed) can collapse the intersection to zero even when the rest of the
+    field has deep, near-total overlap — the leaderboard then reports
+    "insufficient" every run even though 19 of 21 venues quote the same ~64
+    fixtures. This greedily drops the venue with the LEAST overlap with the
+    rest of the current set, one at a time, tracking the common-support size at
+    each step, and returns the venue set (evaluated over sizes from
+    ``len(venues)`` down to ``min_venues``) that maximises the number of
+    common-support OBSERVATIONS. Ties prefer more venues (broader coverage) at
+    the same observation count, then the original venue order.
+
+    Returns ``[]`` if fewer than ``min_venues`` venues exist at all (no subset
+    to search), leaving the caller to render "insufficient" honestly rather
+    than fabricate a ranking out of too few venues to be meaningful.
+    """
+    venues = list(venues)
+    if len(venues) < min_venues:
+        return []
+
+    current = list(venues)
+    best_subset = list(current)
+    best_support = common_support(panel, current)
+    candidates = [(len(best_support), len(best_subset), tuple(best_subset))]
+
+    while len(current) > min_venues:
+        # Drop whichever remaining venue, if removed, most GROWS common
+        # support (i.e. is currently the biggest blocker) — greedy, not
+        # exhaustive (2^21 subsets is intractable), but monotone: dropping the
+        # single worst-overlap venue can only ever match or increase support.
+        best_drop = None
+        best_drop_support = None
+        for v in current:
+            trial = [x for x in current if x != v]
+            trial_support = common_support(panel, trial)
+            if best_drop_support is None or len(trial_support) > len(best_drop_support):
+                best_drop = v
+                best_drop_support = trial_support
+        if best_drop is None:
+            break
+        current = [x for x in current if x != best_drop]
+        candidates.append((len(best_drop_support), len(current), tuple(current)))
+
+    # Pick the candidate with the most common-support observations; break ties
+    # toward MORE venues (broader, more useful leaderboard), then original order.
+    candidates.sort(key=lambda c: (-c[0], -c[1]))
+    _, _, chosen = candidates[0]
+    return list(chosen)
+
 
 def rank_venues(panel: Dict[str, Dict[str, float]], venues: Sequence[str], *,
-                metric: str = "mae", n_boot: int = 2000, seed: int = _DEFAULT_SEED
+                metric: str = "mae", n_boot: int = 2000, seed: int = _DEFAULT_SEED,
+                allow_relaxed_support: bool = False,
+                min_venues: int = MIN_VENUES_FOR_RANKING,
                 ) -> Dict[str, object]:
     """Rank venues by closeness on common support, with CIs, P(rank1) and a verdict.
 
@@ -470,9 +536,38 @@ def rank_venues(panel: Dict[str, Dict[str, float]], venues: Sequence[str], *,
     fixture-block CI + mean within-obs rank + P(rank 1), the Friedman omnibus,
     and a headline ``verdict`` that is "no distinguishable winner" unless the
     evidence actually separates the field.
+
+    When ``allow_relaxed_support`` is set and the FULL venue set has no (or
+    insufficient) common support, this falls back to
+    :func:`best_common_support_subset` — the largest venue subset (>=
+    ``min_venues``) sharing common support — and reruns the identical ranking
+    machinery (within-obs ranks, fixture-block bootstrap, Friedman, P(rank1))
+    on that reduced set. The output is tagged (``"venues_ranked"``,
+    ``"venues_dropped"``, ``"relaxed"``) so callers/readers can see exactly
+    which venues were excluded and why — this is never a silent swap. If even
+    the relaxed search cannot clear ``min_venues`` or
+    :data:`MIN_COMMON_FIXTURES`, the honest "insufficient" verdict is kept.
     """
     venues = list(venues)
     support = common_support(panel, venues)
+    relaxed = False
+    venues_dropped: List[str] = []
+    ranked_venues = venues
+
+    if allow_relaxed_support and len(support) < MIN_COMMON_FIXTURES:
+        # Only relax when the strict (all-venues) support is thin/empty —
+        # never overrides a perfectly good full-venue ranking.
+        n_fix_strict = len({_fixture_of(o) for o in support})
+        if n_fix_strict < MIN_COMMON_FIXTURES:
+            subset = best_common_support_subset(panel, venues, min_venues=min_venues)
+            if subset:
+                subset_support = common_support(panel, subset)
+                if len(subset_support) > len(support):
+                    relaxed = True
+                    ranked_venues = subset
+                    support = subset_support
+                    venues_dropped = [v for v in venues if v not in subset]
+
     n_fix = len({_fixture_of(o) for o in support})
     out: Dict[str, object] = {
         "metric": metric,
@@ -481,15 +576,18 @@ def rank_venues(panel: Dict[str, Dict[str, float]], venues: Sequence[str], *,
         "venues": [],
         "friedman": {"stat": None, "p": None},
         "verdict": None,
+        "relaxed": relaxed,
+        "venues_ranked": ranked_venues,
+        "venues_dropped": venues_dropped,
     }
     if not support:
         out["verdict"] = "insufficient — no common support across venues"
         return out
 
-    ranks = within_obs_ranks(panel, venues, support)
+    ranks = within_obs_ranks(panel, ranked_venues, support)
     rows = []
-    p1 = p_rank_first(panel, venues, support, n_boot=n_boot, seed=seed)
-    for v in venues:
+    p1 = p_rank_first(panel, ranked_venues, support, n_boot=n_boot, seed=seed)
+    for v in ranked_venues:
         vals_by_obs = {o: panel[o][v] for o in support}
         mean_d, lo, hi = fixture_block_bootstrap(vals_by_obs, support, n_boot=n_boot, seed=seed)
         rows.append({
@@ -504,7 +602,7 @@ def rank_venues(panel: Dict[str, Dict[str, float]], venues: Sequence[str], *,
     rows.sort(key=lambda r: (r["mean_rank"], r["mean_distance"] if r["mean_distance"] is not None else 1e9))
     out["venues"] = rows
 
-    stat, p = friedman_test(panel, venues, support)
+    stat, p = friedman_test(panel, ranked_venues, support)
     out["friedman"] = {"stat": None if stat is None else round(stat, 4),
                        "p": None if p is None else round(p, 6)}
 
@@ -521,9 +619,12 @@ def rank_venues(panel: Dict[str, Dict[str, float]], venues: Sequence[str], *,
         and leader["ci_hi"] < runner["ci_lo"]
         and leader["p_rank1"] >= 0.5
     )
+    suffix = (" [relaxed support: %d/%d venues, dropped %s]"
+              % (len(ranked_venues), len(venues), ", ".join(sorted(venues_dropped)))
+              ) if relaxed else ""
     if separated:
-        out["verdict"] = ("closest venue: %s (mean rank %.2f, P(rank1)=%.0f%%)"
-                          % (leader["venue"], leader["mean_rank"], 100 * leader["p_rank1"]))
+        out["verdict"] = ("closest venue: %s (mean rank %.2f, P(rank1)=%.0f%%)%s"
+                          % (leader["venue"], leader["mean_rank"], 100 * leader["p_rank1"], suffix))
     else:
-        out["verdict"] = "no distinguishable winner (top venues' evidence overlaps)"
+        out["verdict"] = "no distinguishable winner (top venues' evidence overlaps)%s" % suffix
     return out

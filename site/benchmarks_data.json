@@ -1,67 +1,1286 @@
 {
   "meta": {
-    "generated": "2026-06-26T19:30:00Z",
-    "n_matched": 23,
-    "n_results": 31,
-    "n_predictions": 576,
-    "note": "Predictions matched from model_predictions_log.jsonl (first build per fixture) against processed/wc2026_results.json. Lambda values not yet stored in log for completed matches — goals calibration shows actual totals vs StatsBomb/WC18+22 baselines. Run scripts/build_benchmarks.py to regenerate automatically."
+    "generated": "2026-07-08T14:33:09.857211+00:00",
+    "n_matched": 75,
+    "n_results": 96,
+    "n_predictions": 79
   },
   "metrics": {
     "model": {
-      "n": 23,
-      "brier": 0.2508,
-      "logloss": 0.8791,
-      "accuracy": 0.6522,
-      "bss": -0.0157
+      "n": 75,
+      "brier": 0.2225,
+      "logloss": 0.7687,
+      "accuracy": 0.7333,
+      "bss": -0.0141
     },
     "elo": {
-      "n": 23,
-      "brier": 0.2641,
-      "logloss": 0.9143,
-      "accuracy": 0.6087,
-      "bss": -0.0705
+      "n": 75,
+      "brier": 0.234,
+      "logloss": 0.8091,
+      "accuracy": 0.68,
+      "bss": -0.0665
     },
     "dc": {
-      "n": 23,
-      "brier": 0.2589,
-      "logloss": 0.8994,
-      "accuracy": 0.6087,
-      "bss": -0.0487
+      "n": 75,
+      "brier": 0.2314,
+      "logloss": 0.7927,
+      "accuracy": 0.6933,
+      "bss": -0.0547
     },
     "market": {
-      "n": 23,
-      "brier": 0.2469,
-      "logloss": 0.8617,
-      "accuracy": 0.6522,
+      "n": 75,
+      "brier": 0.2194,
+      "logloss": 0.7566,
+      "accuracy": 0.7067,
       "bss": 0.0
     }
   },
   "goals_calibration": {
-    "n": 23,
-    "mean_actual_total": 3.13,
-    "wc2018_baseline": 2.64,
-    "wc2022_baseline": 2.69,
-    "inflation_vs_wc2022": 0.164,
-    "note": "Lambda values not logged for completed matches (tracking added 2026-06-26). Goals inflation computed from actual scores vs StatsBomb WC18/22 baselines.",
-    "goals_distribution": {
-      "x": [0, 1, 2, 3, 4, 5, 6, 7, 8],
-      "actual": [0, 6, 6, 1, 4, 3, 2, 0, 1],
-      "actual_pct": [0.0, 0.261, 0.261, 0.043, 0.174, 0.130, 0.087, 0.0, 0.043],
-      "wc2022_pct": [0.069, 0.192, 0.263, 0.219, 0.137, 0.068, 0.032, 0.012, 0.004]
-    },
-    "over25": {
-      "actual_rate": 0.478,
-      "wc2022_baseline": 0.594,
-      "wc2018_baseline": 0.578,
-      "note": "O2.5 actual 47.8% in matched set. WC2026 overall (31 matches) may differ."
-    }
+    "n": 36,
+    "mean_lambda_home": 1.328,
+    "mean_lambda_away": 1.143,
+    "mean_actual_home": 1.472,
+    "mean_actual_away": 1.389,
+    "mean_lambda_total": 2.471,
+    "mean_actual_total": 2.861,
+    "calibration_factor_home": 1.1083,
+    "calibration_factor_away": 1.215,
+    "calibration_factor_total": 1.1577,
+    "mean_ou25_pred": 0.4451,
+    "mean_ou25_actual": 0.5556,
+    "ou_slope": 1.3231,
+    "ou_intercept": -0.0334,
+    "scatter": [
+      {
+        "fixture": "Cape Verde vs Saudi Arabia",
+        "score": "0-0",
+        "lambda_home": 0.898,
+        "lambda_away": 0.952,
+        "lambda_total": 1.85,
+        "actual_home": 0,
+        "actual_away": 0,
+        "actual_total": 0,
+        "p_over25": 0.283,
+        "actual_over25": 0,
+        "error_total": -1.85
+      },
+      {
+        "fixture": "Egypt vs Iran",
+        "score": "1-1",
+        "lambda_home": 0.866,
+        "lambda_away": 0.984,
+        "lambda_total": 1.85,
+        "actual_home": 1,
+        "actual_away": 1,
+        "actual_total": 2,
+        "p_over25": 0.283,
+        "actual_over25": 0,
+        "error_total": 0.15
+      },
+      {
+        "fixture": "New Zealand vs Belgium",
+        "score": "1-5",
+        "lambda_home": 0.509,
+        "lambda_away": 2.401,
+        "lambda_total": 2.91,
+        "actual_home": 1,
+        "actual_away": 5,
+        "actual_total": 6,
+        "p_over25": 0.556,
+        "actual_over25": 1,
+        "error_total": 3.09
+      },
+      {
+        "fixture": "Norway vs France",
+        "score": "1-4",
+        "lambda_home": 0.799,
+        "lambda_away": 1.565,
+        "lambda_total": 2.364,
+        "actual_home": 1,
+        "actual_away": 4,
+        "actual_total": 5,
+        "p_over25": 0.421,
+        "actual_over25": 1,
+        "error_total": 2.636
+      },
+      {
+        "fixture": "Senegal vs Iraq",
+        "score": "5-0",
+        "lambda_home": 1.364,
+        "lambda_away": 0.648,
+        "lambda_total": 2.012,
+        "actual_home": 5,
+        "actual_away": 0,
+        "actual_total": 5,
+        "p_over25": 0.327,
+        "actual_over25": 1,
+        "error_total": 2.988
+      },
+      {
+        "fixture": "Uruguay vs Spain",
+        "score": "0-1",
+        "lambda_home": 0.799,
+        "lambda_away": 1.46,
+        "lambda_total": 2.259,
+        "actual_home": 0,
+        "actual_away": 1,
+        "actual_total": 1,
+        "p_over25": 0.393,
+        "actual_over25": 0,
+        "error_total": -1.259
+      },
+      {
+        "fixture": "Algeria vs Austria",
+        "score": "3-3",
+        "lambda_home": 1.136,
+        "lambda_away": 1.31,
+        "lambda_total": 2.446,
+        "actual_home": 3,
+        "actual_away": 3,
+        "actual_total": 6,
+        "p_over25": 0.442,
+        "actual_over25": 1,
+        "error_total": 3.554
+      },
+      {
+        "fixture": "Colombia vs Portugal",
+        "score": "0-0",
+        "lambda_home": 0.991,
+        "lambda_away": 1.121,
+        "lambda_total": 2.112,
+        "actual_home": 0,
+        "actual_away": 0,
+        "actual_total": 0,
+        "p_over25": 0.354,
+        "actual_over25": 0,
+        "error_total": -2.112
+      },
+      {
+        "fixture": "Croatia vs Ghana",
+        "score": "2-1",
+        "lambda_home": 1.576,
+        "lambda_away": 0.699,
+        "lambda_total": 2.276,
+        "actual_home": 2,
+        "actual_away": 1,
+        "actual_total": 3,
+        "p_over25": 0.397,
+        "actual_over25": 1,
+        "error_total": 0.724
+      },
+      {
+        "fixture": "DR Congo vs Uzbekistan",
+        "score": "3-1",
+        "lambda_home": 0.957,
+        "lambda_away": 1.015,
+        "lambda_total": 1.972,
+        "actual_home": 3,
+        "actual_away": 1,
+        "actual_total": 4,
+        "p_over25": 0.316,
+        "actual_over25": 1,
+        "error_total": 2.028
+      },
+      {
+        "fixture": "Jordan vs Argentina",
+        "score": "1-3",
+        "lambda_home": 0.404,
+        "lambda_away": 2.585,
+        "lambda_total": 2.989,
+        "actual_home": 1,
+        "actual_away": 3,
+        "actual_total": 4,
+        "p_over25": 0.574,
+        "actual_over25": 1,
+        "error_total": 1.011
+      },
+      {
+        "fixture": "Panama vs England",
+        "score": "0-2",
+        "lambda_home": 0.451,
+        "lambda_away": 2.219,
+        "lambda_total": 2.67,
+        "actual_home": 0,
+        "actual_away": 2,
+        "actual_total": 2,
+        "p_over25": 0.499,
+        "actual_over25": 0,
+        "error_total": -0.67
+      },
+      {
+        "fixture": "South Africa vs Canada",
+        "score": "0-1",
+        "lambda_home": 1.064,
+        "lambda_away": 0.98,
+        "lambda_total": 2.043,
+        "actual_home": 0,
+        "actual_away": 1,
+        "actual_total": 1,
+        "p_over25": 0.335,
+        "actual_over25": 0,
+        "error_total": -1.043
+      },
+      {
+        "fixture": "Brazil vs Japan",
+        "score": "2-1",
+        "lambda_home": 2.431,
+        "lambda_away": 0.699,
+        "lambda_total": 3.129,
+        "actual_home": 2,
+        "actual_away": 1,
+        "actual_total": 3,
+        "p_over25": 0.605,
+        "actual_over25": 1,
+        "error_total": -0.129
+      },
+      {
+        "fixture": "Germany vs Paraguay",
+        "score": "1-1",
+        "lambda_home": 2.272,
+        "lambda_away": 0.837,
+        "lambda_total": 3.109,
+        "actual_home": 1,
+        "actual_away": 1,
+        "actual_total": 2,
+        "p_over25": 0.601,
+        "actual_over25": 0,
+        "error_total": -1.109
+      },
+      {
+        "fixture": "Netherlands vs Morocco",
+        "score": "1-1",
+        "lambda_home": 1.62,
+        "lambda_away": 0.792,
+        "lambda_total": 2.412,
+        "actual_home": 1,
+        "actual_away": 1,
+        "actual_total": 2,
+        "p_over25": 0.433,
+        "actual_over25": 0,
+        "error_total": -0.412
+      },
+      {
+        "fixture": "France vs Sweden",
+        "score": "3-0",
+        "lambda_home": 2.096,
+        "lambda_away": 0.813,
+        "lambda_total": 2.91,
+        "actual_home": 3,
+        "actual_away": 0,
+        "actual_total": 3,
+        "p_over25": 0.556,
+        "actual_over25": 1,
+        "error_total": 0.09
+      },
+      {
+        "fixture": "Ivory Coast vs Norway",
+        "score": "1-2",
+        "lambda_home": 1.008,
+        "lambda_away": 1.224,
+        "lambda_total": 2.232,
+        "actual_home": 1,
+        "actual_away": 2,
+        "actual_total": 3,
+        "p_over25": 0.386,
+        "actual_over25": 1,
+        "error_total": 0.768
+      },
+      {
+        "fixture": "Mexico vs Ecuador",
+        "score": "2-0",
+        "lambda_home": 1.326,
+        "lambda_away": 1.009,
+        "lambda_total": 2.336,
+        "actual_home": 2,
+        "actual_away": 0,
+        "actual_total": 2,
+        "p_over25": 0.413,
+        "actual_over25": 0,
+        "error_total": -0.336
+      },
+      {
+        "fixture": "Belgium vs Senegal",
+        "score": "3-2",
+        "lambda_home": 1.514,
+        "lambda_away": 0.863,
+        "lambda_total": 2.376,
+        "actual_home": 3,
+        "actual_away": 2,
+        "actual_total": 5,
+        "p_over25": 0.424,
+        "actual_over25": 1,
+        "error_total": 2.624
+      },
+      {
+        "fixture": "England vs DR Congo",
+        "score": "2-1",
+        "lambda_home": 1.998,
+        "lambda_away": 0.449,
+        "lambda_total": 2.447,
+        "actual_home": 2,
+        "actual_away": 1,
+        "actual_total": 3,
+        "p_over25": 0.443,
+        "actual_over25": 1,
+        "error_total": 0.553
+      },
+      {
+        "fixture": "United States vs Bosnia and Herzegovina",
+        "score": "2-0",
+        "lambda_home": 1.774,
+        "lambda_away": 0.953,
+        "lambda_total": 2.727,
+        "actual_home": 2,
+        "actual_away": 0,
+        "actual_total": 2,
+        "p_over25": 0.513,
+        "actual_over25": 0,
+        "error_total": -0.727
+      },
+      {
+        "fixture": "Portugal vs Croatia",
+        "score": "2-1",
+        "lambda_home": 1.39,
+        "lambda_away": 0.937,
+        "lambda_total": 2.326,
+        "actual_home": 2,
+        "actual_away": 1,
+        "actual_total": 3,
+        "p_over25": 0.411,
+        "actual_over25": 1,
+        "error_total": 0.674
+      },
+      {
+        "fixture": "Spain vs Austria",
+        "score": "3-0",
+        "lambda_home": 1.903,
+        "lambda_away": 0.72,
+        "lambda_total": 2.623,
+        "actual_home": 3,
+        "actual_away": 0,
+        "actual_total": 3,
+        "p_over25": 0.487,
+        "actual_over25": 1,
+        "error_total": 0.377
+      },
+      {
+        "fixture": "Switzerland vs Algeria",
+        "score": "2-0",
+        "lambda_home": 1.476,
+        "lambda_away": 1.023,
+        "lambda_total": 2.499,
+        "actual_home": 2,
+        "actual_away": 0,
+        "actual_total": 2,
+        "p_over25": 0.456,
+        "actual_over25": 0,
+        "error_total": -0.499
+      },
+      {
+        "fixture": "Argentina vs Cape Verde",
+        "score": "3-2",
+        "lambda_home": 2.215,
+        "lambda_away": 0.393,
+        "lambda_total": 2.608,
+        "actual_home": 3,
+        "actual_away": 2,
+        "actual_total": 5,
+        "p_over25": 0.484,
+        "actual_over25": 1,
+        "error_total": 2.392
+      },
+      {
+        "fixture": "Australia vs Egypt",
+        "score": "1-1",
+        "lambda_home": 0.958,
+        "lambda_away": 0.908,
+        "lambda_total": 1.866,
+        "actual_home": 1,
+        "actual_away": 1,
+        "actual_total": 2,
+        "p_over25": 0.287,
+        "actual_over25": 0,
+        "error_total": 0.134
+      },
+      {
+        "fixture": "Colombia vs Ghana",
+        "score": "1-0",
+        "lambda_home": 1.658,
+        "lambda_away": 0.566,
+        "lambda_total": 2.224,
+        "actual_home": 1,
+        "actual_away": 0,
+        "actual_total": 1,
+        "p_over25": 0.384,
+        "actual_over25": 0,
+        "error_total": -1.224
+      },
+      {
+        "fixture": "Canada vs Morocco",
+        "score": "0-3",
+        "lambda_home": 0.66,
+        "lambda_away": 1.165,
+        "lambda_total": 1.825,
+        "actual_home": 0,
+        "actual_away": 3,
+        "actual_total": 3,
+        "p_over25": 0.276,
+        "actual_over25": 1,
+        "error_total": 1.175
+      },
+      {
+        "fixture": "Paraguay vs France",
+        "score": "0-1",
+        "lambda_home": 0.741,
+        "lambda_away": 1.782,
+        "lambda_total": 2.524,
+        "actual_home": 0,
+        "actual_away": 1,
+        "actual_total": 1,
+        "p_over25": 0.462,
+        "actual_over25": 0,
+        "error_total": -1.524
+      },
+      {
+        "fixture": "Brazil vs Norway",
+        "score": "1-2",
+        "lambda_home": 2.284,
+        "lambda_away": 0.832,
+        "lambda_total": 3.116,
+        "actual_home": 1,
+        "actual_away": 2,
+        "actual_total": 3,
+        "p_over25": 0.602,
+        "actual_over25": 1,
+        "error_total": -0.116
+      },
+      {
+        "fixture": "Mexico vs England",
+        "score": "2-3",
+        "lambda_home": 1.107,
+        "lambda_away": 1.678,
+        "lambda_total": 2.784,
+        "actual_home": 2,
+        "actual_away": 3,
+        "actual_total": 5,
+        "p_over25": 0.527,
+        "actual_over25": 1,
+        "error_total": 2.216
+      },
+      {
+        "fixture": "Portugal vs Spain",
+        "score": "0-1",
+        "lambda_home": 1.137,
+        "lambda_away": 1.516,
+        "lambda_total": 2.653,
+        "actual_home": 0,
+        "actual_away": 1,
+        "actual_total": 1,
+        "p_over25": 0.495,
+        "actual_over25": 0,
+        "error_total": -1.653
+      },
+      {
+        "fixture": "United States vs Belgium",
+        "score": "1-4",
+        "lambda_home": 1.385,
+        "lambda_away": 1.96,
+        "lambda_total": 3.345,
+        "actual_home": 1,
+        "actual_away": 4,
+        "actual_total": 5,
+        "p_over25": 0.65,
+        "actual_over25": 1,
+        "error_total": 1.655
+      },
+      {
+        "fixture": "Argentina vs Egypt",
+        "score": "3-2",
+        "lambda_home": 1.988,
+        "lambda_away": 0.63,
+        "lambda_total": 2.618,
+        "actual_home": 3,
+        "actual_away": 2,
+        "actual_total": 5,
+        "p_over25": 0.486,
+        "actual_over25": 1,
+        "error_total": 2.382
+      },
+      {
+        "fixture": "Switzerland vs Colombia",
+        "score": "0-0",
+        "lambda_home": 1.066,
+        "lambda_away": 1.466,
+        "lambda_total": 2.532,
+        "actual_home": 0,
+        "actual_away": 0,
+        "actual_total": 0,
+        "p_over25": 0.464,
+        "actual_over25": 0,
+        "error_total": -2.532
+      }
+    ],
+    "dist_actual": [
+      0.0833,
+      0.1389,
+      0.2222,
+      0.25,
+      0.0556,
+      0.1944,
+      0.0556,
+      0.0,
+      0.0
+    ],
+    "dist_expected": [
+      0.091,
+      0.2116,
+      0.2522,
+      0.2054,
+      0.1286,
+      0.0659,
+      0.0288,
+      0.011,
+      0.0038
+    ],
+    "dist_goals": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
   },
   "scoreline_accuracy": {
-    "n": 23,
-    "top1_rate": 0.087,
-    "top3_rate": 0.174,
-    "top6_rate": 0.261,
-    "note": "Top-1 scoreline prediction hit 8.7% of the time; top-6 covered 26.1%."
+    "n": 36,
+    "top1_rate": 0.1389,
+    "top3_rate": 0.25,
+    "top6_rate": 0.6667,
+    "per_match": [
+      {
+        "fixture": "Cape Verde vs Saudi Arabia",
+        "score": "0-0",
+        "top3_preds": [
+          {
+            "score": "0-0",
+            "prob": 15.72
+          },
+          {
+            "score": "0-1",
+            "prob": 14.97
+          },
+          {
+            "score": "1-0",
+            "prob": 14.12
+          }
+        ],
+        "top1_hit": true,
+        "top3_hit": true
+      },
+      {
+        "fixture": "Egypt vs Iran",
+        "score": "1-1",
+        "top3_preds": [
+          {
+            "score": "0-0",
+            "prob": 15.72
+          },
+          {
+            "score": "0-1",
+            "prob": 15.48
+          },
+          {
+            "score": "1-0",
+            "prob": 13.61
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "New Zealand vs Belgium",
+        "score": "1-5",
+        "top3_preds": [
+          {
+            "score": "0-2",
+            "prob": 15.7
+          },
+          {
+            "score": "0-1",
+            "prob": 13.08
+          },
+          {
+            "score": "0-3",
+            "prob": 12.56
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Norway vs France",
+        "score": "1-4",
+        "top3_preds": [
+          {
+            "score": "0-1",
+            "prob": 14.72
+          },
+          {
+            "score": "1-1",
+            "prob": 11.76
+          },
+          {
+            "score": "0-2",
+            "prob": 11.52
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Senegal vs Iraq",
+        "score": "5-0",
+        "top3_preds": [
+          {
+            "score": "1-0",
+            "prob": 18.24
+          },
+          {
+            "score": "0-0",
+            "prob": 13.37
+          },
+          {
+            "score": "2-0",
+            "prob": 12.44
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Uruguay vs Spain",
+        "score": "0-1",
+        "top3_preds": [
+          {
+            "score": "0-1",
+            "prob": 15.25
+          },
+          {
+            "score": "1-1",
+            "prob": 12.19
+          },
+          {
+            "score": "0-2",
+            "prob": 11.13
+          }
+        ],
+        "top1_hit": true,
+        "top3_hit": true
+      },
+      {
+        "fixture": "Algeria vs Austria",
+        "score": "3-3",
+        "top3_preds": [
+          {
+            "score": "1-1",
+            "prob": 12.89
+          },
+          {
+            "score": "0-1",
+            "prob": 11.35
+          },
+          {
+            "score": "1-0",
+            "prob": 9.84
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Colombia vs Portugal",
+        "score": "0-0",
+        "top3_preds": [
+          {
+            "score": "0-1",
+            "prob": 13.56
+          },
+          {
+            "score": "1-1",
+            "prob": 13.44
+          },
+          {
+            "score": "0-0",
+            "prob": 12.1
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": true
+      },
+      {
+        "fixture": "Croatia vs Ghana",
+        "score": "2-1",
+        "top3_preds": [
+          {
+            "score": "1-0",
+            "prob": 16.19
+          },
+          {
+            "score": "2-0",
+            "prob": 12.76
+          },
+          {
+            "score": "1-1",
+            "prob": 11.33
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "DR Congo vs Uzbekistan",
+        "score": "3-1",
+        "top3_preds": [
+          {
+            "score": "0-1",
+            "prob": 14.13
+          },
+          {
+            "score": "0-0",
+            "prob": 13.92
+          },
+          {
+            "score": "1-1",
+            "prob": 13.52
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Jordan vs Argentina",
+        "score": "1-3",
+        "top3_preds": [
+          {
+            "score": "0-2",
+            "prob": 16.82
+          },
+          {
+            "score": "0-3",
+            "prob": 14.49
+          },
+          {
+            "score": "0-1",
+            "prob": 13.02
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Panama vs England",
+        "score": "0-2",
+        "top3_preds": [
+          {
+            "score": "0-2",
+            "prob": 17.05
+          },
+          {
+            "score": "0-1",
+            "prob": 15.37
+          },
+          {
+            "score": "0-3",
+            "prob": 12.62
+          }
+        ],
+        "top1_hit": true,
+        "top3_hit": true
+      },
+      {
+        "fixture": "South Africa vs Canada",
+        "score": "0-1",
+        "top3_preds": [
+          {
+            "score": "1-0",
+            "prob": 13.78
+          },
+          {
+            "score": "1-1",
+            "prob": 13.5
+          },
+          {
+            "score": "0-0",
+            "prob": 12.96
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Brazil vs Japan",
+        "score": "2-1",
+        "top3_preds": [
+          {
+            "score": "2-0",
+            "prob": 12.93
+          },
+          {
+            "score": "1-0",
+            "prob": 10.64
+          },
+          {
+            "score": "3-0",
+            "prob": 10.47
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Germany vs Paraguay",
+        "score": "1-1",
+        "top3_preds": [
+          {
+            "score": "2-0",
+            "prob": 11.52
+          },
+          {
+            "score": "1-0",
+            "prob": 10.14
+          },
+          {
+            "score": "2-1",
+            "prob": 9.65
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Netherlands vs Morocco",
+        "score": "1-1",
+        "top3_preds": [
+          {
+            "score": "1-0",
+            "prob": 14.53
+          },
+          {
+            "score": "2-0",
+            "prob": 11.77
+          },
+          {
+            "score": "1-1",
+            "prob": 11.5
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": true
+      },
+      {
+        "fixture": "France vs Sweden",
+        "score": "3-0",
+        "top3_preds": [
+          {
+            "score": "2-0",
+            "prob": 11.97
+          },
+          {
+            "score": "1-0",
+            "prob": 11.42
+          },
+          {
+            "score": "2-1",
+            "prob": 9.74
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Ivory Coast vs Norway",
+        "score": "1-2",
+        "top3_preds": [
+          {
+            "score": "1-1",
+            "prob": 13.24
+          },
+          {
+            "score": "0-1",
+            "prob": 13.13
+          },
+          {
+            "score": "1-0",
+            "prob": 10.81
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Mexico vs Ecuador",
+        "score": "2-0",
+        "top3_preds": [
+          {
+            "score": "1-1",
+            "prob": 12.95
+          },
+          {
+            "score": "1-0",
+            "prob": 12.83
+          },
+          {
+            "score": "0-1",
+            "prob": 9.77
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Belgium vs Senegal",
+        "score": "3-2",
+        "top3_preds": [
+          {
+            "score": "1-0",
+            "prob": 14.06
+          },
+          {
+            "score": "1-1",
+            "prob": 12.13
+          },
+          {
+            "score": "2-0",
+            "prob": 10.64
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "England vs DR Congo",
+        "score": "2-1",
+        "top3_preds": [
+          {
+            "score": "1-0",
+            "prob": 17.29
+          },
+          {
+            "score": "2-0",
+            "prob": 17.27
+          },
+          {
+            "score": "3-0",
+            "prob": 11.5
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "United States vs Bosnia and Herzegovina",
+        "score": "2-0",
+        "top3_preds": [
+          {
+            "score": "1-0",
+            "prob": 11.61
+          },
+          {
+            "score": "1-1",
+            "prob": 11.06
+          },
+          {
+            "score": "2-0",
+            "prob": 10.3
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": true
+      },
+      {
+        "fixture": "Portugal vs Croatia",
+        "score": "2-1",
+        "top3_preds": [
+          {
+            "score": "1-0",
+            "prob": 13.57
+          },
+          {
+            "score": "1-1",
+            "prob": 12.71
+          },
+          {
+            "score": "0-0",
+            "prob": 9.77
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Spain vs Austria",
+        "score": "3-0",
+        "top3_preds": [
+          {
+            "score": "1-0",
+            "prob": 13.82
+          },
+          {
+            "score": "2-0",
+            "prob": 13.15
+          },
+          {
+            "score": "1-1",
+            "prob": 9.94
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Switzerland vs Algeria",
+        "score": "2-0",
+        "top3_preds": [
+          {
+            "score": "1-1",
+            "prob": 12.41
+          },
+          {
+            "score": "1-0",
+            "prob": 12.13
+          },
+          {
+            "score": "2-1",
+            "prob": 9.15
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Argentina vs Cape Verde",
+        "score": "3-2",
+        "top3_preds": [
+          {
+            "score": "2-0",
+            "prob": 18.07
+          },
+          {
+            "score": "1-0",
+            "prob": 16.32
+          },
+          {
+            "score": "3-0",
+            "prob": 13.34
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Australia vs Egypt",
+        "score": "1-1",
+        "top3_preds": [
+          {
+            "score": "0-0",
+            "prob": 15.48
+          },
+          {
+            "score": "1-0",
+            "prob": 14.83
+          },
+          {
+            "score": "0-1",
+            "prob": 14.05
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Colombia vs Ghana",
+        "score": "1-0",
+        "top3_preds": [
+          {
+            "score": "1-0",
+            "prob": 17.93
+          },
+          {
+            "score": "2-0",
+            "prob": 14.87
+          },
+          {
+            "score": "0-0",
+            "prob": 10.81
+          }
+        ],
+        "top1_hit": true,
+        "top3_hit": true
+      },
+      {
+        "fixture": "Canada vs Morocco",
+        "score": "0-3",
+        "top3_preds": [
+          {
+            "score": "0-1",
+            "prob": 18.79
+          },
+          {
+            "score": "0-0",
+            "prob": 16.12
+          },
+          {
+            "score": "1-1",
+            "prob": 12.39
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Paraguay vs France",
+        "score": "0-1",
+        "top3_preds": [
+          {
+            "score": "0-1",
+            "prob": 14.29
+          },
+          {
+            "score": "0-2",
+            "prob": 12.73
+          },
+          {
+            "score": "1-1",
+            "prob": 10.59
+          }
+        ],
+        "top1_hit": true,
+        "top3_hit": true
+      },
+      {
+        "fixture": "Brazil vs Norway",
+        "score": "1-2",
+        "top3_preds": [
+          {
+            "score": "2-0",
+            "prob": 11.57
+          },
+          {
+            "score": "1-0",
+            "prob": 10.13
+          },
+          {
+            "score": "2-1",
+            "prob": 9.62
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Mexico vs England",
+        "score": "2-3",
+        "top3_preds": [
+          {
+            "score": "1-1",
+            "prob": 11.47
+          },
+          {
+            "score": "0-1",
+            "prob": 10.36
+          },
+          {
+            "score": "1-2",
+            "prob": 9.62
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Portugal vs Spain",
+        "score": "0-1",
+        "top3_preds": [
+          {
+            "score": "1-1",
+            "prob": 12.14
+          },
+          {
+            "score": "0-1",
+            "prob": 10.68
+          },
+          {
+            "score": "1-2",
+            "prob": 9.2
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": true
+      },
+      {
+        "fixture": "United States vs Belgium",
+        "score": "1-4",
+        "top3_preds": [
+          {
+            "score": "1-1",
+            "prob": 9.57
+          },
+          {
+            "score": "1-2",
+            "prob": 9.38
+          },
+          {
+            "score": "0-1",
+            "prob": 6.91
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Argentina vs Egypt",
+        "score": "3-2",
+        "top3_preds": [
+          {
+            "score": "1-0",
+            "prob": 14.5
+          },
+          {
+            "score": "2-0",
+            "prob": 14.42
+          },
+          {
+            "score": "3-0",
+            "prob": 9.55
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "Switzerland vs Colombia",
+        "score": "0-0",
+        "top3_preds": [
+          {
+            "score": "1-1",
+            "prob": 12.42
+          },
+          {
+            "score": "0-1",
+            "prob": 11.65
+          },
+          {
+            "score": "1-2",
+            "prob": 9.11
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      }
+    ]
   },
   "outcome_table": [
     {
@@ -69,387 +1288,2828 @@
       "date": "2026-06-12",
       "score": "4-1",
       "outcome": "home",
-      "model": {"home": 0.439, "draw": 0.295, "away": 0.266},
-      "market": {"home": 0.465, "draw": 0.298, "away": 0.237},
-      "model_brier": 0.236,
-      "market_brier": 0.216,
+      "model": {
+        "away": 0.266,
+        "draw": 0.295,
+        "home": 0.439
+      },
+      "elo": {
+        "away": 0.313,
+        "draw": 0.291,
+        "home": 0.396
+      },
+      "dc": {
+        "away": 0.278,
+        "draw": 0.293,
+        "home": 0.429
+      },
+      "market": {
+        "away": 0.237,
+        "draw": 0.298,
+        "home": 0.465
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.2363,
+      "market_brier": 0.2156,
+      "model_logloss": 0.8235,
       "model_correct": 1,
       "market_correct": 1,
-      "model_edge_brier": -0.020
-    },
-    {
-      "fixture": "Qatar vs Switzerland",
-      "date": "2026-06-13",
-      "score": "1-1",
-      "outcome": "draw",
-      "model": {"home": 0.077, "draw": 0.160, "away": 0.763},
-      "market": {"home": 0.057, "draw": 0.142, "away": 0.800},
-      "model_brier": 0.647,
-      "market_brier": 0.690,
-      "model_correct": 0,
-      "market_correct": 0,
-      "model_edge_brier": 0.043
-    },
-    {
-      "fixture": "Brazil vs Morocco",
-      "date": "2026-06-13",
-      "score": "1-1",
-      "outcome": "draw",
-      "model": {"home": 0.560, "draw": 0.261, "away": 0.179},
-      "market": {"home": 0.580, "draw": 0.247, "away": 0.172},
-      "model_brier": 0.446,
-      "market_brier": 0.466,
-      "model_correct": 0,
-      "market_correct": 0,
-      "model_edge_brier": 0.020
-    },
-    {
-      "fixture": "Haiti vs Scotland",
-      "date": "2026-06-13",
-      "score": "0-1",
-      "outcome": "away",
-      "model": {"home": 0.169, "draw": 0.235, "away": 0.595},
-      "market": {"home": 0.156, "draw": 0.223, "away": 0.621},
-      "model_brier": 0.124,
-      "market_brier": 0.109,
-      "model_correct": 1,
-      "market_correct": 1,
-      "model_edge_brier": -0.015
+      "model_edge_brier": -0.0207
     },
     {
       "fixture": "Australia vs Turkey",
       "date": "2026-06-13",
       "score": "2-0",
       "outcome": "home",
-      "model": {"home": 0.245, "draw": 0.275, "away": 0.480},
-      "market": {"home": 0.181, "draw": 0.255, "away": 0.564},
-      "model_brier": 0.438,
+      "model": {
+        "away": 0.48,
+        "draw": 0.275,
+        "home": 0.245
+      },
+      "elo": {
+        "away": 0.404,
+        "draw": 0.29,
+        "home": 0.306
+      },
+      "dc": {
+        "away": 0.386,
+        "draw": 0.3,
+        "home": 0.314
+      },
+      "market": {
+        "away": 0.564,
+        "draw": 0.255,
+        "home": 0.181
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.4375,
       "market_brier": 0.527,
+      "model_logloss": 1.4046,
       "model_correct": 0,
       "market_correct": 0,
-      "model_edge_brier": 0.089
+      "model_edge_brier": 0.0895
     },
     {
-      "fixture": "Germany vs Curaçao",
+      "fixture": "Brazil vs Morocco",
+      "date": "2026-06-13",
+      "score": "1-1",
+      "outcome": "draw",
+      "model": {
+        "away": 0.179,
+        "draw": 0.261,
+        "home": 0.56
+      },
+      "elo": {
+        "away": 0.232,
+        "draw": 0.27,
+        "home": 0.498
+      },
+      "dc": {
+        "away": 0.141,
+        "draw": 0.278,
+        "home": 0.581
+      },
+      "market": {
+        "away": 0.172,
+        "draw": 0.247,
+        "home": 0.58
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.4462,
+      "market_brier": 0.4666,
+      "model_logloss": 1.3445,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": 0.0204
+    },
+    {
+      "fixture": "Haiti vs Scotland",
+      "date": "2026-06-13",
+      "score": "0-1",
+      "outcome": "away",
+      "model": {
+        "away": 0.595,
+        "draw": 0.235,
+        "home": 0.169
+      },
+      "elo": {
+        "away": 0.484,
+        "draw": 0.274,
+        "home": 0.242
+      },
+      "dc": {
+        "away": 0.655,
+        "draw": 0.222,
+        "home": 0.123
+      },
+      "market": {
+        "away": 0.621,
+        "draw": 0.223,
+        "home": 0.156
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.1239,
+      "market_brier": 0.1086,
+      "model_logloss": 0.5185,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0153
+    },
+    {
+      "fixture": "Qatar vs Switzerland",
+      "date": "2026-06-13",
+      "score": "1-1",
+      "outcome": "draw",
+      "model": {
+        "away": 0.763,
+        "draw": 0.16,
+        "home": 0.077
+      },
+      "elo": {
+        "away": 0.752,
+        "draw": 0.158,
+        "home": 0.09
+      },
+      "dc": {
+        "away": 0.7,
+        "draw": 0.197,
+        "home": 0.102
+      },
+      "market": {
+        "away": 0.8,
+        "draw": 0.142,
+        "home": 0.057
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.6471,
+      "market_brier": 0.6897,
+      "model_logloss": 1.8325,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": 0.0427
+    },
+    {
+      "fixture": "Germany vs Cura\u00e7ao",
       "date": "2026-06-14",
       "score": "7-1",
       "outcome": "home",
-      "model": {"home": 0.914, "draw": 0.060, "away": 0.026},
-      "market": {"home": 0.944, "draw": 0.041, "away": 0.015},
-      "model_brier": 0.006,
-      "market_brier": 0.003,
+      "model": {
+        "away": 0.026,
+        "draw": 0.06,
+        "home": 0.914
+      },
+      "elo": {
+        "away": 0.063,
+        "draw": 0.121,
+        "home": 0.816
+      },
+      "dc": {
+        "away": 0.01,
+        "draw": 0.038,
+        "home": 0.952
+      },
+      "market": {
+        "away": 0.015,
+        "draw": 0.041,
+        "home": 0.944
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.0059,
+      "market_brier": 0.0025,
+      "model_logloss": 0.0901,
       "model_correct": 1,
       "market_correct": 1,
-      "model_edge_brier": -0.003
-    },
-    {
-      "fixture": "Netherlands vs Japan",
-      "date": "2026-06-14",
-      "score": "2-2",
-      "outcome": "draw",
-      "model": {"home": 0.477, "draw": 0.272, "away": 0.251},
-      "market": {"home": 0.487, "draw": 0.266, "away": 0.247},
-      "model_brier": 0.411,
-      "market_brier": 0.419,
-      "model_correct": 0,
-      "market_correct": 0,
-      "model_edge_brier": 0.008
+      "model_edge_brier": -0.0033
     },
     {
       "fixture": "Ivory Coast vs Ecuador",
       "date": "2026-06-14",
       "score": "1-0",
       "outcome": "home",
-      "model": {"home": 0.243, "draw": 0.310, "away": 0.447},
-      "market": {"home": 0.262, "draw": 0.340, "away": 0.398},
-      "model_brier": 0.435,
-      "market_brier": 0.410,
+      "model": {
+        "away": 0.447,
+        "draw": 0.31,
+        "home": 0.243
+      },
+      "elo": {
+        "away": 0.579,
+        "draw": 0.242,
+        "home": 0.179
+      },
+      "dc": {
+        "away": 0.412,
+        "draw": 0.316,
+        "home": 0.271
+      },
+      "market": {
+        "away": 0.398,
+        "draw": 0.34,
+        "home": 0.262
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.434,
+      "market_brier": 0.4093,
+      "model_logloss": 1.4127,
       "model_correct": 0,
       "market_correct": 0,
-      "model_edge_brier": 0.025
+      "model_edge_brier": -0.0246
     },
     {
-      "fixture": "France vs Senegal",
-      "date": "2026-06-16",
-      "score": "3-1",
-      "outcome": "home",
-      "model": {"home": 0.632, "draw": 0.228, "away": 0.140},
-      "market": {"home": 0.664, "draw": 0.209, "away": 0.126},
-      "model_brier": 0.104,
-      "market_brier": 0.087,
-      "model_correct": 1,
-      "market_correct": 1,
-      "model_edge_brier": -0.017
-    },
-    {
-      "fixture": "Iraq vs Norway",
-      "date": "2026-06-16",
-      "score": "1-4",
-      "outcome": "away",
-      "model": {"home": 0.112, "draw": 0.194, "away": 0.695},
-      "market": {"home": 0.059, "draw": 0.135, "away": 0.806},
-      "model_brier": 0.072,
-      "market_brier": 0.030,
-      "model_correct": 1,
-      "market_correct": 1,
-      "model_edge_brier": -0.042
+      "fixture": "Netherlands vs Japan",
+      "date": "2026-06-14",
+      "score": "2-2",
+      "outcome": "draw",
+      "model": {
+        "away": 0.251,
+        "draw": 0.272,
+        "home": 0.477
+      },
+      "elo": {
+        "away": 0.303,
+        "draw": 0.289,
+        "home": 0.407
+      },
+      "dc": {
+        "away": 0.207,
+        "draw": 0.264,
+        "home": 0.529
+      },
+      "market": {
+        "away": 0.247,
+        "draw": 0.266,
+        "home": 0.487
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.4107,
+      "market_brier": 0.4181,
+      "model_logloss": 1.3034,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": 0.0074
     },
     {
       "fixture": "Argentina vs Algeria",
       "date": "2026-06-16",
       "score": "3-0",
       "outcome": "home",
-      "model": {"home": 0.688, "draw": 0.203, "away": 0.109},
-      "market": {"home": 0.678, "draw": 0.211, "away": 0.111},
-      "model_brier": 0.075,
-      "market_brier": 0.080,
+      "model": {
+        "away": 0.109,
+        "draw": 0.203,
+        "home": 0.688
+      },
+      "elo": {
+        "away": 0.095,
+        "draw": 0.165,
+        "home": 0.74
+      },
+      "dc": {
+        "away": 0.121,
+        "draw": 0.225,
+        "home": 0.654
+      },
+      "market": {
+        "away": 0.111,
+        "draw": 0.211,
+        "home": 0.678
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.0754,
+      "market_brier": 0.0803,
+      "model_logloss": 0.3745,
       "model_correct": 1,
       "market_correct": 1,
-      "model_edge_brier": 0.005
+      "model_edge_brier": 0.0049
     },
     {
       "fixture": "Austria vs Jordan",
       "date": "2026-06-16",
       "score": "3-1",
       "outcome": "home",
-      "model": {"home": 0.651, "draw": 0.215, "away": 0.134},
-      "market": {"home": 0.719, "draw": 0.183, "away": 0.099},
-      "model_brier": 0.093,
-      "market_brier": 0.061,
+      "model": {
+        "away": 0.134,
+        "draw": 0.215,
+        "home": 0.651
+      },
+      "elo": {
+        "away": 0.199,
+        "draw": 0.255,
+        "home": 0.547
+      },
+      "dc": {
+        "away": 0.14,
+        "draw": 0.24,
+        "home": 0.62
+      },
+      "market": {
+        "away": 0.099,
+        "draw": 0.183,
+        "home": 0.719
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.0931,
+      "market_brier": 0.0612,
+      "model_logloss": 0.4294,
       "model_correct": 1,
       "market_correct": 1,
-      "model_edge_brier": -0.032
+      "model_edge_brier": -0.0319
     },
     {
-      "fixture": "Portugal vs DR Congo",
-      "date": "2026-06-17",
-      "score": "1-1",
-      "outcome": "draw",
-      "model": {"home": 0.740, "draw": 0.175, "away": 0.086},
-      "market": {"home": 0.759, "draw": 0.164, "away": 0.077},
-      "model_brier": 0.618,
-      "market_brier": 0.641,
-      "model_correct": 0,
-      "market_correct": 0,
-      "model_edge_brier": 0.023
+      "fixture": "France vs Senegal",
+      "date": "2026-06-16",
+      "score": "3-1",
+      "outcome": "home",
+      "model": {
+        "away": 0.14,
+        "draw": 0.228,
+        "home": 0.632
+      },
+      "elo": {
+        "away": 0.148,
+        "draw": 0.22,
+        "home": 0.632
+      },
+      "dc": {
+        "away": 0.159,
+        "draw": 0.274,
+        "home": 0.567
+      },
+      "market": {
+        "away": 0.126,
+        "draw": 0.209,
+        "home": 0.664
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.1036,
+      "market_brier": 0.0862,
+      "model_logloss": 0.459,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0174
+    },
+    {
+      "fixture": "Iraq vs Norway",
+      "date": "2026-06-16",
+      "score": "1-4",
+      "outcome": "away",
+      "model": {
+        "away": 0.695,
+        "draw": 0.194,
+        "home": 0.112
+      },
+      "elo": {
+        "away": 0.57,
+        "draw": 0.246,
+        "home": 0.184
+      },
+      "dc": {
+        "away": 0.596,
+        "draw": 0.26,
+        "home": 0.144
+      },
+      "market": {
+        "away": 0.806,
+        "draw": 0.135,
+        "home": 0.059
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.0717,
+      "market_brier": 0.0298,
+      "model_logloss": 0.3645,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0419
     },
     {
       "fixture": "England vs Croatia",
       "date": "2026-06-17",
       "score": "4-2",
       "outcome": "home",
-      "model": {"home": 0.533, "draw": 0.268, "away": 0.199},
-      "market": {"home": 0.559, "draw": 0.257, "away": 0.184},
-      "model_brier": 0.165,
-      "market_brier": 0.147,
+      "model": {
+        "away": 0.199,
+        "draw": 0.268,
+        "home": 0.533
+      },
+      "elo": {
+        "away": 0.205,
+        "draw": 0.258,
+        "home": 0.537
+      },
+      "dc": {
+        "away": 0.224,
+        "draw": 0.299,
+        "home": 0.477
+      },
+      "market": {
+        "away": 0.184,
+        "draw": 0.257,
+        "home": 0.559
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.1645,
+      "market_brier": 0.1469,
+      "model_logloss": 0.6285,
       "model_correct": 1,
       "market_correct": 1,
-      "model_edge_brier": -0.018
+      "model_edge_brier": -0.0176
     },
     {
       "fixture": "Ghana vs Panama",
       "date": "2026-06-17",
       "score": "1-0",
       "outcome": "home",
-      "model": {"home": 0.366, "draw": 0.280, "away": 0.354},
-      "market": {"home": 0.435, "draw": 0.289, "away": 0.277},
-      "model_brier": 0.303,
-      "market_brier": 0.240,
+      "model": {
+        "away": 0.354,
+        "draw": 0.28,
+        "home": 0.366
+      },
+      "elo": {
+        "away": 0.597,
+        "draw": 0.235,
+        "home": 0.168
+      },
+      "dc": {
+        "away": 0.267,
+        "draw": 0.308,
+        "home": 0.425
+      },
+      "market": {
+        "away": 0.276,
+        "draw": 0.289,
+        "home": 0.435
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.3031,
+      "market_brier": 0.2394,
+      "model_logloss": 1.006,
       "model_correct": 1,
       "market_correct": 1,
-      "model_edge_brier": 0.063
+      "model_edge_brier": -0.0637
+    },
+    {
+      "fixture": "Portugal vs DR Congo",
+      "date": "2026-06-17",
+      "score": "1-1",
+      "outcome": "draw",
+      "model": {
+        "away": 0.086,
+        "draw": 0.175,
+        "home": 0.74
+      },
+      "elo": {
+        "away": 0.113,
+        "draw": 0.186,
+        "home": 0.702
+      },
+      "dc": {
+        "away": 0.075,
+        "draw": 0.185,
+        "home": 0.74
+      },
+      "market": {
+        "away": 0.077,
+        "draw": 0.164,
+        "home": 0.759
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.6178,
+      "market_brier": 0.6401,
+      "model_logloss": 1.7452,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": 0.0222
     },
     {
       "fixture": "Uzbekistan vs Colombia",
       "date": "2026-06-17",
       "score": "1-3",
       "outcome": "away",
-      "model": {"home": 0.113, "draw": 0.213, "away": 0.674},
-      "market": {"home": 0.094, "draw": 0.195, "away": 0.712},
-      "model_brier": 0.082,
-      "market_brier": 0.065,
+      "model": {
+        "away": 0.674,
+        "draw": 0.213,
+        "home": 0.113
+      },
+      "elo": {
+        "away": 0.613,
+        "draw": 0.228,
+        "home": 0.159
+      },
+      "dc": {
+        "away": 0.657,
+        "draw": 0.235,
+        "home": 0.108
+      },
+      "market": {
+        "away": 0.712,
+        "draw": 0.195,
+        "home": 0.094
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.0824,
+      "market_brier": 0.0649,
+      "model_logloss": 0.3953,
       "model_correct": 1,
       "market_correct": 1,
-      "model_edge_brier": -0.017
-    },
-    {
-      "fixture": "Czech Republic vs South Africa",
-      "date": "2026-06-18",
-      "score": "1-1",
-      "outcome": "draw",
-      "model": {"home": 0.529, "draw": 0.268, "away": 0.203},
-      "market": {"home": 0.545, "draw": 0.255, "away": 0.200},
-      "model_brier": 0.428,
-      "market_brier": 0.446,
-      "model_correct": 0,
-      "market_correct": 0,
-      "model_edge_brier": 0.018
-    },
-    {
-      "fixture": "Switzerland vs Bosnia and Herzegovina",
-      "date": "2026-06-18",
-      "score": "4-1",
-      "outcome": "home",
-      "model": {"home": 0.628, "draw": 0.226, "away": 0.146},
-      "market": {"home": 0.629, "draw": 0.228, "away": 0.143},
-      "model_brier": 0.105,
-      "market_brier": 0.105,
-      "model_correct": 1,
-      "market_correct": 1,
-      "model_edge_brier": 0.000
+      "model_edge_brier": -0.0176
     },
     {
       "fixture": "Canada vs Qatar",
       "date": "2026-06-18",
       "score": "6-0",
       "outcome": "home",
-      "model": {"home": 0.729, "draw": 0.174, "away": 0.097},
-      "market": {"home": 0.763, "draw": 0.163, "away": 0.074},
-      "model_brier": 0.056,
+      "model": {
+        "away": 0.097,
+        "draw": 0.174,
+        "home": 0.729
+      },
+      "elo": {
+        "away": 0.075,
+        "draw": 0.138,
+        "home": 0.788
+      },
+      "dc": {
+        "away": 0.166,
+        "draw": 0.234,
+        "home": 0.6
+      },
+      "market": {
+        "away": 0.074,
+        "draw": 0.163,
+        "home": 0.763
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.0567,
       "market_brier": 0.044,
+      "model_logloss": 0.3166,
       "model_correct": 1,
       "market_correct": 1,
-      "model_edge_brier": -0.012
+      "model_edge_brier": -0.0127
+    },
+    {
+      "fixture": "Czech Republic vs South Africa",
+      "date": "2026-06-18",
+      "score": "1-1",
+      "outcome": "draw",
+      "model": {
+        "away": 0.203,
+        "draw": 0.268,
+        "home": 0.529
+      },
+      "elo": {
+        "away": 0.216,
+        "draw": 0.264,
+        "home": 0.52
+      },
+      "dc": {
+        "away": 0.197,
+        "draw": 0.299,
+        "home": 0.504
+      },
+      "market": {
+        "away": 0.2,
+        "draw": 0.255,
+        "home": 0.545
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.4283,
+      "market_brier": 0.4464,
+      "model_logloss": 1.3168,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": 0.0181
     },
     {
       "fixture": "Mexico vs South Korea",
       "date": "2026-06-18",
       "score": "1-0",
       "outcome": "home",
-      "model": {"home": 0.522, "draw": 0.268, "away": 0.211},
-      "market": {"home": 0.476, "draw": 0.289, "away": 0.235},
-      "model_brier": 0.173,
-      "market_brier": 0.207,
+      "model": {
+        "away": 0.211,
+        "draw": 0.268,
+        "home": 0.522
+      },
+      "elo": {
+        "away": 0.165,
+        "draw": 0.233,
+        "home": 0.602
+      },
+      "dc": {
+        "away": 0.207,
+        "draw": 0.26,
+        "home": 0.532
+      },
+      "market": {
+        "away": 0.235,
+        "draw": 0.289,
+        "home": 0.476
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.1725,
+      "market_brier": 0.2066,
+      "model_logloss": 0.6509,
       "model_correct": 1,
       "market_correct": 1,
-      "model_edge_brier": 0.034
+      "model_edge_brier": 0.0342
     },
     {
-      "fixture": "United States vs Australia",
-      "date": "2026-06-19",
-      "score": "2-0",
+      "fixture": "Switzerland vs Bosnia and Herzegovina",
+      "date": "2026-06-18",
+      "score": "4-1",
       "outcome": "home",
-      "model": {"home": 0.520, "draw": 0.252, "away": 0.229},
-      "market": {"home": 0.607, "draw": 0.218, "away": 0.175},
-      "model_brier": 0.173,
-      "market_brier": 0.116,
+      "model": {
+        "away": 0.146,
+        "draw": 0.226,
+        "home": 0.628
+      },
+      "elo": {
+        "away": 0.113,
+        "draw": 0.186,
+        "home": 0.701
+      },
+      "dc": {
+        "away": 0.186,
+        "draw": 0.262,
+        "home": 0.552
+      },
+      "market": {
+        "away": 0.143,
+        "draw": 0.228,
+        "home": 0.629
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.1056,
+      "market_brier": 0.1052,
+      "model_logloss": 0.466,
       "model_correct": 1,
       "market_correct": 1,
-      "model_edge_brier": 0.057
+      "model_edge_brier": -0.0005
+    },
+    {
+      "fixture": "Brazil vs Haiti",
+      "date": "2026-06-19",
+      "score": "3-0",
+      "outcome": "home",
+      "model": {
+        "away": 0.03,
+        "draw": 0.078,
+        "home": 0.891
+      },
+      "elo": {
+        "away": 0.066,
+        "draw": 0.125,
+        "home": 0.81
+      },
+      "dc": {
+        "away": 0.013,
+        "draw": 0.051,
+        "home": 0.936
+      },
+      "market": {
+        "away": 0.033,
+        "draw": 0.084,
+        "home": 0.883
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.0094,
+      "market_brier": 0.0109,
+      "model_logloss": 0.1149,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": 0.0015
     },
     {
       "fixture": "Scotland vs Morocco",
       "date": "2026-06-19",
       "score": "0-1",
       "outcome": "away",
-      "model": {"home": 0.194, "draw": 0.286, "away": 0.521},
-      "market": {"home": 0.164, "draw": 0.262, "away": 0.575},
-      "model_brier": 0.175,
-      "market_brier": 0.138,
+      "model": {
+        "away": 0.513,
+        "draw": 0.288,
+        "home": 0.199
+      },
+      "elo": {
+        "away": 0.487,
+        "draw": 0.274,
+        "home": 0.24
+      },
+      "dc": {
+        "away": 0.424,
+        "draw": 0.338,
+        "home": 0.239
+      },
+      "market": {
+        "away": 0.562,
+        "draw": 0.266,
+        "home": 0.172
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.1801,
+      "market_brier": 0.1463,
+      "model_logloss": 0.6679,
       "model_correct": 1,
       "market_correct": 1,
-      "model_edge_brier": 0.037
+      "model_edge_brier": -0.0338
     },
     {
       "fixture": "Turkey vs Paraguay",
       "date": "2026-06-19",
       "score": "0-1",
       "outcome": "away",
-      "model": {"home": 0.439, "draw": 0.289, "away": 0.272},
-      "market": {"home": 0.468, "draw": 0.282, "away": 0.250},
-      "model_brier": 0.404,
-      "market_brier": 0.431,
+      "model": {
+        "away": 0.266,
+        "draw": 0.29,
+        "home": 0.444
+      },
+      "elo": {
+        "away": 0.281,
+        "draw": 0.285,
+        "home": 0.434
+      },
+      "dc": {
+        "away": 0.318,
+        "draw": 0.305,
+        "home": 0.378
+      },
+      "market": {
+        "away": 0.238,
+        "draw": 0.284,
+        "home": 0.478
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.4099,
+      "market_brier": 0.445,
+      "model_logloss": 1.324,
       "model_correct": 0,
       "market_correct": 0,
-      "model_edge_brier": 0.027
+      "model_edge_brier": 0.0352
+    },
+    {
+      "fixture": "United States vs Australia",
+      "date": "2026-06-19",
+      "score": "2-0",
+      "outcome": "home",
+      "model": {
+        "away": 0.229,
+        "draw": 0.252,
+        "home": 0.52
+      },
+      "elo": {
+        "away": 0.291,
+        "draw": 0.287,
+        "home": 0.422
+      },
+      "dc": {
+        "away": 0.273,
+        "draw": 0.284,
+        "home": 0.443
+      },
+      "market": {
+        "away": 0.175,
+        "draw": 0.218,
+        "home": 0.607
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.1731,
+      "market_brier": 0.1162,
+      "model_logloss": 0.6543,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0568
+    },
+    {
+      "fixture": "Ecuador vs Cura\u00e7ao",
+      "date": "2026-06-20",
+      "score": "0-0",
+      "outcome": "draw",
+      "model": {
+        "away": 0.046,
+        "draw": 0.114,
+        "home": 0.84
+      },
+      "elo": {
+        "away": 0.067,
+        "draw": 0.127,
+        "home": 0.806
+      },
+      "dc": {
+        "away": 0.035,
+        "draw": 0.115,
+        "home": 0.85
+      },
+      "market": {
+        "away": 0.047,
+        "draw": 0.111,
+        "home": 0.841
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.7467,
+      "market_brier": 0.7502,
+      "model_logloss": 2.1723,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": 0.0034
+    },
+    {
+      "fixture": "Netherlands vs Sweden",
+      "date": "2026-06-20",
+      "score": "5-1",
+      "outcome": "home",
+      "model": {
+        "away": 0.203,
+        "draw": 0.25,
+        "home": 0.547
+      },
+      "elo": {
+        "away": 0.154,
+        "draw": 0.224,
+        "home": 0.622
+      },
+      "dc": {
+        "away": 0.222,
+        "draw": 0.264,
+        "home": 0.514
+      },
+      "market": {
+        "away": 0.202,
+        "draw": 0.247,
+        "home": 0.551
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.1546,
+      "market_brier": 0.152,
+      "model_logloss": 0.6036,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0026
+    },
+    {
+      "fixture": "Tunisia vs Japan",
+      "date": "2026-06-20",
+      "score": "0-4",
+      "outcome": "away",
+      "model": {
+        "away": 0.6,
+        "draw": 0.244,
+        "home": 0.156
+      },
+      "elo": {
+        "away": 0.692,
+        "draw": 0.191,
+        "home": 0.118
+      },
+      "dc": {
+        "away": 0.449,
+        "draw": 0.307,
+        "home": 0.244
+      },
+      "market": {
+        "away": 0.66,
+        "draw": 0.221,
+        "home": 0.119
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.122,
+      "market_brier": 0.0893,
+      "model_logloss": 0.5111,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0327
+    },
+    {
+      "fixture": "Belgium vs Iran",
+      "date": "2026-06-21",
+      "score": "0-0",
+      "outcome": "draw",
+      "model": {
+        "away": 0.16,
+        "draw": 0.234,
+        "home": 0.606
+      },
+      "elo": {
+        "away": 0.264,
+        "draw": 0.281,
+        "home": 0.455
+      },
+      "dc": {
+        "away": 0.205,
+        "draw": 0.276,
+        "home": 0.519
+      },
+      "market": {
+        "away": 0.12,
+        "draw": 0.205,
+        "home": 0.675
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.49,
+      "market_brier": 0.551,
+      "model_logloss": 1.453,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": 0.0609
+    },
+    {
+      "fixture": "New Zealand vs Egypt",
+      "date": "2026-06-21",
+      "score": "1-3",
+      "outcome": "away",
+      "model": {
+        "away": 0.576,
+        "draw": 0.253,
+        "home": 0.171
+      },
+      "elo": {
+        "away": 0.414,
+        "draw": 0.289,
+        "home": 0.298
+      },
+      "dc": {
+        "away": 0.565,
+        "draw": 0.285,
+        "home": 0.15
+      },
+      "market": {
+        "away": 0.608,
+        "draw": 0.232,
+        "home": 0.16
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.1367,
+      "market_brier": 0.1166,
+      "model_logloss": 0.5522,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0202
+    },
+    {
+      "fixture": "Spain vs Saudi Arabia",
+      "date": "2026-06-21",
+      "score": "4-0",
+      "outcome": "home",
+      "model": {
+        "away": 0.036,
+        "draw": 0.104,
+        "home": 0.86
+      },
+      "elo": {
+        "away": 0.044,
+        "draw": 0.09,
+        "home": 0.866
+      },
+      "dc": {
+        "away": 0.049,
+        "draw": 0.146,
+        "home": 0.805
+      },
+      "market": {
+        "away": 0.028,
+        "draw": 0.085,
+        "home": 0.887
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.0158,
+      "market_brier": 0.0104,
+      "model_logloss": 0.1506,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0054
+    },
+    {
+      "fixture": "Uruguay vs Cape Verde",
+      "date": "2026-06-21",
+      "score": "2-2",
+      "outcome": "draw",
+      "model": {
+        "away": 0.107,
+        "draw": 0.227,
+        "home": 0.666
+      },
+      "elo": {
+        "away": 0.126,
+        "draw": 0.199,
+        "home": 0.675
+      },
+      "dc": {
+        "away": 0.104,
+        "draw": 0.238,
+        "home": 0.658
+      },
+      "market": {
+        "away": 0.105,
+        "draw": 0.227,
+        "home": 0.668
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.5257,
+      "market_brier": 0.5273,
+      "model_logloss": 1.4809,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": 0.0016
+    },
+    {
+      "fixture": "Argentina vs Austria",
+      "date": "2026-06-22",
+      "score": "2-0",
+      "outcome": "home",
+      "model": {
+        "away": 0.135,
+        "draw": 0.228,
+        "home": 0.637
+      },
+      "elo": {
+        "away": 0.108,
+        "draw": 0.18,
+        "home": 0.713
+      },
+      "dc": {
+        "away": 0.14,
+        "draw": 0.24,
+        "home": 0.619
+      },
+      "market": {
+        "away": 0.137,
+        "draw": 0.23,
+        "home": 0.634
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.1009,
+      "market_brier": 0.1029,
+      "model_logloss": 0.4508,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": 0.002
+    },
+    {
+      "fixture": "France vs Iraq",
+      "date": "2026-06-22",
+      "score": "3-0",
+      "outcome": "home",
+      "model": {
+        "away": 0.038,
+        "draw": 0.108,
+        "home": 0.854
+      },
+      "elo": {
+        "away": 0.057,
+        "draw": 0.111,
+        "home": 0.832
+      },
+      "dc": {
+        "away": 0.061,
+        "draw": 0.173,
+        "home": 0.766
+      },
+      "market": {
+        "away": 0.024,
+        "draw": 0.075,
+        "home": 0.901
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.0173,
+      "market_brier": 0.008,
+      "model_logloss": 0.1583,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0093
+    },
+    {
+      "fixture": "Jordan vs Algeria",
+      "date": "2026-06-22",
+      "score": "1-2",
+      "outcome": "away",
+      "model": {
+        "away": 0.596,
+        "draw": 0.24,
+        "home": 0.165
+      },
+      "elo": {
+        "away": 0.492,
+        "draw": 0.272,
+        "home": 0.236
+      },
+      "dc": {
+        "away": 0.577,
+        "draw": 0.254,
+        "home": 0.17
+      },
+      "market": {
+        "away": 0.622,
+        "draw": 0.227,
+        "home": 0.151
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.124,
+      "market_brier": 0.1083,
+      "model_logloss": 0.518,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0156
+    },
+    {
+      "fixture": "Norway vs Senegal",
+      "date": "2026-06-22",
+      "score": "3-2",
+      "outcome": "home",
+      "model": {
+        "away": 0.294,
+        "draw": 0.284,
+        "home": 0.421
+      },
+      "elo": {
+        "away": 0.241,
+        "draw": 0.274,
+        "home": 0.486
+      },
+      "dc": {
+        "away": 0.299,
+        "draw": 0.31,
+        "home": 0.391
+      },
+      "market": {
+        "away": 0.301,
+        "draw": 0.273,
+        "home": 0.426
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.2513,
+      "market_brier": 0.2477,
+      "model_logloss": 0.8647,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0037
+    },
+    {
+      "fixture": "Colombia vs DR Congo",
+      "date": "2026-06-23",
+      "score": "1-0",
+      "outcome": "home",
+      "model": {
+        "away": 0.114,
+        "draw": 0.223,
+        "home": 0.663
+      },
+      "elo": {
+        "away": 0.098,
+        "draw": 0.169,
+        "home": 0.733
+      },
+      "dc": {
+        "away": 0.095,
+        "draw": 0.223,
+        "home": 0.682
+      },
+      "market": {
+        "away": 0.126,
+        "draw": 0.232,
+        "home": 0.642
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.0881,
+      "market_brier": 0.099,
+      "model_logloss": 0.4109,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": 0.0109
+    },
+    {
+      "fixture": "England vs Ghana",
+      "date": "2026-06-23",
+      "score": "0-0",
+      "outcome": "draw",
+      "model": {
+        "away": 0.066,
+        "draw": 0.158,
+        "home": 0.777
+      },
+      "elo": {
+        "away": 0.049,
+        "draw": 0.098,
+        "home": 0.852
+      },
+      "dc": {
+        "away": 0.088,
+        "draw": 0.213,
+        "home": 0.699
+      },
+      "market": {
+        "away": 0.057,
+        "draw": 0.14,
+        "home": 0.803
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.6586,
+      "market_brier": 0.6939,
+      "model_logloss": 1.8475,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": 0.0353
+    },
+    {
+      "fixture": "Panama vs Croatia",
+      "date": "2026-06-23",
+      "score": "0-1",
+      "outcome": "away",
+      "model": {
+        "away": 0.628,
+        "draw": 0.233,
+        "home": 0.139
+      },
+      "elo": {
+        "away": 0.48,
+        "draw": 0.275,
+        "home": 0.244
+      },
+      "dc": {
+        "away": 0.673,
+        "draw": 0.216,
+        "home": 0.111
+      },
+      "market": {
+        "away": 0.63,
+        "draw": 0.235,
+        "home": 0.135
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.106,
+      "market_brier": 0.105,
+      "model_logloss": 0.465,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.001
+    },
+    {
+      "fixture": "Portugal vs Uzbekistan",
+      "date": "2026-06-23",
+      "score": "5-0",
+      "outcome": "home",
+      "model": {
+        "away": 0.07,
+        "draw": 0.158,
+        "home": 0.771
+      },
+      "elo": {
+        "away": 0.147,
+        "draw": 0.219,
+        "home": 0.635
+      },
+      "dc": {
+        "away": 0.085,
+        "draw": 0.193,
+        "home": 0.721
+      },
+      "market": {
+        "away": 0.05,
+        "draw": 0.131,
+        "home": 0.819
+      },
+      "lambda_home": null,
+      "lambda_away": null,
+      "model_brier": 0.0411,
+      "market_brier": 0.0261,
+      "model_logloss": 0.2596,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.015
+    },
+    {
+      "fixture": "Cape Verde vs Saudi Arabia",
+      "date": "2026-06-26",
+      "score": "0-0",
+      "outcome": "draw",
+      "model": {
+        "away": 0.344,
+        "draw": 0.304,
+        "home": 0.352
+      },
+      "elo": {
+        "away": 0.3,
+        "draw": 0.289,
+        "home": 0.411
+      },
+      "dc": {
+        "away": 0.346,
+        "draw": 0.336,
+        "home": 0.317
+      },
+      "market": {
+        "away": 0.351,
+        "draw": 0.29,
+        "home": 0.359
+      },
+      "lambda_home": 0.898,
+      "lambda_away": 0.952,
+      "model_brier": 0.3636,
+      "market_brier": 0.3782,
+      "model_logloss": 1.1915,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": 0.0146
+    },
+    {
+      "fixture": "Egypt vs Iran",
+      "date": "2026-06-26",
+      "score": "1-1",
+      "outcome": "draw",
+      "model": {
+        "away": 0.294,
+        "draw": 0.346,
+        "home": 0.359
+      },
+      "elo": {
+        "away": 0.365,
+        "draw": 0.293,
+        "home": 0.342
+      },
+      "dc": {
+        "away": 0.364,
+        "draw": 0.336,
+        "home": 0.3
+      },
+      "market": {
+        "away": 0.247,
+        "draw": 0.361,
+        "home": 0.392
+      },
+      "lambda_home": 0.866,
+      "lambda_away": 0.984,
+      "model_brier": 0.3214,
+      "market_brier": 0.3116,
+      "model_logloss": 1.06,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": -0.0098
+    },
+    {
+      "fixture": "New Zealand vs Belgium",
+      "date": "2026-06-26",
+      "score": "1-5",
+      "outcome": "away",
+      "model": {
+        "away": 0.791,
+        "draw": 0.139,
+        "home": 0.07
+      },
+      "elo": {
+        "away": 0.603,
+        "draw": 0.232,
+        "home": 0.164
+      },
+      "dc": {
+        "away": 0.792,
+        "draw": 0.151,
+        "home": 0.058
+      },
+      "market": {
+        "away": 0.822,
+        "draw": 0.117,
+        "home": 0.06
+      },
+      "lambda_home": 0.509,
+      "lambda_away": 2.401,
+      "model_brier": 0.0339,
+      "market_brier": 0.0245,
+      "model_logloss": 0.2341,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0094
+    },
+    {
+      "fixture": "Norway vs France",
+      "date": "2026-06-26",
+      "score": "1-4",
+      "outcome": "away",
+      "model": {
+        "away": 0.568,
+        "draw": 0.232,
+        "home": 0.2
+      },
+      "elo": {
+        "away": 0.501,
+        "draw": 0.27,
+        "home": 0.229
+      },
+      "dc": {
+        "away": 0.549,
+        "draw": 0.265,
+        "home": 0.185
+      },
+      "market": {
+        "away": 0.589,
+        "draw": 0.209,
+        "home": 0.202
+      },
+      "lambda_home": 0.799,
+      "lambda_away": 1.565,
+      "model_brier": 0.1401,
+      "market_brier": 0.1269,
+      "model_logloss": 0.5654,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0132
+    },
+    {
+      "fixture": "Senegal vs Iraq",
+      "date": "2026-06-26",
+      "score": "5-0",
+      "outcome": "home",
+      "model": {
+        "away": 0.112,
+        "draw": 0.192,
+        "home": 0.696
+      },
+      "elo": {
+        "away": 0.182,
+        "draw": 0.245,
+        "home": 0.573
+      },
+      "dc": {
+        "away": 0.172,
+        "draw": 0.292,
+        "home": 0.536
+      },
+      "market": {
+        "away": 0.07,
+        "draw": 0.134,
+        "home": 0.797
+      },
+      "lambda_home": 1.364,
+      "lambda_away": 0.648,
+      "model_brier": 0.0709,
+      "market_brier": 0.032,
+      "model_logloss": 0.3621,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0388
+    },
+    {
+      "fixture": "Uruguay vs Spain",
+      "date": "2026-06-26",
+      "score": "0-1",
+      "outcome": "away",
+      "model": {
+        "away": 0.566,
+        "draw": 0.265,
+        "home": 0.169
+      },
+      "elo": {
+        "away": 0.631,
+        "draw": 0.22,
+        "home": 0.149
+      },
+      "dc": {
+        "away": 0.522,
+        "draw": 0.279,
+        "home": 0.199
+      },
+      "market": {
+        "away": 0.577,
+        "draw": 0.266,
+        "home": 0.157
+      },
+      "lambda_home": 0.799,
+      "lambda_away": 1.46,
+      "model_brier": 0.1437,
+      "market_brier": 0.1371,
+      "model_logloss": 0.5693,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0065
+    },
+    {
+      "fixture": "Algeria vs Austria",
+      "date": "2026-06-27",
+      "score": "3-3",
+      "outcome": "draw",
+      "model": {
+        "away": 0.353,
+        "draw": 0.376,
+        "home": 0.271
+      },
+      "elo": {
+        "away": 0.356,
+        "draw": 0.293,
+        "home": 0.35
+      },
+      "dc": {
+        "away": 0.4,
+        "draw": 0.285,
+        "home": 0.316
+      },
+      "market": {
+        "away": 0.329,
+        "draw": 0.435,
+        "home": 0.235
+      },
+      "lambda_home": 1.136,
+      "lambda_away": 1.31,
+      "model_brier": 0.2937,
+      "market_brier": 0.2413,
+      "model_logloss": 0.9782,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0525
+    },
+    {
+      "fixture": "Colombia vs Portugal",
+      "date": "2026-06-27",
+      "score": "0-0",
+      "outcome": "draw",
+      "model": {
+        "away": 0.449,
+        "draw": 0.277,
+        "home": 0.274
+      },
+      "elo": {
+        "away": 0.272,
+        "draw": 0.284,
+        "home": 0.445
+      },
+      "dc": {
+        "away": 0.378,
+        "draw": 0.311,
+        "home": 0.312
+      },
+      "market": {
+        "away": 0.514,
+        "draw": 0.259,
+        "home": 0.227
+      },
+      "lambda_home": 0.991,
+      "lambda_away": 1.121,
+      "model_brier": 0.3998,
+      "market_brier": 0.4326,
+      "model_logloss": 1.2843,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": 0.0328
+    },
+    {
+      "fixture": "Croatia vs Ghana",
+      "date": "2026-06-27",
+      "score": "2-1",
+      "outcome": "home",
+      "model": {
+        "away": 0.156,
+        "draw": 0.275,
+        "home": 0.569
+      },
+      "elo": {
+        "away": 0.116,
+        "draw": 0.19,
+        "home": 0.694
+      },
+      "dc": {
+        "away": 0.159,
+        "draw": 0.262,
+        "home": 0.579
+      },
+      "market": {
+        "away": 0.162,
+        "draw": 0.295,
+        "home": 0.543
+      },
+      "lambda_home": 1.576,
+      "lambda_away": 0.699,
+      "model_brier": 0.1429,
+      "market_brier": 0.161,
+      "model_logloss": 0.5639,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": 0.0181
+    },
+    {
+      "fixture": "DR Congo vs Uzbekistan",
+      "date": "2026-06-27",
+      "score": "3-1",
+      "outcome": "home",
+      "model": {
+        "away": 0.266,
+        "draw": 0.271,
+        "home": 0.462
+      },
+      "elo": {
+        "away": 0.331,
+        "draw": 0.292,
+        "home": 0.377
+      },
+      "dc": {
+        "away": 0.353,
+        "draw": 0.324,
+        "home": 0.323
+      },
+      "market": {
+        "away": 0.212,
+        "draw": 0.242,
+        "home": 0.547
+      },
+      "lambda_home": 0.957,
+      "lambda_away": 1.015,
+      "model_brier": 0.2167,
+      "market_brier": 0.1544,
+      "model_logloss": 0.7712,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0623
+    },
+    {
+      "fixture": "Jordan vs Argentina",
+      "date": "2026-06-27",
+      "score": "1-3",
+      "outcome": "away",
+      "model": {
+        "away": 0.835,
+        "draw": 0.119,
+        "home": 0.046
+      },
+      "elo": {
+        "away": 0.86,
+        "draw": 0.093,
+        "home": 0.046
+      },
+      "dc": {
+        "away": 0.84,
+        "draw": 0.123,
+        "home": 0.037
+      },
+      "market": {
+        "away": 0.828,
+        "draw": 0.121,
+        "home": 0.051
+      },
+      "lambda_home": 0.404,
+      "lambda_away": 2.585,
+      "model_brier": 0.0218,
+      "market_brier": 0.0234,
+      "model_logloss": 0.1805,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": 0.0016
+    },
+    {
+      "fixture": "Panama vs England",
+      "date": "2026-06-27",
+      "score": "0-2",
+      "outcome": "away",
+      "model": {
+        "away": 0.806,
+        "draw": 0.135,
+        "home": 0.059
+      },
+      "elo": {
+        "away": 0.692,
+        "draw": 0.19,
+        "home": 0.117
+      },
+      "dc": {
+        "away": 0.778,
+        "draw": 0.165,
+        "home": 0.058
+      },
+      "market": {
+        "away": 0.839,
+        "draw": 0.111,
+        "home": 0.049
+      },
+      "lambda_home": 0.451,
+      "lambda_away": 2.219,
+      "model_brier": 0.0296,
+      "market_brier": 0.0203,
+      "model_logloss": 0.2154,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0093
+    },
+    {
+      "fixture": "South Africa vs Canada",
+      "date": "2026-06-28",
+      "score": "0-1",
+      "outcome": "away",
+      "model": {
+        "away": 0.473,
+        "draw": 0.282,
+        "home": 0.245
+      },
+      "elo": {
+        "away": 0.37,
+        "draw": 0.293,
+        "home": 0.337
+      },
+      "dc": {
+        "away": 0.32,
+        "draw": 0.317,
+        "home": 0.363
+      },
+      "market": {
+        "away": 0.567,
+        "draw": 0.262,
+        "home": 0.171
+      },
+      "lambda_home": 1.064,
+      "lambda_away": 0.98,
+      "model_brier": 0.2084,
+      "market_brier": 0.1425,
+      "model_logloss": 0.7481,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0659
+    },
+    {
+      "fixture": "Brazil vs Japan",
+      "date": "2026-06-29",
+      "score": "2-1",
+      "outcome": "home",
+      "model": {
+        "away": 0.152,
+        "draw": 0.225,
+        "home": 0.622
+      },
+      "elo": {
+        "away": 0.164,
+        "draw": 0.232,
+        "home": 0.604
+      },
+      "dc": {
+        "away": 0.084,
+        "draw": 0.163,
+        "home": 0.753
+      },
+      "market": {
+        "away": 0.185,
+        "draw": 0.255,
+        "home": 0.56
+      },
+      "lambda_home": 2.431,
+      "lambda_away": 0.699,
+      "model_brier": 0.1085,
+      "market_brier": 0.1467,
+      "model_logloss": 0.4747,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": 0.0382
+    },
+    {
+      "fixture": "Germany vs Paraguay",
+      "date": "2026-06-29",
+      "score": "1-1",
+      "outcome": "draw",
+      "model": {
+        "away": 0.129,
+        "draw": 0.217,
+        "home": 0.653
+      },
+      "elo": {
+        "away": 0.151,
+        "draw": 0.222,
+        "home": 0.628
+      },
+      "dc": {
+        "away": 0.118,
+        "draw": 0.189,
+        "home": 0.693
+      },
+      "market": {
+        "away": 0.131,
+        "draw": 0.231,
+        "home": 0.637
+      },
+      "lambda_home": 2.272,
+      "lambda_away": 0.837,
+      "model_brier": 0.5279,
+      "market_brier": 0.5073,
+      "model_logloss": 1.5256,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": -0.0205
+    },
+    {
+      "fixture": "Netherlands vs Morocco",
+      "date": "2026-06-29",
+      "score": "1-1",
+      "outcome": "draw",
+      "model": {
+        "away": 0.231,
+        "draw": 0.276,
+        "home": 0.493
+      },
+      "elo": {
+        "away": 0.207,
+        "draw": 0.259,
+        "home": 0.534
+      },
+      "dc": {
+        "away": 0.176,
+        "draw": 0.258,
+        "home": 0.565
+      },
+      "market": {
+        "away": 0.262,
+        "draw": 0.288,
+        "home": 0.45
+      },
+      "lambda_home": 1.62,
+      "lambda_away": 0.792,
+      "model_brier": 0.4099,
+      "market_brier": 0.3887,
+      "model_logloss": 1.2858,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": -0.0212
+    },
+    {
+      "fixture": "France vs Sweden",
+      "date": "2026-06-30",
+      "score": "3-0",
+      "outcome": "home",
+      "model": {
+        "away": 0.1,
+        "draw": 0.191,
+        "home": 0.709
+      },
+      "elo": {
+        "away": 0.042,
+        "draw": 0.087,
+        "home": 0.871
+      },
+      "dc": {
+        "away": 0.129,
+        "draw": 0.205,
+        "home": 0.666
+      },
+      "market": {
+        "away": 0.094,
+        "draw": 0.201,
+        "home": 0.704
+      },
+      "lambda_home": 2.096,
+      "lambda_away": 0.813,
+      "model_brier": 0.0654,
+      "market_brier": 0.0684,
+      "model_logloss": 0.3433,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": 0.003
+    },
+    {
+      "fixture": "Ivory Coast vs Norway",
+      "date": "2026-06-30",
+      "score": "1-2",
+      "outcome": "away",
+      "model": {
+        "away": 0.421,
+        "draw": 0.312,
+        "home": 0.267
+      },
+      "elo": {
+        "away": 0.453,
+        "draw": 0.282,
+        "home": 0.265
+      },
+      "dc": {
+        "away": 0.404,
+        "draw": 0.3,
+        "home": 0.296
+      },
+      "market": {
+        "away": 0.424,
+        "draw": 0.324,
+        "home": 0.253
+      },
+      "lambda_home": 1.008,
+      "lambda_away": 1.224,
+      "model_brier": 0.2523,
+      "market_brier": 0.2505,
+      "model_logloss": 0.8661,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0018
+    },
+    {
+      "fixture": "Mexico vs Ecuador",
+      "date": "2026-06-30",
+      "score": "2-0",
+      "outcome": "home",
+      "model": {
+        "away": 0.242,
+        "draw": 0.349,
+        "home": 0.408
+      },
+      "elo": {
+        "away": 0.208,
+        "draw": 0.26,
+        "home": 0.531
+      },
+      "dc": {
+        "away": 0.278,
+        "draw": 0.29,
+        "home": 0.433
+      },
+      "market": {
+        "away": 0.23,
+        "draw": 0.394,
+        "home": 0.376
+      },
+      "lambda_home": 1.326,
+      "lambda_away": 1.009,
+      "model_brier": 0.2654,
+      "market_brier": 0.299,
+      "model_logloss": 0.8956,
+      "model_correct": 1,
+      "market_correct": 0,
+      "model_edge_brier": 0.0336
+    },
+    {
+      "fixture": "Belgium vs Senegal",
+      "date": "2026-07-01",
+      "score": "3-2",
+      "outcome": "home",
+      "model": {
+        "away": 0.234,
+        "draw": 0.327,
+        "home": 0.439
+      },
+      "elo": {
+        "away": 0.252,
+        "draw": 0.278,
+        "home": 0.47
+      },
+      "dc": {
+        "away": 0.208,
+        "draw": 0.272,
+        "home": 0.52
+      },
+      "market": {
+        "away": 0.244,
+        "draw": 0.363,
+        "home": 0.393
+      },
+      "lambda_home": 1.514,
+      "lambda_away": 0.863,
+      "model_brier": 0.2385,
+      "market_brier": 0.28,
+      "model_logloss": 0.8242,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": 0.0415
+    },
+    {
+      "fixture": "England vs DR Congo",
+      "date": "2026-07-01",
+      "score": "2-1",
+      "outcome": "home",
+      "model": {
+        "away": 0.077,
+        "draw": 0.202,
+        "home": 0.721
+      },
+      "elo": {
+        "away": 0.102,
+        "draw": 0.174,
+        "home": 0.724
+      },
+      "dc": {
+        "away": 0.069,
+        "draw": 0.191,
+        "home": 0.74
+      },
+      "market": {
+        "away": 0.077,
+        "draw": 0.212,
+        "home": 0.712
+      },
+      "lambda_home": 1.998,
+      "lambda_away": 0.449,
+      "model_brier": 0.0622,
+      "market_brier": 0.0669,
+      "model_logloss": 0.3267,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": 0.0048
+    },
+    {
+      "fixture": "United States vs Bosnia and Herzegovina",
+      "date": "2026-07-01",
+      "score": "2-0",
+      "outcome": "home",
+      "model": {
+        "away": 0.146,
+        "draw": 0.234,
+        "home": 0.62
+      },
+      "elo": {
+        "away": 0.103,
+        "draw": 0.174,
+        "home": 0.723
+      },
+      "dc": {
+        "away": 0.195,
+        "draw": 0.244,
+        "home": 0.561
+      },
+      "market": {
+        "away": 0.129,
+        "draw": 0.239,
+        "home": 0.632
+      },
+      "lambda_home": 1.774,
+      "lambda_away": 0.953,
+      "model_brier": 0.1103,
+      "market_brier": 0.1047,
+      "model_logloss": 0.4783,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0057
+    },
+    {
+      "fixture": "Portugal vs Croatia",
+      "date": "2026-07-02",
+      "score": "2-1",
+      "outcome": "home",
+      "model": {
+        "away": 0.223,
+        "draw": 0.31,
+        "home": 0.467
+      },
+      "elo": {
+        "away": 0.243,
+        "draw": 0.275,
+        "home": 0.481
+      },
+      "dc": {
+        "away": 0.247,
+        "draw": 0.285,
+        "home": 0.468
+      },
+      "market": {
+        "away": 0.208,
+        "draw": 0.327,
+        "home": 0.464
+      },
+      "lambda_home": 1.39,
+      "lambda_away": 0.937,
+      "model_brier": 0.2149,
+      "market_brier": 0.2188,
+      "model_logloss": 0.7614,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": 0.0039
+    },
+    {
+      "fixture": "Spain vs Austria",
+      "date": "2026-07-02",
+      "score": "3-0",
+      "outcome": "home",
+      "model": {
+        "away": 0.091,
+        "draw": 0.218,
+        "home": 0.691
+      },
+      "elo": {
+        "away": 0.1,
+        "draw": 0.171,
+        "home": 0.729
+      },
+      "dc": {
+        "away": 0.129,
+        "draw": 0.222,
+        "home": 0.65
+      },
+      "market": {
+        "away": 0.071,
+        "draw": 0.224,
+        "home": 0.705
+      },
+      "lambda_home": 1.903,
+      "lambda_away": 0.72,
+      "model_brier": 0.0758,
+      "market_brier": 0.0711,
+      "model_logloss": 0.3699,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0046
+    },
+    {
+      "fixture": "Switzerland vs Algeria",
+      "date": "2026-07-02",
+      "score": "2-0",
+      "outcome": "home",
+      "model": {
+        "away": 0.241,
+        "draw": 0.311,
+        "home": 0.447
+      },
+      "elo": {
+        "away": 0.224,
+        "draw": 0.267,
+        "home": 0.509
+      },
+      "dc": {
+        "away": 0.256,
+        "draw": 0.274,
+        "home": 0.47
+      },
+      "market": {
+        "away": 0.237,
+        "draw": 0.337,
+        "home": 0.426
+      },
+      "lambda_home": 1.476,
+      "lambda_away": 1.023,
+      "model_brier": 0.2302,
+      "market_brier": 0.2496,
+      "model_logloss": 0.8043,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": 0.0194
+    },
+    {
+      "fixture": "Argentina vs Cape Verde",
+      "date": "2026-07-03",
+      "score": "3-2",
+      "outcome": "home",
+      "model": {
+        "away": 0.045,
+        "draw": 0.124,
+        "home": 0.831
+      },
+      "elo": {
+        "away": 0.039,
+        "draw": 0.08,
+        "home": 0.881
+      },
+      "dc": {
+        "away": 0.048,
+        "draw": 0.161,
+        "home": 0.791
+      },
+      "market": {
+        "away": 0.044,
+        "draw": 0.114,
+        "home": 0.843
+      },
+      "lambda_home": 2.215,
+      "lambda_away": 0.393,
+      "model_brier": 0.023,
+      "market_brier": 0.0198,
+      "model_logloss": 0.185,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0032
+    },
+    {
+      "fixture": "Australia vs Egypt",
+      "date": "2026-07-03",
+      "score": "1-1",
+      "outcome": "draw",
+      "model": {
+        "away": 0.354,
+        "draw": 0.33,
+        "home": 0.316
+      },
+      "elo": {
+        "away": 0.288,
+        "draw": 0.287,
+        "home": 0.424
+      },
+      "dc": {
+        "away": 0.318,
+        "draw": 0.337,
+        "home": 0.345
+      },
+      "market": {
+        "away": 0.383,
+        "draw": 0.333,
+        "home": 0.283
+      },
+      "lambda_home": 0.958,
+      "lambda_away": 0.908,
+      "model_brier": 0.3372,
+      "market_brier": 0.3358,
+      "model_logloss": 1.1093,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": -0.0014
+    },
+    {
+      "fixture": "Colombia vs Ghana",
+      "date": "2026-07-03",
+      "score": "1-0",
+      "outcome": "home",
+      "model": {
+        "away": 0.111,
+        "draw": 0.234,
+        "home": 0.656
+      },
+      "elo": {
+        "away": 0.06,
+        "draw": 0.116,
+        "home": 0.823
+      },
+      "dc": {
+        "away": 0.117,
+        "draw": 0.248,
+        "home": 0.635
+      },
+      "market": {
+        "away": 0.116,
+        "draw": 0.246,
+        "home": 0.638
+      },
+      "lambda_home": 1.658,
+      "lambda_away": 0.566,
+      "model_brier": 0.0927,
+      "market_brier": 0.1024,
+      "model_logloss": 0.4219,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": 0.0098
+    },
+    {
+      "fixture": "Canada vs Morocco",
+      "date": "2026-07-04",
+      "score": "0-3",
+      "outcome": "away",
+      "model": {
+        "away": 0.521,
+        "draw": 0.285,
+        "home": 0.194
+      },
+      "elo": {
+        "away": 0.439,
+        "draw": 0.285,
+        "home": 0.277
+      },
+      "dc": {
+        "away": 0.474,
+        "draw": 0.324,
+        "home": 0.203
+      },
+      "market": {
+        "away": 0.558,
+        "draw": 0.266,
+        "home": 0.176
+      },
+      "lambda_home": 0.66,
+      "lambda_away": 1.165,
+      "model_brier": 0.1744,
+      "market_brier": 0.1487,
+      "model_logloss": 0.6526,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0257
+    },
+    {
+      "fixture": "Paraguay vs France",
+      "date": "2026-07-04",
+      "score": "0-1",
+      "outcome": "away",
+      "model": {
+        "away": 0.745,
+        "draw": 0.172,
+        "home": 0.083
+      },
+      "elo": {
+        "away": 0.666,
+        "draw": 0.204,
+        "home": 0.13
+      },
+      "dc": {
+        "away": 0.617,
+        "draw": 0.238,
+        "home": 0.145
+      },
+      "market": {
+        "away": 0.823,
+        "draw": 0.134,
+        "home": 0.044
+      },
+      "lambda_home": 0.741,
+      "lambda_away": 1.782,
+      "model_brier": 0.0506,
+      "market_brier": 0.0256,
+      "model_logloss": 0.2939,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.025
+    },
+    {
+      "fixture": "Brazil vs Norway",
+      "date": "2026-07-05",
+      "score": "1-2",
+      "outcome": "away",
+      "model": {
+        "away": 0.189,
+        "draw": 0.24,
+        "home": 0.571
+      },
+      "elo": {
+        "away": 0.204,
+        "draw": 0.258,
+        "home": 0.538
+      },
+      "dc": {
+        "away": 0.116,
+        "draw": 0.187,
+        "home": 0.697
+      },
+      "market": {
+        "away": 0.223,
+        "draw": 0.263,
+        "home": 0.513
+      },
+      "lambda_home": 2.284,
+      "lambda_away": 0.832,
+      "model_brier": 0.5201,
+      "market_brier": 0.4678,
+      "model_logloss": 1.6637,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": -0.0523
+    },
+    {
+      "fixture": "Mexico vs England",
+      "date": "2026-07-05",
+      "score": "2-3",
+      "outcome": "away",
+      "model": {
+        "away": 0.416,
+        "draw": 0.287,
+        "home": 0.297
+      },
+      "elo": {
+        "away": 0.293,
+        "draw": 0.288,
+        "home": 0.419
+      },
+      "dc": {
+        "away": 0.501,
+        "draw": 0.254,
+        "home": 0.245
+      },
+      "market": {
+        "away": 0.393,
+        "draw": 0.303,
+        "home": 0.303
+      },
+      "lambda_home": 1.107,
+      "lambda_away": 1.678,
+      "model_brier": 0.2562,
+      "market_brier": 0.2761,
+      "model_logloss": 0.8782,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": 0.0199
+    },
+    {
+      "fixture": "Portugal vs Spain",
+      "date": "2026-07-06",
+      "score": "0-1",
+      "outcome": "away",
+      "model": {
+        "away": 0.494,
+        "draw": 0.265,
+        "home": 0.24
+      },
+      "elo": {
+        "away": 0.506,
+        "draw": 0.268,
+        "home": 0.226
+      },
+      "dc": {
+        "away": 0.453,
+        "draw": 0.268,
+        "home": 0.278
+      },
+      "market": {
+        "away": 0.513,
+        "draw": 0.263,
+        "home": 0.223
+      },
+      "lambda_home": 1.137,
+      "lambda_away": 1.516,
+      "model_brier": 0.1918,
+      "market_brier": 0.1782,
+      "model_logloss": 0.7043,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0136
+    },
+    {
+      "fixture": "United States vs Belgium",
+      "date": "2026-07-06",
+      "score": "1-4",
+      "outcome": "away",
+      "model": {
+        "away": 0.393,
+        "draw": 0.276,
+        "home": 0.331
+      },
+      "elo": {
+        "away": 0.334,
+        "draw": 0.293,
+        "home": 0.373
+      },
+      "dc": {
+        "away": 0.504,
+        "draw": 0.23,
+        "home": 0.266
+      },
+      "market": {
+        "away": 0.347,
+        "draw": 0.296,
+        "home": 0.357
+      },
+      "lambda_home": 1.385,
+      "lambda_away": 1.96,
+      "model_brier": 0.2773,
+      "market_brier": 0.321,
+      "model_logloss": 0.9346,
+      "model_correct": 1,
+      "market_correct": 0,
+      "model_edge_brier": 0.0436
+    },
+    {
+      "fixture": "Argentina vs Egypt",
+      "date": "2026-07-07",
+      "score": "3-2",
+      "outcome": "home",
+      "model": {
+        "away": 0.094,
+        "draw": 0.19,
+        "home": 0.716
+      },
+      "elo": {
+        "away": 0.076,
+        "draw": 0.14,
+        "home": 0.783
+      },
+      "dc": {
+        "away": 0.103,
+        "draw": 0.206,
+        "home": 0.69
+      },
+      "market": {
+        "away": 0.093,
+        "draw": 0.19,
+        "home": 0.717
+      },
+      "lambda_home": 1.988,
+      "lambda_away": 0.63,
+      "model_brier": 0.0629,
+      "market_brier": 0.0624,
+      "model_logloss": 0.3345,
+      "model_correct": 1,
+      "market_correct": 1,
+      "model_edge_brier": -0.0005
+    },
+    {
+      "fixture": "Switzerland vs Colombia",
+      "date": "2026-07-07",
+      "score": "0-0",
+      "outcome": "draw",
+      "model": {
+        "away": 0.438,
+        "draw": 0.286,
+        "home": 0.276
+      },
+      "elo": {
+        "away": 0.4,
+        "draw": 0.291,
+        "home": 0.309
+      },
+      "dc": {
+        "away": 0.457,
+        "draw": 0.274,
+        "home": 0.269
+      },
+      "market": {
+        "away": 0.434,
+        "draw": 0.291,
+        "home": 0.275
+      },
+      "lambda_home": 1.066,
+      "lambda_away": 1.466,
+      "model_brier": 0.389,
+      "market_brier": 0.3834,
+      "model_logloss": 1.2523,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": -0.0056
     }
   ],
   "calibration_bins": {
     "model": [
-      {"mid": 0.05, "mean_pred": 0.035, "hit_rate": 0.040, "n": 8},
-      {"mid": 0.15, "mean_pred": 0.147, "hit_rate": 0.136, "n": 12},
-      {"mid": 0.25, "mean_pred": 0.252, "hit_rate": 0.211, "n": 18},
-      {"mid": 0.35, "mean_pred": 0.347, "hit_rate": 0.310, "n": 16},
-      {"mid": 0.45, "mean_pred": 0.453, "hit_rate": 0.438, "n": 14},
-      {"mid": 0.55, "mean_pred": 0.548, "hit_rate": 0.533, "n": 11},
-      {"mid": 0.65, "mean_pred": 0.651, "hit_rate": 0.619, "n": 8},
-      {"mid": 0.75, "mean_pred": 0.748, "hit_rate": 0.750, "n": 6},
-      {"mid": 0.85, "mean_pred": 0.862, "hit_rate": 0.857, "n": 4},
-      {"mid": 0.95, "mean_pred": 0.944, "hit_rate": 1.000, "n": 2}
+      {
+        "mid": 0.05,
+        "mean_pred": 0.0654,
+        "hit_rate": 0.0,
+        "n": 21
+      },
+      {
+        "mid": 0.15,
+        "mean_pred": 0.1514,
+        "hit_rate": 0.1111,
+        "n": 45
+      },
+      {
+        "mid": 0.25,
+        "mean_pred": 0.2517,
+        "hit_rate": 0.1714,
+        "n": 70
+      },
+      {
+        "mid": 0.35,
+        "mean_pred": 0.3399,
+        "hit_rate": 0.3,
+        "n": 20
+      },
+      {
+        "mid": 0.45,
+        "mean_pred": 0.4508,
+        "hit_rate": 0.6111,
+        "n": 18
+      },
+      {
+        "mid": 0.55,
+        "mean_pred": 0.5553,
+        "hit_rate": 0.8125,
+        "n": 16
+      },
+      {
+        "mid": 0.65,
+        "mean_pred": 0.6532,
+        "hit_rate": 0.8235,
+        "n": 17
+      },
+      {
+        "mid": 0.75,
+        "mean_pred": 0.7463,
+        "hit_rate": 0.7,
+        "n": 10
+      },
+      {
+        "mid": 0.85,
+        "mean_pred": 0.8454,
+        "hit_rate": 0.8571,
+        "n": 7
+      },
+      {
+        "mid": 0.95,
+        "mean_pred": 0.9139,
+        "hit_rate": 1.0,
+        "n": 1
+      }
+    ],
+    "elo": [
+      {
+        "mid": 0.05,
+        "mean_pred": 0.0708,
+        "hit_rate": 0.05,
+        "n": 20
+      },
+      {
+        "mid": 0.15,
+        "mean_pred": 0.1504,
+        "hit_rate": 0.1333,
+        "n": 45
+      },
+      {
+        "mid": 0.25,
+        "mean_pred": 0.2594,
+        "hit_rate": 0.1974,
+        "n": 76
+      },
+      {
+        "mid": 0.35,
+        "mean_pred": 0.3443,
+        "hit_rate": 0.3333,
+        "n": 15
+      },
+      {
+        "mid": 0.45,
+        "mean_pred": 0.4478,
+        "hit_rate": 0.5238,
+        "n": 21
+      },
+      {
+        "mid": 0.55,
+        "mean_pred": 0.5418,
+        "hit_rate": 0.6154,
+        "n": 13
+      },
+      {
+        "mid": 0.65,
+        "mean_pred": 0.642,
+        "hit_rate": 0.8571,
+        "n": 14
+      },
+      {
+        "mid": 0.75,
+        "mean_pred": 0.7351,
+        "hit_rate": 0.8182,
+        "n": 11
+      },
+      {
+        "mid": 0.85,
+        "mean_pred": 0.8418,
+        "hit_rate": 0.8,
+        "n": 10
+      }
+    ],
+    "dc": [
+      {
+        "mid": 0.05,
+        "mean_pred": 0.0562,
+        "hit_rate": 0.0,
+        "n": 17
+      },
+      {
+        "mid": 0.15,
+        "mean_pred": 0.1522,
+        "hit_rate": 0.1163,
+        "n": 43
+      },
+      {
+        "mid": 0.25,
+        "mean_pred": 0.2541,
+        "hit_rate": 0.1515,
+        "n": 66
+      },
+      {
+        "mid": 0.35,
+        "mean_pred": 0.3326,
+        "hit_rate": 0.2647,
+        "n": 34
+      },
+      {
+        "mid": 0.45,
+        "mean_pred": 0.4441,
+        "hit_rate": 0.8571,
+        "n": 14
+      },
+      {
+        "mid": 0.55,
+        "mean_pred": 0.5437,
+        "hit_rate": 0.75,
+        "n": 20
+      },
+      {
+        "mid": 0.65,
+        "mean_pred": 0.6568,
+        "hit_rate": 0.7647,
+        "n": 17
+      },
+      {
+        "mid": 0.75,
+        "mean_pred": 0.7534,
+        "hit_rate": 0.7778,
+        "n": 9
+      },
+      {
+        "mid": 0.85,
+        "mean_pred": 0.8313,
+        "hit_rate": 0.6667,
+        "n": 3
+      },
+      {
+        "mid": 0.95,
+        "mean_pred": 0.9438,
+        "hit_rate": 1.0,
+        "n": 2
+      }
     ],
     "market": [
-      {"mid": 0.05, "mean_pred": 0.035, "hit_rate": 0.036, "n": 8},
-      {"mid": 0.15, "mean_pred": 0.148, "hit_rate": 0.125, "n": 12},
-      {"mid": 0.25, "mean_pred": 0.252, "hit_rate": 0.200, "n": 18},
-      {"mid": 0.35, "mean_pred": 0.346, "hit_rate": 0.327, "n": 15},
-      {"mid": 0.45, "mean_pred": 0.453, "hit_rate": 0.450, "n": 14},
-      {"mid": 0.55, "mean_pred": 0.551, "hit_rate": 0.545, "n": 11},
-      {"mid": 0.65, "mean_pred": 0.654, "hit_rate": 0.667, "n": 9},
-      {"mid": 0.75, "mean_pred": 0.749, "hit_rate": 0.750, "n": 6},
-      {"mid": 0.85, "mean_pred": 0.851, "hit_rate": 0.875, "n": 4},
-      {"mid": 0.95, "mean_pred": 0.946, "hit_rate": 1.000, "n": 2}
+      {
+        "mid": 0.05,
+        "mean_pred": 0.0612,
+        "hit_rate": 0.0,
+        "n": 27
+      },
+      {
+        "mid": 0.15,
+        "mean_pred": 0.1472,
+        "hit_rate": 0.119,
+        "n": 42
+      },
+      {
+        "mid": 0.25,
+        "mean_pred": 0.246,
+        "hit_rate": 0.194,
+        "n": 67
+      },
+      {
+        "mid": 0.35,
+        "mean_pred": 0.353,
+        "hit_rate": 0.2727,
+        "n": 22
+      },
+      {
+        "mid": 0.45,
+        "mean_pred": 0.45,
+        "hit_rate": 0.6667,
+        "n": 12
+      },
+      {
+        "mid": 0.55,
+        "mean_pred": 0.5526,
+        "hit_rate": 0.6875,
+        "n": 16
+      },
+      {
+        "mid": 0.65,
+        "mean_pred": 0.6404,
+        "hit_rate": 0.8125,
+        "n": 16
+      },
+      {
+        "mid": 0.75,
+        "mean_pred": 0.7319,
+        "hit_rate": 0.8889,
+        "n": 9
+      },
+      {
+        "mid": 0.85,
+        "mean_pred": 0.8329,
+        "hit_rate": 0.75,
+        "n": 12
+      },
+      {
+        "mid": 0.95,
+        "mean_pred": 0.9223,
+        "hit_rate": 1.0,
+        "n": 2
+      }
     ]
   },
   "suggestions": [
     {
       "category": "Goals / xG",
-      "severity": "high",
-      "title": "WC2026 goals inflated vs historical baseline",
-      "detail": "WC2026 group stage averaging 3.13 goals/match (vs WC2022: 2.69, WC2018: 2.64). This +16% inflation vs WC2022 means the DC model's lambda estimates — calibrated on historical data — are systemically low. Norway vs France (today, in-game) hit 4 goals by HT with model lambdas 0.80+1.57=2.37 expected total. Apply a WC2026-specific goals inflation multiplier of ~1.16x to all lambda estimates before pricing O/U and BTTS markets.",
-      "stat": "+16% goals vs WC2022",
-      "priority": 1
+      "severity": "medium",
+      "title": "Model systematically under-predicts total goals",
+      "detail": "Expected avg 2.47 goals/match vs actual 2.86 (calibration factor 1.16x). WC 2018 avg was 2.64, WC 2022 was 2.69. Group stage WC 2026 is running hotter \u2014 consider raising DC attack priors or adding a WC-specific inflation parameter.",
+      "stat": "+15.8% goals vs model"
     },
     {
-      "category": "Goals / xG",
+      "category": "Over/Under",
       "severity": "high",
-      "title": "Norway vs France: 4+ goals by HT vs 2.37 expected total",
-      "detail": "Model predicted lambda_home=0.80, lambda_away=1.57 (total 2.37). The match hit 4+ goals by half-time — a >1.7 sigma event under the Poisson model. This is the most extreme example so far. The independent-Poisson model assigns negligible probability to scorelines like 3-1 or 2-3 by HT. A Negative Binomial with overdispersion parameter fit on WC2026 in-game data would better capture match-level variance. Also consider a matchup-momentum factor for games with large lambda disparity (ratio >1.9x).",
-      "stat": "λ_total=2.37, actual ≥4 by HT",
-      "priority": 2
+      "title": "O/U 2.5 fair prices are over-priced",
+      "detail": "Model predicted 44.5% of matches go Over 2.5 goals, actual rate is 55.6% (delta +11.0%). Recalibrate by applying the goals calibration factor to lambda before pricing O/U markets, or use an empirical WC-specific baseline rate.",
+      "stat": "O2.5 actual 56% vs pred 45%"
     },
     {
       "category": "1X2 Prices",
+      "severity": "high",
+      "title": "Model performing worse than market consensus on 1X2",
+      "detail": "Brier Skill Score vs market = -0.014 (negative = worse than market). DC alone BSS = -0.055. The blend may need rebalancing. Review blend weights (currently 0.10 Elo + 0.30 DC + 0.60 Market) \u2014 increasing market weight or adding a Platt scaling pass on DC probabilities could improve calibration.",
+      "stat": "BSS -0.014"
+    },
+    {
+      "category": "Uncertainty / Variance",
       "severity": "medium",
-      "title": "Model BSS vs market is marginally negative (-0.016)",
-      "detail": "The blended model (0.10 Elo + 0.30 DC + 0.60 Market) achieves Brier 0.251 vs market 0.247. BSS = -0.016 — essentially breakeven, not generating genuine informational edge on 1X2. The DC component alone scores worse (BSS -0.049). To improve: (1) reduce the DC blend weight below 0.30 for group-stage matches where market has absorbed squad-news; (2) add a Platt scaling pass to DC probabilities to close the calibration gap; (3) test a WC-only refit of DC parameters dropping non-WC matches from the training set.",
-      "stat": "BSS -0.016 (model vs market)",
-      "priority": 3
-    },
-    {
-      "category": "Variance / Uncertainty",
-      "severity": "medium",
-      "title": "Fat-tail goal totals underweighted by Poisson model",
-      "detail": "Actual goal distribution: 6 matches (26%) had 4+ goals; 3 (13%) had 5+; 1 had 7+; 1 had 6. Under a Poisson with λ=2.69 (WC2022 mean), P(4+) ≈ 22%, P(5+) ≈ 11% — the actuals are slightly above even calibrated expectations. A Negative Binomial model fit on WC18+22 total-goals data would increase probability mass at 4+ goals and reduce over-confidence in the 0-3 range. This directly impacts O/U fair value and BTTS pricing.",
-      "stat": "26% of matches had 4+ goals",
-      "priority": 4
-    },
-    {
-      "category": "Scoreline",
-      "severity": "medium",
-      "title": "Top-1 scoreline accuracy 8.7%; top-6 only 26%",
-      "detail": "The Poisson scoreline matrix hits the correct score in 8.7% of cases (top-1) and 26.1% in top-6. While this is inherent to scoreline markets (random baseline ≈5% for top-1 given ~20 common outcomes), the Poisson model under-weights draws in the high-scoring range (0-0 predicted too high relative to high-draw matches). A Dixon-Coles rho correction on close scorelines (0-0, 1-0, 0-1, 1-1) may improve calibration here. Note: the model currently applies the DC adjustment — verify the rho parameter magnitude.",
-      "stat": "26% top-6 hit rate",
-      "priority": 5
-    },
-    {
-      "category": "Corners",
-      "severity": "low",
-      "title": "Corners model lacks WC2026 re-calibration data",
-      "detail": "Corner priors are based on WC2018+2022 StatsBomb data (avg ~9.0-9.3 corners/match). WC2026 actual corners are not yet tracked in this system — add actual corner counts to wc2026_results.json to compute live calibration. Until then, the current model (base 8.97, elasticity 0.3) is the best estimate. Suggest adding a live corner data feed.",
-      "stat": "No WC2026 actuals yet",
-      "priority": 6
-    },
-    {
-      "category": "Cards",
-      "severity": "low",
-      "title": "Cards model lacks WC2026 re-calibration data",
-      "detail": "Card priors use WC2018+2022 StatsBomb data (avg ~3.4 yellows/match, ~0.12 reds). WC2026 actual card counts are not yet tracked. Group-stage card rates can vary significantly by referee assignment — adding actual yellow/red card totals per match would enable live drift detection. Suggest adding card data to the results feed.",
-      "stat": "No WC2026 actuals yet",
-      "priority": 7
+      "title": "Large goal-total errors suggest model underestimates match variance",
+      "detail": "6 matches had total-goals error \u2265 2.5 goals. Worst: Algeria vs Austria (expected 2.4, actual 6). A Negative Binomial goal model (with dispersion parameter fit on WC18+22) would better capture the fat tail. Also consider adding a 'blowout' prior for large team-strength mismatches (\u03bb ratio > 3x).",
+      "stat": "6 matches with \u22652.5 goal error"
     }
   ],
   "statsbomb_context": {
-    "source": "StatsBomb Open Data (WC2018 season 3, WC2022 season 106, competition_id=43)",
+    "source": "StatsBomb Open Data (WC2018 season 3, WC2022 season 106)",
     "wc2018": {
       "matches": 64,
       "avg_goals_per_match": 2.64,
@@ -462,30 +4122,15 @@
       "matches": 64,
       "avg_goals_per_match": 2.69,
       "over25_rate": 0.594,
-      "btts_rate": 0.500,
+      "btts_rate": 0.5,
       "avg_corners_per_match": 9.3,
       "avg_yellows_per_match": 3.8
     },
-    "wc2026_so_far": {
-      "matches_with_results": 31,
-      "matches_with_predictions": 23,
-      "avg_goals_per_match": 3.13,
-      "note": "All 31 completed matches tracked in wc2026_results.json. 23 matched to prediction log for accuracy benchmarking."
-    }
+    "note": "Model corner/card priors are calibrated on WC18+22 StatsBomb data. WC2026 actuals are being tracked here in real-time to detect drift."
   },
-  "norway_france_spotlight": {
-    "fixture": "Norway vs France",
-    "date": "2026-06-26",
-    "kickoff_utc": "2026-06-26T19:00:00Z",
-    "lambda_home": 0.799,
-    "lambda_away": 1.565,
-    "lambda_total": 2.364,
-    "model_probs": {"home": 0.153, "draw": 0.209, "away": 0.638},
-    "market_probs": {"home": 0.125, "draw": 0.170, "away": 0.705},
-    "p_over25": 0.538,
-    "p_over35": 0.355,
-    "p_over45": 0.206,
-    "actual_goals_ht": ">=4",
-    "note": "With 4+ goals at HT, this match already exceeded the model's total-goals prediction for the FULL match. This is the clearest live example of model variance underestimation. Under independent Poisson(0.80, 1.57), P(4+ goals by 45') ≈ 6%. This validates the NB/overdispersion recommendation."
+  "wc26_summary": {
+    "matches": 75,
+    "avg_goals_per_match": 2.933,
+    "over25_rate": 0.547
   }
 }
