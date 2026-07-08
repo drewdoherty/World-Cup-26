@@ -12,7 +12,7 @@
     "pass": true,
     "reason": null,
     "source": "site/advancement_data.json",
-    "stamp": "2026-07-08 09:20:08 UTC"
+    "stamp": "2026-07-08 09:54:56 UTC"
    },
    {
     "age_secs": 0.0,
@@ -21,28 +21,28 @@
     "pass": true,
     "reason": null,
     "source": "site/bet_recs.json",
-    "stamp": "2026-07-08 09:20:09 UTC"
+    "stamp": "2026-07-08 09:54:57 UTC"
    },
    {
-    "age_secs": 104.0,
+    "age_secs": 77.0,
     "max_age_secs": 10800,
     "name": "scores_markets",
     "pass": true,
     "reason": null,
     "source": "site/scores_markets.json",
-    "stamp": "2026-07-08 09:18:25 UTC"
+    "stamp": "2026-07-08 09:53:40 UTC"
    },
    {
-    "age_secs": 1602.0,
+    "age_secs": 1672.0,
     "max_age_secs": 21600,
     "name": "pm_ideas",
     "pass": true,
     "reason": null,
     "source": "site/pm_ideas.json",
-    "stamp": "2026-07-08T08:53:27Z"
+    "stamp": "2026-07-08T09:27:05Z"
    },
    {
-    "age_secs": 1462.7,
+    "age_secs": 3550.7,
     "max_age_secs": 86400,
     "name": "orderflow",
     "pass": true,
@@ -51,7 +51,7 @@
     "stamp": "2026-07-08T08:55:46.320540+00:00"
    },
    {
-    "age_secs": 4269.0,
+    "age_secs": 6357.0,
     "max_age_secs": 50400,
     "name": "advancement_model",
     "pass": true,
@@ -72,7 +72,7 @@
   "pass": true
  },
  "meta": {
-  "advancement_model_age_hours": 1.19,
+  "advancement_model_age_hours": 1.77,
   "advancement_model_generated": "2026-07-08 08:09 UTC",
   "caveats": [
    "SHADOW-ONLY: decision-support feed; no verdict here is a trade instruction and nothing is wired to execution.",
@@ -97,16 +97,16 @@
    "site/pm_ideas.json": 21600,
    "site/scores_markets.json": 10800
   },
-  "generated_at": "2026-07-08T09:20:09Z",
+  "generated_at": "2026-07-08T09:54:57Z",
   "n_advancement_legs_without_pm_quote": 16,
   "n_by_verdict": {
    "DO_NOT_TRADE": 1,
    "SHADOW_ADD": 6,
    "WATCH": 17,
-   "WITHHOLD": 3
+   "WITHHOLD": 2
   },
   "n_pm_markets": 24,
-  "n_rows": 27,
+  "n_rows": 26,
   "n_withheld_excluded_uninformative": 8,
   "orderflow_hot": {
    "hot_threshold": 0.8585,
@@ -138,11 +138,11 @@
   "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
   "shadow_only": true,
   "sources": {
-   "site/advancement_data.json": "2026-07-08 09:20:08 UTC",
-   "site/bet_recs.json": "2026-07-08 09:20:09 UTC",
+   "site/advancement_data.json": "2026-07-08 09:54:56 UTC",
+   "site/bet_recs.json": "2026-07-08 09:54:57 UTC",
    "site/microstructure/orderflow.json": "2026-07-08T08:55:46.320540+00:00",
-   "site/pm_ideas.json": "2026-07-08T08:53:27Z",
-   "site/scores_markets.json": "2026-07-08 09:18:25 UTC"
+   "site/pm_ideas.json": "2026-07-08T09:27:05Z",
+   "site/scores_markets.json": "2026-07-08 09:53:40 UTC"
   },
   "verdict_enum": [
    "SHADOW_ADD",
@@ -221,9 +221,9 @@
      "match_no": 97,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2828,
-      "opp_win": 0.1919,
-      "team_win": 0.5253
+      "draw": 0.2811,
+      "opp_win": 0.1888,
+      "team_win": 0.5301
      },
      "opponent": "Morocco",
      "played": false,
@@ -232,7 +232,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "1-0",
-     "top_scoreline_prob": 0.179
+     "top_scoreline_prob": 0.18
     },
     "next_match_reason": null
    },
@@ -353,9 +353,9 @@
      "match_no": 99,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2756,
-      "opp_win": 0.5048,
-      "team_win": 0.2197
+      "draw": 0.276,
+      "opp_win": 0.5047,
+      "team_win": 0.2193
      },
      "opponent": "England",
      "played": false,
@@ -364,7 +364,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "0-1",
-     "top_scoreline_prob": 0.149
+     "top_scoreline_prob": 0.151
     },
     "next_match_reason": null
    },
@@ -483,9 +483,9 @@
      "match_no": 104,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.3012,
-      "opp_win": 0.3818,
-      "team_win": 0.317
+      "draw": 0.3011,
+      "opp_win": 0.3811,
+      "team_win": 0.3178
      },
      "opponent": "Spain",
      "played": false,
@@ -494,7 +494,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "projected",
      "top_scoreline": "1-1",
-     "top_scoreline_prob": 0.142
+     "top_scoreline_prob": 0.141
     },
     "deciding_tie_reason": null,
     "next_match": {
@@ -505,9 +505,9 @@
      "match_no": 95,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.1998,
-      "opp_win": 0.1035,
-      "team_win": 0.6967
+      "draw": 0.1974,
+      "opp_win": 0.1014,
+      "team_win": 0.7012
      },
      "opponent": "Australia",
      "played": false,
@@ -516,7 +516,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "projected",
      "top_scoreline": "1-0",
-     "top_scoreline_prob": 0.169
+     "top_scoreline_prob": 0.17
     },
     "next_match_reason": null
    },
@@ -630,28 +630,8 @@
    "knockout_context": {
     "deciding_tie": null,
     "deciding_tie_reason": "no tie featuring Switzerland in scores_markets.final_games \u2014 the projected bracket's modal path does not reach this stage; tie context unknown (treated as projected by the projection gate)",
-    "next_match": {
-     "away": "Colombia",
-     "date": "2026-07-06",
-     "ft": null,
-     "home": "Switzerland",
-     "match_no": 96,
-     "model_split_90min": {
-      "basis": "1X2_90min",
-      "draw": 0.2971,
-      "opp_win": 0.4192,
-      "team_win": 0.2837
-     },
-     "opponent": "Colombia",
-     "played": false,
-     "round": "Round of 16",
-     "scoreline_orientation": "home-away",
-     "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
-     "tie_status": "real",
-     "top_scoreline": "1-1",
-     "top_scoreline_prob": 0.138
-    },
-    "next_match_reason": null
+    "next_match": null,
+    "next_match_reason": "no unplayed knockout game featuring Switzerland in scores_markets"
    },
    "leg_state": "undecided",
    "market": "advancement",
@@ -769,9 +749,9 @@
      "match_no": 101,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2995,
-      "opp_win": 0.3829,
-      "team_win": 0.3177
+      "draw": 0.2997,
+      "opp_win": 0.3826,
+      "team_win": 0.3178
      },
      "opponent": "Spain",
      "played": false,
@@ -791,9 +771,9 @@
      "match_no": 97,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2828,
-      "opp_win": 0.1919,
-      "team_win": 0.5253
+      "draw": 0.2811,
+      "opp_win": 0.1888,
+      "team_win": 0.5301
      },
      "opponent": "Morocco",
      "played": false,
@@ -802,7 +782,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "1-0",
-     "top_scoreline_prob": 0.179
+     "top_scoreline_prob": 0.18
     },
     "next_match_reason": null
    },
@@ -863,7 +843,7 @@
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.0757,
+   "edge_adj": 0.0727,
    "edge_source": "advancement_data.teams[Argentina].pm[Final].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -921,9 +901,9 @@
      "match_no": 102,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.3061,
-      "opp_win": 0.3022,
-      "team_win": 0.3917
+      "draw": 0.3054,
+      "opp_win": 0.301,
+      "team_win": 0.3935
      },
      "opponent": "England",
      "played": false,
@@ -943,9 +923,9 @@
      "match_no": 95,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.1998,
-      "opp_win": 0.1035,
-      "team_win": 0.6967
+      "draw": 0.1974,
+      "opp_win": 0.1014,
+      "team_win": 0.7012
      },
      "opponent": "Australia",
      "played": false,
@@ -954,7 +934,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "projected",
      "top_scoreline": "1-0",
-     "top_scoreline_prob": 0.169
+     "top_scoreline_prob": 0.17
     },
     "next_match_reason": null
    },
@@ -992,7 +972,7 @@
     "usd": 3495565.45
    },
    "origin": "advancement_data",
-   "pm_price": 0.4085,
+   "pm_price": 0.4055,
    "pm_price_source": "advancement_data.teams[Argentina].pm[Final].pm (YES mid)",
    "position_prob": 0.6749,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -1075,9 +1055,9 @@
      "match_no": 99,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2756,
-      "opp_win": 0.5048,
-      "team_win": 0.2197
+      "draw": 0.276,
+      "opp_win": 0.5047,
+      "team_win": 0.2193
      },
      "opponent": "England",
      "played": false,
@@ -1086,7 +1066,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "0-1",
-     "top_scoreline_prob": 0.149
+     "top_scoreline_prob": 0.151
     },
     "next_match_reason": null
    },
@@ -1124,7 +1104,7 @@
     "usd": 3495565.45
    },
    "origin": "advancement_data",
-   "pm_price": 0.1405,
+   "pm_price": 0.1425,
    "pm_price_source": "advancement_data.teams[Norway].pm[Final].pm (YES mid)",
    "position_prob": 0.8957,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -1199,28 +1179,8 @@
    "knockout_context": {
     "deciding_tie": null,
     "deciding_tie_reason": "no tie featuring Switzerland in scores_markets.sf_games \u2014 the projected bracket's modal path does not reach this stage; tie context unknown (treated as projected by the projection gate)",
-    "next_match": {
-     "away": "Colombia",
-     "date": "2026-07-06",
-     "ft": null,
-     "home": "Switzerland",
-     "match_no": 96,
-     "model_split_90min": {
-      "basis": "1X2_90min",
-      "draw": 0.2971,
-      "opp_win": 0.4192,
-      "team_win": 0.2837
-     },
-     "opponent": "Colombia",
-     "played": false,
-     "round": "Round of 16",
-     "scoreline_orientation": "home-away",
-     "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
-     "tie_status": "real",
-     "top_scoreline": "1-1",
-     "top_scoreline_prob": 0.138
-    },
-    "next_match_reason": null
+    "next_match": null,
+    "next_match_reason": "no unplayed knockout game featuring Switzerland in scores_markets"
    },
    "leg_state": "undecided",
    "market": "advancement",
@@ -1280,7 +1240,7 @@
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.1179,
+   "edge_adj": 0.1218,
    "edge_source": "advancement_data.teams[Switzerland].pm[SF].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -1332,28 +1292,8 @@
    "knockout_context": {
     "deciding_tie": null,
     "deciding_tie_reason": "no tie featuring Switzerland in scores_markets.qf_games \u2014 the projected bracket's modal path does not reach this stage; tie context unknown (treated as projected by the projection gate)",
-    "next_match": {
-     "away": "Colombia",
-     "date": "2026-07-06",
-     "ft": null,
-     "home": "Switzerland",
-     "match_no": 96,
-     "model_split_90min": {
-      "basis": "1X2_90min",
-      "draw": 0.2971,
-      "opp_win": 0.4192,
-      "team_win": 0.2837
-     },
-     "opponent": "Colombia",
-     "played": false,
-     "round": "Round of 16",
-     "scoreline_orientation": "home-away",
-     "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
-     "tie_status": "real",
-     "top_scoreline": "1-1",
-     "top_scoreline_prob": 0.138
-    },
-    "next_match_reason": null
+    "next_match": null,
+    "next_match_reason": "no unplayed knockout game featuring Switzerland in scores_markets"
    },
    "leg_state": "undecided",
    "market": "advancement",
@@ -1389,7 +1329,7 @@
     "usd": 2102284.46
    },
    "origin": "advancement_data",
-   "pm_price": 0.2645,
+   "pm_price": 0.27,
    "pm_price_source": "advancement_data.teams[Switzerland].pm[SF].pm (YES mid)",
    "position_prob": 0.8597,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -1478,9 +1418,9 @@
      "match_no": 99,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2756,
-      "opp_win": 0.2197,
-      "team_win": 0.5048
+      "draw": 0.276,
+      "opp_win": 0.2193,
+      "team_win": 0.5047
      },
      "opponent": "Norway",
      "played": false,
@@ -1489,7 +1429,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "0-1",
-     "top_scoreline_prob": 0.149
+     "top_scoreline_prob": 0.151
     },
     "deciding_tie_reason": null,
     "next_match": {
@@ -1500,9 +1440,9 @@
      "match_no": 99,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2756,
-      "opp_win": 0.2197,
-      "team_win": 0.5048
+      "draw": 0.276,
+      "opp_win": 0.2193,
+      "team_win": 0.5047
      },
      "opponent": "Norway",
      "played": false,
@@ -1511,7 +1451,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "0-1",
-     "top_scoreline_prob": 0.149
+     "top_scoreline_prob": 0.151
     },
     "next_match_reason": null
    },
@@ -1630,9 +1570,9 @@
      "match_no": 99,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2756,
-      "opp_win": 0.5048,
-      "team_win": 0.2197
+      "draw": 0.276,
+      "opp_win": 0.5047,
+      "team_win": 0.2193
      },
      "opponent": "England",
      "played": false,
@@ -1641,7 +1581,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "0-1",
-     "top_scoreline_prob": 0.149
+     "top_scoreline_prob": 0.151
     },
     "deciding_tie_reason": null,
     "next_match": {
@@ -1652,9 +1592,9 @@
      "match_no": 99,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2756,
-      "opp_win": 0.5048,
-      "team_win": 0.2197
+      "draw": 0.276,
+      "opp_win": 0.5047,
+      "team_win": 0.2193
      },
      "opponent": "England",
      "played": false,
@@ -1663,7 +1603,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "0-1",
-     "top_scoreline_prob": 0.149
+     "top_scoreline_prob": 0.151
     },
     "next_match_reason": null
    },
@@ -1790,9 +1730,9 @@
      "match_no": 104,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.3012,
-      "opp_win": 0.317,
-      "team_win": 0.3818
+      "draw": 0.3011,
+      "opp_win": 0.3178,
+      "team_win": 0.3811
      },
      "opponent": "Argentina",
      "played": false,
@@ -1801,7 +1741,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "projected",
      "top_scoreline": "1-1",
-     "top_scoreline_prob": 0.142
+     "top_scoreline_prob": 0.141
     },
     "deciding_tie_reason": null,
     "next_match": {
@@ -1812,9 +1752,9 @@
      "match_no": 98,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2487,
-      "opp_win": 0.1926,
-      "team_win": 0.5587
+      "draw": 0.2488,
+      "opp_win": 0.1924,
+      "team_win": 0.5588
      },
      "opponent": "Belgium",
      "played": false,
@@ -1950,9 +1890,9 @@
      "match_no": 101,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2995,
-      "opp_win": 0.3177,
-      "team_win": 0.3829
+      "draw": 0.2997,
+      "opp_win": 0.3178,
+      "team_win": 0.3826
      },
      "opponent": "France",
      "played": false,
@@ -1972,9 +1912,9 @@
      "match_no": 98,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2487,
-      "opp_win": 0.1926,
-      "team_win": 0.5587
+      "draw": 0.2488,
+      "opp_win": 0.1924,
+      "team_win": 0.5588
      },
      "opponent": "Belgium",
      "played": false,
@@ -2102,9 +2042,9 @@
      "match_no": 102,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.3061,
-      "opp_win": 0.3917,
-      "team_win": 0.3022
+      "draw": 0.3054,
+      "opp_win": 0.3935,
+      "team_win": 0.301
      },
      "opponent": "Argentina",
      "played": false,
@@ -2124,9 +2064,9 @@
      "match_no": 99,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2756,
-      "opp_win": 0.2197,
-      "team_win": 0.5048
+      "draw": 0.276,
+      "opp_win": 0.2193,
+      "team_win": 0.5047
      },
      "opponent": "Norway",
      "played": false,
@@ -2135,7 +2075,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "0-1",
-     "top_scoreline_prob": 0.149
+     "top_scoreline_prob": 0.151
     },
     "next_match_reason": null
    },
@@ -2254,9 +2194,9 @@
      "match_no": 100,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.284,
-      "opp_win": 0.2217,
-      "team_win": 0.4942
+      "draw": 0.2815,
+      "opp_win": 0.2187,
+      "team_win": 0.4998
      },
      "opponent": "Colombia",
      "played": false,
@@ -2265,7 +2205,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "projected",
      "top_scoreline": "1-0",
-     "top_scoreline_prob": 0.153
+     "top_scoreline_prob": 0.152
     },
     "deciding_tie_reason": null,
     "next_match": {
@@ -2276,9 +2216,9 @@
      "match_no": 95,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.1998,
-      "opp_win": 0.1035,
-      "team_win": 0.6967
+      "draw": 0.1974,
+      "opp_win": 0.1014,
+      "team_win": 0.7012
      },
      "opponent": "Australia",
      "played": false,
@@ -2287,7 +2227,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "projected",
      "top_scoreline": "1-0",
-     "top_scoreline_prob": 0.169
+     "top_scoreline_prob": 0.17
     },
     "next_match_reason": null
    },
@@ -2414,9 +2354,9 @@
      "match_no": 97,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2828,
-      "opp_win": 0.5253,
-      "team_win": 0.1919
+      "draw": 0.2811,
+      "opp_win": 0.5301,
+      "team_win": 0.1888
      },
      "opponent": "France",
      "played": false,
@@ -2425,7 +2365,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "1-0",
-     "top_scoreline_prob": 0.179
+     "top_scoreline_prob": 0.18
     },
     "deciding_tie_reason": null,
     "next_match": {
@@ -2436,9 +2376,9 @@
      "match_no": 97,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2828,
-      "opp_win": 0.5253,
-      "team_win": 0.1919
+      "draw": 0.2811,
+      "opp_win": 0.5301,
+      "team_win": 0.1888
      },
      "opponent": "France",
      "played": false,
@@ -2447,7 +2387,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "1-0",
-     "top_scoreline_prob": 0.179
+     "top_scoreline_prob": 0.18
     },
     "next_match_reason": null
    },
@@ -2566,9 +2506,9 @@
      "match_no": 97,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2828,
-      "opp_win": 0.1919,
-      "team_win": 0.5253
+      "draw": 0.2811,
+      "opp_win": 0.1888,
+      "team_win": 0.5301
      },
      "opponent": "Morocco",
      "played": false,
@@ -2577,7 +2517,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "1-0",
-     "top_scoreline_prob": 0.179
+     "top_scoreline_prob": 0.18
     },
     "deciding_tie_reason": null,
     "next_match": {
@@ -2588,9 +2528,9 @@
      "match_no": 97,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2828,
-      "opp_win": 0.1919,
-      "team_win": 0.5253
+      "draw": 0.2811,
+      "opp_win": 0.1888,
+      "team_win": 0.5301
      },
      "opponent": "Morocco",
      "played": false,
@@ -2599,7 +2539,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "1-0",
-     "top_scoreline_prob": 0.179
+     "top_scoreline_prob": 0.18
     },
     "next_match_reason": null
    },
@@ -2726,9 +2666,9 @@
      "match_no": 98,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2487,
-      "opp_win": 0.5587,
-      "team_win": 0.1926
+      "draw": 0.2488,
+      "opp_win": 0.5588,
+      "team_win": 0.1924
      },
      "opponent": "Spain",
      "played": false,
@@ -2748,9 +2688,9 @@
      "match_no": 98,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2487,
-      "opp_win": 0.5587,
-      "team_win": 0.1926
+      "draw": 0.2488,
+      "opp_win": 0.5588,
+      "team_win": 0.1924
      },
      "opponent": "Spain",
      "played": false,
@@ -2878,9 +2818,9 @@
      "match_no": 98,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2487,
-      "opp_win": 0.1926,
-      "team_win": 0.5587
+      "draw": 0.2488,
+      "opp_win": 0.1924,
+      "team_win": 0.5588
      },
      "opponent": "Belgium",
      "played": false,
@@ -2900,9 +2840,9 @@
      "match_no": 98,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2487,
-      "opp_win": 0.1926,
-      "team_win": 0.5587
+      "draw": 0.2488,
+      "opp_win": 0.1924,
+      "team_win": 0.5588
      },
      "opponent": "Belgium",
      "played": false,
@@ -3032,9 +2972,9 @@
      "match_no": 98,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2487,
-      "opp_win": 0.5587,
-      "team_win": 0.1926
+      "draw": 0.2488,
+      "opp_win": 0.5588,
+      "team_win": 0.1924
      },
      "opponent": "Spain",
      "played": false,
@@ -3165,9 +3105,9 @@
      "match_no": 99,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2756,
-      "opp_win": 0.2197,
-      "team_win": 0.5048
+      "draw": 0.276,
+      "opp_win": 0.2193,
+      "team_win": 0.5047
      },
      "opponent": "Norway",
      "played": false,
@@ -3176,7 +3116,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "0-1",
-     "top_scoreline_prob": 0.149
+     "top_scoreline_prob": 0.151
     },
     "next_match_reason": null
    },
@@ -3238,7 +3178,7 @@
   {
    "bet_rec": null,
    "bucket": "longshot",
-   "edge_adj": 0.0093,
+   "edge_adj": 0.0103,
    "edge_source": "advancement_data.teams[Morocco].pm[win].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -3248,7 +3188,7 @@
     "edge": {
      "note": "threshold 0.02 replicated from scripts/wca_betrecs.py MIN_EDGE",
      "pass": false,
-     "reason": "near_threshold_edge: +0.0093 inside the 0.02 actionable threshold (scripts/wca_betrecs.py MIN_EDGE)"
+     "reason": "near_threshold_edge: +0.0103 inside the 0.02 actionable threshold (scripts/wca_betrecs.py MIN_EDGE)"
     },
     "freshness": {
      "pass": true,
@@ -3298,9 +3238,9 @@
      "match_no": 97,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2828,
-      "opp_win": 0.5253,
-      "team_win": 0.1919
+      "draw": 0.2811,
+      "opp_win": 0.5301,
+      "team_win": 0.1888
      },
      "opponent": "France",
      "played": false,
@@ -3309,7 +3249,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "1-0",
-     "top_scoreline_prob": 0.179
+     "top_scoreline_prob": 0.18
     },
     "next_match_reason": null
    },
@@ -3347,7 +3287,7 @@
     "usd": 215617892.96
    },
    "origin": "advancement_data",
-   "pm_price": 0.0305,
+   "pm_price": 0.0295,
    "pm_price_source": "advancement_data.teams[Morocco].pm[win].pm (YES mid)",
    "position_prob": 0.0412,
    "position_prob_source": "= model_prob",
@@ -3364,7 +3304,7 @@
    "team": "Morocco",
    "verdict": "WATCH",
    "verdict_reasons": [
-    "near_threshold_edge: fee-adjusted edge +0.0093 is inside the 0.02 actionable threshold (scripts/wca_betrecs.py MIN_EDGE)",
+    "near_threshold_edge: fee-adjusted edge +0.0103 is inside the 0.02 actionable threshold (scripts/wca_betrecs.py MIN_EDGE)",
     "longshot_no_cash: position pays out at model 4% < 25% \u2014 no cash on longshots (likely-PnL rule; 0-for-12 in backtests)",
     "projected_tie: no tie featuring Morocco in scores_markets.final_games \u2014 the projected bracket's modal path does not reach this stage; tie context unknown (treated as projected by the projection gate)"
    ]
@@ -3432,9 +3372,9 @@
      "match_no": 98,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2487,
-      "opp_win": 0.5587,
-      "team_win": 0.1926
+      "draw": 0.2488,
+      "opp_win": 0.5588,
+      "team_win": 0.1924
      },
      "opponent": "Spain",
      "played": false,
@@ -3565,9 +3505,9 @@
      "match_no": 97,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2828,
-      "opp_win": 0.5253,
-      "team_win": 0.1919
+      "draw": 0.2811,
+      "opp_win": 0.5301,
+      "team_win": 0.1888
      },
      "opponent": "France",
      "played": false,
@@ -3576,7 +3516,7 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "1-0",
-     "top_scoreline_prob": 0.179
+     "top_scoreline_prob": 0.18
     },
     "next_match_reason": null
    },
@@ -3638,106 +3578,14 @@
   },
   {
    "bet_rec": null,
-   "book_edge": 0.0015,
-   "book_edge_source": "bet_recs.withheld[argentina_vs_switzerland_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 5.9253,
-   "book_price_source": "bet_recs.withheld[argentina_vs_switzerland_away_1x2].price (decimal book odds)",
-   "bucket": "longshot",
-   "edge_adj": null,
-   "edge_source": null,
-   "ev_net": 0.0087,
-   "fixture": "Argentina vs Switzerland",
-   "gates": {
-    "clv_history": {
-     "pass": false,
-     "reason": "BLOCKED: durable PM/odds price history for advancement markets is stale/missing and no CLV stamping / price capture exists for them (no fixed close; convergence metrics still COLLECTING). Live-money gate: a market without price capture + CLV stamping does not get real money \u2014 ANY real-money upgrade first needs price/CLV capture restored. This desk is SHADOW-ONLY until that plumbing ships."
-    },
-    "edge": {
-     "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
-     "pass": false,
-     "reason": "book edge +0.0015 not above the 0.02 threshold"
-    },
-    "freshness": {
-     "pass": true,
-     "reason": null
-    },
-    "min_prob_cash": {
-     "pass": false,
-     "reason": "longshot_no_cash: model 17% < 25%"
-    },
-    "orderflow": {
-     "note": "book-venue near-miss; PM orderflow context not applicable",
-     "pass": true,
-     "reason": null
-    },
-    "price_present": {
-     "pass": true,
-     "reason": null
-    },
-    "projection": {
-     "note": "fixture already fixed (near-miss on a real fixture)",
-     "pass": true,
-     "reason": null
-    },
-    "settlement": {
-     "note": "settles at 90 minutes (1X2) \u2014 NEVER compare with PM advancement (ET+pens) as if they settle the same",
-     "pass": true,
-     "reason": null
-    },
-    "side_attribution": {
-     "note": "book selection \u2014 no PM side to attribute",
-     "pass": true,
-     "reason": null
-    }
-   },
-   "group": null,
-   "group_context": null,
-   "kickoff": "2026-07-12 01:00:00+00:00",
-   "knockout_context": {
-    "deciding_tie": null,
-    "deciding_tie_reason": "withheld near-miss: fixture bet, no advancement deciding tie",
-    "next_match": null,
-    "next_match_reason": "fixture 'Argentina vs Switzerland' not found in scores_markets knockout rounds"
-   },
-   "leg_state": null,
-   "market": "1X2",
-   "market_label": "Argentina vs Switzerland \u00b7 away \u00b7 settles at 90 min",
-   "model_prob": 0.1702,
-   "model_source": "bet_recs.withheld[argentina_vs_switzerland_away_1x2].model_prob",
-   "orderflow": null,
-   "origin": "bet_recs.withheld",
-   "pm_price": null,
-   "pm_price_source": null,
-   "position_prob": 0.1702,
-   "position_prob_source": "= model_prob (book selection)",
-   "related_pm_ideas": {
-    "ideas": [],
-    "n": 0,
-    "reason": null
-   },
-   "selection": "away",
-   "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only \u2014 this row IS the 90-minute side",
-   "side": null,
-   "side_confidence": null,
-   "side_note": null,
-   "stage": null,
-   "team": "Switzerland",
-   "verdict": "WITHHOLD",
-   "verdict_reasons": [
-    "withheld by bet_recs: model_prob 17% < floor 20%"
-   ],
-   "withheld_reason": "model_prob 17% < floor 20%"
-  },
-  {
-   "bet_rec": null,
-   "book_edge": 0.0177,
+   "book_edge": 0.0194,
    "book_edge_source": "bet_recs.withheld[spain_vs_belgium_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 6.0705,
+   "book_price_decimal": 6.2247,
    "book_price_source": "bet_recs.withheld[spain_vs_belgium_away_1x2].price (decimal book odds)",
    "bucket": "longshot",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": 0.1077,
+   "ev_net": 0.1209,
    "fixture": "Spain vs Belgium",
    "gates": {
     "clv_history": {
@@ -3747,7 +3595,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge +0.0177 not above the 0.02 threshold"
+     "reason": "book edge +0.0194 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": true,
@@ -3796,9 +3644,9 @@
      "match_no": 98,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2487,
-      "opp_win": 0.5587,
-      "team_win": 0.1926
+      "draw": 0.2488,
+      "opp_win": 0.5588,
+      "team_win": 0.1924
      },
      "opponent": "Spain",
      "played": false,
@@ -3814,13 +3662,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "Spain vs Belgium \u00b7 away \u00b7 settles at 90 min",
-   "model_prob": 0.1825,
+   "model_prob": 0.1801,
    "model_source": "bet_recs.withheld[spain_vs_belgium_away_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.1825,
+   "position_prob": 0.1801,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -3842,14 +3690,14 @@
   },
   {
    "bet_rec": null,
-   "book_edge": 0.022,
+   "book_edge": 0.0223,
    "book_edge_source": "bet_recs.withheld[france_vs_morocco_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 6.9733,
+   "book_price_decimal": 6.9653,
    "book_price_source": "bet_recs.withheld[france_vs_morocco_away_1x2].price (decimal book odds)",
    "bucket": "longshot",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": 0.1537,
+   "ev_net": 0.1557,
    "fixture": "France vs Morocco",
    "gates": {
     "clv_history": {
@@ -3908,9 +3756,9 @@
      "match_no": 97,
      "model_split_90min": {
       "basis": "1X2_90min",
-      "draw": 0.2828,
-      "opp_win": 0.5253,
-      "team_win": 0.1919
+      "draw": 0.2811,
+      "opp_win": 0.5301,
+      "team_win": 0.1888
      },
      "opponent": "France",
      "played": false,
@@ -3919,20 +3767,20 @@
      "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
      "tie_status": "real",
      "top_scoreline": "1-0",
-     "top_scoreline_prob": 0.179
+     "top_scoreline_prob": 0.18
     },
     "next_match_reason": null
    },
    "leg_state": null,
    "market": "1X2",
    "market_label": "France vs Morocco \u00b7 away \u00b7 settles at 90 min",
-   "model_prob": 0.1655,
+   "model_prob": 0.1659,
    "model_source": "bet_recs.withheld[france_vs_morocco_away_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.1655,
+   "position_prob": 0.1659,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
