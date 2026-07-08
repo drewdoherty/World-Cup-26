@@ -66,7 +66,16 @@ class RecordingSession:
         return self.handler(method, url, kwargs)
 
 
+def _tmp_fill_log() -> str:
+    """A throwaway fill-log path so tests never write into the repo's data/."""
+    fd, path = tempfile.mkstemp(suffix=".jsonl")
+    os.close(fd)
+    os.remove(path)  # filltelemetry creates it lazily on first append
+    return path
+
+
 def _trader(key: str, session=None, **cfg_kw) -> ClobTrader:
+    cfg_kw.setdefault("fill_log_path", _tmp_fill_log())
     cfg = TradeConfig(**cfg_kw)
     return ClobTrader(private_key=key, config=cfg, session=session)
 

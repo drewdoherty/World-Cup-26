@@ -48,6 +48,7 @@ from wca.bot.telegram import (
 )
 from wca.ledger import reports
 from wca.ledger.store import record_bet, settle_cashout
+from wca.pm import filltelemetry as _filltelemetry
 
 logger = logging.getLogger(__name__)
 
@@ -1945,6 +1946,7 @@ def execute_cashout(
     dry_run: bool,
     ts_utc: Optional[str] = None,
     reconcile_fn: Optional[Any] = None,
+    fill_log_path: str = _filltelemetry.DEFAULT_LOG_PATH,
 ) -> Dict[str, Any]:
     """Place a cash-out SELL and book ONLY what ACTUALLY filled (from /trades).
 
@@ -1968,6 +1970,10 @@ def execute_cashout(
         order whose fill we cannot confirm is ``unconfirmed`` (submitted, not
         settled — alert, never auto-retry); a FOK that didn't fill is ``no_fill``
         (retry next tick).
+
+    ``fill_log_path`` is where the observation-only fill telemetry
+    (:mod:`wca.pm.filltelemetry`) is appended — overridable so tests never
+    write into the real runtime log.
     """
     if ts_utc is None:
         ts_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
@@ -2046,11 +2052,21 @@ def execute_cashout(
             "⚠️ cash-out SELL placed (order %s) but FILL UNCONFIRMED — NOT booked; "
             "reconcile manually." % order_id
         )
+        _filltelemetry.log_fill_observed(
+            order_id=order_id, token_id=token_id, side="SELL",
+            filled_size=0.0, requested_size=size, status="unconfirmed",
+            path=fill_log_path,
+        )
         return res
     filled, proceeds_actual = rec
     if filled <= 0:
         res["outcome"] = "no_fill"
         res["message"] = "cash-out SELL not filled (FOK killed); nothing sold"
+        _filltelemetry.log_fill_observed(
+            order_id=order_id, token_id=token_id, side="SELL",
+            filled_size=0.0, requested_size=size, status="no_fill",
+            path=fill_log_path,
+        )
         return res
 
     proceeds = round(float(proceeds_actual), 6)
@@ -2077,6 +2093,12 @@ def execute_cashout(
             "⚠️ cash-out SELL filled (order %s, %.2f sh = $%.2f) but BOOKING "
             "FAILED — %s. Reconcile manually." % (order_id, filled, proceeds, exc)
         )
+        _filltelemetry.log_fill_observed(
+            order_id=order_id, token_id=token_id, side="SELL",
+            filled_size=filled, requested_size=size,
+            proceeds_or_cost=proceeds, status="settle_failed",
+            path=fill_log_path,
+        )
         return res
 
     _autosync(db_path, "polymarket cash-out")
@@ -2089,6 +2111,13 @@ def execute_cashout(
         "cash-out LIVE — sold %.2f sh = $%.2f, P&L $%+.2f over %d row(s)%s | order %s"
         % (filled, info["proceeds"], info["pl"],
            info["rows_cashed"] + info["rows_split"], partial, order_id)
+    )
+    _filltelemetry.log_fill_observed(
+        order_id=order_id, token_id=token_id, side="SELL",
+        filled_size=filled, requested_size=size,
+        proceeds_or_cost=info["proceeds"],
+        status=("partial" if filled < size - 1e-6 else "filled"),
+        path=fill_log_path,
     )
     return res
 

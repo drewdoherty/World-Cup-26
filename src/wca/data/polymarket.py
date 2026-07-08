@@ -183,12 +183,15 @@ def _yes_token_and_price(
 
     # Best price: mid of bestBid/bestAsk if both present, else outcomePrices.
     price: Optional[float] = None
+    best_bid: Optional[float] = None
+    best_ask: Optional[float] = None
     bb, ba = market.get("bestBid"), market.get("bestAsk")
     try:
         if bb is not None and ba is not None:
             bb_f, ba_f = float(bb), float(ba)
             if bb_f > 0.0 and ba_f > 0.0:
                 price = (bb_f + ba_f) / 2.0
+                best_bid, best_ask = bb_f, ba_f
     except (TypeError, ValueError):
         price = None
     if price is None:
@@ -209,6 +212,13 @@ def _yes_token_and_price(
         "outcome": "Yes",
         "event_slug": (event or {}).get("slug") or "",
         "event_title": (event or {}).get("title") or "",
+        # Additive, telemetry-only (2026-07-08 gate-fill-telemetry review):
+        # the true book bid/ask behind ``price`` when the mid path was used,
+        # so a caller can detect a tick-snap rounding the mid onto the ask
+        # (or bid) on a 1-tick-wide book. None when the outcomePrices
+        # fallback was used (no live book).
+        "best_bid": best_bid,
+        "best_ask": best_ask,
     }
 
 

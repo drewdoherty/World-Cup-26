@@ -42,3 +42,7 @@ data/archive/
 
 # host-local Polymarket exact-score cache (written by wca_scores_data / wca_forest_data)
 data/pm_exactscore_cache.json
+
+# PM order/fill lifecycle telemetry (wca.pm.filltelemetry) — append-only
+# runtime log written by the live trader/bot, never a tracked deliverable.
+data/pm_fill_log.jsonl

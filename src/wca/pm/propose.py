@@ -37,6 +37,7 @@ from wca.card import (
 )
 from wca.data.polymarket import resolve_outcome_token
 from wca.markets import kelly as kelly_mod
+from wca.pm import filltelemetry as _filltelemetry
 
 # Below this notional an order is not worth parking (dust / rounding).
 _MIN_ORDER_USD = 1.0
@@ -53,6 +54,7 @@ def build_pm_proposals(
     fraction: float = 0.25,
     cap: float = 0.05,
     events: Optional[List[Dict[str, Any]]] = None,
+    fill_log_path: str = _filltelemetry.DEFAULT_LOG_PATH,
 ) -> List[Dict[str, Any]]:
     """Turn the card's recommendations into Polymarket parked-order proposals.
 
@@ -79,6 +81,10 @@ def build_pm_proposals(
         Optional pre-fetched Polymarket events to resolve tokens against (avoids
         a network call). When ``None`` the live World Cup events are fetched
         once per :func:`resolve_outcome_token` call that needs them.
+    fill_log_path:
+        Where the observation-only mid-rounding telemetry
+        (:func:`wca.pm.filltelemetry.log_mid_rounding`) is appended.
+        Overridable so tests never write into the real runtime log.
 
     Returns
     -------
@@ -131,11 +137,25 @@ def build_pm_proposals(
         # trader's order-amount rounding) so the parked price IS the executable
         # price. Without this, a mid like 0.075 is parked but the order fills at
         # 0.08, silently overspending; sizing/EV below then use the real price.
+        raw_mid = price
         price = float(
             Decimal(str(price)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         )
         if not (0.0 < price < 1.0):
             continue
+        # Telemetry only (2026-07-08 review): on a 1-tick-wide book the
+        # ROUND_HALF_UP snap above can push the parked price onto (or past)
+        # the best ask/bid — i.e. an order believed to rest "at mid" is
+        # actually parked at the touch. Never changes ``price`` or sizing;
+        # purely counts how often this happens.
+        _filltelemetry.log_mid_rounding(
+            token_id=resolved["token_id"],
+            raw_mid=raw_mid,
+            rounded_price=price,
+            best_bid=resolved.get("best_bid"),
+            best_ask=resolved.get("best_ask"),
+            path=fill_log_path,
+        )
 
         pm_odds = 1.0 / price
         # Quarter-Kelly at the Polymarket price, then hard-capped.
