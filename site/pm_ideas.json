@@ -1,9 +1,46 @@
 {
   "meta": {
-    "generated": "2026-07-08T03:19:06Z",
+    "generated": "2026-07-08T03:52:33Z",
     "ranking": "+EV moneylines > mid > longshots; further-out fixtures first; EV tiebreak",
-    "games_held": true,
+    "games_held": false,
     "confirm": "Y PM-<n> in @gamble1_bot fires; PM_DRY_RUN gates execution"
   },
-  "ideas": []
+  "ideas": [
+    {
+      "group": "game",
+      "match": "France vs Morocco",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 25.0,
+      "model_c": 26.7,
+      "ev_pct": 6.8,
+      "size_usd": 14.2,
+      "hours_out": 40.1,
+      "bucket": "mid"
+    },
+    {
+      "group": "game",
+      "match": "Spain vs Belgium",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 17.0,
+      "model_c": 18.2,
+      "ev_pct": 7.1,
+      "size_usd": 9.1,
+      "hours_out": 63.1,
+      "bucket": "longshot"
+    },
+    {
+      "group": "game",
+      "match": "France vs Morocco",
+      "selection": "Yes",
+      "side": "BUY",
+      "price_c": 15.0,
+      "model_c": 16.5,
+      "ev_pct": 9.9,
+      "size_usd": 10.94,
+      "hours_out": 40.1,
+      "bucket": "longshot"
+    }
+  ]
 }
