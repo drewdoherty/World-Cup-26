@@ -1,35 +1,35 @@
 {
   "meta": {
-    "generated": "2026-07-08 09:20:09 UTC",
+    "generated": "2026-07-08 09:49:12 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
-      "bankroll": 3264.014296992481,
+      "bankroll": 3000.0,
       "rung": 0,
       "kelly_fraction": 0.25,
       "per_bet_cap": 0.05,
-      "max_stake": 163.2,
-      "n_settled": 27,
-      "clv_to_date": -0.018335811964298322,
-      "reason": "COMBINED-POOL \u00a33264 (\u00a33000 +177.10\u00a3 GBP P&L +115.60$ PM P&L at $1.33/\u00a3; user 2026-07-02) \u2014 ladder rung 0 (\u00a32000) for reference; 27/50 settled-with-close, CLV -0.0183",
+      "max_stake": 150.0,
+      "n_settled": 0,
+      "clv_to_date": null,
+      "reason": "COMBINED-POOL \u00a33000 (\u00a33000 +0.00\u00a3 GBP P&L +0.00$ PM P&L at $1.33/\u00a3; user 2026-07-02) \u2014 ladder rung 0 (\u00a32000) for reference; 0/50 settled-with-close, CLV n/a",
       "currency": "GBP",
       "source": "ledger"
     },
     "pm_pool": {
-      "bankroll": 4105.6,
+      "bankroll": 3990.0,
       "kelly_fraction": 0.25,
       "per_bet_cap": 0.04,
-      "max_stake": 164.22,
+      "max_stake": 159.6,
       "currency": "USD",
-      "source": "ledger (realised $+115.60)"
+      "source": "ledger (realised $+0.00)"
     },
     "open_exposure": {
-      "ev": 0.14,
+      "ev": 0.0,
       "best_case": 0.0,
-      "worst_case": -795.96,
+      "worst_case": 0.0,
       "best_case_usd": 0.0,
-      "worst_case_usd": -1065.74,
+      "worst_case_usd": 0.0,
       "p_profit": null,
-      "n_open": 85,
+      "n_open": 0,
       "source": "ledger"
     },
     "fx": {
@@ -38,20 +38,20 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 1745,
-      "advancement_secs": 1,
+      "model_secs": 532,
+      "advancement_secs": 1744,
       "price_secs": null,
-      "promo_secs": 78618,
+      "promo_secs": 80361,
       "exposure_secs": null
     },
     "coverage": {
       "match_singles": "1X2 from blended model (10%% Elo + 30%% DC + 60%% market) vs de-vigged consensus. Price = market-implied (no best-price pull). Top-3 per fixture by net EV. BTTS/totals: withheld \u2014 no live book price.",
       "event_props": "Corners/cards: calibrated but withheld \u2014 no live sportsbook price snapshot. Player scorer: withheld \u2014 player xG-share not yet wired.",
-      "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($4106).",
+      "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($3990).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
     "actionable_count": 5,
-    "withheld_count": 11
+    "withheld_count": 10
   },
   "match_singles": [],
   "event_props": [],
@@ -71,11 +71,11 @@
       "price": 1.5111,
       "edge_adj": 0.0325,
       "ev_net": 0.0374,
-      "stake": 113.56,
+      "stake": 110.36,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 1744,
+        "price_secs": 1744
       },
       "stale": false,
       "stale_reason": null,
@@ -109,11 +109,11 @@
       "price": 5.2623,
       "edge_adj": 0.0649,
       "ev_net": 0.0654,
-      "stake": 82.83,
+      "stake": 80.5,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 1744,
+        "price_secs": 1744
       },
       "stale": false,
       "stale_reason": null,
@@ -147,11 +147,11 @@
       "price": 2.6885,
       "edge_adj": 0.0384,
       "ev_net": 0.0434,
-      "stake": 71.0,
+      "stake": 69.0,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 1744,
+        "price_secs": 1744
       },
       "stale": false,
       "stale_reason": null,
@@ -185,11 +185,11 @@
       "price": 4.3724,
       "edge_adj": 0.0835,
       "ev_net": 0.084,
-      "stake": 111.77,
+      "stake": 108.63,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 1744,
+        "price_secs": 1744
       },
       "stale": false,
       "stale_reason": null,
@@ -223,11 +223,11 @@
       "price": 3.8433,
       "edge_adj": 0.0479,
       "ev_net": 0.0484,
-      "stake": 67.16,
+      "stake": 65.27,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1,
-        "price_secs": 1
+        "model_secs": 1744,
+        "price_secs": 1744
       },
       "stale": false,
       "stale_reason": null,
@@ -257,10 +257,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Morocco",
-      "model_prob": 0.1655,
-      "price": 6.9733,
-      "edge": 0.022,
-      "ev_net": 0.1537,
+      "model_prob": 0.1659,
+      "price": 6.9653,
+      "edge": 0.0223,
+      "ev_net": 0.1557,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 17% < floor 20%",
@@ -275,31 +275,13 @@
       "market": "1X2",
       "selection": "away",
       "team": "Belgium",
-      "model_prob": 0.1825,
-      "price": 6.0705,
-      "edge": 0.0177,
-      "ev_net": 0.1077,
+      "model_prob": 0.1801,
+      "price": 6.2247,
+      "edge": 0.0194,
+      "ev_net": 0.1209,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 18% < floor 20%",
-      "stale": false,
-      "stale_reason": null
-    },
-    {
-      "id": "argentina_vs_switzerland_away_1x2",
-      "fixture": "Argentina vs Switzerland",
-      "kickoff": "2026-07-12 01:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "selection": "away",
-      "team": "Switzerland",
-      "model_prob": 0.1702,
-      "price": 5.9253,
-      "edge": 0.0015,
-      "ev_net": 0.0087,
-      "stake": 0.0,
-      "currency": "GBP",
-      "withheld_reason": "model_prob 17% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
