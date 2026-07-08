@@ -255,6 +255,13 @@ def run_cycle(
         new_changed: List[Tuple[str, str, Dict[str, Any]]] = []  # (site, kind, promo)
         plus_ev_boosts: List[Tuple[int, Dict[str, Any]]] = []  # (eval_id, view)
 
+        # Dedup set for boost grading, shared between the scrape branch below
+        # and the seed/catch-all pass in step 2.5 — seeded with whatever was
+        # already graded earlier today (a prior cycle) so a long-running daemon
+        # doesn't re-insert the same static seed description every hour.
+        today_prefix = now[:10]  # "YYYY-MM-DD"
+        graded_today = promos.graded_fingerprints_today(conn, today_prefix)
+
         # 2) Per-site scrape + diff.
         for entry in promos.SITES:
             stats["sites"] += 1
@@ -321,12 +328,46 @@ def run_cycle(
                     eid, view, is_ev = _grade_boost(
                         conn, site, cand, scores_feed, now
                     )
+                    graded_today.add((site, (cand.get("title") or "")[:120] or None))
                     stats["boosts_seen"] += 1
                     if view.get("_priceable"):
                         stats["boosts_priceable"] += 1
                     if is_ev:
                         stats["boosts_plus_ev"] += 1
                         plus_ev_boosts.append((eid, view))
+
+        # 2.5) Grade active boost-type promotions from ANY source (seed included)
+        # that haven't been graded yet today. Historically ``boost_evals`` was
+        # written ONLY from the scrape branch above, so a book whose live
+        # scraper never returns 'ok' (the common case — most hubs are
+        # JS-rendered SPAs) never produced a single boost-eval row even though
+        # its recon-seeded catalog correctly lists a "Power Prices" / "Super
+        # Boost" style entry. Seed rows are generic descriptions of a recurring
+        # promo MECHANIC ("daily enhanced odds"), not a priced instance, so
+        # they will almost always land ``priceable=False`` here — that is the
+        # honest outcome (see wca.promos docstring), not a bug: it makes the
+        # boost stream show "we know this book runs boosts, we just can't see
+        # today's specific price" instead of silence. Scraped boosts already
+        # graded above in this same cycle (or an earlier cycle today) are
+        # skipped via the shared ``graded_today`` dedup set.
+        for row in promos.active_boost_promotions(conn):
+            site = row["site"]
+            cand = {
+                "title": row["title"] or "",
+                "description": row["description"] or "",
+                "promo_type": "boost",
+            }
+            selection_key = (cand.get("title") or "")[:120] or None
+            if (site, selection_key) in graded_today:
+                continue
+            eid, view, is_ev = _grade_boost(conn, site, cand, scores_feed, now)
+            graded_today.add((site, selection_key))
+            stats["boosts_seen"] += 1
+            if view.get("_priceable"):
+                stats["boosts_priceable"] += 1
+            if is_ev:
+                stats["boosts_plus_ev"] += 1
+                plus_ev_boosts.append((eid, view))
 
         # 3/4) Push NEW/CHANGED promos + +EV boosts (capped, highest-edge first).
         under_pytest = bool(os.environ.get("PYTEST_CURRENT_TEST"))
