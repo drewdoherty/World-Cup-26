@@ -457,6 +457,80 @@ def test_no_side_edge_buckets_on_position_probability():
     assert row["bucket"] == "mid"
 
 
+# --------------------------------------------- explicit side from the feed
+
+
+def _set_side(feeds, team, stage, side, ask=None):
+    """Add the (new) explicit side/ask fields to a fixture pm entry."""
+    for t in feeds["advancement"]["teams"]:
+        if t["team"] == team:
+            entry = dict(t["pm"][stage])
+            entry["side"] = side
+            if ask is not None:
+                entry["ask"] = ask
+            t["pm"][stage] = entry
+
+
+def test_feed_side_preferred_over_derivation():
+    """The reviewer's stale-print scenario resolves itself once the feed
+    emits the side: Nordland's edge_adj +0.0428 belongs to YES (ask 0.40)
+    even though model < mid — with pm[stage].side present there is nothing
+    to derive, so the HIGH-2 uncertainty guard must NOT fire."""
+    feeds = _feeds()
+    _set_side(feeds, "Nordland", "SF", "YES", ask=0.4)
+    feed = _build(feeds)
+    row = _row(feed, "Nordland", "SF")
+    assert row["side"] == "YES"
+    assert row["side_source"] == "feed"
+    assert row["side_confidence"] == "explicit"
+    assert row["position_prob"] == 0.45
+    assert row["bucket"] == "mid"                 # buckets on the FEED side
+    assert row["gates"]["side_attribution"]["pass"] is True
+    assert "advancement_data" in row["side_note"]
+    assert "feed-emitted side" in row["edge_source"]
+    assert row["verdict"] == "SHADOW_ADD"         # was WATCH when derived
+    assert not any("side attribution UNCERTAIN" in c
+                   for c in feed["meta"]["caveats"])
+
+
+def test_feed_side_no_buckets_on_position_probability():
+    feeds = _feeds()
+    _set_side(feeds, "Nordland", "SF", "NO")
+    feed = _build(feeds)
+    row = _row(feed, "Nordland", "SF")
+    assert row["side"] == "NO"
+    assert row["side_source"] == "feed"
+    assert row["position_prob"] == 0.55           # 1 - model_prob
+    assert row["bucket"] == "moneyline"
+    assert row["gates"]["side_attribution"]["pass"] is True
+
+
+def test_malformed_feed_side_falls_back_to_derivation():
+    # Anything but a literal "YES"/"NO" is verified, never trusted.
+    feeds = _feeds()
+    _set_side(feeds, "Nordland", "SF", "Maybe")
+    feed = _build(feeds)
+    row = _row(feed, "Nordland", "SF")
+    assert row["side_source"] == "derived"
+    assert row["side_confidence"] == "uncertain"  # guard still fires
+    assert row["verdict"] == "WATCH"
+
+
+def test_side_source_recorded_on_every_row():
+    feed = _build()
+    # The fixture feed predates pm[stage].side → every advancement_data row
+    # is a derivation; bet_recs rows carry their explicit YES buy; withheld
+    # book near-misses have no PM side at all.
+    assert _row(feed, "Morocco", "SF")["side_source"] == "derived"
+    assert _row(feed, "Nordland", "SF")["side_source"] == "derived"
+    assert _row(feed, "Brazil", "QF")["side_source"] == "bet_recs"
+    withheld = [r for r in feed["rows"]
+                if r["origin"] == "bet_recs.withheld"][0]
+    assert withheld["side_source"] is None
+    for row in feed["rows"]:
+        assert "side_source" in row
+
+
 # ------------------------------------------------------ pm_ideas (LOW-2/3)
 
 def test_related_pm_ideas_joined_on_canonical_names_with_settlement_tag():
@@ -642,14 +716,30 @@ def test_ordering_bucket_then_further_out_stage_then_edge():
     ]
 
 
-def test_bucket_convention_matches_wca_pm_propose_thresholds():
-    # PROB_BUCKETS replicated verbatim (follow-up: import wca.selection).
+def test_bucket_convention_imported_from_wca_selection():
+    # Canonical selection rule IMPORTED, not replicated (PR #170 follow-up
+    # closed): identity with wca.selection, so the desk can never drift.
+    import wca.selection as selection
+    assert MOD.PROB_BUCKETS is selection.PROB_BUCKETS
+    assert MOD.prob_bucket is selection.prob_bucket
+    assert MOD.longshot_no_cash is selection.longshot_no_cash
+    assert MOD.LONGSHOT_PROB == selection.LONGSHOT_PROB == 0.25
     assert MOD.PROB_BUCKETS == ((0.50, "moneyline"), (0.25, "mid"),
                                 (0.0, "longshot"))
     assert MOD.prob_bucket(0.55) == "moneyline"
     assert MOD.prob_bucket(0.30) == "mid"
     assert MOD.prob_bucket(0.10) == "longshot"
-    assert "wca_pm_propose" in _build()["meta"]["selection_rule"]["source"]
+    meta = _build()["meta"]
+    assert "wca.selection" in meta["selection_rule"]["source"]
+    assert "follow_up" not in meta["selection_rule"]   # follow-up shipped
+
+
+def test_min_edge_imported_from_betrecs():
+    # MIN_EDGE comes from its defining module (scripts/wca_betrecs.py) — the
+    # edge desk put scripts/ on sys.path when it loaded, so import directly.
+    import wca_betrecs
+    assert MOD.MIN_EDGE_ADJ == wca_betrecs.MIN_EDGE == 0.02
+    assert "wca_betrecs" in _build()["meta"]["edge_gate"]["source"]
 
 
 def test_deterministic_output():

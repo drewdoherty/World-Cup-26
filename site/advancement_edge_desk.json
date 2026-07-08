@@ -6,7 +6,7 @@
  "freshness": {
   "checks": [
    {
-    "age_secs": 1.0,
+    "age_secs": 657.0,
     "max_age_secs": 10800,
     "name": "advancement",
     "pass": true,
@@ -15,7 +15,7 @@
     "stamp": "2026-07-08 13:59:03 UTC"
    },
    {
-    "age_secs": 1.0,
+    "age_secs": 657.0,
     "max_age_secs": 10800,
     "name": "bet_recs",
     "pass": true,
@@ -24,7 +24,7 @@
     "stamp": "2026-07-08 13:59:03 UTC"
    },
    {
-    "age_secs": 87.0,
+    "age_secs": 743.0,
     "max_age_secs": 10800,
     "name": "scores_markets",
     "pass": true,
@@ -33,7 +33,7 @@
     "stamp": "2026-07-08 13:57:37 UTC"
    },
    {
-    "age_secs": 251.0,
+    "age_secs": 907.0,
     "max_age_secs": 21600,
     "name": "pm_ideas",
     "pass": true,
@@ -42,7 +42,7 @@
     "stamp": "2026-07-08T13:54:53Z"
    },
    {
-    "age_secs": 3423.3,
+    "age_secs": 4079.3,
     "max_age_secs": 86400,
     "name": "orderflow",
     "pass": true,
@@ -51,7 +51,7 @@
     "stamp": "2026-07-08T13:02:00.714554+00:00"
    },
    {
-    "age_secs": 21004.0,
+    "age_secs": 21660.0,
     "max_age_secs": 50400,
     "name": "advancement_model",
     "pass": true,
@@ -72,7 +72,7 @@
   "pass": true
  },
  "meta": {
-  "advancement_model_age_hours": 5.83,
+  "advancement_model_age_hours": 6.02,
   "advancement_model_generated": "2026-07-08 08:09 UTC",
   "caveats": [
    "SHADOW-ONLY: decision-support feed; no verdict here is a trade instruction and nothing is wired to execution.",
@@ -87,7 +87,7 @@
   ],
   "edge_gate": {
    "min_edge_adj": 0.02,
-   "source": "replicated from scripts/wca_betrecs.py MIN_EDGE (current live actionable threshold)"
+   "source": "imported from scripts/wca_betrecs.py MIN_EDGE (current live actionable threshold)"
   },
   "freshness_max_age_s": {
    "site/advancement_data.json": 10800,
@@ -97,7 +97,7 @@
    "site/pm_ideas.json": 21600,
    "site/scores_markets.json": 10800
   },
-  "generated_at": "2026-07-08T13:59:04Z",
+  "generated_at": "2026-07-08T14:10:00Z",
   "n_advancement_legs_without_pm_quote": 16,
   "n_by_verdict": {
    "DO_NOT_TRADE": 1,
@@ -118,7 +118,6 @@
   "ordering": "bucket on the MODEL prob that the position pays out (moneyline>=50c, mid 25-50c, longshot <25c) primary; further-out stage first secondary (win > Final > SF > QF > R16 > R32 > group_winner); fee-adjusted edge desc as tiebreak only. Decided legs then withheld near-misses rank after the actionable tier. Render in feed order \u2014 do not re-sort.",
   "schema_version": 2,
   "selection_rule": {
-   "follow_up": "switch to the wca.selection import once the concurrent selection-module PR lands on main",
    "prob_buckets": [
     [
      0.5,
@@ -133,7 +132,7 @@
      "longshot"
     ]
    ],
-   "source": "replicated verbatim from scripts/wca_pm_propose.py PROB_BUCKETS"
+   "source": "imported from wca.selection (src/wca/selection.py \u2014 canonical selection rule, human-approved-change file)"
   },
   "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
   "shadow_only": true,
@@ -283,6 +282,7 @@
    "side": "NO",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "win",
    "team": "France",
    "verdict": "WATCH",
@@ -415,6 +415,7 @@
    "side": "NO",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "win",
    "team": "Norway",
    "verdict": "WATCH",
@@ -567,6 +568,7 @@
    "side": "NO",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "win",
    "team": "Argentina",
    "verdict": "WATCH",
@@ -680,6 +682,7 @@
    "side": "NO",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "win",
    "team": "Switzerland",
    "verdict": "WATCH",
@@ -833,6 +836,7 @@
    "side": "NO",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "Final",
    "team": "France",
    "verdict": "WATCH",
@@ -985,6 +989,7 @@
    "side": "NO",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "Final",
    "team": "Argentina",
    "verdict": "WATCH",
@@ -1117,6 +1122,7 @@
    "side": "NO",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "Final",
    "team": "Norway",
    "verdict": "WATCH",
@@ -1229,6 +1235,7 @@
    "side": "NO",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "Final",
    "team": "Switzerland",
    "verdict": "WATCH",
@@ -1342,6 +1349,7 @@
    "side": "NO",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "SF",
    "team": "Switzerland",
    "verdict": "WATCH",
@@ -1502,6 +1510,7 @@
    "side": "YES",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "SF",
    "team": "England",
    "verdict": "SHADOW_ADD",
@@ -1654,6 +1663,7 @@
    "side": "NO",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "SF",
    "team": "Norway",
    "verdict": "SHADOW_ADD",
@@ -1814,6 +1824,7 @@
    "side": "YES",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "win",
    "team": "Spain",
    "verdict": "WATCH",
@@ -1974,6 +1985,7 @@
    "side": "YES",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "Final",
    "team": "Spain",
    "verdict": "WATCH",
@@ -2126,6 +2138,7 @@
    "side": "YES",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "Final",
    "team": "England",
    "verdict": "DO_NOT_TRADE",
@@ -2278,6 +2291,7 @@
    "side": "NO",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "SF",
    "team": "Argentina",
    "verdict": "WATCH",
@@ -2438,6 +2452,7 @@
    "side": "YES",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "SF",
    "team": "Morocco",
    "verdict": "SHADOW_ADD",
@@ -2590,6 +2605,7 @@
    "side": "NO",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "SF",
    "team": "France",
    "verdict": "SHADOW_ADD",
@@ -2742,6 +2758,7 @@
    "side": "NO",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "SF",
    "team": "Spain",
    "verdict": "SHADOW_ADD",
@@ -2902,6 +2919,7 @@
    "side": "YES",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "SF",
    "team": "Belgium",
    "verdict": "SHADOW_ADD",
@@ -3034,6 +3052,7 @@
    "side": "YES",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "win",
    "team": "Belgium",
    "verdict": "WATCH",
@@ -3167,6 +3186,7 @@
    "side": "YES",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "win",
    "team": "England",
    "verdict": "WATCH",
@@ -3300,6 +3320,7 @@
    "side": "YES",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "win",
    "team": "Morocco",
    "verdict": "WATCH",
@@ -3434,6 +3455,7 @@
    "side": "YES",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "Final",
    "team": "Belgium",
    "verdict": "WATCH",
@@ -3567,6 +3589,7 @@
    "side": "YES",
    "side_confidence": "derived",
    "side_note": "derived from sign(model - pm_yes_mid): advancement_data omits the traded side",
+   "side_source": "derived",
    "stage": "Final",
    "team": "Morocco",
    "verdict": "WATCH",
@@ -3659,6 +3682,7 @@
    "side": null,
    "side_confidence": null,
    "side_note": null,
+   "side_source": null,
    "stage": null,
    "team": "Switzerland",
    "verdict": "WITHHOLD",
@@ -3771,6 +3795,7 @@
    "side": null,
    "side_confidence": null,
    "side_note": null,
+   "side_source": null,
    "stage": null,
    "team": "Belgium",
    "verdict": "WITHHOLD",
@@ -3883,6 +3908,7 @@
    "side": null,
    "side_confidence": null,
    "side_note": null,
+   "side_source": null,
    "stage": null,
    "team": "Morocco",
    "verdict": "WITHHOLD",
