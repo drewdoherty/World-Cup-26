@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-08 01:08:53 UTC"
+    "generated": "2026-07-08 01:43:38 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -9,51 +9,56 @@
     "p_profit": 0,
     "p_loss": 0,
     "p_big_win": 0,
-    "n_scenarios": 27
+    "n_scenarios": 81
   },
   "correlation": {
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0724,
+        "prob": 0.0416,
         "results": [
           "France",
           "Spain",
-          "Norway"
+          "Norway",
+          "Argentina"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0851,
+        "prob": 0.0184,
         "results": [
           "France",
           "Spain",
+          "Norway",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.1783,
+        "prob": 0.0124,
         "results": [
           "France",
           "Spain",
-          "England"
+          "Norway",
+          "Switzerland"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0298,
+        "prob": 0.0489,
         "results": [
           "France",
+          "Spain",
           "Draw",
-          "Norway"
+          "Argentina"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.035,
+        "prob": 0.0216,
         "results": [
           "France",
+          "Spain",
           "Draw",
           "Draw"
         ]
@@ -62,29 +67,32 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0724,
+        "prob": 0.0416,
         "results": [
           "France",
           "Spain",
-          "Norway"
+          "Norway",
+          "Argentina"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.0851,
+        "prob": 0.0184,
         "results": [
           "France",
           "Spain",
+          "Norway",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.1783,
+        "prob": 0.0124,
         "results": [
           "France",
           "Spain",
-          "England"
+          "Norway",
+          "Switzerland"
         ]
       }
     ],
@@ -119,7 +127,7 @@
       "results": [
         {
           "outcome": "France",
-          "prob": 0.579,
+          "prob": 0.5789,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -128,7 +136,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2554,
+          "prob": 0.2555,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -160,7 +168,7 @@
       "results": [
         {
           "outcome": "Spain",
-          "prob": 0.5798,
+          "prob": 0.5801,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -169,7 +177,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2386,
+          "prob": 0.2382,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -178,7 +186,7 @@
         },
         {
           "outcome": "Belgium",
-          "prob": 0.1816,
+          "prob": 0.1817,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -255,6 +263,47 @@
         "best_outcome": "Norway",
         "worst_outcome": "Norway",
         "n_blindspots": 3
+      }
+    },
+    {
+      "fixture": "Argentina vs Switzerland",
+      "kickoff": null,
+      "results": [
+        {
+          "outcome": "Argentina",
+          "prob": 0.5747,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.2536,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Switzerland",
+          "prob": 0.1717,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        }
+      ],
+      "events": [],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "Argentina",
+        "worst_outcome": "Argentina",
+        "n_blindspots": 0
       }
     }
   ],

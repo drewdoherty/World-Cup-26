@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-08 01:09:16 UTC",
+    "generated": "2026-07-08 01:44:01 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 864,
+      "model_secs": 761,
       "advancement_secs": 1,
       "price_secs": null,
-      "promo_secs": 49165,
+      "promo_secs": 51250,
       "exposure_secs": null
     },
     "coverage": {
@@ -51,7 +51,7 @@
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
     "actionable_count": 5,
-    "withheld_count": 11
+    "withheld_count": 12
   },
   "match_singles": [],
   "event_props": [],
@@ -258,9 +258,9 @@
       "selection": "away",
       "team": "Morocco",
       "model_prob": 0.1656,
-      "price": 6.9615,
-      "edge": 0.0219,
-      "ev_net": 0.1528,
+      "price": 6.9632,
+      "edge": 0.022,
+      "ev_net": 0.1529,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 17% < floor 20%",
@@ -275,13 +275,31 @@
       "market": "1X2",
       "selection": "away",
       "team": "Belgium",
-      "model_prob": 0.1816,
-      "price": 6.1213,
-      "edge": 0.0183,
-      "ev_net": 0.1119,
+      "model_prob": 0.1817,
+      "price": 6.116,
+      "edge": 0.0182,
+      "ev_net": 0.1115,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 18% < floor 20%",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "argentina_vs_switzerland_away_1x2",
+      "fixture": "Argentina vs Switzerland",
+      "kickoff": "2026-07-12 01:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "away",
+      "team": "Switzerland",
+      "model_prob": 0.1717,
+      "price": 5.8423,
+      "edge": 0.0005,
+      "ev_net": 0.003,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "model_prob 17% < floor 20%",
       "stale": false,
       "stale_reason": null
     },
