@@ -30,9 +30,138 @@ except Exception:  # pragma: no cover - archive is optional
 
 _LEGS = ("home", "draw", "away")
 
+# 1X2 shadow-variant tuning (SHADOW-ONLY — see build_predictions docstring).
+# The residual model that mw90_* blends the market against: the deployed
+# 0.25*Elo + 0.75*DC split (matches the card's model residual, not the final
+# 0.90-market blend which would be circular). Changing these is a shadow-config
+# tweak only — nothing here touches live pricing/sizing/selection.
+_MW90_W_MARKET = 0.90
+_MW90_ELO_WEIGHT = 0.25
+_MW90_DC_WEIGHT = 0.75
+_SHRINK_K_MID = 0.5      # k for legs the model rates >= 0.25
+_SHRINK_K_LONGSHOT = 0.25  # k for legs the model rates < 0.25
+_SHRINK_LONGSHOT_PROB = 0.25
+_DISAGREE_PP = 0.03      # |model - market| >= 3pp flags a leg as a disagreement
+
 
 def _triple(probs: Dict[str, float]) -> Dict[str, float]:
     return {leg: round(float(probs[leg]), 6) for leg in _LEGS}
+
+
+def _renorm(triple: Dict[str, float]) -> Optional[Dict[str, float]]:
+    """Non-negative-clamp then sum-to-one renormalise, or ``None`` if degenerate.
+
+    Legs are floored at 0 (a blend can never legitimately go negative here, but
+    float noise / a stray input could); ``None`` is returned when the total is
+    non-positive so a caller omits the shadow rather than emitting a fabricated
+    uniform triple.
+    """
+    clamped = {leg: max(0.0, float(triple.get(leg, 0.0))) for leg in _LEGS}
+    total = sum(clamped.values())
+    if total <= 0.0:
+        return None
+    return {leg: clamped[leg] / total for leg in _LEGS}
+
+
+def _valid_triple(probs: Any) -> bool:
+    """True iff *probs* carries a finite number for every 1X2 leg."""
+    if not isinstance(probs, Mapping):
+        return False
+    return all(isinstance(probs.get(leg), (int, float)) for leg in _LEGS)
+
+
+def _mw90_triple(
+    elo: Mapping[str, float],
+    dc: Mapping[str, float],
+    market: Mapping[str, float],
+) -> Optional[Dict[str, float]]:
+    """``0.9*market + 0.1*(0.25*elo + 0.75*dc)`` renormalised, or ``None``.
+
+    SHADOW-ONLY 1X2 variant (n=73 evidence: in-sample optimal market weight was
+    100%; this parks a 90/10 residual blend so it can be CLV/Brier-scored before
+    any move toward the market touches live pricing). Returns ``None`` when any
+    of the three component triples is missing/malformed — never fabricated.
+    """
+    if not (_valid_triple(elo) and _valid_triple(dc) and _valid_triple(market)):
+        return None
+    residual = {
+        leg: _MW90_ELO_WEIGHT * float(elo[leg]) + _MW90_DC_WEIGHT * float(dc[leg])
+        for leg in _LEGS
+    }
+    blended = {
+        leg: _MW90_W_MARKET * float(market[leg]) + (1.0 - _MW90_W_MARKET) * residual[leg]
+        for leg in _LEGS
+    }
+    return _renorm(blended)
+
+
+def _shrink_triple(
+    model: Mapping[str, float],
+    market: Mapping[str, float],
+) -> Optional[Dict[str, float]]:
+    """Shrink-to-market ``p' = p_mkt + k*(p_model - p_mkt)`` renormalised.
+
+    SHADOW-ONLY 1X2 variant. ``k = 0.5`` for legs the model rates ``>= 0.25``
+    and ``k = 0.25`` for legs it rates ``< 0.25`` (pulls the anti-signal model
+    longshots harder toward the market — n=99 legs ran 15.8% predicted vs 10.1%
+    realized). The per-leg shrink is applied *before* renormalisation across the
+    three legs. Returns ``None`` when either input triple is missing.
+    """
+    if not (_valid_triple(model) and _valid_triple(market)):
+        return None
+    shrunk = {}
+    for leg in _LEGS:
+        p_model = float(model[leg])
+        p_mkt = float(market[leg])
+        k = _SHRINK_K_MID if p_model >= _SHRINK_LONGSHOT_PROB else _SHRINK_K_LONGSHOT
+        shrunk[leg] = p_mkt + k * (p_model - p_mkt)
+    return _renorm(shrunk)
+
+
+def _disagree3pp(
+    model: Mapping[str, float],
+    market: Mapping[str, float],
+) -> Optional[Dict[str, bool]]:
+    """Per-leg ``|model - market| >= 3pp`` flags, or ``None`` if inputs missing.
+
+    SHADOW-ONLY diagnostic: disagreement legs were anti-signal *both* ways at
+    n=73 (model>=mkt+3pp legs hit 17.9% vs market 20.6%; mkt>=model+3pp legs hit
+    65.5% vs model 57.7%), so the scorer can slice paired diffs on this flag.
+    """
+    if not (_valid_triple(model) and _valid_triple(market)):
+        return None
+    return {
+        leg: abs(float(model[leg]) - float(market[leg])) >= _DISAGREE_PP
+        for leg in _LEGS
+    }
+
+
+def _onex2_shadows(
+    model: Mapping[str, float],
+    elo: Mapping[str, float],
+    dc: Mapping[str, float],
+    market: Mapping[str, float],
+) -> Dict[str, Any]:
+    """All 1X2 shadow fields present for a row, guarded on the market triple.
+
+    Emits nothing (``{}``) when the fixture has no usable market triple — the
+    hard guard from the spec: shadows are omitted for a row rather than
+    fabricated. When present, keys are ``mw90`` (triple), ``shrink`` (triple)
+    and ``disagree3pp`` (per-leg bools).
+    """
+    if not _valid_triple(market):
+        return {}
+    out: Dict[str, Any] = {}
+    mw90 = _mw90_triple(elo, dc, market)
+    if mw90 is not None:
+        out["mw90"] = _triple(mw90)
+    shrink = _shrink_triple(model, market)
+    if shrink is not None:
+        out["shrink"] = _triple(shrink)
+    flags = _disagree3pp(model, market)
+    if flags is not None:
+        out["disagree3pp"] = flags
+    return out
 
 
 def _lambdas_for(dc_model: Any, fb: Any) -> Optional[Dict[str, float]]:
@@ -138,6 +267,18 @@ def build_predictions(
     ``tl_lambda_blend_away`` (the blended lambda, model shrunk toward the
     market). See :mod:`wca.models.totals_prior` for the exact de-vig/blend
     method. NOT consumed by any pricing or sizing path in this change.
+
+    1X2 SHADOW variants are additionally emitted for every row that carries a
+    usable de-vigged market triple (all rows in practice), computed from the
+    ``model`` / ``elo`` / ``dc`` / ``market`` triples already in the row (no new
+    inputs needed): ``mw90`` (``0.9*market + 0.1*(0.25*elo + 0.75*dc)``,
+    renormalised — the near-market blend the n=73 evidence favoured), ``shrink``
+    (shrink-to-market ``p' = p_mkt + k*(p_model - p_mkt)`` with ``k=0.5`` for
+    model legs ``>=0.25`` and ``k=0.25`` below, renormalised) and
+    ``disagree3pp`` (per-leg ``|model - market| >= 3pp`` booleans). All three
+    are SHADOW-ONLY and scored by ``scripts/wca_shadow_score.py``; none touch
+    live pricing/sizing/selection. A fixture with no market triple carries none
+    of them (guarded — never fabricated).
     """
     fixtures: List[Dict[str, Any]] = []
     for fb in blends:
@@ -152,6 +293,11 @@ def build_predictions(
             "dc": _triple(fb.dc_map),
             "market": _triple(fb.mkt_map),
         }
+        # 1X2 SHADOW variants (mw90 / shrink / disagree3pp): counterfactually
+        # computable from the market+elo+dc+model triples already in the row, so
+        # they are emitted for every build with a usable market. Guarded — a
+        # fixture with no market triple carries none of them (never fabricated).
+        row.update(_onex2_shadows(row["model"], row["elo"], row["dc"], row["market"]))
         lambdas = _lambdas_for(dc_model, fb)
         if lambdas is not None:
             row.update(lambdas)
