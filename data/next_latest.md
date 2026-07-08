@@ -1,10 +1,10 @@
-<!-- generated: 2026-07-08T13:44:08 -->
+<!-- generated: 2026-07-08T14:20:43 -->
 ⚽ *Next match* — France vs Morocco
 Kickoff 2026-07-09 20:00:00+00:00
 
 *Winner* (model blend)
   France         model 58.5¢ · mkt 61.5¢ (Polymarket)  EV -4.8%
-  Draw           model 25.5¢ · mkt 24.5¢ (Polymarket)  EV +4.0% ✅  $13.95
+  Draw           model 25.5¢ · mkt 24.4¢ (Smarkets)  EV +4.4% ✅  $15.51
   Morocco        model 16.0¢ · mkt 13.5¢ (Polymarket)  EV +18.5% ✅  (<25¢ — no cash)
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
