@@ -12,7 +12,7 @@
     "pass": true,
     "reason": null,
     "source": "site/advancement_data.json",
-    "stamp": "2026-07-08 04:37:55 UTC"
+    "stamp": "2026-07-08 05:12:39 UTC"
    },
    {
     "age_secs": 0.0,
@@ -21,7 +21,7 @@
     "pass": true,
     "reason": null,
     "source": "site/bet_recs.json",
-    "stamp": "2026-07-08 04:37:56 UTC"
+    "stamp": "2026-07-08 05:12:40 UTC"
    },
    {
     "age_secs": 69.0,
@@ -30,28 +30,28 @@
     "pass": true,
     "reason": null,
     "source": "site/scores_markets.json",
-    "stamp": "2026-07-08 04:36:47 UTC"
+    "stamp": "2026-07-08 05:11:31 UTC"
    },
    {
-    "age_secs": 713.0,
+    "age_secs": 793.0,
     "max_age_secs": 21600,
     "name": "pm_ideas",
     "pass": true,
     "reason": null,
     "source": "site/pm_ideas.json",
-    "stamp": "2026-07-08T04:26:03Z"
+    "stamp": "2026-07-08T04:59:27Z"
    },
    {
-    "age_secs": 2972.4,
+    "age_secs": 1370.3,
     "max_age_secs": 86400,
     "name": "orderflow",
     "pass": true,
     "reason": null,
     "source": "site/microstructure/orderflow.json",
-    "stamp": "2026-07-08T03:48:23.582685+00:00"
+    "stamp": "2026-07-08T04:49:49.690092+00:00"
    },
    {
-    "age_secs": 31496.0,
+    "age_secs": 33580.0,
     "max_age_secs": 50400,
     "name": "advancement_model",
     "pass": true,
@@ -72,7 +72,7 @@
   "pass": true
  },
  "meta": {
-  "advancement_model_age_hours": 8.75,
+  "advancement_model_age_hours": 9.33,
   "advancement_model_generated": "2026-07-07 19:53 UTC",
   "caveats": [
    "SHADOW-ONLY: decision-support feed; no verdict here is a trade instruction and nothing is wired to execution.",
@@ -97,7 +97,7 @@
    "site/pm_ideas.json": 21600,
    "site/scores_markets.json": 10800
   },
-  "generated_at": "2026-07-08T04:37:56Z",
+  "generated_at": "2026-07-08T05:12:40Z",
   "n_advancement_legs_without_pm_quote": 16,
   "n_by_verdict": {
    "DO_NOT_TRADE": 1,
@@ -109,7 +109,7 @@
   "n_rows": 27,
   "n_withheld_excluded_uninformative": 8,
   "orderflow_hot": {
-   "hot_threshold": 0.8588,
+   "hot_threshold": 0.8586,
    "mean_buy_pressure": 0.778,
    "method": "hot = category buy_pressure >= cross-category mean + 1 sample sd within this orderflow feed (taker flow is structurally buy-heavy, so an absolute threshold over-tags)",
    "n_categories": 9,
@@ -138,11 +138,11 @@
   "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
   "shadow_only": true,
   "sources": {
-   "site/advancement_data.json": "2026-07-08 04:37:55 UTC",
-   "site/bet_recs.json": "2026-07-08 04:37:56 UTC",
-   "site/microstructure/orderflow.json": "2026-07-08T03:48:23.582685+00:00",
-   "site/pm_ideas.json": "2026-07-08T04:26:03Z",
-   "site/scores_markets.json": "2026-07-08 04:36:47 UTC"
+   "site/advancement_data.json": "2026-07-08 05:12:39 UTC",
+   "site/bet_recs.json": "2026-07-08 05:12:40 UTC",
+   "site/microstructure/orderflow.json": "2026-07-08T04:49:49.690092+00:00",
+   "site/pm_ideas.json": "2026-07-08T04:59:27Z",
+   "site/scores_markets.json": "2026-07-08 05:11:31 UTC"
   },
   "verdict_enum": [
    "SHADOW_ADD",
@@ -242,7 +242,7 @@
    "model_prob": 0.1915,
    "model_source": "advancement_data.teams[France].model[win]",
    "orderflow": {
-    "avg_trade_usd": 454.67,
+    "avg_trade_usd": 453.85,
     "buy_pressure": 0.5724,
     "category": "winner",
     "dumb_usd_share": 0.0158,
@@ -261,13 +261,13 @@
      "n_jumps": 1,
      "p90_reprice_s": 0.0
     },
-    "n_trades": 472312,
+    "n_trades": 473320,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
     "smart_usd_share": 0.022,
-    "usd": 214744323.86
+    "usd": 214814663.91
    },
    "origin": "advancement_data",
    "pm_price": 0.3275,
@@ -293,7 +293,7 @@
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.0283,
+   "edge_adj": 0.0274,
    "edge_source": "advancement_data.teams[Norway].pm[win].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -374,7 +374,7 @@
    "model_prob": 0.029,
    "model_source": "advancement_data.teams[Norway].model[win]",
    "orderflow": {
-    "avg_trade_usd": 454.67,
+    "avg_trade_usd": 453.85,
     "buy_pressure": 0.5724,
     "category": "winner",
     "dumb_usd_share": 0.0158,
@@ -393,16 +393,16 @@
      "n_jumps": 1,
      "p90_reprice_s": 0.0
     },
-    "n_trades": 472312,
+    "n_trades": 473320,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
     "smart_usd_share": 0.022,
-    "usd": 214744323.86
+    "usd": 214814663.91
    },
    "origin": "advancement_data",
-   "pm_price": 0.0595,
+   "pm_price": 0.0585,
    "pm_price_source": "advancement_data.teams[Norway].pm[win].pm (YES mid)",
    "position_prob": 0.971,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -526,7 +526,7 @@
    "model_prob": 0.1741,
    "model_source": "advancement_data.teams[Argentina].model[win]",
    "orderflow": {
-    "avg_trade_usd": 454.67,
+    "avg_trade_usd": 453.85,
     "buy_pressure": 0.5724,
     "category": "winner",
     "dumb_usd_share": 0.0158,
@@ -545,13 +545,13 @@
      "n_jumps": 1,
      "p90_reprice_s": 0.0
     },
-    "n_trades": 472312,
+    "n_trades": 473320,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
     "smart_usd_share": 0.022,
-    "usd": 214744323.86
+    "usd": 214814663.91
    },
    "origin": "advancement_data",
    "pm_price": 0.1875,
@@ -659,7 +659,7 @@
    "model_prob": 0.0157,
    "model_source": "advancement_data.teams[Switzerland].model[win]",
    "orderflow": {
-    "avg_trade_usd": 454.67,
+    "avg_trade_usd": 453.85,
     "buy_pressure": 0.5724,
     "category": "winner",
     "dumb_usd_share": 0.0158,
@@ -678,13 +678,13 @@
      "n_jumps": 1,
      "p90_reprice_s": 0.0
     },
-    "n_trades": 472312,
+    "n_trades": 473320,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
     "smart_usd_share": 0.022,
-    "usd": 214744323.86
+    "usd": 214814663.91
    },
    "origin": "advancement_data",
    "pm_price": 0.0225,
@@ -812,8 +812,8 @@
    "model_prob": 0.3493,
    "model_source": "advancement_data.teams[France].model[Final]",
    "orderflow": {
-    "avg_trade_usd": 100.93,
-    "buy_pressure": 0.8284,
+    "avg_trade_usd": 100.81,
+    "buy_pressure": 0.8278,
     "category": "advancement_final",
     "dumb_usd_share": 0.0081,
     "honesty_notes": [
@@ -831,13 +831,13 @@
      "n_jumps": 34,
      "p90_reprice_s": 82.0
     },
-    "n_trades": 34288,
+    "n_trades": 34390,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0542,
-    "usd": 3460562.56
+    "smart_usd_share": 0.0541,
+    "usd": 3466740.26
    },
    "origin": "advancement_data",
    "pm_price": 0.535,
@@ -863,7 +863,7 @@
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.0667,
+   "edge_adj": 0.0677,
    "edge_source": "advancement_data.teams[Argentina].pm[Final].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -964,8 +964,8 @@
    "model_prob": 0.3251,
    "model_source": "advancement_data.teams[Argentina].model[Final]",
    "orderflow": {
-    "avg_trade_usd": 100.93,
-    "buy_pressure": 0.8284,
+    "avg_trade_usd": 100.81,
+    "buy_pressure": 0.8278,
     "category": "advancement_final",
     "dumb_usd_share": 0.0081,
     "honesty_notes": [
@@ -983,16 +983,16 @@
      "n_jumps": 34,
      "p90_reprice_s": 82.0
     },
-    "n_trades": 34288,
+    "n_trades": 34390,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0542,
-    "usd": 3460562.56
+    "smart_usd_share": 0.0541,
+    "usd": 3466740.26
    },
    "origin": "advancement_data",
-   "pm_price": 0.4035,
+   "pm_price": 0.402,
    "pm_price_source": "advancement_data.teams[Argentina].pm[Final].pm (YES mid)",
    "position_prob": 0.6749,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -1015,7 +1015,7 @@
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.0321,
+   "edge_adj": 0.0292,
    "edge_source": "advancement_data.teams[Norway].pm[Final].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -1096,8 +1096,8 @@
    "model_prob": 0.1043,
    "model_source": "advancement_data.teams[Norway].model[Final]",
    "orderflow": {
-    "avg_trade_usd": 100.93,
-    "buy_pressure": 0.8284,
+    "avg_trade_usd": 100.81,
+    "buy_pressure": 0.8278,
     "category": "advancement_final",
     "dumb_usd_share": 0.0081,
     "honesty_notes": [
@@ -1115,16 +1115,16 @@
      "n_jumps": 34,
      "p90_reprice_s": 82.0
     },
-    "n_trades": 34288,
+    "n_trades": 34390,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0542,
-    "usd": 3460562.56
+    "smart_usd_share": 0.0541,
+    "usd": 3466740.26
    },
    "origin": "advancement_data",
-   "pm_price": 0.1405,
+   "pm_price": 0.139,
    "pm_price_source": "advancement_data.teams[Norway].pm[Final].pm (YES mid)",
    "position_prob": 0.8957,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -1228,8 +1228,8 @@
    "model_prob": 0.0501,
    "model_source": "advancement_data.teams[Switzerland].model[Final]",
    "orderflow": {
-    "avg_trade_usd": 100.93,
-    "buy_pressure": 0.8284,
+    "avg_trade_usd": 100.81,
+    "buy_pressure": 0.8278,
     "category": "advancement_final",
     "dumb_usd_share": 0.0081,
     "honesty_notes": [
@@ -1247,13 +1247,13 @@
      "n_jumps": 34,
      "p90_reprice_s": 82.0
     },
-    "n_trades": 34288,
+    "n_trades": 34390,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0542,
-    "usd": 3460562.56
+    "smart_usd_share": 0.0541,
+    "usd": 3466740.26
    },
    "origin": "advancement_data",
    "pm_price": 0.0805,
@@ -1279,7 +1279,7 @@
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.1208,
+   "edge_adj": 0.112,
    "edge_source": "advancement_data.teams[Switzerland].pm[SF].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -1360,8 +1360,8 @@
    "model_prob": 0.1403,
    "model_source": "advancement_data.teams[Switzerland].model[SF]",
    "orderflow": {
-    "avg_trade_usd": 78.69,
-    "buy_pressure": 0.7983,
+    "avg_trade_usd": 78.66,
+    "buy_pressure": 0.7982,
     "category": "advancement_sf",
     "dumb_usd_share": 0.0164,
     "honesty_notes": [
@@ -1379,16 +1379,16 @@
      "n_jumps": 106,
      "p90_reprice_s": 97.0
     },
-    "n_trades": 26492,
+    "n_trades": 26560,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0376,
-    "usd": 2084707.78
+    "smart_usd_share": 0.0375,
+    "usd": 2089099.09
    },
    "origin": "advancement_data",
-   "pm_price": 0.2675,
+   "pm_price": 0.261,
    "pm_price_source": "advancement_data.teams[Switzerland].pm[SF].pm (YES mid)",
    "position_prob": 0.8597,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -1520,8 +1520,8 @@
    "model_prob": 0.6992,
    "model_source": "advancement_data.teams[England].model[SF]",
    "orderflow": {
-    "avg_trade_usd": 78.69,
-    "buy_pressure": 0.7983,
+    "avg_trade_usd": 78.66,
+    "buy_pressure": 0.7982,
     "category": "advancement_sf",
     "dumb_usd_share": 0.0164,
     "honesty_notes": [
@@ -1539,13 +1539,13 @@
      "n_jumps": 106,
      "p90_reprice_s": 97.0
     },
-    "n_trades": 26492,
+    "n_trades": 26560,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0376,
-    "usd": 2084707.78
+    "smart_usd_share": 0.0375,
+    "usd": 2089099.09
    },
    "origin": "advancement_data",
    "pm_price": 0.655,
@@ -1672,8 +1672,8 @@
    "model_prob": 0.3008,
    "model_source": "advancement_data.teams[Norway].model[SF]",
    "orderflow": {
-    "avg_trade_usd": 78.69,
-    "buy_pressure": 0.7983,
+    "avg_trade_usd": 78.66,
+    "buy_pressure": 0.7982,
     "category": "advancement_sf",
     "dumb_usd_share": 0.0164,
     "honesty_notes": [
@@ -1691,13 +1691,13 @@
      "n_jumps": 106,
      "p90_reprice_s": 97.0
     },
-    "n_trades": 26492,
+    "n_trades": 26560,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0376,
-    "usd": 2084707.78
+    "smart_usd_share": 0.0375,
+    "usd": 2089099.09
    },
    "origin": "advancement_data",
    "pm_price": 0.35,
@@ -1832,7 +1832,7 @@
    "model_prob": 0.2554,
    "model_source": "advancement_data.teams[Spain].model[win]",
    "orderflow": {
-    "avg_trade_usd": 454.67,
+    "avg_trade_usd": 453.85,
     "buy_pressure": 0.5724,
     "category": "winner",
     "dumb_usd_share": 0.0158,
@@ -1851,13 +1851,13 @@
      "n_jumps": 1,
      "p90_reprice_s": 0.0
     },
-    "n_trades": 472312,
+    "n_trades": 473320,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
     "smart_usd_share": 0.022,
-    "usd": 214744323.86
+    "usd": 214814663.91
    },
    "origin": "advancement_data",
    "pm_price": 0.1855,
@@ -1992,8 +1992,8 @@
    "model_prob": 0.4154,
    "model_source": "advancement_data.teams[Spain].model[Final]",
    "orderflow": {
-    "avg_trade_usd": 100.93,
-    "buy_pressure": 0.8284,
+    "avg_trade_usd": 100.81,
+    "buy_pressure": 0.8278,
     "category": "advancement_final",
     "dumb_usd_share": 0.0081,
     "honesty_notes": [
@@ -2011,13 +2011,13 @@
      "n_jumps": 34,
      "p90_reprice_s": 82.0
     },
-    "n_trades": 34288,
+    "n_trades": 34390,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0542,
-    "usd": 3460562.56
+    "smart_usd_share": 0.0541,
+    "usd": 3466740.26
    },
    "origin": "advancement_data",
    "pm_price": 0.365,
@@ -2144,8 +2144,8 @@
    "model_prob": 0.3861,
    "model_source": "advancement_data.teams[England].model[Final]",
    "orderflow": {
-    "avg_trade_usd": 100.93,
-    "buy_pressure": 0.8284,
+    "avg_trade_usd": 100.81,
+    "buy_pressure": 0.8278,
     "category": "advancement_final",
     "dumb_usd_share": 0.0081,
     "honesty_notes": [
@@ -2163,13 +2163,13 @@
      "n_jumps": 34,
      "p90_reprice_s": 82.0
     },
-    "n_trades": 34288,
+    "n_trades": 34390,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0542,
-    "usd": 3460562.56
+    "smart_usd_share": 0.0541,
+    "usd": 3466740.26
    },
    "origin": "advancement_data",
    "pm_price": 0.385,
@@ -2296,8 +2296,8 @@
    "model_prob": 0.5514,
    "model_source": "advancement_data.teams[Argentina].model[SF]",
    "orderflow": {
-    "avg_trade_usd": 78.69,
-    "buy_pressure": 0.7983,
+    "avg_trade_usd": 78.66,
+    "buy_pressure": 0.7982,
     "category": "advancement_sf",
     "dumb_usd_share": 0.0164,
     "honesty_notes": [
@@ -2315,13 +2315,13 @@
      "n_jumps": 106,
      "p90_reprice_s": 97.0
     },
-    "n_trades": 26492,
+    "n_trades": 26560,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0376,
-    "usd": 2084707.78
+    "smart_usd_share": 0.0375,
+    "usd": 2089099.09
    },
    "origin": "advancement_data",
    "pm_price": 0.725,
@@ -2456,8 +2456,8 @@
    "model_prob": 0.3127,
    "model_source": "advancement_data.teams[Morocco].model[SF]",
    "orderflow": {
-    "avg_trade_usd": 78.69,
-    "buy_pressure": 0.7983,
+    "avg_trade_usd": 78.66,
+    "buy_pressure": 0.7982,
     "category": "advancement_sf",
     "dumb_usd_share": 0.0164,
     "honesty_notes": [
@@ -2475,13 +2475,13 @@
      "n_jumps": 106,
      "p90_reprice_s": 97.0
     },
-    "n_trades": 26492,
+    "n_trades": 26560,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0376,
-    "usd": 2084707.78
+    "smart_usd_share": 0.0375,
+    "usd": 2089099.09
    },
    "origin": "advancement_data",
    "pm_price": 0.2235,
@@ -2608,8 +2608,8 @@
    "model_prob": 0.6873,
    "model_source": "advancement_data.teams[France].model[SF]",
    "orderflow": {
-    "avg_trade_usd": 78.69,
-    "buy_pressure": 0.7983,
+    "avg_trade_usd": 78.66,
+    "buy_pressure": 0.7982,
     "category": "advancement_sf",
     "dumb_usd_share": 0.0164,
     "honesty_notes": [
@@ -2627,13 +2627,13 @@
      "n_jumps": 106,
      "p90_reprice_s": 97.0
     },
-    "n_trades": 26492,
+    "n_trades": 26560,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0376,
-    "usd": 2084707.78
+    "smart_usd_share": 0.0375,
+    "usd": 2089099.09
    },
    "origin": "advancement_data",
    "pm_price": 0.775,
@@ -2768,8 +2768,8 @@
    "model_prob": 0.3086,
    "model_source": "advancement_data.teams[Belgium].model[SF]",
    "orderflow": {
-    "avg_trade_usd": 78.69,
-    "buy_pressure": 0.7983,
+    "avg_trade_usd": 78.66,
+    "buy_pressure": 0.7982,
     "category": "advancement_sf",
     "dumb_usd_share": 0.0164,
     "honesty_notes": [
@@ -2787,13 +2787,13 @@
      "n_jumps": 106,
      "p90_reprice_s": 97.0
     },
-    "n_trades": 26492,
+    "n_trades": 26560,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0376,
-    "usd": 2084707.78
+    "smart_usd_share": 0.0375,
+    "usd": 2089099.09
    },
    "origin": "advancement_data",
    "pm_price": 0.2535,
@@ -2920,8 +2920,8 @@
    "model_prob": 0.6914,
    "model_source": "advancement_data.teams[Spain].model[SF]",
    "orderflow": {
-    "avg_trade_usd": 78.69,
-    "buy_pressure": 0.7983,
+    "avg_trade_usd": 78.66,
+    "buy_pressure": 0.7982,
     "category": "advancement_sf",
     "dumb_usd_share": 0.0164,
     "honesty_notes": [
@@ -2939,13 +2939,13 @@
      "n_jumps": 106,
      "p90_reprice_s": 97.0
     },
-    "n_trades": 26492,
+    "n_trades": 26560,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0376,
-    "usd": 2084707.78
+    "smart_usd_share": 0.0375,
+    "usd": 2089099.09
    },
    "origin": "advancement_data",
    "pm_price": 0.745,
@@ -3052,7 +3052,7 @@
    "model_prob": 0.0565,
    "model_source": "advancement_data.teams[Belgium].model[win]",
    "orderflow": {
-    "avg_trade_usd": 454.67,
+    "avg_trade_usd": 453.85,
     "buy_pressure": 0.5724,
     "category": "winner",
     "dumb_usd_share": 0.0158,
@@ -3071,13 +3071,13 @@
      "n_jumps": 1,
      "p90_reprice_s": 0.0
     },
-    "n_trades": 472312,
+    "n_trades": 473320,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
     "smart_usd_share": 0.022,
-    "usd": 214744323.86
+    "usd": 214814663.91
    },
    "origin": "advancement_data",
    "pm_price": 0.0235,
@@ -3104,7 +3104,7 @@
   {
    "bet_rec": null,
    "bucket": "longshot",
-   "edge_adj": 0.0254,
+   "edge_adj": 0.0243,
    "edge_source": "advancement_data.teams[England].pm[win].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -3185,7 +3185,7 @@
    "model_prob": 0.1853,
    "model_source": "advancement_data.teams[England].model[win]",
    "orderflow": {
-    "avg_trade_usd": 454.67,
+    "avg_trade_usd": 453.85,
     "buy_pressure": 0.5724,
     "category": "winner",
     "dumb_usd_share": 0.0158,
@@ -3204,16 +3204,16 @@
      "n_jumps": 1,
      "p90_reprice_s": 0.0
     },
-    "n_trades": 472312,
+    "n_trades": 473320,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
     "smart_usd_share": 0.022,
-    "usd": 214744323.86
+    "usd": 214814663.91
    },
    "origin": "advancement_data",
-   "pm_price": 0.1555,
+   "pm_price": 0.1565,
    "pm_price_source": "advancement_data.teams[England].pm[win].pm (YES mid)",
    "position_prob": 0.1853,
    "position_prob_source": "= model_prob",
@@ -3318,7 +3318,7 @@
    "model_prob": 0.0412,
    "model_source": "advancement_data.teams[Morocco].model[win]",
    "orderflow": {
-    "avg_trade_usd": 454.67,
+    "avg_trade_usd": 453.85,
     "buy_pressure": 0.5724,
     "category": "winner",
     "dumb_usd_share": 0.0158,
@@ -3337,13 +3337,13 @@
      "n_jumps": 1,
      "p90_reprice_s": 0.0
     },
-    "n_trades": 472312,
+    "n_trades": 473320,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
     "smart_usd_share": 0.022,
-    "usd": 214744323.86
+    "usd": 214814663.91
    },
    "origin": "advancement_data",
    "pm_price": 0.0295,
@@ -3452,8 +3452,8 @@
    "model_prob": 0.1313,
    "model_source": "advancement_data.teams[Belgium].model[Final]",
    "orderflow": {
-    "avg_trade_usd": 100.93,
-    "buy_pressure": 0.8284,
+    "avg_trade_usd": 100.81,
+    "buy_pressure": 0.8278,
     "category": "advancement_final",
     "dumb_usd_share": 0.0081,
     "honesty_notes": [
@@ -3471,13 +3471,13 @@
      "n_jumps": 34,
      "p90_reprice_s": 82.0
     },
-    "n_trades": 34288,
+    "n_trades": 34390,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0542,
-    "usd": 3460562.56
+    "smart_usd_share": 0.0541,
+    "usd": 3466740.26
    },
    "origin": "advancement_data",
    "pm_price": 0.0685,
@@ -3585,8 +3585,8 @@
    "model_prob": 0.1038,
    "model_source": "advancement_data.teams[Morocco].model[Final]",
    "orderflow": {
-    "avg_trade_usd": 100.93,
-    "buy_pressure": 0.8284,
+    "avg_trade_usd": 100.81,
+    "buy_pressure": 0.8278,
     "category": "advancement_final",
     "dumb_usd_share": 0.0081,
     "honesty_notes": [
@@ -3604,13 +3604,13 @@
      "n_jumps": 34,
      "p90_reprice_s": 82.0
     },
-    "n_trades": 34288,
+    "n_trades": 34390,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.0542,
-    "usd": 3460562.56
+    "smart_usd_share": 0.0541,
+    "usd": 3466740.26
    },
    "origin": "advancement_data",
    "pm_price": 0.0845,
@@ -3637,14 +3637,14 @@
   },
   {
    "bet_rec": null,
-   "book_edge": 0.0007,
+   "book_edge": 0.0001,
    "book_edge_source": "bet_recs.withheld[argentina_vs_switzerland_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 5.8571,
+   "book_price_decimal": 5.8085,
    "book_price_source": "bet_recs.withheld[argentina_vs_switzerland_away_1x2].price (decimal book odds)",
    "bucket": "longshot",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": 0.004,
+   "ev_net": 0.0007,
    "fixture": "Argentina vs Switzerland",
    "gates": {
     "clv_history": {
@@ -3654,7 +3654,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge +0.0007 not above the 0.02 threshold"
+     "reason": "book edge +0.0001 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": true,
@@ -3701,13 +3701,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "Argentina vs Switzerland \u00b7 away \u00b7 settles at 90 min",
-   "model_prob": 0.1714,
+   "model_prob": 0.1723,
    "model_source": "bet_recs.withheld[argentina_vs_switzerland_away_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.1714,
+   "position_prob": 0.1723,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -3729,14 +3729,14 @@
   },
   {
    "bet_rec": null,
-   "book_edge": 0.0182,
+   "book_edge": 0.0178,
    "book_edge_source": "bet_recs.withheld[spain_vs_belgium_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 6.116,
+   "book_price_decimal": 6.0769,
    "book_price_source": "bet_recs.withheld[spain_vs_belgium_away_1x2].price (decimal book odds)",
    "bucket": "longshot",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": 0.1115,
+   "ev_net": 0.1082,
    "fixture": "Spain vs Belgium",
    "gates": {
     "clv_history": {
@@ -3746,7 +3746,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge +0.0182 not above the 0.02 threshold"
+     "reason": "book edge +0.0178 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": true,
@@ -3813,13 +3813,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "Spain vs Belgium \u00b7 away \u00b7 settles at 90 min",
-   "model_prob": 0.1817,
+   "model_prob": 0.1824,
    "model_source": "bet_recs.withheld[spain_vs_belgium_away_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.1817,
+   "position_prob": 0.1824,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],

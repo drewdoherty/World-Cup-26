@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-08T03:58:13 -->
+<!-- generated: 2026-07-08T04:34:57 -->
 ⚽ *Next match* — France vs Morocco
 Kickoff 2026-07-09 20:00:00+00:00
 
