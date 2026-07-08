@@ -24,6 +24,24 @@ from wca.markets import kelly as kelly_mod
 from wca.pm import propose
 
 
+@pytest.fixture(autouse=True)
+def _isolate_fill_telemetry(tmp_path, monkeypatch):
+    """Redirect build_pm_proposals' mid-rounding telemetry to a tmp file.
+
+    ``build_pm_proposals`` observation-only-logs every resolved price via
+    ``wca.pm.filltelemetry.log_mid_rounding`` (2026-07-08 gate-fill-telemetry).
+    Without this, every test in this module would append to the real
+    ``data/pm_fill_log.jsonl`` in the repo working tree as a side effect.
+    """
+    monkeypatch.setattr(
+        propose, "_filltelemetry",
+        type("_FakeTelemetry", (), {
+            "DEFAULT_LOG_PATH": str(tmp_path / "pm_fill_log.jsonl"),
+            "log_mid_rounding": staticmethod(lambda *a, **k: None),
+        })(),
+    )
+
+
 # ---------------------------------------------------------------------------
 # Synthetic events fixture (mirrors the live Gamma shape).
 # ---------------------------------------------------------------------------
