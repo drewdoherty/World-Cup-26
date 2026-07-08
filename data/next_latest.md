@@ -1,15 +1,15 @@
-<!-- generated: 2026-07-08T13:44:08 -->
+<!-- generated: 2026-07-08T14:43:15 -->
 ⚽ *Next match* — France vs Morocco
 Kickoff 2026-07-09 20:00:00+00:00
 
 *Winner* (model blend)
-  France         model 58.5¢ · mkt 61.5¢ (Polymarket)  EV -4.8%
-  Draw           model 25.5¢ · mkt 24.5¢ (Polymarket)  EV +4.0% ✅  $13.95
-  Morocco        model 16.0¢ · mkt 13.5¢ (Polymarket)  EV +18.5% ✅  (<25¢ — no cash)
-  _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
+  France         model 58.0¢ · mkt 61.5¢ (Polymarket)  EV -5.8%
+  Draw           model 25.9¢ · mkt 24.5¢ (Polymarket)  EV +5.8% ✅  $12.54
+  Morocco        model 16.1¢ · mkt 13.5¢ (Polymarket)  EV +19.4% ✅  (<25¢ — no cash)
+  _stake = ¼-Kelly @ £2000 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
-*Corners* (model, exp 8.3)
-  O/U 8.5: over 44.5¢ / under 55.5¢ (model prices)
+*Corners* (model, exp 8.2)
+  O/U 8.5: over 43.9¢ / under 56.1¢ (model prices)
 
 *Top goalscorers* — from the cached /goalscorers card (as of 2026-07-08T11:15:00)
 _top anytime (both teams — add squad to split + FGS)_
@@ -21,5 +21,5 @@ _top anytime (both teams — add squad to split + FGS)_
   Ismael Saibari        4.00 (William Hill)  imp 25%
 
 *Scorelines* (top 6)
-1-0 17.0% | 2-0 12.7% | 1-1 11.6% | 0-0 10.4% | 2-1 9.9% | 0-1 6.4%
-  O/U 2.5: over 39.2% / under 60.8%   BTTS 40.9%
+1-0 17.5% | 2-0 12.6% | 1-1 11.7% | 0-0 10.9% | 2-1 9.8% | 0-1 6.5%
+  O/U 2.5: over 38.1% / under 61.9%   BTTS 40.3%
