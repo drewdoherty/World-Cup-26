@@ -43,6 +43,10 @@ from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from wca.advancement import (  # noqa: E402  — resolved-market bounds (single source)
+    PM_RESOLVED_HI,
+    PM_RESOLVED_LO,
+)
 from wca.markets import bankroll as pm_rule  # noqa: E402  (needs src on path)
 from wca.selection import (  # noqa: E402  — canonical desk selection rule
     bucket_rank,
@@ -744,6 +748,12 @@ def build_advancement_futures(
         model_probs = team_entry.get("model") or {}
         pm_data = team_entry.get("pm") or {}
         delta = team_entry.get("delta") or {}
+        # State-freshness gate (2026-07-08): the feed builder stamps a reason
+        # on any team whose knockout tie has kicked off but is NOT pinned in
+        # the sim's conditioning set — its stage probabilities are phantom
+        # (USA showed P(QF)=0.317 after its Jul-6 elimination; Egypt
+        # P(R16)=0.469 after winning its Jul-3 shootout). Withhold, never size.
+        state_reason = team_entry.get("state_stale_reason")
 
         for stage, pm_info in (pm_data.items() if isinstance(pm_data, dict) else []):
             pm_price = pm_info.get("pm")
@@ -761,7 +771,38 @@ def build_advancement_futures(
             net_cost = pm_price + fee
             ev = p_model - net_cost
 
+            # Resolved-market guard (2026-07-08): a YES quote pinned at ≥0.98
+            # or ≤0.02 means the market has effectively settled — any "edge"
+            # against it is a sim-vs-reality disagreement, not a trade.
+            # (compare_to_polymarket now drops these at build time; this guard
+            # covers feeds built before the fix.)
+            if pm_price >= PM_RESOLVED_HI or pm_price <= PM_RESOLVED_LO:
+                withheld.append({
+                    "id": "%s_%s_pm" % (team.lower().replace(" ", "_"), stage.lower()),
+                    "team": team, "group": group, "stage": stage,
+                    "market": "advancement", "selection": "reach_%s" % stage,
+                    "venue": "polymarket", "currency": "USD",
+                    "model_prob": round(p_model, 4), "pm_price": round(pm_price, 4),
+                    "ev_net": round(ev, 4), "stake": 0.0,
+                    "withheld_reason": "resolved market (pm=%.2f) — outcome "
+                                       "effectively decided; no tradable edge"
+                                       % pm_price,
+                })
+                continue
+
             if ev < MIN_EDGE:
+                continue
+
+            if state_reason:
+                withheld.append({
+                    "id": "%s_%s_pm" % (team.lower().replace(" ", "_"), stage.lower()),
+                    "team": team, "group": group, "stage": stage,
+                    "market": "advancement", "selection": "reach_%s" % stage,
+                    "venue": "polymarket", "currency": "USD",
+                    "model_prob": round(p_model, 4), "pm_price": round(pm_price, 4),
+                    "ev_net": round(ev, 4), "stake": 0.0,
+                    "withheld_reason": state_reason,
+                })
                 continue
 
             # Canonical cash floor (wca.selection.longshot_no_cash; user

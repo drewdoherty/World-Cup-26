@@ -46,8 +46,14 @@ def _load_or_fit_models(
     ``structural_prior`` is set the Dixon-Coles ridge shrinks low-data teams
     toward the socio-economic prior; that is a *different* fit, so the caller
     routes it to a distinct cache file (see ``main``) to keep A/B runs separate.
+
+    The fit is anchored to the deployed total-goals level
+    (``DEFAULT_DC_LEVEL_TARGET``, same as the live card — fix 2026-07-08: the
+    unanchored fit ran KO totals ~1.86 vs 2.70 realised, inflating draws and
+    understating favourites). A cached fit whose recorded ``_level_target``
+    does not match is a stale unanchored pickle and is refit.
     """
-    from wca.card import fit_models
+    from wca.card import DEFAULT_DC_LEVEL_TARGET, fit_models
     from wca.data.results import load_results
 
     cache = Path(cache_path)
@@ -55,8 +61,15 @@ def _load_or_fit_models(
         try:
             with cache.open("rb") as fh:
                 models = pickle.load(fh)
-            print("Reusing cached model fit: %s" % cache)
-            return models
+            cached_target = getattr(models.dc, "_level_target", None)
+            if cached_target == DEFAULT_DC_LEVEL_TARGET:
+                print("Reusing cached model fit: %s" % cache)
+                return models
+            print(
+                "Cached fit has level_target=%s (deployed anchor is %s); "
+                "refitting." % (cached_target, DEFAULT_DC_LEVEL_TARGET),
+                file=sys.stderr,
+            )
         except Exception as exc:  # noqa: BLE001 - cache is best-effort
             print("Cache load failed (%s); refitting." % exc, file=sys.stderr)
 
@@ -65,7 +78,11 @@ def _load_or_fit_models(
         % (" [structural prior]" if structural_prior else "")
     )
     results = load_results(results_path)
-    models = fit_models(results, structural_prior=structural_prior)
+    models = fit_models(
+        results,
+        structural_prior=structural_prior,
+        dc_level_target=DEFAULT_DC_LEVEL_TARGET,
+    )
     try:
         cache.parent.mkdir(parents=True, exist_ok=True)
         with cache.open("wb") as fh:
