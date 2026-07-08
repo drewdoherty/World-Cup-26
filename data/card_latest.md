@@ -1,28 +1,28 @@
-<!-- generated: 2026-07-08T00:18:18 -->
+<!-- generated: 2026-07-08T00:54:52 -->
 *World Cup Alpha — bet card* (1 staked picks, hit-prob ranked)
 
-*1. [DRAW] France vs Morocco* — Draw @ *4.10* via *betfair*
-    model 25.5% / mkt 24.0%  edge *+4.6%*  [elo 25% dc 29%]
-    stake: gbp £12.01  further-out (44h) — thin/soft market
+*1. [DRAW] France vs Morocco* — Draw @ *4.10* via *smarkets*
+    model 25.5% / mkt 24.1%  edge *+4.7%*  [elo 25% dc 29%]
+    stake: gbp £12.42  further-out (43h) — thin/soft market
 
 *— CUT (excluded from staking, 2) —*
-  x France vs Morocco — Morocco @ 7.20 (model 16.6%, +19.4% EV): below 20% hit-probability floor (model 16.6%) — too unlikely to return PnL even at +19.4% EV
+  x France vs Morocco — Morocco @ 7.00 (model 16.6%, +15.9% EV): below 20% hit-probability floor (model 16.6%) — too unlikely to return PnL even at +15.9% EV
   x Spain vs Belgium — Belgium @ 6.20 (model 18.2%, +12.6% EV): below 20% hit-probability floor (model 18.2%) — too unlikely to return PnL even at +12.6% EV
 
-*Venue split (gbp):* betfair £12.01
+*Venue split (gbp):* smarkets £12.42
 
 *— REFERENCE, NOT SIZED (models + fair odds only) —*
 *World Cup Alpha — scorelines* (3 fixtures)
 
 *France vs Morocco*
     xG: 1.51-0.72
-    1-0  17.2%  fair 5.83 (17.2%)  back >= 5.95 (16.8%)
-    2-0  12.5%  fair 7.97 (12.5%)  back >= 8.13 (12.3%)
-    1-1  11.5%  fair 8.66 (11.5%)  back >= 8.83 (11.3%)
-    0-0  10.5%  fair 9.49 (10.5%)  back >= 9.68 (10.3%)
+    1-0  17.1%  fair 5.83 (17.1%)  back >= 5.95 (16.8%)
+    2-0  12.5%  fair 7.98 (12.5%)  back >= 8.14 (12.3%)
+    1-1  11.6%  fair 8.65 (11.6%)  back >= 8.82 (11.3%)
+    0-0  10.6%  fair 9.48 (10.6%)  back >= 9.67 (10.3%)
     2-1  9.9%  fair 10.15 (9.9%)  back >= 10.35 (9.7%)
-    0-1  6.6%  fair 15.05 (6.6%)  back >= 15.35 (6.5%)
-    O/U 2.5: over 38.8% / under 61.2%   BTTS 40.7%
+    0-1  6.6%  fair 15.07 (6.6%)  back >= 15.37 (6.5%)
+    O/U 2.5: over 38.7% / under 61.3%   BTTS 40.7%
 
 *Spain vs Belgium*
     xG: 1.92-1.05
