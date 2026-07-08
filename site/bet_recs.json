@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-08 15:26:57 UTC",
+    "generated": "2026-07-08 17:46:43 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 1753,
-      "advancement_secs": 2099,
+      "model_secs": 10139,
+      "advancement_secs": 1,
       "price_secs": null,
-      "promo_secs": 2809,
+      "promo_secs": 11195,
       "exposure_secs": null
     },
     "coverage": {
@@ -50,7 +50,7 @@
       "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($4106).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
-    "actionable_count": 6,
+    "actionable_count": 5,
     "withheld_count": 12
   },
   "match_singles": [],
@@ -74,8 +74,8 @@
       "stake": 153.32,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2099,
-        "price_secs": 2099
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -112,8 +112,8 @@
       "stake": 84.01,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2099,
-        "price_secs": 2099
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -150,8 +150,8 @@
       "stake": 101.38,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2099,
-        "price_secs": 2099
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -168,44 +168,6 @@
         "team_win": 0.559,
         "draw": 0.249,
         "opp_win": 0.192
-      }
-    },
-    {
-      "id": "argentina_final_pm",
-      "team": "Argentina",
-      "group": "J",
-      "stage": "Final",
-      "market": "advancement",
-      "selection": "reach_Final",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.4323,
-      "pm_price": 0.3955,
-      "pm_fee": 0.0072,
-      "price": 2.4834,
-      "edge_adj": 0.0261,
-      "ev_net": 0.0296,
-      "stake": 50.91,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 2099,
-        "price_secs": 2099
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Switzerland",
-      "match_round": "Quarter-finals",
-      "match_1x2": {
-        "team_win": 0.589,
-        "draw": 0.244,
-        "opp_win": 0.167
       }
     },
     {
@@ -226,8 +188,8 @@
       "stake": 91.81,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2099,
-        "price_secs": 2099
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -256,16 +218,16 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.3,
-      "pm_price": 0.2535,
+      "pm_price": 0.253,
       "pm_fee": 0.0057,
-      "price": 3.8584,
+      "price": 3.8659,
       "edge_adj": 0.0403,
-      "ev_net": 0.0408,
-      "stake": 56.56,
+      "ev_net": 0.0413,
+      "stake": 57.22,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 2099,
-        "price_secs": 2099
+        "model_secs": 1,
+        "price_secs": 1
       },
       "stale": false,
       "stale_reason": null,
@@ -421,8 +383,8 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.2284,
-      "pm_price": 0.1875,
-      "ev_net": 0.0363,
+      "pm_price": 0.1945,
+      "ev_net": 0.0292,
       "stake": 0.0,
       "withheld_reason": "model-prob longshot (23% < 25%) \u2014 no cash (free-bet/lottery only)"
     },
