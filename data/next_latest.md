@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-08T03:21:23 -->
+<!-- generated: 2026-07-08T03:58:13 -->
 ⚽ *Next match* — France vs Morocco
 Kickoff 2026-07-09 20:00:00+00:00
 
 *Winner* (model blend)
-  France         model 57.9¢ · mkt 61.7¢ (betfair_ex_uk)  EV -6.2%
-  Draw           model 25.6¢ · mkt 24.5¢ (Polymarket)  EV +4.3% ✅  $15.18
-  Morocco        model 16.6¢ · mkt 14.3¢ (betfair_ex_uk)  EV +15.9% ✅  (<25¢ — no cash)
+  France         model 57.7¢ · mkt 61.7¢ (betfair_ex_uk)  EV -6.5%
+  Draw           model 25.7¢ · mkt 24.5¢ (Polymarket)  EV +4.9% ✅  $17.40
+  Morocco        model 16.6¢ · mkt 14.3¢ (betfair_ex_uk)  EV +16.0% ✅  (<25¢ — no cash)
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.3)
@@ -21,5 +21,5 @@ _top anytime (both teams — add squad to split + FGS)_
   Ismael Saibari        4.00 (William Hill)  imp 25%
 
 *Scorelines* (top 6)
-1-0 17.1% | 2-0 12.5% | 1-1 11.6% | 0-0 10.6% | 2-1 9.9% | 0-1 6.6%
+1-0 17.1% | 2-0 12.5% | 1-1 11.6% | 0-0 10.6% | 2-1 9.8% | 0-1 6.6%
   O/U 2.5: over 38.7% / under 61.3%   BTTS 40.8%
