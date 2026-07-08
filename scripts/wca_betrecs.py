@@ -114,6 +114,13 @@ REASON_MISSING_PM_PRICE = "missing_pm_price"
 REASON_MISSING_PM_MODEL_PROB = "missing_model_prob"
 REASON_LONGSHOT_NO_CASH = "longshot_no_cash"
 REASON_STALE_ADVANCEMENT = "stale_advancement"
+# Added alongside the advancement KO-correctness gates (#177, landed on
+# origin/main after this branch forked): both already emitted a withheld row
+# (not a silent ``continue``), but lacked a reason_code — extending the
+# taxonomy here keeps the breakdown complete rather than leaving these two
+# gates as "(no reason_code)" rows in wca_telemetry_report.py.
+REASON_RESOLVED_MARKET = "resolved_market"
+REASON_STATE_STALE = "state_stale"
 
 
 # ---------------------------------------------------------------------------
@@ -922,6 +929,7 @@ def build_advancement_futures(
                     "withheld_reason": "resolved market (pm=%.2f) — outcome "
                                        "effectively decided; no tradable edge"
                                        % pm_price,
+                    "reason_code": REASON_RESOLVED_MARKET,
                 })
                 continue
 
@@ -950,6 +958,7 @@ def build_advancement_futures(
                     "model_prob": round(p_model, 4), "pm_price": round(pm_price, 4),
                     "ev_net": round(ev, 4), "stake": 0.0,
                     "withheld_reason": state_reason,
+                    "reason_code": REASON_STATE_STALE,
                 })
                 continue
 

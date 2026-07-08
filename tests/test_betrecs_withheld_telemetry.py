@@ -295,6 +295,30 @@ class TestWithheldCompleteness:
         assert recs == []
         assert any(w.get("reason_code") == br.REASON_STALE_ADVANCEMENT for w in withheld)
 
+    def test_advancement_resolved_market_reason_code(self):
+        """Resolved-market guard (pm price pinned near 0/1): reason_code wired."""
+        adv = {"meta": {"generated": "2099-12-31 20:00:00 UTC", "stages": ["QF"], "n_pm_markets": 12},
+               "teams": [{"team": "AllButOver", "group": "A", "model": {"QF": 0.97},
+                          "pm": {"QF": {"pm": 0.99, "edge_adj": -0.02}}, "delta": {}}]}
+        recs, withheld = br.build_advancement_futures(adv, _pm_pool(), adv_age_secs=10)
+        assert recs == []
+        rows = [w for w in withheld if w.get("reason_code") == br.REASON_RESOLVED_MARKET]
+        assert rows
+        assert "resolved market" in rows[0]["withheld_reason"]
+
+    def test_advancement_state_stale_reason_code(self):
+        """Per-team state-freshness guard (KO tie kicked off but not pinned
+        in the sim's conditioning set): reason_code wired."""
+        adv = {"meta": {"generated": "2099-12-31 20:00:00 UTC", "stages": ["QF"], "n_pm_markets": 12},
+               "teams": [{"team": "PhantomTeam", "group": "A", "model": {"QF": 0.60},
+                          "pm": {"QF": {"pm": 0.40, "edge_adj": 0.15}}, "delta": {},
+                          "state_stale_reason": "eliminated 2026-07-06 — sim not yet re-conditioned"}]}
+        recs, withheld = br.build_advancement_futures(adv, _pm_pool(), adv_age_secs=10)
+        assert recs == []
+        rows = [w for w in withheld if w.get("reason_code") == br.REASON_STATE_STALE]
+        assert rows
+        assert rows[0]["withheld_reason"] == "eliminated 2026-07-06 — sim not yet re-conditioned"
+
     def test_event_props_reason_codes(self):
         prop_cal = {"fixtures": [{"fixture": "X vs Y", "corners": {"mean": 9.0}}]}
         _, withheld = br.build_event_props(
