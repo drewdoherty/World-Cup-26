@@ -204,6 +204,95 @@ def test_common_support_restricts_to_all_venues():
     assert sup == ["f0|b", "f2|b"]
 
 
+# --------------------------------------------------------------------------- #
+# Relaxed common support (2026-07 fix): one chronically-thin venue must not
+# zero out the whole leaderboard when the rest of the field overlaps deeply.
+# Mirrors production: 19/21 books quote ~64 fixtures each; Polymarket only
+# quotes 14 and Betfair Sportsbook only 42, so requiring ALL 21 renders
+# "insufficient" every run even with 1,566+ shared observations available.
+# --------------------------------------------------------------------------- #
+
+
+def _panel_with_one_thin_venue(n_deep=20, n_thin_overlap=2, n_deep_venues=8):
+    """Deep venues (D0..Dn) share every fixture; THIN shares only a couple."""
+    venues_ = ["D%d" % i for i in range(n_deep_venues)] + ["THIN"]
+    panel = {}
+    for i in range(n_deep):
+        obs = "fix%02d|b0" % i
+        row = {v: 0.02 + 0.001 * i for v in venues_[:-1]}
+        if i < n_thin_overlap:
+            row["THIN"] = 0.05 + 0.001 * i
+        panel[obs] = row
+    return panel, venues_
+
+
+def test_best_common_support_subset_drops_the_thin_venue():
+    panel, venues_ = _panel_with_one_thin_venue()
+    # Strict support across all 9 venues collapses to the thin overlap.
+    strict = vb.common_support(panel, venues_)
+    assert len(strict) == 2
+
+    subset = vb.best_common_support_subset(panel, venues_, min_venues=3)
+    assert "THIN" not in subset
+    assert len(subset) == 8  # every deep venue kept
+    relaxed_support = vb.common_support(panel, subset)
+    assert len(relaxed_support) == 20  # full deep overlap recovered
+
+
+def test_best_common_support_subset_returns_empty_below_min_venues():
+    panel, venues_ = _panel_with_one_thin_venue(n_deep_venues=2)  # 3 total incl THIN
+    subset = vb.best_common_support_subset(panel, venues_, min_venues=6)
+    assert subset == []
+
+
+def test_rank_venues_relaxed_emits_ranking_when_strict_support_is_empty():
+    panel, venues_ = _panel_with_one_thin_venue(n_deep=20, n_thin_overlap=1, n_deep_venues=8)
+    # With only 1 shared obs, strict common support has 1 fixture -> insufficient.
+    strict = vb.rank_venues(panel, venues_, metric="mae", n_boot=200)
+    assert "insufficient" in strict["verdict"]
+    assert strict["relaxed"] is False
+
+    relaxed = vb.rank_venues(
+        panel, venues_, metric="mae", n_boot=200, allow_relaxed_support=True,
+    )
+    assert relaxed["relaxed"] is True
+    assert relaxed["n_fixtures"] == 20
+    assert "THIN" in relaxed["venues_dropped"]
+    assert "THIN" not in relaxed["venues_ranked"]
+    assert set(relaxed["venues_ranked"]) == set(venues_) - {"THIN"}
+    # A real leaderboard actually renders now (not "insufficient").
+    assert relaxed["venues"], "relaxed ranking must produce venue rows"
+    assert "insufficient" not in relaxed["verdict"] or "relaxed" in relaxed["verdict"]
+
+
+def test_rank_venues_relaxed_never_fabricates_below_min_venues():
+    # Only 3 venues total and min_venues defaults to 6 -> no subset qualifies,
+    # so the honest "insufficient" verdict must survive even with relaxation on.
+    panel, venues_ = _panel_from_distances({
+        "A": [0.01, 0.02, 0.03],
+        "B": [0.05, 0.06, 0.07],
+        "C": [0.09, 0.10, 0.11],
+    })
+    res = vb.rank_venues(panel, venues_, metric="mae", n_boot=200, allow_relaxed_support=True)
+    assert "insufficient" in res["verdict"]
+
+
+def test_rank_venues_relaxed_does_not_override_good_strict_support():
+    # When the FULL venue set already has ample common support, relaxation
+    # must be a no-op (never silently drops venues from a working leaderboard).
+    rng = np.random.default_rng(0)
+    n = 14
+    panel, venues_ = _panel_from_distances({
+        "A": list(0.010 + 0.001 * rng.random(n)),
+        "B": list(0.050 + 0.001 * rng.random(n)),
+        "C": list(0.090 + 0.001 * rng.random(n)),
+    })
+    res = vb.rank_venues(panel, venues_, metric="mae", n_boot=200, allow_relaxed_support=True)
+    assert res["relaxed"] is False
+    assert res["venues_dropped"] == []
+    assert set(res["venues_ranked"]) == set(venues_)
+
+
 def test_within_obs_ranks_average_ties():
     panel = {"f0|b": {"A": 0.1, "B": 0.1, "C": 0.3}}
     ranks = vb.within_obs_ranks(panel, ["A", "B", "C"], ["f0|b"])
