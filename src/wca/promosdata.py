@@ -29,9 +29,16 @@ Output shape (consumed by the front-end JS)::
       "signup_offers": [{site, offer, min_odds, min_stake, free_bet_value,
                          expiry, promo_code, url}],
       "watchlist":     [{site, title, description, why}],
+      "manual_check":  [{site, url, reason}],
       "boost_evals":   [{ts, site, fixture, market, selection, boosted_odds,
                          model_prob, fair_odds, edge, is_plus_ev, source}],
       "scrape_health": [{site, status, http_status, last_ok_utc}] }
+
+``manual_check`` is the human's daily click-through list: sources a real probe
+confirmed cannot be recovered by server-side scraping (pure JS-rendered SPA
+shells, or an active bot-challenge) — see :func:`wca.promos.manual_check_sites`.
+It is populated straight from the :data:`wca.promos.SITES` registry, not the
+DB, so it stays honest even on a brand-new/empty catalog.
 """
 
 from __future__ import annotations
@@ -199,6 +206,7 @@ def build_promos_data(
         "sites": sites_out,
         "signup_offers": signups,
         "watchlist": watchlist,
+        "manual_check": promos.manual_check_sites(),
         "boost_evals": boost_evals_out,
         "scrape_health": scrape_health,
     }

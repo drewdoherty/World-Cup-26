@@ -1,0 +1,19 @@
+<!--
+Trimmed reproduction of a genuine Cloudflare JS-challenge response (the actual
+shape returned by Sky Bet / Smarkets to a plain `requests` GET, captured
+2026-07-08 recon). This is a REAL block that wca.promos._BLOCK_MARKERS must
+still catch after the "captcha" bare-substring marker was tightened —
+regression fixture for tests/test_promos.py::TestBlockMarkers.
+-->
+<html>
+<head><title>Just a moment...</title></head>
+<body>
+<script>
+(function(){window._cf_chl_opt={r:'a17fb3579de10d8b',t:'MTc4MzUyMDEyMQ=='};
+var a=document.createElement('script');
+a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';
+document.getElementsByTagName('head')[0].appendChild(a);})();
+</script>
+<div id="challenge-body-text">Checking your browser before accessing the site.</div>
+</body>
+</html>

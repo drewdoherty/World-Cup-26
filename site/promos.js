@@ -324,6 +324,33 @@
     $("scrape-health").innerHTML = '<div class="promo-health">' + html + '</div>';
   }
 
+  // ---- 6. manual-check ------------------------------------------------------
+
+  function renderManualCheck(d) {
+    var items = d.manual_check || [];
+    $("manual-check-meta").textContent = items.length
+      ? items.length + " source" + (items.length === 1 ? "" : "s")
+      : "";
+    if (!items.length) {
+      $("manual-check").innerHTML =
+        '<div class="empty">Nothing flagged for manual check</div>';
+      return;
+    }
+    var html = items.map(function (m) {
+      return '<div class="promo-watch-item">' +
+        '<div class="promo-watch-top">' +
+          '<span class="promo-watch-title">' +
+            linkOr(m.url, m.site) +
+          '</span>' +
+          '<span class="promo-watch-site">' + orDash(m.site) + '</span>' +
+        '</div>' +
+        (m.reason
+          ? '<div class="promo-watch-why">' + esc(m.reason) + '</div>' : '') +
+      '</div>';
+    }).join("");
+    $("manual-check").innerHTML = '<div class="promo-watch">' + html + '</div>';
+  }
+
   // ---- boot ---------------------------------------------------------------
 
   function renderFooter(d) {
@@ -342,6 +369,7 @@
     renderWatchlist(d);
     renderBoosts(d);
     renderHealth(d);
+    renderManualCheck(d);
     renderFooter(d);
   }
 
@@ -360,7 +388,7 @@
         showNoData("PROMOS FEED UNAVAILABLE");
         render({
           meta: {}, sites: [], signup_offers: [], watchlist: [],
-          boost_evals: [], scrape_health: []
+          manual_check: [], boost_evals: [], scrape_health: []
         });
       });
   }

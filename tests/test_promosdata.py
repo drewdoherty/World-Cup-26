@@ -96,7 +96,7 @@ class TestBuildPromosData:
             conn.close()
         # Exact top-level key set from the shared contract.
         assert set(data.keys()) == {
-            "meta", "sites", "signup_offers", "watchlist",
+            "meta", "sites", "signup_offers", "watchlist", "manual_check",
             "boost_evals", "scrape_health",
         }
         assert data["meta"] == {"generated": FIXED_NOW}
@@ -183,3 +183,22 @@ class TestBuildPromosData:
         # Sites still listed (registry), all 'never' scraped.
         assert len(data["sites"]) == len(promos.SITES)
         assert all(s["scrape"]["status"] == "never" for s in data["sites"])
+        # manual_check is registry-derived (not DB-derived), so it is NOT empty
+        # even on a brand-new DB — the human's click-through list is available
+        # from minute one, not only after a scrape has run.
+        assert data["manual_check"], (
+            "manual_check must be populated from the SITES registry even on "
+            "an empty/new DB"
+        )
+
+    def test_manual_check_shape_and_content(self) -> None:
+        conn = _seeded_conn()
+        try:
+            data = promosdata.build_promos_data(conn, None, FIXED_NOW)
+        finally:
+            conn.close()
+        assert data["manual_check"] == promos.manual_check_sites()
+        for entry in data["manual_check"]:
+            assert set(entry.keys()) == {"site", "url", "reason"}
+        # A site NOT flagged manual_check in the registry must not appear here.
+        assert "Unibet" not in {e["site"] for e in data["manual_check"]}
