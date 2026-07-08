@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-08T04:34:57 -->
+<!-- generated: 2026-07-08T05:11:38 -->
 ⚽ *Next match* — France vs Morocco
 Kickoff 2026-07-09 20:00:00+00:00
 
@@ -11,9 +11,9 @@ Kickoff 2026-07-09 20:00:00+00:00
 *Corners* (model, exp 8.3)
   O/U 8.5: over 44.2¢ / under 55.8¢ (model prices)
 
-*Top goalscorers* — from the cached /goalscorers card (as of 2026-07-08T01:54:15)
+*Top goalscorers* — from the cached /goalscorers card (as of 2026-07-08T05:01:07)
 _top anytime (both teams — add squad to split + FGS)_
-  Kylian Mbappe         1.93 (Betfair)  imp 52%
+  Kylian Mbappe         1.94 (Betfair)  imp 52%
   Jean-Philippe Mateta  2.88 (William Hill)  imp 35%
   Marcus Thuram         2.88 (William Hill)  imp 35%
   Ousmane Dembele       3.60 (Betfair)  imp 28%
