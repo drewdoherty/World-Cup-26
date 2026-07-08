@@ -95,6 +95,13 @@ HOST_NATIONS: Tuple[str, ...] = ("United States", "Mexico", "Canada")
 # Stage ordering used for reporting / monotonicity, best (easiest) first.
 STAGE_ORDER: Tuple[str, ...] = ("R32", "R16", "QF", "SF", "F", "win")
 
+# Strictly NESTED advancement chain for one team: win ⊂ F ⊂ SF ⊂ QF ⊂ R16 ⊂ R32
+# (reaching a deeper stage implies reaching every shallower one). Group-winner
+# (GW) is deliberately EXCLUDED: winning the group implies reaching R32 but is
+# NOT ordered against R16+ (a group winner can still lose its R32 tie), so GW
+# remains an independent exposure. Used by :func:`apply_path_exposure_caps`.
+NESTED_PATH_STAGES: FrozenSet[str] = frozenset(STAGE_ORDER)
+
 # "Further-out" ordering for the canonical selection rule's SECONDARY key
 # (wca.selection): a deeper knockout stage is the analogue of a further-out
 # fixture (Final/Win > SF > QF > R16 > R32 > group-winner). Higher = further
@@ -874,7 +881,12 @@ class AdvancementEdge:
     raw_edge: float  # sim_prob - pm_price
     fee_adj_edge: float  # sim_prob - pm_price - fee (per $ at risk)
     fee_adj_ev_per_dollar: float  # same as fee_adj_edge here (binary $1 payout)
-    stake: float  # quarter-Kelly stake on the PM pool, capped
+    # Independent per-rung quarter-Kelly stake on the PM pool, per-bet-capped.
+    # NOTE: the frame returned by compare_to_polymarket additionally applies
+    # the same-team nested-path cap (apply_path_exposure_caps): its ``stake``
+    # column is the path-capped figure and this independent one is kept there
+    # as ``stake_precap``.
+    stake: float
 
     @property
     def edge_pct(self) -> float:
@@ -961,6 +973,113 @@ def _group_winner_event_letter(title: str) -> Optional[str]:
     return None
 
 
+def apply_path_exposure_caps(df: pd.DataFrame) -> pd.DataFrame:
+    """Cap one team's nested advancement stakes as ONE correlated path exposure.
+
+    Stages in :data:`NESTED_PATH_STAGES` are strictly nested for a single team
+    (win ⊂ F ⊂ SF ⊂ QF ⊂ R16 ⊂ R32), so positions on several rungs of one
+    team's path are NOT independent bets: on one elimination path they lose
+    together and their payouts stack together. Sizing every rung at an
+    independent ¼-Kelly of the same pool therefore overbets the path (observed
+    live 2026-07-08: Morocco SF $112 + Morocco Final $33 ≈ 4.5% of the pool on
+    one correlated path — the whole-book rule says size ALL bets together).
+
+    Rule: staked rows are grouped by ``(team, side)`` over the nested chain.
+    Each family's **path cap** is the independent ¼-Kelly stake of the family's
+    TIGHTEST staked rung — the rung whose payout event is a subset of every
+    other rung's in the family, i.e. the tightest single-outcome Kelly bound:
+
+    * YES family: the DEEPEST staked stage (win beats Final beats SF …);
+    * NO family: the SHALLOWEST staked stage — the NO nesting runs the other
+      way ("fails to reach SF" implies "fails to reach the Final", so NO-SF ⊂
+      NO-Final ⊂ NO-win).
+
+    The family's rung stakes are scaled by one common factor
+    ``min(1, cap / total)`` so their SUM never exceeds the cap — proportional
+    scaling preserves relative sizing, and the transform only ever REDUCES
+    stakes. A family with a single staked rung is unchanged (total == cap).
+
+    Documented treatment decisions (do not regress silently):
+
+    * **NO rows are NEVER co-capped with YES rows of the same team.** A deep
+      YES and a shallow NO cannot both win and do not lose together on one
+      elimination path — they hedge each other rather than stack, so lumping
+      them under one cap would misstate both exposures. Each side forms its
+      own nested family; cross-side/cross-team worst case remains the job of
+      the whole-book exposure layer.
+    * **Opposing-team rows are separate exposures** (different teams never
+      share a family).
+    * **Group-winner (GW) rows are excluded** from the chain (see
+      :data:`NESTED_PATH_STAGES`) and keep their independent stake.
+    * **Zero-stake rows** (longshot no-cash floor, or no positive fee-adjusted
+      Kelly edge) are ignored when picking the cap rung and are never scaled.
+
+    Returns a copy of ``df`` with ``stake`` scaled and three added columns:
+    ``stake_precap`` (the independent per-rung ¼-Kelly stake, kept for
+    transparency/CLV comparison), ``path_cap_usd`` (the family cap, NaN outside
+    staked chain families) and ``path_scale`` (the common factor, 1.0 when no
+    scaling was needed).
+    """
+    out = df.copy()
+    out["stake_precap"] = out["stake"].astype(float)
+    out["path_scale"] = 1.0
+    out["path_cap_usd"] = np.nan
+    if out.empty:
+        return out
+    staked = out["stage"].isin(NESTED_PATH_STAGES) & (out["stake_precap"] > 0.0)
+    if not staked.any():
+        return out
+    for (_team, side), grp in out[staked].groupby(["team", "side"], sort=False):
+        depth = grp["stage"].map(stage_further_out)
+        # Tightest rung: deepest staked stage for YES, shallowest for NO.
+        cap_idx = depth.idxmax() if side == "YES" else depth.idxmin()
+        cap = float(grp.loc[cap_idx, "stake_precap"])
+        total = float(grp["stake_precap"].sum())
+        scale = 1.0 if total <= cap else cap / total
+        out.loc[grp.index, "stake"] = grp["stake_precap"] * scale
+        out.loc[grp.index, "path_scale"] = scale
+        out.loc[grp.index, "path_cap_usd"] = cap
+    return out
+
+
+def path_exposure_summary(df: pd.DataFrame) -> Dict[str, Dict[str, Dict[str, Any]]]:
+    """Per-team, per-side nested-path exposure blocks for feed emission.
+
+    Built from the columns :func:`apply_path_exposure_caps` stamped on the
+    comparison frame. Shape::
+
+        {team: {side: {total_stake_usd, total_stake_precap_usd, cap_usd,
+                       cap_stage, scale, scaling_applied, stages}}}
+
+    Only ``(team, side)`` families with at least one staked nested-chain rung
+    appear; ``scaling_applied`` is True when the family total was actually
+    reduced. Stage labels use this module's stage codes (``"F"``, ``"win"`` …);
+    feed builders map them to their own dialect.
+    """
+    out: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    if df is None or df.empty or "path_cap_usd" not in df.columns:
+        return out
+    staked = df["stage"].isin(NESTED_PATH_STAGES) & (df["stake_precap"] > 0.0)
+    if not staked.any():
+        return out
+    for (team, side), grp in df[staked].groupby(["team", "side"], sort=False):
+        grp = grp.copy()
+        grp["_depth"] = grp["stage"].map(stage_further_out)
+        grp = grp.sort_values("_depth")
+        cap_idx = grp["_depth"].idxmax() if side == "YES" else grp["_depth"].idxmin()
+        scale = float(grp["path_scale"].iloc[0])
+        out.setdefault(str(team), {})[str(side)] = {
+            "total_stake_usd": round(float(grp["stake"].sum()), 2),
+            "total_stake_precap_usd": round(float(grp["stake_precap"].sum()), 2),
+            "cap_usd": round(float(grp["path_cap_usd"].iloc[0]), 2),
+            "cap_stage": str(grp.loc[cap_idx, "stage"]),
+            "scale": round(scale, 4),
+            "scaling_applied": bool(scale < 1.0),
+            "stages": [str(s) for s in grp["stage"]],
+        }
+    return out
+
+
 def compare_to_polymarket(
     sim_df: pd.DataFrame,
     pm_events: Sequence[Dict[str, Any]],
@@ -988,8 +1107,15 @@ def compare_to_polymarket(
 
     Returns
     -------
-    pandas.DataFrame, one row per matched team-stage market, sorted by
-    fee-adjusted edge descending. Columns mirror :class:`AdvancementEdge`.
+    pandas.DataFrame, one row per matched team-stage market, in the canonical
+    desk order. Columns mirror :class:`AdvancementEdge`, plus the same-team
+    path-exposure columns from :func:`apply_path_exposure_caps` (fix
+    2026-07-08): ``stake`` is the PATH-CAPPED stake — one team's nested
+    advancement rungs (same side) are sized as ONE correlated exposure whose
+    sum respects the ¼-Kelly stake of the tightest staked rung —
+    ``stake_precap`` keeps the independent per-rung figure, and
+    ``path_cap_usd`` / ``path_scale`` expose the family cap and the common
+    reduction factor. Aggregation only ever reduces stakes.
     """
     edges: List[AdvancementEdge] = []
 
@@ -1098,6 +1224,11 @@ def compare_to_polymarket(
     ]
     df = pd.DataFrame(rows)
     if not df.empty:
+        # Same-team nested-path exposure aggregation (fix 2026-07-08): a
+        # team's stage rungs are one correlated path leg, not independent
+        # bets — scale each (team, side) family so its stake SUM respects the
+        # ¼-Kelly stake of the tightest staked rung. Reduces only.
+        df = apply_path_exposure_caps(df)
         # Canonical desk ordering (wca.selection; user 2026-07-07):
         #   1. model-prob bucket (moneyline > mid > longshot), ALWAYS;
         #   2. further-out first — deeper knockout stage (stage_further_out desc);

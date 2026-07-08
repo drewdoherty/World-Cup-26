@@ -198,6 +198,17 @@ def _write_report(
         "(`fraction=%.2f`)."
         % (PM_PER_BET_CAP * 100, PM_POOL_BANKROLL, PM_KELLY_FRACTION)
     )
+    a(
+        "8. **Same-team path exposure.** One team's advancement rungs are "
+        "NESTED (win ⊂ Final ⊂ SF ⊂ QF ⊂ R16 ⊂ R32) — one correlated path "
+        "leg, not independent bets. Per team and traded side, the staked "
+        "rungs are jointly capped by the quarter-Kelly stake of the tightest "
+        "staked rung (deepest stage for YES; shallowest for NO, whose "
+        "nesting runs the other way) and scaled proportionally, so the Stake "
+        "column sums to at most that cap per path. NO positions are never "
+        "co-capped with YES positions of the same team (they hedge, not "
+        "stack); group-winner is a separate exposure."
+    )
     a("")
     a(
         "**Coverage.** %d Polymarket World-Cup events pulled; %d scored "
