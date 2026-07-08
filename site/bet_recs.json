@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-08 14:51:40 UTC",
+    "generated": "2026-07-08 17:00:41 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3000.0,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 505,
-      "advancement_secs": 1608,
+      "model_secs": 501,
+      "advancement_secs": 9349,
       "price_secs": null,
-      "promo_secs": 692,
+      "promo_secs": 8433,
       "exposure_secs": null
     },
     "coverage": {
@@ -51,7 +51,7 @@
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
     "actionable_count": 6,
-    "withheld_count": 12
+    "withheld_count": 35
   },
   "match_singles": [],
   "event_props": [],
@@ -74,8 +74,8 @@
       "stake": 112.43,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1608,
-        "price_secs": 1608
+        "model_secs": 9349,
+        "price_secs": 9349
       },
       "stale": false,
       "stale_reason": null,
@@ -112,8 +112,8 @@
       "stake": 73.87,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1608,
-        "price_secs": 1608
+        "model_secs": 9349,
+        "price_secs": 9349
       },
       "stale": false,
       "stale_reason": null,
@@ -150,8 +150,8 @@
       "stake": 84.77,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1608,
-        "price_secs": 1608
+        "model_secs": 9349,
+        "price_secs": 9349
       },
       "stale": false,
       "stale_reason": null,
@@ -188,8 +188,8 @@
       "stake": 35.11,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1608,
-        "price_secs": 1608
+        "model_secs": 9349,
+        "price_secs": 9349
       },
       "stale": false,
       "stale_reason": null,
@@ -226,8 +226,8 @@
       "stake": 101.38,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1608,
-        "price_secs": 1608
+        "model_secs": 9349,
+        "price_secs": 9349
       },
       "stale": false,
       "stale_reason": null,
@@ -264,8 +264,8 @@
       "stake": 66.14,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 1608,
-        "price_secs": 1608
+        "model_secs": 9349,
+        "price_secs": 9349
       },
       "stale": false,
       "stale_reason": null,
@@ -288,6 +288,44 @@
   "guaranteed_arbs": [],
   "withheld": [
     {
+      "id": "france_vs_morocco_home_1x2",
+      "fixture": "France vs Morocco",
+      "kickoff": "2026-07-09 20:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "home",
+      "team": "France",
+      "model_prob": 0.5796,
+      "price": 1.6179,
+      "edge": -0.0385,
+      "ev_net": -0.0623,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "edge_below_floor:-0.0385<0.0200",
+      "reason_code": "edge_below_floor",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "france_vs_morocco_draw_1x2",
+      "fixture": "France vs Morocco",
+      "kickoff": "2026-07-09 20:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "draw",
+      "team": "Draw",
+      "model_prob": 0.2592,
+      "price": 4.0612,
+      "edge": 0.013,
+      "ev_net": 0.0528,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "edge_below_floor:0.0130<0.0200",
+      "reason_code": "edge_below_floor",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
       "id": "france_vs_morocco_away_1x2",
       "fixture": "France vs Morocco",
       "kickoff": "2026-07-09 20:00:00+00:00",
@@ -302,6 +340,45 @@
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 16% < floor 20%",
+      "reason_code": "below_min_prob",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "spain_vs_belgium_home_1x2",
+      "fixture": "Spain vs Belgium",
+      "kickoff": "2026-07-10 19:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "home",
+      "team": "Spain",
+      "model_prob": 0.581,
+      "price": 1.6694,
+      "edge": -0.018,
+      "ev_net": -0.0301,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "edge_below_floor:-0.0180<0.0200",
+      "reason_code": "edge_below_floor",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "spain_vs_belgium_draw_1x2",
+      "fixture": "Spain vs Belgium",
+      "kickoff": "2026-07-10 19:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "draw",
+      "team": "Draw",
+      "model_prob": 0.239,
+      "price": 4.1607,
+      "edge": -0.0014,
+      "ev_net": -0.0058,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "edge_below_floor:-0.0014<0.0200",
+      "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
     },
@@ -320,6 +397,102 @@
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 18% < floor 20%",
+      "reason_code": "below_min_prob",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "norway_vs_england_home_1x2",
+      "fixture": "Norway vs England",
+      "kickoff": "2026-07-11 21:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "home",
+      "team": "Norway",
+      "model_prob": 0.2111,
+      "price": 4.5366,
+      "edge": -0.0093,
+      "ev_net": -0.0421,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "edge_below_floor:-0.0093<0.0200",
+      "reason_code": "edge_below_floor",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "norway_vs_england_draw_1x2",
+      "fixture": "Norway vs England",
+      "kickoff": "2026-07-11 21:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "draw",
+      "team": "Draw",
+      "model_prob": 0.2558,
+      "price": 3.8421,
+      "edge": -0.0044,
+      "ev_net": -0.017,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "edge_below_floor:-0.0044<0.0200",
+      "reason_code": "edge_below_floor",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "norway_vs_england_away_1x2",
+      "fixture": "Norway vs England",
+      "kickoff": "2026-07-11 21:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "away",
+      "team": "England",
+      "model_prob": 0.533,
+      "price": 1.9257,
+      "edge": 0.0137,
+      "ev_net": 0.0264,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "edge_below_floor:0.0137<0.0200",
+      "reason_code": "edge_below_floor",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "argentina_vs_switzerland_home_1x2",
+      "fixture": "Argentina vs Switzerland",
+      "kickoff": "2026-07-12 01:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "home",
+      "team": "Argentina",
+      "model_prob": 0.575,
+      "price": 1.776,
+      "edge": 0.012,
+      "ev_net": 0.0212,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "edge_below_floor:0.0120<0.0200",
+      "reason_code": "edge_below_floor",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "argentina_vs_switzerland_draw_1x2",
+      "fixture": "Argentina vs Switzerland",
+      "kickoff": "2026-07-12 01:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "draw",
+      "team": "Draw",
+      "model_prob": 0.2574,
+      "price": 3.6576,
+      "edge": -0.016,
+      "ev_net": -0.0584,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "edge_below_floor:-0.0160<0.0200",
+      "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
     },
@@ -331,13 +504,14 @@
       "market": "1X2",
       "selection": "away",
       "team": "Switzerland",
-      "model_prob": 0.1658,
-      "price": 6.2248,
-      "edge": 0.0052,
-      "ev_net": 0.0321,
+      "model_prob": 0.1675,
+      "price": 6.1145,
+      "edge": 0.004,
+      "ev_net": 0.0244,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 17% < floor 20%",
+      "reason_code": "below_min_prob",
       "stale": false,
       "stale_reason": null
     },
@@ -347,6 +521,7 @@
       "market": "corners",
       "selection": "corners over 8.5",
       "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
+      "reason_code": "no_live_price",
       "stale": true,
       "stale_reason": "price snapshot absent or older than 2h",
       "tags": [
@@ -361,6 +536,7 @@
       "market": "cards",
       "selection": "cards over 2.5",
       "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
+      "reason_code": "no_live_price",
       "stale": true,
       "stale_reason": "price snapshot absent or older than 2h",
       "tags": [
@@ -375,6 +551,7 @@
       "market": "corners",
       "selection": "corners over 8.5",
       "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
+      "reason_code": "no_live_price",
       "stale": true,
       "stale_reason": "price snapshot absent or older than 2h",
       "tags": [
@@ -389,6 +566,7 @@
       "market": "cards",
       "selection": "cards over 2.5",
       "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
+      "reason_code": "no_live_price",
       "stale": true,
       "stale_reason": "price snapshot absent or older than 2h",
       "tags": [
@@ -403,6 +581,7 @@
       "market": "anytime_scorer",
       "selection": "\u2014",
       "withheld_reason": "player xG-share + penalty-taker injection not yet wired (no real inputs)",
+      "reason_code": "unsupported",
       "stale": false,
       "stale_reason": null,
       "tags": [
@@ -410,6 +589,38 @@
         "scorer",
         "unsupported"
       ]
+    },
+    {
+      "id": "spain_sf_pm",
+      "team": "Spain",
+      "group": "H",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.6917,
+      "pm_price": 0.755,
+      "ev_net": -0.0688,
+      "stake": 0.0,
+      "withheld_reason": "edge_below_floor:-0.0688<0.0200",
+      "reason_code": "edge_below_floor"
+    },
+    {
+      "id": "argentina_sf_pm",
+      "team": "Argentina",
+      "group": "J",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.7214,
+      "pm_price": 0.735,
+      "ev_net": -0.0194,
+      "stake": 0.0,
+      "withheld_reason": "edge_below_floor:-0.0194<0.0200",
+      "reason_code": "edge_below_floor"
     },
     {
       "id": "argentina_win_pm",
@@ -424,7 +635,88 @@
       "pm_price": 0.1875,
       "ev_net": 0.0315,
       "stake": 0.0,
-      "withheld_reason": "model-prob longshot (22% < 25%) \u2014 no cash (free-bet/lottery only)"
+      "withheld_reason": "model-prob longshot (22% < 25%) \u2014 no cash (free-bet/lottery only)",
+      "reason_code": "longshot_no_cash"
+    },
+    {
+      "id": "france_win_pm",
+      "team": "France",
+      "group": "I",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1915,
+      "pm_price": 0.3265,
+      "ev_net": -0.1416,
+      "stake": 0.0,
+      "withheld_reason": "edge_below_floor:-0.1416<0.0200",
+      "reason_code": "edge_below_floor"
+    },
+    {
+      "id": "france_final_pm",
+      "team": "France",
+      "group": "I",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.3529,
+      "pm_price": 0.535,
+      "ev_net": -0.1896,
+      "stake": 0.0,
+      "withheld_reason": "edge_below_floor:-0.1896<0.0200",
+      "reason_code": "edge_below_floor"
+    },
+    {
+      "id": "france_sf_pm",
+      "team": "France",
+      "group": "I",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.6929,
+      "pm_price": 0.775,
+      "ev_net": -0.0873,
+      "stake": 0.0,
+      "withheld_reason": "edge_below_floor:-0.0873<0.0200",
+      "reason_code": "edge_below_floor"
+    },
+    {
+      "id": "england_final_pm",
+      "team": "England",
+      "group": "L",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.3726,
+      "pm_price": 0.385,
+      "ev_net": -0.0195,
+      "stake": 0.0,
+      "withheld_reason": "edge_below_floor:-0.0195<0.0200",
+      "reason_code": "edge_below_floor"
+    },
+    {
+      "id": "england_win_pm",
+      "team": "England",
+      "group": "L",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.1777,
+      "pm_price": 0.1575,
+      "ev_net": 0.0162,
+      "stake": 0.0,
+      "withheld_reason": "edge_below_floor:0.0162<0.0200",
+      "reason_code": "edge_below_floor"
     },
     {
       "id": "belgium_win_pm",
@@ -439,7 +731,8 @@
       "pm_price": 0.0245,
       "ev_net": 0.0297,
       "stake": 0.0,
-      "withheld_reason": "model-prob longshot (5% < 25%) \u2014 no cash (free-bet/lottery only)"
+      "withheld_reason": "model-prob longshot (5% < 25%) \u2014 no cash (free-bet/lottery only)",
+      "reason_code": "longshot_no_cash"
     },
     {
       "id": "belgium_final_pm",
@@ -454,7 +747,72 @@
       "pm_price": 0.0665,
       "ev_net": 0.0626,
       "stake": 0.0,
-      "withheld_reason": "model-prob longshot (13% < 25%) \u2014 no cash (free-bet/lottery only)"
+      "withheld_reason": "model-prob longshot (13% < 25%) \u2014 no cash (free-bet/lottery only)",
+      "reason_code": "longshot_no_cash"
+    },
+    {
+      "id": "morocco_win_pm",
+      "team": "Morocco",
+      "group": "C",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0385,
+      "pm_price": 0.0315,
+      "ev_net": 0.0061,
+      "stake": 0.0,
+      "withheld_reason": "edge_below_floor:0.0061<0.0200",
+      "reason_code": "edge_below_floor"
+    },
+    {
+      "id": "morocco_final_pm",
+      "team": "Morocco",
+      "group": "C",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0999,
+      "pm_price": 0.0785,
+      "ev_net": 0.0192,
+      "stake": 0.0,
+      "withheld_reason": "edge_below_floor:0.0192<0.0200",
+      "reason_code": "edge_below_floor"
+    },
+    {
+      "id": "switzerland_sf_pm",
+      "team": "Switzerland",
+      "group": "B",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.2787,
+      "pm_price": 0.264,
+      "ev_net": 0.0089,
+      "stake": 0.0,
+      "withheld_reason": "edge_below_floor:0.0089<0.0200",
+      "reason_code": "edge_below_floor"
+    },
+    {
+      "id": "switzerland_win_pm",
+      "team": "Switzerland",
+      "group": "B",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0337,
+      "pm_price": 0.0215,
+      "ev_net": 0.0116,
+      "stake": 0.0,
+      "withheld_reason": "edge_below_floor:0.0116<0.0200",
+      "reason_code": "edge_below_floor"
     },
     {
       "id": "switzerland_final_pm",
@@ -469,7 +827,56 @@
       "pm_price": 0.0705,
       "ev_net": 0.0323,
       "stake": 0.0,
-      "withheld_reason": "model-prob longshot (10% < 25%) \u2014 no cash (free-bet/lottery only)"
+      "withheld_reason": "model-prob longshot (10% < 25%) \u2014 no cash (free-bet/lottery only)",
+      "reason_code": "longshot_no_cash"
+    },
+    {
+      "id": "norway_win_pm",
+      "team": "Norway",
+      "group": "I",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0281,
+      "pm_price": 0.0595,
+      "ev_net": -0.0331,
+      "stake": 0.0,
+      "withheld_reason": "edge_below_floor:-0.0331<0.0200",
+      "reason_code": "edge_below_floor"
+    },
+    {
+      "id": "norway_final_pm",
+      "team": "Norway",
+      "group": "I",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.0988,
+      "pm_price": 0.1395,
+      "ev_net": -0.0443,
+      "stake": 0.0,
+      "withheld_reason": "edge_below_floor:-0.0443<0.0200",
+      "reason_code": "edge_below_floor"
+    },
+    {
+      "id": "norway_sf_pm",
+      "team": "Norway",
+      "group": "I",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.3001,
+      "pm_price": 0.345,
+      "ev_net": -0.0517,
+      "stake": 0.0,
+      "withheld_reason": "edge_below_floor:-0.0517<0.0200",
+      "reason_code": "edge_below_floor"
     }
   ]
 }

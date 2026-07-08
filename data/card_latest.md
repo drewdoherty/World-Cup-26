@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-08T14:43:15 -->
+<!-- generated: 2026-07-08T16:52:20 -->
 *World Cup Alpha — bet card* (0 staked, 1 indicative picks, hit-prob ranked)
 
 _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. Wire a 2nd book (Betfair creds) or set WCA_STAKE_SINGLE_SOURCE=1 to size them._
@@ -45,11 +45,11 @@ _⚠ Every pick is single-source (Polymarket only) — INDICATIVE, not staked. W
     O/U 2.5: over 57.2% / under 42.8%   BTTS 57.2%
 
 *Argentina vs Switzerland*
-    xG: 1.83-0.91
-    1-1  12.2%  fair 8.21 (12.2%)  back >= 8.37 (11.9%)
-    1-0  11.1%  fair 9.01 (11.1%)  back >= 9.19 (10.9%)
-    2-0  10.6%  fair 9.41 (10.6%)  back >= 9.60 (10.4%)
-    2-1  9.9%  fair 10.15 (9.9%)  back >= 10.36 (9.7%)
-    0-0  7.5%  fair 13.39 (7.5%)  back >= 13.66 (7.3%)
-    3-0  6.4%  fair 15.51 (6.4%)  back >= 15.82 (6.3%)
-    O/U 2.5: over 51.3% / under 48.7%   BTTS 51.6%
+    xG: 1.82-0.91
+    1-1  12.3%  fair 8.15 (12.3%)  back >= 8.31 (12.0%)
+    1-0  11.0%  fair 9.06 (11.0%)  back >= 9.24 (10.8%)
+    2-0  10.6%  fair 9.47 (10.6%)  back >= 9.66 (10.4%)
+    2-1  9.8%  fair 10.22 (9.8%)  back >= 10.42 (9.6%)
+    0-0  7.5%  fair 13.29 (7.5%)  back >= 13.56 (7.4%)
+    3-0  6.4%  fair 15.61 (6.4%)  back >= 15.92 (6.3%)
+    O/U 2.5: over 51.2% / under 48.8%   BTTS 51.6%
