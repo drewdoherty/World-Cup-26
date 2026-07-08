@@ -6,13 +6,13 @@
  "freshness": {
   "checks": [
    {
-    "age_secs": 0.0,
+    "age_secs": 1.0,
     "max_age_secs": 10800,
     "name": "advancement",
     "pass": true,
     "reason": null,
     "source": "site/advancement_data.json",
-    "stamp": "2026-07-08 06:56:39 UTC"
+    "stamp": "2026-07-08 07:31:18 UTC"
    },
    {
     "age_secs": 0.0,
@@ -21,28 +21,28 @@
     "pass": true,
     "reason": null,
     "source": "site/bet_recs.json",
-    "stamp": "2026-07-08 06:56:39 UTC"
+    "stamp": "2026-07-08 07:31:19 UTC"
    },
    {
-    "age_secs": 69.0,
+    "age_secs": 68.0,
     "max_age_secs": 10800,
     "name": "scores_markets",
     "pass": true,
     "reason": null,
     "source": "site/scores_markets.json",
-    "stamp": "2026-07-08 06:55:30 UTC"
+    "stamp": "2026-07-08 07:30:11 UTC"
    },
    {
-    "age_secs": 1016.0,
+    "age_secs": 1092.0,
     "max_age_secs": 21600,
     "name": "pm_ideas",
     "pass": true,
     "reason": null,
     "source": "site/pm_ideas.json",
-    "stamp": "2026-07-08T06:39:43Z"
+    "stamp": "2026-07-08T07:13:07Z"
    },
    {
-    "age_secs": 232.3,
+    "age_secs": 2312.3,
     "max_age_secs": 86400,
     "name": "orderflow",
     "pass": true,
@@ -51,7 +51,7 @@
     "stamp": "2026-07-08T06:52:46.731916+00:00"
    },
    {
-    "age_secs": 39819.0,
+    "age_secs": 41899.0,
     "max_age_secs": 50400,
     "name": "advancement_model",
     "pass": true,
@@ -72,7 +72,7 @@
   "pass": true
  },
  "meta": {
-  "advancement_model_age_hours": 11.06,
+  "advancement_model_age_hours": 11.64,
   "advancement_model_generated": "2026-07-07 19:53 UTC",
   "caveats": [
    "SHADOW-ONLY: decision-support feed; no verdict here is a trade instruction and nothing is wired to execution.",
@@ -97,7 +97,7 @@
    "site/pm_ideas.json": 21600,
    "site/scores_markets.json": 10800
   },
-  "generated_at": "2026-07-08T06:56:39Z",
+  "generated_at": "2026-07-08T07:31:19Z",
   "n_advancement_legs_without_pm_quote": 16,
   "n_by_verdict": {
    "DO_NOT_TRADE": 1,
@@ -138,11 +138,11 @@
   "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
   "shadow_only": true,
   "sources": {
-   "site/advancement_data.json": "2026-07-08 06:56:39 UTC",
-   "site/bet_recs.json": "2026-07-08 06:56:39 UTC",
+   "site/advancement_data.json": "2026-07-08 07:31:18 UTC",
+   "site/bet_recs.json": "2026-07-08 07:31:19 UTC",
    "site/microstructure/orderflow.json": "2026-07-08T06:52:46.731916+00:00",
-   "site/pm_ideas.json": "2026-07-08T06:39:43Z",
-   "site/scores_markets.json": "2026-07-08 06:55:30 UTC"
+   "site/pm_ideas.json": "2026-07-08T07:13:07Z",
+   "site/scores_markets.json": "2026-07-08 07:30:11 UTC"
   },
   "verdict_enum": [
    "SHADOW_ADD",
@@ -992,7 +992,7 @@
     "usd": 3490086.55
    },
    "origin": "advancement_data",
-   "pm_price": 0.4055,
+   "pm_price": 0.4065,
    "pm_price_source": "advancement_data.teams[Argentina].pm[Final].pm (YES mid)",
    "position_prob": 0.6749,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -1015,7 +1015,7 @@
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.0311,
+   "edge_adj": 0.0321,
    "edge_source": "advancement_data.teams[Norway].pm[Final].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -1124,7 +1124,7 @@
     "usd": 3490086.55
    },
    "origin": "advancement_data",
-   "pm_price": 0.1395,
+   "pm_price": 0.1405,
    "pm_price_source": "advancement_data.teams[Norway].pm[Final].pm (YES mid)",
    "position_prob": 0.8957,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -1147,7 +1147,7 @@
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.0228,
+   "edge_adj": 0.0199,
    "edge_source": "advancement_data.teams[Switzerland].pm[Final].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -1156,8 +1156,8 @@
     },
     "edge": {
      "note": "threshold 0.02 replicated from scripts/wca_betrecs.py MIN_EDGE",
-     "pass": true,
-     "reason": null
+     "pass": false,
+     "reason": "near_threshold_edge: +0.0199 inside the 0.02 actionable threshold (scripts/wca_betrecs.py MIN_EDGE)"
     },
     "freshness": {
      "pass": true,
@@ -1256,7 +1256,7 @@
     "usd": 3490086.55
    },
    "origin": "advancement_data",
-   "pm_price": 0.0755,
+   "pm_price": 0.0735,
    "pm_price_source": "advancement_data.teams[Switzerland].pm[Final].pm (YES mid)",
    "position_prob": 0.9499,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -1273,6 +1273,7 @@
    "team": "Switzerland",
    "verdict": "WATCH",
    "verdict_reasons": [
+    "near_threshold_edge: fee-adjusted edge +0.0199 is inside the 0.02 actionable threshold (scripts/wca_betrecs.py MIN_EDGE)",
     "projected_tie: no tie featuring Switzerland in scores_markets.sf_games \u2014 the projected bracket's modal path does not reach this stage; tie context unknown (treated as projected by the projection gate)"
    ]
   },
@@ -1388,7 +1389,7 @@
     "usd": 2093996.52
    },
    "origin": "advancement_data",
-   "pm_price": 0.2595,
+   "pm_price": 0.263,
    "pm_price_source": "advancement_data.teams[Switzerland].pm[SF].pm (YES mid)",
    "position_prob": 0.8597,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
@@ -1564,14 +1565,14 @@
    "bet_rec": {
     "action_label": "ADD",
     "currency": "USD",
-    "ev_net": 0.0325,
+    "ev_net": 0.0374,
     "id": "england_sf_pm",
-    "pm_fee": 0.0067,
+    "pm_fee": 0.0068,
     "source": "bet_recs.advancement_futures[england_sf_pm]",
-    "stake": 100.0
+    "stake": 113.56
    },
    "bucket": "moneyline",
-   "edge_adj": 0.0226,
+   "edge_adj": 0.0325,
    "edge_source": "advancement_data.teams[England].pm[SF].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -1700,7 +1701,7 @@
     "usd": 2093996.52
    },
    "origin": "advancement_data",
-   "pm_price": 0.66,
+   "pm_price": 0.655,
    "pm_price_source": "advancement_data.teams[England].pm[SF].pm (YES mid)",
    "position_prob": 0.6992,
    "position_prob_source": "= model_prob",
@@ -2971,7 +2972,7 @@
   {
    "bet_rec": null,
    "bucket": "longshot",
-   "edge_adj": 0.0308,
+   "edge_adj": 0.0318,
    "edge_source": "advancement_data.teams[Belgium].pm[win].edge_adj (better-side fee-adjusted edge; side NOT emitted by the feed)",
    "gates": {
     "clv_history": {
@@ -3080,7 +3081,7 @@
     "usd": 215026953.6
    },
    "origin": "advancement_data",
-   "pm_price": 0.0245,
+   "pm_price": 0.0235,
    "pm_price_source": "advancement_data.teams[Belgium].pm[win].pm (YES mid)",
    "position_prob": 0.0565,
    "position_prob_source": "= model_prob",
@@ -3639,12 +3640,12 @@
    "bet_rec": null,
    "book_edge": 0.0028,
    "book_edge_source": "bet_recs.withheld[argentina_vs_switzerland_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 6.0476,
+   "book_price_decimal": 6.0433,
    "book_price_source": "bet_recs.withheld[argentina_vs_switzerland_away_1x2].price (decimal book odds)",
    "bucket": "longshot",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": 0.0172,
+   "ev_net": 0.0169,
    "fixture": "Argentina vs Switzerland",
    "gates": {
     "clv_history": {
@@ -3701,13 +3702,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "Argentina vs Switzerland \u00b7 away \u00b7 settles at 90 min",
-   "model_prob": 0.1682,
+   "model_prob": 0.1683,
    "model_source": "bet_recs.withheld[argentina_vs_switzerland_away_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.1682,
+   "position_prob": 0.1683,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -3731,12 +3732,12 @@
    "bet_rec": null,
    "book_edge": 0.0179,
    "book_edge_source": "bet_recs.withheld[spain_vs_belgium_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 6.0844,
+   "book_price_decimal": 6.0866,
    "book_price_source": "bet_recs.withheld[spain_vs_belgium_away_1x2].price (decimal book odds)",
    "bucket": "longshot",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": 0.1088,
+   "ev_net": 0.109,
    "fixture": "Spain vs Belgium",
    "gates": {
     "clv_history": {
@@ -3841,14 +3842,14 @@
   },
   {
    "bet_rec": null,
-   "book_edge": 0.0218,
+   "book_edge": 0.022,
    "book_edge_source": "bet_recs.withheld[france_vs_morocco_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 6.9467,
+   "book_price_decimal": 6.9711,
    "book_price_source": "bet_recs.withheld[france_vs_morocco_away_1x2].price (decimal book odds)",
    "bucket": "longshot",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": 0.1516,
+   "ev_net": 0.1536,
    "fixture": "France vs Morocco",
    "gates": {
     "clv_history": {
@@ -3925,13 +3926,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "France vs Morocco \u00b7 away \u00b7 settles at 90 min",
-   "model_prob": 0.1658,
+   "model_prob": 0.1655,
    "model_source": "bet_recs.withheld[france_vs_morocco_away_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.1658,
+   "position_prob": 0.1655,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
