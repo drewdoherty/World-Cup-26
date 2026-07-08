@@ -325,7 +325,7 @@ def poll_once(db_path: str, repo_root: Path, policy: PollPolicy) -> int:
 
     # During live/pre-close phases, periodically regenerate + push the site's
     # line-history so the chart tracks the match (every 6th fast poll ≈ 18 min —
-    # Vercel Hobby caps deploys at ~100/day and every push deploys). Best-effort by design.
+    # throttled to keep data-commit noise on main down). Best-effort by design.
     if reason in ("in_game", "pre_close"):
         _SYNC_STATE["fast_polls"] = _SYNC_STATE.get("fast_polls", 0) + 1
         if _SYNC_STATE["fast_polls"] % 6 == 1:  # 1st, 7th, 13th... fast poll (~18 min)

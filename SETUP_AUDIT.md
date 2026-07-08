@@ -217,7 +217,7 @@
 2. ✅ **Verify the website updates**
    - Run: `python scripts/wca_site.py`
    - Confirm: `site/data.json` has predictions
-   - Visit: https://fifa-world-cup-2026-betting-gamblin.vercel.app
+   - Visit: http://localhost:8000 (localhost-only; Vercel removed 2026-07-08)
    - Confirm: Predictions section shows scorelines
 
 3. ✅ **Verify Telegram bot**

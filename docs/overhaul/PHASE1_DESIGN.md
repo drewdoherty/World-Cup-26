@@ -542,7 +542,9 @@ that gating becomes declarative-per-command instead of regex-adjacent.
      feed dir (7.c.3) so nothing tracked is ever left permanently dirty.
    The detached-data-branch alternative (mini commits data to a `data` branch, main
    stays code-only) is rejected: it doubles the branch surface the day after a 98-branch
-   cleanup and makes the two Vercel builds read from two refs. Untracking is smaller,
+   cleanup and splits what the serving surfaces read across two refs (when recorded
+   this meant the two Vercel builds; Vercel was removed 2026-07-08 — it now means the
+   localhost 8000/8001 servers). Untracking is smaller,
    testable, and reversible per-file.
 2. **Single installer.** Delete `deploy/install_services.sh` AND `deploy/sync.sh` (the
    legacy 5-min sync destroys fresh daemon artifacts: `git checkout -- .` + stash drop,
@@ -584,10 +586,12 @@ not exist); `visuals.html`/`tracking.html` are 19-line redirect stubs; two feeds
 no generator at all (`site-analytics/data/mc_futures.json`,
 `site/microstructure/index.json` — the only feed the microstructure page fetches).
 
-1. **One site.** `site/` keeps the public URL and adopts the lilac shape: a single
-   tabbed terminal (`site-lilac/` is the proven prototype). Analytics panels (the 13
-   feeds `analytics.js:1049-1063` fetches) and microstructure become tabs. Retired:
-   `site-analytics/` tree + its Vercel project, `site-lilac/` as a separate tree (its
+1. **One site.** `site/` keeps its serving slot (localhost:8000 — the hosted Vercel
+   URL was retired with Vercel's removal, 2026-07-08) and adopts the lilac shape: a
+   single tabbed terminal (`site-lilac/` is the proven prototype). Analytics panels
+   (the 13 feeds `analytics.js:1049-1063` fetches) and microstructure become tabs.
+   Retired:
+   `site-analytics/` tree (its Vercel project is already gone), `site-lilac/` as a separate tree (its
    template becomes the site), `terminal.html`, `visuals.html`, `tracking.html`,
    `benchmarks_data.json` (dead generator) — and `mc_futures.json` unless its generator
    is resurrected (user call: the docs reference a `wca_mc_futures.py` that does not
@@ -604,9 +608,10 @@ no generator at all (`site-analytics/data/mc_futures.json`,
 4. **Per-feed freshness badges.** The UI renders age from `generated_at` and badges
    stale feeds (>2× expected cadence) — a 10-day-old panel can never again look live.
 5. **Real-time tier.** Positions / bet recs / line-move only: short-poll (15–30 s) of
-   small JSONs. Short-poll over SSE deliberately: the public copy is static Vercel
-   hosting (no SSE server), and the localhost copy gets the same behavior with zero
-   infra. Everything else stays batch (30-min publish).
+   small JSONs. Short-poll over SSE deliberately: the site is plain static-file
+   serving with no SSE server (localhost 8000/8001 only since Vercel's 2026-07-08
+   removal), so short-poll works with zero infra. Everything else stays batch
+   (30-min publish).
 
 ---
 
@@ -656,7 +661,7 @@ sign-off gates unchanged.
 | 6 | Data unlocks — SHADOW MODE | `wca_clobd` daemon + `pm_ticks.db` + backfill; pm-snapshot.yml stall fix; StatsBomb weekly build; xG anchor + totals prior + sharp-book weighting as shadow candidates in clvbench; F7 tracking-only wire; F9 wire-or-delete executed | 2 (services), 5 (canonical devig) | New mini jobs + API load (CLOB rate limits — daemon backs off); ZERO staking change by construction (everything dual-written and compared) | stop daemons; revert PRs; incumbent constants untouched | SIGN-OFF (new mini services); staking flips are increment 7/8 gates |
 | 7 | Sizing scale-up | bankroll.py per-pool + correlation cap + hard floor (4.1); static caps + bankroll-computed recommendations + kill-switch (4.2, amended 2026-07-02); staged ceiling raises; resolve the per-pool vs global-PM-rule conflict | 4 (FX P&L feeds), 5 (exposure_corr canonical), 6 (shadow evidence) | HIGHEST — this changes real stake sizes. Staged: framework lands with Stage-0 ceilings (numerically identical to today), then each raise is its own sign-off | flip ceilings back to Stage 0 (config, not code); revert PR | **HARD SIGN-OFF** (per stage) |
 | 8 | Exotic markets, tier by tier | Totals/BTTS CLV capture in closecapture → T1 totals+BTTS live (ONE exposure/fixture) → T2 team totals pilot, DC/DNB pricing identity, AH monitoring → T3 PM term-structure + group markets, depth-gated | 6 (anchors + CLOB depth), 7 (correlation sizing) | Each market = new settlement surface; the four shipping requirements (section 5) are mandatory per market; T1 first because settlement is cleanest and the model already prices it | per-market disable (stop proposing); revert PR | SIGN-OFF per market tier |
-| 9 | Big rewrites | Event-sourced ledger with dual-write shadow + migration framework + fixtures FK (7.a.5); ONE lilac-shaped site + one publisher + freshness badges + real-time tier (7.c); Telegram v2 typed commands + richer confirmation cards (6.2/6.5) | 4, 5; site rewrite benefits from 2 | Large units — each lands behind a shadow/parallel period (ledger: projection-equality proof; site: old tree serves until parity checklist passes; bot: command registry runs behind the existing dispatcher first) | ledger: stop event writes (table authoritative throughout shadow); site: re-point Vercel at old tree; bot: revert PR | SIGN-OFF each |
+| 9 | Big rewrites | Event-sourced ledger with dual-write shadow + migration framework + fixtures FK (7.a.5); ONE lilac-shaped site + one publisher + freshness badges + real-time tier (7.c); Telegram v2 typed commands + richer confirmation cards (6.2/6.5) | 4, 5; site rewrite benefits from 2 | Large units — each lands behind a shadow/parallel period (ledger: projection-equality proof; site: old tree serves until parity checklist passes; bot: command registry runs behind the existing dispatcher first) | ledger: stop event writes (table authoritative throughout shadow); site: re-point the localhost servers at the old tree; bot: revert PR | SIGN-OFF each |
 | 10 | Betfair standing decision | No build. Record section 8 in ARCHITECTURE.md; optional MacBook VPN read-relay as a 3.c input if the user wants it | — | none | — | none (decision already recorded) |
 
 **STOP. Nothing beyond increment 0 and documentation merges proceeds without explicit
