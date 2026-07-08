@@ -137,7 +137,8 @@ def _write_pins(ko_pinned, path=PINS_JSON):
 
 
 def _pm_by_team_stage(sim_df):
-    """``{team: {stage: {pm, edge_adj, side, ask}}}`` from the live PM markets.
+    """``{team: {stage: {pm, edge_adj, side, ask, stake_usd, path_scale}}}``
+    from the live PM markets, plus the per-team path-exposure blocks.
 
     ``pm`` is the YES mid; ``edge_adj`` is the fee-adjusted edge of whichever
     side (YES/NO) the sim favours — so ``side`` names that side explicitly and
@@ -147,16 +148,27 @@ def _pm_by_team_stage(sim_df):
     against a stale-print mid (the Edge Desk's HIGH-2
     ``side_attribution_uncertain`` guard existed for exactly that) — emit it
     at the source instead. Additive fields: pm/edge_adj are unchanged.
+
+    ``stake_usd`` / ``path_scale`` (fix 2026-07-08) carry the SIZING SOURCE's
+    path-capped ¼-Kelly stake per rung: one team's nested advancement rungs
+    (same side) are one correlated exposure, jointly capped by the tightest
+    staked rung's ¼-Kelly (``wca.advancement.apply_path_exposure_caps``).
+    Downstream sizers (wca_betrecs) treat ``stake_usd`` as a hard per-rung
+    ceiling so the Action Desk can never re-stack the path independently.
+
+    Returns ``(by_team, n_matched, path_exposure)`` where ``path_exposure`` is
+    ``{team: {side: {total_stake_usd, cap_usd, scaling_applied, ...}}}`` in
+    this feed's stage dialect (``Final``, not ``F``), for site/bot display.
     """
     try:
         pm_events = polymarket.find_world_cup_markets(include_closed=False)
         edges = adv.compare_to_polymarket(sim_df, pm_events)
     except Exception as exc:  # noqa: BLE001 — PM must never break the feed.
         print("polymarket pairing failed (%s); continuing" % exc, file=sys.stderr)
-        return {}, 0
+        return {}, 0, {}
     out = {}
     if edges is None or edges.empty:
-        return out, 0
+        return out, 0, {}
     for _, e in edges.iterrows():
         st = _PM_STAGE.get(str(e["stage"]))
         if st is None:
@@ -166,8 +178,19 @@ def _pm_by_team_stage(sim_df):
             "edge_adj": round(float(e["fee_adj_edge"]), 4),
             "side": str(e["side"]),
             "ask": round(float(e["pm_price"]), 4),
+            "stake_usd": round(float(e["stake"]), 2),
+            "path_scale": round(float(e["path_scale"]), 4),
         }
-    return out, int(len(edges))
+    path_exposure = {}
+    for team, sides in adv.path_exposure_summary(edges).items():
+        blocks = {}
+        for side, blk in sides.items():
+            blk = dict(blk)
+            blk["cap_stage"] = _PM_STAGE.get(blk["cap_stage"], blk["cap_stage"])
+            blk["stages"] = [_PM_STAGE.get(s, s) for s in blk["stages"]]
+            blocks[side] = blk
+        path_exposure[str(team)] = blocks
+    return out, int(len(edges)), path_exposure
 
 
 def _group_tables():
@@ -232,7 +255,7 @@ def main(argv=None) -> int:
                 return 1
 
     sim_df = _records_to_simdf(recs)
-    pm, n_pm = _pm_by_team_stage(sim_df)
+    pm, n_pm, path_exposure = _pm_by_team_stage(sim_df)
     groups = _group_tables()
 
     # State-freshness gate (2026-07-08): a team whose knockout tie has kicked
@@ -264,6 +287,11 @@ def main(argv=None) -> int:
             "model": model, "bucket": bucket, "delta": (delta or None),
             "pm": pm.get(t, {}),
         }
+        # Same-team nested-path exposure (fix 2026-07-08): total path-capped
+        # stake vs the tightest-rung ¼-Kelly cap, per traded side, so the
+        # site/bot can display the correlated-path sizing explicitly.
+        if t in path_exposure:
+            entry["path_exposure"] = path_exposure[t]
         if t in state_stale:
             entry["state_stale_reason"] = state_stale[t]
         teams.append(entry)

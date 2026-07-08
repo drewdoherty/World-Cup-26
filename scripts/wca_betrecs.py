@@ -827,6 +827,28 @@ def build_advancement_futures(
             stake = _kelly_stake(p_model, price, bankroll, kelly_frac, PER_BET_CAP)
             stake = min(stake, max_stake)
 
+            # Same-team nested-path exposure cap (fix 2026-07-08). One team's
+            # advancement rungs are NESTED (win ⊂ Final ⊂ SF ⊂ QF ⊂ R16 ⊂
+            # R32) — one correlated path leg, not independent bets. The
+            # sizing source (wca.advancement.apply_path_exposure_caps) emits
+            # per-rung PATH-CAPPED stakes into the feed (``stake_usd``: the
+            # team's same-side rung stakes sum to at most the tightest staked
+            # rung's ¼-Kelly); respect it here as a HARD per-rung ceiling so
+            # this builder's independent re-derivation can never re-stack the
+            # path (observed: Morocco SF $112 + Morocco Final $33 on one
+            # path). YES-side only — this loop only ever backs YES, and a
+            # NO-side feed stake is a different exposure (never co-capped).
+            # Older feeds without the field are unaffected. Reduces only.
+            path_capped = False
+            feed_rung_stake = pm_info.get("stake_usd")
+            if (
+                pm_info.get("side") == "YES"
+                and isinstance(feed_rung_stake, (int, float))
+                and float(feed_rung_stake) < stake
+            ):
+                stake = float(feed_rung_stake)
+                path_capped = True
+
             if stake <= 0:
                 continue
 
@@ -872,6 +894,10 @@ def build_advancement_futures(
                 "stale_reason": stale_reason,
                 "tags": ["model", "advancement", "polymarket"],
             }
+            if path_capped:
+                # Stake was bound by the same-team nested-path cap emitted by
+                # the sizing source (advancement_data pm[stage].stake_usd).
+                rec["path_capped"] = True
 
             # Enrich with the team's next KO tie (opponent + 90' 1X2 split) and
             # market-kind labels so an advancement moneyline is never confused

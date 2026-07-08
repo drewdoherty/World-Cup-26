@@ -56,25 +56,42 @@ _EVENTS = [{
 def test_pm_block_emits_side_and_ask(monkeypatch):
     monkeypatch.setattr(mod.polymarket, "find_world_cup_markets",
                         lambda include_closed=False: _EVENTS)
-    out, n = mod._pm_by_team_stage(_sim_df())
+    out, n, path_exposure = mod._pm_by_team_stage(_sim_df())
     assert n == 3
 
     yes = out["Morocco"]["SF"]
-    assert yes == {"pm": 0.44, "edge_adj": 0.0825, "side": "YES", "ask": 0.46}
+    assert {k: yes[k] for k in ("pm", "edge_adj", "side", "ask")} == {
+        "pm": 0.44, "edge_adj": 0.0825, "side": "YES", "ask": 0.46}
 
     no = out["Brazil"]["SF"]
-    assert no == {"pm": 0.65, "edge_adj": 0.3331, "side": "NO", "ask": 0.36}
+    assert {k: no[k] for k in ("pm", "edge_adj", "side", "ask")} == {
+        "pm": 0.65, "edge_adj": 0.3331, "side": "NO", "ask": 0.36}
 
     # Legacy consumers: pm is still the YES mid and edge_adj the better-side
-    # fee-adjusted edge — the new keys are strictly additive.
+    # fee-adjusted edge — the new keys are strictly additive (stake_usd /
+    # path_scale carry the sizing source's path-capped ¼-Kelly per rung).
     for entry in (yes, no):
-        assert set(entry) == {"pm", "edge_adj", "side", "ask"}
+        assert set(entry) == {"pm", "edge_adj", "side", "ask",
+                              "stake_usd", "path_scale"}
+        assert entry["stake_usd"] > 0.0
+        # Single staked rung per (team, side) family here — never scaled.
+        assert entry["path_scale"] == 1.0
+
+    # Per-team path-exposure blocks: single-rung families are uncapped
+    # (total == cap, no scaling) and keyed by the traded side.
+    yes_blk = path_exposure["Morocco"]["YES"]
+    assert yes_blk["scaling_applied"] is False
+    assert yes_blk["total_stake_usd"] == yes_blk["cap_usd"]
+    assert yes_blk["stages"] == ["SF"] and yes_blk["cap_stage"] == "SF"
+    no_blk = path_exposure["Brazil"]["NO"]
+    assert no_blk["scaling_applied"] is False
+    assert no_blk["total_stake_usd"] == no_blk["cap_usd"]
 
 
 def test_pm_block_names_side_in_stale_print_scenario(monkeypatch):
     monkeypatch.setattr(mod.polymarket, "find_world_cup_markets",
                         lambda include_closed=False: _EVENTS)
-    out, _ = mod._pm_by_team_stage(_sim_df())
+    out, _, _ = mod._pm_by_team_stage(_sim_df())
     row = out["Netherlands"]["SF"]
     # Sign(model - mid) would say NO (0.45 < 0.50); the true edge side is YES
     # at the 0.40 ask. The feed states it so nothing downstream has to guess.
@@ -88,5 +105,5 @@ def test_pm_failure_still_returns_empty_not_raise(monkeypatch):
     def _boom(include_closed=False):
         raise RuntimeError("no PM route on this host")
     monkeypatch.setattr(mod.polymarket, "find_world_cup_markets", _boom)
-    out, n = mod._pm_by_team_stage(_sim_df())
-    assert out == {} and n == 0
+    out, n, path_exposure = mod._pm_by_team_stage(_sim_df())
+    assert out == {} and n == 0 and path_exposure == {}
