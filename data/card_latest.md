@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-08T02:44:31 -->
+<!-- generated: 2026-07-08T03:21:23 -->
 *World Cup Alpha — bet card* (1 staked picks, hit-prob ranked)
 
 *1. [DRAW] France vs Morocco* — Draw @ *4.08* via *polymarket*
@@ -6,7 +6,7 @@
     stake: pm $15.18  further-out (41h) — thin/soft market
 
 *— CUT (excluded from staking, 2) —*
-  x France vs Morocco — Morocco @ 7.20 (model 16.6%, +19.2% EV): below 20% hit-probability floor (model 16.6%) — too unlikely to return PnL even at +19.2% EV
+  x France vs Morocco — Morocco @ 7.00 (model 16.6%, +15.9% EV): below 20% hit-probability floor (model 16.6%) — too unlikely to return PnL even at +15.9% EV
   x Spain vs Belgium — Belgium @ 6.20 (model 18.2%, +12.7% EV): below 20% hit-probability floor (model 18.2%) — too unlikely to return PnL even at +12.7% EV
 
 *Venue split (pm):* polymarket $15.18
@@ -36,12 +36,12 @@
 
 *Norway vs England*
     xG: 0.96-1.71
-    1-1  12.1%  fair 8.28 (12.1%)  back >= 8.45 (11.8%)
-    0-1  10.6%  fair 9.47 (10.6%)  back >= 9.66 (10.4%)
-    0-2  10.0%  fair 10.01 (10.0%)  back >= 10.21 (9.8%)
-    1-2  8.9%  fair 11.20 (8.9%)  back >= 11.43 (8.8%)
-    0-0  7.7%  fair 12.94 (7.7%)  back >= 13.20 (7.6%)
-    1-0  6.6%  fair 15.08 (6.6%)  back >= 15.38 (6.5%)
+    1-1  12.1%  fair 8.26 (12.1%)  back >= 8.43 (11.9%)
+    0-1  10.6%  fair 9.48 (10.6%)  back >= 9.67 (10.3%)
+    0-2  10.0%  fair 10.02 (10.0%)  back >= 10.22 (9.8%)
+    1-2  8.9%  fair 11.21 (8.9%)  back >= 11.43 (8.7%)
+    0-0  7.7%  fair 12.92 (7.7%)  back >= 13.17 (7.6%)
+    1-0  6.6%  fair 15.09 (6.6%)  back >= 15.40 (6.5%)
     O/U 2.5: over 49.7% / under 50.3%   BTTS 50.5%
 
 *Argentina vs Switzerland*
