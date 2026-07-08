@@ -1,0 +1,187 @@
+{
+  "meta": {
+    "bootstrap": 2000,
+    "ci": 0.9,
+    "decision_min_n": 30,
+    "generated": "2026-07-08T15:00:17",
+    "knockout_start_date": "2026-06-28",
+    "matched_fixtures": 75,
+    "note": "SHADOW-ONLY. Lower is better; diff = shadow - live, negative means the shadow beat the deployed blend. 1X2 shadows (mw90/shrink) are recomputed over ALL settled fixtures; totals shadow families (gb, tl, discovered from <prefix>_lambda_home/away keys present in the log) score a total-goals O/2.5 market plus a BTTS Brier and mean signed goal-lambda bias, only where the lambdas were logged. Group/knockout split is by kickoff date vs 2026-06-28 (heuristic; no stage field in results). Nothing here feeds live pricing/sizing/selection.",
+    "total_results": 96,
+    "totals_line": 2.5,
+    "totals_shadow_families": [
+      "gb",
+      "tl"
+    ]
+  },
+  "shadows": [
+    {
+      "brier_ci_hi": 0.002934486776309686,
+      "brier_ci_lo": -0.013733206738244281,
+      "brier_diff": -0.005415495070997074,
+      "brier_live": 0.4395116609114666,
+      "brier_shadow": 0.4340961658404696,
+      "decision": "COLLECTING n=75/30",
+      "family": "mw90",
+      "logloss_ci_hi": 0.0012705294367274238,
+      "logloss_ci_lo": -0.02284389687932757,
+      "logloss_diff": -0.01097076390886008,
+      "logloss_live": 0.7609495233941378,
+      "logloss_shadow": 0.7499787594852776,
+      "market": "1x2",
+      "n": 75,
+      "split": {
+        "group": {
+          "brier_diff": -0.006760120496345578,
+          "logloss_diff": -0.012312763761434411,
+          "n": 51
+        },
+        "knockout": {
+          "brier_diff": -0.002558166042131502,
+          "logloss_diff": -0.008119014222139634,
+          "n": 24
+        }
+      }
+    },
+    {
+      "brier_ci_hi": 0.002268047145687573,
+      "brier_ci_lo": -0.011066603511511938,
+      "brier_diff": -0.004573678176143436,
+      "brier_live": 0.4395116609114666,
+      "brier_shadow": 0.4349379827353233,
+      "decision": "COLLECTING n=75/30",
+      "family": "shrink",
+      "logloss_ci_hi": 0.0005563593094639118,
+      "logloss_ci_lo": -0.019007338188642975,
+      "logloss_diff": -0.00940071990560436,
+      "logloss_live": 0.7609495233941378,
+      "logloss_shadow": 0.7515488034885333,
+      "market": "1x2",
+      "n": 75,
+      "split": {
+        "group": {
+          "brier_diff": -0.0052408363755545185,
+          "logloss_diff": -0.009752859052573774,
+          "n": 51
+        },
+        "knockout": {
+          "brier_diff": -0.0031559670023948855,
+          "logloss_diff": -0.008652424218294357,
+          "n": 24
+        }
+      }
+    },
+    {
+      "brier_ci_hi": 0.0047190432180266645,
+      "brier_ci_lo": -0.01668977898158669,
+      "brier_diff": -0.006106996954666672,
+      "brier_live": 0.4395116609114666,
+      "brier_shadow": 0.4334046639568,
+      "decision": "COLLECTING n=75/30",
+      "family": "market",
+      "logloss_ci_hi": 0.002853409699572029,
+      "logloss_ci_lo": -0.02847001494158467,
+      "logloss_diff": -0.012953992727360007,
+      "logloss_live": 0.7609495233941378,
+      "logloss_shadow": 0.7479955306667776,
+      "market": "1x2",
+      "n": 75,
+      "split": {
+        "group": {
+          "brier_diff": -0.007584414224039227,
+          "logloss_diff": -0.014179423248140649,
+          "n": 51
+        },
+        "knockout": {
+          "brier_diff": -0.0029674852572499967,
+          "logloss_diff": -0.010349952870701144,
+          "n": 24
+        }
+      }
+    },
+    {
+      "brier_ci_hi": 0.04840864747055234,
+      "brier_ci_lo": -0.014102577608634813,
+      "brier_diff": 0.016495896827055413,
+      "brier_live": 0.2211431026403552,
+      "brier_shadow": 0.23763899946741057,
+      "btts": {
+        "brier_ci_hi": 0.03552626133100596,
+        "brier_ci_lo": -0.016917998392841676,
+        "brier_diff": 0.009003790057097493,
+        "brier_live": 0.25042749621538885,
+        "brier_shadow": 0.2594312862724863,
+        "n": 14
+      },
+      "decision": "COLLECTING n=14/30",
+      "family": "gb",
+      "goal_bias": {
+        "mean_live": -0.04707885714285709,
+        "mean_shadow": -0.16123664285714287,
+        "n_live": 14,
+        "n_shadow": 14
+      },
+      "logloss_ci_hi": 0.10174946327624414,
+      "logloss_ci_lo": -0.03193426142861376,
+      "logloss_diff": 0.033110017812558554,
+      "logloss_live": 0.6347947669387455,
+      "logloss_shadow": 0.6679047847513041,
+      "market": "totals",
+      "n": 14,
+      "split": {
+        "group": {
+          "brier_diff": null,
+          "logloss_diff": null,
+          "n": 0
+        },
+        "knockout": {
+          "brier_diff": 0.016495896827055413,
+          "logloss_diff": 0.033110017812558554,
+          "n": 14
+        }
+      }
+    },
+    {
+      "brier_ci_hi": 0.001687132901769861,
+      "brier_ci_lo": -0.018209135167192636,
+      "brier_diff": -0.008261001132711387,
+      "brier_live": 0.23637660011528638,
+      "brier_shadow": 0.228115598982575,
+      "btts": {
+        "brier_ci_hi": 0.0012562755910703882,
+        "brier_ci_lo": -0.015652379874158823,
+        "brier_diff": -0.007198052141544217,
+        "brier_live": 0.29649381291883947,
+        "brier_shadow": 0.2892957607772953,
+        "n": 2
+      },
+      "decision": "COLLECTING n=2/30",
+      "family": "tl",
+      "goal_bias": {
+        "mean_live": 0.08335649999999983,
+        "mean_shadow": 0.04093850000000021,
+        "n_live": 2,
+        "n_shadow": 2
+      },
+      "logloss_ci_hi": 0.0033754096796230204,
+      "logloss_ci_lo": -0.03674852193152378,
+      "logloss_diff": -0.01668655612595038,
+      "logloss_live": 0.6658369028351918,
+      "logloss_shadow": 0.6491503467092414,
+      "market": "totals",
+      "n": 2,
+      "split": {
+        "group": {
+          "brier_diff": null,
+          "logloss_diff": null,
+          "n": 0
+        },
+        "knockout": {
+          "brier_diff": -0.008261001132711387,
+          "logloss_diff": -0.01668655612595038,
+          "n": 2
+        }
+      }
+    }
+  ]
+}

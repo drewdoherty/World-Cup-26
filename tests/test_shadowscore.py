@@ -151,7 +151,9 @@ def _full_row(fixture, generated):
 
 def test_scoreboard_scores_1x2_shadows_over_all_rows():
     # Two settled fixtures, each with a pre-kickoff row carrying full triples but
-    # NO gb/tl lambdas: mw90/shrink/market must still be scored (n=2), totals not.
+    # NO gb/tl (or any) lambda keys anywhere in the log: mw90/shrink/market must
+    # still be scored (n=2); no totals family is discovered at all (dynamic
+    # discovery never fabricates an empty gb/tl row when the keys are absent).
     rows = [
         _full_row("Brazil vs Serbia", "2026-06-13T08:00:00"),
         _full_row("Spain vs Japan", "2026-06-20T08:00:00"),
@@ -169,9 +171,10 @@ def test_scoreboard_scores_1x2_shadows_over_all_rows():
         assert by_family[fam]["market"] == "1x2"
         assert by_family[fam]["n"] == 2          # scored over ALL rows
         assert by_family[fam]["decision"].startswith("COLLECTING")
-    # No gb/tl lambdas logged -> totals families score nothing.
-    assert by_family["gb"]["n"] == 0
-    assert by_family["tl"]["n"] == 0
+    # No gb/tl (or any) lambda keys logged -> no totals families discovered.
+    assert "gb" not in by_family
+    assert "tl" not in by_family
+    assert sb["meta"]["totals_shadow_families"] == []
 
 
 def test_paired_market_diff_matches_hand_brier():
@@ -220,3 +223,142 @@ def test_totals_shadow_scored_only_where_lambdas_present():
     p_live = shadowscore.prob_over_line(1.6, 1.1, 2.5)
     want = shadowscore.brier_binary(p_gb, 1) - shadowscore.brier_binary(p_live, 1)
     assert abs(gb_row["brier_diff"] - want) < 1e-9
+
+
+# ---------------------------------------------------------------------------
+# BTTS + signed goal-bias diagnostics (paired against live, from the same
+# goal-lambda pair used for the totals O/U metric).
+# ---------------------------------------------------------------------------
+
+
+def test_prob_btts_yes_hand_value():
+    # P(both score) = (1 - e^-1.6) * (1 - e^-1.1) under independent Poissons.
+    lam_h, lam_a = 1.6, 1.1
+    want = (1.0 - math.exp(-lam_h)) * (1.0 - math.exp(-lam_a))
+    assert abs(shadowscore.prob_btts_yes(lam_h, lam_a) - want) < 1e-12
+    assert shadowscore.prob_btts_yes(float("nan"), 1.0) is None
+    assert shadowscore.prob_btts_yes(None, 1.0) is None
+
+
+def test_signed_goal_bias_hand_value():
+    # lambda sum 2.7, actual 4 goals -> bias = 2.7 - 4 = -1.3 (under-predicted).
+    assert abs(shadowscore.signed_goal_bias(1.6, 1.1, 4) - (-1.3)) < 1e-12
+    # lambda sum 2.7, actual 1 goal -> bias = +1.7 (over-predicted).
+    assert abs(shadowscore.signed_goal_bias(1.6, 1.1, 1) - 1.7) < 1e-12
+    assert shadowscore.signed_goal_bias(None, 1.1, 4) is None
+
+
+def test_totals_row_carries_btts_and_bias_diagnostics():
+    row = _full_row("Brazil vs Serbia", "2026-06-13T08:00:00")
+    row["lambda_home"], row["lambda_away"] = 1.6, 1.1
+    row["gb_lambda_home"], row["gb_lambda_away"] = 1.4, 1.0
+    results = [{"fixture": "Brazil vs Serbia", "kickoff_utc": "2026-06-13T18:00:00Z",
+                "date": "2026-06-13", "outcome": "home", "score": "3-1"}]  # BTTS yes, 4 goals
+    sb = shadowscore.build_scoreboard([row], results, "2026-07-08T00:00:00")
+    gb_row = next(r for r in sb["shadows"] if r["family"] == "gb")
+
+    p_btts_gb = shadowscore.prob_btts_yes(1.4, 1.0)
+    p_btts_live = shadowscore.prob_btts_yes(1.6, 1.1)
+    want_btts_diff = (
+        shadowscore.brier_binary(p_btts_gb, 1) - shadowscore.brier_binary(p_btts_live, 1)
+    )
+    assert gb_row["btts"]["n"] == 1
+    assert abs(gb_row["btts"]["brier_diff"] - want_btts_diff) < 1e-9
+
+    assert gb_row["goal_bias"]["n_shadow"] == 1
+    assert abs(gb_row["goal_bias"]["mean_shadow"] - (2.4 - 4)) < 1e-9   # 1.4+1.0-4
+    assert gb_row["goal_bias"]["n_live"] == 1
+    assert abs(gb_row["goal_bias"]["mean_live"] - (2.7 - 4)) < 1e-9     # 1.6+1.1-4
+
+    # 1X2 families never carry the totals-only diagnostic keys.
+    market_row = next(r for r in sb["shadows"] if r["family"] == "market")
+    assert "btts" not in market_row
+    assert "goal_bias" not in market_row
+
+
+# ---------------------------------------------------------------------------
+# Dynamic prefix discovery.
+# ---------------------------------------------------------------------------
+
+
+def test_discover_lambda_prefixes_finds_plain_and_blend_patterns():
+    rows = [
+        {"lambda_home": 1.0, "lambda_away": 1.0,
+         "gb_lambda_home": 1.1, "gb_lambda_away": 0.9,
+         "tl_lambda_blend_home": 1.2, "tl_lambda_blend_away": 0.8,
+         "tl_lambda_market_total": 2.0},  # decoy key, no "_away" counterpart
+    ]
+    prefixes = shadowscore.discover_lambda_prefixes(rows)
+    assert prefixes == {
+        "gb": ("gb_lambda_home", "gb_lambda_away"),
+        "tl": ("tl_lambda_blend_home", "tl_lambda_blend_away"),
+    }
+    # The bare live lambda pair is never listed as a discovered family.
+    assert "lambda" not in prefixes
+    assert "" not in prefixes
+
+
+def test_discover_lambda_prefixes_ignores_unpaired_or_bare_keys():
+    rows = [
+        {"lambda_home": 1.0, "lambda_away": 1.0},         # live only
+        {"gb_lambda_home": 1.1},                          # no _away partner
+        {"foo_bar_home": 2.0, "foo_bar_away": 1.0},       # no "lambda" substring
+    ]
+    assert shadowscore.discover_lambda_prefixes(rows) == {}
+
+
+def test_discover_lambda_prefixes_picks_up_a_future_family_automatically():
+    rows = [{"xy_lambda_home": 1.3, "xy_lambda_away": 0.7}]
+    prefixes = shadowscore.discover_lambda_prefixes(rows)
+    assert prefixes == {"xy": ("xy_lambda_home", "xy_lambda_away")}
+
+
+def test_new_family_is_judged_end_to_end_with_no_code_change():
+    # A hypothetical future shadow "xy_lambda_*" should be scored exactly like
+    # gb/tl without any hardcoded family list.
+    row = _full_row("Brazil vs Serbia", "2026-06-13T08:00:00")
+    row["lambda_home"], row["lambda_away"] = 1.6, 1.1
+    row["xy_lambda_home"], row["xy_lambda_away"] = 1.3, 1.3
+    results = [{"fixture": "Brazil vs Serbia", "kickoff_utc": "2026-06-13T18:00:00Z",
+                "date": "2026-06-13", "outcome": "home", "score": "3-1"}]
+    sb = shadowscore.build_scoreboard([row], results, "2026-07-08T00:00:00")
+    by_family = {r["family"]: r for r in sb["shadows"]}
+    assert "xy" in by_family
+    assert by_family["xy"]["market"] == "totals"
+    assert by_family["xy"]["n"] == 1
+    assert sb["meta"]["totals_shadow_families"] == ["xy"]
+
+
+# ---------------------------------------------------------------------------
+# Clean empty scoreboard when there are no shadow rows at all.
+# ---------------------------------------------------------------------------
+
+
+def test_no_shadow_rows_gives_clean_empty_scoreboard():
+    # Rows carry no market/elo/dc triples and no lambdas at all (e.g. a totally
+    # empty log, or rows that predate every shadow dual-write). The scorer must
+    # not error, and every family must report n=0 / COLLECTING rather than
+    # fabricating a verdict.
+    rows = [{"fixture": "Brazil vs Serbia", "generated": "2026-06-13T08:00:00",
+             "model": _M}]
+    results = [{"fixture": "Brazil vs Serbia", "kickoff_utc": "2026-06-13T18:00:00Z",
+                "date": "2026-06-13", "outcome": "home", "score": "2-0"}]
+    sb = shadowscore.build_scoreboard(rows, results, "2026-07-08T00:00:00")
+    assert sb["meta"]["totals_shadow_families"] == []
+    by_family = {r["family"]: r for r in sb["shadows"]}
+    assert set(by_family) == {"mw90", "shrink", "market"}   # no totals rows at all
+    for fam in ("mw90", "shrink", "market"):
+        assert by_family[fam]["n"] == 0
+        assert by_family[fam]["decision"] == "COLLECTING n=0/%d" % shadowscore.DECISION_MIN_N
+
+
+def test_completely_empty_inputs_give_clean_empty_scoreboard():
+    sb = shadowscore.build_scoreboard([], [], "2026-07-08T00:00:00")
+    assert sb["meta"]["matched_fixtures"] == 0
+    assert sb["meta"]["total_results"] == 0
+    assert sb["meta"]["totals_shadow_families"] == []
+    by_family = {r["family"]: r for r in sb["shadows"]}
+    assert set(by_family) == {"mw90", "shrink", "market"}
+    for fam in by_family.values():
+        assert fam["n"] == 0
+        assert fam["decision"].startswith("COLLECTING")

@@ -16,10 +16,15 @@ by :mod:`wca.tracking`):
   recomputed** from the ``elo`` / ``dc`` / ``market`` / ``model`` triples that
   every historical row already carries — so they are scored over ALL settled
   fixtures, not only the future dual-writes;
-* the goal-lambda shadows (``gb`` / ``tl``) settle a *totals* market (total
-  goals over/under a line) — they are scored on total-goals log-loss/Brier only
-  where the row carries the lambdas AND the realised score is known, and they
-  are kept in a SEPARATE market family from the 1X2 variants (never mixed);
+* the goal-lambda shadow families are DISCOVERED dynamically from whichever
+  ``<prefix>_lambda_home`` / ``<prefix>_lambda_away`` (or ``..._blend_home/away``)
+  keys are actually present in the log (see :func:`discover_lambda_prefixes`;
+  currently ``gb`` and ``tl``, but a new dual-write family needs no code change
+  to be judged) and settle a *totals* market (total goals over/under a line,
+  plus a BTTS Brier and mean signed goal-lambda bias as extra diagnostics) —
+  scored only where the row carries the lambdas AND the realised score is
+  known, and kept in a SEPARATE market family from the 1X2 variants (never
+  mixed);
 * every family is scored **paired** against the live baseline on the exact same
   fixture set, and a bootstrap 90% CI on the mean paired diff drives a
   ``decision`` (PROMOTE / KILL / COLLECTING) at an ``n >= 30`` gate.
@@ -122,6 +127,41 @@ def prob_over_line(lambda_home: float, lambda_away: float, line: float,
     return p_at_least
 
 
+def prob_btts_yes(lambda_home: float, lambda_away: float) -> Optional[float]:
+    """P(both teams score) under two independent Poissons.
+
+    Same independence convention as :func:`prob_over_line` (a goal-lambda pair
+    carries no correlation term, so BTTS is scored as ``P(home>0)*P(away>0)``
+    rather than the DC-matrix inclusion-exclusion used elsewhere in the repo,
+    e.g. :meth:`wca.models.dixon_coles.DixonColesModel.both_teams_to_score`).
+    ``None`` for a non-finite lambda.
+    """
+    if lambda_home is None or lambda_away is None:
+        return None
+    if not (math.isfinite(lambda_home) and math.isfinite(lambda_away)):
+        return None
+    p_home_scores = 1.0 - math.exp(-float(lambda_home))
+    p_away_scores = 1.0 - math.exp(-float(lambda_away))
+    return p_home_scores * p_away_scores
+
+
+def signed_goal_bias(lambda_home: float, lambda_away: float,
+                     actual_total_goals: int) -> Optional[float]:
+    """``(lambda_home + lambda_away) - actual_total_goals`` for one fixture.
+
+    Positive => the lambda pair over-predicted goals; negative => it
+    under-predicted. Averaged across fixtures in the scoreboard to surface a
+    systematic (signed, not squared-error) bias per shadow family — this is a
+    diagnostic column, not part of the PROMOTE/KILL decision. ``None`` for a
+    non-finite lambda.
+    """
+    if lambda_home is None or lambda_away is None:
+        return None
+    if not (math.isfinite(lambda_home) and math.isfinite(lambda_away)):
+        return None
+    return (float(lambda_home) + float(lambda_away)) - float(actual_total_goals)
+
+
 # ---------------------------------------------------------------------------
 # Bootstrap CI on a paired difference.
 # ---------------------------------------------------------------------------
@@ -218,19 +258,61 @@ def shadow_1x2(family: str, row: Mapping[str, Any]) -> Optional[Dict[str, float]
     return None
 
 
-def totals_lambdas(family: str, row: Mapping[str, Any]) -> Optional[Tuple[float, float]]:
+_LIVE_LAMBDA_KEYS = ("lambda_home", "lambda_away")
+
+
+def discover_lambda_prefixes(rows: Sequence[Mapping[str, Any]]) -> Dict[str, Tuple[str, str]]:
+    """Scan log rows for ``<prefix>_lambda_home`` / ``<prefix>_lambda_away`` pairs.
+
+    Returns ``{prefix: (home_key, away_key)}`` for every goal-lambda shadow
+    family PRESENT IN THE DATA — so a brand-new shadow (any future
+    ``<prefix>_lambda_*`` dual-write) is picked up automatically without a code
+    change, and a family with zero rows in the log never appears at all (no
+    fabricated empty families). Recognises both the plain pattern
+    (``gb_lambda_home`` / ``gb_lambda_away`` -> prefix ``gb``) and the
+    qualified pattern used by the totals-prior blend (``tl_lambda_blend_home``
+    / ``tl_lambda_blend_away`` -> prefix ``tl``, stem ``tl_lambda_blend``). The
+    bare ``lambda_home`` / ``lambda_away`` (the live DC baseline) is never
+    treated as a discovered family — it is the fixed comparison baseline for
+    every totals shadow, handled by :func:`totals_lambdas` under the
+    ``"live"`` family name.
+    """
+    stems: set = set()
+    for row in rows:
+        if not isinstance(row, Mapping):
+            continue
+        for key in row.keys():
+            if key.endswith("_home") and "lambda" in key:
+                stem = key[: -len("_home")]
+                if stem and stem != "lambda" and (stem + "_away") in row:
+                    stems.add(stem)
+    prefixes: Dict[str, Tuple[str, str]] = {}
+    for stem in stems:
+        idx = stem.find("_lambda")
+        if idx <= 0:
+            continue  # no non-empty prefix before "_lambda" -> not a shadow family
+        prefix = stem[:idx]
+        # First stem wins for a given prefix (stable given one naming scheme
+        # per prefix in practice); avoids silently merging two conventions.
+        prefixes.setdefault(prefix, (stem + "_home", stem + "_away"))
+    return prefixes
+
+
+def totals_lambdas(family: str, row: Mapping[str, Any],
+                   prefix_keys: Optional[Mapping[str, Tuple[str, str]]] = None
+                   ) -> Optional[Tuple[float, float]]:
     """``(lambda_home, lambda_away)`` for a goal-lambda shadow family, or ``None``.
 
-    ``live`` uses the deployed DC lambdas (``lambda_home`` / ``lambda_away``);
-    ``gb`` the F7 goal-blend shadow (``gb_lambda_*``); ``tl`` the totals-prior
-    blend (``tl_lambda_blend_*``). Missing lambdas -> ``None`` (row skipped).
+    ``live`` uses the deployed DC lambdas (``lambda_home`` / ``lambda_away``).
+    Any other *family* is looked up in *prefix_keys* (as produced by
+    :func:`discover_lambda_prefixes`) — e.g. ``gb`` -> ``gb_lambda_*``, ``tl``
+    -> ``tl_lambda_blend_*``. Missing lambdas, or a family absent from
+    *prefix_keys*, -> ``None`` (row skipped, never fabricated).
     """
-    keymap = {
-        "live": ("lambda_home", "lambda_away"),
-        "gb": ("gb_lambda_home", "gb_lambda_away"),
-        "tl": ("tl_lambda_blend_home", "tl_lambda_blend_away"),
-    }
-    keys = keymap.get(family)
+    if family == "live":
+        keys = _LIVE_LAMBDA_KEYS
+    else:
+        keys = (prefix_keys or {}).get(family)
     if keys is None:
         return None
     lam_h, lam_a = row.get(keys[0]), row.get(keys[1])
@@ -246,8 +328,9 @@ def totals_lambdas(family: str, row: Mapping[str, Any]) -> Optional[Tuple[float,
 # Which 1X2 shadow families we score (against the ``live`` baseline). ``market``
 # is included as a reference column (the n=73 evidence's in-sample winner).
 ONEX2_SHADOWS = ("mw90", "shrink", "market")
-# Goal-lambda shadow families, scored on a total-goals over/under market.
-TOTALS_SHADOWS = ("gb", "tl")
+# Goal-lambda shadow families are DISCOVERED dynamically per-run from the log
+# rows (see discover_lambda_prefixes) rather than hardcoded, so a new
+# "<prefix>_lambda_home/away" dual-write is judged automatically.
 TOTALS_LINE = 2.5
 
 
@@ -255,6 +338,7 @@ def _paired_scores(
     matched: Sequence[Tuple[Mapping[str, Any], Mapping[str, Any]]],
     shadow_family: str,
     market: str,
+    prefix_keys: Optional[Mapping[str, Tuple[str, str]]] = None,
 ) -> Dict[str, Any]:
     """Paired Brier/log-loss of *shadow_family* vs the live baseline.
 
@@ -262,6 +346,15 @@ def _paired_scores(
     fixture). *market* is ``"1x2"`` or ``"totals"`` and selects both the
     baseline and the metric. Only fixtures where BOTH the shadow and the live
     baseline produce a probability are counted (a true paired comparison).
+
+    For ``market == "totals"``, two extra diagnostics are computed from the
+    SAME goal-lambda pair (never gating the PROMOTE/KILL decision, which stays
+    driven by the primary total-goals O/U metric): a paired BTTS Brier (own n
+    + bootstrap CI, since a fixture can be missing a lambda for one metric but
+    not the other — e.g. a non-finite lambda still parses a score) and the
+    mean SIGNED goal bias (shadow lambda-sum minus actual total goals, and the
+    same for live) — a diagnostic of systematic over/under-prediction, not a
+    loss, so no CI is computed for it.
     """
     brier_shadow: List[float] = []
     brier_live: List[float] = []
@@ -273,6 +366,11 @@ def _paired_scores(
         "group": {"brier": [], "logloss": []},
         "knockout": {"brier": [], "logloss": []},
     }
+    btts_brier_shadow: List[float] = []
+    btts_brier_live: List[float] = []
+    btts_diffs: List[float] = []
+    bias_shadow: List[float] = []
+    bias_live: List[float] = []
 
     for row, result in matched:
         if market == "1x2":
@@ -293,8 +391,8 @@ def _paired_scores(
                 continue
             total_goals = parsed[0] + parsed[1]
             hit = 1 if total_goals > TOTALS_LINE else 0
-            s_lam = totals_lambdas(shadow_family, row)
-            l_lam = totals_lambdas("live", row)
+            s_lam = totals_lambdas(shadow_family, row, prefix_keys)
+            l_lam = totals_lambdas("live", row, prefix_keys)
             if s_lam is None or l_lam is None:
                 continue
             p_s = prob_over_line(s_lam[0], s_lam[1], TOTALS_LINE)
@@ -303,6 +401,23 @@ def _paired_scores(
             b_l = brier_binary(p_l, hit)
             ll_s = log_loss_binary(p_s, hit)
             ll_l = log_loss_binary(p_l, hit)
+
+            # BTTS + signed goal bias: same lambda pair, independent diagnostic.
+            btts_hit = 1 if (parsed[0] > 0 and parsed[1] > 0) else 0
+            p_btts_s = prob_btts_yes(s_lam[0], s_lam[1])
+            p_btts_l = prob_btts_yes(l_lam[0], l_lam[1])
+            btts_b_s = brier_binary(p_btts_s, btts_hit)
+            btts_b_l = brier_binary(p_btts_l, btts_hit)
+            if btts_b_s is not None and btts_b_l is not None:
+                btts_brier_shadow.append(btts_b_s)
+                btts_brier_live.append(btts_b_l)
+                btts_diffs.append(btts_b_s - btts_b_l)
+            bias_s = signed_goal_bias(s_lam[0], s_lam[1], total_goals)
+            bias_l = signed_goal_bias(l_lam[0], l_lam[1], total_goals)
+            if bias_s is not None:
+                bias_shadow.append(bias_s)
+            if bias_l is not None:
+                bias_live.append(bias_l)
 
         if None in (b_s, b_l, ll_s, ll_l):
             continue
@@ -319,7 +434,7 @@ def _paired_scores(
     n = len(brier_diffs)
     b_lo, b_hi = bootstrap_ci(brier_diffs)
     ll_lo, ll_hi = bootstrap_ci(ll_diffs)
-    return {
+    out: Dict[str, Any] = {
         "family": shadow_family,
         "market": market,
         "n": n,
@@ -343,6 +458,23 @@ def _paired_scores(
         },
         "decision": decide(n, b_lo, b_hi, ll_lo, ll_hi),
     }
+    if market == "totals":
+        btts_lo, btts_hi = bootstrap_ci(btts_diffs)
+        out["btts"] = {
+            "n": len(btts_diffs),
+            "brier_shadow": _mean(btts_brier_shadow),
+            "brier_live": _mean(btts_brier_live),
+            "brier_diff": _mean(btts_diffs),
+            "brier_ci_lo": btts_lo,
+            "brier_ci_hi": btts_hi,
+        }
+        out["goal_bias"] = {
+            "n_shadow": len(bias_shadow),
+            "mean_shadow": _mean(bias_shadow),
+            "n_live": len(bias_live),
+            "mean_live": _mean(bias_live),
+        }
+    return out
 
 
 def decide(n: int,
@@ -388,6 +520,14 @@ def build_scoreboard(
     scored on the SAME deduped fixture set for its market so the pairing is
     honest. ``now_utc`` is caller-supplied (no clock reads here) so the output
     is reproducible.
+
+    Goal-lambda ("totals") shadow families are DISCOVERED dynamically from
+    *log_rows* (see :func:`discover_lambda_prefixes`) rather than a hardcoded
+    list — any current or future ``<prefix>_lambda_home/away`` dual-write
+    (``gb``, ``tl``, or a family not yet invented) is judged automatically, and
+    a family absent from the log entirely never appears in the output (no
+    empty fabricated rows, per the "no-shadow-rows -> clean empty scoreboard"
+    contract).
     """
     matched: List[Tuple[Dict[str, Any], Dict[str, Any]]] = []
     for result in results:
@@ -395,11 +535,14 @@ def build_scoreboard(
         if row is not None:
             matched.append((row, dict(result)))
 
+    prefix_keys = discover_lambda_prefixes(log_rows)
+    totals_families = sorted(prefix_keys.keys())
+
     rows_out: List[Dict[str, Any]] = []
     for family in ONEX2_SHADOWS:
         rows_out.append(_paired_scores(matched, family, "1x2"))
-    for family in TOTALS_SHADOWS:
-        rows_out.append(_paired_scores(matched, family, "totals"))
+    for family in totals_families:
+        rows_out.append(_paired_scores(matched, family, "totals", prefix_keys))
 
     return {
         "meta": {
@@ -411,15 +554,19 @@ def build_scoreboard(
             "ci": DEFAULT_CI,
             "totals_line": TOTALS_LINE,
             "knockout_start_date": KNOCKOUT_START_DATE,
+            "totals_shadow_families": totals_families,
             "note": (
                 "SHADOW-ONLY. Lower is better; diff = shadow - live, negative "
                 "means the shadow beat the deployed blend. 1X2 shadows "
                 "(mw90/shrink) are recomputed over ALL settled fixtures; "
-                "totals shadows (gb/tl) score a total-goals O/%.1f market only "
-                "where the lambdas were logged. Group/knockout split is by "
-                "kickoff date vs %s (heuristic; no stage field in results). "
-                "Nothing here feeds live pricing/sizing/selection."
-            ) % (TOTALS_LINE, KNOCKOUT_START_DATE),
+                "totals shadow families (%s, discovered from "
+                "<prefix>_lambda_home/away keys present in the log) score a "
+                "total-goals O/%.1f market plus a BTTS Brier and mean signed "
+                "goal-lambda bias, only where the lambdas were logged. "
+                "Group/knockout split is by kickoff date vs %s (heuristic; no "
+                "stage field in results). Nothing here feeds live "
+                "pricing/sizing/selection."
+            ) % (", ".join(totals_families) or "none", TOTALS_LINE, KNOCKOUT_START_DATE),
         },
         "shadows": rows_out,
     }
