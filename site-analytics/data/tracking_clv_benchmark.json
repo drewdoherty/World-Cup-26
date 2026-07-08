@@ -8,47 +8,47 @@
       "hi_edge": -0.05,
       "lo_edge": -1.0,
       "n": 94,
-      "placebo_clv": -0.458392
+      "placebo_clv": -0.465405
     },
     {
       "bucket": "-5..-2%",
-      "clv_hi": 0.075095,
-      "clv_lo": 0.064191,
-      "clv_mean": 0.069643,
+      "clv_hi": 0.078453,
+      "clv_lo": 0.066235,
+      "clv_mean": 0.072344,
       "hi_edge": -0.02,
       "lo_edge": -0.05,
-      "n": 376,
-      "placebo_clv": -0.108693
+      "n": 327,
+      "placebo_clv": -0.081985
     },
     {
       "bucket": "-2..0%",
-      "clv_hi": 0.04606,
-      "clv_lo": 0.035637,
-      "clv_mean": 0.040849,
+      "clv_hi": 0.049253,
+      "clv_lo": 0.036959,
+      "clv_mean": 0.043106,
       "hi_edge": 0.0,
       "lo_edge": -0.02,
-      "n": 809,
-      "placebo_clv": 0.331395
+      "n": 677,
+      "placebo_clv": 0.368348
     },
     {
       "bucket": "0..2%",
-      "clv_hi": -0.020117,
-      "clv_lo": -0.027905,
-      "clv_mean": -0.024011,
+      "clv_hi": -0.018302,
+      "clv_lo": -0.027224,
+      "clv_mean": -0.022763,
       "hi_edge": 0.02,
       "lo_edge": 0.0,
-      "n": 925,
-      "placebo_clv": 1.055328
+      "n": 797,
+      "placebo_clv": 1.184397
     },
     {
       "bucket": "2..5%",
-      "clv_hi": -0.118899,
-      "clv_lo": -0.131887,
-      "clv_mean": -0.125393,
+      "clv_hi": -0.122755,
+      "clv_lo": -0.136799,
+      "clv_mean": -0.129777,
       "hi_edge": 0.05,
       "lo_edge": 0.02,
-      "n": 528,
-      "placebo_clv": 0.732055
+      "n": 480,
+      "placebo_clv": 0.71734
     },
     {
       "bucket": ">5%",
@@ -58,12 +58,12 @@
       "hi_edge": 1.0,
       "lo_edge": 0.05,
       "n": 28,
-      "placebo_clv": -0.134405
+      "placebo_clv": -0.125857
     }
   ],
   "by_market": [
     {
-      "clv_median": 0.000956,
+      "clv_median": -0.004712,
       "hist": [
         {
           "count": 3,
@@ -81,17 +81,17 @@
           "lo": -0.202627
         },
         {
-          "count": 136,
+          "count": 130,
           "hi": -0.056359,
           "lo": -0.129493
         },
         {
-          "count": 385,
+          "count": 335,
           "hi": 0.016774,
           "lo": -0.056359
         },
         {
-          "count": 260,
+          "count": 197,
           "hi": 0.089908,
           "lo": 0.016774
         },
@@ -107,10 +107,10 @@
         }
       ],
       "leg": "home",
-      "n": 920
+      "n": 801
     },
     {
-      "clv_median": 0.013865,
+      "clv_median": 0.012096,
       "hist": [
         {
           "count": 29,
@@ -128,22 +128,22 @@
           "lo": -0.159233
         },
         {
-          "count": 170,
+          "count": 127,
           "hi": -0.029691,
           "lo": -0.094462
         },
         {
-          "count": 290,
+          "count": 233,
           "hi": 0.03508,
           "lo": -0.029691
         },
         {
-          "count": 265,
+          "count": 252,
           "hi": 0.099852,
           "lo": 0.03508
         },
         {
-          "count": 60,
+          "count": 54,
           "hi": 0.164623,
           "lo": 0.099852
         },
@@ -154,10 +154,10 @@
         }
       ],
       "leg": "draw",
-      "n": 920
+      "n": 801
     },
     {
-      "clv_median": -0.016488,
+      "clv_median": 0.005671,
       "hist": [
         {
           "count": 50,
@@ -170,17 +170,17 @@
           "lo": -0.234584
         },
         {
-          "count": 382,
+          "count": 282,
           "hi": -0.004444,
           "lo": -0.119514
         },
         {
-          "count": 316,
+          "count": 299,
           "hi": 0.110625,
           "lo": -0.004444
         },
         {
-          "count": 107,
+          "count": 105,
           "hi": 0.225695,
           "lo": 0.110625
         },
@@ -201,7 +201,7 @@
         }
       ],
       "leg": "away",
-      "n": 920
+      "n": 801
     }
   ],
   "by_odds_bucket": [
@@ -212,8 +212,8 @@
     },
     {
       "bucket": "1.5-2.0",
-      "clv_median": 0.006862,
-      "n": 423
+      "clv_median": 0.00647,
+      "n": 304
     },
     {
       "bucket": "2.0-3.0",
@@ -222,58 +222,58 @@
     },
     {
       "bucket": "3.0-5.0",
-      "clv_median": 0.016878,
-      "n": 1080
+      "clv_median": 0.01711,
+      "n": 941
     },
     {
       "bucket": "5.0+",
-      "clv_median": -0.051399,
-      "n": 753
+      "clv_median": -0.052017,
+      "n": 654
     }
   ],
   "coverage_by_market": {
     "away": {
-      "clv_n": 920,
-      "coverage_pct": 50.25,
-      "n": 1831
+      "clv_n": 801,
+      "coverage_pct": 43.3,
+      "n": 1850
     },
     "draw": {
-      "clv_n": 920,
-      "coverage_pct": 50.25,
-      "n": 1831
+      "clv_n": 801,
+      "coverage_pct": 43.3,
+      "n": 1850
     },
     "home": {
-      "clv_n": 920,
-      "coverage_pct": 50.25,
-      "n": 1831
+      "clv_n": 801,
+      "coverage_pct": 43.3,
+      "n": 1850
     }
   },
   "headline": {
     "beat_rate": {
-      "hi": 0.520812,
-      "lo": 0.48353,
-      "n": 2760,
-      "p": 0.502174
+      "hi": 0.515612,
+      "lo": 0.475662,
+      "n": 2403,
+      "p": 0.49563
     },
-    "brier_skill": -0.020981,
-    "clv_median": 0.000782,
-    "clv_trimmed_mean": -0.005435,
-    "coverage_pct": 50.25,
-    "drift_beta": -2.630274,
-    "lead_rate": 0.497826,
-    "placebo_drift_beta": 13.853574,
-    "placebo_null": 0.501153
+    "brier_skill": -0.016276,
+    "clv_median": -0.000659,
+    "clv_trimmed_mean": -0.005707,
+    "coverage_pct": 43.3,
+    "drift_beta": -2.668429,
+    "lead_rate": 0.50437,
+    "placebo_drift_beta": 13.78511,
+    "placebo_null": 0.492379
   },
   "meta": {
-    "generated": "2026-07-08T09:24:09Z",
-    "n_legs": 5493,
-    "n_with_close": 2760
+    "generated": "2026-07-08T11:25:09Z",
+    "n_legs": 5550,
+    "n_with_close": 2403
   },
   "note": "Full model book (every home/draw/away leg of every build) scored fair-vs-fair against the de-vigged consensus close: clv_odds = p_close/p_model - 1. beat_rate excludes pushes and no-close legs from numerator AND denominator (Wilson 95%). placebo_null = beat-rate under within-build label-shuffle (skill-free baseline vs the real close, absorbs consensus overround; beat THIS, not 0.50). clv_odds is right-skewed so headline uses median + 10% trimmed mean. Market legs never pooled. Small sample: read n and coverage.",
   "placed_vs_passed": {
     "passed": {
-      "clv_median": 0.002082,
-      "n": 2698
+      "clv_median": 0.001301,
+      "n": 2341
     },
     "placed": {
       "clv_median": -0.170701,

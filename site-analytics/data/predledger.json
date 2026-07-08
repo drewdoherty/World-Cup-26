@@ -1,16 +1,16 @@
 {
   "by_market": [
     {
-      "lost": 4688,
+      "lost": 5070,
       "market": "1X2",
-      "model_brier": 0.1388,
-      "n": 8031,
+      "model_brier": 0.1397,
+      "n": 8088,
       "push": 0,
-      "settled": 7032,
-      "win_hi": 0.3444,
-      "win_lo": 0.3224,
+      "settled": 7605,
+      "win_hi": 0.344,
+      "win_lo": 0.3228,
       "win_rate": 0.3333,
-      "won": 2344
+      "won": 2535
     },
     {
       "lost": 0,
@@ -64,8 +64,8 @@
   "coverage": {
     "1X2": {
       "clv_n": 4941,
-      "coverage_pct": 61.52,
-      "n": 8031
+      "coverage_pct": 61.09,
+      "n": 8088
     },
     "advancement": {
       "clv_n": 0,
@@ -89,24 +89,537 @@
     }
   },
   "headline": {
-    "clv_coverage_pct": 61.52,
+    "clv_coverage_pct": 61.09,
     "n_with_clv": 4941,
     "paper_win_rate": {
-      "hi": 0.3444,
-      "lo": 0.3224,
-      "n": 7032,
+      "hi": 0.344,
+      "lo": 0.3228,
+      "n": 7605,
       "p": 0.3333
     }
   },
   "meta": {
     "db": "dev.db",
-    "generated": "2026-07-08T09:24:08Z",
-    "n_paper": 8031,
-    "n_predictions": 8031,
+    "generated": "2026-07-08T11:25:08Z",
+    "n_paper": 8088,
+    "n_predictions": 8088,
     "n_realized": 0,
     "n_with_clv": 4941
   },
   "recent": [
+    {
+      "build_id": "bf_20260708111734",
+      "clv": null,
+      "fixture": "Argentina vs Switzerland",
+      "market": "1X2",
+      "model_prob": 0.1705,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708111734",
+      "clv": null,
+      "fixture": "Argentina vs Switzerland",
+      "market": "1X2",
+      "model_prob": 0.2541,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708111734",
+      "clv": null,
+      "fixture": "Argentina vs Switzerland",
+      "market": "1X2",
+      "model_prob": 0.5753,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708111734",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.5326,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708111734",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.2531,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708111734",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.2144,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708111734",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.1818,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708111734",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.2392,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708111734",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.5789,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708111734",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.1612,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708111734",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.2548,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708111734",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.5839,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708104101",
+      "clv": null,
+      "fixture": "Argentina vs Switzerland",
+      "market": "1X2",
+      "model_prob": 0.1702,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708104101",
+      "clv": null,
+      "fixture": "Argentina vs Switzerland",
+      "market": "1X2",
+      "model_prob": 0.2546,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708104101",
+      "clv": null,
+      "fixture": "Argentina vs Switzerland",
+      "market": "1X2",
+      "model_prob": 0.5752,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708104101",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.5326,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708104101",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.2531,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708104101",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.2144,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708104101",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.1819,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708104101",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.2388,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708104101",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.5793,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708104101",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.1612,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708104101",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.2548,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708104101",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.5839,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708100430",
+      "clv": null,
+      "fixture": "Argentina vs Switzerland",
+      "market": "1X2",
+      "model_prob": 0.17,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708100430",
+      "clv": null,
+      "fixture": "Argentina vs Switzerland",
+      "market": "1X2",
+      "model_prob": 0.2545,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708100430",
+      "clv": null,
+      "fixture": "Argentina vs Switzerland",
+      "market": "1X2",
+      "model_prob": 0.5755,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708100430",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.5333,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708100430",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.2523,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708100430",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.2144,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708100430",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.1821,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708100430",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.2389,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708100430",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.5789,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708100430",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.1617,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708100430",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.2557,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708100430",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.5825,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708094020",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.533,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708094020",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.2558,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708094020",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.2111,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708094020",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.1801,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708094020",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.239,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708094020",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.581,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708094020",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.1659,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708094020",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.2576,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708094020",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.5765,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708092751",
+      "clv": null,
+      "fixture": "Argentina vs Switzerland",
+      "market": "1X2",
+      "model_prob": 0.1702,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708092751",
+      "clv": null,
+      "fixture": "Argentina vs Switzerland",
+      "market": "1X2",
+      "model_prob": 0.2523,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708092751",
+      "clv": null,
+      "fixture": "Argentina vs Switzerland",
+      "market": "1X2",
+      "model_prob": 0.5774,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708092751",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.5328,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708092751",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.2544,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708092751",
+      "clv": null,
+      "fixture": "Norway vs England",
+      "market": "1X2",
+      "model_prob": 0.2129,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708092751",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.1825,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708092751",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.2377,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708092751",
+      "clv": null,
+      "fixture": "Spain vs Belgium",
+      "market": "1X2",
+      "model_prob": 0.5798,
+      "selection": "Home",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708092751",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.1655,
+      "selection": "Away",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708092751",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.2565,
+      "selection": "Draw",
+      "status": "open"
+    },
+    {
+      "build_id": "bf_20260708092751",
+      "clv": null,
+      "fixture": "France vs Morocco",
+      "market": "1X2",
+      "model_prob": 0.5779,
+      "selection": "Home",
+      "status": "open"
+    },
     {
       "build_id": "bf_20260708085104",
       "clv": null,
@@ -131,519 +644,6 @@
       "fixture": "Argentina vs Switzerland",
       "market": "1X2",
       "model_prob": 0.5774,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708085104",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.5328,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708085104",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.2544,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708085104",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.2129,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708085104",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.1825,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708085104",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.2377,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708085104",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.5798,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708085104",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.1655,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708085104",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.2569,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708085104",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.5776,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708081433",
-      "clv": null,
-      "fixture": "Argentina vs Switzerland",
-      "market": "1X2",
-      "model_prob": 0.1694,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708081433",
-      "clv": null,
-      "fixture": "Argentina vs Switzerland",
-      "market": "1X2",
-      "model_prob": 0.2521,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708081433",
-      "clv": null,
-      "fixture": "Argentina vs Switzerland",
-      "market": "1X2",
-      "model_prob": 0.5785,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708081433",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.5327,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708081433",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.253,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708081433",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.2143,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708081433",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.1829,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708081433",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.2394,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708081433",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.5778,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708081433",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.1647,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708081433",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.2573,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708081433",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.578,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708073802",
-      "clv": null,
-      "fixture": "Argentina vs Switzerland",
-      "market": "1X2",
-      "model_prob": 0.1677,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708073802",
-      "clv": null,
-      "fixture": "Argentina vs Switzerland",
-      "market": "1X2",
-      "model_prob": 0.2529,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708073802",
-      "clv": null,
-      "fixture": "Argentina vs Switzerland",
-      "market": "1X2",
-      "model_prob": 0.5793,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708073802",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.5305,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708073802",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.2539,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708073802",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.2156,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708073802",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.1824,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708073802",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.2392,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708073802",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.5785,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708073802",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.1661,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708073802",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.2559,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708073802",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.578,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708070128",
-      "clv": null,
-      "fixture": "Argentina vs Switzerland",
-      "market": "1X2",
-      "model_prob": 0.1683,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708070128",
-      "clv": null,
-      "fixture": "Argentina vs Switzerland",
-      "market": "1X2",
-      "model_prob": 0.2538,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708070128",
-      "clv": null,
-      "fixture": "Argentina vs Switzerland",
-      "market": "1X2",
-      "model_prob": 0.5779,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708070128",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.5306,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708070128",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.2543,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708070128",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.2151,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708070128",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.1822,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708070128",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.2392,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708070128",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.5786,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708070128",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.1655,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708070128",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.2558,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708070128",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.5787,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708062456",
-      "clv": null,
-      "fixture": "Argentina vs Switzerland",
-      "market": "1X2",
-      "model_prob": 0.1682,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708062456",
-      "clv": null,
-      "fixture": "Argentina vs Switzerland",
-      "market": "1X2",
-      "model_prob": 0.254,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708062456",
-      "clv": null,
-      "fixture": "Argentina vs Switzerland",
-      "market": "1X2",
-      "model_prob": 0.5778,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708062456",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.5307,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708062456",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.2541,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708062456",
-      "clv": null,
-      "fixture": "Norway vs England",
-      "market": "1X2",
-      "model_prob": 0.2152,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708062456",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.1822,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708062456",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.2392,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708062456",
-      "clv": null,
-      "fixture": "Spain vs Belgium",
-      "market": "1X2",
-      "model_prob": 0.5785,
-      "selection": "Home",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708062456",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.1658,
-      "selection": "Away",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708062456",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.2561,
-      "selection": "Draw",
-      "status": "open"
-    },
-    {
-      "build_id": "bf_20260708062456",
-      "clv": null,
-      "fixture": "France vs Morocco",
-      "market": "1X2",
-      "model_prob": 0.5781,
       "selection": "Home",
       "status": "open"
     }
