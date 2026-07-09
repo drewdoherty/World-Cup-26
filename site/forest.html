@@ -39,6 +39,7 @@
 
   .legend { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin: 12px 0 2px; font-size: 11px; color: var(--text-dim); }
   .legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+  .legend .sw-bar { width: 16px; height: 5px; border-radius: 3px; }
   .legend .dim { color: var(--muted); }
   .empty { color: var(--text-dim); font-size: 12px; padding: 10px 0; }
   .fpending { color: var(--text-dim); font-size: 12px; padding: 10px 0; }
@@ -75,10 +76,15 @@
       </div>
       <div class="panel-body">
         <p class="viz-sub" style="font-size:11px;color:var(--text-dim);line-height:1.6;margin:0 0 12px">
-          Pick one or more upcoming fixtures. Each row shows the <b style="color:var(--accent)">model</b> probability and the
-          <b style="color:var(--polymarket)">market</b> price for that outcome; the bar between them is the
-          <b>|model &minus; market|</b> edge (green = model above market, red = below). Where no live market
-          price exists for an outcome, only the model dot is shown, labelled &ldquo;model&rdquo;.
+          Pick one or more upcoming fixtures. Every row is a Polymarket market: the exact
+          <b style="color:var(--accent)">model</b> probability and <b style="color:var(--polymarket)">market</b> price
+          are annotated on each row, and the bar between the dots is the trade signal at the
+          <b>&plusmn;2pp</b> threshold &mdash; <b style="color:var(--pos)">green = BACK</b> the outcome (model above market),
+          <b style="color:var(--neg)">red = LAY</b> / back the complement (market above model), grey = no trade.
+          Rows where Polymarket lists no market say &ldquo;no PM market&rdquo;; rows the model cannot
+          price fairly yet say &ldquo;no model&rdquo; (hover any row for sources and reasons). Dimmed rows
+          are display-only (longshot / killed family &mdash; never cash). 90-minute settlement throughout,
+          except the <b style="color:var(--warn)">Team to Advance</b> section, which settles ET+pens.
         </p>
         <div id="forest-nav" class="fx-chips"></div>
         <div class="panel-body" id="forest-body" style="padding:0"></div>

@@ -189,6 +189,29 @@ def test_decided_leg_without_bet_rec_is_do_not_trade():
     assert any("decided_leg" in r for r in row["verdict_reasons"])
 
 
+def test_state_stale_team_forced_withhold_with_stamped_reason():
+    # PR #177 follow-up: advancement_data stamps state_stale_reason when a
+    # team's kicked-off tie is missing from the sim's conditioning set; the
+    # desk must force WITHHOLD with the reason verbatim — never a normal
+    # verdict from probs conditioned on a pre-kickoff world.
+    stamped = ("state-stale: earlier-round tie unsettled in sim "
+               "(Switzerland vs Colombia kicked off 2026-07-06, not pinned)")
+    feeds = _feeds()
+    for t in feeds["advancement"]["teams"]:
+        if t["team"] == "Switzerland":
+            t["state_stale_reason"] = stamped
+    feed = _build(feeds)
+    row = _row(feed, "Switzerland", "SF")
+    assert row["verdict"] == "WITHHOLD"
+    assert row["verdict_reasons"] == [stamped]          # carried verbatim
+    assert row["gates"]["state_freshness"]["pass"] is False
+    assert row["gates"]["state_freshness"]["reason"] == stamped
+    # unstamped teams keep the passing gate and their normal verdicts
+    other = _row(feed, "Morocco", "SF")
+    assert other["gates"]["state_freshness"]["pass"] is True
+    assert other["verdict_reasons"] != [stamped]
+
+
 def test_withheld_near_miss_included_with_reason_and_1x2_settlement():
     feed = _build()
     rows = [r for r in feed["rows"] if r["origin"] == "bet_recs.withheld"]

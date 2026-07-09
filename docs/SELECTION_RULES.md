@@ -105,6 +105,7 @@ analogue for advancement). "Cash floor" = `longshot_no_cash` gates the stake.
 | Advancement matrix (client) | `site/adv_edge_matrix.js` | ✅ | ✅ (stage depth) | ✅ | Drives off the server-computed `bucket` tag; greys/flags <25c cells; `advKelly` returns 0 on <25c. |
 | Edge desk (SHADOW) | `scripts/wca_edge_desk.py` | ✅ | ✅ (stage depth) | ✅ (longshots capped at WATCH) | SHADOW-only decision feed, no stakes; imports `prob_bucket`/`PROB_BUCKETS`/`longshot_no_cash`/`LONGSHOT_PROB`; consumers render feed order. |
 | Bot /matchevents | `src/wca/bot/app.py` (`handle_matchevents`) | ✅ (moneyline ONLY by spec) | ✅ (`preference_sort_key`) | ✅ (ML-only filter + killed markets) | Display-only exotics view: `prob_bucket(model) == "moneyline"` AND net edge > 0; ordering via `preference_sort_key`; display-only sizing via the PM pool + kelly kernel. |
+| Event markets (PM) | `src/wca/eventmarkets.py` (`build_event_market_recs`) + `scripts/wca_event_markets.py` | ✅ | ✅ | ✅ | Full single-match PM coverage feed (`site/event_market_recs.json`); imports `preference_sort_key`/`bucket_rank`/`longshot_no_cash`/`prob_bucket`; adds kill-list (correct score / scorer props) + totals-under ban + same-fixture correlation cap on top of the canonical rule; consumers (arb.html panel) render feed order. |
 
 ### Exempt (deliberately NOT wired)
 

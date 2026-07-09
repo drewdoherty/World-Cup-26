@@ -37,8 +37,8 @@
 |---|---|---|
 | MacBook (`/Users/andrewdoherty/Desktop/Coding/World Cup Alpha`) | DEV box | Currently on a clean `main`, 4 commits behind origin, zero modified tracked files (devbox report §6 — the brief's "stale dirty feature branch" claim is outdated). Holds a live-armed `.env` and a stale 723 MB `wca.db` — see Hazard H2. |
 | Mac mini (`~/World-Cup-26`, SSH `andrewdoherty@192.168.68.55`) | PRODUCTION | Runs both bots and all scheduled jobs; holds the canonical ledger `data/wca.db` [UNVERIFIED-MINI: 1.94 GB, 210+ bets]. Git-untracked by `.gitignore:11` (`data/*.db`). |
-| GitHub | Source of truth + data mover | `origin/main` is what Vercel serves and what the mini pulls. 5 of 7 CI workflows push data commits to main at hourly-or-better cadence (§1.4). |
-| Vercel | Static hosting | Two projects (§1.5): main site (`site/`) and analytics (`site-analytics/`). |
+| GitHub | Source of truth + data mover | `origin/main` is what the mini pulls (and what the localhost sites serve once pulled). 5 of 7 CI workflows push data commits to main at hourly-or-better cadence (§1.4). |
+| ~~Vercel~~ | **REMOVED 2026-07-08** | Serving is localhost-only: `site/` on :8000, `site-analytics/` on :8001 (§1.5). |
 
 ### 1.2 Deploy flow
 
@@ -46,12 +46,13 @@
                  PR + pytest (ADVISORY — see H-S1)         merge
   MacBook dev ──────────────────────────────────► GitHub origin/main ◄──────────────┐
                                                     │        ▲   ▲                  │
-                              Vercel deploys        │        │   │ "Auto-sync" data │
-                              site/ + site-analytics│        │   │ commits, hourly+ │
-                                                    │        │   │ (5 CI workflows) │
+                        localhost sites serve       │        │   │ "Auto-sync" data │
+                 site/ :8000 · site-analytics :8001 │        │   │ commits, hourly+ │
+                     (Vercel REMOVED 2026-07-08)    │        │   │ (5 CI workflows) │
                                                     ▼        │   │                  │
                                              ┌──────────────┐│  GitHub Actions      │
-                                             │    Vercel    ││                      │
+                                             │  localhost   ││                      │
+                                             │ :8000 /:8001 ││                      │
                                              └──────────────┘│                      │
                                                              │                      │
    Mac mini (PROD) ──── autopull every 5 min ────────────────┘                      │
@@ -123,10 +124,9 @@ Source of truth: `deploy/macmini/services.env:10-12` (`WCA_DAEMONS`), `:59-76` (
 
 GH Actions cadence is therefore **hourly-or-better** — the "~4×/day backup" figure survives only in stale comments (`deploy/publish_site.sh:6`, `services.env:67`). Auto-sync commits are pushed with the default `GITHUB_TOKEN`, and GITHUB_TOKEN pushes do **not** trigger `on: push` workflows — most recent main history has no pytest status at all (deploy_ci report §4).
 
-### 1.5 Vercel
+### 1.5 Vercel — REMOVED (2026-07-08)
 
-- **Root `vercel.json`**: `outputDirectory: site` — main site; `ignoreCommand` builds only when the pushed commit touched `site/` or `vercel.json`; 60 s cache on `/data.json`.
-- **`site-analytics/vercel.json`**: separate project rooted at `site-analytics/`; `ignoreCommand` diffs `site-analytics/` only. Since nothing ever commits `site-analytics/data/*.json` (§7.2), the deployed analytics feeds change only when a human commits them — the mechanism of the analytics freeze.
+Vercel hosting is gone. Deployments had already been blocked at the dashboard level and the leftover Vercel PR checks permanently failed (blocking merges), so both `vercel.json` files (root + `site-analytics/`) were deleted from the repo. **The localhost servers are the ONLY serving surfaces: `site/` on `localhost:8000`, `site-analytics/` on `localhost:8001`** — each machine serves its own pulled tree. Note the Vercel↔GitHub INTEGRATION lives in the Vercel dashboard, not the repo: it must be disconnected there (Project Settings → Git → Disconnect, for both `fifa-world-cup-2026` and `world-cup-26-v2`) or Vercel's PR checks keep appearing. Historical note: while the analytics Vercel project existed, nothing ever committed `site-analytics/data/*.json` (§7.2), so its deployed feeds changed only when a human committed them — the mechanism of the analytics freeze.
 
 ---
 
@@ -502,7 +502,7 @@ Most scripts otherwise take `--db` defaulting to the literal `data/wca.db`. **DE
 | Tree | LOC | Shape | Feeds |
 |---|---|---|---|
 | `site/` | 9,844 | 8 nav pages: Bets (index), Scores & Markets, Event Markets (forest), Under The Hood (architecture), Promos, Action Desk (arb.html — nav label "Bet Recs"), Microstructure, Benchmarks (`site/index.html:19-28`) | 28 JSON: 16 top-level + 12 under `site/microstructure/` |
-| `site-analytics/` | 2,958 | single page, own Vercel project | 16 tracked JSON in `data/` (not 17); `analytics.js:1049-1063` fetches 13; **8 exclusive** to this tree (winrate, rigor, risk_pnl, predledger, venues_benchmark, market_intel, mc_futures, tracking_clv_benchmark) |
+| `site-analytics/` | 2,958 | single page, served on localhost:8001 (was its own Vercel project until 2026-07-08) | 16 tracked JSON in `data/` (not 17); `analytics.js:1049-1063` fetches 13; **8 exclusive** to this tree (winrate, rigor, risk_pnl, predledger, venues_benchmark, market_intel, mc_futures, tracking_clv_benchmark) |
 | `site-lilac/` | 6,532 | single-page 6-tab terminal (Open Exposure, Scores & Markets, Visuals, Under The Hood, Tracking, Promos — index.html:379-385); data baked into one `const DATA` blob | builder `wca_lilac_ledger.py:205-227` loads 15+ feeds from site-analytics/data; `inject()` at :277-287 |
 
 Corrections to the brief: `site/visuals.html` and `site/tracking.html` are 19-line **redirect stubs** (meta-refresh to scores.html / index.html), not standalone variants. `site/terminal.html` IS standalone but **orphaned**: its data is a baked `const D` blob dated 2026-06-11 and its claimed builder `scripts/wca_terminal.py` does not exist anywhere on origin/main.
@@ -549,7 +549,7 @@ All spot-checked feeds DO carry `meta.generated`/`generated_at` — staleness is
 
 ### 7.5 Fire-button guard stack (site side)
 
-`scripts/wca_place_server.py`: binds `127.0.0.1:8010` (:51-52, :276) + belt-and-braces client loopback check (:205-207, 403 otherwise); `X-WCA-Place-Token` shared secret **fails closed** when env unset (:233-236); forwards its own `PM_DRY_RUN` (default "1", :79) and never hardcodes 0; `WCA_PLACE_MAX_USD` default 100 (:68); CORS pinned to localhost (:199). `site/arb.js`: `IS_LOCAL` hostname guard (:135-140) — the Vercel copy renders **no button at all** (placeCell returns "" :174; reveal no-ops :246-248); per-click idempotency nonce (:163-168). Downstream: `wca_pm_fire.py` idempotency + caps (§8.5).
+`scripts/wca_place_server.py`: binds `127.0.0.1:8010` (:51-52, :276) + belt-and-braces client loopback check (:205-207, 403 otherwise); `X-WCA-Place-Token` shared secret **fails closed** when env unset (:233-236); forwards its own `PM_DRY_RUN` (default "1", :79) and never hardcodes 0; `WCA_PLACE_MAX_USD` default 100 (:68); CORS pinned to localhost (:199). `site/arb.js`: `IS_LOCAL` hostname guard (:135-140) — any non-localhost copy renders **no button at all** (placeCell returns "" :174; reveal no-ops :246-248); per-click idempotency nonce (:163-168). Downstream: `wca_pm_fire.py` idempotency + caps (§8.5).
 
 ---
 
@@ -593,7 +593,7 @@ Enforced in order:
 
 ### 8.5 One-click fire path
 
-`wca_pm_fire.py`: `pm_fire_log` with `UNIQUE(rec_id, nonce)` (:204-208) + a same-rec time-window block even with a fresh nonce (:224-245); `ABSOLUTE_MAX_USD = 100.0` (:66); honours `_pm_dry_run` (default ON). `wca_place_server.py` + `arb.js` guards in §7.5. The whole path is hostname-inert on Vercel and dry-run by default; the caveat is that the server forwards whatever PM_DRY_RUN its own shell holds (H2).
+`wca_pm_fire.py`: `pm_fire_log` with `UNIQUE(rec_id, nonce)` (:204-208) + a same-rec time-window block even with a fresh nonce (:224-245); `ABSOLUTE_MAX_USD = 100.0` (:66); honours `_pm_dry_run` (default ON). `wca_place_server.py` + `arb.js` guards in §7.5. The whole path is hostname-inert off-localhost and dry-run by default; the caveat is that the server forwards whatever PM_DRY_RUN its own shell holds (H2).
 
 ### 8.6 Conductor isolation — and its one vacuous guard
 

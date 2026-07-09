@@ -465,16 +465,16 @@ RESULT LANDS
   predledger.settle            (1x2/scoreline/ou/btts ← wc2026_results.json;
                                 advancement ← advancement_played_results.json; money or not)
 
-SITE BUILD / PUBLISH (CI → Vercel from origin/main)
+SITE BUILD / PUBLISH (CI commits to origin/main; served from localhost 8000/8001 — Vercel removed 2026-07-08)
   predledger publish → predledger.json
   wca_winrate_data / clvbench / rigor build / mc builders → site/*.json
-  → commit → GitHub Actions → Vercel
+  → commit → GitHub Actions → origin/main → localhost serving
 ```
 
 ### 4.3 Constraints (hard rules)
 
 - **Single-writer / WAL:** `_connect` sets `journal_mode=WAL`; predledger sets `busy_timeout=5000` **per-connection** (not in shared `_connect`); short transactions only. Concurrent reads never block the live bot.
-- **Mini is the canonical ledger.** Dev-box & mini ledgers are forked; the mini drives Vercel. **Never mutate `wca.db` from this MacBook** — predledger/CLV/rigor writes go to `dev.db` here; a guard **refuses a `wca.db` basename on the dev box** unless `WCA_ALLOW_PROD_DB` is set. All stamping passes run on the mini. CLI `--db` defaults from `.env.dev`.
+- **Mini is the canonical ledger.** Dev-box & mini ledgers are forked; the mini drives the published feeds on origin/main. **Never mutate `wca.db` from this MacBook** — predledger/CLV/rigor writes go to `dev.db` here; a guard **refuses a `wca.db` basename on the dev box** unless `WCA_ALLOW_PROD_DB` is set. All stamping passes run on the mini. CLI `--db` defaults from `.env.dev`.
 - **Site never reads SQLite** — only the derived `site/*.json` projections. DB is source of truth; JSON is a view.
 - **Currency separation — £/$ NEVER summed.** CLV is dimensionless → CLV tables span all venues (but **never pool across `n_outcomes`**). Any realized-P&L/EV table is faceted `GBP`/`USD` per `reports._platform_currency` (`polymarket|kalshi → USD`, else GBP) and never summed. **MC P&L is the sole sanctioned cross-currency view** — FX-adjusted at the position level with rate+timestamp recorded in `meta` and disclosed on-panel as "distribution view only."
 

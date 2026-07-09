@@ -776,6 +776,12 @@ def _build_adv_row(team, team_row, stage, *, origin, model_prob, pm_price,
     bucket = prob_bucket(position_prob if position_prob is not None
                          else model_prob)
     decided = model_prob is not None and not (0.0 < model_prob < 1.0)
+    # PR #177 follow-up: the advancement feed stamps state_stale_reason on a
+    # team whose knockout tie kicked off but is NOT pinned in the sim's
+    # conditioning set — its probs are conditioned on a pre-kickoff world, so
+    # any "edge" is a stage-state mirage. betrecs already withholds these;
+    # the desk must too. bet_recs-origin rows carry no team_row → gate passes.
+    state_stale_reason = (team_row or {}).get("state_stale_reason")
     flow = _orderflow_context(orderflow, stage, flow_baseline)
     group_ctx = _group_context(
         advancement, team_row if team_row is not None
@@ -824,8 +830,19 @@ def _build_adv_row(team, team_row, stage, *, origin, model_prob, pm_price,
         % ("%.0f%%" % (position_prob * 100) if position_prob is not None
            else "?", LONGSHOT_PROB * 100))
     gates["clv_history"] = _gate(False, CLV_BLOCKER_REASON)
+    gates["state_freshness"] = _gate(
+        state_stale_reason is None, state_stale_reason,
+        note=("sim conditioning set covers every kicked-off tie for this "
+              "team (data/advancement_sim_pins.json sidecar; stamped by "
+              "scripts/wca_advancement_data.py)"))
 
-    if decided:
+    if state_stale_reason:
+        # Takes precedence over decided/actionable verdicts: a state-stale
+        # team's prob is mid-range precisely BECAUSE the sim missed the
+        # result, so the branches below would misread it as a live edge.
+        verdict = "WITHHOLD"
+        verdict_reasons = [state_stale_reason]
+    elif decided:
         if br is not None:
             verdict = "WITHHOLD"
             verdict_reasons = [

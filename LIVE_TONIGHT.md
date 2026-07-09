@@ -197,6 +197,6 @@ Once tonight is stable:
 
 **Monitor:**
 - Bot: `/summary`, `/card`, `/scores`, `/bets`
-- Website: https://fifa-world-cup-2026-betting-gamblin.vercel.app
+- Website: http://localhost:8000 (localhost-only; Vercel removed 2026-07-08)
 
 Let me know if anything breaks or you need adjustments!
