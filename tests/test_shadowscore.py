@@ -346,8 +346,8 @@ def test_no_shadow_rows_gives_clean_empty_scoreboard():
     sb = shadowscore.build_scoreboard(rows, results, "2026-07-08T00:00:00")
     assert sb["meta"]["totals_shadow_families"] == []
     by_family = {r["family"]: r for r in sb["shadows"]}
-    assert set(by_family) == {"mw90", "shrink", "market"}   # no totals rows at all
-    for fam in ("mw90", "shrink", "market"):
+    assert set(by_family) == {"raw", "mw90", "shrink", "market"}   # no totals rows at all
+    for fam in ("raw", "mw90", "shrink", "market"):
         assert by_family[fam]["n"] == 0
         assert by_family[fam]["decision"] == "COLLECTING n=0/%d" % shadowscore.DECISION_MIN_N
 
@@ -358,7 +358,48 @@ def test_completely_empty_inputs_give_clean_empty_scoreboard():
     assert sb["meta"]["total_results"] == 0
     assert sb["meta"]["totals_shadow_families"] == []
     by_family = {r["family"]: r for r in sb["shadows"]}
-    assert set(by_family) == {"mw90", "shrink", "market"}
+    assert set(by_family) == {"raw", "mw90", "shrink", "market"}
     for fam in by_family.values():
         assert fam["n"] == 0
         assert fam["decision"].startswith("COLLECTING")
+
+
+# ---------------------------------------------------------------------------
+# Post-promotion shadow integrity (2026-07-09): live `model` is the shrunk line,
+# `model_raw` carries the raw blend. `raw` scores raw-vs-live only where
+# `model_raw` is present; `shrink` recomputes from the RAW model, never the
+# already-shrunk `model`.
+# ---------------------------------------------------------------------------
+
+
+def test_shrink_recompute_uses_model_raw_when_present():
+    market = {"home": 0.60, "draw": 0.25, "away": 0.15}
+    raw = {"home": 0.70, "draw": 0.20, "away": 0.10}
+    shrunk_live = shadowscore._shrink_triple(raw, market)  # what model would be
+    row = {"model": shrunk_live, "model_raw": raw, "market": market,
+           "elo": raw, "dc": raw}
+    got = shadowscore.shadow_1x2("shrink", row)
+    # Must equal shrink(model_raw), i.e. the SAME as shrunk_live — NOT shrink of
+    # the already-shrunk `model` (which would shrink twice).
+    from_raw = shadowscore._shrink_triple(raw, market)
+    from_shrunk = shadowscore._shrink_triple(shrunk_live, market)
+    for leg in ("home", "draw", "away"):
+        assert abs(got[leg] - from_raw[leg]) < 1e-9
+    assert any(abs(from_raw[leg] - from_shrunk[leg]) > 1e-7
+               for leg in ("home", "draw", "away"))
+
+
+def test_raw_family_strict_no_model_raw_returns_none():
+    # A pre-promotion row (no model_raw) -> `raw` family yields None (it does not
+    # fall back to `model`, so it never logs trivially-zero raw-vs-live diffs).
+    row = {"model": {"home": 0.6, "draw": 0.25, "away": 0.15},
+           "market": {"home": 0.6, "draw": 0.25, "away": 0.15}}
+    assert shadowscore.shadow_1x2("raw", row) is None
+
+
+def test_raw_family_reads_model_raw_when_present():
+    raw = {"home": 0.70, "draw": 0.20, "away": 0.10}
+    row = {"model": {"home": 0.65, "draw": 0.22, "away": 0.13}, "model_raw": raw,
+           "market": {"home": 0.6, "draw": 0.25, "away": 0.15}}
+    got = shadowscore.shadow_1x2("raw", row)
+    assert got == raw

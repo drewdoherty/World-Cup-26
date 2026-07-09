@@ -509,6 +509,10 @@ def build_next_match(
             winner[outcome] = (p, venue_label(book), odds, edge)
 
         pred = models.dc.predict(fb.home, fb.away, neutral=fb.neutral, warn=False)
+        # Scorelines reconcile to the LIVE line (``fb.blended``, the shrunk blend
+        # when WCA_SHRINK_LIVE is on) — the same 1X2 the winner edge above uses —
+        # so the distribution stays consistent with the bet line (card.py's
+        # scorelines-match-bets invariant).
         scores = scoreline_card(
             pred,
             (fb.blended["home"], fb.blended["draw"], fb.blended["away"]),

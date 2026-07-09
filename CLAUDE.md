@@ -8,8 +8,11 @@ Where this file and older docs disagree, this file + `ARCHITECTURE.md` win.
 Quant betting on the 2026 World Cup (football ONLY). PRIMARY: advancement /
 knockout futures on Polymarket. SECONDARY: maximum extraction from boosts and
 returning-customer offers (matched or high-EV unmatched). Model = Elo +
-Dixon-Coles + de-vigged market blend; **CLV is the primary KPI** — a market
-without price capture + CLV stamping does not get real money.
+Dixon-Coles + de-vigged market blend, then **shrunk toward the de-vigged market
+reference** before it drives edge/EV/sizing (the `shrink` family, promoted from
+shadow to LIVE 2026-07-09 — see the shrink kill-switch under Live-money gates);
+**CLV is the primary KPI** — a market without price capture + CLV stamping does
+not get real money.
 
 ## Sizing (single source of truth)
 
@@ -101,6 +104,17 @@ Canonical rule (user-confirmed 2026-07-07), key `(bucket_rank, -hours_out, -ev)`
   (single Y can fire a tagged BATCH — check `/pm` first).
 - Model changes ship SHADOW-FIRST (dual-written, CLV-compared) before they
   touch pricing or sizing. F7 goal-blend is in shadow now (`gb_lambda_*`).
+- **Shrink-to-market is LIVE** (graduated from shadow 2026-07-09, user-approved).
+  `p' = p_mkt + k*(p_model − p_mkt)` per leg (`k=0.5` for model legs ≥0.25,
+  `k=0.25` below), renormalised — applied in `wca.card._iter_fixture_blends`, so
+  the LIVE `model` line the card + `betrecs` + `eventmarkets` bet against is the
+  shrunk one; the RAW blend is preserved as `blended_raw` / `model_raw` and the
+  scoreboard still scores raw→shrunk→market. **Kill-switch `WCA_SHRINK_LIVE`
+  (default ON)** — set `WCA_SHRINK_LIVE=0` to restore the exact pre-promotion
+  raw-blend behaviour (reversible, no data migration). `advancement.py`
+  recomputes 1X2 from live odds and is NOT affected. Evidence: backtest n=383
+  model-vs-PM (model on the wrong side of PM ~75% when they disagree ≥2pp),
+  per-leg calibration n=99, `shrink` shadow brierΔ −0.0046 at n=75.
 - New markets need: price capture, CLV stamping, settlement automation —
   before real money.
 

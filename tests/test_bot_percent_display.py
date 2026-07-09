@@ -209,9 +209,17 @@ class TestBuildCardWatchSink:
             assert 0.0 <= w.edge < min_edge  # the near-threshold band only
             assert all(s == 0.0 for s in w.stakes.values())  # never staked
 
-    def test_watch_rows_collected_below_a_high_floor(self, slate):
+    def test_watch_rows_collected_below_a_high_floor(self, slate, monkeypatch):
         """With a high floor every +EV row lands in the sink — proving the
-        sink actually collects (the synthetic slate has +EV outcomes)."""
+        sink actually collects (the synthetic slate has +EV outcomes).
+
+        The LIVE shrink-to-market (WCA_SHRINK_LIVE, default on) compresses the
+        synthetic model-vs-market edges toward zero, which is orthogonal to the
+        watch-sink MECHANISM under test here — so pin the flag off to keep the
+        raw +EV edges the mechanism needs. The shrink itself is exercised in
+        tests/test_shrink_live.py.
+        """
+        monkeypatch.setenv("WCA_SHRINK_LIVE", "0")
         from wca.card import build_card
 
         models, odds, meta = slate
