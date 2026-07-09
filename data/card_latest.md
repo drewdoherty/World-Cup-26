@@ -1,23 +1,21 @@
-<!-- generated: 2026-07-09T13:35:06 -->
-*World Cup Alpha — bet card* (2 staked picks, hit-prob ranked)
+<!-- generated: 2026-07-09T14:11:34 -->
+*World Cup Alpha — trade card* (1 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
-*1. [ML·FAV] Norway vs England* — England — back *52.4%* impl via *betfair*
-    model 53.4% / mkt 52.2% (+1.1pp)  EV *+2.1%* ✅+EV  [elo 46% dc 58%]
-    stake: gbp £18.40  further-out (55h) — thin/soft market
-*2. [MID·DRAW] France vs Morocco* — Draw — back *25.0%* impl via *betfair*
-    model 25.7% / mkt 24.6% (+0.7pp)  EV *+2.8%* ✅+EV  [elo 25% dc 28%]
-    stake: gbp £7.66
+*1. [ML·FAV] Norway vs England* — England — back *52.1%* impl via *smarkets*
+    model 53.4% / mkt 52.2% (+1.3pp)  EV *+2.6%* ✅+EV  [elo 46% dc 58%]
+    stake: gbp £22.71  further-out (55h) — thin/soft market
 
 *— CUT (excluded from staking, 3) —*
-  x [LS] France vs Morocco — Morocco — back 14.3% impl (model 16.2%, EV +13.3% ✅+EV): below 20% hit-probability floor (model 16.2%) — too unlikely to return PnL even at +13.3% EV
-  x [LS] Spain vs Belgium — Belgium — back 16.9% impl (model 18.5%, EV +8.9% ✅+EV): below 20% hit-probability floor (model 18.5%) — too unlikely to return PnL even at +8.9% EV
-  x [LS] Argentina vs Switzerland — Switzerland — back 16.7% impl (model 17.1%, EV +2.4% ✅+EV): below 20% hit-probability floor (model 17.1%) — too unlikely to return PnL even at +2.4% EV
+  x [LS] Spain vs Belgium — Belgium — back 16.7% impl (model 18.4%, EV +10.4% ✅+EV): below 20% hit-probability floor (model 18.4%) — too unlikely to return PnL even at +10.4% EV
+  x [LS] France vs Morocco — Morocco — back 13.9% impl (model 16.2%, EV +8.3% ✅+EV): below 20% hit-probability floor (model 16.2%) — too unlikely to return PnL even at +8.3% EV
+  x [LS] Argentina vs Switzerland — Switzerland — back 16.7% impl (model 17.1%, EV +2.3% ✅+EV): below 20% hit-probability floor (model 17.1%) — too unlikely to return PnL even at +2.3% EV
 
-*— WATCH (near-threshold, below the +2% EV floor — NOT staked, 1) —*
-  ~ [ML] Argentina vs Switzerland — Argentina — back 57.1% impl via betfair (model 57.7% / mkt 56.9%, EV +0.9% ✅+EV)
+*— WATCH (near-threshold, below the +2% EV floor — NOT staked, 2) —*
+  ~ [ML] Argentina vs Switzerland — Argentina — back 57.5% impl via betfair (model 57.6% / mkt 56.9%, EV +0.3% ✅+EV)
+  ~ [MID] France vs Morocco — Draw — back 25.0% impl via betfair (model 25.7% / mkt 24.6%, EV +1.4% ✅+EV)
 
-*Venue split (gbp):* betfair £26.06
+*Venue split (gbp):* smarkets £22.71
 
 *— REFERENCE, NOT SIZED (model prices only) —*
 *World Cup Alpha — scorelines* (4 fixtures)
@@ -36,9 +34,9 @@ _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out firs
     xG: 1.92-1.06
     1-1  11.2%  back at impl <= 11.0%
     2-1  10.6%  back at impl <= 10.4%
-    1-0  9.6%  back at impl <= 9.5%
+    1-0  9.7%  back at impl <= 9.5%
     2-0  9.4%  back at impl <= 9.2%
-    3-1  6.5%  back at impl <= 6.3%
+    3-1  6.5%  back at impl <= 6.4%
     3-0  5.8%  back at impl <= 5.7%
     O/U 2.5: over 57.0% / under 43.0%   BTTS 57.0%
 
