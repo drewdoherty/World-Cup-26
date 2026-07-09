@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-09T18:25:19 -->
+<!-- generated: 2026-07-09T19:01:39 -->
 ⚽ *Next match* — France vs Morocco
 Kickoff 2026-07-09 20:00:00+00:00
 
 *Winner* (model blend)
-  France         model 59.8% · mkt 60.6% (matchbook)  EV -1.3% ❌−EV
-  Draw           model 25.4% · mkt 25.0% (Smarkets)  EV +1.5% ✅+EV (below +2% gate)  $5.33
-  Morocco        model 14.8% · mkt 14.3% (betfair_ex_uk)  EV +3.6% ✅+EV  (<25% model — NO CASH)
+  France         model 60.1% · mkt 61.7% (betfair_ex_uk)  EV -2.6% ❌−EV
+  Draw           model 25.4% · mkt 25.0% (betfair_ex_uk)  EV +1.5% ✅+EV (below +2% gate)  $5.34
+  Morocco        model 14.5% · mkt 13.9% (betfair_ex_uk)  EV +4.5% ✅+EV  (<25% model — NO CASH)
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.3)
@@ -22,4 +22,4 @@ _top anytime, mkt implied % (both teams — add squad to split + FGS; no model p
 
 *Scorelines* (top 6)
 1-0 17.4% | 2-0 13.0% | 1-1 11.5% | 0-0 10.4% | 2-1 10.1% | 3-0 6.2%
-  O/U 2.5: over 39.4% / under 60.6%   BTTS 40.9%
+  O/U 2.5: over 39.4% / under 60.6%   BTTS 40.8%
