@@ -32,6 +32,11 @@ from wca import tracking  # noqa: E402
 from wca.data import polymarket  # noqa: E402
 
 MODEL_JSON = "data/advancement_current_vs_pretournament.json"
+# Sidecar recording the KO ties the cached sim was CONDITIONED on (its pinned
+# set). The state-freshness gate compares reality against THIS — not against a
+# fresh load_played_knockout_results(), which can know more than the cached sim
+# did. A cache without the sidecar has unknown conditioning -> force a re-sim.
+PINS_JSON = "data/advancement_sim_pins.json"
 RESULTS_JSON = "data/processed/wc2026_results.json"
 # Progression stages shown on the chart x-axis (group winner kept separate).
 STAGES = ["R32", "R16", "QF", "SF", "Final", "win"]
@@ -79,24 +84,61 @@ def _sim_to_records(cur, pre):
 
 
 def _run_sim():
-    """Fit models then simulate current + pre-tournament tournaments."""
-    from wca.card import fit_models
+    """Fit models then simulate current + pre-tournament tournaments.
+
+    Returns ``(cur, pre, ko_pinned)`` — the pinned knockout set is surfaced so
+    the caller can persist it (``PINS_JSON``) for the state-freshness gate.
+    """
+    from wca.card import DEFAULT_DC_LEVEL_TARGET, fit_models
     from wca.data.cleaning import resolve_results_path
     from wca.data.results import load_results
 
-    models = fit_models(load_results(resolve_results_path()))
+    # Same total-goals level anchor as the live card (fix 2026-07-08): the
+    # unanchored fit's KO totals ran ~1.86 goals vs 2.70 realised, inflating
+    # draws and understating favourites throughout the sim.
+    models = fit_models(
+        load_results(resolve_results_path()),
+        dc_level_target=DEFAULT_DC_LEVEL_TARGET,
+    )
     # Pin BOTH played group results (results=None auto-loads them) AND played
     # knockout ties incl. penalty-shootout winners (ko_results). Without the
     # latter the sim re-plays every knockout from scratch, so an eliminated team
     # keeps a large survival probability (e.g. Germany P(R16)=0.72 after losing
     # its R32 shootout) — the panel numbers must reflect real KO eliminations.
-    cur = adv.run_advancement(models, ko_results=adv.load_played_knockout_results())
+    ko_pinned = adv.load_played_knockout_results()
+    cur = adv.run_advancement(models, ko_results=ko_pinned)
     pre = adv.run_advancement(models, results=[])   # pre-tournament baseline
-    return cur, pre
+    return cur, pre, ko_pinned
+
+
+def _load_pins(path=PINS_JSON):
+    """Cached-sim pinned KO set as ``{frozenset(pair): winner}``, or None.
+
+    ``None`` = unknown conditioning (legacy cache predating the sidecar, or an
+    unreadable file) — the caller treats that as a stale cache / fails closed.
+    """
+    try:
+        raw = json.load(open(path))
+        return {
+            frozenset((str(a), str(b))): str(w)
+            for a, b, w in (raw.get("ko_pinned") or [])
+        }
+    except (OSError, json.JSONDecodeError, TypeError, ValueError):
+        return None
+
+
+def _write_pins(ko_pinned, path=PINS_JSON):
+    payload = {
+        "generated": _now().strftime("%Y-%m-%d %H:%M:%S UTC"),
+        "ko_pinned": sorted([sorted(pair) + [w] for pair, w in ko_pinned.items()]),
+    }
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, indent=2, ensure_ascii=False)
 
 
 def _pm_by_team_stage(sim_df):
-    """``{team: {stage: {pm, edge_adj, side, ask}}}`` from the live PM markets.
+    """``{team: {stage: {pm, edge_adj, side, ask, stake_usd, path_scale}}}``
+    from the live PM markets, plus the per-team path-exposure blocks.
 
     ``pm`` is the YES mid; ``edge_adj`` is the fee-adjusted edge of whichever
     side (YES/NO) the sim favours — so ``side`` names that side explicitly and
@@ -106,16 +148,27 @@ def _pm_by_team_stage(sim_df):
     against a stale-print mid (the Edge Desk's HIGH-2
     ``side_attribution_uncertain`` guard existed for exactly that) — emit it
     at the source instead. Additive fields: pm/edge_adj are unchanged.
+
+    ``stake_usd`` / ``path_scale`` (fix 2026-07-08) carry the SIZING SOURCE's
+    path-capped ¼-Kelly stake per rung: one team's nested advancement rungs
+    (same side) are one correlated exposure, jointly capped by the tightest
+    staked rung's ¼-Kelly (``wca.advancement.apply_path_exposure_caps``).
+    Downstream sizers (wca_betrecs) treat ``stake_usd`` as a hard per-rung
+    ceiling so the Action Desk can never re-stack the path independently.
+
+    Returns ``(by_team, n_matched, path_exposure)`` where ``path_exposure`` is
+    ``{team: {side: {total_stake_usd, cap_usd, scaling_applied, ...}}}`` in
+    this feed's stage dialect (``Final``, not ``F``), for site/bot display.
     """
     try:
         pm_events = polymarket.find_world_cup_markets(include_closed=False)
         edges = adv.compare_to_polymarket(sim_df, pm_events)
     except Exception as exc:  # noqa: BLE001 — PM must never break the feed.
         print("polymarket pairing failed (%s); continuing" % exc, file=sys.stderr)
-        return {}, 0
+        return {}, 0, {}
     out = {}
     if edges is None or edges.empty:
-        return out, 0
+        return out, 0, {}
     for _, e in edges.iterrows():
         st = _PM_STAGE.get(str(e["stage"]))
         if st is None:
@@ -125,8 +178,19 @@ def _pm_by_team_stage(sim_df):
             "edge_adj": round(float(e["fee_adj_edge"]), 4),
             "side": str(e["side"]),
             "ask": round(float(e["pm_price"]), 4),
+            "stake_usd": round(float(e["stake"]), 2),
+            "path_scale": round(float(e["path_scale"]), 4),
         }
-    return out, int(len(edges))
+    path_exposure = {}
+    for team, sides in adv.path_exposure_summary(edges).items():
+        blocks = {}
+        for side, blk in sides.items():
+            blk = dict(blk)
+            blk["cap_stage"] = _PM_STAGE.get(blk["cap_stage"], blk["cap_stage"])
+            blk["stages"] = [_PM_STAGE.get(s, s) for s in blk["stages"]]
+            blocks[side] = blk
+        path_exposure[str(team)] = blocks
+    return out, int(len(edges)), path_exposure
 
 
 def _group_tables():
@@ -165,14 +229,25 @@ def main(argv=None) -> int:
         except (OSError, json.JSONDecodeError):
             recs = None
 
-    if recs is None or age is None or age[0] > args.max_age_hours:
+    ko_pinned = _load_pins()
+    cache_stale = recs is None or age is None or age[0] > args.max_age_hours
+    if not cache_stale and ko_pinned is None:
+        # Legacy cache without the pins sidecar: the sim's KO conditioning is
+        # unknown, so the state-freshness gate cannot trust it. Re-run once
+        # (the new cache writes the sidecar alongside).
+        print("model cache lacks the pins sidecar (%s); re-running sim" % PINS_JSON)
+        cache_stale = True
+
+    if cache_stale:
         try:
-            cur, pre = _run_sim()
+            cur, pre, ko_pinned = _run_sim()
             recs = _sim_to_records(cur, pre)
             with open(MODEL_JSON, "w", encoding="utf-8") as fh:
                 json.dump(recs, fh, indent=2)
+            _write_pins(ko_pinned)
             model_generated = _now().strftime("%Y-%m-%d %H:%M UTC")
-            print("re-ran advancement sim (%d teams)" % len(recs))
+            print("re-ran advancement sim (%d teams, %d KO ties pinned)"
+                  % (len(recs), len(ko_pinned)))
         except Exception as exc:  # noqa: BLE001
             print("sim failed (%s); using cached model probs" % exc, file=sys.stderr)
             if recs is None:
@@ -180,8 +255,22 @@ def main(argv=None) -> int:
                 return 1
 
     sim_df = _records_to_simdf(recs)
-    pm, n_pm = _pm_by_team_stage(sim_df)
+    pm, n_pm, path_exposure = _pm_by_team_stage(sim_df)
     groups = _group_tables()
+
+    # State-freshness gate (2026-07-08): a team whose knockout tie has kicked
+    # off but is NOT pinned in the sim's conditioning set has phantom stage
+    # probabilities (the sim replays a decided tie — USA showed P(QF)=0.317
+    # after its Jul-6 elimination). Stamp the reason per team so downstream
+    # (wca_betrecs.build_advancement_futures) withholds instead of sizing.
+    # ko_pinned=None (sim failed AND no sidecar) fails closed: every kicked-off
+    # KO tie counts as unsettled.
+    try:
+        state_stale = adv.knockout_state_staleness(ko_pinned)
+    except Exception as exc:  # noqa: BLE001 — the gate must never kill the feed.
+        print("state-staleness scan failed (%s); continuing without"
+              % exc, file=sys.stderr)
+        state_stale = {}
 
     teams = []
     for r in recs:
@@ -193,11 +282,19 @@ def main(argv=None) -> int:
         bucket = {st: adv.prob_bucket(model.get(st)) for st in model}
         delta = {st: r[col + "_delta"] for st, col in _COL.items()
                  if (col + "_delta") in r}
-        teams.append({
+        entry = {
             "team": t, "group": r.get("group"),
             "model": model, "bucket": bucket, "delta": (delta or None),
             "pm": pm.get(t, {}),
-        })
+        }
+        # Same-team nested-path exposure (fix 2026-07-08): total path-capped
+        # stake vs the tightest-rung ¼-Kelly cap, per traded side, so the
+        # site/bot can display the correlated-path sizing explicitly.
+        if t in path_exposure:
+            entry["path_exposure"] = path_exposure[t]
+        if t in state_stale:
+            entry["state_stale_reason"] = state_stale[t]
+        teams.append(entry)
     teams.sort(key=lambda x: -(x["model"].get("win") or 0.0))
 
     data = {
@@ -206,6 +303,8 @@ def main(argv=None) -> int:
             "model_generated": model_generated,
             "stages": STAGES,
             "n_pm_markets": n_pm,
+            "n_ko_pinned": (None if ko_pinned is None else len(ko_pinned)),
+            "n_state_stale": len(state_stale),
         },
         "teams": teams,
         "groups": groups,

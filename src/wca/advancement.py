@@ -95,6 +95,13 @@ HOST_NATIONS: Tuple[str, ...] = ("United States", "Mexico", "Canada")
 # Stage ordering used for reporting / monotonicity, best (easiest) first.
 STAGE_ORDER: Tuple[str, ...] = ("R32", "R16", "QF", "SF", "F", "win")
 
+# Strictly NESTED advancement chain for one team: win ⊂ F ⊂ SF ⊂ QF ⊂ R16 ⊂ R32
+# (reaching a deeper stage implies reaching every shallower one). Group-winner
+# (GW) is deliberately EXCLUDED: winning the group implies reaching R32 but is
+# NOT ordered against R16+ (a group winner can still lose its R32 tie), so GW
+# remains an independent exposure. Used by :func:`apply_path_exposure_caps`.
+NESTED_PATH_STAGES: FrozenSet[str] = frozenset(STAGE_ORDER)
+
 # "Further-out" ordering for the canonical selection rule's SECONDARY key
 # (wca.selection): a deeper knockout stage is the analogue of a further-out
 # fixture (Final/Win > SF > QF > R16 > R32 > group-winner). Higher = further
@@ -133,6 +140,21 @@ STAGE_LABEL: Dict[str, str] = {
 
 # Polymarket sports taker-fee coefficient: fee per share = COEF * p * (1 - p).
 PM_TAKER_FEE_COEF: float = 0.03
+
+# A Polymarket binary quoting YES at/beyond these bounds is effectively RESOLVED
+# (the earlier-round tie is decided); there is no tradable edge left, only a
+# phantom "sim vs 0.99" disagreement. Such rows are dropped from the comparison
+# and withheld from the Action Desk feed (fix 2026-07-08).
+PM_RESOLVED_HI: float = 0.98
+PM_RESOLVED_LO: float = 0.02
+
+# Freshest played-results feed. ``data/raw`` results CSVs lag 1-3 days
+# (documented in CLAUDE.md); this derived JSON (scripts/wca_build_wc2026_results
+# .py) is refreshed continuously and carries fixture/score/outcome/kickoff_utc.
+# Knockout pinning unions BOTH sources, preferring whichever has the result —
+# a lagging CSV alone published phantom edges (USA P(QF)=0.317 after its Jul-6
+# elimination).
+RESULTS_JSON_PATH: str = "data/processed/wc2026_results.json"
 
 # Polymarket pool sizing — from the project-wide GLOBAL RULE
 # (``wca.markets.bankroll``): ¼-Kelly of £3,000 ± realised P&L at $1.33/£,
@@ -259,7 +281,15 @@ def make_prob_fn(
         )
         # Dixon-Coles: neutral (no per-host venue term available).
         d_h, d_d, d_a = dc_probs(models, a, b, neutral=True)
-        mkt = None if knockout else market_lookup.get((a, b))
+        # Market anchor applies to KNOCKOUT fixtures too (fix 2026-07-08): once
+        # the bracket is set, R16/QF/... pairings are FIXED fixtures with live
+        # 1X2 books, and the 90-minute 1X2 is exactly what the simulator needs
+        # here (the ET/pens path is resolved downstream by the sim's ET model).
+        # The old ``None if knockout`` guard silently ran the ENTIRE post-group
+        # tournament on the Elo/DC-only fallback — measured worse on the 22
+        # played KO ties (log-loss 0.7465 model-only vs 0.7190 market, n=22).
+        # Both pair orientations are stored in the lookup.
+        mkt = market_lookup.get((a, b))
         if mkt is None:
             p_a = fallback_elo * e_h + fallback_dc * d_h
             p_d = fallback_elo * e_d + fallback_dc * d_d
@@ -396,24 +426,92 @@ def load_played_group_results(
     return out
 
 
+def _played_wc2026_json_rows(
+    results_json_path: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    """Parsed rows of the freshest played-results feed (best-effort, never raises).
+
+    Reads ``data/processed/wc2026_results.json`` (schema: ``{"results":
+    [{date, fixture, score, outcome, kickoff_utc?}]}``, one row per PLAYED 2026
+    WC fixture) and returns ``{home, away, home_goals, away_goals, outcome,
+    when}`` dicts with canonical team names. Unparseable rows are skipped; a
+    missing/corrupt file yields ``[]`` so the CSV path keeps working alone.
+    """
+    import json
+
+    path = results_json_path if results_json_path is not None else RESULTS_JSON_PATH
+    try:
+        with open(path, encoding="utf-8") as fh:
+            results = json.load(fh).get("results", [])
+    except (OSError, ValueError):
+        return []
+
+    out: List[Dict[str, Any]] = []
+    for r in results:
+        fixture = str(r.get("fixture") or "")
+        score = str(r.get("score") or "")
+        if " vs " not in fixture or "-" not in score:
+            continue
+        home_raw, away_raw = fixture.split(" vs ", 1)
+        try:
+            hg_s, ag_s = score.split("-", 1)
+            hg, ag = int(hg_s), int(ag_s)
+        except ValueError:
+            continue
+        when = pd.to_datetime(
+            r.get("kickoff_utc") or r.get("date"), errors="coerce", utc=True
+        )
+        if pd.notna(when):
+            when = when.tz_localize(None)
+        out.append(
+            {
+                "home": canonical(home_raw.strip()),
+                "away": canonical(away_raw.strip()),
+                "home_goals": hg,
+                "away_goals": ag,
+                "outcome": (str(r["outcome"]) if r.get("outcome") else None),
+                "when": when,
+            }
+        )
+    return out
+
+
 def load_played_knockout_results(
     groups: Optional[Dict[str, List[str]]] = None,
     results_path: Optional[str] = None,
     shootouts_df: Optional[pd.DataFrame] = None,
+    results_json_path: Optional[str] = None,
 ) -> Dict[FrozenSet[str], str]:
     """Return already-played 2026 World Cup *knockout* ties with a resolved winner.
 
     Mirrors :func:`load_played_group_results` but selects the CROSS-group
     fixtures (a knockout tie is between two teams that are **not** in the same
     2026 group) that have a final scoreline, and resolves each tie to a winner
-    *name*:
+    *name*. Rows are pinned from the **union** of two sources, preferring
+    whichever has the result (fix 2026-07-08 — the CSV alone lags 1-3 days and
+    published phantom edges for already-eliminated teams):
+
+    * the cleaned results CSV (``resolve_results_path()``), as before;
+    * the freshest derived feed ``data/processed/wc2026_results.json``
+      (:data:`RESULTS_JSON_PATH`), which is refreshed continuously.
+
+    Per candidate row the winner is resolved as:
 
     * a decisive 90-minute result -> the higher-scoring side;
     * a drawn 90-minute result -> the penalty-shootout winner via
       :func:`wca.data.results.shootout_winner` (matched on the unordered pair and
-      the fixture date). A drawn tie with **no** shootout record is *skipped*
-      (it cannot be pinned — leaving it unfixed keeps the sim from inventing a
-      winner it has no basis for).
+      the fixture date);
+    * a drawn 90-minute result with **no** shootout record but whose
+      results-JSON ``outcome`` field names a side (``home``/``away`` despite the
+      drawn scoreline) -> that side. NOTE: the current builder
+      (``scripts/wca_build_wc2026_results.py``) computes ``outcome`` from the
+      score, so drawn ties carry ``"draw"`` today and this fallback is dormant —
+      it exists so a feed that marks the advancing side pins without a code
+      change; a drawn tie with neither source stays unpinned;
+    * otherwise the tie is *skipped* (it cannot be pinned — leaving it unfixed
+      keeps the sim from inventing a winner it has no basis for; the
+      state-freshness gate, :func:`knockout_state_staleness`, then withholds the
+      affected teams instead of publishing phantom edges).
 
     These are passed to :class:`TournamentSimulator` so completed knockout ties
     are *fixed* rather than re-simulated from scratch — otherwise an eliminated
@@ -453,29 +551,146 @@ def load_played_knockout_results(
 
     from wca.data.results import shootout_winner
 
-    out: Dict[FrozenSet[str], str] = {}
+    # Candidate rows from BOTH sources, CSV first (the two agree on the 90'
+    # scoreline when both have the row; the JSON adds fresher rows the CSV
+    # lacks, plus the ``outcome`` advancing-side marker for drawn ties).
+    candidates: List[Dict[str, Any]] = []
     for _, r in df.iterrows():
-        home = canonical(str(r["home_team"]))
-        away = canonical(str(r["away_team"]))
+        candidates.append(
+            {
+                "home": canonical(str(r["home_team"])),
+                "away": canonical(str(r["away_team"])),
+                "home_goals": int(r["home_score"]),
+                "away_goals": int(r["away_score"]),
+                "outcome": None,
+                "when": r.get("_date"),
+            }
+        )
+    candidates.extend(_played_wc2026_json_rows(results_json_path))
+
+    out: Dict[FrozenSet[str], str] = {}
+    for c in candidates:
+        home, away = c["home"], c["away"]
         gh, ga = team_to_group.get(home), team_to_group.get(away)
         # A knockout tie is CROSS-group. Skip intra-group (group-stage) rows and
         # any team that does not resolve to a 2026 group.
         if gh is None or ga is None or gh == ga:
             continue
-        hg, ag = int(r["home_score"]), int(r["away_score"])
+        pair = frozenset((home, away))
+        if pair in out:
+            continue  # already pinned from an earlier (resolved) candidate
+        hg, ag = c["home_goals"], c["away_goals"]
         if hg > ag:
             winner = home
         elif ag > hg:
             winner = away
         else:
-            # Drawn after 90'/ET -> decided on penalties. Match on the pair and
-            # the fixture date; skip if there is no shootout record to pin it.
+            # Drawn after 90' -> decided in ET/pens. Match on the pair and the
+            # fixture date; fall back to the results-JSON advancing-side marker.
+            winner = shootout_winner(shootouts_df, home, away, when=c.get("when"))
+            if winner is not None:
+                winner = canonical(str(winner))
+            elif c.get("outcome") == "home":
+                winner = home
+            elif c.get("outcome") == "away":
+                winner = away
+            else:
+                continue  # cannot pin — never invent a winner
+        out[pair] = winner
+    return out
+
+
+def knockout_state_staleness(
+    pinned: Optional[Mapping[FrozenSet[str], str]],
+    groups: Optional[Dict[str, List[str]]] = None,
+    results_path: Optional[str] = None,
+    results_json_path: Optional[str] = None,
+    now: Optional[pd.Timestamp] = None,
+) -> Dict[str, str]:
+    """Map team -> withheld-reason for teams whose KO state the sim has NOT settled.
+
+    State-freshness gate (fix 2026-07-08). A knockout tie that has *kicked off*
+    but is not pinned in the sim's conditioning set (``pinned``, from
+    :func:`load_played_knockout_results` at sim time) means every advancement
+    probability for BOTH participants is phantom: the sim re-simulates a tie
+    reality has already decided (USA showed P(QF)=0.317 after its Jul-6
+    elimination; Egypt P(R16)=0.4708 after winning its Jul-3 shootout). Such
+    teams must be WITHHELD from actionable surfaces, not repriced.
+
+    Kicked-off detection (no fabrication, evidence only):
+
+    * a played row (numeric scoreline) in either the results CSV or the freshest
+      ``wc2026_results.json`` feed — the fixture certainly kicked off;
+    * a *scheduled* CSV row (NA scoreline) whose date is strictly before today
+      (UTC) — the CSV carries the full KO bracket ahead of time, so a past-dated
+      NA row is a played-but-not-yet-recorded tie (the 1-3 day CSV lag). Same-day
+      NA rows are NOT flagged (date-only granularity: kickoff may still be
+      ahead).
+
+    ``pinned=None`` means the sim's conditioning set is UNKNOWN (e.g. a legacy
+    cache without pin metadata) and is treated as empty — fail closed.
+
+    Returns
+    -------
+    ``{team: reason}`` for every affected team (canonical names); empty when the
+    sim's state is complete.
+    """
+    grp = groups if groups is not None else WC2026_GROUPS
+    team_to_group = {t: g for g, ts in grp.items() for t in ts}
+    pinned_pairs = set(pinned.keys()) if pinned else set()
+    ts_now = (
+        pd.Timestamp.now(tz="UTC").tz_localize(None)
+        if now is None
+        else pd.Timestamp(now)
+    )
+
+    if results_path is None:
+        from wca.data.cleaning import resolve_results_path
+
+        results_path = resolve_results_path()
+
+    # Candidate (home, away, when, played) knockout fixtures with evidence of
+    # having kicked off.
+    kicked_off: List[Tuple[str, str, Optional[pd.Timestamp]]] = []
+
+    try:
+        df = pd.read_csv(results_path)
+    except OSError:
+        df = pd.DataFrame()
+    if not df.empty and "tournament" in df.columns:
+        df = df[df["tournament"] == "FIFA World Cup"].copy()
+        dates = pd.to_datetime(df["date"], errors="coerce")
+        df["_date"] = dates
+        df = df[dates.dt.year == 2026]
+        scores = pd.to_numeric(df["home_score"], errors="coerce")
+        played = scores.notna() & pd.to_numeric(df["away_score"], errors="coerce").notna()
+        for _, r in df.iterrows():
             when = r.get("_date")
-            winner = shootout_winner(shootouts_df, home, away, when=when)
-            if winner is None:
+            is_played = bool(played.loc[r.name])
+            # NA-score rows: kicked off only when dated strictly before today.
+            if not is_played and not (pd.notna(when) and when.date() < ts_now.date()):
                 continue
-            winner = canonical(str(winner))
-        out[frozenset((home, away))] = winner
+            kicked_off.append(
+                (canonical(str(r["home_team"])), canonical(str(r["away_team"])), when)
+            )
+
+    for c in _played_wc2026_json_rows(results_json_path):
+        kicked_off.append((c["home"], c["away"], c.get("when")))
+
+    out: Dict[str, str] = {}
+    for home, away, when in kicked_off:
+        gh, ga = team_to_group.get(home), team_to_group.get(away)
+        if gh is None or ga is None or gh == ga:
+            continue  # not a knockout tie between 2026 teams
+        if frozenset((home, away)) in pinned_pairs:
+            continue  # settled in the sim's conditioning set
+        date_s = when.strftime("%Y-%m-%d") if pd.notna(when) else "date unknown"
+        reason = (
+            "state-stale: earlier-round tie unsettled in sim "
+            "(%s vs %s, kicked off %s)" % (home, away, date_s)
+        )
+        out.setdefault(home, reason)
+        out.setdefault(away, reason)
     return out
 
 
@@ -666,7 +881,12 @@ class AdvancementEdge:
     raw_edge: float  # sim_prob - pm_price
     fee_adj_edge: float  # sim_prob - pm_price - fee (per $ at risk)
     fee_adj_ev_per_dollar: float  # same as fee_adj_edge here (binary $1 payout)
-    stake: float  # quarter-Kelly stake on the PM pool, capped
+    # Independent per-rung quarter-Kelly stake on the PM pool, per-bet-capped.
+    # NOTE: the frame returned by compare_to_polymarket additionally applies
+    # the same-team nested-path cap (apply_path_exposure_caps): its ``stake``
+    # column is the path-capped figure and this independent one is kept there
+    # as ``stake_precap``.
+    stake: float
 
     @property
     def edge_pct(self) -> float:
@@ -753,6 +973,113 @@ def _group_winner_event_letter(title: str) -> Optional[str]:
     return None
 
 
+def apply_path_exposure_caps(df: pd.DataFrame) -> pd.DataFrame:
+    """Cap one team's nested advancement stakes as ONE correlated path exposure.
+
+    Stages in :data:`NESTED_PATH_STAGES` are strictly nested for a single team
+    (win ⊂ F ⊂ SF ⊂ QF ⊂ R16 ⊂ R32), so positions on several rungs of one
+    team's path are NOT independent bets: on one elimination path they lose
+    together and their payouts stack together. Sizing every rung at an
+    independent ¼-Kelly of the same pool therefore overbets the path (observed
+    live 2026-07-08: Morocco SF $112 + Morocco Final $33 ≈ 4.5% of the pool on
+    one correlated path — the whole-book rule says size ALL bets together).
+
+    Rule: staked rows are grouped by ``(team, side)`` over the nested chain.
+    Each family's **path cap** is the independent ¼-Kelly stake of the family's
+    TIGHTEST staked rung — the rung whose payout event is a subset of every
+    other rung's in the family, i.e. the tightest single-outcome Kelly bound:
+
+    * YES family: the DEEPEST staked stage (win beats Final beats SF …);
+    * NO family: the SHALLOWEST staked stage — the NO nesting runs the other
+      way ("fails to reach SF" implies "fails to reach the Final", so NO-SF ⊂
+      NO-Final ⊂ NO-win).
+
+    The family's rung stakes are scaled by one common factor
+    ``min(1, cap / total)`` so their SUM never exceeds the cap — proportional
+    scaling preserves relative sizing, and the transform only ever REDUCES
+    stakes. A family with a single staked rung is unchanged (total == cap).
+
+    Documented treatment decisions (do not regress silently):
+
+    * **NO rows are NEVER co-capped with YES rows of the same team.** A deep
+      YES and a shallow NO cannot both win and do not lose together on one
+      elimination path — they hedge each other rather than stack, so lumping
+      them under one cap would misstate both exposures. Each side forms its
+      own nested family; cross-side/cross-team worst case remains the job of
+      the whole-book exposure layer.
+    * **Opposing-team rows are separate exposures** (different teams never
+      share a family).
+    * **Group-winner (GW) rows are excluded** from the chain (see
+      :data:`NESTED_PATH_STAGES`) and keep their independent stake.
+    * **Zero-stake rows** (longshot no-cash floor, or no positive fee-adjusted
+      Kelly edge) are ignored when picking the cap rung and are never scaled.
+
+    Returns a copy of ``df`` with ``stake`` scaled and three added columns:
+    ``stake_precap`` (the independent per-rung ¼-Kelly stake, kept for
+    transparency/CLV comparison), ``path_cap_usd`` (the family cap, NaN outside
+    staked chain families) and ``path_scale`` (the common factor, 1.0 when no
+    scaling was needed).
+    """
+    out = df.copy()
+    out["stake_precap"] = out["stake"].astype(float)
+    out["path_scale"] = 1.0
+    out["path_cap_usd"] = np.nan
+    if out.empty:
+        return out
+    staked = out["stage"].isin(NESTED_PATH_STAGES) & (out["stake_precap"] > 0.0)
+    if not staked.any():
+        return out
+    for (_team, side), grp in out[staked].groupby(["team", "side"], sort=False):
+        depth = grp["stage"].map(stage_further_out)
+        # Tightest rung: deepest staked stage for YES, shallowest for NO.
+        cap_idx = depth.idxmax() if side == "YES" else depth.idxmin()
+        cap = float(grp.loc[cap_idx, "stake_precap"])
+        total = float(grp["stake_precap"].sum())
+        scale = 1.0 if total <= cap else cap / total
+        out.loc[grp.index, "stake"] = grp["stake_precap"] * scale
+        out.loc[grp.index, "path_scale"] = scale
+        out.loc[grp.index, "path_cap_usd"] = cap
+    return out
+
+
+def path_exposure_summary(df: pd.DataFrame) -> Dict[str, Dict[str, Dict[str, Any]]]:
+    """Per-team, per-side nested-path exposure blocks for feed emission.
+
+    Built from the columns :func:`apply_path_exposure_caps` stamped on the
+    comparison frame. Shape::
+
+        {team: {side: {total_stake_usd, total_stake_precap_usd, cap_usd,
+                       cap_stage, scale, scaling_applied, stages}}}
+
+    Only ``(team, side)`` families with at least one staked nested-chain rung
+    appear; ``scaling_applied`` is True when the family total was actually
+    reduced. Stage labels use this module's stage codes (``"F"``, ``"win"`` …);
+    feed builders map them to their own dialect.
+    """
+    out: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    if df is None or df.empty or "path_cap_usd" not in df.columns:
+        return out
+    staked = df["stage"].isin(NESTED_PATH_STAGES) & (df["stake_precap"] > 0.0)
+    if not staked.any():
+        return out
+    for (team, side), grp in df[staked].groupby(["team", "side"], sort=False):
+        grp = grp.copy()
+        grp["_depth"] = grp["stage"].map(stage_further_out)
+        grp = grp.sort_values("_depth")
+        cap_idx = grp["_depth"].idxmax() if side == "YES" else grp["_depth"].idxmin()
+        scale = float(grp["path_scale"].iloc[0])
+        out.setdefault(str(team), {})[str(side)] = {
+            "total_stake_usd": round(float(grp["stake"].sum()), 2),
+            "total_stake_precap_usd": round(float(grp["stake_precap"].sum()), 2),
+            "cap_usd": round(float(grp["path_cap_usd"].iloc[0]), 2),
+            "cap_stage": str(grp.loc[cap_idx, "stage"]),
+            "scale": round(scale, 4),
+            "scaling_applied": bool(scale < 1.0),
+            "stages": [str(s) for s in grp["stage"]],
+        }
+    return out
+
+
 def compare_to_polymarket(
     sim_df: pd.DataFrame,
     pm_events: Sequence[Dict[str, Any]],
@@ -780,8 +1107,15 @@ def compare_to_polymarket(
 
     Returns
     -------
-    pandas.DataFrame, one row per matched team-stage market, sorted by
-    fee-adjusted edge descending. Columns mirror :class:`AdvancementEdge`.
+    pandas.DataFrame, one row per matched team-stage market, in the canonical
+    desk order. Columns mirror :class:`AdvancementEdge`, plus the same-team
+    path-exposure columns from :func:`apply_path_exposure_caps` (fix
+    2026-07-08): ``stake`` is the PATH-CAPPED stake — one team's nested
+    advancement rungs (same side) are sized as ONE correlated exposure whose
+    sum respects the ¼-Kelly stake of the tightest staked rung —
+    ``stake_precap`` keeps the independent per-rung figure, and
+    ``path_cap_usd`` / ``path_scale`` expose the family cap and the common
+    reduction factor. Aggregation only ever reduces stakes.
     """
     edges: List[AdvancementEdge] = []
 
@@ -806,6 +1140,13 @@ def compare_to_polymarket(
             sim_p = float(sim_df.loc[team, col])
             yes_mid = _yes_mid(market)
             if yes_mid is None:
+                continue
+            # Resolved/decided markets (fix 2026-07-08): a YES quote pinned at
+            # ≥0.98 or ≤0.02 means the market has effectively settled (the
+            # team's tie is decided). There is no tradable edge — only a
+            # phantom sim-vs-0.99 disagreement when the sim's conditioning
+            # lags reality — so the row is dropped, never sized.
+            if yes_mid >= PM_RESOLVED_HI or yes_mid <= PM_RESOLVED_LO:
                 continue
 
             yes_buy = _yes_ask(market, yes_mid)
@@ -883,6 +1224,11 @@ def compare_to_polymarket(
     ]
     df = pd.DataFrame(rows)
     if not df.empty:
+        # Same-team nested-path exposure aggregation (fix 2026-07-08): a
+        # team's stage rungs are one correlated path leg, not independent
+        # bets — scale each (team, side) family so its stake SUM respects the
+        # ¼-Kelly stake of the tightest staked rung. Reduces only.
+        df = apply_path_exposure_caps(df)
         # Canonical desk ordering (wca.selection; user 2026-07-07):
         #   1. model-prob bucket (moneyline > mid > longshot), ALWAYS;
         #   2. further-out first — deeper knockout stage (stage_further_out desc);

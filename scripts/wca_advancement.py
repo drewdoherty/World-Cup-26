@@ -46,8 +46,14 @@ def _load_or_fit_models(
     ``structural_prior`` is set the Dixon-Coles ridge shrinks low-data teams
     toward the socio-economic prior; that is a *different* fit, so the caller
     routes it to a distinct cache file (see ``main``) to keep A/B runs separate.
+
+    The fit is anchored to the deployed total-goals level
+    (``DEFAULT_DC_LEVEL_TARGET``, same as the live card — fix 2026-07-08: the
+    unanchored fit ran KO totals ~1.86 vs 2.70 realised, inflating draws and
+    understating favourites). A cached fit whose recorded ``_level_target``
+    does not match is a stale unanchored pickle and is refit.
     """
-    from wca.card import fit_models
+    from wca.card import DEFAULT_DC_LEVEL_TARGET, fit_models
     from wca.data.results import load_results
 
     cache = Path(cache_path)
@@ -55,8 +61,15 @@ def _load_or_fit_models(
         try:
             with cache.open("rb") as fh:
                 models = pickle.load(fh)
-            print("Reusing cached model fit: %s" % cache)
-            return models
+            cached_target = getattr(models.dc, "_level_target", None)
+            if cached_target == DEFAULT_DC_LEVEL_TARGET:
+                print("Reusing cached model fit: %s" % cache)
+                return models
+            print(
+                "Cached fit has level_target=%s (deployed anchor is %s); "
+                "refitting." % (cached_target, DEFAULT_DC_LEVEL_TARGET),
+                file=sys.stderr,
+            )
         except Exception as exc:  # noqa: BLE001 - cache is best-effort
             print("Cache load failed (%s); refitting." % exc, file=sys.stderr)
 
@@ -65,7 +78,11 @@ def _load_or_fit_models(
         % (" [structural prior]" if structural_prior else "")
     )
     results = load_results(results_path)
-    models = fit_models(results, structural_prior=structural_prior)
+    models = fit_models(
+        results,
+        structural_prior=structural_prior,
+        dc_level_target=DEFAULT_DC_LEVEL_TARGET,
+    )
     try:
         cache.parent.mkdir(parents=True, exist_ok=True)
         with cache.open("wb") as fh:
@@ -180,6 +197,17 @@ def _write_report(
         "win probability, capped at %.0f%% of the $%.0f pool "
         "(`fraction=%.2f`)."
         % (PM_PER_BET_CAP * 100, PM_POOL_BANKROLL, PM_KELLY_FRACTION)
+    )
+    a(
+        "8. **Same-team path exposure.** One team's advancement rungs are "
+        "NESTED (win ⊂ Final ⊂ SF ⊂ QF ⊂ R16 ⊂ R32) — one correlated path "
+        "leg, not independent bets. Per team and traded side, the staked "
+        "rungs are jointly capped by the quarter-Kelly stake of the tightest "
+        "staked rung (deepest stage for YES; shallowest for NO, whose "
+        "nesting runs the other way) and scaled proportionally, so the Stake "
+        "column sums to at most that cap per path. NO positions are never "
+        "co-capped with YES positions of the same team (they hedge, not "
+        "stack); group-winner is a separate exposure."
     )
     a("")
     a(

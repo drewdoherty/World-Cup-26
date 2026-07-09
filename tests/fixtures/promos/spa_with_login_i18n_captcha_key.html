@@ -1,0 +1,33 @@
+<!--
+Trimmed-down reproduction of the real Unibet promotions-hub HTML shape
+(captured 2026-07-08 recon; team-name/copy details paraphrased, structure and
+the specific false-positive substring are faithful to the live page).
+
+The page IS genuinely server-rendered (unlike Paddy Power / Virgin Bet / etc,
+which are pure JS shells) and carries real, current promo text. But it ALSO
+ships a client-side login-form i18n JSON blob containing the literal substring
+"captcha" as part of an unrelated validation-message KEY
+(`"captchaRequired":"Please verify that you are not a robot"`), which an
+earlier version of wca.promos._BLOCK_MARKERS matched as a bare substring and
+misclassified the whole page as `blocked` — silently discarding every real
+offer below. This fixture is what tests/test_promos.py::TestBlockMarkers pins
+against a regression back to the bare-substring check.
+-->
+<html>
+<head><title>Promotions</title></head>
+<body>
+<script id="login-i18n" type="application/json">
+{"LOGIN.email.invalid":"You've entered an incorrect email or password","LOGIN.userName":"Email","LOGIN.captchaRequired":"Please verify that you are not a robot","LOGIN.isCaptchaSupportEnabledOnRegistration":true,"LOGIN.months.november":"November"}
+</script>
+<main>
+  <section class="promo-card">
+    <h2>25% DAILY BET BUILDER PROFIT BOOST</h2>
+    <p>Build a qualifying Bet Builder on Football World Championships matches and get a 25% boost on your winnings if it lands. Price Boost and Super Boost available daily.</p>
+  </section>
+  <section class="promo-card">
+    <h2>Create a Sports account and get £30 in Free Bets when you bet £10!</h2>
+    <p>New customers only. Min odds evens. 7-day expiry.</p>
+  </section>
+</main>
+</body>
+</html>

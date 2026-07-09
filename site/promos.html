@@ -196,12 +196,24 @@
       <div class="panel-body" id="scrape-health"></div>
     </section>
 
+    <!-- 6. Manual-check -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-label">06 // Manual Check // Click Through Daily</span>
+        <span class="panel-meta" id="manual-check-meta"></span>
+      </div>
+      <div class="panel-body" id="manual-check"></div>
+    </section>
+
     <div class="track-note">
       Sign-up "Used" flags and opt-in toggles are personal trackers held in this
       browser's localStorage &mdash; per device, not synced. Boost evaluations are
       graded against the model's fair price at capture time; a green marker means
       the boosted odds cleared the fair line (+EV). Scrape health is the honest
-      record of which promo pages the scraper could reach.
+      record of which promo pages the scraper could reach. Manual-check sources
+      were confirmed (real probe, not a guess) to require a browser to render —
+      the scraper still tries them every cycle, but treat this list as the
+      2-minute daily click-through for anything they can't reach.
     </div>
   </main>
 

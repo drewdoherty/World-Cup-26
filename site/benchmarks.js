@@ -1,4 +1,14 @@
-/* benchmarks.js — WCA Benchmarking page */
+/* benchmarks.js — WCA Benchmarking page
+ *
+ * Renders the JSON emitted by scripts/build_benchmarks.py verbatim — every
+ * number on this page is read from D (the fetched JSON), never hard-coded.
+ * (Regression, 2026-07: this file used to render a hand-authored JSON shape
+ * with fields the builder never emits — a one-off "Norway/France spotlight",
+ * a fabricated priority-sorted suggestions list, StatsBomb-vs-WC2026 baseline
+ * deltas that were typed in by hand — so rebuilding the data never actually
+ * updated the page's narrative. The builder's real schema is the only
+ * source of truth now.)
+ */
 
 (async function () {
   const root = document.getElementById('bench-root');
@@ -12,6 +22,12 @@
     return;
   }
 
+  if (D.error || !D.metrics) {
+    const n = (D.meta && D.meta.n) || 0;
+    root.innerHTML = `<div class="bench-loading">No benchmark data yet (n=${n}). Run scripts/build_benchmarks.py once fixtures have settled.</div>`;
+    return;
+  }
+
   root.innerHTML = renderAll(D);
   drawCalibration(D);
   drawGoalsDist(D);
@@ -20,61 +36,53 @@
 /* ---- Top-level render ---- */
 function renderAll(D) {
   const parts = [];
-  parts.push(renderNorwaySpotlight(D.norway_france_spotlight));
   parts.push(renderKPIs(D.metrics, D.meta));
-  parts.push(renderGoalsSection(D.goals_calibration, D.statsbomb_context));
+  parts.push(renderGoalsSection(D.goals_calibration, D.wc26_summary, D.statsbomb_context));
   parts.push(renderCalibrationSection());
-  parts.push(renderSuggestions(D.suggestions));
-  parts.push(renderMatchTable(D.outcome_table));
+  if (D.suggestions && D.suggestions.length) parts.push(renderSuggestions(D.suggestions));
+  parts.push(renderMatchTable(D.outcome_table || []));
   return `<div class="bench-grid">${parts.join('')}</div>`;
-}
-
-/* ---- Norway / France Spotlight ---- */
-function renderNorwaySpotlight(s) {
-  if (!s) return '';
-  const lambdaTotal = (s.lambda_home + s.lambda_away).toFixed(2);
-  return `
-  <section class="panel bench-full">
-    <div class="panel-head">
-      <span class="panel-label">Live Spotlight &mdash; Norway vs France (2026-06-26)</span>
-      <span class="panel-meta" style="color:var(--neg)">model failure: 4+ goals by HT vs &lambda;=${lambdaTotal}</span>
-    </div>
-    <div class="norway-grid">
-      <div class="norway-cell">
-        <div class="norway-label">Model &lambda; Total (full match)</div>
-        <div class="norway-val">${lambdaTotal}</div>
-        <div class="norway-sub">&lambda;<sub>H</sub>=${s.lambda_home.toFixed(2)} &lambda;<sub>A</sub>=${s.lambda_away.toFixed(2)}</div>
-      </div>
-      <div class="norway-cell">
-        <div class="norway-label">Actual Goals by HT</div>
-        <div class="norway-val alert">&ge;4</div>
-        <div class="norway-sub">already exceeds full-match prediction</div>
-      </div>
-      <div class="norway-cell">
-        <div class="norway-label">P(4+ goals by 45&prime;) under model</div>
-        <div class="norway-val alert">~6%</div>
-        <div class="norway-sub">P(O2.5 full match) = ${pct(s.p_over25)}</div>
-      </div>
-    </div>
-    <div class="norway-note">
-      Model assigned &lambda; = ${s.lambda_home.toFixed(2)} (Norway) + ${s.lambda_away.toFixed(2)} (France) = ${lambdaTotal} expected goals total.
-      With &ge;4 goals by half-time this match has already exceeded the full-match prediction — a &gt;1.7&sigma; event under independent Poisson.
-      This validates the core calibration finding: <span style="color:var(--warn)">WC2026 group stage goals are running +16% above WC2022 baseline</span>,
-      and the independent-Poisson model systemically underweights match-level variance.
-      Suggested fix: apply WC2026 goals inflation multiplier (~1.16&times;) to all &lambda; estimates + fit Negative Binomial overdispersion.
-    </div>
-  </section>`;
 }
 
 /* ---- KPI strip ---- */
 function renderKPIs(m, meta) {
   const bss = m.model.bss;
   const bssColor = bss >= 0 ? 'var(--pos)' : 'var(--neg)';
+
+  // Best-performing proprietary component vs market, derived from the data
+  // (never hard-coded): whichever of elo/dc/model has the LEAST-negative (or
+  // most-positive) BSS is "closest to / beating the market".
+  const components = ['elo', 'dc', 'model']
+    .filter((k) => m[k] && typeof m[k].bss === 'number')
+    .map((k) => ({ key: k, bss: m[k].bss, brier: m[k].brier }));
+  const best = components.length
+    ? components.reduce((a, b) => (b.bss > a.bss ? b : a))
+    : null;
+  const labelFor = { elo: 'Elo', dc: 'DC', model: 'Blend' };
+
+  const narrativeBits = [];
+  if (components.length) {
+    const others = components.filter((c) => c.key !== best.key);
+    if (others.length) {
+      const othersTxt = others
+        .map((c) => `${labelFor[c.key]} (Brier ${D3(c.brier)}, BSS ${D3(c.bss)})`)
+        .join(' and ');
+      narrativeBits.push(`${othersTxt} trail the market.`.replace(/^(\w)/, (c) => c.toUpperCase()));
+    }
+    const bssTxt = `BSS of ${bss >= 0 ? '+' : ''}${D3(bss)}`;
+    const verdict = bss > 0.02
+      ? 'beats the market — the blend is adding positive value.'
+      : bss < -0.02
+        ? 'trails the market — the proprietary components are adding net noise, not signal.'
+        : 'is near-breakeven with the market.';
+    narrativeBits.push(`${bssTxt} for the deployed blend ${verdict}`);
+  }
+
   return `
   <section class="panel bench-full">
     <div class="panel-head">
       <span class="panel-label">1X2 Accuracy // ${meta.n_matched} matched fixtures</span>
-      <span class="panel-meta">${meta.n_results} completed &mdash; first prediction per fixture vs actual</span>
+      <span class="panel-meta">${meta.n_results} settled results total &mdash; first prediction per fixture vs actual</span>
     </div>
     <div class="kpi-row">
       <div class="kpi">
@@ -109,72 +117,79 @@ function renderKPIs(m, meta) {
       </div>
     </div>
     <div style="padding:0 16px 12px; font-size:11px; color:var(--text-dim); line-height:1.5">
-      Blend weights: <span style="color:var(--text)">0.10 Elo + 0.30 DC + 0.60 Market</span>.
-      DC (Brier ${D3(m.dc.brier)}, BSS ${m.dc.bss.toFixed(3)}) and Elo (${D3(m.elo.brier)}, ${m.elo.bss.toFixed(3)}) both trail the market.
-      BSS of &minus;0.016 is near-breakeven but indicates the proprietary components are adding marginal noise, not signal.
-      Scoreline top-6 hit rate: <span style="color:var(--text)">26%</span>.
+      ${narrativeBits.join(' ')}
     </div>
   </section>`;
 }
 
 /* ---- Goals / xG section ---- */
-function renderGoalsSection(gc, sb) {
-  const wc26 = sb.wc2026_so_far;
-  const wc22 = sb.wc2022;
-  const wc18 = sb.wc2018;
-  const delta = (wc26.avg_goals_per_match - wc22.avg_goals_per_match);
-  const deltaSign = delta >= 0 ? '+' : '';
+function renderGoalsSection(gc, wc26, sb) {
+  if (!gc || !gc.n) {
+    return `
+    <section class="panel">
+      <div class="panel-head"><span class="panel-label">Goals Calibration // xG vs Actual</span></div>
+      <div class="bench-loading">No fixtures with logged &lambda; yet (n=0) &mdash; lambda persistence started 2026-06-26.</div>
+    </section>`;
+  }
 
-  const bars = [
-    { label: 'WC2026', val: wc26.avg_goals_per_match, color: 'var(--neg)', max: 4.0 },
-    { label: 'WC2022', val: wc22.avg_goals_per_match, color: 'var(--accent)', max: 4.0 },
-    { label: 'WC2018', val: wc18.avg_goals_per_match, color: 'var(--text-dim)', max: 4.0 },
-  ];
+  const wc22 = sb && sb.wc2022;
+  const wc18 = sb && sb.wc2018;
+  const wc26Avg = wc26 && wc26.matches ? wc26.avg_goals_per_match : gc.mean_actual_total;
+  const wc26N = wc26 && wc26.matches ? wc26.matches : gc.n;
+
+  const bars = [{ label: 'WC2026', val: wc26Avg, color: 'var(--neg)' }];
+  if (wc22) bars.push({ label: 'WC2022', val: wc22.avg_goals_per_match, color: 'var(--accent)' });
+  if (wc18) bars.push({ label: 'WC2018', val: wc18.avg_goals_per_match, color: 'var(--text-dim)' });
+  const maxBar = Math.max(4.0, ...bars.map((b) => b.val));
+
+  const calibPct = gc.calibration_factor_total != null
+    ? ((gc.calibration_factor_total - 1) * 100)
+    : null;
 
   return `
   <section class="panel">
     <div class="panel-head">
-      <span class="panel-label">Goals Calibration // xG vs Actual</span>
-      <span class="panel-meta" style="color:var(--neg)">${deltaSign}${delta.toFixed(2)} vs WC2022</span>
+      <span class="panel-label">Goals Calibration // &lambda; vs Actual (n=${gc.n})</span>
+      ${calibPct != null ? `<span class="panel-meta" style="color:${calibPct >= 0 ? 'var(--neg)' : 'var(--text-dim)'}">${calibPct >= 0 ? '+' : ''}${calibPct.toFixed(1)}% vs model &lambda;</span>` : ''}
     </div>
     <div class="spotlight">
       <div class="spot-item">
-        <div class="spot-label">WC2026 Goals/Match</div>
-        <div class="spot-val" style="color:var(--neg)">${wc26.avg_goals_per_match.toFixed(2)}</div>
-        <div class="spot-delta">${gc.n} matched matches</div>
+        <div class="spot-label">Actual Goals/Match</div>
+        <div class="spot-val" style="color:var(--neg)">${gc.mean_actual_total.toFixed(2)}</div>
+        <div class="spot-delta">${gc.n} matched matches (&lambda; logged)${wc26N !== gc.n ? ` &middot; ${wc26N} total settled` : ''}</div>
       </div>
       <div class="spot-item" style="border-right:none">
-        <div class="spot-label">Inflation vs WC2022</div>
-        <div class="spot-val" style="color:var(--warn)">+${(gc.inflation_vs_wc2022 * 100).toFixed(0)}%</div>
-        <div class="spot-delta">model &lambda; not yet adjusted</div>
+        <div class="spot-label">Model &lambda; Total (mean)</div>
+        <div class="spot-val" style="color:var(--warn)">${gc.mean_lambda_total.toFixed(2)}</div>
+        <div class="spot-delta">${calibPct != null ? `calibration factor ${gc.calibration_factor_total.toFixed(2)}x` : 'n/a'}</div>
       </div>
     </div>
-    ${bars.map(b => `
+    ${bars.map((b) => `
     <div class="comp-bar-row">
       <div class="comp-bar-label">${b.label}</div>
       <div class="comp-bar-track">
-        <div class="comp-bar-fill" style="width:${(b.val / b.max * 100).toFixed(1)}%;background:${b.color}"></div>
+        <div class="comp-bar-fill" style="width:${Math.min(100, (b.val / maxBar) * 100).toFixed(1)}%;background:${b.color}"></div>
       </div>
       <div class="comp-bar-val" style="color:${b.color}">${b.val.toFixed(2)}</div>
     </div>`).join('')}
     <div style="padding:10px 16px;font-size:10px;color:var(--muted)">
-      O2.5 actual rate: <span style="color:var(--text)">${pct(gc.over25.actual_rate)}</span>
-      &nbsp;&mdash;&nbsp; WC2022 baseline: <span style="color:var(--text-dim)">${pct(gc.over25.wc2022_baseline)}</span>
-      &nbsp;&mdash;&nbsp; WC2018 baseline: <span style="color:var(--text-dim)">${pct(gc.over25.wc2018_baseline)}</span>
+      O2.5 actual rate: <span style="color:var(--text)">${pct(gc.mean_ou25_actual)}</span>
+      &nbsp;&mdash;&nbsp; model-predicted: <span style="color:var(--text-dim)">${pct(gc.mean_ou25_pred)}</span>
+      ${wc22 ? `&nbsp;&mdash;&nbsp; WC2022 baseline: <span style="color:var(--text-dim)">${pct(wc22.over25_rate)}</span>` : ''}
     </div>
   </section>
 
   <section class="panel">
     <div class="panel-head">
-      <span class="panel-label">Goals Distribution // WC2026 vs WC2022</span>
+      <span class="panel-label">Goals Distribution // Actual vs Model-Expected (Poisson)</span>
       <span class="panel-meta">${gc.n} matched matches</span>
     </div>
     <div class="cal-wrap">
       <canvas class="dist-canvas" id="dist-canvas"></canvas>
     </div>
     <div style="padding:0 16px 10px; display:flex; gap:16px; font-size:10px; color:var(--text-dim)">
-      <span><span style="display:inline-block;width:10px;height:10px;background:var(--neg);border-radius:2px;margin-right:4px"></span>WC2026 actual</span>
-      <span><span style="display:inline-block;width:10px;height:10px;background:var(--accent);border-radius:2px;margin-right:4px"></span>WC2022 baseline</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--neg);border-radius:2px;margin-right:4px"></span>Actual</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--accent);border-radius:2px;margin-right:4px"></span>Model-expected (Poisson &lambda;)</span>
     </div>
   </section>`;
 }
@@ -199,9 +214,18 @@ function renderCalibrationSection() {
 }
 
 /* ---- Improvement suggestions ---- */
+const _SEVERITY_RANK = { high: 0, medium: 1, low: 2, info: 3 };
+
 function renderSuggestions(suggestions) {
-  const sorted = [...suggestions].sort((a, b) => a.priority - b.priority);
-  const items = sorted.map(s => `
+  // The builder (scripts/build_benchmarks.py) does not emit a `priority`
+  // field — sort by severity instead (high first), stable on insertion order
+  // within a tier, so this never crashes on real builder output.
+  const sorted = [...suggestions].sort((a, b) => {
+    const ra = _SEVERITY_RANK[a.severity] ?? 99;
+    const rb = _SEVERITY_RANK[b.severity] ?? 99;
+    return ra - rb;
+  });
+  const items = sorted.map((s) => `
     <div class="suggestion">
       <div class="sug-badge ${s.severity}">${s.severity}</div>
       <div class="sug-body">
@@ -215,7 +239,7 @@ function renderSuggestions(suggestions) {
   <section class="panel bench-full">
     <div class="panel-head">
       <span class="panel-label">Modelling Improvement Suggestions</span>
-      <span class="panel-meta">data-driven &mdash; ranked by impact &mdash; WC2026 + StatsBomb WC18+22</span>
+      <span class="panel-meta">data-driven &mdash; ranked by severity &mdash; WC2026 + StatsBomb WC18+22</span>
     </div>
     ${items}
   </section>`;
@@ -223,8 +247,14 @@ function renderSuggestions(suggestions) {
 
 /* ---- Match-by-match table ---- */
 function renderMatchTable(table) {
+  if (!table.length) {
+    return `
+    <section class="panel bench-full">
+      <div class="panel-head"><span class="panel-label">Match-by-Match Results</span></div>
+      <div class="bench-loading">No matched fixtures yet.</div>
+    </section>`;
+  }
   const rows = table.map(m => {
-    const bestOutcome = Object.entries(m.model).reduce((a, b) => b[1] > a[1] ? b : a)[0];
     const correct = m.model_correct === 1;
     const brier = m.model_brier;
     const brierCls = brier < 0.1 ? 'brier-good' : brier > 0.45 ? 'brier-bad' : 'brier-neutral';
@@ -324,11 +354,12 @@ function drawCalibration(D) {
     ctx.fillText(v.toFixed(2), pad.left - 5, scaleY(v) + 4);
   }
 
+  const calBins = D.calibration_bins || {};
   // Series
   const series = [
-    { data: D.calibration_bins.model, color: '#6D4AD0' },
-    { data: D.calibration_bins.market, color: '#2563B0' },
-  ];
+    { data: calBins.model, color: '#6D4AD0' },
+    { data: calBins.market, color: '#2563B0' },
+  ].filter((s) => Array.isArray(s.data) && s.data.length);
 
   series.forEach(({ data, color }) => {
     ctx.strokeStyle = color;
@@ -353,17 +384,19 @@ function drawCalibration(D) {
 function drawGoalsDist(D) {
   const canvas = document.getElementById('dist-canvas');
   if (!canvas) return;
+  const gc = D.goals_calibration;
+  if (!gc || !gc.n || !gc.dist_goals) return;
+
   const W = canvas.offsetWidth || 500;
   const H = 160;
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
-  const gc = D.goals_calibration;
 
-  const xs = gc.goals_distribution.x;
-  const actual = gc.goals_distribution.actual_pct;
-  const baseline = gc.goals_distribution.wc2022_pct;
-  const maxVal = Math.max(...actual, ...baseline) * 1.1;
+  const xs = gc.dist_goals;
+  const actual = gc.dist_actual;
+  const expected = gc.dist_expected;
+  const maxVal = Math.max(...actual, ...expected) * 1.1;
 
   const pad = { top: 10, right: 10, bottom: 28, left: 8 };
   const bw = Math.floor((W - pad.left - pad.right) / xs.length);
@@ -375,13 +408,13 @@ function drawGoalsDist(D) {
     const bx = pad.left + i * bw;
     const bottom = H - pad.bottom;
 
-    // WC2026
+    // Actual
     ctx.fillStyle = '#6D4AD0';
     ctx.fillRect(bx + 1, scaleY(actual[i]), each, bottom - scaleY(actual[i]));
 
-    // WC2022
+    // Model-expected
     ctx.fillStyle = '#9390B2';
-    ctx.fillRect(bx + each + 3, scaleY(baseline[i]), each, bottom - scaleY(baseline[i]));
+    ctx.fillRect(bx + each + 3, scaleY(expected[i]), each, bottom - scaleY(expected[i]));
 
     // X label
     ctx.fillStyle = '#9390B2';

@@ -43,6 +43,10 @@ from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from wca.advancement import (  # noqa: E402  — resolved-market bounds (single source)
+    PM_RESOLVED_HI,
+    PM_RESOLVED_LO,
+)
 from wca.markets import bankroll as pm_rule  # noqa: E402  (needs src on path)
 from wca.selection import (  # noqa: E402  — canonical desk selection rule
     bucket_rank,
@@ -76,6 +80,47 @@ FX_FALLBACK_GBP_USD: float = 1.27      # fallback when no FX available
 PM_FEE_RATE: float = 0.03
 
 OUTCOMES = ("home", "draw", "away")
+
+
+# ---------------------------------------------------------------------------
+# Withheld-row reason taxonomy (telemetry — see docs/HANDOFF_2026-07-03.md /
+# the 2026-07-08 gate-fill-telemetry review).
+#
+# ``reason_code`` is a NEW, machine-greppable field added alongside the
+# existing free-text ``withheld_reason`` (never renamed/removed — site/arb.js
+# only ever reads ``withheld_reason`` as opaque display text, so adding a
+# field is behaviour-safe; see PR description). Every candidate a gate drops —
+# not just the historically-instrumented ones — must append a withheld row
+# carrying one of these codes so the 2pp edge-floor's true rejection cost
+# becomes measurable instead of a bare ``continue``.
+#
+# Codes are intentionally granular (one per gate) rather than reusing a single
+# generic "filtered" bucket, so ``wca_telemetry_report.py`` can show a
+# breakdown by gate.
+# ---------------------------------------------------------------------------
+REASON_MISSING_MODEL_OR_MARKET = "missing_model_or_market"
+REASON_KICKOFF_PAST = "kickoff_past"
+REASON_MISSING_PRICE = "missing_price"
+REASON_BAD_DEVIG_PRICE = "bad_devig_price"
+REASON_BELOW_MIN_PROB = "below_min_prob"
+REASON_LONGSHOT_FILTER = "longshot_filter"
+REASON_EDGE_BELOW_FLOOR = "edge_below_floor"
+REASON_STALE_MODEL = "stale_model"
+REASON_ZERO_STAKE = "zero_stake"
+REASON_TOP3_CAP = "top3_per_fixture_cap"
+REASON_NO_LIVE_PRICE = "no_live_price"
+REASON_UNSUPPORTED = "unsupported"
+REASON_MISSING_PM_PRICE = "missing_pm_price"
+REASON_MISSING_PM_MODEL_PROB = "missing_model_prob"
+REASON_LONGSHOT_NO_CASH = "longshot_no_cash"
+REASON_STALE_ADVANCEMENT = "stale_advancement"
+# Added alongside the advancement KO-correctness gates (#177, landed on
+# origin/main after this branch forked): both already emitted a withheld row
+# (not a silent ``continue``), but lacked a reason_code — extending the
+# taxonomy here keeps the breakdown complete rather than leaving these two
+# gates as "(no reason_code)" rows in wca_telemetry_report.py.
+REASON_RESOLVED_MARKET = "resolved_market"
+REASON_STATE_STALE = "state_stale"
 
 
 # ---------------------------------------------------------------------------
@@ -501,21 +546,46 @@ def build_match_singles(
         model = fix.get("model") or {}
         market = fix.get("market") or {}
 
-        if not model or not market:
-            continue
-
-        # Kickoff guard: skip if kickoff is in the past (> 3h ago)
-        if kickoff:
-            kick_age = _age_secs(kickoff)
-            if kick_age is not None and kick_age > 3 * 3600:
-                continue
-
         teams = fixture.split(" vs ")
         team_map = {
             "home": teams[0] if teams else "Home",
             "draw": "Draw",
             "away": teams[1] if len(teams) > 1 else "Away",
         }
+
+        if not model or not market:
+            # Whole fixture dropped — no model or no market side to compare.
+            # One withheld row per outcome so the candidate count stays
+            # honest (previously a bare ``continue``, zero telemetry).
+            for outcome in OUTCOMES:
+                withheld.append({
+                    "id": "%s_%s_1x2" % (fixture.lower().replace(" vs ", "_vs_").replace(" ", "_"), outcome),
+                    "fixture": fixture, "kickoff": kickoff, "group": group,
+                    "market": "1X2", "selection": outcome, "team": team_map[outcome],
+                    "model_prob": None, "price": None, "edge": None, "ev_net": None,
+                    "stake": 0.0, "currency": "GBP",
+                    "withheld_reason": "missing model or market data for fixture",
+                    "reason_code": REASON_MISSING_MODEL_OR_MARKET,
+                    "stale": None, "stale_reason": None,
+                })
+            continue
+
+        # Kickoff guard: skip if kickoff is in the past (> 3h ago)
+        if kickoff:
+            kick_age = _age_secs(kickoff)
+            if kick_age is not None and kick_age > 3 * 3600:
+                for outcome in OUTCOMES:
+                    withheld.append({
+                        "id": "%s_%s_1x2" % (fixture.lower().replace(" vs ", "_vs_").replace(" ", "_"), outcome),
+                        "fixture": fixture, "kickoff": kickoff, "group": group,
+                        "market": "1X2", "selection": outcome, "team": team_map[outcome],
+                        "model_prob": None, "price": None, "edge": None, "ev_net": None,
+                        "stake": 0.0, "currency": "GBP",
+                        "withheld_reason": "kickoff %ds in the past (> 3h stale fixture)" % kick_age,
+                        "reason_code": REASON_KICKOFF_PAST,
+                        "stale": None, "stale_reason": None,
+                    })
+                continue
 
         recs_this_fixture: List[Dict[str, Any]] = []
 
@@ -524,10 +594,31 @@ def build_match_singles(
             p_devig = float(market.get(outcome) or 0.0)
 
             if p_devig <= 0.0 or p_model <= 0.0:
+                withheld.append({
+                    "id": "%s_%s_1x2" % (fixture.lower().replace(" vs ", "_vs_").replace(" ", "_"), outcome),
+                    "fixture": fixture, "kickoff": kickoff, "group": group,
+                    "market": "1X2", "selection": outcome, "team": team_map[outcome],
+                    "model_prob": round(p_model, 4) if p_model else None,
+                    "price": None, "edge": None, "ev_net": None, "stake": 0.0,
+                    "currency": "GBP",
+                    "withheld_reason": "missing price: model=%.4f devig=%.4f" % (p_model, p_devig),
+                    "reason_code": REASON_MISSING_PRICE,
+                    "stale": None, "stale_reason": None,
+                })
                 continue
 
             price = _devig_price(p_devig)
             if price is None or price <= 1.0:
+                withheld.append({
+                    "id": "%s_%s_1x2" % (fixture.lower().replace(" vs ", "_vs_").replace(" ", "_"), outcome),
+                    "fixture": fixture, "kickoff": kickoff, "group": group,
+                    "market": "1X2", "selection": outcome, "team": team_map[outcome],
+                    "model_prob": round(p_model, 4), "price": price, "edge": None,
+                    "ev_net": None, "stake": 0.0, "currency": "GBP",
+                    "withheld_reason": "bad de-vig price: %s" % (price,),
+                    "reason_code": REASON_BAD_DEVIG_PRICE,
+                    "stale": None, "stale_reason": None,
+                })
                 continue
 
             edge = round(p_model - p_devig, 6)
@@ -547,6 +638,7 @@ def build_match_singles(
                     "model_prob": round(p_model, 4), "price": price,
                     "edge": round(edge, 4), "ev_net": round(ev, 4), "stake": 0.0,
                     "currency": "GBP", "withheld_reason": "model_prob %.0f%% < floor %.0f%%" % (p_model * 100, SELECTION_MIN_PROB * 100),
+                    "reason_code": REASON_BELOW_MIN_PROB,
                     "stale": stale, "stale_reason": stale_reason,
                 })
                 continue
@@ -559,11 +651,27 @@ def build_match_singles(
                     "model_prob": round(p_model, 4), "price": price,
                     "edge": round(edge, 4), "ev_net": round(ev, 4), "stake": 0.0,
                     "currency": "GBP", "withheld_reason": "longshot filter: prob %.0f%% < %.0f%% (minnow risk)" % (p_model * 100, LONGSHOT_PROB * 100),
+                    "reason_code": REASON_LONGSHOT_FILTER,
                     "stale": stale, "stale_reason": stale_reason,
                 })
                 continue
 
             if edge < min_edge:
+                # THE 2pp edge-floor gate the telemetry review named directly
+                # (previously a bare ``continue`` — no withheld row, no way to
+                # measure how many candidates this floor actually rejects).
+                # Reason is machine-greppable: "edge_below_floor:<edge><min_edge>".
+                withheld.append({
+                    "id": "%s_%s_1x2" % (fixture.lower().replace(" vs ", "_vs_").replace(" ", "_"), outcome),
+                    "fixture": fixture, "kickoff": kickoff, "group": group,
+                    "market": "1X2", "selection": outcome, "team": team,
+                    "model_prob": round(p_model, 4), "price": price,
+                    "edge": round(edge, 4), "ev_net": round(ev, 4), "stake": 0.0,
+                    "currency": "GBP",
+                    "withheld_reason": "edge_below_floor:%.4f<%.4f" % (edge, min_edge),
+                    "reason_code": REASON_EDGE_BELOW_FLOOR,
+                    "stale": stale, "stale_reason": stale_reason,
+                })
                 continue
 
             if stale:
@@ -574,6 +682,7 @@ def build_match_singles(
                     "model_prob": round(p_model, 4), "price": price,
                     "edge": round(edge, 4), "ev_net": round(ev, 4), "stake": 0.0,
                     "currency": "GBP", "withheld_reason": stale_reason or "stale",
+                    "reason_code": REASON_STALE_MODEL,
                     "stale": True, "stale_reason": stale_reason,
                 })
                 continue
@@ -582,6 +691,20 @@ def build_match_singles(
             stake = min(stake, max_stake)
 
             if stake <= 0:
+                # Kelly stake rounded to 0 after the per-bet cap (e.g. a tiny
+                # positive edge against a small bankroll) — a real candidate
+                # that survived every gate above but sizes to nothing.
+                withheld.append({
+                    "id": "%s_%s_1x2" % (fixture.lower().replace(" vs ", "_vs_").replace(" ", "_"), outcome),
+                    "fixture": fixture, "kickoff": kickoff, "group": group,
+                    "market": "1X2", "selection": outcome, "team": team,
+                    "model_prob": round(p_model, 4), "price": price,
+                    "edge": round(edge, 4), "ev_net": round(ev, 4), "stake": 0.0,
+                    "currency": "GBP",
+                    "withheld_reason": "stake rounded to zero (kelly=%.2f, bankroll=%.2f)" % (stake, bankroll),
+                    "reason_code": REASON_ZERO_STAKE,
+                    "stale": stale, "stale_reason": stale_reason,
+                })
                 continue
 
             action = _label_action(fixture, team, open_fixtures, blind_spots)
@@ -631,6 +754,7 @@ def build_match_singles(
             actionable.append(rec)
         for rec in recs_this_fixture[3:]:
             rec["withheld_reason"] = "top-3 per fixture cap"
+            rec["reason_code"] = REASON_TOP3_CAP
             withheld.append(rec)
 
     # Cross-fixture ranking: same canonical key (bucket, -hours_out, -ev_net).
@@ -673,6 +797,7 @@ def build_event_props(
                 "market": mkt,
                 "selection": label,
                 "withheld_reason": "no live book price snapshot (props require sportsbook feed)",
+                "reason_code": REASON_NO_LIVE_PRICE,
                 "stale": True,
                 "stale_reason": "price snapshot absent or older than %dh" % (PRICE_STALE_SECS // 3600),
                 "tags": ["model", "prop", "no_price"],
@@ -685,6 +810,7 @@ def build_event_props(
         "market": "anytime_scorer",
         "selection": "—",
         "withheld_reason": "player xG-share + penalty-taker injection not yet wired (no real inputs)",
+        "reason_code": REASON_UNSUPPORTED,
         "stale": False,
         "stale_reason": None,
         "tags": ["model", "scorer", "unsupported"],
@@ -744,16 +870,42 @@ def build_advancement_futures(
         model_probs = team_entry.get("model") or {}
         pm_data = team_entry.get("pm") or {}
         delta = team_entry.get("delta") or {}
+        # State-freshness gate (2026-07-08): the feed builder stamps a reason
+        # on any team whose knockout tie has kicked off but is NOT pinned in
+        # the sim's conditioning set — its stage probabilities are phantom
+        # (USA showed P(QF)=0.317 after its Jul-6 elimination; Egypt
+        # P(R16)=0.4708 after winning its Jul-3 shootout). Withhold, never size.
+        state_reason = team_entry.get("state_stale_reason")
 
         for stage, pm_info in (pm_data.items() if isinstance(pm_data, dict) else []):
             pm_price = pm_info.get("pm")
             edge_adj = pm_info.get("edge_adj")
 
             if pm_price is None or edge_adj is None:
+                withheld.append({
+                    "id": "%s_%s_pm" % (team.lower().replace(" ", "_"), stage.lower()),
+                    "team": team, "group": group, "stage": stage,
+                    "market": "advancement", "selection": "reach_%s" % stage,
+                    "venue": "polymarket", "currency": "USD",
+                    "model_prob": round(float(model_probs.get(stage) or 0.0), 4),
+                    "pm_price": None, "ev_net": None, "stake": 0.0,
+                    "withheld_reason": "missing PM price or edge_adj for stage",
+                    "reason_code": REASON_MISSING_PM_PRICE,
+                })
                 continue
 
             p_model = float(model_probs.get(stage) or 0.0)
             if p_model <= 0.0:
+                withheld.append({
+                    "id": "%s_%s_pm" % (team.lower().replace(" ", "_"), stage.lower()),
+                    "team": team, "group": group, "stage": stage,
+                    "market": "advancement", "selection": "reach_%s" % stage,
+                    "venue": "polymarket", "currency": "USD",
+                    "model_prob": 0.0, "pm_price": round(pm_price, 4),
+                    "ev_net": None, "stake": 0.0,
+                    "withheld_reason": "missing/zero model probability for stage",
+                    "reason_code": REASON_MISSING_PM_MODEL_PROB,
+                })
                 continue
 
             # Fee-adjusted EV: back YES at pm_price, fee = PM_FEE_RATE×p×(1-p)
@@ -761,7 +913,53 @@ def build_advancement_futures(
             net_cost = pm_price + fee
             ev = p_model - net_cost
 
+            # Resolved-market guard (2026-07-08): a YES quote pinned at ≥0.98
+            # or ≤0.02 means the market has effectively settled — any "edge"
+            # against it is a sim-vs-reality disagreement, not a trade.
+            # (compare_to_polymarket now drops these at build time; this guard
+            # covers feeds built before the fix.)
+            if pm_price >= PM_RESOLVED_HI or pm_price <= PM_RESOLVED_LO:
+                withheld.append({
+                    "id": "%s_%s_pm" % (team.lower().replace(" ", "_"), stage.lower()),
+                    "team": team, "group": group, "stage": stage,
+                    "market": "advancement", "selection": "reach_%s" % stage,
+                    "venue": "polymarket", "currency": "USD",
+                    "model_prob": round(p_model, 4), "pm_price": round(pm_price, 4),
+                    "ev_net": round(ev, 4), "stake": 0.0,
+                    "withheld_reason": "resolved market (pm=%.2f) — outcome "
+                                       "effectively decided; no tradable edge"
+                                       % pm_price,
+                    "reason_code": REASON_RESOLVED_MARKET,
+                })
+                continue
+
             if ev < MIN_EDGE:
+                # THE 2pp edge-floor gate on the advancement side — same
+                # telemetry gap as build_match_singles: previously a bare
+                # ``continue``, no withheld row, cost unmeasurable.
+                withheld.append({
+                    "id": "%s_%s_pm" % (team.lower().replace(" ", "_"), stage.lower()),
+                    "team": team, "group": group, "stage": stage,
+                    "market": "advancement", "selection": "reach_%s" % stage,
+                    "venue": "polymarket", "currency": "USD",
+                    "model_prob": round(p_model, 4), "pm_price": round(pm_price, 4),
+                    "ev_net": round(ev, 4), "stake": 0.0,
+                    "withheld_reason": "edge_below_floor:%.4f<%.4f" % (ev, MIN_EDGE),
+                    "reason_code": REASON_EDGE_BELOW_FLOOR,
+                })
+                continue
+
+            if state_reason:
+                withheld.append({
+                    "id": "%s_%s_pm" % (team.lower().replace(" ", "_"), stage.lower()),
+                    "team": team, "group": group, "stage": stage,
+                    "market": "advancement", "selection": "reach_%s" % stage,
+                    "venue": "polymarket", "currency": "USD",
+                    "model_prob": round(p_model, 4), "pm_price": round(pm_price, 4),
+                    "ev_net": round(ev, 4), "stake": 0.0,
+                    "withheld_reason": state_reason,
+                    "reason_code": REASON_STATE_STALE,
+                })
                 continue
 
             # Canonical cash floor (wca.selection.longshot_no_cash; user
@@ -779,6 +977,7 @@ def build_advancement_futures(
                     "ev_net": round(ev, 4), "stake": 0.0,
                     "withheld_reason": "model-prob longshot (%.0f%% < 25%%) — no cash "
                                        "(free-bet/lottery only)" % (p_model * 100),
+                    "reason_code": REASON_LONGSHOT_NO_CASH,
                 })
                 continue
 
@@ -786,7 +985,41 @@ def build_advancement_futures(
             stake = _kelly_stake(p_model, price, bankroll, kelly_frac, PER_BET_CAP)
             stake = min(stake, max_stake)
 
+            # Same-team nested-path exposure cap (fix 2026-07-08). One team's
+            # advancement rungs are NESTED (win ⊂ Final ⊂ SF ⊂ QF ⊂ R16 ⊂
+            # R32) — one correlated path leg, not independent bets. The
+            # sizing source (wca.advancement.apply_path_exposure_caps) emits
+            # per-rung PATH-CAPPED stakes into the feed (``stake_usd``: the
+            # team's same-side rung stakes sum to at most the tightest staked
+            # rung's ¼-Kelly); respect it here as a HARD per-rung ceiling so
+            # this builder's independent re-derivation can never re-stack the
+            # path (observed: Morocco SF $112 + Morocco Final $33 on one
+            # path). YES-side only — this loop only ever backs YES, and a
+            # NO-side feed stake is a different exposure (never co-capped).
+            # Older feeds without the field are unaffected. Reduces only.
+            path_capped = False
+            feed_rung_stake = pm_info.get("stake_usd")
+            if (
+                pm_info.get("side") == "YES"
+                and isinstance(feed_rung_stake, (int, float))
+                and float(feed_rung_stake) < stake
+            ):
+                stake = float(feed_rung_stake)
+                path_capped = True
+
             if stake <= 0:
+                # Kelly stake rounded to 0 after the per-bet cap — survived
+                # every gate above but sizes to nothing.
+                withheld.append({
+                    "id": "%s_%s_pm" % (team.lower().replace(" ", "_"), stage.lower()),
+                    "team": team, "group": group, "stage": stage,
+                    "market": "advancement", "selection": "reach_%s" % stage,
+                    "venue": "polymarket", "currency": "USD",
+                    "model_prob": round(p_model, 4), "pm_price": round(pm_price, 4),
+                    "ev_net": round(ev, 4), "stake": 0.0,
+                    "withheld_reason": "stake rounded to zero (kelly=%.2f, bankroll=%.2f)" % (stake, bankroll),
+                    "reason_code": REASON_ZERO_STAKE,
+                })
                 continue
 
             stale = model_stale or adv_stale or pm_blind
@@ -831,6 +1064,10 @@ def build_advancement_futures(
                 "stale_reason": stale_reason,
                 "tags": ["model", "advancement", "polymarket"],
             }
+            if path_capped:
+                # Stake was bound by the same-team nested-path cap emitted by
+                # the sizing source (advancement_data pm[stage].stake_usd).
+                rec["path_capped"] = True
 
             # Enrich with the team's next KO tie (opponent + 90' 1X2 split) and
             # market-kind labels so an advancement moneyline is never confused
@@ -839,6 +1076,7 @@ def build_advancement_futures(
 
             if stale:
                 rec["withheld_reason"] = stale_reason
+                rec["reason_code"] = REASON_STALE_ADVANCEMENT
                 withheld.append(rec)
             else:
                 actionable.append(rec)

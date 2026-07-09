@@ -243,6 +243,7 @@ def test_execute_cashout_books_actual_fill(tmp_path):
         _proposal(side="SELL", price=0.06, size=10.0), db,
         trader=trader, dry_run=False,
         reconcile_fn=lambda asset, size: (10.0, 0.60),  # /trades: 10 sh for $0.60
+        fill_log_path=str(tmp_path / "fills.jsonl"),
     )
     assert res["outcome"] == "sold" and res["settled"] is True
     assert res["proceeds"] == pytest.approx(0.60)
@@ -261,6 +262,7 @@ def test_execute_cashout_partial_fill_splits_row(tmp_path):
         _proposal(side="SELL", price=0.06, size=10.0), db,
         trader=_FakeTrader(), dry_run=False,
         reconcile_fn=lambda asset, size: (4.0, 0.24),  # only 4 sh filled
+        fill_log_path=str(tmp_path / "fills.jsonl"),
     )
     assert res["outcome"] == "sold" and res["filled_size"] == pytest.approx(4.0)
     con = sqlite3.connect(db)
@@ -276,6 +278,7 @@ def test_execute_cashout_no_fill_books_nothing(tmp_path):
         _proposal(side="SELL", price=0.06, size=10.0), db,
         trader=_FakeTrader(), dry_run=False,
         reconcile_fn=lambda asset, size: (0.0, 0.0),  # FOK didn't fill
+        fill_log_path=str(tmp_path / "fills.jsonl"),
     )
     assert res["outcome"] == "no_fill" and res["settled"] is False
     con = sqlite3.connect(db)
@@ -291,6 +294,7 @@ def test_execute_cashout_unconfirmed_books_nothing(tmp_path):
         _proposal(side="SELL", price=0.06, size=10.0), db,
         trader=_FakeTrader(), dry_run=False,
         reconcile_fn=lambda asset, size: None,  # couldn't confirm the fill
+        fill_log_path=str(tmp_path / "fills.jsonl"),
     )
     assert res["outcome"] == "unconfirmed" and res["settled"] is False
     con = sqlite3.connect(db)

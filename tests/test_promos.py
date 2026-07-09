@@ -109,6 +109,92 @@ class TestExtractPromos:
 
 
 # ---------------------------------------------------------------------------
+# fetch_page block-marker classification (2026-07-08 fix regression coverage)
+#
+# The bug: a bare "captcha" substring marker false-positived on ordinary SPA
+# login-form i18n JSON (e.g. Unibet ships `"captchaRequired":"..."` on every
+# page load — a validation-message KEY, not a challenge shown to the visitor)
+# and silently discarded a genuinely scrapeable, real-content page as
+# 'blocked' every single day. Fixed by requiring a full challenge PHRASE
+# ("complete the captcha", "verify you are human", ...) instead of the bare
+# token. These tests pin the fix + prove genuine blocks are still caught.
+# ---------------------------------------------------------------------------
+
+_FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures" / "promos"
+
+
+def _read_fixture(name: str) -> str:
+    return (_FIXTURES_DIR / name).read_text(encoding="utf-8")
+
+
+class _StubResponse:
+    """Minimal stand-in for a ``requests.Response`` (status + .content)."""
+
+    def __init__(self, status_code: int, text: str) -> None:
+        self.status_code = status_code
+        self.content = text.encode("utf-8")
+
+    def close(self) -> None:  # pragma: no cover - parity with requests.Response
+        pass
+
+
+class _StubSession:
+    def __init__(self, status_code: int, text: str) -> None:
+        self._status_code = status_code
+        self._text = text
+
+    def get(self, url, timeout=None, headers=None, stream=None):  # noqa: ANN001
+        return _StubResponse(self._status_code, self._text)
+
+
+class TestBlockMarkers:
+    def test_login_form_captcha_json_is_not_misclassified_as_blocked(self) -> None:
+        """Regression: a real page with an unrelated captcha-flavoured i18n
+        key must classify 'ok' and its real offers must be extractable —
+        NOT be swallowed as 'blocked' by a bare substring match."""
+        html = _read_fixture("spa_with_login_i18n_captcha_key.html")
+        session = _StubSession(200, html)
+        status, text, fetch_status = promos.fetch_page("http://x", session=session)
+        assert fetch_status == "ok", (
+            "a page merely mentioning 'captcha' in an unrelated login-form "
+            "i18n key must not be classified as blocked"
+        )
+        items = promos.extract_promos(text, "Unibet")
+        titles = " || ".join(i["title"].lower() for i in items)
+        assert "bet builder profit boost" in titles
+        assert "free bets" in titles
+
+    def test_genuine_cloudflare_js_challenge_is_still_blocked(self) -> None:
+        """A REAL Cloudflare challenge page (the /cdn-cgi/challenge-platform/
+        script injection) must still classify 'blocked' after the captcha
+        marker was tightened — other markers carry the detection."""
+        html = _read_fixture("cloudflare_js_challenge.html")
+        session = _StubSession(200, html)
+        status, text, fetch_status = promos.fetch_page("http://x", session=session)
+        assert fetch_status == "blocked"
+
+    def test_genuine_spa_shell_yields_no_offers(self) -> None:
+        """A real client-rendered SPA shell classifies 'ok' (it IS a real 200
+        with real bytes, no block marker hit) but must yield ZERO extracted
+        offers rather than fabricating one from script/style boilerplate — this
+        is the live shape of Virgin Bet / Matchbook / Ladbrokes / William Hill,
+        confirmed by manual probe 2026-07-08 and recorded as ``manual_check``
+        in the :data:`wca.promos.SITES` registry."""
+        html = _read_fixture("spa_empty_shell.html")
+        session = _StubSession(200, html)
+        status, text, fetch_status = promos.fetch_page("http://x", session=session)
+        assert fetch_status == "ok"
+        assert promos.extract_promos(text, "X") == []
+
+    def test_tiny_body_is_classified_empty(self) -> None:
+        """A 200 with a body under the useful-length floor (e.g. a redirect
+        stub or a near-blank error page) classifies 'empty', not 'ok'."""
+        session = _StubSession(200, "<html><body>hi</body></html>")
+        status, text, fetch_status = promos.fetch_page("http://x", session=session)
+        assert fetch_status == "empty"
+
+
+# ---------------------------------------------------------------------------
 # fingerprint
 # ---------------------------------------------------------------------------
 
@@ -262,6 +348,106 @@ class TestSeedFromRecon:
         counts = promos.seed_from_recon(conn, path="/nonexistent/recon.md",
                                         now_utc=FIXED_NOW)
         assert counts == {"signup": 0, "ongoing": 0}
+        conn.close()
+
+
+# ---------------------------------------------------------------------------
+# manual_check_sites (2026-07-08: honest fallback for genuinely unscrapeable
+# sources — a real probe confirmed these are pure JS-shells or sit behind an
+# active bot-challenge, so the daemon still fetches them every cycle but the
+# feed also surfaces them as a dated, URL'd, one-line-reason click-through list
+# for the human's daily sweep instead of a silent "nothing here").
+# ---------------------------------------------------------------------------
+
+
+class TestManualCheckSites:
+    def test_shape_and_nonempty(self) -> None:
+        out = promos.manual_check_sites()
+        assert out, "expected at least one manual-check source in the registry"
+        for entry in out:
+            assert set(entry.keys()) == {"site", "url", "reason"}
+            assert entry["site"]
+            assert entry["reason"], "every manual-check entry must state why"
+
+    def test_only_flagged_sites_included(self) -> None:
+        out = promos.manual_check_sites()
+        flagged_names = {s["name"] for s in promos.SITES if s.get("manual_check")}
+        assert {e["site"] for e in out} == flagged_names
+
+    def test_unflagged_registry_entries_excluded(self) -> None:
+        # Unibet is scrapeable (2026-07-08 fix) and must NOT be manual-check.
+        out = promos.manual_check_sites()
+        assert "Unibet" not in {e["site"] for e in out}
+        # Polymarket has no manual_check flag set at all (expect_promos=False
+        # is a different, orthogonal concept) -> also excluded.
+        assert "Polymarket" not in {e["site"] for e in out}
+
+    def test_urls_match_registry(self) -> None:
+        out = {e["site"]: e["url"] for e in promos.manual_check_sites()}
+        for entry in promos.SITES:
+            if entry.get("manual_check"):
+                assert out[entry["name"]] == entry["promos_url"]
+
+
+# ---------------------------------------------------------------------------
+# active_boost_promotions / graded_fingerprints_today (2026-07-08: boost_evals
+# was permanently empty because only SCRAPED boost candidates ever reached the
+# grading step — a seed-sourced "Power Prices" row from the recon doc never
+# got graded no matter how many cycles ran, since every UK book hub is a
+# JS-rendered SPA the scraper can't extract from. See scripts/wca_promosd.py
+# step "2.5" for the daemon-side wiring these readers support.)
+# ---------------------------------------------------------------------------
+
+
+class TestActiveBoostPromotions:
+    def test_returns_active_boost_rows_any_source(self) -> None:
+        db = _tmp_db()
+        conn = _conn(db)
+        # A seed-sourced boost row (mirrors seed_from_recon's shape).
+        promos._upsert_seed_row(
+            conn,
+            {"site": "Paddy Power", "title": "Power Prices",
+             "description": "Daily enhanced odds on selected matches.",
+             "promo_type": "boost", "terms": "", "url": ""},
+            FIXED_NOW,
+        )
+        # A scraped boost row + a non-boost row, for contrast.
+        promos.diff_and_upsert(
+            conn, "Sky Bet",
+            [{"title": "Brazil was 2/1 now 5/2", "description": "boost",
+              "promo_type": "boost", "terms": "", "url": ""},
+             {"title": "Bet £10 Get £30", "description": "signup-ish",
+              "promo_type": "ongoing", "terms": "", "url": ""}],
+            FIXED_NOW, source="scrape",
+        )
+        rows = promos.active_boost_promotions(conn)
+        sites = {r["site"] for r in rows}
+        assert sites == {"Paddy Power", "Sky Bet"}
+        assert all(r["promo_type"] == "boost" for r in rows)
+        conn.close()
+
+    def test_empty_catalog_returns_empty(self) -> None:
+        db = _tmp_db()
+        conn = _conn(db)
+        assert promos.active_boost_promotions(conn) == []
+        conn.close()
+
+
+class TestGradedFingerprintsToday:
+    def test_dedup_key_matches_same_day_evals(self) -> None:
+        db = _tmp_db()
+        conn = _conn(db)
+        promos.record_boost_eval(
+            conn, ts_utc="2026-06-13T09:00:00", site="Paddy Power",
+            fixture=None, market=None, selection="Power Prices",
+            boosted_odds=None, was_odds=None, model_prob=None, fair_odds=None,
+            edge=None, is_plus_ev=False, priceable=False,
+            reason="could not parse boost text", source="scrape",
+        )
+        graded = promos.graded_fingerprints_today(conn, "2026-06-13")
+        assert ("Paddy Power", "Power Prices") in graded
+        # A different day's prefix must not match.
+        assert promos.graded_fingerprints_today(conn, "2026-06-14") == set()
         conn.close()
 
 
@@ -453,3 +639,67 @@ class TestDaemonCycle:
         n_snaps = conn.execute("SELECT COUNT(*) FROM promo_snapshots").fetchone()[0]
         assert n_snaps == len(promos.SITES)
         conn.close()
+
+    def test_seed_boost_promos_get_graded_even_when_scraping_is_fully_blocked(
+        self,
+    ) -> None:
+        """Regression for the 2026-07-08 fix: before this, ``boost_evals`` was
+        permanently empty because grading only ever ran on SCRAPED boost
+        candidates — a book whose live scraper never returns 'ok' (every UK
+        book hub, in production) meant a seed-sourced "Power Prices" row from
+        the recon doc was never graded no matter how many cycles ran. Step 2.5
+        in run_cycle now grades every active boost promo (any source) once a
+        day, so even a fully-blocked scrape cycle still produces an honest
+        (if unpriceable) boost-eval row for a book known to run boosts."""
+        daemon = _load_daemon()
+        db = _tmp_db()
+
+        def all_blocked(url):
+            return (403, None, "blocked")
+
+        stats = daemon.run_cycle(
+            db, max_per_cycle=5, seed=False, fetch=all_blocked, now_utc=FIXED_NOW,
+        )
+        # The empty-catalog auto-seed ran, and the recon doc's "boost" rows
+        # (e.g. Paddy Power's Power Prices) must now have been graded despite
+        # every live scrape coming back blocked.
+        assert stats["boosts_seen"] >= 1
+        conn = _conn(db)
+        evals = promos.recent_boost_evals(conn, limit=100)
+        assert evals, "expected at least one boost_evals row from seed grading"
+        # Seed rows are generic promo-mechanic descriptions (no "was X now Y"
+        # instance), so the honest outcome is unpriceable with a stated reason
+        # — never a fabricated price.
+        assert all(not e["priceable"] for e in evals)
+        assert all(e["reason"] for e in evals)
+        conn.close()
+
+    def test_seed_boost_not_regraded_twice_in_the_same_day(self) -> None:
+        """A second same-day cycle must not re-insert a boost_evals row for a
+        seed promo already graded earlier today (would flood the table on a
+        long-running hourly daemon for a perfectly static seed description)."""
+        daemon = _load_daemon()
+        db = _tmp_db()
+
+        def all_blocked(url):
+            return (403, None, "blocked")
+
+        s1 = daemon.run_cycle(
+            db, max_per_cycle=5, seed=False, fetch=all_blocked, now_utc=FIXED_NOW,
+        )
+        conn = _conn(db)
+        n1 = conn.execute("SELECT COUNT(*) FROM boost_evals").fetchone()[0]
+        conn.close()
+        assert n1 >= 1
+
+        # Same day, a later timestamp -> no re-seed (catalog non-empty) and no
+        # re-grading of the same static seed boosts.
+        same_day_later = FIXED_NOW[:11] + "18:00:00"
+        s2 = daemon.run_cycle(
+            db, max_per_cycle=5, seed=False, fetch=all_blocked,
+            now_utc=same_day_later,
+        )
+        conn = _conn(db)
+        n2 = conn.execute("SELECT COUNT(*) FROM boost_evals").fetchone()[0]
+        conn.close()
+        assert n2 == n1, "same-day re-run must not duplicate boost_evals rows"

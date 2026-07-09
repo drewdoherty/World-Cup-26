@@ -104,6 +104,19 @@ MAX_PAGE_BYTES = 12 * 1024 * 1024
 #: ``expect_promos`` — when False, an empty fetch is recorded honestly as
 #:                     "no traditional promos here" rather than a scrape miss
 #:                     (exchanges + Polymarket don't run bookmaker promotions).
+#: ``manual_check``  — when True, a real-browser recon pass (2026-07-08) confirmed
+#:                     this hub is a pure client-rendered SPA shell (or is behind
+#:                     an active Cloudflare/Akamai JS challenge) with NO offer text
+#:                     in the server-rendered HTML a plain ``requests`` GET can see
+#:                     — server-side scraping cannot ever recover it without a
+#:                     headless browser (out of scope; see the module docstring).
+#:                     We keep fetching it anyway (a redesign could make it
+#:                     scrapeable, and the scrape-health history stays honest),
+#:                     but the daemon ALSO surfaces it as a dated manual-check
+#:                     entry (site + url + reason) so the human's daily sweep is a
+#:                     short click-through list instead of a false "nothing here".
+#: ``manual_check_reason`` — one-line, human-readable justification (what we saw
+#:                     when we probed it), shown verbatim on the site.
 SITES: List[Dict[str, Any]] = [
     # --- Bookmakers (run sign-up offers, ongoing promos and price boosts) ---
     {
@@ -112,6 +125,11 @@ SITES: List[Dict[str, Any]] = [
         "promos_url": "https://www.paddypower.com/promotions",
         "boosts_url": None,
         "expect_promos": True,
+        "manual_check": True,
+        "manual_check_reason": (
+            "web-components app-shell (SVG sprite preloads only); offer text is "
+            "fetched client-side, nothing server-rendered to parse"
+        ),
     },
     {
         "name": "Sky Bet",
@@ -119,6 +137,11 @@ SITES: List[Dict[str, Any]] = [
         "promos_url": "https://www.skybet.com/offers",
         "boosts_url": None,
         "expect_promos": True,
+        "manual_check": True,
+        "manual_check_reason": (
+            "active Cloudflare JS challenge (/cdn-cgi/challenge-platform/) on "
+            "every fetch — correctly recorded as 'blocked', not fixable server-side"
+        ),
     },
     {
         "name": "Bet365",
@@ -126,6 +149,11 @@ SITES: List[Dict[str, Any]] = [
         "promos_url": "https://www.bet365.com/#/AVR/B1/",
         "boosts_url": None,
         "expect_promos": True,
+        "manual_check": True,
+        "manual_check_reason": (
+            "403 on every fetch, and the promo hub is a '#/' SPA hash-route a "
+            "plain GET can never resolve differently anyway"
+        ),
     },
     {
         "name": "Virgin Bet",
@@ -133,13 +161,24 @@ SITES: List[Dict[str, Any]] = [
         "promos_url": "https://www.virginbet.com/promotions",
         "boosts_url": None,
         "expect_promos": True,
+        "manual_check": True,
+        "manual_check_reason": (
+            "genuine empty shell — body is just "
+            "<div id=\"clientAppRoot\"></div>, offers load via client-side XHR "
+            "with no discoverable open JSON endpoint"
+        ),
     },
     {
         "name": "William Hill",
         "kind": "book",
-        "promos_url": "https://sports.williamhill.com/betting/en-gb/promotions",
+        "promos_url": "https://sports.williamhill.com/betting/en-gb/apps/promotions",
         "boosts_url": None,
         "expect_promos": True,
+        "manual_check": True,
+        "manual_check_reason": (
+            "200 but an empty shell (one deferred bundle.js); the site's own "
+            "GraphQL API (gql-cs.williamhill.com) is auth-gated (403 unauthenticated)"
+        ),
     },
     {
         "name": "Ladbrokes",
@@ -147,6 +186,12 @@ SITES: List[Dict[str, Any]] = [
         "promos_url": "https://sports.ladbrokes.com/promotions",
         "boosts_url": None,
         "expect_promos": True,
+        "manual_check": True,
+        "manual_check_reason": (
+            "Entain/bwin client-bootstrap SPA — empty <body>, real content "
+            "loads via a session-cookie-bound clientconfig API with no static "
+            "guessable JSON URL"
+        ),
     },
     {
         "name": "Unibet",
@@ -161,6 +206,11 @@ SITES: List[Dict[str, Any]] = [
         "promos_url": "https://www.betfair.com/sport/promotions",
         "boosts_url": None,
         "expect_promos": True,
+        "manual_check": True,
+        "manual_check_reason": (
+            "403 on every fetch (Cloudflare) even after following the redirect "
+            "to /betting/"
+        ),
     },
     # --- Exchanges (peer-to-peer; no bookmaker-style promos) ---
     {
@@ -169,6 +219,11 @@ SITES: List[Dict[str, Any]] = [
         "promos_url": "https://smarkets.com/promotions",
         "boosts_url": None,
         "expect_promos": False,
+        "manual_check": True,
+        "manual_check_reason": (
+            "active Cloudflare JS challenge (/cdn-cgi/challenge-platform/) — "
+            "correctly recorded as 'blocked'; exchange, no promos expected anyway"
+        ),
     },
     {
         "name": "Matchbook",
@@ -176,6 +231,11 @@ SITES: List[Dict[str, Any]] = [
         "promos_url": "https://www.matchbook.com/promotions",
         "boosts_url": None,
         "expect_promos": False,
+        "manual_check": True,
+        "manual_check_reason": (
+            "genuine empty shell (<div id=\"root\"></div>, 0 bytes of body text); "
+            "exchange, no promos expected anyway"
+        ),
     },
     {
         "name": "Betfair Exchange",
@@ -183,6 +243,11 @@ SITES: List[Dict[str, Any]] = [
         "promos_url": "https://www.betfair.com/exchange/plus/promotions",
         "boosts_url": None,
         "expect_promos": False,
+        "manual_check": True,
+        "manual_check_reason": (
+            "same Cloudflare block as Betfair Sportsbook; exchange, no promos "
+            "expected anyway"
+        ),
     },
     # --- Prediction market (no promos) ---
     {
@@ -201,6 +266,32 @@ def site_by_name(name: str) -> Optional[Dict[str, Any]]:
         if s["name"] == name:
             return s
     return None
+
+
+def manual_check_sites() -> List[Dict[str, str]]:
+    """Registry entries flagged ``manual_check`` -> ``{site, url, reason}``.
+
+    This is the human's daily 2-minute click-through list: sources a real probe
+    confirmed are pure client-rendered SPA shells or sit behind an active
+    bot-challenge, so server-side scraping structurally cannot recover them
+    (see :data:`SITES`'s ``manual_check`` docs). We keep fetching these sites
+    every cycle regardless — a site redesign could make one scrapeable again,
+    and the scrape-health history stays honest either way — but this view is
+    what the feed builder surfaces as an explicit "go look yourself" list rather
+    than silently presenting an empty scrape as "no promos".
+    """
+    out: List[Dict[str, str]] = []
+    for entry in SITES:
+        if not entry.get("manual_check"):
+            continue
+        out.append(
+            {
+                "site": entry["name"],
+                "url": entry.get("promos_url") or "",
+                "reason": entry.get("manual_check_reason") or "",
+            }
+        )
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -305,6 +396,19 @@ def _now_utc() -> str:
 
 #: Body markers that betray a Cloudflare / bot-challenge / geo-block interstitial
 #: even when the HTTP status is a deceptive 200. Lower-cased substring match.
+#:
+#: NOTE on the bare word "captcha": earlier versions of this tuple included it
+#: as a standalone marker, which false-positived on ordinary SPA login-form i18n
+#: JSON embedded in an otherwise perfectly scrapeable page (e.g. Unibet ships a
+#: ``"captchaRequired":"Please verify that you are not a robot"`` login-validation
+#: string on every page load — that is *not* a challenge shown to us, just a label
+#: for a form the user never sees on a promotions page). A real captcha
+#: interstitial reads as a sentence directed at the visitor ("complete the
+#: captcha", "verify you are human", "i'm not a robot" checkbox copy), so we
+#: require one of those *phrases* instead of the bare token. Genuine Cloudflare/
+#: Akamai/Incapsula JS-challenge pages are still caught by the other, more
+#: specific markers below (``challenge-platform``, ``cf-browser-verification``,
+#: etc.) regardless of this change.
 _BLOCK_MARKERS: Tuple[str, ...] = (
     "cf-browser-verification",
     "cf-challenge",
@@ -316,9 +420,13 @@ _BLOCK_MARKERS: Tuple[str, ...] = (
     "you have been blocked",
     "enable javascript and cookies to continue",
     "ddos protection by cloudflare",
-    "captcha",
+    "complete the captcha",
+    "solve the captcha",
+    "captcha to continue",
+    "verify you are human",
+    "i'm not a robot",
+    "im not a robot",
     "incapsula incident",
-    "akamai",
     "error 1020",
     "ray id",
 )
@@ -1287,6 +1395,44 @@ def active_promotions(conn: sqlite3.Connection) -> List[sqlite3.Row]:
         "SELECT * FROM promotions WHERE status = 'active' "
         "ORDER BY site, promo_type, id"
     ).fetchall()
+
+
+def active_boost_promotions(conn: sqlite3.Connection) -> List[sqlite3.Row]:
+    """Active ``promo_type='boost'`` promotions, ANY source (scrape or seed).
+
+    Historically only *scraped* boost candidates ever reached
+    :func:`wca.wca_promosd._grade_boost` (the diff/upsert path in the daemon),
+    so a book whose scraper never comes back ``ok`` (the common case — most
+    hubs are JS-rendered SPAs, see the module docstring) never produced a
+    single ``boost_evals`` row even when its recon-seeded catalog correctly
+    lists a "Power Prices" / "Super Boost" style row. This view is what lets
+    the daemon grade — and thus honestly report on — those seed rows too, not
+    just live-scraped ones.
+    """
+    return conn.execute(
+        "SELECT * FROM promotions WHERE status = 'active' AND promo_type = 'boost' "
+        "ORDER BY site, id"
+    ).fetchall()
+
+
+def graded_fingerprints_today(conn: sqlite3.Connection, today_utc: str) -> set:
+    """Fingerprints of promotions already graded (any ``boost_evals`` row) today.
+
+    ``today_utc`` is a ``YYYY-MM-DD`` prefix; a boost eval's ``fixture`` field
+    doesn't carry the source fingerprint directly, so we match on the natural
+    key the daemon controls: ``site`` + first 120 chars of ``selection`` (how
+    :func:`wca.wca_promosd._grade_seed_boost` derives the eval's selection from
+    a promotion's title). This is a best-effort dedup to stop the same static
+    seed description being re-inserted every single cycle — it is NOT a
+    uniqueness constraint (a duplicate insert is harmless, just noisy), so an
+    imperfect match here fails open (re-grades) rather than silently dropping
+    a genuinely new boost.
+    """
+    rows = conn.execute(
+        "SELECT DISTINCT site, selection FROM boost_evals WHERE ts_utc LIKE ?",
+        (today_utc + "%",),
+    ).fetchall()
+    return {(r["site"], r["selection"]) for r in rows}
 
 
 def signup_offers(conn: sqlite3.Connection) -> List[Dict[str, Any]]:
