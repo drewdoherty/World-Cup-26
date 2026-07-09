@@ -1,19 +1,19 @@
-<!-- generated: 2026-07-09T17:12:56 -->
+<!-- generated: 2026-07-09T17:49:07 -->
 *World Cup Alpha — trade card* (1 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
 *1. [ML·FAV] Norway vs England* — England — back *52.1%* impl via *betfair*
     model 53.3% / mkt 51.9% (+1.2pp)  EV *+2.2%* ✅+EV  [elo 46% dc 58%]
-    stake: gbp £19.91  further-out (52h) — thin/soft market
+    stake: gbp £19.91  further-out (51h) — thin/soft market
 
 *— CUT (excluded from staking, 3) —*
-  x [LS] Spain vs Belgium — Belgium — back 16.7% impl (model 18.5%, EV +11.1% ✅+EV): below 20% hit-probability floor (model 18.5%) — too unlikely to return PnL even at +11.1% EV
-  x [LS] France vs Morocco — Morocco — back 13.9% impl (model 16.4%, EV +9.0% ✅+EV): below 20% hit-probability floor (model 16.4%) — too unlikely to return PnL even at +9.0% EV
+  x [LS] Spain vs Belgium — Belgium — back 16.7% impl (model 18.4%, EV +10.5% ✅+EV): below 20% hit-probability floor (model 18.4%) — too unlikely to return PnL even at +10.5% EV
+  x [LS] France vs Morocco — Morocco — back 14.3% impl (model 16.2%, EV +6.8% ✅+EV): below 20% hit-probability floor (model 16.2%) — too unlikely to return PnL even at +6.8% EV
   x [LS] Argentina vs Switzerland — Switzerland — back 16.1% impl (model 17.1%, EV +5.8% ✅+EV): below 20% hit-probability floor (model 17.1%) — too unlikely to return PnL even at +5.8% EV
 
 *— WATCH (near-threshold, below the +2% EV floor — NOT staked, 2) —*
-  ~ [ML] Argentina vs Switzerland — Argentina — back 57.1% impl via betfair (model 57.7% / mkt 56.9%, EV +0.9% ✅+EV)
-  ~ [MID] France vs Morocco — Draw — back 25.0% impl via smarkets (model 25.8% / mkt 24.7%, EV +1.6% ✅+EV)
+  ~ [ML] Argentina vs Switzerland — Argentina — back 57.1% impl via smarkets (model 57.7% / mkt 56.9%, EV +0.9% ✅+EV)
+  ~ [MID] France vs Morocco — Draw — back 25.0% impl via smarkets (model 25.8% / mkt 24.8%, EV +1.7% ✅+EV)
 
 *Venue split (gbp):* betfair £19.91
 
@@ -22,12 +22,12 @@ _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out firs
 
 *France vs Morocco*
     xG: 1.53-0.72
-    1-0  16.8%  back at impl <= 16.4%
+    1-0  16.8%  back at impl <= 16.5%
     2-0  12.5%  back at impl <= 12.3%
     1-1  11.7%  back at impl <= 11.5%
     0-0  10.6%  back at impl <= 10.4%
-    2-1  9.7%  back at impl <= 9.5%
-    0-1  6.6%  back at impl <= 6.4%
+    2-1  9.8%  back at impl <= 9.6%
+    0-1  6.5%  back at impl <= 6.4%
     O/U 2.5: over 39.1% / under 60.9%   BTTS 41.0%
 
 *Spain vs Belgium*
@@ -35,7 +35,7 @@ _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out firs
     1-1  11.2%  back at impl <= 11.0%
     2-1  10.6%  back at impl <= 10.4%
     1-0  9.7%  back at impl <= 9.5%
-    2-0  9.4%  back at impl <= 9.2%
+    2-0  9.4%  back at impl <= 9.3%
     3-1  6.5%  back at impl <= 6.4%
     3-0  5.8%  back at impl <= 5.7%
     O/U 2.5: over 57.0% / under 43.0%   BTTS 57.0%
