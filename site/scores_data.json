@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-09 09:01:37 UTC"
+    "generated": "2026-07-09 13:00:56 UTC"
   },
   "fixtures": [
     {
@@ -8,110 +8,36 @@
       "scores": [
         {
           "score": "1-0",
-          "prob": 17.5,
-          "fair": 5.72,
+          "prob": 16.9,
+          "fair": 5.92,
           "pm_prob": 13.5
         },
         {
           "score": "2-0",
           "prob": 12.6,
           "fair": 7.93,
-          "pm_prob": 12.5
+          "pm_prob": 11.5
         },
         {
           "score": "1-1",
           "prob": 11.7,
-          "fair": 8.56,
-          "pm_prob": 12.5
+          "fair": 8.58,
+          "pm_prob": 11.5
         },
         {
           "score": "0-0",
-          "prob": 10.9,
-          "fair": 9.2,
+          "prob": 10.5,
+          "fair": 9.51,
           "pm_prob": 7.5
         },
         {
           "score": "2-1",
           "prob": 9.8,
-          "fair": 10.16,
+          "fair": 10.2,
           "pm_prob": 10.5
         },
         {
           "score": "0-1",
-          "prob": 6.5,
-          "fair": 15.29,
-          "pm_prob": 5.5
-        }
-      ],
-      "over_under": {
-        "line": 2.5,
-        "over": 38.1,
-        "under": 61.9
-      },
-      "btts": 40.3,
-      "model_1x2": {
-        "home": 0.579584,
-        "draw": 0.259235,
-        "away": 0.161182
-      },
-      "approx_1x2": false,
-      "venues": [
-        {
-          "venue": "polymarket",
-          "selection_prices": {
-            "home": 1.626,
-            "draw": 4.0816,
-            "away": 7.4074
-          },
-          "implied": {
-            "home": 0.6150061500615006,
-            "draw": 0.24500196001568014,
-            "away": 0.135000135000135
-          },
-          "edge_vs_model": {
-            "home": -0.057596416000000095,
-            "draw": 0.05809357599999987,
-            "away": 0.19393954680000003
-          }
-        }
-      ],
-      "kickoff": "2026-07-09T20:00:00+00:00"
-    },
-    {
-      "fixture": "Norway vs England",
-      "scores": [
-        {
-          "score": "1-1",
-          "prob": 12.2,
-          "fair": 8.2,
-          "pm_prob": 12.5
-        },
-        {
-          "score": "0-1",
-          "prob": 10.5,
-          "fair": 9.53,
-          "pm_prob": 9.5
-        },
-        {
-          "score": "0-2",
-          "prob": 10.0,
-          "fair": 10.01,
-          "pm_prob": 8.5
-        },
-        {
-          "score": "1-2",
-          "prob": 8.9,
-          "fair": 11.19,
-          "pm_prob": 10.5
-        },
-        {
-          "score": "0-0",
-          "prob": 7.8,
-          "fair": 12.9,
-          "pm_prob": 5.5
-        },
-        {
-          "score": "1-0",
           "prob": 6.5,
           "fair": 15.48,
           "pm_prob": 5.5
@@ -119,185 +45,849 @@
       ],
       "over_under": {
         "line": 2.5,
-        "over": 49.9,
-        "under": 50.1
+        "over": 39.2,
+        "under": 60.8
       },
-      "btts": 50.7,
+      "btts": 41.0,
       "model_1x2": {
-        "home": 0.211139,
-        "draw": 0.255843,
-        "away": 0.533018
+        "home": 0.582014,
+        "draw": 0.256614,
+        "away": 0.161371
       },
       "approx_1x2": false,
       "venues": [
         {
-          "venue": "polymarket",
+          "venue": "unibet_uk",
           "selection_prices": {
-            "home": 4.4444,
-            "draw": 3.7736,
-            "away": 1.9048
+            "home": 1.6,
+            "draw": 4.0,
+            "away": 6.0
           },
           "implied": {
-            "home": 0.22500225002250024,
-            "draw": 0.26499894000423996,
-            "away": 0.5249895002099958
+            "home": 0.625,
+            "draw": 0.25,
+            "away": 0.16666666666666666
           },
           "edge_vs_model": {
-            "home": -0.06161382840000007,
-            "draw": -0.03455085520000001,
-            "away": 0.015292686400000033
+            "home": -0.06877759999999988,
+            "draw": 0.026456000000000035,
+            "away": -0.03177400000000008
+          }
+        },
+        {
+          "venue": "ladbrokes_uk",
+          "selection_prices": {
+            "home": 1.57,
+            "draw": 3.9,
+            "away": 5.75
+          },
+          "implied": {
+            "home": 0.6369426751592356,
+            "draw": 0.25641025641025644,
+            "away": 0.17391304347826086
+          },
+          "edge_vs_model": {
+            "home": -0.08623801999999992,
+            "draw": 0.0007946000000000897,
+            "away": -0.07211675000000006
+          }
+        },
+        {
+          "venue": "casumo",
+          "selection_prices": {
+            "home": 1.56,
+            "draw": 3.8,
+            "away": 6.5
+          },
+          "implied": {
+            "home": 0.641025641025641,
+            "draw": 0.2631578947368421,
+            "away": 0.15384615384615385
+          },
+          "edge_vs_model": {
+            "home": -0.09205815999999989,
+            "draw": -0.024866799999999967,
+            "away": 0.0489115
+          }
+        },
+        {
+          "venue": "coral",
+          "selection_prices": {
+            "home": 1.57,
+            "draw": 3.9,
+            "away": 6.0
+          },
+          "implied": {
+            "home": 0.6369426751592356,
+            "draw": 0.25641025641025644,
+            "away": 0.16666666666666666
+          },
+          "edge_vs_model": {
+            "home": -0.08623801999999992,
+            "draw": 0.0007946000000000897,
+            "away": -0.03177400000000008
+          }
+        },
+        {
+          "venue": "livescorebet",
+          "selection_prices": {
+            "home": 1.55,
+            "draw": 3.75,
+            "away": 6.4
+          },
+          "implied": {
+            "home": 0.6451612903225806,
+            "draw": 0.26666666666666666,
+            "away": 0.15625
+          },
+          "edge_vs_model": {
+            "home": -0.09787829999999997,
+            "draw": -0.03769749999999994,
+            "away": 0.03277439999999987
+          }
+        },
+        {
+          "venue": "virginbet",
+          "selection_prices": {
+            "home": 1.55,
+            "draw": 3.75,
+            "away": 6.4
+          },
+          "implied": {
+            "home": 0.6451612903225806,
+            "draw": 0.26666666666666666,
+            "away": 0.15625
+          },
+          "edge_vs_model": {
+            "home": -0.09787829999999997,
+            "draw": -0.03769749999999994,
+            "away": 0.03277439999999987
+          }
+        },
+        {
+          "venue": "leovegas",
+          "selection_prices": {
+            "home": 1.57,
+            "draw": 3.8,
+            "away": 6.5
+          },
+          "implied": {
+            "home": 0.6369426751592356,
+            "draw": 0.2631578947368421,
+            "away": 0.15384615384615385
+          },
+          "edge_vs_model": {
+            "home": -0.08623801999999992,
+            "draw": -0.024866799999999967,
+            "away": 0.0489115
+          }
+        },
+        {
+          "venue": "grosvenor",
+          "selection_prices": {
+            "home": 1.57,
+            "draw": 3.8,
+            "away": 6.0
+          },
+          "implied": {
+            "home": 0.6369426751592356,
+            "draw": 0.2631578947368421,
+            "away": 0.16666666666666666
+          },
+          "edge_vs_model": {
+            "home": -0.08623801999999992,
+            "draw": -0.024866799999999967,
+            "away": -0.03177400000000008
+          }
+        },
+        {
+          "venue": "smarkets",
+          "selection_prices": {
+            "home": 1.62,
+            "draw": 4.1,
+            "away": 7.0
+          },
+          "implied": {
+            "home": 0.6172839506172839,
+            "draw": 0.24390243902439027,
+            "away": 0.14285714285714285
+          },
+          "edge_vs_model": {
+            "home": -0.057137319999999936,
+            "draw": 0.05211739999999998,
+            "away": 0.12959699999999996
+          }
+        },
+        {
+          "venue": "betfred_uk",
+          "selection_prices": {
+            "home": 1.57,
+            "draw": 4.0,
+            "away": 6.0
+          },
+          "implied": {
+            "home": 0.6369426751592356,
+            "draw": 0.25,
+            "away": 0.16666666666666666
+          },
+          "edge_vs_model": {
+            "home": -0.08623801999999992,
+            "draw": 0.026456000000000035,
+            "away": -0.03177400000000008
+          }
+        },
+        {
+          "venue": "betway",
+          "selection_prices": {
+            "home": 1.57,
+            "draw": 3.8,
+            "away": 6.5
+          },
+          "implied": {
+            "home": 0.6369426751592356,
+            "draw": 0.2631578947368421,
+            "away": 0.15384615384615385
+          },
+          "edge_vs_model": {
+            "home": -0.08623801999999992,
+            "draw": -0.024866799999999967,
+            "away": 0.0489115
+          }
+        },
+        {
+          "venue": "skybet",
+          "selection_prices": {
+            "home": 1.57,
+            "draw": 3.8,
+            "away": 6.0
+          },
+          "implied": {
+            "home": 0.6369426751592356,
+            "draw": 0.2631578947368421,
+            "away": 0.16666666666666666
+          },
+          "edge_vs_model": {
+            "home": -0.08623801999999992,
+            "draw": -0.024866799999999967,
+            "away": -0.03177400000000008
+          }
+        },
+        {
+          "venue": "paddypower",
+          "selection_prices": {
+            "home": 1.57,
+            "draw": 3.75,
+            "away": 6.5
+          },
+          "implied": {
+            "home": 0.6369426751592356,
+            "draw": 0.26666666666666666,
+            "away": 0.15384615384615385
+          },
+          "edge_vs_model": {
+            "home": -0.08623801999999992,
+            "draw": -0.03769749999999994,
+            "away": 0.0489115
+          }
+        },
+        {
+          "venue": "betvictor",
+          "selection_prices": {
+            "home": 1.55,
+            "draw": 3.9,
+            "away": 6.0
+          },
+          "implied": {
+            "home": 0.6451612903225806,
+            "draw": 0.25641025641025644,
+            "away": 0.16666666666666666
+          },
+          "edge_vs_model": {
+            "home": -0.09787829999999997,
+            "draw": 0.0007946000000000897,
+            "away": -0.03177400000000008
+          }
+        },
+        {
+          "venue": "matchbook",
+          "selection_prices": {
+            "home": 1.63,
+            "draw": 3.95,
+            "away": 7.0
+          },
+          "implied": {
+            "home": 0.6134969325153374,
+            "draw": 0.2531645569620253,
+            "away": 0.14285714285714285
+          },
+          "edge_vs_model": {
+            "home": -0.05131717999999996,
+            "draw": 0.013625300000000173,
+            "away": 0.12959699999999996
+          }
+        },
+        {
+          "venue": "betfair_ex_uk",
+          "selection_prices": {
+            "home": 1.63,
+            "draw": 4.0,
+            "away": 7.0
+          },
+          "implied": {
+            "home": 0.6134969325153374,
+            "draw": 0.25,
+            "away": 0.14285714285714285
+          },
+          "edge_vs_model": {
+            "home": -0.05131717999999996,
+            "draw": 0.026456000000000035,
+            "away": 0.12959699999999996
+          }
+        },
+        {
+          "venue": "sport888",
+          "selection_prices": {
+            "home": 1.53,
+            "draw": 3.6,
+            "away": 6.0
+          },
+          "implied": {
+            "home": 0.6535947712418301,
+            "draw": 0.2777777777777778,
+            "away": 0.16666666666666666
+          },
+          "edge_vs_model": {
+            "home": -0.10951857999999992,
+            "draw": -0.07618959999999997,
+            "away": -0.03177400000000008
+          }
+        },
+        {
+          "venue": "boylesports",
+          "selection_prices": {
+            "home": 1.55,
+            "draw": 3.75,
+            "away": 6.5
+          },
+          "implied": {
+            "home": 0.6451612903225806,
+            "draw": 0.26666666666666666,
+            "away": 0.15384615384615385
+          },
+          "edge_vs_model": {
+            "home": -0.09787829999999997,
+            "draw": -0.03769749999999994,
+            "away": 0.0489115
+          }
+        },
+        {
+          "venue": "betfair_sb_uk",
+          "selection_prices": {
+            "home": 1.57,
+            "draw": 3.9,
+            "away": 6.5
+          },
+          "implied": {
+            "home": 0.6369426751592356,
+            "draw": 0.25641025641025644,
+            "away": 0.15384615384615385
+          },
+          "edge_vs_model": {
+            "home": -0.08623801999999992,
+            "draw": 0.0007946000000000897,
+            "away": 0.0489115
           }
         }
       ],
-      "kickoff": "2026-07-11T21:00:00+00:00"
+      "kickoff": "2026-07-09T20:00:00+00:00"
     },
     {
       "fixture": "Spain vs Belgium",
       "scores": [
         {
           "score": "1-1",
-          "prob": 11.3,
-          "fair": 8.84,
-          "pm_prob": 11.5
+          "prob": 11.2,
+          "fair": 8.91
         },
         {
           "score": "2-1",
           "prob": 10.6,
-          "fair": 9.45,
-          "pm_prob": 10.5
+          "fair": 9.47
         },
         {
           "score": "1-0",
           "prob": 9.6,
-          "fair": 10.4,
-          "pm_prob": 11.5
+          "fair": 10.37
         },
         {
           "score": "2-0",
           "prob": 9.4,
-          "fair": 10.63,
-          "pm_prob": 10.5
+          "fair": 10.61
         },
         {
           "score": "3-1",
           "prob": 6.5,
-          "fair": 15.39,
-          "pm_prob": 6.5
+          "fair": 15.44
         },
         {
           "score": "3-0",
           "prob": 5.8,
-          "fair": 17.32,
-          "pm_prob": 6.5
+          "fair": 17.31
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 57.1,
-        "under": 42.9
+        "over": 57.0,
+        "under": 43.0
       },
-      "btts": 57.2,
+      "btts": 57.0,
       "model_1x2": {
-        "home": 0.577379,
-        "draw": 0.240817,
-        "away": 0.181804
+        "home": 0.576464,
+        "draw": 0.238901,
+        "away": 0.184635
       },
       "approx_1x2": false,
       "venues": [
         {
-          "venue": "polymarket",
+          "venue": "leovegas",
           "selection_prices": {
-            "home": 1.6807,
-            "draw": 4.0816,
-            "away": 6.0606
+            "home": 1.65,
+            "draw": 3.9,
+            "away": 5.2
           },
           "implied": {
-            "home": 0.594990182661986,
-            "draw": 0.24500196001568014,
-            "away": 0.165000165000165
+            "home": 0.6060606060606061,
+            "draw": 0.25641025641025644,
+            "away": 0.1923076923076923
           },
           "edge_vs_model": {
-            "home": -0.029599114699999984,
-            "draw": -0.017081332800000015,
-            "away": 0.10184132239999988
+            "home": -0.048834400000000056,
+            "draw": -0.06828610000000002,
+            "away": -0.03989799999999999
+          }
+        },
+        {
+          "venue": "unibet_uk",
+          "selection_prices": {
+            "home": 1.65,
+            "draw": 4.0,
+            "away": 5.25
+          },
+          "implied": {
+            "home": 0.6060606060606061,
+            "draw": 0.25,
+            "away": 0.19047619047619047
+          },
+          "edge_vs_model": {
+            "home": -0.048834400000000056,
+            "draw": -0.04439599999999999,
+            "away": -0.030666250000000006
+          }
+        },
+        {
+          "venue": "coral",
+          "selection_prices": {
+            "home": 1.61,
+            "draw": 4.0,
+            "away": 5.25
+          },
+          "implied": {
+            "home": 0.6211180124223602,
+            "draw": 0.25,
+            "away": 0.19047619047619047
+          },
+          "edge_vs_model": {
+            "home": -0.07189296,
+            "draw": -0.04439599999999999,
+            "away": -0.030666250000000006
+          }
+        },
+        {
+          "venue": "ladbrokes_uk",
+          "selection_prices": {
+            "home": 1.61,
+            "draw": 4.0,
+            "away": 5.25
+          },
+          "implied": {
+            "home": 0.6211180124223602,
+            "draw": 0.25,
+            "away": 0.19047619047619047
+          },
+          "edge_vs_model": {
+            "home": -0.07189296,
+            "draw": -0.04439599999999999,
+            "away": -0.030666250000000006
+          }
+        },
+        {
+          "venue": "betway",
+          "selection_prices": {
+            "home": 1.61,
+            "draw": 3.8,
+            "away": 5.25
+          },
+          "implied": {
+            "home": 0.6211180124223602,
+            "draw": 0.2631578947368421,
+            "away": 0.19047619047619047
+          },
+          "edge_vs_model": {
+            "home": -0.07189296,
+            "draw": -0.09217620000000004,
+            "away": -0.030666250000000006
+          }
+        },
+        {
+          "venue": "virginbet",
+          "selection_prices": {
+            "home": 1.61,
+            "draw": 3.8,
+            "away": 5.3
+          },
+          "implied": {
+            "home": 0.6211180124223602,
+            "draw": 0.2631578947368421,
+            "away": 0.18867924528301888
+          },
+          "edge_vs_model": {
+            "home": -0.07189296,
+            "draw": -0.09217620000000004,
+            "away": -0.021434500000000023
+          }
+        },
+        {
+          "venue": "livescorebet",
+          "selection_prices": {
+            "home": 1.61,
+            "draw": 3.8,
+            "away": 5.3
+          },
+          "implied": {
+            "home": 0.6211180124223602,
+            "draw": 0.2631578947368421,
+            "away": 0.18867924528301888
+          },
+          "edge_vs_model": {
+            "home": -0.07189296,
+            "draw": -0.09217620000000004,
+            "away": -0.021434500000000023
+          }
+        },
+        {
+          "venue": "casumo",
+          "selection_prices": {
+            "home": 1.63,
+            "draw": 3.9,
+            "away": 5.5
+          },
+          "implied": {
+            "home": 0.6134969325153374,
+            "draw": 0.25641025641025644,
+            "away": 0.18181818181818182
+          },
+          "edge_vs_model": {
+            "home": -0.06036368000000014,
+            "draw": -0.06828610000000002,
+            "away": 0.015492499999999909
+          }
+        },
+        {
+          "venue": "grosvenor",
+          "selection_prices": {
+            "home": 1.62,
+            "draw": 3.8,
+            "away": 5.5
+          },
+          "implied": {
+            "home": 0.6172839506172839,
+            "draw": 0.2631578947368421,
+            "away": 0.18181818181818182
+          },
+          "edge_vs_model": {
+            "home": -0.06612832000000002,
+            "draw": -0.09217620000000004,
+            "away": 0.015492499999999909
+          }
+        },
+        {
+          "venue": "betvictor",
+          "selection_prices": {
+            "home": 1.61,
+            "draw": 3.9,
+            "away": 5.25
+          },
+          "implied": {
+            "home": 0.6211180124223602,
+            "draw": 0.25641025641025644,
+            "away": 0.19047619047619047
+          },
+          "edge_vs_model": {
+            "home": -0.07189296,
+            "draw": -0.06828610000000002,
+            "away": -0.030666250000000006
+          }
+        },
+        {
+          "venue": "smarkets",
+          "selection_prices": {
+            "home": 1.69,
+            "draw": 4.1,
+            "away": 5.9
+          },
+          "implied": {
+            "home": 0.591715976331361,
+            "draw": 0.24390243902439027,
+            "away": 0.1694915254237288
+          },
+          "edge_vs_model": {
+            "home": -0.025775840000000105,
+            "draw": -0.020505900000000077,
+            "away": 0.0893465
+          }
+        },
+        {
+          "venue": "betfred_uk",
+          "selection_prices": {
+            "home": 1.62,
+            "draw": 4.0,
+            "away": 5.5
+          },
+          "implied": {
+            "home": 0.6172839506172839,
+            "draw": 0.25,
+            "away": 0.18181818181818182
+          },
+          "edge_vs_model": {
+            "home": -0.06612832000000002,
+            "draw": -0.04439599999999999,
+            "away": 0.015492499999999909
+          }
+        },
+        {
+          "venue": "skybet",
+          "selection_prices": {
+            "home": 1.62,
+            "draw": 3.8,
+            "away": 5.25
+          },
+          "implied": {
+            "home": 0.6172839506172839,
+            "draw": 0.2631578947368421,
+            "away": 0.19047619047619047
+          },
+          "edge_vs_model": {
+            "home": -0.06612832000000002,
+            "draw": -0.09217620000000004,
+            "away": -0.030666250000000006
+          }
+        },
+        {
+          "venue": "paddypower",
+          "selection_prices": {
+            "home": 1.62,
+            "draw": 3.8,
+            "away": 5.5
+          },
+          "implied": {
+            "home": 0.6172839506172839,
+            "draw": 0.2631578947368421,
+            "away": 0.18181818181818182
+          },
+          "edge_vs_model": {
+            "home": -0.06612832000000002,
+            "draw": -0.09217620000000004,
+            "away": 0.015492499999999909
+          }
+        },
+        {
+          "venue": "matchbook",
+          "selection_prices": {
+            "home": 1.69,
+            "draw": 4.0,
+            "away": 5.9
+          },
+          "implied": {
+            "home": 0.591715976331361,
+            "draw": 0.25,
+            "away": 0.1694915254237288
+          },
+          "edge_vs_model": {
+            "home": -0.025775840000000105,
+            "draw": -0.04439599999999999,
+            "away": 0.0893465
+          }
+        },
+        {
+          "venue": "betfair_ex_uk",
+          "selection_prices": {
+            "home": 1.69,
+            "draw": 4.1,
+            "away": 5.9
+          },
+          "implied": {
+            "home": 0.591715976331361,
+            "draw": 0.24390243902439027,
+            "away": 0.1694915254237288
+          },
+          "edge_vs_model": {
+            "home": -0.025775840000000105,
+            "draw": -0.020505900000000077,
+            "away": 0.0893465
+          }
+        },
+        {
+          "venue": "sport888",
+          "selection_prices": {
+            "home": 1.61,
+            "draw": 3.7,
+            "away": 5.0
+          },
+          "implied": {
+            "home": 0.6211180124223602,
+            "draw": 0.27027027027027023,
+            "away": 0.2
+          },
+          "edge_vs_model": {
+            "home": -0.07189296,
+            "draw": -0.11606629999999996,
+            "away": -0.07682500000000003
+          }
+        },
+        {
+          "venue": "boylesports",
+          "selection_prices": {
+            "home": 1.6,
+            "draw": 3.8,
+            "away": 5.0
+          },
+          "implied": {
+            "home": 0.625,
+            "draw": 0.2631578947368421,
+            "away": 0.2
+          },
+          "edge_vs_model": {
+            "home": -0.0776576,
+            "draw": -0.09217620000000004,
+            "away": -0.07682500000000003
+          }
+        },
+        {
+          "venue": "betfair_sb_uk",
+          "selection_prices": {
+            "home": 1.65,
+            "draw": 3.9,
+            "away": 5.5
+          },
+          "implied": {
+            "home": 0.6060606060606061,
+            "draw": 0.25641025641025644,
+            "away": 0.18181818181818182
+          },
+          "edge_vs_model": {
+            "home": -0.048834400000000056,
+            "draw": -0.06828610000000002,
+            "away": 0.015492499999999909
           }
         }
       ],
       "kickoff": "2026-07-10T19:00:00+00:00"
     },
     {
-      "fixture": "Argentina vs Switzerland",
+      "fixture": "Norway vs England",
       "scores": [
         {
           "score": "1-1",
-          "prob": 12.3,
-          "fair": 8.15,
-          "pm_prob": 12.5
+          "prob": 12.1,
+          "fair": 8.28
         },
         {
-          "score": "1-0",
-          "prob": 11.0,
-          "fair": 9.06,
-          "pm_prob": 15.5
+          "score": "0-1",
+          "prob": 10.7,
+          "fair": 9.33
         },
         {
-          "score": "2-0",
-          "prob": 10.6,
-          "fair": 9.47,
-          "pm_prob": 11.5
+          "score": "0-2",
+          "prob": 10.1,
+          "fair": 9.9
         },
         {
-          "score": "2-1",
-          "prob": 9.8,
-          "fair": 10.22,
-          "pm_prob": 10.5
+          "score": "1-2",
+          "prob": 9.0,
+          "fair": 11.16
         },
         {
           "score": "0-0",
-          "prob": 7.5,
-          "fair": 13.29,
-          "pm_prob": 9.5
+          "prob": 7.8,
+          "fair": 12.84
         },
         {
-          "score": "3-0",
-          "prob": 6.4,
-          "fair": 15.61,
-          "pm_prob": 5.5
+          "score": "1-0",
+          "prob": 6.6,
+          "fair": 15.17
         }
       ],
       "over_under": {
         "line": 2.5,
-        "over": 51.2,
-        "under": 48.8
+        "over": 49.5,
+        "under": 50.5
       },
-      "btts": 51.6,
+      "btts": 50.2,
       "model_1x2": {
-        "home": 0.575009,
-        "draw": 0.257447,
-        "away": 0.167543
+        "home": 0.212308,
+        "draw": 0.253375,
+        "away": 0.534316
       },
       "approx_1x2": false,
-      "venues": [
+      "venues": []
+    },
+    {
+      "fixture": "Argentina vs Switzerland",
+      "scores": [
         {
-          "venue": "polymarket",
-          "selection_prices": {
-            "home": 1.7699,
-            "draw": 3.6364,
-            "away": 6.0606
-          },
-          "implied": {
-            "home": 0.5650036725238714,
-            "draw": 0.2749972500274997,
-            "away": 0.165000165000165
-          },
-          "edge_vs_model": {
-            "home": 0.017708429100000034,
-            "draw": -0.06381972920000001,
-            "away": 0.015411105799999936
-          }
+          "score": "1-1",
+          "prob": 12.0,
+          "fair": 8.3
+        },
+        {
+          "score": "1-0",
+          "prob": 11.2,
+          "fair": 8.93
+        },
+        {
+          "score": "2-0",
+          "prob": 10.6,
+          "fair": 9.44
+        },
+        {
+          "score": "2-1",
+          "prob": 9.9,
+          "fair": 10.1
+        },
+        {
+          "score": "0-0",
+          "prob": 7.4,
+          "fair": 13.51
+        },
+        {
+          "score": "3-0",
+          "prob": 6.4,
+          "fair": 15.72
         }
       ],
-      "kickoff": "2026-07-12T01:00:00+00:00"
+      "over_under": {
+        "line": 2.5,
+        "over": 51.1,
+        "under": 48.9
+      },
+      "btts": 51.5,
+      "model_1x2": {
+        "home": 0.576181,
+        "draw": 0.252696,
+        "away": 0.171123
+      },
+      "approx_1x2": false,
+      "venues": []
     }
   ]
 }
