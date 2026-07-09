@@ -123,6 +123,14 @@ def test_single_source_picks_are_indicative_and_unstaked(monkeypatch):
 
 def test_single_source_override_stakes(monkeypatch):
     monkeypatch.setenv("WCA_STAKE_SINGLE_SOURCE", "1")
+    # Pin the LIVE shrink off (default on): this fixture is a single PM-only
+    # book, so the de-vigged "market" reference IS that same PM price and the
+    # shrink collapses the model-vs-market edge to ~0 (correctly — there is no
+    # second price to disagree with), leaving nothing to stake. That is
+    # orthogonal to the single-source-override MECHANISM under test here (that a
+    # non-indicative PM outcome gets staked once the override is set). The shrink
+    # is exercised in tests/test_shrink_live.py.
+    monkeypatch.setenv("WCA_SHRINK_LIVE", "0")
     recs = build_card(_models(), _pm_only_odds(), default_pools(), _fixtures_meta(),
                       min_edge=-1.0, now="2026-06-20T12:00:00Z")
     assert recs

@@ -16,6 +16,7 @@ Two artefacts, both git-tracked so history is preserved by commits:
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
@@ -42,6 +43,58 @@ _SHRINK_K_MID = 0.5      # k for legs the model rates >= 0.25
 _SHRINK_K_LONGSHOT = 0.25  # k for legs the model rates < 0.25
 _SHRINK_LONGSHOT_PROB = 0.25
 _DISAGREE_PP = 0.03      # |model - market| >= 3pp flags a leg as a disagreement
+
+
+# ---------------------------------------------------------------------------
+# LIVE shrink-to-market kill-switch (graduation of the `shrink` shadow).
+# ---------------------------------------------------------------------------
+#
+# The `shrink` shadow family (``p' = p_mkt + k*(p_model - p_mkt)``, ``k=0.5``
+# for legs the model rates >=0.25 and ``k=0.25`` below) was promoted to the LIVE
+# model line (user-approved 2026-07-09). Evidence: backtest n=383 model-vs-PM
+# observations — when the model disagrees with PM by >=2pp, resolution moves
+# TOWARD the model only 24.8% [21.1, 28.5] of the time (7.7% on favourites);
+# per-leg calibration n=99, model <0.25 legs predict 15.8% vs realize 10.1%; the
+# `shrink` shadow trended positive vs live (brierΔ −0.0046 at n=75, same
+# direction as `market`). Conclusion: shrink the model prob TOWARD the de-vigged
+# market reference BEFORE it drives edge/EV/sizing.
+#
+# The application layer is :func:`wca.card._iter_fixture_blends` (the single
+# blend origin shared by the card, ``nextmatch`` and the persisted
+# ``model_predictions.json`` that ``betrecs`` / ``eventmarkets`` read). This flag
+# gates ONLY the LIVE application; the SHADOW recompute in the scorer and the
+# ``shrink`` field written here are untouched by it. Default ON — flip
+# ``WCA_SHRINK_LIVE=0`` to restore the EXACT pre-promotion behaviour (raw blend
+# drives everything). Reversible, no data migration.
+_SHRINK_LIVE_ENV = "WCA_SHRINK_LIVE"
+
+
+def shrink_live_enabled() -> bool:
+    """True unless ``WCA_SHRINK_LIVE`` is explicitly a falsey value.
+
+    Default ON (per the 2026-07-09 approval). ``0`` / ``false`` / ``no`` / ``off``
+    (case-insensitive) turns the LIVE shrink OFF so the raw blend drives
+    edge/EV/sizing exactly as it did before promotion. Any other value — or the
+    variable being unset — leaves it ON.
+    """
+    raw = os.environ.get(_SHRINK_LIVE_ENV)
+    if raw is None:
+        return True
+    return raw.strip().lower() not in ("0", "false", "no", "off", "")
+
+
+def shrink_triple(
+    model: Mapping[str, float],
+    market: Mapping[str, float],
+) -> Optional[Dict[str, float]]:
+    """Public alias for the promoted shrink-to-market transform.
+
+    This is the EXACT function the ``shrink`` shadow family has always used
+    (:func:`_shrink_triple`); it was promoted verbatim to the LIVE model line so
+    the live behaviour can never drift from what the scoreboard scored. Returns
+    ``None`` (caller keeps the raw blend) when either triple is missing.
+    """
+    return _shrink_triple(model, market)
 
 
 def _triple(probs: Dict[str, float]) -> Dict[str, float]:
@@ -268,36 +321,59 @@ def build_predictions(
     market). See :mod:`wca.models.totals_prior` for the exact de-vig/blend
     method. NOT consumed by any pricing or sizing path in this change.
 
+    Each row carries BOTH ``model`` and ``model_raw``:
+
+    * ``model`` — the LIVE model line the desk bets against. Since the 2026-07-09
+      shrink promotion (:func:`shrink_live_enabled`, ``WCA_SHRINK_LIVE``) this is
+      the shrink-to-market blend when the flag is on, and the RAW blend when it
+      is off. The value comes from ``fb.blended``, which
+      :func:`wca.card._iter_fixture_blends` already shrinks upstream, so
+      ``betrecs`` / ``eventmarkets`` read the shrunk value with no change.
+    * ``model_raw`` — the RAW (pre-shrink) Elo/DC/market blend, from
+      ``fb.blended_raw``. Preserved so the shadow scoreboard can keep comparing
+      RAW -> shrunk -> market after promotion (the ``shrink`` shadow becomes the
+      live line and ``raw`` becomes the family scored against it).
+
     1X2 SHADOW variants are additionally emitted for every row that carries a
     usable de-vigged market triple (all rows in practice), computed from the
-    ``model`` / ``elo`` / ``dc`` / ``market`` triples already in the row (no new
-    inputs needed): ``mw90`` (``0.9*market + 0.1*(0.25*elo + 0.75*dc)``,
-    renormalised — the near-market blend the n=73 evidence favoured), ``shrink``
-    (shrink-to-market ``p' = p_mkt + k*(p_model - p_mkt)`` with ``k=0.5`` for
-    model legs ``>=0.25`` and ``k=0.25`` below, renormalised) and
-    ``disagree3pp`` (per-leg ``|model - market| >= 3pp`` booleans). All three
-    are SHADOW-ONLY and scored by ``scripts/wca_shadow_score.py``; none touch
-    live pricing/sizing/selection. A fixture with no market triple carries none
-    of them (guarded — never fabricated).
+    ``model_raw`` / ``elo`` / ``dc`` / ``market`` triples in the row (the RAW
+    model, so the shadow comparison is never blinded by the live shrink):
+    ``mw90`` (``0.9*market + 0.1*(0.25*elo + 0.75*dc)``, renormalised — the
+    near-market blend the n=73 evidence favoured), ``shrink`` (shrink-to-market
+    ``p' = p_mkt + k*(p_model - p_mkt)`` with ``k=0.5`` for model legs ``>=0.25``
+    and ``k=0.25`` below, renormalised — the family PROMOTED to the live line)
+    and ``disagree3pp`` (per-leg ``|model - market| >= 3pp`` booleans). The
+    shadow fields themselves never touch live pricing/sizing/selection and are
+    scored by ``scripts/wca_shadow_score.py``. A fixture with no market triple
+    carries none of them (guarded — never fabricated).
     """
     fixtures: List[Dict[str, Any]] = []
     for fb in blends:
         match_id = str(fb.fx.get("event_id", ""))
+        # ``fb.blended`` is the LIVE model line: the shrunk blend when the
+        # WCA_SHRINK_LIVE promotion is on, the raw blend when it is off. The RAW
+        # (pre-shrink) blend is ``fb.blended_raw`` when the producer supplies it
+        # (``_iter_fixture_blends`` always does); older callers / test stubs that
+        # only carry ``blended`` fall back to it (there the two coincide).
+        raw_blend = getattr(fb, "blended_raw", None)
+        if raw_blend is None:
+            raw_blend = fb.blended
         row: Dict[str, Any] = {
             "generated": now_utc,
             "fixture": "%s vs %s" % (fb.home, fb.away),
             "match_id": match_id,
             "kickoff": str(fb.fx.get("commence_time", "")),
-            "model": _triple(fb.blended),
+            "model": _triple(fb.blended),       # LIVE line (shrunk when on)
+            "model_raw": _triple(raw_blend),    # RAW pre-shrink blend (shadow baseline)
             "elo": _triple(fb.elo_map),
             "dc": _triple(fb.dc_map),
             "market": _triple(fb.mkt_map),
         }
-        # 1X2 SHADOW variants (mw90 / shrink / disagree3pp): counterfactually
-        # computable from the market+elo+dc+model triples already in the row, so
-        # they are emitted for every build with a usable market. Guarded — a
-        # fixture with no market triple carries none of them (never fabricated).
-        row.update(_onex2_shadows(row["model"], row["elo"], row["dc"], row["market"]))
+        # 1X2 SHADOW variants (mw90 / shrink / disagree3pp): recomputed from the
+        # RAW model + market so the scoreboard keeps comparing raw -> shrunk ->
+        # market honestly even AFTER ``model`` becomes the shrunk live line.
+        # Guarded — a fixture with no market triple carries none of them.
+        row.update(_onex2_shadows(row["model_raw"], row["elo"], row["dc"], row["market"]))
         lambdas = _lambdas_for(dc_model, fb)
         if lambdas is not None:
             row.update(lambdas)

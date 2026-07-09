@@ -264,3 +264,42 @@ def test_renorm_rejects_degenerate_triple():
     assert modelpreds._renorm({"home": -1.0, "draw": 0.0, "away": 0.0}) is None
     out = modelpreds._renorm({"home": 1.0, "draw": 1.0, "away": 2.0})
     assert abs(out["away"] - 0.5) < 1e-9
+
+
+# ---------------------------------------------------------------------------
+# model_raw persistence (2026-07-09 shrink promotion). A blend stub that carries
+# `blended_raw` distinct from `blended` (the shrunk live line) persists both,
+# and the shrink shadow is computed from the RAW model.
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class _ShrunkBlend(_Blend):
+    blended_raw: Dict[str, float] = None  # type: ignore[assignment]
+
+
+def test_model_raw_falls_back_to_model_for_legacy_stub():
+    # A blend WITHOUT blended_raw (legacy shape) -> model_raw mirrors model.
+    payload = modelpreds.build_predictions([_distinct_blend()], NOW)
+    (fx,) = payload["fixtures"]
+    assert fx["model_raw"] == fx["model"]
+
+
+def test_model_raw_persisted_when_distinct():
+    b = _ShrunkBlend(
+        home="Brazil", away="Serbia",
+        blended={"home": 0.65, "draw": 0.22, "away": 0.13},        # shrunk live line
+        elo_map={"home": 0.40, "draw": 0.30, "away": 0.30},
+        dc_map={"home": 0.50, "draw": 0.25, "away": 0.25},
+        mkt_map={"home": 0.60, "draw": 0.25, "away": 0.15},
+        fx={"event_id": "ev2", "commence_time": "2026-06-14T18:00:00Z"},
+        blended_raw={"home": 0.70, "draw": 0.20, "away": 0.10},    # raw blend
+    )
+    payload = modelpreds.build_predictions([b], NOW)
+    (fx,) = payload["fixtures"]
+    assert abs(fx["model"]["home"] - 0.65) < 1e-6
+    assert abs(fx["model_raw"]["home"] - 0.70) < 1e-6
+    # shrink shadow must be shrink(model_raw, market), NOT shrink(model, market).
+    from_raw = modelpreds.shrink_triple(fx["model_raw"], fx["market"])
+    for leg in ("home", "draw", "away"):
+        assert abs(fx["shrink"][leg] - from_raw[leg]) < 1e-6

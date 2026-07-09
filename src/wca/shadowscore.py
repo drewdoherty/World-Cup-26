@@ -237,24 +237,67 @@ def _market_1x2(row: Mapping[str, Any]) -> Optional[Dict[str, float]]:
     return dict(mkt) if _valid_triple(mkt) else None
 
 
+def _raw_model_for_shrink(row: Mapping[str, Any]) -> Optional[Dict[str, float]]:
+    """The RAW model blend to feed the ``shrink`` recompute (lenient fallback).
+
+    Since the 2026-07-09 shrink promotion the live writer persists ``model_raw``
+    (the raw blend) alongside ``model`` (the shrunk live line). Historical rows
+    predate ``model_raw``; there ``model`` IS the raw blend (no live shrink was
+    applied), so we fall back to it. This keeps the ``shrink`` recompute honest
+    across the promotion boundary — it always shrinks the RAW model, never an
+    already-shrunk value.
+    """
+    raw = row.get("model_raw")
+    if _valid_triple(raw):
+        return dict(raw)
+    model = row.get("model")
+    return dict(model) if _valid_triple(model) else None
+
+
+def _raw_1x2(row: Mapping[str, Any]) -> Optional[Dict[str, float]]:
+    """The RAW pre-shrink blend for the ``raw`` family (STRICT — no fallback).
+
+    Only returns a triple when the row genuinely carries ``model_raw`` (i.e. a
+    post-promotion build). Pre-promotion rows — where ``model`` already IS the
+    raw blend — return ``None`` so the ``raw`` family does not accumulate a pile
+    of trivially-zero (raw == live) paired diffs; it measures the promotion only
+    over builds where a distinct pre-shrink blend was actually recorded.
+    """
+    raw = row.get("model_raw")
+    return dict(raw) if _valid_triple(raw) else None
+
+
 def shadow_1x2(family: str, row: Mapping[str, Any]) -> Optional[Dict[str, float]]:
     """1X2 triple for a shadow *family*, recomputed from the row's components.
 
     ``mw90`` / ``shrink`` are recomputed (so historical rows predating the
-    dual-write are still scored); ``market`` and ``live`` are read straight from
+    dual-write are still scored); ``market`` / ``live`` / ``raw`` are read from
     the row. Returns ``None`` when the required component triples are absent.
+
+    Post-promotion the ``live`` baseline (``model``) is the shrunk line. The
+    ``shrink`` recompute reads the RAW model via :func:`_raw_model_for_shrink`
+    (``model_raw`` when present, else ``model`` for pre-promotion rows) so it
+    shrinks the raw blend, not an already-shrunk one. The ``raw`` family reads
+    the RAW blend STRICTLY (:func:`_raw_1x2`, only where ``model_raw`` is
+    present) so it scores the ex-live blend against the now-live shrunk one only
+    over post-promotion builds.
     """
     if family == "live":
         return _live_1x2(row)
     if family == "market":
         return _market_1x2(row)
-    model, elo, dc, mkt = (
-        row.get("model"), row.get("elo"), row.get("dc"), row.get("market")
-    )
+    if family == "raw":
+        return _raw_1x2(row)
+    elo, dc, mkt = row.get("elo"), row.get("dc"), row.get("market")
     if family == "mw90":
         return _mw90_triple(elo, dc, mkt) if _valid_triple(mkt) else None
     if family == "shrink":
-        return _shrink_triple(model, mkt) if _valid_triple(mkt) else None
+        raw_model = _raw_model_for_shrink(row)
+        return (
+            _shrink_triple(raw_model, mkt)
+            if (raw_model is not None and _valid_triple(mkt))
+            else None
+        )
     return None
 
 
@@ -327,7 +370,13 @@ def totals_lambdas(family: str, row: Mapping[str, Any],
 
 # Which 1X2 shadow families we score (against the ``live`` baseline). ``market``
 # is included as a reference column (the n=73 evidence's in-sample winner).
-ONEX2_SHADOWS = ("mw90", "shrink", "market")
+# ``raw`` is the PRE-shrink blend: after the 2026-07-09 shrink promotion the
+# ``live`` baseline (``model``) is the shrunk line, so ``raw`` measures the
+# blend that USED to be live against the one that is now live (a positive
+# ``raw`` brier_diff = the promotion helped). ``shrink`` still recomputes the
+# shrunk line from the RAW model, so it should track ``live`` closely once every
+# scored row carries ``model_raw``.
+ONEX2_SHADOWS = ("raw", "mw90", "shrink", "market")
 # Goal-lambda shadow families are DISCOVERED dynamically per-run from the log
 # rows (see discover_lambda_prefixes) rather than hardcoded, so a new
 # "<prefix>_lambda_home/away" dual-write is judged automatically.
@@ -556,16 +605,21 @@ def build_scoreboard(
             "knockout_start_date": KNOCKOUT_START_DATE,
             "totals_shadow_families": totals_families,
             "note": (
-                "SHADOW-ONLY. Lower is better; diff = shadow - live, negative "
-                "means the shadow beat the deployed blend. 1X2 shadows "
-                "(mw90/shrink) are recomputed over ALL settled fixtures; "
+                "Lower is better; diff = family - live, negative means the "
+                "family beat the deployed (live ``model``) blend. Since the "
+                "2026-07-09 shrink promotion the live line IS the shrunk blend, "
+                "so ``raw`` scores the ex-live (pre-shrink) blend against it "
+                "(positive raw brier_diff => the promotion helped) and ``shrink`` "
+                "recomputes the shrunk line from the RAW model (``model_raw``, "
+                "or ``model`` on pre-promotion rows). 1X2 families "
+                "(raw/mw90/shrink) are recomputed over ALL settled fixtures; "
                 "totals shadow families (%s, discovered from "
                 "<prefix>_lambda_home/away keys present in the log) score a "
                 "total-goals O/%.1f market plus a BTTS Brier and mean signed "
                 "goal-lambda bias, only where the lambdas were logged. "
                 "Group/knockout split is by kickoff date vs %s (heuristic; no "
-                "stage field in results). Nothing here feeds live "
-                "pricing/sizing/selection."
+                "stage field in results). This scorer is read-only reporting — "
+                "it never itself feeds live pricing/sizing/selection."
             ) % (", ".join(totals_families) or "none", TOTALS_LINE, KNOCKOUT_START_DATE),
         },
         "shadows": rows_out,

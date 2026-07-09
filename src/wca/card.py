@@ -33,6 +33,7 @@ from typing import Dict, List, Optional, Sequence, Tuple, Union
 import numpy as np
 import pandas as pd
 
+from wca import modelpreds as modelpreds_mod
 from wca.data.teamnames import canonical
 from wca.markets import devig as devig_mod
 from wca.markets.bankroll import (
@@ -1080,7 +1081,17 @@ def best_price(books: Dict[str, Dict[str, float]], outcome: str) -> Tuple[Option
 
 @dataclass
 class _FixtureBlend:
-    """Per-fixture blend state shared by the recommendation and score pipelines."""
+    """Per-fixture blend state shared by the recommendation and score pipelines.
+
+    ``blended`` is the LIVE model line the desk bets against: since the
+    2026-07-09 shrink-to-market promotion it is the shrunk blend when
+    ``WCA_SHRINK_LIVE`` is on (default) and the raw blend when it is off. Every
+    live surface — edge/EV/sizing AND the scoreline / BTTS reconciliation that
+    the codebase pins to "the same blended 1X2 as the bets" — reads ``blended``.
+    ``blended_raw`` is always the RAW pre-shrink Elo/DC/market blend; it is NOT a
+    display target — it exists only as the shadow baseline, persisted as
+    ``model_raw`` so the scoreboard can keep comparing raw -> shrunk -> market.
+    """
 
     fx: Dict[str, object]
     home: str  # canonical
@@ -1088,10 +1099,17 @@ class _FixtureBlend:
     neutral: bool
     host: Optional[str]
     books: Dict[str, Dict[str, float]]
-    blended: Dict[str, float]  # home/draw/away
+    blended: Dict[str, float]  # home/draw/away — LIVE line (shrunk when on)
     elo_map: Dict[str, float]
     dc_map: Dict[str, float]
     mkt_map: Dict[str, float]
+    blended_raw: Optional[Dict[str, float]] = None  # RAW pre-shrink blend
+
+    def __post_init__(self) -> None:
+        # Older constructors that only pass ``blended`` (e.g. test stubs) get a
+        # raw blend that coincides with the live one — the shrink is a no-op there.
+        if self.blended_raw is None:
+            self.blended_raw = dict(self.blended)
 
 
 def _meta_lookup(
@@ -1171,11 +1189,23 @@ def _iter_fixture_blends(
             continue
         m_h, m_d, m_a = float(mkt[0]), float(mkt[1]), float(mkt[2])
 
-        blended = {
+        blended_raw = {
             "home": w.elo * e_h + w.dc * d_h + w.market * m_h,
             "draw": w.elo * e_d + w.dc * d_d + w.market * m_d,
             "away": w.elo * e_a + w.dc * d_a + w.market * m_a,
         }
+        mkt_map = {"home": m_h, "draw": m_d, "away": m_a}
+        # LIVE shrink-to-market (promoted from shadow 2026-07-09): before the raw
+        # Elo/DC/market blend drives edge/EV/sizing, pull it toward the de-vigged
+        # market reference using the EXACT ``shrink`` shadow transform. Gated by
+        # WCA_SHRINK_LIVE (default on); when off, or when the shrink degenerates,
+        # ``blended`` stays byte-identical to the raw blend. ``blended_raw`` always
+        # carries the pre-shrink blend for the scoreline surfaces + shadow scoring.
+        blended = blended_raw
+        if modelpreds_mod.shrink_live_enabled():
+            shrunk = modelpreds_mod.shrink_triple(blended_raw, mkt_map)
+            if shrunk is not None:
+                blended = shrunk
         out.append(
             _FixtureBlend(
                 fx=fx,
@@ -1187,7 +1217,8 @@ def _iter_fixture_blends(
                 blended=blended,
                 elo_map={"home": e_h, "draw": e_d, "away": e_a},
                 dc_map={"home": d_h, "draw": d_d, "away": d_a},
-                mkt_map={"home": m_h, "draw": m_d, "away": m_a},
+                mkt_map=mkt_map,
+                blended_raw=blended_raw,
             )
         )
     return out
@@ -1482,6 +1513,11 @@ def build_score_cards(
     cards: List[ScorelineCard] = []
     for fb in blends:
         pred = models.dc.predict(fb.home, fb.away, neutral=fb.neutral, warn=False)
+        # Reconcile the scoreline matrix to the LIVE line (``fb.blended``, the
+        # shrunk blend when WCA_SHRINK_LIVE is on) so the scorelines stay
+        # consistent with the 1X2 the card actually BETS against — the codebase's
+        # standing invariant (scorelines reconcile to the same blended 1X2 as the
+        # bets). ``blended_raw`` is the shadow baseline, not this display target.
         target = (
             fb.blended["home"],
             fb.blended["draw"],
@@ -1605,7 +1641,10 @@ def build_event_references(
         lam_h = float(getattr(pred, "lambda_home", 0.0) or 0.0)
         lam_a = float(getattr(pred, "lambda_away", 0.0) or 0.0)
 
-        # BTTS from the reconciled matrix so it matches the blended 1X2 bets use.
+        # BTTS from the scoreline matrix reconciled to the LIVE line
+        # (``fb.blended``) so it matches the blended 1X2 the bets use — same
+        # invariant as build_score_cards; the shrink (when on) flows through here
+        # too, keeping this derived reference consistent with the bet line.
         scores = scoreline_card(
             pred,
             (fb.blended["home"], fb.blended["draw"], fb.blended["away"]),
