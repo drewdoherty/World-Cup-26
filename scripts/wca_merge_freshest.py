@@ -43,18 +43,25 @@ from pathlib import Path
 from typing import Optional
 
 
-def _generated_of(path: Path) -> Optional[str]:
+def _generated_of(path: Path, orig_path: str = "") -> Optional[str]:
     """Extract a comparable timestamp string from a data artifact.
 
     JSON: ``meta.generated`` / ``meta.generated_at`` / top-level ``generated``.
     Markdown: the ``<!-- generated: ... -->`` header used by ``cardcache``.
     Returns None if the file is missing/unparseable (never invents a date).
+
+    REGRESSION NOTE (2026-07-09): type dispatch MUST use ``orig_path`` (%P) —
+    git hands the driver suffix-less temp files (``.merge_file_XXXXXX``), so
+    keying off ``path.suffix`` sent every real JSON merge down the markdown
+    branch → both sides None → silent defer to conflict markers. The unit
+    tests masked it by naming their fixtures ``*.json``. (``path.suffix`` is
+    kept as a fallback so direct invocations on named files still work.)
     """
     try:
         text = path.read_text(encoding="utf-8")
     except OSError:
         return None
-    if path.suffix == ".json":
+    if str(orig_path).endswith(".json") or path.suffix == ".json":
         try:
             d = json.loads(text)
         except Exception:
@@ -108,8 +115,8 @@ def main(argv=None) -> int:
               % (orig_path, merged.count("\n")))
         return 0
 
-    ours_gen = _generated_of(ours_p)
-    theirs_gen = _generated_of(theirs_p)
+    ours_gen = _generated_of(ours_p, orig_path)
+    theirs_gen = _generated_of(theirs_p, orig_path)
     if ours_gen is None and theirs_gen is None:
         # Can't tell which is fresher — defer to git's real conflict markers
         # (never silently pick a side when we have no evidence).
