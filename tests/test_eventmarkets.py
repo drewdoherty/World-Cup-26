@@ -660,3 +660,30 @@ def test_advance_model_probs_pairing_mismatch_is_null():
     ph, pa, note = script.advance_model_probs(adv, "France", "Morocco")
     assert ph is None and pa is None
     assert "mismatch" in note
+
+
+# ---------------------------------------------------------------- blind guard
+
+def test_pm_blind_guard_blocks_and_allows(tmp_path):
+    """Regression (2026-07-09): a PM-blind rerun must never clobber a feed
+    with real market prices (advancement #161 bug class)."""
+    import json as _json
+
+    priced = [{"rows": [{"outcome": "x", "market": 0.42}]}]
+    blind = [{"rows": [{"outcome": "x", "market": None}]}]
+    feed = tmp_path / "forest.json"
+    feed.write_text(_json.dumps({"fixtures": priced}))
+
+    # blind run vs priced existing feed -> BLOCK
+    assert script.pm_blind_guard_blocks(blind, str(feed)) is True
+    # priced run -> allowed
+    assert script.pm_blind_guard_blocks(priced, str(feed)) is False
+    # blind run vs blind existing feed -> allowed (nothing to protect)
+    feed.write_text(_json.dumps({"fixtures": blind}))
+    assert script.pm_blind_guard_blocks(blind, str(feed)) is False
+    # no existing feed -> allowed
+    assert script.pm_blind_guard_blocks(
+        blind, str(tmp_path / "none.json")) is False
+    # force flag overrides
+    feed.write_text(_json.dumps({"fixtures": priced}))
+    assert script.pm_blind_guard_blocks(blind, str(feed), force=True) is False

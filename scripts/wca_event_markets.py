@@ -943,6 +943,35 @@ def make_scorer_pricer(matrix_by_fixture: Dict[str, Any]):
 # ---------------------------------------------------------------------------
 
 
+def _count_priced_rows(fixtures_list) -> int:
+    return sum(1 for entry in fixtures_list or []
+               for r in entry.get("rows", [])
+               if "section" not in r and r.get("market") is not None)
+
+
+def pm_blind_guard_blocks(out_fixtures, out_forest_path, *,
+                          force: bool = False) -> bool:
+    """PM-BLIND guard (same class as the advancement #161 fix): a run with
+    the PM route down produces model-only rows and must NEVER clobber a feed
+    carrying real market prices. Observed 2026-07-09: a VPN drop + rerun
+    overwrote 319 priced rows with 0. Returns True when the write must be
+    blocked."""
+    if force or _count_priced_rows(out_fixtures) > 0:
+        return False
+    try:
+        with open(out_forest_path, encoding="utf-8") as fh:
+            existing_mkt = _count_priced_rows(json.load(fh).get("fixtures"))
+    except Exception:  # noqa: BLE001 - no existing feed, nothing to protect
+        return False
+    if existing_mkt > 0:
+        print("PM-BLIND GUARD: this run captured 0 market prices but the "
+              "existing feed has %d priced rows - refusing to overwrite "
+              "(reconnect the PM route / VPN and rerun, or pass "
+              "--force-blind)." % existing_mkt)
+        return True
+    return False
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(
         description="Build the PM event-markets forest + trade recs feeds.")
@@ -958,6 +987,10 @@ def main(argv=None) -> int:
                     help="skip the DC fit (grid families become model:null)")
     ap.add_argument("--no-clob", action="store_true",
                     help="skip CLOB top-of-book calls (gamma prices only)")
+    ap.add_argument("--force-blind", action="store_true",
+                    help="overwrite the feeds even when this run captured "
+                         "ZERO market prices (default: refuse if the "
+                         "existing feed has priced rows)")
     ap.add_argument("--env", default=".env")
     args = ap.parse_args(argv)
 
@@ -1023,6 +1056,10 @@ def main(argv=None) -> int:
             fx["fixture"], sorted(pm_by_kind.keys()), n_rows, n_mkt)
         coverage.append(cov)
         print("  " + cov)
+
+    if pm_blind_guard_blocks(out_fixtures, args.out_forest,
+                             force=args.force_blind):
+        return 1
 
     forest = {
         "meta": {
