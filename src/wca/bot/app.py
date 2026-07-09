@@ -1018,14 +1018,14 @@ def handle_betbuilder(
     )
     if cached is None:
         return (
-            "*Bet builder*\n"
+            "*Trade builder*\n"
             "No card cached yet. The cron build (`scripts/wca_betbuilder.py`) "
             "writes it alongside the main card — try again after the next build."
         )
     generated = cached.get("generated")
     if not generated:
         return (
-            "*Bet builder*\n"
+            "*Trade builder*\n"
             "NO TRADE — `%s` has no generation timestamp; "
             "data age is unknown." % betbuilder_path
         )
