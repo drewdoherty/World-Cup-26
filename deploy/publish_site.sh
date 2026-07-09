@@ -47,6 +47,12 @@ stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 # ledger or execution. (Renamed from edge_desk.json pre-merge; no alias needed —
 # the Action Desk panel and this wiring moved with it in the same PR.)
 "$PY" scripts/wca_edge_desk.py >/dev/null 2>&1 || true
+# hl_xvenue.json (SHADOW-ONLY HL<->PM cross-venue monitor) is OFF by default:
+# the mini is PM-blind and api.hyperliquid.xyz rides the same VPN-only route,
+# so this runs only where WCA_HL_XVENUE=1 is exported (MacBook over NordVPN).
+# Guarded run + guarded stage in one line — the feed may not exist elsewhere,
+# and an unguarded `git add` of a missing pathspec would 128 the publish.
+[ "${WCA_HL_XVENUE:-0}" = "1" ] && { "$PY" scripts/wca_hl_xvenue.py >/dev/null 2>&1 && git add site/hl_xvenue.json; } || true
 # Mirror the freshly-built main-site feeds into the analytics feed dir. localhost
 # :8001 reads site-analytics/data/*.json directly and the :8002 lilac terminal is
 # built from it (next line) — but these main-feed copies had NO refresher and
