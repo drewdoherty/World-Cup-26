@@ -61,7 +61,7 @@ function cards(){
   const order=['£','$']; let h='';
   for(const sym of order){ const s=D.summary[sym]; if(!s) continue;
     h+=`<div class="card"><h2>${sym==='£'?'GBP — sportsbook':'USD — prediction mkts'} (${sym})</h2>
-      <div class="row"><span class="k">open bets</span><span>${s.open_n}</span></div>
+      <div class="row"><span class="k">open trades</span><span>${s.open_n}</span></div>
       <div class="row"><span class="k">at risk</span><span class="neg">${sym}${s.open_at_risk.toFixed(2)}</span></div>
       <div class="row"><span class="k">max win (open)</span><span class="pos">${sym}${s.open_max_win.toFixed(2)}</span></div>
       <div class="row"><span class="k">settled W/L/V</span><span>${s.won}/${s.lost}/${s.void}</span></div>
@@ -94,7 +94,7 @@ function render(){
       return `<td class="${numc.has(k)?'num':''}">${v==null?'':v}</td>`;
     }).join('')+'</tr>';
   }
-  if(!rows.length) h+=`<tr><td colspan="${cols.length}" class="muted" style="padding:18px">no ${view} bets</td></tr>`;
+  if(!rows.length) h+=`<tr><td colspan="${cols.length}" class="muted" style="padding:18px">no ${view} trades</td></tr>`;
   h+='</tbody></table>';
   document.getElementById('table').innerHTML=h;
   document.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1}render()});

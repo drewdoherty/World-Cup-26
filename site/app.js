@@ -173,7 +173,7 @@
     if (p.match) parts.push(p.match);
     if (p.market) parts.push("market: " + p.market);
     if (p.selection) parts.push("selection: " + p.selection);
-    if (p.id != null) parts.push("bet #" + p.id);
+    if (p.id != null) parts.push("trade #" + p.id);
     if (p.account) parts.push("account " + p.account);
     if (p.notes) parts.push("notes: " + p.notes);
     return parts.join("  |  ");
@@ -280,7 +280,7 @@
       ["Avg CLV", esc(clvVal), hasClv ? (Number(clv.avg_clv) >= 0 ? "pos" : "neg") : "dim"],
       ["Settled P&L", plStr, ""],
       primaryReturn,
-      ["Bet Count", esc(String(t.n_bets || 0)), ""]
+      ["Trade Count", esc(String(t.n_bets || 0)), ""]
     ];
 
     // SECONDARY row — everything else, collapsed by default behind "more".
@@ -472,7 +472,7 @@
             '<div class="venue-fill ' + pvk + '" style="width:' +
               (frac * 100).toFixed(1) + '%;background:' + color + ';opacity:.75"></div>' +
           '</div>' +
-          '<div class="venue-sub num">' + nb + ' bet' + (nb === 1 ? '' : 's') +
+          '<div class="venue-sub num">' + nb + ' trade' + (nb === 1 ? '' : 's') +
             ' · open ' + money(v.open_stake || 0, ccy) + '</div>' +
           books +
         '</div>';
@@ -1198,7 +1198,7 @@
     ($("exp-pwin50") || {}).textContent = prob(m.p_win_50);
     var detail = $("exposure-detail");
     if (detail) {
-      var note = "Portfolio exposure: " + (exp.n_open_bets || 0) + " open bets.";
+      var note = "Portfolio exposure: " + (exp.n_open_bets || 0) + " open trades.";
       if (exp.updated_at) {
         var age = Math.round((Date.now() - Date.parse(exp.updated_at)) / 60000);
         if (age > 60) note += " (data " + age + " min old)";
@@ -1230,8 +1230,8 @@
     if (!pos.length) {
       el.innerHTML = '<div class="empty">' +
         (posFilter.closed === "today"
-          ? "No settled bets today"
-          : "No settled bets yet — P&L appears here after results") + '</div>';
+          ? "No settled trades today"
+          : "No settled trades yet — P&L appears here after results") + '</div>';
       if (meta) meta.textContent = posFilter.closed === "today" ? "0 today" : "0";
       return;
     }

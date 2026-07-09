@@ -575,6 +575,6 @@ def format_arb_report(opps: Sequence[ArbOpportunity], *, limit: int = 8,
 
     if len(opps) > limit:
         lines.append("_…and %d more (showing top %d by return)._" % (len(opps) - limit, limit))
-    lines.append("_Indicative only; never auto-bet. Executable arb needs direct "
+    lines.append("_Indicative only; never auto-trade. Executable arb needs direct "
                  "exchange/PM APIs (live price + depth)._")
     return "\n".join(lines).rstrip()

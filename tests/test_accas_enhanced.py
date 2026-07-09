@@ -829,7 +829,7 @@ class TestFormatEnhancedOutput:
         assert len(txt) <= MSG_LIMIT
 
     def test_no_bet_emitted_when_nothing_clears(self):
-        """When no accas pass every gate, 'NO BET' or empty message shown."""
+        """When no accas pass every gate, 'NO TRADE' or empty message shown."""
         result = {
             "mode": "value", "accas": [],
             "bankroll": 2500.0, "bankroll_reason": "fallback",
@@ -839,7 +839,7 @@ class TestFormatEnhancedOutput:
         }
         txt = format_accas(result)
         # Should mention that there are no qualifying accas (existing text)
-        assert "No qualifying" in txt or "NO BET" in txt
+        assert "No qualifying" in txt or "NO TRADE" in txt
 
     def test_promo_check_required_appears_when_flagged(self):
         result = {

@@ -66,7 +66,7 @@ class TestHandleCard:
         write_card("picks here", path=path, ts_utc=None)
         out = app.handle_card("irrelevant.db", card_path=path,
                               now_utc="2026-06-21T12:00:00")
-        assert "NO BET" in out
+        assert "NO TRADE" in out
 
     def test_stale_banner_present_when_old(self, tmp_path):
         path = _write_cache(tmp_path, "card_latest.md", "picks",
@@ -110,7 +110,7 @@ class TestHandleNext:
         path = str(tmp_path / "next_latest.md")
         write_card("preview here", path=path, ts_utc=None)
         out = app.handle_next(next_path=path, now_utc="2026-06-21T12:00:00")
-        assert "NO BET" in out
+        assert "NO TRADE" in out
 
     def test_stale_banner_present_when_old(self, tmp_path):
         path = _write_cache(tmp_path, "next_latest.md",
@@ -148,7 +148,7 @@ class TestHandleGoalscorers:
         write_card("scorer picks", path=path, ts_utc=None)
         out = app.handle_goalscorers(goalscorers_path=path,
                                      now_utc="2026-06-21T12:00:00")
-        assert "NO BET" in out
+        assert "NO TRADE" in out
 
     def test_stale_banner_present_when_old(self, tmp_path):
         path = _write_cache(tmp_path, "goalscorers_latest.md",

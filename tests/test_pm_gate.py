@@ -401,10 +401,10 @@ def test_confirm_pm_bad_number_returns_none():
 
 def test_bet_confirmation_path_unchanged():
     assert app.handle_confirmation("Y BET-12", "x.db") == (
-        "Bet BET-12 confirmed. (Ledger write pending card-generator wiring.)"
+        "Trade BET-12 confirmed. (Ledger write pending card-generator wiring.)"
     )
     assert app.handle_confirmation("N BET-7", "x.db") == (
-        "Bet BET-7 declined. (Ledger write pending card-generator wiring.)"
+        "Trade BET-7 declined. (Ledger write pending card-generator wiring.)"
     )
 
 

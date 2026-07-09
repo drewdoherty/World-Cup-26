@@ -351,7 +351,7 @@ def _open_bets_rows(bets: List[Dict[str, Any]]) -> str:
     if not open_bets:
         return (
             '<tr><td colspan="6" class="empty-row">'
-            "No open bets.</td></tr>"
+            "No open trades.</td></tr>"
         )
 
     rows: List[str] = []
@@ -510,7 +510,7 @@ def render_html(stats: Dict[str, Any], now_utc: str = "") -> str:
         _tile("Total Wagered", _esc(_fmt_money(totals.get("wagered", 0.0)))),
         _tile("Open Exposure", _esc(_fmt_money(totals.get("open_stake", 0.0)))),
         _tile("Settled P&L", _esc(_fmt_signed_money(settled_pl)), cls=pl_cls),
-        _tile("Bets Placed", _esc(str(int(totals.get("n_bets", 0))))),
+        _tile("Trades Placed", _esc(str(int(totals.get("n_bets", 0))))),
         _clv_tile(clv),
     ])
 
@@ -521,7 +521,7 @@ def render_html(stats: Dict[str, Any], now_utc: str = "") -> str:
     if not inputs_ok:
         banner = (
             '<div class="banner">No ledger database found yet &mdash; '
-            "showing zeros. Place a bet to populate the dashboard.</div>"
+            "showing zeros. Place a trade to populate the dashboard.</div>"
         )
 
     doc = (
@@ -538,7 +538,7 @@ def render_html(stats: Dict[str, Any], now_utc: str = "") -> str:
         '<div class="wrap">\n'
         '<header class="app">\n'
         '<h1>World Cup Alpha <span class="dot">&bull;</span> '
-        "Betting Dashboard</h1>\n"
+        "Trading Dashboard</h1>\n"
         "%s\n"
         "</header>\n"
         "%s\n"
@@ -548,7 +548,7 @@ def render_html(stats: Dict[str, Any], now_utc: str = "") -> str:
         "%s\n"
         "</section>\n"
         '<section class="card">\n'
-        "<h2>Open bets</h2>\n"
+        "<h2>Open trades</h2>\n"
         '<table class="bets">\n'
         "<thead><tr>"
         "<th>Match</th><th>Selection</th>"

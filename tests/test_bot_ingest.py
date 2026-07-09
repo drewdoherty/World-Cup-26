@@ -33,7 +33,7 @@ def test_handle_photo_no_bets(monkeypatch):
     monkeypatch.setattr(vision, "extract_bets_from_image", lambda *a, **k: [])
     pending = {}
     msg = app.handle_photo(b"img", 1, pending)
-    assert "No bets" in msg and 1 not in pending
+    assert "No trades" in msg and 1 not in pending
 
 
 def test_handle_photo_vision_error(monkeypatch):
@@ -114,7 +114,7 @@ def test_format_extracted_breaks_out_combo_legs():
     # Each leg shown as a bullet, not as a separate numbered bet.
     assert "• Over 3.5 Goals" in out
     assert "• Folarin Balogun" in out
-    assert "Parsed 1 bet(s)" in out
+    assert "Parsed 1 trade(s)" in out
 
 
 def test_confirmation_no_discards(tmp_path):

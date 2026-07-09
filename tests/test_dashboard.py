@@ -225,7 +225,7 @@ class TestMissingDb:
         stats = dashboard.gather_stats("/nope.db")
         html_out = dashboard.render_html(stats, now_utc="2026-06-11 00:00:00 UTC")
         assert "World Cup Alpha" in html_out
-        assert "No open bets." in html_out
+        assert "No open trades." in html_out
 
 
 # ---------------------------------------------------------------------------

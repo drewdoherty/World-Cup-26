@@ -1,8 +1,8 @@
 # World Cup Alpha
 
-A quantitative betting **research platform and live operation** for the 2026 FIFA World Cup. Built from zero in the ~25 hours before the opening match; now running through the tournament. It tests one question with real money and pre-registered metrics: **can systematic +EV betting on international football be demonstrated — and measured honestly — across bookmakers and prediction markets?**
+A quantitative trading **research platform and live operation** for the 2026 FIFA World Cup. Built from zero in the ~25 hours before the opening match; now running through the tournament. It tests one question with real money and pre-registered metrics: **can systematic +EV trading on international football be demonstrated — and measured honestly — across bookmakers and prediction markets?**
 
-**Dashboard:** served locally only — `http://localhost:8000` (`site/`: bets, scores & markets, under the hood) and `http://localhost:8001` (`site-analytics/`). Hosted Vercel deploys were removed 2026-07-08; each machine serves its own pulled `origin/main` tree.
+**Dashboard:** served locally only — `http://localhost:8000` (`site/`: trades, scores & markets, under the hood) and `http://localhost:8001` (`site-analytics/`). Hosted Vercel deploys were removed 2026-07-08; each machine serves its own pulled `origin/main` tree.
 
 Three bankroll pools: UK sportsbooks (£1,000 notional, CLV-gated ladder to £5,000), Polymarket ($1,310 USDC), Kalshi (planned). Recommendations-only at the sportsbooks; semi-automated with a human confirm gate on prediction markets.
 
@@ -69,7 +69,7 @@ flowchart TD
 2. **Calibration** — Brier / log-loss of the blend vs. the Shin-de-vigged market baseline. A model that can't beat the market's Brier score has no business staking on it.
 3. **Bankroll** — lagging, variance-dominated confirmation only.
 
-**Pre-registered pause rule:** if aggregate CLV is negative after ~50 settled-with-close bets, real-money model bets pause for diagnostic review. **Bankroll ladder:** the sportsbook pool starts at £1,000 notional and is promoted (£2,500 at 50 settled-with-close bets with positive CLV, £5,000 at 100) or demoted by the same evidence — wired into the card generator, not enforced by willpower.
+**Pre-registered pause rule:** if aggregate CLV is negative after ~50 settled-with-close trades, real-money model trades pause for diagnostic review. **Bankroll ladder:** the sportsbook pool starts at £1,000 notional and is promoted (£2,500 at 50 settled-with-close trades with positive CLV, £5,000 at 100) or demoted by the same evidence — wired into the card generator, not enforced by willpower.
 
 ## The system
 
@@ -84,7 +84,7 @@ flowchart TD
 - **48-team Monte Carlo tournament simulator** (official R32 bracket + third-place allocation) → per-team advancement probabilities, compared against Polymarket stage markets. Already-played group matches are **fixed** in the simulation (it conditions on the actual results so far rather than replaying the whole group stage), so advancement odds move with each result.
 
 ### Decision & scanning
-- **Card generator**: blend vs. best price across ~19 books, EV floor, quarter-Kelly stakes per pool with per-bet and daily exposure caps.
+- **Card generator**: blend vs. best price across ~19 books, EV floor, quarter-Kelly stakes per pool with per-trade and daily exposure caps.
 - **Derivative EV scanner** (`wca_event_ev`): BTTS / totals / DNB / alternate lines priced off the reconciled matrix vs. live books + Polymarket, commission- and fee-adjusted.
 - **Arbitrage scanner** (`wca_arb`): cross-book, Polymarket-internal, and book-vs-PM — with a hard **settlement-key guard** so 90-minute markets are never "arbed" against ET/pens-inclusive ones (the classic fake-arb trap).
 - **Promo/boost evaluation** as a first-class edge source (2-up early payout, super subs, odds boosts) — frequently the largest genuine +EV available to a small bankroll.
@@ -144,7 +144,7 @@ cp .env.example .env                                 # add your keys
 |---|---|
 | `ODDS_API_KEY` | the-odds-api.com (20k credits/mo tier recommended for in-play cadence) |
 | `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | bot auth; chat id is comma-separable (private + group) |
-| `TELEGRAM_ADMIN_USER_ID` | admin gate — only this user can confirm orders / log bets |
+| `TELEGRAM_ADMIN_USER_ID` | admin gate — only this user can confirm orders / log trades |
 | `ANTHROPIC_API_KEY` | Claude vision for betslip-screenshot ingestion |
 | `POLYMARKET_PRIVATE_KEY` / `POLYMARKET_FUNDER` | CLOB order signing (dry-run default: `PM_DRY_RUN=1`) |
 | `BETFAIR_APP_KEY` … | exchange API (planned: correct-score markets + execution) |
@@ -153,7 +153,7 @@ cp .env.example .env                                 # add your keys
 
 ## Honest expectations
 
-This repository is a measurement instrument first. The backtests in `docs/research/backtests/` repeatedly conclude "keep the simple default" because the data could not justify more — that is the point. Sources of edge, in realistic order: promos/boosts → line shopping → novelty markets (48-team format) → derivative/prop pricing → model alpha vs. the close (unproven until the CLV sample says otherwise). A few hundred bets cannot prove an ROI edge; CLV and calibration can move first.
+This repository is a measurement instrument first. The backtests in `docs/research/backtests/` repeatedly conclude "keep the simple default" because the data could not justify more — that is the point. Sources of edge, in realistic order: promos/boosts → line shopping → novelty markets (48-team format) → derivative/prop pricing → model alpha vs. the close (unproven until the CLV sample says otherwise). A few hundred trades cannot prove an ROI edge; CLV and calibration can move first.
 
 ## References
 

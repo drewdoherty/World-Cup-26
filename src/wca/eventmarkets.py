@@ -601,7 +601,7 @@ def build_event_market_recs(
         stake = min(float(sized["stake"]), hard_cap)
         caps: List[str] = []
         if sized.get("capped"):
-            caps.append("per-bet %.0f%% pool cap" % (pm_rule.PM_MAX_STAKE_FRAC * 100))
+            caps.append("per-trade %.0f%% pool cap" % (pm_rule.PM_MAX_STAKE_FRAC * 100))
         if float(sized["stake"]) > hard_cap:
             caps.append("$%.0f per-order cap" % float(max_order_usd))
         if no_cash is not None:

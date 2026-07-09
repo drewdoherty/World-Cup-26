@@ -142,7 +142,7 @@ def format_activity(pass_result: Dict[str, object], report: Optional[Dict[str, o
     if live_bankroll is not None and placed:
         caps = []
         if max_frac:
-            caps.append("%.0f%%/bet" % (100 * max_frac))
+            caps.append("%.0f%%/trade" % (100 * max_frac))
         caps.append("75% whole-book")
         lines.append("_%s (%s) of a £3,000±realised bankroll at $1.33=£1 (USD)._"
                      % (klabel, ", ".join(caps)))

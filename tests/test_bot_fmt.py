@@ -173,7 +173,7 @@ class TestBetsFormat:
         db = str(tmp_path / "t.db")
         _seed(db)
         out = app.handle_bets(db)
-        assert "Open bets" in out
+        assert "Open trades" in out
         assert "(3)" in out
 
     def test_code_block_fences_present(self, tmp_path):

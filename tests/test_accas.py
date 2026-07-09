@@ -197,11 +197,11 @@ def test_promo_lose_free_effective_risk_note():
 def test_format_empty_state():
     # value/low-win mode steers toward the higher-edge alternative
     txt = format_accas({"mode": "value", "accas": []})
-    assert "NO BET" in txt
+    assert "NO TRADE" in txt
     assert "+EV favourite legs" in txt
     # edge/other modes explain the +EV gate
     edge_txt = format_accas({"mode": "edge", "accas": []})
-    assert "NO BET" in edge_txt
+    assert "NO TRADE" in edge_txt
     assert "no qualifying accas cleared the +EV gate" in edge_txt
 
 
