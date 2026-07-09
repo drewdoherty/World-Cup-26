@@ -1,7 +1,29 @@
 {
  "meta": {
-  "updated_utc": "",
-  "writer": "wca_pm_inplay_monitor (MacBook) — git artifact relay; mini ingests via scripts/wca_pm_inplay_ingest.py"
+  "updated_utc": "2026-07-09T15:00:41Z",
+  "writer": "wca_pm_inplay_monitor (MacBook)"
  },
- "proposals": []
+ "proposals": [
+  {
+   "created_utc": "2026-07-09T15:00:31Z",
+   "detector": "event_market_fire",
+   "ev": 0.029045,
+   "inplay": true,
+   "label": "Over 1.5",
+   "market_question": "Over 1.5",
+   "match_desc": "Argentina vs Switzerland",
+   "model_prob": 0.716458,
+   "neg_risk": false,
+   "outcome": "Over 1.5",
+   "price": 0.69,
+   "reason": "event-market fire: Argentina vs Switzerland Over 1.5 (net edge +2.0pp, moneyline bucket)",
+   "settlement_basis": "90min",
+   "shares": 107.75,
+   "side": "BUY",
+   "size": 107.75,
+   "size_usd": 74.35,
+   "token_id": "30832186473485489334120104796032388930526660633476597146132134578867673440960",
+   "uid": "evfire-cdf7a884-verify-valid-1"
+  }
+ ]
 }
