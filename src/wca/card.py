@@ -48,7 +48,7 @@ from wca.models.dixon_coles import DixonColesModel
 from wca.models.elo import EloOutcomeModel, EloRater
 from wca.models.props import CardsModel, CornersModel
 from wca.models.scores import ScorelineCard, scoreline_card
-from wca.selection import bucket_rank, longshot_no_cash
+from wca.selection import MARKET_MATCH, bucket_rank, hours_out_term, longshot_no_cash
 from wca.displayfmt import bucket_tag, edge_pp, ev_marker, ev_str, implied_pct, implied_prob, pct
 
 # 1X2 outcome order used throughout: home, draw, away.
@@ -1777,15 +1777,21 @@ def _cut_reason(rec: Recommendation) -> Optional[str]:
 def rank_card(recs: Sequence[Recommendation]) -> RankedCard:
     """Apply the canonical selection rule (:mod:`wca.selection`) to gated recs.
 
-    Ranking key ``(bucket_rank, -hours_to_kickoff, -edge)`` (user 2026-07-07):
+    Ranking key ``(bucket_rank, hours_term, -edge)`` (user 2026-07-07; refined
+    2026-07-09):
 
     1. **MODEL-prob bucket** (moneyline >=0.50 / mid 0.25-0.50 / longshot
        <0.25) — a higher bucket ALWAYS ranks above a lower one, regardless of
        EV. (Longshots below the cut floor never reach here; those in the
        0.20-0.25 band that survive the floor still sort last.)
-    2. **Further-out fixtures first** — raw continuous ``hours_to_kickoff``,
-       descending (thin/soft early markets are more likely mispriced).
-    3. **EV** breaks ties ONLY, within the same bucket + further-out tier.
+    2. **Hours-out term — NEUTRAL here.** Trade-card recs are 90-min MATCH
+       markets (1X2), so the category-conditional secondary key
+       (:func:`wca.selection.hours_out_term` with ``MARKET_MATCH``) contributes
+       0: the 2026-07-09 backtest found no early premium after fees for match
+       markets, so EV breaks ties within the bucket directly (further-out-first
+       is kept only for multi-week futures/advancement, which this surface is
+       not). The conditional lives in ``wca.selection`` — never re-hardcode it.
+    3. **EV** breaks ties within the bucket.
 
     ``rec.category`` (FAV / 2ND-FAV / structural_draw) is no longer part of the
     sort key — it survives as a cosmetic display label only (REPLACE ruling).
@@ -1806,8 +1812,8 @@ def rank_card(recs: Sequence[Recommendation]) -> RankedCard:
     picks.sort(
         key=lambda r: (
             bucket_rank(r.model_prob),               # model-prob bucket (primary)
-            -(r.hours_to_kickoff or 0.0),            # further-out fixtures first
-            -r.edge,                                 # EV breaks ties only
+            hours_out_term(r.hours_to_kickoff or 0.0, MARKET_MATCH),  # neutral (match)
+            -r.edge,                                 # EV breaks ties within bucket
         )
     )
     cut.sort(key=lambda r: -r.edge)  # show the most-tempting (highest EV) first
@@ -2032,7 +2038,9 @@ def format_ranked_card(
             watch,
             key=lambda r: (
                 bucket_rank(r.model_prob),
-                -(r.hours_to_kickoff or 0.0),
+                # 90-min match markets -> hours-out neutral (EV breaks ties);
+                # the match/futures conditional lives in wca.selection.
+                hours_out_term(r.hours_to_kickoff or 0.0, MARKET_MATCH),
                 -r.edge,
             ),
         )

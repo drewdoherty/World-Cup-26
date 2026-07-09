@@ -49,8 +49,10 @@ from wca.advancement import (  # noqa: E402  — resolved-market bounds (single 
 )
 from wca.markets import bankroll as pm_rule  # noqa: E402  (needs src on path)
 from wca.selection import (  # noqa: E402  — canonical desk selection rule
+    MARKET_MATCH,
     bucket_rank,
     hours_out as _sel_hours_out,
+    hours_out_term,
     longshot_no_cash,
 )
 
@@ -170,13 +172,21 @@ def _hours_out(kickoff: Optional[str]) -> float:
 def _singles_sort_key(rec: Dict[str, Any]) -> Tuple[int, float, float]:
     """Canonical desk ordering for 1X2 single recs (wca.selection).
 
-    ``(bucket_rank(model_prob), -hours_out, -ev_net)`` — model-prob bucket
-    first (moneyline > mid > longshot, regardless of EV), further-out fixtures
-    next, EV descending as the tie-break.
+    ``(bucket_rank(model_prob), hours_term, -ev_net)`` — model-prob bucket
+    first (moneyline > mid > longshot, regardless of EV), then the
+    category-conditional hours term, EV descending as the tie-break.
+
+    These are 90-min MATCH markets (1X2 singles), so the hours term is NEUTRAL
+    (:func:`wca.selection.hours_out_term` with ``MARKET_MATCH`` -> 0.0): the
+    2026-07-09 backtest found no early premium after fees for match markets, so
+    EV breaks ties within the bucket. Further-out-first is kept only for
+    multi-week futures/advancement (see ``build_advancement_futures``, which
+    uses its own stage-depth secondary key). The conditional lives in
+    ``wca.selection`` — do not re-hardcode ``-hours`` here.
     """
     return (
         bucket_rank(rec.get("model_prob")),
-        -_hours_out(rec.get("kickoff")),
+        hours_out_term(_hours_out(rec.get("kickoff")), MARKET_MATCH),
         -float(rec.get("ev_net") or 0.0),
     )
 
@@ -1087,6 +1097,11 @@ def build_advancement_futures(
     #   3. EV descending breaks ties within a bucket + stage tier.
     # `_stage_further_out` is the inverse of the old nearest-first `_stage_order`:
     # group_winner is the nearest-term market, Win the furthest out.
+    # This is a MULTI-WEEK FUTURES surface (wca.selection.MARKET_FUTURES): the
+    # 2026-07-09 category-conditional refinement KEEPS further-out-first here
+    # (the proven +6-7% early edge) via this stage-depth key — it never used
+    # wca.selection.hours_out, so it is intentionally UNCHANGED (only match
+    # markets had their hours-out term neutralised). Cf. `_singles_sort_key`.
     _stage_further_out = {
         "group_winner": 0, "R32": 1, "R16": 2, "QF": 3, "SF": 4,
         "Final": 5, "win": 6,

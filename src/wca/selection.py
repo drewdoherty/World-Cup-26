@@ -9,19 +9,49 @@ this module so the rule can never drift between surfaces again. See
 ``docs/SELECTION_RULES.md`` for the full spec and the per-surface compliance
 table.
 
-The rule (canonical, user-confirmed 2026-07-07)
------------------------------------------------
+The rule (canonical, user-confirmed 2026-07-07; refined 2026-07-09)
+------------------------------------------------------------------
 1. **Bucket by MODEL probability (PRIMARY sort).** ``moneyline`` = model
    ``>= 0.50``; ``mid`` = ``0.25 <= model < 0.50``; ``longshot`` = model
    ``< 0.25``. A higher bucket ALWAYS ranks above a lower bucket, regardless
    of EV.
-2. **Further-out fixtures first (SECONDARY).** Raw continuous hours-to-kickoff,
-   descending — thin/soft early markets are more likely mispriced. This is a
-   continuous float; it is never bucketed into day-tiers.
-3. **EV breaks ties ONLY (tertiary)** — within the same bucket + further-out
-   tier.
+2. **Further-out fixtures first (SECONDARY) — CATEGORY-CONDITIONAL (2026-07-09).**
+   Raw continuous hours-to-kickoff, descending — but ONLY for multi-week
+   futures / advancement markets. For 90-minute MATCH markets the hours-out
+   term is NEUTRALISED (contributes 0) so EV breaks ties within the bucket.
+   The hours value, when it applies, is a continuous float, never bucketed.
+3. **EV breaks ties** — within the same bucket + further-out tier for futures;
+   within the bucket directly for match markets (where hours-out is neutral).
 4. **No cash on longshots (model < 0.25).** Free-bet / lottery only: stake is
    forced to 0 and the side is flagged (it may still be DISPLAYED, dimmed).
+
+The 2026-07-09 category-conditional refinement
+----------------------------------------------
+Backtest (2026-07-09, n=1,046 resolved PM markets, composition-controlled,
+look-ahead-guarded) found:
+
+* **Match (90-min) markets** — PM efficiency is FLAT from 168h out to kickoff
+  (fixed-cohort Brier 0.131 -> 0.124, CIs overlap); early entry earns ~0 after
+  fees inside 72h and a small PENALTY inside 12h. The apparent early premium is
+  a favourite-firms / longshot-bleeds drift already captured by BUCKETING plus
+  ``longshot_no_cash``. => "further-out-first" has NO basis for match markets;
+  the hours-out term is neutralised there and EV breaks ties within the bucket.
+* **Multi-week futures / advancement** — a REAL tradeable early edge (+6-7% at
+  24-72h, n=60, truncation-caveated). => further-out-first is KEPT there.
+
+So the ``-hours_out`` secondary term is now conditional on the candidate's
+market category (:data:`MARKET_MATCH` vs :data:`MARKET_FUTURES`). Futures /
+advancement surfaces order by DEEPER STAGE FIRST via their own ``stage_further_out``
+depth map (``wca.advancement.stage_further_out`` etc.) — a separate secondary
+key that was never routed through :func:`hours_out`, so those surfaces are
+already correct and unchanged. ``preference_sort_key`` keeps a
+``market_kind`` opt-in so any hours-driven futures surface stays further-out-first.
+
+Default (documented): a candidate that does not declare a category is treated
+as :data:`MARKET_MATCH` (hours-out NEUTRAL). Match markets are the bulk and the
+evidence says neutral is correct for them; futures must OPT IN to
+further-out-first (pass ``market_kind=MARKET_FUTURES`` or set a futures
+settlement/category on the candidate).
 
 The 2026-07-07 REPLACE ruling
 -----------------------------
@@ -35,7 +65,14 @@ predicate anymore.
 
 Design invariants (do NOT "improve")
 ------------------------------------
-* ``hours_out`` stays a continuous raw-float secondary key — never bucketed.
+* ``hours_out`` stays a continuous raw-float value — never bucketed. It is
+  the raw hours-to-kickoff; whether it FEEDS the sort is decided by
+  :func:`hours_out_term` from the candidate's ``market_kind`` (2026-07-09).
+* The category-conditional hours term lives in ONE place —
+  :func:`hours_out_term`. Every surface that builds its own inline sort key
+  (``card.rank_card``, ``accas.rank_key``, ``wca_betrecs._singles_sort_key``)
+  MUST call it rather than hardcoding ``-hours``; never re-derive the
+  match/futures conditional at a call site.
 * ``preference_sort_key`` ONLY deprioritises longshots (rank 2); it does NOT
   enforce the cash ban. The cash ban is ``longshot_no_cash()``, applied at the
   SIZING step and kept SEPARATE so a surface can display a longshot dimmed
@@ -50,6 +87,37 @@ import datetime as _dt
 PROB_BUCKETS = ((0.50, "moneyline"), (0.25, "mid"), (0.0, "longshot"))
 _BUCKET_RANK = {"moneyline": 0, "mid": 1, "longshot": 2}
 LONGSHOT_PROB = 0.25  # cash floor: sides below this are free-bet/lottery only, NEVER cash
+
+# --- Market category (2026-07-09) -------------------------------------------
+# The "further-out-first" secondary key is CONDITIONAL on category:
+#   * MARKET_MATCH   — 90-minute match markets (1X2, totals, BTTS, spreads,
+#                      event-props that settle at 90'). Hours-out is NEUTRAL:
+#                      EV breaks ties within the bucket.
+#   * MARKET_FUTURES — multi-week futures / advancement (settlement ET+pens,
+#                      advancement / group_winner / outright / "win"). Keep
+#                      further-out-first (hours-out retained where it drives
+#                      the sort; stage-depth surfaces use their own depth map).
+# SAFE DEFAULT: an undeclared candidate is treated as MARKET_MATCH (hours-out
+# neutral) — match is the bulk and the backtest says neutral is correct there;
+# futures must OPT IN to further-out-first.
+MARKET_MATCH = "match"
+MARKET_FUTURES = "futures"
+
+# Settlement / category tokens that mark a candidate as multi-week futures.
+# Everything else (incl. "90min", 1X2, totals, btts, spreads, unknown) is
+# treated as a MATCH market. Compared case-insensitively as substrings on the
+# candidate's settlement / market / family / kind fields. NOTE the bare
+# tournament-winner token "win" is intentionally NOT a loose substring (it
+# would false-match "winner", "winning margin", etc.); the winner-futures case
+# is caught by "outright" / "to_win" / "tournament" / an explicit
+# market_kind=MARKET_FUTURES instead. A single-match "Team to Advance"
+# (settlement ET+pens but resolved within a match) is deliberately still a
+# MATCH market — the ruling is about MULTI-WEEK futures, keyed off tournament
+# advancement/outright, not any ET+pens leg.
+_FUTURES_MARKERS = (
+    "advancement", "group_winner", "group winner", "outright",
+    "to_win", "tournament", "futures", "reach_",
+)
 
 
 def prob_bucket(model_prob):
@@ -89,13 +157,65 @@ def longshot_no_cash(model_prob):
     return float(model_prob or 0.0) < LONGSHOT_PROB
 
 
+def resolve_market_kind(*hints):
+    """Resolve a candidate's market category -> ``MARKET_MATCH`` / ``MARKET_FUTURES``.
+
+    Pass any category hints in priority order: an explicit ``market_kind``, a
+    ``settlement`` basis, a ``market`` / ``family`` label, a ``stage`` token,
+    etc. The FIRST hint that is an explicit ``MARKET_MATCH`` / ``MARKET_FUTURES``
+    wins verbatim; otherwise a hint is scanned (case-insensitive substring) for
+    a multi-week-futures marker (:data:`_FUTURES_MARKERS`).
+
+    SAFE DEFAULT: if nothing declares futures, return :data:`MARKET_MATCH`
+    (hours-out NEUTRAL). Match is the bulk of the book and the 2026-07-09
+    backtest says neutral is correct there; futures must OPT IN. See the module
+    docstring for the ruling.
+    """
+    for h in hints:
+        if h is None:
+            continue
+        s = str(h).strip().lower()
+        if not s:
+            continue
+        if s == MARKET_MATCH:
+            return MARKET_MATCH
+        if s == MARKET_FUTURES:
+            return MARKET_FUTURES
+        if any(mark in s for mark in _FUTURES_MARKERS):
+            return MARKET_FUTURES
+    return MARKET_MATCH
+
+
+def hours_out_term(hours, market_kind=MARKET_MATCH):
+    """The CATEGORY-CONDITIONAL secondary sort contribution (2026-07-09).
+
+    Returns the value to place in the sort key's secondary slot:
+
+    * ``MARKET_FUTURES`` -> ``-float(hours)`` (further-out-first KEPT — deeper /
+      later-resolving markets rank first, the proven multi-week early edge).
+    * ``MARKET_MATCH`` (default, incl. unknown) -> ``0.0`` (hours-out
+      NEUTRALISED — EV breaks ties within the bucket for 90-min match markets).
+
+    This is the ONE place the match/futures conditional lives. Every surface —
+    including those that build their own inline sort key (``card.rank_card``,
+    ``accas.rank_key``, ``wca_betrecs._singles_sort_key``) — MUST route its
+    secondary term through here rather than hardcoding ``-hours``, so the
+    conditional can never drift between surfaces.
+    """
+    if market_kind == MARKET_FUTURES:
+        return -float(hours or 0.0)
+    return 0.0
+
+
 def hours_out(p, kick_by_match=None, now_dt=None):
     """Continuous hours until the proposal's fixture kicks off (0.0 when unknown).
 
     ``p`` is a mapping-like proposal with a ``match_desc`` key; ``kick_by_match``
     maps ``match_desc`` -> kickoff timestamp. Returns a raw float (never
-    bucketed): the SECONDARY sort key, used descending so further-out fixtures
-    rank first. Unknown / unparseable kickoffs return 0.0 (sorts as imminent).
+    bucketed). Whether this value FEEDS the sort is decided by
+    :func:`hours_out_term` from the candidate's category (2026-07-09): for
+    ``MARKET_FUTURES`` further-out fixtures rank first; for ``MARKET_MATCH`` the
+    term is neutral. Unknown / unparseable kickoffs return 0.0.
     """
     import pandas as _pd
 
@@ -110,22 +230,38 @@ def hours_out(p, kick_by_match=None, now_dt=None):
         return 0.0
 
 
-def preference_sort_key(p, kick_by_match=None, now_dt=None):
-    """Canonical desk ordering: ``(bucket_rank, -hours_out, -ev)``.
+def preference_sort_key(p, kick_by_match=None, now_dt=None, market_kind=None):
+    """Canonical desk ordering: ``(bucket_rank, hours_term, -ev)`` (2026-07-09).
 
     1. ``bucket_rank`` (model-prob bucket) — moneyline over mid over longshot,
        ALWAYS, regardless of EV.
-    2. ``-hours_out`` — further-out fixtures first (thin/soft early markets are
-       more likely mispriced). Continuous raw float, never bucketed.
-    3. ``-ev`` — EV descending, breaking ties ONLY within the same bucket +
-       further-out tier.
+    2. ``hours_term`` — CATEGORY-CONDITIONAL (:func:`hours_out_term`):
+       * multi-week FUTURES / advancement -> ``-hours_out`` (further-out
+         fixtures first — the proven early edge; continuous raw float);
+       * 90-min MATCH markets (default) -> ``0.0`` (NEUTRAL — the backtest
+         found no early premium after fees, so EV breaks ties within the
+         bucket directly).
+    3. ``-ev`` — EV descending. For match markets this is the effective
+       secondary key (hours neutral); for futures it breaks ties within the
+       same bucket + further-out tier.
+
+    ``market_kind`` selects the branch. Resolution order:
+      * the explicit ``market_kind`` argument, else
+      * the candidate's ``market_kind`` / ``settlement`` / ``market`` /
+        ``family`` / ``stage`` fields (via :func:`resolve_market_kind`), else
+      * the SAFE DEFAULT :data:`MARKET_MATCH` (hours NEUTRAL). Futures surfaces
+        must OPT IN. See the module docstring for the 2026-07-09 ruling.
 
     NOTE: this key ONLY deprioritises longshots (they sort last). It does NOT
     enforce the cash ban — that is :func:`longshot_no_cash`, applied at the
     sizing step.
     """
+    kind = market_kind or resolve_market_kind(
+        p.get("market_kind"), p.get("settlement"), p.get("market"),
+        p.get("family"), p.get("stage"),
+    )
     return (
         bucket_rank(p.get("model_prob")),
-        -hours_out(p, kick_by_match, now_dt),
+        hours_out_term(hours_out(p, kick_by_match, now_dt), kind),
         -float(p.get("ev") or 0.0),
     )
