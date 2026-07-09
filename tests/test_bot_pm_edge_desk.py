@@ -50,11 +50,12 @@ def test_pm_edge_desk_happy_path(tmp_path):
     out = app.handle_pm(str(tmp_path / "db.db"), edge_desk_path=str(p))
     assert "EDGE DESK (SHADOW)" in out
     # SHADOW_ADD rows in FEED order: PM ¢ convention, bucket tag, team/stage,
-    # fee-adjusted edge, settlement basis — labelled shadow, never an order.
+    # fee-adjusted edge with the +EV/−EV marker (ruling 2026-07-08),
+    # settlement basis — labelled shadow, never an order.
     assert ("shadow [MONEYLINE] Morocco SF — model 55¢ / PM 44¢, "
-            "edge +10.3¢ — incl. ET+pens") in out
+            "edge +10.3¢ ✅+EV — incl. ET+pens") in out
     assert ("shadow [MID] Brazil group_winner — model 48¢ / PM 41¢, "
-            "edge +5.1¢ — settles on group stage") in out
+            "edge +5.1¢ ✅+EV — settles on group stage") in out
     # Non-SHADOW verdicts are counted, not listed.
     assert "watch 7 · withhold 2 · do-not-trade 1" in out
     assert "Coldland" not in out

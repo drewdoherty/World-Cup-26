@@ -377,9 +377,14 @@ def main() -> None:
             # build_card gates +EV outcomes (with the further-out tilt baked in,
             # rule 3) and tags each with venue + selection category; rank_card
             # then applies the selection rule (rule 2): hit-probability ranking
-            # plus the mispriced-minnow longshot CUT.
+            # plus the mispriced-minnow longshot CUT. watch_rows collects the
+            # DISPLAY-ONLY near-threshold tier (0..min_edge EV, zero-staked) so
+            # the card shows the full decision surface (ruling 2026-07-08)
+            # without loosening the staking gate.
+            watch_rows = []
             recs = build_card(
                 models, odds_df, pools, fixtures_meta=fixtures_meta, now=now_str,
+                watch_sink=watch_rows,
             )
             recs = apply_daily_exposure_caps(recs, pools)
             ranked = rank_card(recs)
@@ -388,12 +393,12 @@ def main() -> None:
             print("ERROR: card generation failed: %s" % exc, file=sys.stderr)
             sys.exit(1)
 
-        # Classic card layout restored (user, 2026-07-03, from the reference
-        # screenshots): scorelines appendix back (REFERENCE-ONLY, never sized);
-        # only the bankroll-model footer stays removed.
+        # Percent-convention layout (user ruling 2026-07-08 — supersedes the
+        # 2026-07-03 classic-decimal layout): scorelines appendix stays
+        # (REFERENCE-ONLY, never sized); the bankroll-model footer stays removed.
         card_text = (
-            format_ranked_card(ranked, pools, bank=pool_bank)
-            + "\n\n*— REFERENCE, NOT SIZED (models + fair odds only) —*\n"
+            format_ranked_card(ranked, pools, bank=pool_bank, watch=watch_rows)
+            + "\n\n*— REFERENCE, NOT SIZED (model prices only) —*\n"
             + format_scores(score_cards)
         )
 

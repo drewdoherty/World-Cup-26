@@ -104,6 +104,7 @@ analogue for advancement). "Cash floor" = `longshot_no_cash` gates the stake.
 | Betbuilder CLI | `scripts/wca_betbuilder.py` | — | ✅ | (no stakes) | Fixtures sorted further-out BEFORE `--max-fixtures` truncation. |
 | Advancement matrix (client) | `site/adv_edge_matrix.js` | ✅ | ✅ (stage depth) | ✅ | Drives off the server-computed `bucket` tag; greys/flags <25c cells; `advKelly` returns 0 on <25c. |
 | Edge desk (SHADOW) | `scripts/wca_edge_desk.py` | ✅ | ✅ (stage depth) | ✅ (longshots capped at WATCH) | SHADOW-only decision feed, no stakes; imports `prob_bucket`/`PROB_BUCKETS`/`longshot_no_cash`/`LONGSHOT_PROB`; consumers render feed order. |
+| Bot /matchevents | `src/wca/bot/app.py` (`handle_matchevents`) | ✅ (moneyline ONLY by spec) | ✅ (`preference_sort_key`) | ✅ (ML-only filter + killed markets) | Display-only exotics view: `prob_bucket(model) == "moneyline"` AND net edge > 0; ordering via `preference_sort_key`; display-only sizing via the PM pool + kelly kernel. |
 
 ### Exempt (deliberately NOT wired)
 
@@ -117,7 +118,9 @@ arithmetic — applying the selection rule would be wrong:
   `exposure.py` — accounting / exposure views.
 - `site/app.js`, `site/tracking_adv.js` — chart / ledger views.
 - `site/arb.js` + `site/arb.html` — already order-preserving.
-- `src/wca/bot/app.py` — faithful pass-through of pre-sorted feeds.
+- `src/wca/bot/app.py` — faithful pass-through of pre-sorted feeds (EXCEPT
+  `handle_matchevents`, which applies the rule — see the table above; the
+  `wca.displayfmt` helpers show `bucket_tag` labels but never re-sort a feed).
 - Guaranteed-arb sorts; `boostlock.py` / `matched.py` — boost-hedge arithmetic.
 
 ---

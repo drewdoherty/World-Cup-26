@@ -696,3 +696,59 @@ class TestStatusNormalization:
         data = sitedata.build_site_data(db, card_path=str(tmp_path / "none.md"))
         assert data["dropped_open_bets"] == []
         assert data["positions"] == []
+
+
+# ---------------------------------------------------------------------------
+# Percent-convention scoreline rows (user ruling 2026-07-08): the card now
+# writes "1-0  16.9%  back at impl <= 16.6%" — the parser must reconstruct the
+# decimal fair/back schema so site feed consumers are unchanged.
+# ---------------------------------------------------------------------------
+
+
+_PCT_CARD = """*World Cup Alpha — scorelines* (1 fixtures)
+
+*Mexico vs South Africa*
+    xG: 1.47-0.89
+    1-0  16.9%  back at impl <= 16.6%
+    2-0  15.5%  back at impl <= 15.2%
+    O/U 2.5: over 45.8% / under 54.2%   BTTS 39.0%
+"""
+
+
+class TestParseScorelinesPercentFormat:
+    def test_pct_rows_reconstruct_fair_and_back(self) -> None:
+        preds = sitedata.parse_scorelines(_PCT_CARD)
+        assert len(preds) == 1
+        top = preds[0]["scores"][0]
+        assert top["score"] == "1-0"
+        assert top["prob"] == pytest.approx(16.9)
+        # fair = 100/prob, back = 100/backpct — same schema as the old card.
+        assert top["fair"] == pytest.approx(100.0 / 16.9, abs=0.01)
+        assert top["back"] == pytest.approx(100.0 / 16.6, abs=0.01)
+
+    def test_round_trip_through_format_scores(self) -> None:
+        """format_scores output parses back with consistent prob/back values."""
+        import numpy as np
+
+        from wca.card import format_scores
+        from wca.models.scores import ScorelineCard
+
+        matrix = np.zeros((3, 3))
+        matrix[1, 0] = 0.4
+        matrix[0, 0] = 0.35
+        matrix[1, 1] = 0.25
+        card = ScorelineCard(
+            home="Alpha", away="Bravo", matrix=matrix,
+            top_scorelines=[(1, 0, 0.4), (0, 0, 0.35), (1, 1, 0.25)],
+            over_under={2.5: (0.25, 0.75)}, btts=0.25,
+            one_x_two=(0.65, 0.35, 0.0), min_edge=0.02,
+        )
+        text = format_scores([card])
+        assert "back at impl <=" in text
+        assert "fair" not in text  # decimal columns retired
+        parsed = sitedata.parse_scorelines(text)
+        assert parsed and parsed[0]["fixture"] == "Alpha vs Bravo"
+        top = parsed[0]["scores"][0]
+        assert top["prob"] == pytest.approx(40.0)
+        # back reconstructs the min +2%-edge price: p/ (1+min_edge) implied.
+        assert top["back"] == pytest.approx(card.min_price(0.4, 0.02), abs=0.02)
