@@ -87,6 +87,36 @@
   }
   .wca-place-note { font-size: 9px; color: var(--ll-muted); }
 
+  /* -------- Fire → park a PM-<n> (02A Event Markets; localhost-only) ----- */
+  .wca-fire-btn {
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border: 1px solid var(--ll-accent, #16c784);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--ll-accent, #16c784);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .wca-fire-btn:hover:not(:disabled) { background: var(--ll-accent, #16c784); color: #04120b; }
+  .wca-fire-btn:disabled { opacity: 0.55; cursor: default; }
+  .wca-fire-btn.parked { border-color: var(--ll-muted); color: var(--ll-muted); }
+  .wca-fire-status {
+    display: block;
+    margin-top: 3px;
+    font-size: 9px;
+    color: var(--ll-muted);
+    max-width: 240px;
+    white-space: normal;
+  }
+  .wca-fire-status.ok { color: var(--ll-accent, #16c784); }
+  .wca-fire-status.err { color: var(--ll-danger, #e5484d); }
+  .wca-fire-note { font-size: 9px; color: var(--ll-muted); }
+
   /* -------- Advancement Edge Desk (SHADOW-ONLY) panel ------------------- */
   .ed-banner {
     padding: 6px 10px;
@@ -370,6 +400,8 @@
               <th>Settles</th><th class="r">Price ¢</th><th class="r">Model ¢</th>
               <th class="r">Net edge</th><th class="r">Net EV %</th>
               <th class="r">Stake $</th><th>Kickoff</th><th>Price src</th>
+              <!-- FIRE: localhost-only; the panel JS reveals it via .wca-fire-col -->
+              <th class="wca-fire-col" hidden>Fire</th>
             </tr>
           </thead>
           <tbody id="tbody-event-markets"><tr><td colspan="12" class="dim">loading&hellip;</td></tr></tbody>
@@ -738,7 +770,14 @@
    bucket → further-out → net-EV tiebreak) — no client re-sorting. PM ¢ prices,
    $ stakes, hours-out tags, settlement basis per row. Dimmed rows are
    display-only (stake $0: longshot / killed family / totals-under ban) with
-   the reason on hover. Nothing here can place an order. */
+   the reason on hover.
+
+   FIRE (localhost-only): each SIZED (stake_usd>0 && !dimmed) row gets a
+   "Fire → TG" button that POSTs to 127.0.0.1:<port>/park-event. That endpoint
+   re-validates the rec server-side, resolves the PM token, and PARKS a PM-<n>
+   via the in-play relay + pings Telegram — the human approves with Y PM-<n> in
+   @gamble1_bot. Nothing here places or auto-fires an order. Dimmed / $0 /
+   killed / longshot / stale rows get NO button (frontend AND backend guard). */
 (function () {
   var BUCKET_LABEL = { moneyline: "ML ≥ 50¢", mid: "MID 25–50¢", longshot: "LONGSHOT" };
   var tbody = document.getElementById("tbody-event-markets");
@@ -755,6 +794,158 @@
     return h >= 1 ? Math.round(h) + "h out" : "<1h";
   }
   function cents(v) { return v == null ? "—" : Number(v).toFixed(1) + "¢"; }
+
+  // ---- Fire → park (localhost-only) --------------------------------------
+  // Inert off localhost: the render helper emits no button, so a non-local
+  // copy of the page can never show or fire one.
+  var IS_LOCAL = (function () {
+    try {
+      var h = (location && location.hostname) || "";
+      return h === "localhost" || h === "127.0.0.1" || h === "[::1]" || h === "::1";
+    } catch (e) { return false; }
+  })();
+  var FIRE_ENDPOINT = "http://127.0.0.1:8010/park-event";
+  var FIRE_TOKEN_KEY = "wcaPlaceToken";  // SAME shared secret as the Place button
+
+  // Fireable predicate — the single source of truth the frontend uses to
+  // decide whether a row gets a Fire button. Mirrors the backend gate
+  // (wca.eventfire.validate_fireable): sized cash row, not dimmed, no no-cash
+  // reason, moneyline/mid bucket, killed families excluded, positive edge.
+  // Exposed on window for the unit test.
+  function isFireable(r) {
+    if (!r) return false;
+    var KILLED = { exact_score: 1, scorer_prop: 1, correct_score: 1 };
+    if (KILLED[String(r.family || "").toLowerCase()]) return false;
+    if (r.no_cash_reason) return false;
+    if (r.dimmed) return false;
+    if (!(Number(r.stake_usd) > 0)) return false;
+    var b = String(r.bucket || "").toLowerCase();
+    if (b !== "moneyline" && b !== "mid") return false;
+    if (!(Number(r.edge_net) > 0)) return false;
+    return true;
+  }
+  window.wcaEventMarketFireable = isFireable;
+
+  function fireToken() {
+    try {
+      var t = window.localStorage.getItem(FIRE_TOKEN_KEY);
+      if (t && t.trim()) return t.trim();
+      var entered = window.prompt(
+        "One-time setup: paste the WCA place-server shared secret " +
+        "(WCA_PLACE_TOKEN). Stored locally in this browser only.");
+      if (entered && entered.trim()) {
+        window.localStorage.setItem(FIRE_TOKEN_KEY, entered.trim());
+        return entered.trim();
+      }
+    } catch (e) { /* localStorage/prompt unavailable — fall through */ }
+    return null;
+  }
+  function makeNonce() {
+    var rnd;
+    try { rnd = Math.random().toString(36).slice(2); } catch (e) { rnd = "" + Math.random(); }
+    return "web-evfire-" + Date.now() + "-" + rnd;
+  }
+  // The identity the backend re-looks-up (fixture|family|selection, lowercased).
+  function recId(r) {
+    return [r.fixture || "", r.family || "", r.selection || ""].join("|").trim().toLowerCase();
+  }
+  function fireCell(r) {
+    if (!IS_LOCAL) return "";  // no Fire column off localhost
+    if (!isFireable(r)) {
+      return '<td data-label="Fire"><span class="wca-fire-note">&mdash;</span></td>';
+    }
+    var settle = r.settlement === "ET+pens" ? "ET+pens" : "90 min";
+    return '<td data-label="Fire">' +
+      '<button type="button" class="wca-fire-btn"' +
+        ' data-fire-id="' + esc(recId(r)) + '"' +
+        ' data-fixture="' + esc(r.fixture) + '"' +
+        ' data-family="' + esc(r.family) + '"' +
+        ' data-selection="' + esc(r.selection) + '"' +
+        ' data-stake="' + esc(r.stake_usd) + '"' +
+        ' data-price-c="' + esc(r.price_c) + '"' +
+        ' data-settle="' + esc(settle) + '"' +
+        ' title="Parks a PM-<n> and pings Telegram; approve with Y PM-<n>.">' +
+        "Fire &rarr; TG</button></td>";
+  }
+  function postFire(btn) {
+    var token = fireToken();
+    if (!token) {
+      return Promise.resolve({ ok: false, message: "no place token configured (set the shared secret)" });
+    }
+    var body = JSON.stringify({
+      rec_id: btn.getAttribute("data-fire-id"),
+      fixture: btn.getAttribute("data-fixture"),
+      family: btn.getAttribute("data-family"),
+      selection: btn.getAttribute("data-selection"),
+      nonce: makeNonce()
+    });
+    return fetch(FIRE_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-WCA-Place-Token": token },
+      body: body
+    })
+      .then(function (resp) {
+        return resp.json().catch(function () {
+          return { ok: false, message: "server returned non-JSON (HTTP " + resp.status + ")" };
+        });
+      })
+      .catch(function (e) {
+        return { ok: false, message: "place server unreachable (" + (e && e.message || e) + ")" };
+      });
+  }
+  function setStatus(cell, cls, text) {
+    var prev = cell.querySelector ? cell.querySelector(".wca-fire-status") : null;
+    if (prev) prev.parentNode.removeChild(prev);
+    var span = document.createElement("span");
+    span.className = "wca-fire-status " + (cls || "");
+    span.textContent = text;
+    cell.appendChild(span);
+  }
+  function wireFire() {
+    if (!IS_LOCAL) return;
+    document.addEventListener("click", function (ev) {
+      var btn = ev.target && ev.target.closest ? ev.target.closest(".wca-fire-btn") : null;
+      if (!btn || btn.disabled) return;
+      var fixture = btn.getAttribute("data-fixture");
+      var selection = btn.getAttribute("data-selection");
+      var stake = btn.getAttribute("data-stake");
+      var priceC = btn.getAttribute("data-price-c");
+      var settle = btn.getAttribute("data-settle");
+      var ok = window.confirm(
+        "Fire (park a PM-<n>) — approve later with Y PM-<n>:\n\n" +
+        fixture + "\nBACK: " + selection + "\nStake $" + stake +
+        " @ " + priceC + "¢\nSettles: " + settle +
+        "\n\nThis PARKS a proposal + pings Telegram. It does NOT place an order.");
+      if (!ok) return;
+      var cell = btn.parentNode;
+      btn.disabled = true;
+      var restore = btn.innerHTML;
+      btn.textContent = "firing…";
+      postFire(btn).then(function (res) {
+        if (res && res.ok) {
+          btn.classList.add("parked");
+          if (res.pm_tag) {
+            btn.textContent = res.dry_run ? "DRY " + res.pm_tag : res.pm_tag;
+            setStatus(cell, "ok", "parked " + res.pm_tag + " — reply Y " + res.pm_tag);
+          } else {
+            btn.textContent = res.dry_run ? "DRY parked" : "parked";
+            setStatus(cell, "ok", res.message || "parked — fireable after mini sync");
+          }
+          // keep disabled — one park per row per load.
+        } else {
+          btn.disabled = false;
+          btn.innerHTML = restore;
+          setStatus(cell, "err", (res && res.message) || "fire failed");
+        }
+      });
+    });
+  }
+  function revealFireColumn() {
+    if (!IS_LOCAL) return;
+    var cols = document.querySelectorAll(".wca-fire-col");
+    for (var i = 0; i < cols.length; i++) { cols[i].hidden = false; }
+  }
+
   fetch("event_market_recs.json", { cache: "no-store" })
     .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
     .then(function (d) {
@@ -769,8 +960,9 @@
         age.textContent = isFinite(ageH) ? (ageH < 1 ? Math.round(ageH * 60) + "m old" : ageH.toFixed(1) + "h old") : "";
         if (isFinite(ageH) && ageH > 2) age.textContent += " ⚠ STALE — re-run wca_event_markets.py";
       }
+      var COLSPAN = IS_LOCAL ? 13 : 12;
       if (!recs.length) {
-        tbody.innerHTML = '<tr><td colspan="12" class="dim">no event-market trades clear the ' +
+        tbody.innerHTML = '<tr><td colspan="' + COLSPAN + '" class="dim">no event-market trades clear the ' +
           "2pp net-edge floor in the current snapshot</td></tr>";
         return;
       }
@@ -799,18 +991,22 @@
           '<td class="r" title="' + esc(capNote) + '">' +
             (dim ? "$0 †" : "$" + esc(r.stake_usd)) + "</td>" +
           "<td>" + hoursLabel(r.hours_out) + "</td>" +
-          '<td class="dim">' + esc(r.price_source || "—") + "</td></tr>";
+          '<td class="dim">' + esc(r.price_source || "—") + "</td>" +
+          fireCell(r) + "</tr>";
       });
-      rows += '<tr><td colspan="12" class="dim">† display-only (stake $0): longshot &lt;25¢ model, ' +
+      rows += '<tr><td colspan="' + COLSPAN + '" class="dim">† display-only (stake $0): longshot &lt;25¢ model, ' +
         "killed family (correct score / scorer props), or totals-under ban — reason on hover. " +
         esc(meta.correlation_cap || "") + "</td></tr>";
       tbody.innerHTML = rows;
+      revealFireColumn();
     })
     .catch(function () {
       cnt.textContent = "feed unavailable";
       tbody.innerHTML = '<tr><td colspan="12" class="dim">event_market_recs.json not published yet ' +
         "(written by scripts/wca_event_markets.py)</td></tr>";
     });
+
+  wireFire();  // no-op unless localhost
 })();
 </script>
 </body>
