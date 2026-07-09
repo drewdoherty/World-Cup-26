@@ -441,9 +441,11 @@ class TestCardIntegration:
         assert "Alpha vs Bravo" in text
         assert "O/U 2.5" in text
         assert "BTTS" in text
-        assert "back >=" in text
-        # A scoreline line like "1-0  ..%  fair ..  back >= .." must appear.
-        assert "fair" in text
+        # Percent ruling 2026-07-08: the back threshold is an implied %, and
+        # the decimal fair/back columns are retired.
+        assert "back at impl <=" in text
+        assert "back >=" not in text
+        assert "fair" not in text
 
     def test_build_card_still_backward_compatible(self):
         from wca.card import build_card, fit_models, format_card, PoolConfig

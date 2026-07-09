@@ -196,17 +196,21 @@ def test_xg_absent_when_not_in_card(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# handle_scores: fair % / fair decimal odds / ¼-Kelly display (rebuilt #99)
+# handle_scores: model % / ¼-Kelly display (percent ruling 2026-07-08 —
+# the fair-decimal column is retired; decimal odds never shown)
 # ---------------------------------------------------------------------------
 
 
-def test_scores_show_fair_decimal_on_top_and_runners(tmp_path):
+def test_scores_show_model_pct_not_fair_decimals(tmp_path):
     path = _write_card(str(tmp_path))
     out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
-    # Top score (1-0) shows its prob AND fair decimal odds (1/p = 5.91 from card).
-    assert "16.9% / fair 5.91" in out
-    # A runner-up also carries its fair decimal odds.
-    assert "fair 6.45" in out  # 2-0 runner-up
+    # Top score (1-0) shows its model prob as a percent.
+    assert "*1-0* (model 16.9%)" in out
+    # Runner-ups carry percents too.
+    assert "2-0 15.5%" in out
+    # The fair-decimal column is retired (ruling 2026-07-08): no decimal odds.
+    assert "fair 5.91" not in out and "fair 6.45" not in out
+    assert "fair " not in out
 
 
 def test_scores_show_quarter_kelly_on_top_score(tmp_path):
@@ -229,8 +233,8 @@ def test_scores_kelly_value_matches_kelly_kernel(tmp_path):
         assert ("¼-K £%.2f" % expected) in out
 
 
-def test_scores_fair_unknown_renders_question_mark(tmp_path):
-    """A scoreline without a parsed fair price degrades to 'fair ?', never crashes."""
+def test_scores_row_without_prices_still_renders_pct(tmp_path):
+    """A scoreline without fair/back prices still renders its model %, never crashes."""
     path = os.path.join(str(tmp_path), "card.md")
     cardcache.write_card(
         "*World Cup Alpha — scorelines* (1 fixtures)\n\n*A vs B*\n"
@@ -238,7 +242,8 @@ def test_scores_fair_unknown_renders_question_mark(tmp_path):
         "    O/U 2.5: over 50.0% / under 50.0%   BTTS 40.0%\n",
         path, ts_utc="2026-06-11T12:00:00")
     out = app.handle_scores(card_path=path, now_utc="2026-06-11T13:00:00")
-    assert "fair ?" in out
+    assert "*1-0* (model 20.0%)" in out
+    assert "fair" not in out  # decimal column retired (ruling 2026-07-08)
 
 
 # ---------------------------------------------------------------------------

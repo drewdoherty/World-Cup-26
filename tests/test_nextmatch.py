@@ -493,9 +493,15 @@ class TestGoalscorerCard:
         text = format_goalscorer_card([fx1, fx2])
         assert "Goalscorers" in text and "next 2 games" in text
         assert "Alpha vs Bravo" in text and "Charlie vs Delta" in text
-        assert "Any  bk 3.00" in text and "1st  bk 8.00" in text
+        # Percent ruling 2026-07-08: book prices as implied %, never decimals.
+        assert "Any  bk 33.3%" in text and "1st  bk 12.5%" in text
+        assert "3.00" not in text and "8.00" not in text
+        # Model % + explicit EV marker on the priced leg (0.45*3.0-1 = +35%).
+        assert "model 45.0% EV +35% ✅+EV" in text
         assert "£" in text                       # +EV model edge -> Kelly stake
         assert "no scorer market" in text        # fx2 degrades
+        # Scorer-punt leak warning rides on every scorer surface.
+        assert "−73.9% leak" in text and "NO-CASH" in text
 
     def test_format_empty(self):
         assert "No upcoming fixtures" in format_goalscorer_card([])
@@ -511,8 +517,11 @@ class TestGoalscorerCard:
                                  best_book="Book A", implied=0.4)],
         )
         text = format_goalscorer_card([fx])
-        assert "top anytime (both teams" in text
-        assert "Star Man" in text and "2.50" in text
+        assert "top anytime, mkt implied % (both teams" in text
+        # Market-implied % only, no decimal odds, no fabricated model price.
+        assert "Star Man" in text and "mkt 40% (Book A)" in text
+        assert "2.50" not in text
+        assert "+EV unverifiable" in text
 
     def test_handle_goalscorers_serves_cache(self, tmp_path):
         from wca.bot.app import handle_goalscorers

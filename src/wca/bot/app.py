@@ -46,9 +46,11 @@ from wca.bot.telegram import (
     TelegramError,
     image_document_file_id,
 )
+from wca.displayfmt import bucket_tag, edge_pp, ev_marker, ev_str, implied_pct, pct
 from wca.ledger import reports
 from wca.ledger.store import record_bet, settle_cashout
 from wca.pm import filltelemetry as _filltelemetry
+from wca.selection import prob_bucket
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +59,10 @@ NEXT_PATH = "data/next_latest.md"
 GOALSCORERS_PATH = "data/goalscorers_latest.md"
 BETBUILDER_PATH = "data/betbuilder_latest.md"
 SCORES_FEED_PATH = "site/scores_data.json"
+BET_RECS_PATH = "site/bet_recs.json"
+# /matchevents primary feed — written by scripts/wca_event_markets.py (an
+# event-markets branch that may not be merged yet); consumed DEFENSIVELY.
+EVENT_RECS_PATH = "site/event_market_recs.json"
 CARD_MAX_AGE_HOURS = 6.0
 # Reference bankroll used to size the display-only ¼-Kelly stake shown next to
 # each predicted scoreline in /scores. Scorelines have no live book feed (they
@@ -130,7 +136,8 @@ _TELEGRAM_COMMANDS = [
     {"command": "card",        "description": "Today's recommended bet card"},
     {"command": "next",        "description": "Next match preview: winner, corners, scorers"},
     {"command": "goalscorers", "description": "Anytime + first-goalscorer recs, next 5 games"},
-    {"command": "betbuilder",  "description": "Team totals + player SoT/cards/fouls model fair odds"},
+    {"command": "betbuilder",  "description": "Team totals + player SoT/cards/fouls model %"},
+    {"command": "matchevents", "description": "Exotic match-event markets — +EV moneyline bucket only"},
     {"command": "scores",      "description": "Predicted FT scorelines per fixture"},
     {"command": "accas",       "description": "4+ leg accumulators, next 5 matches"},
     {"command": "today",       "description": "What to place right now — recs + PM ideas + boosts"},
@@ -149,7 +156,8 @@ HELP_TEXT = (
     "/card — today's recommended bet card\n"
     "/next — next match preview: winner, corners, scorers, scorelines\n"
     "/goalscorers — anytime + first-goalscorer recs, next 5 games\n"
-    "/betbuilder — team totals + player SoT/cards/fouls model fair odds (model-only; sportsbook markets)\n"
+    "/betbuilder — team totals + player SoT/cards/fouls model % (model-only; sportsbook markets)\n"
+    "/matchevents — exotic match-event markets (BTTS/totals/…), +EV moneyline bucket only\n"
     "/scores — predicted FT scorelines per fixture\n"
     "/accas [value|edge|hedge|longshot|promo] — model accas; default=low-win favourites @ modest odds (edge=high-edge underdogs)\n"
     "/today — what to place right now (recs + PM ideas + boosts, freshness-stamped)\n"
@@ -190,7 +198,8 @@ def _authorized(chat_id: int | str, allowed: Optional[str]) -> bool:
 
 READ_ONLY_MSG = (
     "🔒 Read-only: bets and order confirmations are admin-only in this chat. "
-    "You can use /next, /goalscorers, /scores, /card, /summary, /bets, /clv, /ping."
+    "You can use /next, /goalscorers, /matchevents, /scores, /card, /summary, "
+    "/bets, /clv, /ping."
 )
 
 # Lone yes/no (betslip confirm) or Y/N BET-<id> / PM-<n> (order confirm) —
@@ -667,10 +676,101 @@ def render_card(recs, pools, score_cards=None) -> str:
     return "\n".join(parts)
 
 
+#: Near-threshold display band for the /card watch tier: withheld rows whose
+#: model-vs-devig edge sits in [0, 2pp). DISPLAY ONLY — the 2pp staking gate
+#: itself lives in scripts/wca_betrecs.py and is not touched here.
+WATCH_EDGE_BAND = (0.0, 0.02)
+_WATCH_MAX_ROWS = 8
+
+
+def _bet_recs_watch_section(
+    recs_path: str = BET_RECS_PATH, now_utc: Optional[str] = None
+) -> List[str]:
+    """WATCH-tier lines for /card from the bet-recs gate telemetry feed.
+
+    Widens the DISPLAY, not the gates (ruling 2026-07-08): near-threshold
+    withheld rows (0–2pp edge) are listed individually — percent convention,
+    EV marker, selection-rule bucket tag — and every other withheld row is
+    summarised by its machine-greppable ``reason_code`` (the gate-fill
+    telemetry work), so the full decision surface is visible without a single
+    stake changing. A missing feed yields one honest line, never an error.
+    """
+    import json as _json
+
+    header = "*— WATCH / WITHHELD (site/bet\\_recs.json telemetry — NOT staked) —*"
+    try:
+        with open(recs_path, "r", encoding="utf-8") as fh:
+            feed = _json.load(fh)
+    except Exception:
+        return ["", header,
+                "  _watch tier unavailable — %s missing (publish job?)_" % recs_path]
+
+    meta = feed.get("meta") or {}
+    withheld = feed.get("withheld") or []
+    if now_utc is None:
+        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    age = _staleness_age_hours(meta.get("generated"), now_utc)
+    age_str = ("%.1fh old" % age) if age is not None else "age unknown ⚠"
+
+    lines = ["", header, "  _feed %s_" % age_str]
+    if not withheld:
+        lines.append("  _no withheld rows in the current feed_")
+        return lines
+
+    def _edge(w):
+        try:
+            return float(w.get("edge"))
+        except (TypeError, ValueError):
+            return None
+
+    lo, hi = WATCH_EDGE_BAND
+    watch = [w for w in withheld
+             if _edge(w) is not None and lo <= _edge(w) < hi]
+    # Same-bucket ordering as the canonical rule: bucket first, then edge
+    # (kickoff hours are not carried on withheld rows -> EV tiebreak only).
+    from wca.selection import bucket_rank as _bucket_rank
+    watch.sort(key=lambda w: (_bucket_rank(w.get("model_prob")), -(_edge(w) or 0.0)))
+    if watch:
+        lines.append("  _near-threshold (+0 to +2pp — below the staking floor):_")
+        for w in watch[:_WATCH_MAX_ROWS]:
+            model_p = w.get("model_prob")
+            price = w.get("price")
+            label = w.get("fixture") or w.get("team") or "?"
+            sel = w.get("selection") or w.get("stage") or "?"
+            lines.append(
+                "  ~ [%s] %s — %s — model %s / mkt %s · edge %s %s [%s]"
+                % (
+                    bucket_tag(model_p), label, sel,
+                    pct(model_p), implied_pct(price),
+                    edge_pp(_edge(w)), ev_marker(_edge(w)),
+                    w.get("reason_code") or "no reason_code",
+                )
+            )
+        if len(watch) > _WATCH_MAX_ROWS:
+            lines.append("  _… %d more near-threshold rows in the feed_"
+                         % (len(watch) - _WATCH_MAX_ROWS))
+    else:
+        lines.append("  _no near-threshold rows (0–2pp) right now_")
+
+    rest = [w for w in withheld if w not in watch]
+    if rest:
+        counts: Dict[str, int] = {}
+        for w in rest:
+            code = str(w.get("reason_code") or "no reason_code")
+            counts[code] = counts.get(code, 0) + 1
+        lines.append(
+            "  _withheld by gate: %s_"
+            % " · ".join("%s ×%d" % (c, n)
+                         for c, n in sorted(counts.items(), key=lambda kv: -kv[1]))
+        )
+    return lines
+
+
 def handle_card(
     db_path: str,
     card_path: str = CARD_PATH,
     now_utc: Optional[str] = None,
+    recs_path: str = BET_RECS_PATH,
 ) -> str:
     """Serve the most recent cached card written by ``scripts/wca_build_card.py``.
 
@@ -684,6 +784,7 @@ def handle_card(
     """
     if now_utc is None:
         now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    watch_tail = "\n".join(_bet_recs_watch_section(recs_path, now_utc=now_utc))
     cached = cardcache.read_card(
         card_path, now_utc=now_utc, max_age_hours=CARD_MAX_AGE_HOURS
     )
@@ -692,6 +793,7 @@ def handle_card(
             "*Today's card*\n"
             "No card cached yet. The cron build (`scripts/wca_build_card.py`) "
             "fits the models, pulls live odds and writes the card here."
+            + ("\n" + watch_tail if watch_tail else "")
         )
     generated = cached.get("generated")
     if not generated:
@@ -705,7 +807,10 @@ def handle_card(
     provenance = "_Source: %s — generated %s UTC — fetched %s_" % (
         card_path, generated, now_utc
     )
-    return "%s*Today's card*\n%s\n\n%s" % (banner, provenance, body)
+    return "%s*Today's card*\n%s\n\n%s%s" % (
+        banner, provenance, body,
+        ("\n" + watch_tail if watch_tail else ""),
+    )
 
 
 def handle_scores(
@@ -748,8 +853,9 @@ def handle_scores(
     banner = _stale_banner(generated, now_utc, CARD_MAX_AGE_HOURS, label="card")
     lines = [
         banner + header if banner else header,
-        "_fair = 1/model-prob; ¼-K = ¼-Kelly @ £%.0f (display-only, "
-        "scorelines are REFERENCE — no live book feed)_" % SCORES_DISPLAY_BANKROLL,
+        "_model %% per scoreline; ¼-K = ¼-Kelly @ £%.0f (display-only, "
+        "scorelines are REFERENCE — no live book feed, +EV unverifiable)_"
+        % SCORES_DISPLAY_BANKROLL,
         "",
     ]
     for fx in fixtures:
@@ -766,21 +872,19 @@ def handle_scores(
         if xg_home is not None and xg_away is not None:
             lines.append("xG %.2f – %.2f" % (xg_home, xg_away))
 
-        # Top score (most likely) + up to 4 runner-ups. Each shows the model
-        # implied fair % and fair decimal odds (1/p); the most-likely score
-        # additionally shows the ¼-Kelly stake (display-only, see
-        # SCORES_DISPLAY_BANKROLL) priced at its minimum back price.
+        # Top score (most likely) + up to 4 runner-ups, model % each (percent
+        # convention, ruling 2026-07-08 — the old fair-decimal column is
+        # retired); the most-likely score additionally shows the ¼-Kelly
+        # stake (display-only, see SCORES_DISPLAY_BANKROLL) priced at its
+        # minimum back price.
         top = scores[0]
-        top_str = "*%s* (%s%% / fair %s)" % (
-            top["score"], _fmt_prob(top["prob"]), _fmt_fair(top.get("fair")),
-        )
+        top_str = "*%s* (model %s%%)" % (top["score"], _fmt_prob(top["prob"]))
         kelly_str = _fmt_score_kelly(top.get("prob"), top.get("back"))
         if kelly_str:
             top_str += " " + kelly_str
         runners = scores[1:5]
         runner_strs = [
-            "%s %s%% (fair %s)"
-            % (s["score"], _fmt_prob(s["prob"]), _fmt_fair(s.get("fair")))
+            "%s %s%%" % (s["score"], _fmt_prob(s["prob"]))
             for s in runners
         ]
         score_line = top_str
@@ -880,6 +984,13 @@ def handle_goalscorers(
             "data age is unknown." % goalscorers_path
         )
     body = cached.get("text") or "(empty card)"
+    # The leak warning ships inside the card via wca.nextmatch (SCORER_LEAK
+    # WARNING); a cache built by pre-ruling code lacks it — append defensively
+    # so no scorer surface is ever served without the reminder.
+    if "−73.9% leak" not in body and "-73.9% leak" not in body:
+        from wca.nextmatch import SCORER_LEAK_WARNING
+
+        body += "\n\n_%s_" % SCORER_LEAK_WARNING
     banner = _stale_banner(generated, now_utc, CARD_MAX_AGE_HOURS, label="card")
     provenance = "_Source: %s — generated %s UTC_\n\n" % (goalscorers_path, generated)
     return banner + provenance + body
@@ -929,13 +1040,6 @@ def _fmt_prob(prob: Optional[float]) -> str:
     if prob is None:
         return "?"
     return "%.1f" % prob
-
-
-def _fmt_fair(fair: Optional[float]) -> str:
-    """Format fair decimal odds (``1/p``) as a 2-d.p. string, ``?`` if unknown."""
-    if fair is None:
-        return "?"
-    return "%.2f" % fair
 
 
 def _fmt_score_kelly(prob_pct: Optional[float], back: Optional[float]) -> str:
@@ -1150,25 +1254,25 @@ def format_boost_verdict(boost: Any, ev: Any) -> str:
     boosted = getattr(boost, "boosted_odds", None)
     was = getattr(boost, "was_odds", None)
 
-    boosted_str = ("%.2f" % boosted) if boosted else "?"
-    was_str = (" (was %.2f)" % was) if was else ""
-    header = "⚡ *Boost* — %s\n%s — *%s* @ %s%s" % (
-        site, fixture, selection, boosted_str, was_str,
+    # Percent convention (ruling 2026-07-08): the boosted book price is the
+    # executable number -> shown as its implied % with the venue (site) tagged.
+    boosted_str = implied_pct(boosted) if boosted else "?"
+    was_str = (" (was %s impl)" % implied_pct(was)) if was else ""
+    header = "⚡ *Boost* — %s\n%s — *%s* @ %s impl (%s)%s" % (
+        site, fixture, selection, boosted_str, site, was_str,
     )
 
     if not getattr(ev, "priceable", False):
         return "%s\n⚠️ *can't price* — %s" % (header, getattr(ev, "reason", "no model price"))
 
     model_prob = getattr(ev, "model_prob", None)
-    fair = getattr(ev, "fair_odds", None)
     edge = getattr(ev, "edge", None)
     prob_str = ("%.1f%%" % (model_prob * 100.0)) if model_prob is not None else "?"
-    fair_str = ("%.2f" % fair) if fair else "?"
     edge_str = ("%+.1f%%" % (edge * 100.0)) if edge is not None else "?"
 
     tag = "✅ *+EV*" if getattr(ev, "is_plus_ev", False) else "❌ *not +EV*"
-    return "%s\n%s — edge %s | fair %s | model %s\n_%s_" % (
-        header, tag, edge_str, fair_str, prob_str, getattr(ev, "reason", ""),
+    return "%s\n%s — EV %s | model %s vs %s impl\n_%s_" % (
+        header, tag, edge_str, prob_str, boosted_str, getattr(ev, "reason", ""),
     )
 
 
@@ -1807,7 +1911,7 @@ def format_parked_order(token: str, proposal: Dict[str, Any]) -> str:
     backing = describe_pm_selection(proposal)
 
     model_prob = float(proposal.get("model_prob", 0.0))
-    ev_pct = float(proposal.get("ev", 0.0)) * 100.0  # ev stored as decimal (0.28 = 28%)
+    ev = float(proposal.get("ev", 0.0))  # stored as decimal (0.28 = 28%)
     size_usd = float(proposal.get("size_usd", notional))
 
     pm_pool_usd = 2500.0
@@ -1815,10 +1919,13 @@ def format_parked_order(token: str, proposal: Dict[str, Any]) -> str:
 
     header = ("*%s* — backing %s" % (match_desc, backing)) if match_desc else ("*%s*" % backing)
     qline = ("\n    %s → *%s*" % (question, outcome)) if question else ""
+    # PM ¢ convention (¢ IS a percent — ruling 2026-07-08): price and model in
+    # ¢, selection-rule bucket tag + explicit +EV/−EV marker on every order.
     return (
-        "%s%s @ %.2f | $%.2f | model %.1f%% | ev %+.1f%% | %.1f%% PM pool\n"
+        "%s%s [%s] @ %.0f¢ | $%.2f | model %.1f¢ | EV %+.1f%% %s | %.1f%% PM pool\n"
         "→ `Y %s` execute | `N %s` discard"
-        % (header, qline, price, size_usd, model_prob * 100.0, ev_pct, pct_pm, token, token)
+        % (header, qline, bucket_tag(model_prob), price * 100.0, size_usd,
+           model_prob * 100.0, ev * 100.0, ev_marker(ev), pct_pm, token, token)
     )
 
 
@@ -2447,13 +2554,29 @@ def handle_today(db_path: str = "data/wca.db",
                 if n_act >= 8:
                     break
                 stake = r.get("stake")
+                # Percent convention (ruling 2026-07-08): decimal book price
+                # -> implied %; model % + selection-rule bucket tag + EV marker
+                # on every row. Feed order is preserved (the feed is already
+                # rule-sorted by wca_betrecs via wca.selection).
+                model_p = r.get("model_prob")
+                ev = r.get("ev_net") if r.get("ev_net") is not None else r.get("ev")
+                ev = float(ev) if ev is not None else None
+                # PM advancement rows carry pm_price as a probability -> ¢
+                # (¢ IS a percent); book rows carry a decimal price -> implied %.
+                if r.get("pm_price") is not None:
+                    mkt_str = "%.0f¢ (PM)" % (float(r["pm_price"]) * 100.0)
+                else:
+                    mkt_str = implied_pct(r.get("price") or r.get("odds"))
                 lines.append(
-                    "  %d. [%s] %s — %s @ %s | EV %+.1f%% | stake %s"
+                    "  %d. [%s·%s] %s — %s | model %s / mkt %s | EV %s %s | stake %s"
                     % (n_act + 1, label,
-                       r.get("match") or r.get("team") or "?",
+                       bucket_tag(model_p),
+                       r.get("match") or r.get("fixture") or r.get("team") or "?",
                        r.get("selection") or r.get("stage") or "?",
-                       r.get("price") or r.get("odds") or "?",
-                       100.0 * float(r.get("ev_net") or r.get("ev") or 0.0),
+                       pct(model_p) if model_p is not None else "?",
+                       mkt_str,
+                       ev_str(ev) if ev is not None else "?",
+                       ev_marker(ev),
                        ("$%.2f" % stake) if isinstance(stake, (int, float)) else "?"))
                 n_act += 1
         if n_act == 0:
@@ -2473,12 +2596,13 @@ def handle_today(db_path: str = "data/wca.db",
         lines.append("*2) PM trade ideas* — %s — confirm via `Y PM-<n>` (/pm lists numbers)"
                      % _age_str(meta.get("generated")))
         for i, r in enumerate(rows[:6], 1):
+            ev_pct = float(r.get("ev_pct") or 0.0)
             lines.append(
-                "  %d. [%s] %s — %s %s @ %s¢ (model %s¢, EV %+.1f%%) $%.2f, %sh out"
+                "  %d. [%s] %s — %s %s @ %s¢ (model %s¢, EV %+.1f%% %s) $%.2f, %sh out"
                 % (i, str(r.get("bucket", "?")).upper(), r.get("match", "?"),
                    r.get("side", "BUY"), r.get("selection", "?"),
                    r.get("price_c", "?"), r.get("model_c", "?"),
-                   float(r.get("ev_pct") or 0.0),
+                   ev_pct, ev_marker(ev_pct),
                    float(r.get("size_usd") or 0.0),
                    r.get("hours_out", "?")))
         if not rows:
@@ -2503,6 +2627,281 @@ def handle_today(db_path: str = "data/wca.db",
     lines.append("_Sizing: combined £3,000±P&L pool, ¼-Kelly. Rules: +EV moneylines "
                  "over longshots; further-out preferred; no cash <25%. 1X2 = 90-min; "
                  "advancement incl. ET/pens._")
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# /matchevents — exotic props / match-event markets, +EV MONEYLINE bucket only.
+# ---------------------------------------------------------------------------
+
+#: Markets killed for cash as proven −EV leaks (CLAUDE.md; user's own
+#: correct-score punts were a documented −73.9% leak). NEVER actionable here
+#: even if a feed row were to clear the filters.
+_KILLED_CASH_MARKETS = ("correct_score", "exact_score", "scorer", "sgm")
+
+
+def _is_killed_market(market: str) -> bool:
+    m = (market or "").lower().replace(" ", "_")
+    return any(k in m for k in _KILLED_CASH_MARKETS)
+
+
+def _me_pm_stake(model_prob: float, market_prob: float, db_path: str) -> Optional[float]:
+    """Display-only ¼-Kelly $ stake off the PM pool for a moneyline-bucket row.
+
+    Uses the same pool resolution + Kelly kernel as every other surface
+    (:func:`wca.card.default_pools` / :func:`wca.markets.kelly.stake` — no new
+    sizing rules). Returns ``None`` when the pool/db is unavailable so the row
+    can say "stake n/a" instead of fabricating a number.
+    """
+    try:
+        from wca.card import default_pools, net_odds, pool_for_venue
+        from wca.markets import kelly as kelly_mod
+
+        if not (0.0 < market_prob < 1.0):
+            return None
+        pools = default_pools(db_path=db_path)
+        pool = pool_for_venue("polymarket", pools)
+        odds = net_odds("polymarket", 1.0 / market_prob)
+        return float(kelly_mod.stake(
+            model_prob, odds, pool.bankroll,
+            fraction=pool.kelly_fraction, cap=pool.per_bet_cap,
+        ))
+    except Exception:
+        return None
+
+
+def handle_matchevents(
+    recs_path: str = EVENT_RECS_PATH,
+    scores_path: str = SCORES_FEED_PATH,
+    db_path: str = "data/wca.db",
+    now_utc: Optional[str] = None,
+) -> str:
+    """`/matchevents` — exotic match-event markets, +EV MONEYLINE bucket ONLY.
+
+    BTTS, totals lines, exact score, corners/cards, team goals — filtered to
+    selections with model prob >= 0.50 (``wca.selection.prob_bucket`` ==
+    "moneyline") AND a positive net edge against a live market price: the
+    likely-PnL exotics, nothing else. Killed-for-cash markets (correct score,
+    scorer props, un-boosted SGMs) are structurally excluded.
+
+    Primary feed: ``site/event_market_recs.json`` (written by
+    ``scripts/wca_event_markets.py`` on a branch that may not be merged yet) —
+    consumed DEFENSIVELY. Fallback: the totals/BTTS/exact-score model prices
+    already in ``site/scores_data.json``; rows without a live market price are
+    shown model-only with an honest "+EV unverifiable" label, never dressed up
+    as actionable. Display-only — the bot never places bets.
+    """
+    import json as _json
+
+    if now_utc is None:
+        now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+
+    def _load(path):
+        try:
+            with open(path, "r", encoding="utf-8") as fh:
+                return _json.load(fh)
+        except Exception:
+            return None
+
+    def _f(x) -> Optional[float]:
+        try:
+            return float(x)
+        except (TypeError, ValueError):
+            return None
+
+    lines: List[str] = [
+        "🎯 *Match events* — +EV exotics, MONEYLINE bucket only",
+        "_filter: model ≥50% (wca.selection moneyline bucket) AND net edge "
+        ">0 vs a live price — likely-PnL exotics, nothing else_",
+    ]
+
+    # Candidate rows, normalised to:
+    #   (label, selection, market, model, mkt, edge, venue, settle, kickoff, killed)
+    candidates: List[Dict[str, Any]] = []
+    feed = _load(recs_path)
+    from_feed = feed is not None
+
+    if from_feed:
+        meta = (feed.get("meta") or {}) if isinstance(feed, dict) else {}
+        age = _staleness_age_hours(meta.get("generated"), now_utc)
+        lines.append("_source: %s — %s_" % (
+            recs_path, ("%.1fh old" % age) if age is not None else "age unknown ⚠"))
+        rows = feed.get("recs") or feed.get("rows") or feed.get("selections") or []
+        for r in rows:
+            if not isinstance(r, dict):
+                continue
+            model = _f(r.get("model_prob") or r.get("model"))
+            mkt = _f(r.get("market_prob") or r.get("mkt_prob") or r.get("pm_price"))
+            if mkt is None:
+                price = _f(r.get("price") or r.get("odds"))
+                mkt = (1.0 / price) if price and price > 1.0 else None
+            edge = _f(r.get("ev_net"))
+            if edge is None:
+                edge = _f(r.get("edge_adj") if r.get("edge_adj") is not None
+                          else r.get("edge"))
+            if edge is None and model is not None and mkt is not None:
+                edge = model - mkt
+            market = str(r.get("market") or "?")
+            candidates.append({
+                "label": r.get("fixture") or r.get("match") or r.get("team") or "?",
+                "selection": r.get("selection") or r.get("side") or "?",
+                "market": market,
+                "model": model, "mkt": mkt, "edge": edge,
+                "venue": str(r.get("venue") or "?"),
+                "settle": str(r.get("settlement") or r.get("settles") or "90-min"),
+                "kickoff": r.get("kickoff") or r.get("commence_time"),
+                "killed": _is_killed_market(market),
+            })
+    else:
+        lines.append(
+            "_event-market feed not yet built (%s missing) — run "
+            "`scripts/wca_event_markets.py`; falling back to model prices in "
+            "%s_" % (recs_path, scores_path))
+        scores = _load(scores_path)
+        if scores:
+            age = _staleness_age_hours(
+                (scores.get("meta") or {}).get("generated"), now_utc)
+            lines.append("_fallback source: %s — %s_" % (
+                scores_path,
+                ("%.1fh old" % age) if age is not None else "age unknown ⚠"))
+            for fx in scores.get("fixtures") or []:
+                label = fx.get("fixture") or "?"
+                kickoff = fx.get("kickoff")
+                ou = fx.get("over_under") or {}
+                line_val = ou.get("line")
+                for sel, key in (("Over", "over"), ("Under", "under")):
+                    p = _f(ou.get(key))
+                    if p is None:
+                        continue
+                    candidates.append({
+                        "label": label,
+                        "selection": "%s %.1f goals" % (sel, line_val or 2.5),
+                        "market": "totals",
+                        "model": p / 100.0, "mkt": None, "edge": None,
+                        "venue": "?", "settle": "90-min", "kickoff": kickoff,
+                        "killed": False,
+                    })
+                btts = _f(fx.get("btts"))
+                if btts is not None:
+                    for sel, p in (("BTTS Yes", btts / 100.0),
+                                   ("BTTS No", 1.0 - btts / 100.0)):
+                        candidates.append({
+                            "label": label, "selection": sel, "market": "btts",
+                            "model": p, "mkt": None, "edge": None,
+                            "venue": "?", "settle": "90-min", "kickoff": kickoff,
+                            "killed": False,
+                        })
+                for s in fx.get("scores") or []:
+                    p = _f(s.get("prob"))
+                    pm = _f(s.get("pm_prob"))
+                    if p is None:
+                        continue
+                    candidates.append({
+                        "label": label,
+                        "selection": "exact %s" % (s.get("score") or "?"),
+                        "market": "exact_score",
+                        "model": p / 100.0,
+                        "mkt": (pm / 100.0) if pm is not None else None,
+                        "edge": (p - pm) / 100.0 if pm is not None else None,
+                        "venue": "polymarket" if pm is not None else "?",
+                        "settle": "90-min", "kickoff": kickoff,
+                        "killed": True,  # correct score: killed cash market
+                    })
+
+    if not candidates:
+        lines.append("")
+        lines.append(
+            "_no event-market candidates in any cached feed — nothing to "
+            "show (not a model verdict; the feeds carry no rows)._")
+        return "\n".join(lines)
+
+    # THE filter (task spec): moneyline bucket AND positive net edge AND a
+    # live market price AND not a killed-for-cash market.
+    actionable, model_only = [], []
+    n_below_bucket = n_neg = n_killed = 0
+    for c in candidates:
+        if c["model"] is None:
+            continue
+        # Killed-for-cash markets are excluded CATEGORICALLY (proven −EV
+        # leaks) — before any bucket/edge consideration.
+        if c["killed"]:
+            n_killed += 1
+            continue
+        if prob_bucket(c["model"]) != "moneyline":
+            n_below_bucket += 1
+            continue
+        if c["mkt"] is None or c["edge"] is None:
+            model_only.append(c)
+            continue
+        if c["edge"] <= 0.0:
+            n_neg += 1
+            continue
+        actionable.append(c)
+
+    # Canonical ordering (wca.selection.preference_sort_key): all rows here
+    # share the moneyline bucket, so this is further-out first, EV tiebreak.
+    from wca.selection import preference_sort_key
+    kick_by_match = {
+        str(c["label"]): c["kickoff"] for c in candidates if c.get("kickoff")
+    }
+    def _key(c):
+        return preference_sort_key(
+            {"model_prob": c["model"], "ev": c["edge"] or 0.0,
+             "match_desc": str(c["label"])},
+            kick_by_match,
+        )
+    actionable.sort(key=_key)
+    model_only.sort(key=_key)
+
+    lines.append("")
+    lines.append("*Actionable (+EV, model ≥50%%, live-priced): %d*" % len(actionable))
+    for i, c in enumerate(actionable[:10], 1):
+        stake_str = "stake n/a"
+        if str(c["venue"]).lower() == "polymarket":
+            stk = _me_pm_stake(c["model"], c["mkt"], db_path)
+            stake_str = ("$%.2f (PM ¼-Kelly, display-only)" % stk) if stk is not None \
+                else "stake n/a (PM pool unavailable)"
+        lines.append(
+            "  %d. [ML] %s — %s (%s) — model %s / mkt %s (%s) · edge %s %s · "
+            "%s · settles %s"
+            % (i, c["label"], c["selection"], c["market"],
+               pct(c["model"]), pct(c["mkt"]), c["venue"],
+               edge_pp(c["edge"]), ev_marker(c["edge"]), stake_str, c["settle"]))
+    if not actionable:
+        lines.append("  _none — no live-priced moneyline-bucket exotic clears "
+                     "+EV right now_")
+
+    if model_only:
+        lines.append("")
+        lines.append(
+            "*Model-only (no live price — +EV unverifiable, NOT actionable): %d*"
+            % len(model_only))
+        for c in model_only[:8]:
+            lines.append(
+                "  · [ML] %s — %s (%s) — model %s / mkt ? · %s · settles %s"
+                % (c["label"], c["selection"], c["market"],
+                   pct(c["model"]), ev_marker(None), c["settle"]))
+        if len(model_only) > 8:
+            lines.append("  _… %d more model-only rows_" % (len(model_only) - 8))
+
+    excl = []
+    if n_below_bucket:
+        excl.append("%d below the moneyline bucket (mid/longshot — by design)"
+                    % n_below_bucket)
+    if n_neg:
+        excl.append("%d −EV or zero-edge" % n_neg)
+    if n_killed:
+        excl.append("%d killed-for-cash market rows (correct score/scorer/SGM "
+                    "— proven −EV leaks, never cash)" % n_killed)
+    if excl:
+        lines.append("")
+        lines.append("_excluded: %s_" % "; ".join(excl))
+
+    lines.append("")
+    lines.append(
+        "_settlement: totals/BTTS/exact-score settle at 90 minutes; PM "
+        "advancement markets settle incl. ET+pens — never confuse the two. "
+        "Display-only: nothing here is placeable from this command._")
     return "\n".join(lines)
 
 
@@ -2562,18 +2961,21 @@ def _edge_desk_section(path: str = EDGE_DESK_PATH,
     # further-out stage first — render as-is, bucket tag shown per row.
     for r in shadow[:_EDGE_DESK_MAX_ROWS]:
         try:
+            edge_val = float(r.get("edge_adj"))
             model_c = "%.0f" % (float(r.get("model_prob")) * 100.0)
             pm_c = "%.0f" % (float(r.get("pm_price")) * 100.0)
-            edge_c = "%+.1f" % (float(r.get("edge_adj")) * 100.0)
+            edge_c = "%+.1f" % (edge_val * 100.0)
         except (TypeError, ValueError):
             model_c = pm_c = "?"
             edge_c = "?"
+            edge_val = None
         settle = ("settles on group stage" if r.get("stage") == "group_winner"
                   else "incl. ET+pens")
         lines.append(
-            "  shadow [%s] %s %s — model %s¢ / PM %s¢, edge %s¢ — %s"
+            "  shadow [%s] %s %s — model %s¢ / PM %s¢, edge %s¢ %s — %s"
             % (str(r.get("bucket", "?")).upper(), r.get("team", "?"),
-               r.get("stage", "?"), model_c, pm_c, edge_c, settle))
+               r.get("stage", "?"), model_c, pm_c, edge_c,
+               ev_marker(edge_val), settle))
     if not shadow:
         lines.append("  _no SHADOW_ADD rows in the current feed_")
     counts = meta.get("n_by_verdict") or {}
@@ -2791,6 +3193,8 @@ def dispatch(text: str, db_path: str) -> str:
         return handle_goalscorers(goalscorers_path=GOALSCORERS_PATH)
     if cmd == "/betbuilder":
         return handle_betbuilder(betbuilder_path=BETBUILDER_PATH)
+    if cmd == "/matchevents":
+        return handle_matchevents(db_path=db_path)
     if cmd == "/scores":
         return handle_scores(card_path=CARD_PATH)
     if cmd == "/accas":

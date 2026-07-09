@@ -48,6 +48,7 @@ from wca.models.elo import EloOutcomeModel, EloRater
 from wca.models.props import CardsModel, CornersModel
 from wca.models.scores import ScorelineCard, scoreline_card
 from wca.selection import bucket_rank, longshot_no_cash
+from wca.displayfmt import bucket_tag, edge_pp, ev_marker, ev_str, implied_pct, implied_prob, pct
 
 # 1X2 outcome order used throughout: home, draw, away.
 OUTCOMES = ("home", "draw", "away")
@@ -664,6 +665,8 @@ class Recommendation:
     cut_reason: str = ""
     indicative: bool = False              # single-source price (no cross-venue
     #                                       confirmation) — shown, not auto-staked
+    watch: bool = False                   # near-threshold (+EV below the display
+    #                                       floor) — DISPLAY ONLY, never staked
 
 
 @dataclass
@@ -1302,6 +1305,7 @@ def build_card(
     host_nations: Sequence[str] = ("United States", "Mexico", "Canada", "USA"),
     neutral_host_factor: float = DEFAULT_NEUTRAL_HOST_FACTOR,
     now: Optional[object] = None,
+    watch_sink: Optional[List[Recommendation]] = None,
 ) -> List[Recommendation]:
     """Generate +EV recommendations for every outcome in the slate.
 
@@ -1321,6 +1325,13 @@ def build_card(
         Reference time (ISO-8601 or Timestamp) for the further-out tilt (rule 3).
         ``None`` uses real UTC. When kickoff is unparseable the tilt is skipped
         (edge unchanged) so the function never crashes on a bad timestamp.
+    watch_sink:
+        Optional list that collects DISPLAY-ONLY "watch" rows: outcomes whose
+        tilted edge is non-negative but below ``min_edge`` (the near-threshold
+        0-to-``min_edge`` band). They are emitted with ALL stakes forced to
+        0.0 and ``watch=True`` so the card can show the full decision surface
+        (ruling 2026-07-08) WITHOUT loosening any staking gate — the returned
+        recommendations are byte-identical whether or not a sink is passed.
     """
     blends = _iter_fixture_blends(
         models, odds_df, fixtures_meta, weights, host_nations, neutral_host_factor
@@ -1349,6 +1360,39 @@ def build_card(
             # before it gates / sizes (flag, don't size the full gap).
             e = raw_e * IMMINENT_EDGE_DISCOUNT if (imminent and raw_e > 0) else raw_e
             if e < min_edge:
+                # Near-threshold band (0 <= edge < min_edge): DISPLAY-ONLY
+                # watch row when the caller asks for it (ruling 2026-07-08:
+                # widen the DISPLAY, never the gate). Stakes are forced to 0
+                # and the staked output above is untouched.
+                if watch_sink is not None and e >= 0.0:
+                    watch_sink.append(
+                        Recommendation(
+                            match_id=str(fb.fx["event_id"]),
+                            match_desc="%s vs %s" % (home, away),
+                            commence_time=commence,
+                            selection=outcome,
+                            selection_team=team_map[outcome],
+                            best_book=venue_label(book),
+                            best_odds=odds,
+                            model_prob=p,
+                            market_prob=fb.mkt_map[outcome],
+                            elo_prob=fb.elo_map[outcome],
+                            dc_prob=fb.dc_map[outcome],
+                            edge=e,
+                            ev_per_unit=e,
+                            stakes={pool.name: 0.0 for pool in pools},
+                            venue=venue_of(book),
+                            raw_edge=raw_e,
+                            hours_to_kickoff=h2k,
+                            imminent=imminent,
+                            category=classify_outcome(outcome, p, fb.mkt_map),
+                            indicative=(
+                                books_pricing(fb.books, outcome) < MIN_BOOKS_FOR_STAKING
+                                and not _stake_single_source()
+                            ),
+                            watch=True,
+                        )
+                    )
                 continue
             # Single-source guard (rule, 2026-06-29): if this outcome is priced
             # by fewer than MIN_BOOKS_FOR_STAKING distinct books there is no
@@ -1800,7 +1844,13 @@ def whole_book_exposure(
 
 
 def format_card(recs: Sequence[Recommendation], pools: Sequence[PoolConfig]) -> str:
-    """Human-readable card for the terminal or Telegram (Markdown)."""
+    """Human-readable card for the terminal or Telegram (Markdown).
+
+    Percent convention (user ruling 2026-07-08): the executable book price is
+    shown as its implied percentage with the venue tagged — never bare decimal
+    odds — and every selection carries its EV with a +EV/−EV marker plus its
+    selection-rule bucket tag (ML/MID/LS, :mod:`wca.selection`).
+    """
     if not recs:
         return "*No +EV bets* on the current slate at the configured threshold."
     lines = ["*World Cup Alpha — bet card* (%d picks)" % len(recs), ""]
@@ -1809,12 +1859,14 @@ def format_card(recs: Sequence[Recommendation], pools: Sequence[PoolConfig]) -> 
             "%s £%.2f" % (p.name, r.stakes.get(p.name, 0.0)) for p in pools
         )
         lines.append(
-            "*%d. %s* — %s @ *%.2f* (%s)\n"
-            "    model %.1f%% / mkt %.1f%%  edge *%+.1f%%*  [elo %.0f%% dc %.0f%%]\n"
+            "*%d. [%s] %s* — %s — back %s impl (%s)\n"
+            "    model %s / mkt %s  EV *%s* %s  [elo %.0f%% dc %.0f%%]\n"
             "    stake: %s"
             % (
-                i, r.match_desc, r.selection_team, r.best_odds, r.best_book,
-                r.model_prob * 100, r.market_prob * 100, r.edge * 100,
+                i, bucket_tag(r.model_prob), r.match_desc, r.selection_team,
+                implied_pct(r.best_odds), r.best_book,
+                pct(r.model_prob), pct(r.market_prob),
+                ev_str(r.edge), ev_marker(r.edge),
                 r.elo_prob * 100, r.dc_prob * 100, stake_str,
             )
         )
@@ -1833,8 +1885,9 @@ def format_ranked_card(
     ranked: RankedCard,
     pools: Union[PoolConfig, Sequence[PoolConfig]],
     bank: Optional["PoolBankroll"] = None,
+    watch: Sequence[Recommendation] = (),
 ) -> str:
-    """Operating-rules card (Markdown): ranked picks, CUT list, footer.
+    """Operating-rules card (Markdown): ranked picks, CUT list, WATCH tier, footer.
 
     Renders rule 2 (hit-probability ranking + CUT longshots), rule 3 (the
     further-out tilt — imminent fixtures flagged and edge-discounted), rule 4
@@ -1843,6 +1896,17 @@ def format_ranked_card(
     and shown in its venue's own currency — Polymarket in $ off the $-pool,
     every other book in £ off the £-pool. Reference-only markets (scorelines
     etc.) are appended by the caller, clearly flagged "REFERENCE, NOT SIZED".
+
+    Percent convention (user ruling 2026-07-08, supersedes the 2026-07-03
+    "classic decimal" layout): prices are shown as ``model % / mkt %`` with the
+    executable book price as its implied % (venue tagged) — never bare decimal
+    odds. Every line carries its EV with a +EV/−EV marker and its
+    selection-rule bucket tag (ML/MID/LS) so the moneylines-over-longshots
+    ordering is visible.
+
+    ``watch`` (optional) is the DISPLAY-ONLY near-threshold tier collected by
+    :func:`build_card` via ``watch_sink`` — rendered after the CUT list, never
+    staked, clearly separated so it cannot be confused with actionable picks.
 
     ``pools`` accepts a single :class:`PoolConfig` (legacy single-pool callers)
     or a sequence; a lone pool is wrapped so per-pick routing still works.
@@ -1858,6 +1922,10 @@ def format_ranked_card(
         header += ", %d indicative" % n_indicative
     header += " picks, hit-prob ranked)"
     lines.append(header)
+    lines.append(
+        "_order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), "
+        "further-out first, EV tiebreak — wca.selection_"
+    )
     lines.append("")
     if not ranked.picks:
         lines.append("_No +EV bets clear the selection rule on the current slate._")
@@ -1875,38 +1943,72 @@ def format_ranked_card(
         if r.indicative:
             tilt = "  INDICATIVE — single-source, no cross-venue confirmation (not staked)"
         elif r.imminent and r.raw_edge is not None:
-            tilt = "  IMMINENT: edge discounted %+.1f%%->%+.1f%% (likely model error)" % (
-                r.raw_edge * 100, r.edge * 100
+            tilt = "  IMMINENT: EV discounted %s->%s (likely model error)" % (
+                ev_str(r.raw_edge), ev_str(r.edge)
             )
         elif r.hours_to_kickoff is not None and r.hours_to_kickoff >= FURTHER_OUT_HOURS:
             tilt = "  further-out (%.0fh) — thin/soft market" % r.hours_to_kickoff
-        # Classic card line format restored (user, 2026-07-03, from the
-        # reference screenshots): decimal odds, model/mkt %, elo/dc bracket,
-        # stake in the pick's OWN pool currency. The ¢/$ Polymarket convention
-        # now lives on the /pm trade-ideas surface instead.
+        # Percent convention (ruling 2026-07-08): bucket tag + category label,
+        # model/mkt %, executable price as implied % via the venue, EV with
+        # marker, elo/dc bracket, stake in the pick's OWN pool currency. The
+        # ¢/$ Polymarket convention lives on the /pm trade-ideas surface.
+        gap = (
+            r.model_prob - implied_prob(r.best_odds)
+            if implied_prob(r.best_odds) is not None else None
+        )
         lines.append(
-            "*%d. [%s] %s* — %s @ *%.2f* via *%s*\n"
-            "    model %.1f%% / mkt %.1f%%  edge *%+.1f%%*  [elo %.0f%% dc %.0f%%]\n"
+            "*%d. [%s·%s] %s* — %s — back *%s* impl via *%s*\n"
+            "    model %s / mkt %s (%s)  EV *%s* %s  [elo %.0f%% dc %.0f%%]\n"
             "    stake: %s %s%.2f%s"
             % (
-                i, _CATEGORY_LABEL.get(r.category, r.category.upper()),
-                r.match_desc, r.selection_team, r.best_odds, r.venue,
-                r.model_prob * 100, r.market_prob * 100, r.edge * 100,
+                i, bucket_tag(r.model_prob),
+                _CATEGORY_LABEL.get(r.category, r.category.upper()),
+                r.match_desc, r.selection_team, implied_pct(r.best_odds), r.venue,
+                pct(r.model_prob), pct(r.market_prob), edge_pp(gap),
+                ev_str(r.edge), ev_marker(r.edge),
                 r.elo_prob * 100, r.dc_prob * 100, rp.name, rp.symbol, stake, tilt,
             )
         )
 
-    # CUT list (rule 2, classic format restored 2026-07-03): excluded
-    # longshots kept fully visible with EV + reason — nothing hidden.
+    # CUT list (rule 2): excluded longshots kept fully visible with EV +
+    # verbose reason — nothing hidden. Percent convention as above.
     if ranked.cut:
         lines.append("")
         lines.append("*— CUT (excluded from staking, %d) —*" % len(ranked.cut))
         for r in ranked.cut:
             lines.append(
-                "  x %s — %s @ %.2f (model %.1f%%, %+.1f%% EV): %s"
+                "  x [%s] %s — %s — back %s impl (model %s, EV %s %s): %s"
                 % (
-                    r.match_desc, r.selection_team, r.best_odds,
-                    r.model_prob * 100, r.edge * 100, r.cut_reason,
+                    bucket_tag(r.model_prob), r.match_desc, r.selection_team,
+                    implied_pct(r.best_odds), pct(r.model_prob),
+                    ev_str(r.edge), ev_marker(r.edge), r.cut_reason,
+                )
+            )
+
+    # WATCH tier (ruling 2026-07-08): near-threshold rows (0 <= EV < the 2pp
+    # display floor) shown so the decision surface is complete — DISPLAY ONLY,
+    # stakes are structurally 0 (build_card zeroes them; the gate is unchanged).
+    if watch:
+        wsorted = sorted(
+            watch,
+            key=lambda r: (
+                bucket_rank(r.model_prob),
+                -(r.hours_to_kickoff or 0.0),
+                -r.edge,
+            ),
+        )
+        lines.append("")
+        lines.append(
+            "*— WATCH (near-threshold, below the +2%% EV floor — NOT staked, %d) —*"
+            % len(wsorted)
+        )
+        for r in wsorted:
+            lines.append(
+                "  ~ [%s] %s — %s — back %s impl via %s (model %s / mkt %s, EV %s %s)"
+                % (
+                    bucket_tag(r.model_prob), r.match_desc, r.selection_team,
+                    implied_pct(r.best_odds), r.venue, pct(r.model_prob),
+                    pct(r.market_prob), ev_str(r.edge), ev_marker(r.edge),
                 )
             )
 
@@ -1961,11 +2063,12 @@ def format_scores(
     """Human-readable scoreline card for the terminal or Telegram (Markdown).
 
     Per fixture: expected goals from the model, the top-6 scorelines
-    (``"2-1  12.3%  fair 8.13  back >= 8.46"``) followed by one line with
-    over/under 2.5 and BTTS probabilities.  The ``back >=`` price is the
-    minimum decimal odds at which backing that scoreline clears ``min_edge``
-    (each card's own ``min_edge`` is used; the argument is a display-only
-    fallback for cards that predate it).
+    (``"2-1  12.3%  back at impl <= 11.8%"``) followed by one line with
+    over/under 2.5 and BTTS probabilities.  Percent convention (user ruling
+    2026-07-08): the minimum back price that clears ``min_edge`` is shown as
+    its implied percentage — back only when the market's implied probability
+    is AT OR BELOW that threshold (each card's own ``min_edge`` is used; the
+    argument is a display-only fallback for cards that predate it).
     """
     if not cards:
         return "*No scoreline cards* for the current slate."
@@ -1981,15 +2084,13 @@ def format_scores(
         ea = float((cols * c.matrix.sum(axis=0)).sum())
         lines.append("    xG: %.2f-%.2f" % (eh, ea))
         for h, a, p in c.top_scorelines:
-            fair = c.fair_odds(p)
             backp = c.min_price(p, me)
-            # Show the implied probability after each decimal price: the fair
-            # leg restates the model prob; the back leg is the break-even prob at
-            # the minimum price (the gap is the edge buffer you must clear).
+            # Model % first; the executable threshold is the break-even
+            # implied % at the minimum acceptable back price (the model-vs-
+            # threshold gap is the edge buffer that must clear min_edge).
             lines.append(
-                "    %d-%d  %.1f%%  fair %.2f (%.1f%%)  back >= %.2f (%.1f%%)"
-                % (h, a, p * 100, fair, (100.0 / fair) if fair else 0.0,
-                   backp, (100.0 / backp) if backp else 0.0)
+                "    %d-%d  %.1f%%  back at impl <= %.1f%%"
+                % (h, a, p * 100, (100.0 / backp) if backp else 0.0)
             )
         ou25 = c.over_under.get(2.5)
         p_over = ou25[0] if ou25 is not None else float("nan")

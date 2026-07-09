@@ -52,8 +52,11 @@ from wca import dashboard
 # numbered "*1. A vs B* ..." headings are never mistaken for fixtures.
 _FIXTURE_RE = re.compile(r"^\*(?P<name>.+?)\*\s*$")
 
-# A single scoreline row: "1-0  16.9%  fair 5.91  back >= 6.03".  The "fair"
-# and "back" columns are optional so we tolerate slimmer card variants.
+# A single scoreline row. Three card generations are tolerated:
+#   percent (2026-07-08 ruling): "1-0  16.9%  back at impl <= 16.6%"
+#   annotated decimal:           "1-0  16.9%  fair 5.91 (16.9%)  back >= 6.03 (16.6%)"
+#   plain decimal:               "1-0  16.9%  fair 5.91  back >= 6.03"
+# The "fair"/"back" columns are optional so slimmer variants still parse.
 _SCORE_RE = re.compile(
     r"^(?P<score>\d+\s*-\s*\d+)\s+"
     r"(?P<prob>\d+(?:\.\d+)?)%"
@@ -62,6 +65,10 @@ _SCORE_RE = re.compile(
     # note-free format) so the site feed keeps parsing either card variant.
     r"(?:\s+fair\s+(?P<fair>\d+(?:\.\d+)?)(?:\s*\(\d+(?:\.\d+)?%\))?)?"
     r"(?:\s+back\s*>=\s*(?P<back>\d+(?:\.\d+)?)(?:\s*\(\d+(?:\.\d+)?%\))?)?"
+    # Percent-convention back threshold: "back at impl <= 16.6%". The decimal
+    # ``back`` price is reconstructed as 100/pct in the parser so the site
+    # feed's schema (fair/back decimals) is unchanged for consumers.
+    r"(?:\s+back\s+at\s+impl\s*<=\s*(?P<backpct>\d+(?:\.\d+)?)%)?"
     r"\s*$"
 )
 
@@ -170,11 +177,23 @@ def parse_scorelines(card_text: str) -> List[Dict[str, Any]]:
         # Scoreline row.
         score_match = _SCORE_RE.match(line)
         if score_match and current is not None:
+            prob = _to_opt_float(score_match.group("prob"))
+            fair = _to_opt_float(score_match.group("fair"))
+            back = _to_opt_float(score_match.group("back"))
+            # Percent-convention card (2026-07-08 ruling): the row carries the
+            # back threshold as an implied %; reconstruct the decimal price
+            # (100/pct) and the fair price (100/model-prob — the same identity
+            # the old card printed) so the feed schema is unchanged.
+            backpct = _to_opt_float(score_match.group("backpct"))
+            if back is None and backpct and backpct > 0:
+                back = round(100.0 / backpct, 2)
+            if fair is None and prob and prob > 0 and (back is not None or backpct):
+                fair = round(100.0 / prob, 2)
             current["scores"].append({
                 "score": score_match.group("score").replace(" ", ""),
-                "prob": _to_opt_float(score_match.group("prob")),
-                "fair": _to_opt_float(score_match.group("fair")),
-                "back": _to_opt_float(score_match.group("back")),
+                "prob": prob,
+                "fair": fair,
+                "back": back,
             })
             continue
 
