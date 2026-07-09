@@ -1,10 +1,10 @@
-<!-- generated: 2026-07-09T20:14:30 -->
+<!-- generated: 2026-07-09T20:51:00 -->
 ⚽ *Next match* — Spain vs Belgium
 Kickoff 2026-07-10 19:00:00+00:00
 
 *Winner* (model blend)
   Spain          model 58.6% · mkt 59.2% (betfair_ex_uk)  EV -1.0% ❌−EV
-  Belgium        model 17.3% · mkt 16.7% (matchbook)  EV +4.0% ✅+EV  (<25% model — NO CASH)
+  Belgium        model 17.3% · mkt 16.7% (betfair_ex_uk)  EV +4.0% ✅+EV  (<25% model — NO CASH)
   Draw           model 24.1% · mkt 24.4% (betfair_ex_uk)  EV -1.3% ❌−EV  (<25% model — NO CASH)
 
 *Corners* (model, exp 9.0)
