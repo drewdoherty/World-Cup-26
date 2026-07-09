@@ -112,7 +112,8 @@ before starting any task.
 
 - Betfair execution: NO-BUILD (ADR-003). Read-only CLV reference at most;
   Smarkets first if a GBP exchange is ever needed.
-- Sites: `site/` (8000) is primary; publish via the mini `publish` job;
-  site-analytics frozen pending consolidation (post-tournament).
+- Sites: localhost-ONLY — `site/` (8000) primary, `site-analytics/` (8001)
+  frozen pending consolidation (post-tournament); publish via the mini
+  `publish` job. Vercel REMOVED entirely 2026-07-08 (no hosted deploys).
 - Overhaul plan + gates: `docs/overhaul/PHASE1_DESIGN.md` (tournament track
   vs post-tournament track); rollback tag `pre-overhaul-2026-07-01`.

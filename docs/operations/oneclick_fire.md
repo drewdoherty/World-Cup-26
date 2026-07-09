@@ -11,7 +11,7 @@ sets `PM_DRY_RUN=0`.
 |---|---|---|
 | `scripts/wca_pm_fire.py` | **mini** | Loads a rec by id, RE-RESOLVES the live PM market (current YES price, never the stale `pm_price`), hard-caps the stake, idempotency-guards (`pm_fire_log`), and calls `wca.bot.app._execute_parked_order` (honours `PM_DRY_RUN`, records `data/wca.db`). Prints one JSON line. |
 | `scripts/wca_place_server.py` | **dev box** | Localhost-only (`127.0.0.1`) stdlib HTTP bridge. `POST /place {rec_id,nonce}` with `X-WCA-Place-Token` → SSHes to the mini and runs the fire script, **forwarding its own `PM_DRY_RUN` (default `1`)**. `GET /health`. |
-| `site/arb.js` + `site/arb.html` | browser | Adds a "Place" column that renders **only** when `location.hostname` is `localhost`/`127.0.0.1` (never on Vercel). Click POSTs to `http://127.0.0.1:8010/place` with the shared secret from `localStorage` (`wcaPlaceToken`, prompted once). |
+| `site/arb.js` + `site/arb.html` | browser | Adds a "Place" column that renders **only** when `location.hostname` is `localhost`/`127.0.0.1` (never on a non-local host). Click POSTs to `http://127.0.0.1:8010/place` with the shared secret from `localStorage` (`wcaPlaceToken`, prompted once). |
 
 ## Safety guarantees
 
@@ -24,7 +24,8 @@ sets `PM_DRY_RUN=0`.
 - Re-resolves at fire time and refuses if the live YES price moved
   > `PRICE_SANITY_BAND` (0.08) from the rec, if there is no live market, if the
   rec is not an actionable `ADD`, or if it is stale.
-- The button is inert off-localhost; the `<th>` stays `hidden` on Vercel.
+- The button is inert off-localhost; the `<th>` stays `hidden` on any
+  non-local host.
 - The server refuses non-loopback clients and any request whose
   `X-WCA-Place-Token` ≠ env `WCA_PLACE_TOKEN`; a mismatched/unset secret 403s.
 - If the mini is unreachable the server returns a clean JSON error — never a

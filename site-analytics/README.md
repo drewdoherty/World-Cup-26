@@ -2,8 +2,8 @@
 
 A **standalone** analytics dashboard, isolated from the main `site/`, that surfaces the
 full *paper book* (every priced model selection, not just placed bets) per
-`docs/research/analytics_design.md`. Deployed as its **own** Vercel project so it lives
-alongside — not on top of — the existing terminal site.
+`docs/research/analytics_design.md`. Served on its **own** localhost port (8001) so it
+lives alongside — not on top of — the main terminal site on :8000.
 
 ## Sections (design modules)
 
@@ -51,41 +51,21 @@ python3 scripts/serve_analytics.py     # serves site-analytics/ on :8755
 # open http://localhost:8755/
 ```
 
-## Deploy — BRAND-NEW, SEPARATE Vercel project (do NOT touch production)
+## Serving — localhost only (Vercel removed 2026-07-08)
 
-> ⛔ **Hard guardrail.** The existing production site
-> (`fifa-world-cup-2026-betting-gambling.vercel.app` and the model URL) must stay **exactly
-> as-is**. This dashboard deploys as its **own new project**. Never run `vercel link` /
-> `vercel --prod` against the existing project, never change its Root Directory, never
-> repoint its domain. If a `vercel link` prompt offers an existing project, choose
-> **“create a new project”** — never the existing one.
-
-The `vercel` CLI was not installed in the build environment, so deploy with one of:
-
-### Option A — Vercel CLI (recommended)
+There is no hosted deploy: Vercel was removed from the project entirely on
+2026-07-08 (both `vercel.json` files deleted; deployments were already blocked
+at the dashboard). The dashboard is served as static files from a local
+Python HTTP server:
 
 ```
-npm i -g vercel                 # if not installed
-cd site-analytics
-vercel login                    # if not already authed
-vercel link                     # at the prompt: "Set up and deploy" -> create a NEW project
-                                #   name e.g. "wca-analytics-lilac". DO NOT pick the existing
-                                #   fifa-world-cup-2026-betting-gambling project.
-vercel --prod                   # deploys THIS dir as its own project; prints the new *.vercel.app URL
+# the standing serving surface (mini + dev box)
+python3 -m http.server 8001 --bind 127.0.0.1 --directory site-analytics
+# open http://localhost:8001/
 ```
 
-`site-analytics/` is the project **root** (it contains `index.html` + `vercel.json`), so no
-`outputDirectory` is needed — Vercel serves the directory as a static site. Because the root
-is `site-analytics/`, this project can never serve or overwrite the production `site/`.
-
-### Option B — Vercel dashboard (no CLI)
-
-1. Push this branch (done by the accompanying PR).
-2. vercel.com → **Add New… → Project** → import this Git repo as a **brand-new** project.
-   It must NOT be the existing `fifa-world-cup-2026-betting-gambling` project.
-3. Set **Root Directory = `site-analytics`**. Framework preset: **Other** (static). No build command.
-4. Deploy → Vercel returns the new `https://<project>.vercel.app` URL. The production project
-   is untouched.
-
-To keep it auto-refreshing later, add a **separate** GitHub Action (or a step that writes the
-five feeds into `site-analytics/data/`) — do not modify the production deploy workflow.
+`scripts/serve_analytics.py` (above, :8755) remains available as an ad-hoc
+local preview. Feeds under `data/` refresh via the mini's hourly `analytics`
+job in its local working tree; the tree itself is frozen pending the
+post-tournament site consolidation (see `CLAUDE.md` standing decisions and
+`docs/overhaul/PHASE1_DESIGN.md` §7.c).

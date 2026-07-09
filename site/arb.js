@@ -125,7 +125,7 @@
 
   // --------------------------------------------------------------------------
   // One-click PLACE (localhost-only). SAFETY: this entire module is inert on
-  // any non-localhost host (Vercel), so the deployed page can never render or
+  // any non-localhost host, so a non-local copy of the page can never render or
   // fire a button. Guarded so a missing config or a non-localhost load never
   // throws.
   // --------------------------------------------------------------------------

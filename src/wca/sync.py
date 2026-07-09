@@ -1,5 +1,6 @@
-"""Best-effort site sync: regenerate site/data.json and push so the live
-Vercel site tracks the ledger automatically after a bot write.
+"""Best-effort site sync: regenerate site/data.json and push so the site
+feeds on origin/main (served from localhost:8000 on each machine) track
+the ledger automatically after a bot write.
 
 Design:
 * Fully best-effort — every failure is swallowed and logged; the bot must

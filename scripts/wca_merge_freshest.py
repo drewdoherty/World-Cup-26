@@ -14,10 +14,11 @@ merge.freshest.driver``.
 
 This is a SMALL, safe mitigation, not the full Phase-1 increment 2
 (untrack daemon artifacts / detached data branch) — that bigger change
-would also break how Vercel serves the site (it serves whatever's
-committed on main) and needs its own sign-off. This driver keeps every
-file tracked and Vercel-servable; it only stops git from raising a
-conflict marker when two builds of the same artifact diverge.
+would also change how site data is distributed (each machine's
+localhost server serves whatever's committed on main once pulled) and
+needs its own sign-off. This driver keeps every file tracked on main;
+it only stops git from raising a conflict marker when two builds of
+the same artifact diverge.
 
 Usage (as a git merge driver, called by git itself)::
 
