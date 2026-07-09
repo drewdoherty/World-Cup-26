@@ -670,6 +670,23 @@ def main() -> int:
 
     _load_dotenv(args.env)
 
+    # BACKSTOP ingest of relayed in-play proposals (data/pm_inplay_proposals
+    # .json -> pm_parked + admin DM). Primary is the 60s `pminplayingest`
+    # launchd job; this hook covers a mini where that job is not yet installed.
+    # Runs FIRST (before any PM network call) so it still executes on the
+    # PM-blind mini where the odds/PM pulls below fail. Best-effort: parking
+    # only, never fires, never blocks the propose run.
+    if not args.dry_print:
+        try:
+            import wca_pm_inplay_ingest as _inplay_ingest
+
+            _res = _inplay_ingest.ingest_file()
+            if any(_res.values()):
+                print("in-play ingest: parked=%d skipped=%d invalid=%d"
+                      % (len(_res["parked"]), len(_res["skipped"]), len(_res["invalid"])))
+        except Exception as _exc:  # noqa: BLE001 — backstop must never break propose
+            print("in-play ingest backstop failed: %s" % _exc, file=sys.stderr)
+
     funder = _resolve_funder()
 
     now_dt = datetime.datetime.utcnow()
