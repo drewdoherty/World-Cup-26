@@ -55,6 +55,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 from wca.selection import (
+    MARKET_MATCH,
     bucket_rank,
     longshot_no_cash,
     preference_sort_key,
@@ -650,7 +651,15 @@ def build_event_market_recs(
     kick_by_match = {r["fixture"]: r.get("kickoff") or "" for r in recs}
     for r in recs:
         r["match_desc"] = r["fixture"]  # key expected by selection.hours_out
-    recs.sort(key=lambda r: preference_sort_key(r, kick_by_match, now_dt))
+    # Single-match PM coverage feed = 90-min MATCH markets (1X2 / totals / BTTS
+    # / spreads / exact; even the same-match "Team to Advance" leg resolves
+    # within the match, NOT multi-week). So the hours-out term is NEUTRAL
+    # (MARKET_MATCH): EV breaks ties within the bucket (2026-07-09 backtest —
+    # no early premium after fees for match markets). Passed explicitly so this
+    # whole-feed category is deterministic; the conditional lives in
+    # wca.selection.
+    recs.sort(key=lambda r: preference_sort_key(
+        r, kick_by_match, now_dt, market_kind=MARKET_MATCH))
     from wca.selection import hours_out as _hours_out
 
     for r in recs:
@@ -669,9 +678,11 @@ def build_event_market_recs(
                 "on one match) and are jointly capped at $%.0f per fixture"
                 % hard_cap
             ),
-            "ranking": ("bucket by MODEL prob (moneyline>mid>longshot), "
-                        "further-out fixtures first, net-EV tiebreak "
-                        "(wca.selection.preference_sort_key)"),
+            "ranking": ("bucket by MODEL prob (moneyline>mid>longshot), then "
+                        "net-EV (90-min match markets: hours-out NEUTRAL per "
+                        "the 2026-07-09 category-conditional refinement — "
+                        "further-out-first is kept only for multi-week "
+                        "futures/advancement) (wca.selection.preference_sort_key)"),
             "settlement_note": ("90-min markets settle on the 90'+stoppage "
                                 "score; ET+pens rows are advancement-basis and "
                                 "flagged per row — never mix the two"),

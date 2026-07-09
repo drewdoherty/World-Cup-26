@@ -113,13 +113,17 @@ def _rec(team, model, edge, h2k, odds=2.5, mkt=None, category="favourite",
 
 
 def _mixed_recs():
-    """Mixed feed exercising bucket > hours-out > EV (the canonical key)."""
+    """Mixed feed exercising bucket > hours-term > EV (the canonical key).
+
+    Trade-card recs are 90-min MATCH markets, so post-2026-07-09 the hours-out
+    term is NEUTRAL and EV breaks ties within the bucket.
+    """
     return [
         # MID bucket, huge EV, furthest out — must still rank BELOW every ML.
         _rec("MidHighEV", model=0.30, edge=0.20, h2k=200.0),
-        # ML bucket, near kickoff, best EV among MLs.
+        # ML bucket, near kickoff, BEST EV among MLs -> ranks first (EV wins).
         _rec("MlNear", model=0.55, edge=0.10, h2k=5.0),
-        # ML bucket, further out, lower EV — ranks above MlNear (hours first).
+        # ML bucket, further out, LOWER EV -> ranks below MlNear (hours neutral).
         _rec("MlFar", model=0.60, edge=0.05, h2k=72.0),
     ]
 
@@ -130,18 +134,20 @@ class TestCardPercentAndOrdering:
         ranked = rank_card(_mixed_recs())
         text = format_ranked_card(ranked, pools)
         # The rendered order must follow the canonical key: any ML above the
-        # MID regardless of EV (MidHighEV has the biggest EV of the slate),
-        # and further-out first within the ML bucket (MlFar over MlNear even
-        # though MlNear has double the EV).
+        # MID regardless of EV (MidHighEV has the biggest EV of the slate), and
+        # for MATCH markets EV breaks ties within the ML bucket (MlNear over
+        # MlFar — the higher EV; hours-out is neutral post-2026-07-09).
         pos = {team: text.index(team) for team in ("MlFar", "MlNear", "MidHighEV")}
-        assert pos["MlFar"] < pos["MlNear"] < pos["MidHighEV"]
-        # Cross-check against the CANONICAL key itself (never re-derived):
-        # the MID row sorts last through wca.selection.preference_sort_key.
+        assert pos["MlNear"] < pos["MlFar"] < pos["MidHighEV"]
+        # Cross-check against the CANONICAL key itself (never re-derived): the
+        # MID row sorts last through wca.selection.preference_sort_key, and the
+        # match default keeps the hours term neutral.
         proposals = [{"model_prob": r.model_prob, "ev": r.edge,
                       "match_desc": r.match_desc, "team": r.selection_team}
                      for r in _mixed_recs()]
         expected = sorted(proposals, key=lambda p: preference_sort_key(p, {}))
         assert expected[-1]["team"] == "MidHighEV"
+        assert [p["team"] for p in expected] == ["MlNear", "MlFar", "MidHighEV"]
 
     def test_percent_format_no_decimal_odds(self):
         pools = [PoolConfig(name="sb", bankroll=1000.0)]
@@ -383,23 +389,25 @@ class TestMatchEvents:
         assert "exact 1-0" not in out[out.index("*Actionable"):].split("_excluded")[0]
         assert "killed-for-cash" in out
 
-    def test_ordering_further_out_first(self, tmp_path):
+    def test_ordering_match_ev_first_hours_neutral(self, tmp_path):
         p = tmp_path / "event_market_recs.json"
         p.write_text(json.dumps(_event_feed([
             _event_row(fixture="Near vs Kick", selection="NearRow",
-                       model_prob=0.60, market_prob=0.50,
+                       model_prob=0.60, market_prob=0.50,  # bigger edge
                        kickoff="2099-01-01T20:00:00+00:00"),
             _event_row(fixture="Far vs Kick", selection="FarRow",
-                       model_prob=0.55, market_prob=0.50,
+                       model_prob=0.55, market_prob=0.50,  # smaller edge, further out
                        kickoff="2099-06-01T20:00:00+00:00"),
         ])), encoding="utf-8")
         out = app.handle_matchevents(recs_path=str(p),
                                      scores_path=str(tmp_path / "none.json"),
                                      db_path=str(tmp_path / "db.db"),
                                      now_utc="2026-07-09T10:00:00")
-        # Same (moneyline) bucket: the further-out fixture ranks first even
-        # though the nearer one has the bigger edge — the canonical key.
-        assert out.index("FarRow") < out.index("NearRow")
+        # /matchevents is a single-match 90-min exotics view = MATCH markets.
+        # Post-2026-07-09 the hours-out term is NEUTRAL, so within the shared
+        # moneyline bucket the BIGGER-EDGE row ranks first (NearRow), NOT the
+        # further-out one — the OPPOSITE of the pre-2026-07-09 rule.
+        assert out.index("NearRow") < out.index("FarRow")
 
     def test_missing_feed_falls_back_with_honest_hint(self, tmp_path):
         scores = {

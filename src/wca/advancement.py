@@ -1233,6 +1233,11 @@ def compare_to_polymarket(
         #   1. model-prob bucket (moneyline > mid > longshot), ALWAYS;
         #   2. further-out first — deeper knockout stage (stage_further_out desc);
         #   3. fee-adjusted edge breaks ties within a bucket + stage tier.
+        # This is a MULTI-WEEK FUTURES surface (wca.selection.MARKET_FUTURES):
+        # the 2026-07-09 category-conditional refinement KEEPS further-out-first
+        # here (the proven +6-7% early edge). It uses the stage-depth analogue,
+        # never wca.selection.hours_out, so it is intentionally UNCHANGED by
+        # that refinement (which only neutralises hours-out for match markets).
         df["_bucket_rank"] = df["sim_prob"].map(bucket_rank)
         df["_stage_out"] = df["stage"].map(stage_further_out)
         df = df.sort_values(

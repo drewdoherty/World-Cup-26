@@ -2839,8 +2839,12 @@ def handle_matchevents(
         actionable.append(c)
 
     # Canonical ordering (wca.selection.preference_sort_key): all rows here
-    # share the moneyline bucket, so this is further-out first, EV tiebreak.
-    from wca.selection import preference_sort_key
+    # share the moneyline bucket. These are single-match 90-min exotic markets
+    # (MARKET_MATCH), so the hours-out term is NEUTRAL and EV breaks the tie
+    # within the bucket (2026-07-09 category-conditional refinement — no early
+    # premium after fees for match markets). The conditional lives in
+    # wca.selection.
+    from wca.selection import MARKET_MATCH, preference_sort_key
     kick_by_match = {
         str(c["label"]): c["kickoff"] for c in candidates if c.get("kickoff")
     }
@@ -2849,6 +2853,7 @@ def handle_matchevents(
             {"model_prob": c["model"], "ev": c["edge"] or 0.0,
              "match_desc": str(c["label"])},
             kick_by_match,
+            market_kind=MARKET_MATCH,
         )
     actionable.sort(key=_key)
     model_only.sort(key=_key)

@@ -603,6 +603,7 @@ def _build_scorer_proposals(
 # unchanged; every other bet-ranking/selection/sizing surface imports the same
 # module so the rule can never drift again. See docs/SELECTION_RULES.md.
 from wca.selection import (  # noqa: E402
+    MARKET_MATCH,
     PROB_BUCKETS,
     hours_out,
     preference_sort_key,
@@ -782,7 +783,12 @@ def main() -> int:
         )
 
     # Props first, then games — each group ordered by the desk's selection
-    # rules (moneylines > longshots; further-out > imminent; EV tiebreak).
+    # rules. Both scorer props and game 1X2 moneylines here are single-match
+    # 90-min MATCH markets (MARKET_MATCH): the hours-out term is NEUTRAL, so
+    # EV breaks ties within the bucket (2026-07-09 category-conditional
+    # refinement — no early premium after fees for match markets; further-out-
+    # first is kept only for multi-week futures/advancement). The conditional
+    # lives in wca.selection.
     kick_by_match: dict = {}
     if odds_df is not None and not odds_df.empty and "commence_time" in odds_df.columns:
         for _, _r in odds_df.iterrows():
@@ -792,10 +798,12 @@ def main() -> int:
             )
             kick_by_match.setdefault(_k, str(_r.get("commence_time") or ""))
     scorer_proposals.sort(
-        key=lambda p: preference_sort_key(p, kick_by_match, now_dt)
+        key=lambda p: preference_sort_key(p, kick_by_match, now_dt,
+                                          market_kind=MARKET_MATCH)
     )
     game_proposals.sort(
-        key=lambda p: preference_sort_key(p, kick_by_match, now_dt)
+        key=lambda p: preference_sort_key(p, kick_by_match, now_dt,
+                                          market_kind=MARKET_MATCH)
     )
     proposals = scorer_proposals + game_proposals
 

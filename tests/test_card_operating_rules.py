@@ -150,9 +150,11 @@ class TestSelectionRule:
         assert all(v == 0.0 for v in cut.stakes.values())
 
     def test_ranking_order_by_bucket_then_edge(self):
-        """Canonical ordering (wca.selection; user 2026-07-07):
-        ``(bucket_rank, -hours_out, -edge)`` — market CATEGORY no longer feeds
-        the sort (REPLACE ruling). With no hours set:
+        """Canonical ordering (wca.selection; user 2026-07-07, refined
+        2026-07-09): ``(bucket_rank, hours_term, -edge)`` — market CATEGORY no
+        longer feeds the sort (REPLACE ruling), and for 90-min MATCH markets
+        (the trade card) the ``hours_term`` is NEUTRAL so EV breaks ties. With
+        no hours set:
 
         * ``Fav`` (model 0.55) is the only ``moneyline`` -> ranks first;
         * ``2nd`` (0.35) and ``Draw`` (0.28) are both ``mid`` -> EV breaks the
@@ -169,13 +171,19 @@ class TestSelectionRule:
         ranked = rank_card([second, draw, fav])
         assert [r.selection_team for r in ranked.picks] == ["Fav", "2nd", "Draw"]
 
-    def test_ranking_further_out_before_edge_within_bucket(self):
-        """Within a bucket, further-out fixtures rank before higher EV
-        (secondary key beats the tertiary EV tie-break)."""
+    def test_ranking_match_ev_beats_further_out_within_bucket(self):
+        """2026-07-09 category-conditional refinement: the trade card is 90-min
+        MATCH markets, so the hours-out secondary term is NEUTRALISED and EV
+        breaks ties WITHIN the bucket. A NEARER, higher-EV pick now ranks ABOVE
+        a further-out lower-EV one — the OPPOSITE of the pre-2026-07-09 rule
+        (backtest 2026-07-09: no early premium after fees for match markets;
+        further-out-first is kept only for multi-week futures/advancement, which
+        the card is not). NOTE: this is the SORT term only — the separate
+        IMMINENT_EDGE_DISCOUNT edge haircut on <6h fixtures is unchanged."""
         near = _rec(team="Near", model_prob=0.55, edge=0.20, h2k=2.0)
         far = _rec(team="Far", model_prob=0.55, edge=0.05, h2k=120.0)
         ranked = rank_card([near, far])
-        assert [r.selection_team for r in ranked.picks] == ["Far", "Near"]
+        assert [r.selection_team for r in ranked.picks] == ["Near", "Far"]
 
     def test_classify_outcome_buckets(self):
         mkt = {"home": 0.55, "draw": 0.27, "away": 0.18}

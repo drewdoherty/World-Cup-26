@@ -385,15 +385,17 @@ def test_rec_different_fixtures_not_jointly_capped():
 
 
 def test_rec_ordering_is_canonical_selection_rule():
-    # moneyline ALWAYS above mid above longshot, regardless of EV;
-    # within a bucket further-out first; EV breaks ties last.
+    # Single-match PM = 90-min MATCH markets. moneyline ALWAYS above mid above
+    # longshot, regardless of EV; WITHIN a bucket EV breaks ties (hours-out is
+    # NEUTRAL for match markets post-2026-07-09 — the higher-EV near-ML now
+    # ranks ABOVE the further-out lower-EV ML, the OPPOSITE of the old rule).
     import datetime as dt
 
     now = dt.datetime(2026, 7, 8, 12, 0, 0)
     near_ml = _cand(fixture="ML near", kickoff="2026-07-09T12:00:00+00:00",
-                    model_prob=0.60, price=0.50)          # moneyline, 24h out
+                    model_prob=0.60, price=0.50)          # moneyline, 24h out, bigger EV
     far_ml = _cand(fixture="ML far", kickoff="2026-07-11T12:00:00+00:00",
-                   model_prob=0.55, price=0.50)           # moneyline, 72h out
+                   model_prob=0.55, price=0.50)           # moneyline, 72h out, smaller EV
     mid = _cand(fixture="MID huge EV", kickoff="2026-07-12T12:00:00+00:00",
                 model_prob=0.45, price=0.30)              # mid bucket, giant EV
     lsh = _cand(fixture="LONGSHOT", kickoff="2026-07-12T12:00:00+00:00",
@@ -401,7 +403,7 @@ def test_rec_ordering_is_canonical_selection_rule():
     out = EM.build_event_market_recs([mid, lsh, near_ml, far_ml],
                                      bankroll_usd=_BANKROLL, now_dt=now)
     order = [r["fixture"] for r in out["recs"]]
-    assert order == ["ML far", "ML near", "MID huge EV", "LONGSHOT"]
+    assert order == ["ML near", "ML far", "MID huge EV", "LONGSHOT"]
 
 
 def test_rec_meta_documents_governance():

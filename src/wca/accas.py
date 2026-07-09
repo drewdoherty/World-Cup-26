@@ -38,8 +38,10 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from wca.selection import (
     LONGSHOT_PROB,
+    MARKET_MATCH,
     bucket_rank,
     hours_out as _sel_hours_out,
+    hours_out_term,
     longshot_no_cash,
 )
 from wca.displayfmt import bucket_tag, ev_marker, ev_str, implied_pct, pct
@@ -824,12 +826,17 @@ def assemble_accas(
         max_combined_odds = VALUE_MAX_COMBINED
 
     def rank_key(L: Leg):
-        # Canonical desk ordering (wca.selection; user 2026-07-07): model-prob
-        # bucket first (moneyline > mid > longshot — replaces the old market-TYPE
-        # is_moneyline flag), then further-out fixtures, then EV; portfolio
-        # concentration stays as the final tie-break.
+        # Canonical desk ordering (wca.selection; user 2026-07-07, refined
+        # 2026-07-09): model-prob bucket first (moneyline > mid > longshot —
+        # replaces the old market-TYPE is_moneyline flag), then the category-
+        # conditional hours term, then EV; portfolio concentration stays as the
+        # final tie-break. Acca legs are 90-min MATCH fixtures (MARKET_MATCH),
+        # so the hours term is NEUTRAL (no early premium after fees for match
+        # markets) and EV breaks ties within the bucket. The conditional lives
+        # in wca.selection — do not re-hardcode -hours here.
         conc = _leg_concentration(L, exposure)
-        return (bucket_rank(L.model_prob), -L.hours_out, -L.edge, conc)
+        return (bucket_rank(L.model_prob),
+                hours_out_term(L.hours_out, MARKET_MATCH), -L.edge, conc)
 
     legs = sorted(legs, key=rank_key)
 
@@ -1567,7 +1574,12 @@ def build_accas(
         anchor = a.legs[0] if a.legs else None
         if anchor is None:
             return (3, 0.0, -float(a.edge or 0.0))
-        return (bucket_rank(anchor.model_prob), -anchor.hours_out, -float(a.edge or 0.0))
+        # Anchor leg is a 90-min MATCH fixture -> hours term NEUTRAL
+        # (MARKET_MATCH); EV breaks ties within the bucket (2026-07-09). The
+        # conditional lives in wca.selection.
+        return (bucket_rank(anchor.model_prob),
+                hours_out_term(anchor.hours_out, MARKET_MATCH),
+                -float(a.edge or 0.0))
 
     accas.sort(key=_acca_key)
 

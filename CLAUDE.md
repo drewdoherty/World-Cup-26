@@ -29,18 +29,29 @@ cash-out; fire backstop $200) — changing them is a human-approved code change.
 
 **The rule lives in ONE place: `src/wca/selection.py`.** Every bet-ranking /
 selection / sizing surface imports it (`bucket_rank`, `longshot_no_cash`,
-`hours_out`, `preference_sort_key`); it is a **human-approved-change file** like
-the execution caps — editing `PROB_BUCKETS` / `LONGSHOT_PROB` /
-`preference_sort_key` moves ALL real-money orderings at once. Full spec + the
-per-surface compliance table: `docs/SELECTION_RULES.md`.
+`hours_out`, `hours_out_term`, `resolve_market_kind`, `preference_sort_key`);
+it is a **human-approved-change file** like the execution caps — editing
+`PROB_BUCKETS` / `LONGSHOT_PROB` / `hours_out_term` / `preference_sort_key`
+moves ALL real-money orderings at once. Full spec + the per-surface compliance
+table: `docs/SELECTION_RULES.md`.
 
-Canonical rule (user-confirmed 2026-07-07), key `(bucket_rank, -hours_out, -ev)`:
+Canonical rule (user-confirmed 2026-07-07; category-conditional refinement
+2026-07-09), key `(bucket_rank, hours_term, -ev)`:
 - **Bucket by MODEL prob (PRIMARY)**: moneyline `≥0.50` / mid `0.25–0.50` /
   longshot `<0.25` (inclusive lower bounds). A higher bucket ALWAYS ranks above
   a lower one, regardless of EV.
-- **Further-out fixtures first (SECONDARY)**: raw continuous hours-to-kickoff,
-  descending (thin early markets are more likely mispriced) — never bucketed.
-- **EV breaks ties ONLY (tertiary)**, within the same bucket + further-out tier.
+- **Further-out fixtures first (SECONDARY) — CATEGORY-CONDITIONAL (2026-07-09)**:
+  kept ONLY for multi-week **futures/advancement** (raw hours descending, or the
+  stage-depth analogue); **NEUTRALISED for 90-min match markets** (contributes
+  0), so EV breaks ties within the bucket. Basis: backtest 2026-07-09 (n=1,046
+  resolved PM markets, composition-controlled, look-ahead-guarded) — match PM
+  efficiency is FLAT 168h→kickoff (Brier 0.131→0.124, CIs overlap; ~0 after
+  fees, small penalty <12h), while multi-week futures show a real +6–7% early
+  edge at 24–72h (n=60). The conditional lives in `hours_out_term`; the SAFE
+  DEFAULT is match (hours-neutral) — futures OPT IN via `market_kind` /
+  settlement / category. `bucket_rank` + `longshot_no_cash` UNCHANGED.
+- **EV breaks ties**: the effective secondary key for match markets (hours
+  neutral); the tertiary tie-break within bucket + further-out tier for futures.
 - **No cash on longshots (`<0.25` model)**: strict floor — free-bet/lottery only
   (stake forced to 0, flagged, may still be DISPLAYED dimmed). `longshot_no_cash`
   is applied at the SIZING step, kept SEPARATE from the sort so a surface can
