@@ -82,6 +82,28 @@ def has_scorer_markets(scorer_by_event) -> bool:
     )
 
 
+def window_odds_df(odds_df, now_dt, cutoff_dt):
+    """Return ``odds_df`` filtered to ``commence_time`` in ``[now_dt, cutoff_dt]``.
+
+    Pulled out of ``main`` so the display-window filter (used for the card the
+    bot renders) is independently testable and unambiguously separate from the
+    UNFILTERED frame that :func:`main` also keeps (``odds_df_all``) for
+    prediction-log persistence — see the coverage-hole regression this
+    separation fixes: ``tests/test_build_card_prediction_coverage.py``.
+
+    A missing/unparseable ``commence_time`` column, or an empty frame, is
+    returned unchanged (nothing to filter on).
+    """
+    import pandas as pd
+
+    if odds_df.empty or "commence_time" not in odds_df.columns:
+        return odds_df
+    ct = pd.to_datetime(odds_df["commence_time"], errors="coerce", utc=True)
+    ct_naive = ct.dt.tz_localize(None) if ct.dt.tz is None else ct.dt.tz_convert(None)
+    mask = (ct_naive >= now_dt) & (ct_naive <= cutoff_dt)
+    return odds_df[mask].copy()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Build and cache tonight's World Cup Alpha matchday card."
@@ -285,15 +307,19 @@ def main() -> None:
 
     # ------------------------------------------------------------------
     # Filter fixtures to the requested look-ahead window.
+    #
+    # ``odds_df_all`` (unfiltered) is kept alongside the windowed frame
+    # specifically for prediction-log persistence (below): the display card
+    # only wants the near-term slate, but the log must capture a pre-match
+    # snapshot for EVERY fixture that ever has a usable market — otherwise a
+    # fixture whose market only firms up outside the window (thin/simultaneous
+    # kickoffs) or that kicks off between hourly builds never gets a row and
+    # silently vanishes from benchmarking once ``now_dt`` passes it (regression
+    # found 2026-07: 21/96 settled fixtures had zero predictions-log rows,
+    # concentrated on simultaneous final-group-matchday kickoffs).
     # ------------------------------------------------------------------
-    import pandas as pd
-
-    if not odds_df.empty and "commence_time" in odds_df.columns:
-        ct = pd.to_datetime(odds_df["commence_time"], errors="coerce", utc=True)
-        # Convert to naive UTC for comparison.
-        ct_naive = ct.dt.tz_localize(None) if ct.dt.tz is None else ct.dt.tz_convert(None)
-        mask = (ct_naive >= now_dt) & (ct_naive <= cutoff_dt)
-        odds_df = odds_df[mask].copy()
+    odds_df_all = odds_df
+    odds_df = window_odds_df(odds_df, now_dt, cutoff_dt)
 
     # Neutral/host resolution comes from the results dataframe (scheduled
     # fixture rows carry neutral/country), NOT from the odds feed.
@@ -351,9 +377,14 @@ def main() -> None:
             # build_card gates +EV outcomes (with the further-out tilt baked in,
             # rule 3) and tags each with venue + selection category; rank_card
             # then applies the selection rule (rule 2): hit-probability ranking
-            # plus the mispriced-minnow longshot CUT.
+            # plus the mispriced-minnow longshot CUT. watch_rows collects the
+            # DISPLAY-ONLY near-threshold tier (0..min_edge EV, zero-staked) so
+            # the card shows the full decision surface (ruling 2026-07-08)
+            # without loosening the staking gate.
+            watch_rows = []
             recs = build_card(
                 models, odds_df, pools, fixtures_meta=fixtures_meta, now=now_str,
+                watch_sink=watch_rows,
             )
             recs = apply_daily_exposure_caps(recs, pools)
             ranked = rank_card(recs)
@@ -362,12 +393,12 @@ def main() -> None:
             print("ERROR: card generation failed: %s" % exc, file=sys.stderr)
             sys.exit(1)
 
-        # Classic card layout restored (user, 2026-07-03, from the reference
-        # screenshots): scorelines appendix back (REFERENCE-ONLY, never sized);
-        # only the bankroll-model footer stays removed.
+        # Percent-convention layout (user ruling 2026-07-08 — supersedes the
+        # 2026-07-03 classic-decimal layout): scorelines appendix stays
+        # (REFERENCE-ONLY, never sized); the bankroll-model footer stays removed.
         card_text = (
-            format_ranked_card(ranked, pools, bank=pool_bank)
-            + "\n\n*— REFERENCE, NOT SIZED (models + fair odds only) —*\n"
+            format_ranked_card(ranked, pools, bank=pool_bank, watch=watch_rows)
+            + "\n\n*— REFERENCE, NOT SIZED (model prices only) —*\n"
             + format_scores(score_cards)
         )
 
@@ -376,11 +407,19 @@ def main() -> None:
         # Persist the exact blended 1X2 per fixture (latest + append-only log) so
         # the site and prediction tracking read real model output rather than the
         # top-k scoreline approximation.
+        #
+        # Deliberately uses ``odds_df_all`` (the UNFILTERED odds pull), not the
+        # display-window-filtered ``odds_df``: the odds source only ever quotes
+        # near-term/live fixtures anyway (settled matches drop off the feed), so
+        # this is bounded, but it closes the coverage hole where a fixture
+        # kicking off just outside --hours-ahead, or between hourly builds,
+        # never got a single pre-match snapshot logged and then silently
+        # dropped out of the window forever once it kicked off.
         try:
             from wca.card import fixture_blends
             from wca.modelpreds import build_predictions, write_predictions
 
-            blends = fixture_blends(models, odds_df, fixtures_meta)
+            blends = fixture_blends(models, odds_df_all, fixtures_meta)
 
             # SHADOW-ONLY (P6 totals-lambda-prior, docs/HANDOFF_2026-07-03.md
             # §4): best-effort load of the latest totals O/U ladder per match

@@ -2,7 +2,8 @@ name: pytest
 
 # Test gate: runs the full pytest suite on every PR to main and on pushes to
 # main. Make this a required status check in branch protection so red can never
-# land silently again (there was previously only a Vercel preview check).
+# land silently again (there was previously only a Vercel preview check;
+# Vercel itself was removed entirely on 2026-07-08).
 
 on:
   pull_request:

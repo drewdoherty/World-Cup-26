@@ -2,7 +2,7 @@
 
 A quantitative betting **research platform and live operation** for the 2026 FIFA World Cup. Built from zero in the ~25 hours before the opening match; now running through the tournament. It tests one question with real money and pre-registered metrics: **can systematic +EV betting on international football be demonstrated — and measured honestly — across bookmakers and prediction markets?**
 
-**Live dashboard:** https://fifa-world-cup-2026-model.vercel.app ([scores & markets](https://fifa-world-cup-2026-betting-gamblin.vercel.app/scores) · [under the hood](https://fifa-world-cup-2026-betting-gamblin.vercel.app/architecture))
+**Dashboard:** served locally only — `http://localhost:8000` (`site/`: bets, scores & markets, under the hood) and `http://localhost:8001` (`site-analytics/`). Hosted Vercel deploys were removed 2026-07-08; each machine serves its own pulled `origin/main` tree.
 
 Three bankroll pools: UK sportsbooks (£1,000 notional, CLV-gated ladder to £5,000), Polymarket ($1,310 USDC), Kalshi (planned). Recommendations-only at the sportsbooks; semi-automated with a human confirm gate on prediction markets.
 
@@ -116,7 +116,7 @@ src/wca/
 └── sync.py            # auto regenerate + push site on ledger writes
 scripts/               # wca_bot, wca_snapshotd, wca_build_card, wca_site,
                        # wca_event_ev, wca_arb, wca_advancement, wca_pm_probe, wca_cli
-site/                  # static terminal dashboard (Vercel): positions open/closed,
+site/                  # static terminal dashboard (localhost:8000): positions open/closed,
                        # P&L, line-movement & staking charts, scores vs market, architecture
 backtests/             # halflife sweep, blend fit, WC2022 closing-odds pull
 docs/                  # SYSTEM_MAP, recon (7 verified reports), research + bibliography

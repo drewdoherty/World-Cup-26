@@ -61,6 +61,7 @@ from decimal import ROUND_DOWN, ROUND_HALF_UP, Decimal
 from typing import Any, Dict, List, Optional, Tuple
 
 from wca.pm import signing
+from wca.pm import filltelemetry as _filltelemetry
 
 logger = logging.getLogger(__name__)
 
@@ -261,6 +262,10 @@ class TradeConfig:
     # budget. Still a hard ceiling so a fat-fingered size can't dump an
     # arbitrarily large position.
     max_cashout_usd_per_order: float = 400.0
+    # Observation-only order/fill lifecycle log (wca.pm.filltelemetry). NOT a
+    # guardrail: never read to gate, size, or cap anything — purely additive
+    # telemetry so an unfilled resting GTC maker order stops being invisible.
+    fill_log_path: str = _filltelemetry.DEFAULT_LOG_PATH
 
 
 @dataclass
@@ -1057,6 +1062,22 @@ class ClobTrader:
                 dry_run=True,
                 market=market_question,
             )
+            # Fill-lifecycle telemetry (observation only — never gates,
+            # sizes, or retries anything). See wca.pm.filltelemetry module
+            # docstring: this is the "GTC-at-mid, no fill-rate logging"
+            # instrumentation from the 2026-07-08 review.
+            _filltelemetry.log_placed(
+                order_id=None,
+                token_id=token_id,
+                market=market_question,
+                side=side,
+                price=price,
+                size=size,
+                order_type=order_type,
+                dry_run=True,
+                de_risk=de_risk,
+                path=self.config.fill_log_path,
+            )
             return {
                 "dry_run": True,
                 "submitted": False,
@@ -1157,6 +1178,25 @@ class ClobTrader:
                 "live order accepted (id %s) but pm_order_log write failed: %s"
                 % (order_id, exc),
             ) from exc
+
+        # Fill-lifecycle telemetry (observation only). A GTC BUY logged here
+        # rests at ``price``; whether it ever fills is NOT observed on this
+        # path today (see wca.pm.filltelemetry docstring) — that is exactly
+        # the invisible-EV-leak this row makes measurable: a "placed" row
+        # with no later "fill_observed" row for the same order_id is an
+        # unconfirmed/unfilled resting order.
+        _filltelemetry.log_placed(
+            order_id=order_id,
+            token_id=token_id,
+            market=market_question,
+            side=side,
+            price=price,
+            size=size,
+            order_type=order_type,
+            dry_run=False,
+            de_risk=de_risk,
+            path=self.config.fill_log_path,
+        )
         result: Dict[str, Any] = dict(out) if isinstance(out, dict) else {"response": out}
         result.update(
             {

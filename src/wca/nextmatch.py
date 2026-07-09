@@ -48,6 +48,15 @@ from wca.markets import kelly as kelly_mod
 from wca.models.props import CornersModel
 from wca.models.scores import ScorelineCard, scoreline_card
 from wca.selection import bucket_rank, longshot_no_cash
+from wca.displayfmt import edge_pp, ev_marker, ev_str, implied_pct, implied_prob, pct
+
+#: Scorer-punt warning (ruling 2026-07-08): the user's own scorer punts were a
+#: documented −73.9% leak — every scorer surface must carry this reminder and
+#: the <25% model legs stay NO-CASH (wca.selection.longshot_no_cash).
+SCORER_LEAK_WARNING = (
+    "⚠ scorer punts: documented −73.9% leak — <25% model legs are "
+    "NO-CASH (free-bet/lottery only)"
+)
 
 DEFAULT_CORNERS_LINE = 8.5
 ANYTIME_SCORER_MARKET = "player_goal_scorer_anytime"
@@ -549,8 +558,12 @@ def build_next_match(
 
 
 def _fmt_odds(o: Optional[float]) -> str:
-    """Decimal odds or ``--`` when unavailable."""
-    return "%.2f" % o if o and o > 1.0 else "--"
+    """A price as its implied percent (ruling 2026-07-08), ``--`` when unavailable.
+
+    Kept under its historical name so every scorer call site stays a one-word
+    change; decimal odds are never displayed on bot surfaces any more.
+    """
+    return implied_pct(o) if o and o > 1.0 else "--"
 
 
 def _model_suffix(
@@ -559,23 +572,25 @@ def _model_suffix(
     book_odds: Optional[float],
     card: "NextMatchCard",
 ) -> str:
-    """`` | model <fair> <edge%> £<stake>`` for a priced goalscorer leg.
+    """`` | model <p%> EV <±%> <marker> £<stake>`` for a priced goalscorer leg.
 
-    Empty when the player has no model price (no share). The Kelly stake is
-    quarter-Kelly of the card bankroll vs the best book odds, shown only on a
-    positive model edge (``model_p * book_odds - 1 > 0``).
+    Empty when the player has no model price (no share). Percent convention
+    (ruling 2026-07-08): the model price is the model probability itself, the
+    edge is EV vs the best book price with an explicit +EV/−EV marker. The
+    Kelly stake is quarter-Kelly of the card bankroll vs the best book odds,
+    shown only on a positive model edge (``model_p * book_odds - 1 > 0``).
     """
     if not model_p or not model_fair or model_fair <= 1.0:
         return ""
-    s = " | model %.2f" % model_fair
+    s = " | model %s" % pct(model_p)
     if book_odds and book_odds > 1.0:
         edge = model_p * book_odds - 1.0
-        s += " %+.0f%%" % (edge * 100)
+        s += " EV %s %s" % (ev_str(edge, 0), ev_marker(edge))
         # Canonical cash floor (wca.selection.longshot_no_cash): anytime-scorer
-        # legs are structurally <25c model prob — free-bet / lottery only, never
-        # cash. Show the model fair + edge for reference, but never a cash stake.
+        # legs are structurally <25% model prob — free-bet / lottery only, never
+        # cash. Show the model prob + EV for reference, but never a cash stake.
         if longshot_no_cash(model_p):
-            s += " (<25¢ — no cash)"
+            s += " (<25% model — NO CASH)"
         else:
             stk = kelly_mod.stake(
                 model_p, book_odds, card.bankroll, card.kelly_fraction, card.kelly_cap
@@ -699,11 +714,15 @@ def _format_goalscorers(card: NextMatchCard) -> List[str]:
     if not (gs.get("home") or gs.get("away")):
         # Fall back to the legacy flat anytime list if the split is empty.
         if card.scorers:
-            out = ["*Anytime scorer* (best book price, vig in)"]
+            out = [
+                "*Anytime scorer* (best-book implied %, vig in — "
+                "no model price on these rows, +EV unverifiable)",
+                "_%s_" % SCORER_LEAK_WARNING,
+            ]
             for s in card.scorers:
                 out.append(
-                    "  %-18s %5.2f (%s)  imp %.0f%%"
-                    % (s.player[:18], s.best_odds, s.best_book, s.implied * 100)
+                    "  %-18s mkt %s (%s)"
+                    % (s.player[:18], pct(s.implied, 0), s.best_book)
                 )
             return out
         cached = _scorers_from_cache(card.home, card.away)
@@ -711,7 +730,10 @@ def _format_goalscorers(card: NextMatchCard) -> List[str]:
             return cached
         return ["*Top goalscorers* — no scorer market available yet."]
 
-    out = ["*Top goalscorers* — best book / Polymarket"]
+    out = [
+        "*Top goalscorers* — best book / Polymarket (implied %)",
+        "_%s_" % SCORER_LEAK_WARNING,
+    ]
     out.extend(_goalscorer_team_blocks(card))
     if card.goalscorer_note:
         out.append("_%s_" % card.goalscorer_note)
@@ -742,15 +764,17 @@ def _format_single_next_match(card: NextMatchCard) -> str:
     )
     for outcome in ordered:
         p, book, odds, edge = card.winner[outcome]
-        # Polymarket convention: price = implied probability in cents, $1 payout.
-        line = "  %-14s model %4.1f¢" % (names[outcome][:14], p * 100)
+        # Percent convention (ruling 2026-07-08): model % vs venue-implied %,
+        # EV with an explicit +EV/−EV marker on every priced outcome.
+        line = "  %-14s model %5s" % (names[outcome][:14], pct(p))
         if book is not None and odds > 1.0:
-            flag = " ✅" if edge >= card.min_edge else ""
-            line += " · mkt %4.1f¢ (%s)  EV %+.1f%%%s" % (
-                100.0 / odds, book, edge * 100, flag
+            line += " · mkt %5s (%s)  EV %s %s" % (
+                implied_pct(odds), book, ev_str(edge), ev_marker(edge)
             )
+            if 0.0 < edge < card.min_edge:
+                line += " (below +%.0f%% gate)" % (card.min_edge * 100)
             if longshot_no_cash(p):
-                line += "  (<25¢ — no cash)"
+                line += "  (<25% model — NO CASH)"
             else:
                 stk = kelly_mod.stake(
                     p, odds, card.bankroll, card.kelly_fraction, card.kelly_cap
@@ -758,6 +782,8 @@ def _format_single_next_match(card: NextMatchCard) -> str:
                 if stk > 0:
                     line += "  $%.2f" % gbp_to_usd(stk)
                     staked = True
+        else:
+            line += " · no live price — EV unverifiable"
         lines.append(line)
     if staked:
         lines.append(
@@ -770,7 +796,8 @@ def _format_single_next_match(card: NextMatchCard) -> str:
     lines.append("")
     lines.append("*Corners* (model, exp %.1f)" % card.corners_mu)
     lines.append(
-        "  O/U %.1f: over %.1f¢ / under %.1f¢ (model prices)"
+        "  O/U %.1f: over %.1f%% / under %.1f%% (model only — no live "
+        "corners feed, +EV unverifiable)"
         % (card.corners_line, p_over * 100, (1.0 - p_over) * 100)
     )
 
@@ -936,12 +963,23 @@ def format_goalscorer_card(fixtures: List[GoalscorerFixture]) -> str:
             "⚽ *Goalscorers*\n"
             "No upcoming fixtures with a usable market in the current window."
         )
+    n_with_model = sum(
+        1 for fx in fixtures
+        if (fx.goalscorers or {}).get("home") or (fx.goalscorers or {}).get("away")
+    )
     out = [
         "⚽ *Goalscorers* — next %d games" % len(fixtures),
-        "_anytime + first · best book / Polymarket; "
-        "¼-Kelly £ stake on most likely + best EV_",
+        "_anytime + first · model % vs best book/PM implied %; "
+        "¼-Kelly £ stake only on ≥25% model legs · further-out fixtures "
+        "first (wca.selection)_",
+        "_%s_" % SCORER_LEAK_WARNING,
         "",
     ]
+    if n_with_model == 0:
+        out.insert(3, (
+            "_no model-priced scorer rows this build — market implied %% only "
+            "(%d fixtures), +EV unverifiable on these_" % len(fixtures)
+        ))
     for fx in fixtures:
         out.append(
             "*%s vs %s*  _%s_" % (fx.home, fx.away, _fmt_kickoff(fx.commence_time))
@@ -952,12 +990,16 @@ def format_goalscorer_card(fixtures: List[GoalscorerFixture]) -> str:
             if fx.goalscorer_note:
                 out.append("_%s_" % fx.goalscorer_note)
         elif fx.scorers:
-            # Squad split unavailable: show the flat top-anytime list (both teams).
-            out.append("_top anytime (both teams — add squad to split + FGS)_")
+            # Squad split unavailable: show the flat top-anytime list (both
+            # teams), market-implied % only (no model price -> no EV claim).
+            out.append(
+                "_top anytime, mkt implied % (both teams — add squad to "
+                "split + FGS; no model price, +EV unverifiable)_"
+            )
             for s in fx.scorers:
                 out.append(
-                    "  %-20s %5.2f (%s)  imp %.0f%%"
-                    % (s.player[:20], s.best_odds, s.best_book, s.implied * 100)
+                    "  %-20s mkt %s (%s)"
+                    % (s.player[:20], pct(s.implied, 0), s.best_book)
                 )
         else:
             out.append(

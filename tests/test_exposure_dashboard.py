@@ -172,3 +172,129 @@ def test_empty_ledger_returns_zeros(tmp_path):
     assert res["n_open_bets"] == 0
     assert res["metrics"]["p_profit"] is None
     assert res["metrics"]["best_case"] == 0.0
+
+
+# ---------------------------------------------------------------------------
+# Nested-path advancement worst-case aggregation (2026-07-08 fix).
+#
+# Same-team advancement bets across NESTED knockout stages (reach SF implies
+# already having won the QF tie, etc.) are perfectly correlated — a team
+# eliminated before its earliest recommended rung loses every nested rung
+# TOGETHER, not independently. Regression: the live feed staked Morocco SF
+# $112 and Morocco Final $33 in the same pass; summing both stakes into
+# worst_case (the old per-bet-independent methodology) overstated the joint
+# loss as additive ($145) when it is actually one correlated path capped at
+# the larger single rung ($112).
+#
+# NOTE: PR #183 (wca.advancement.apply_path_exposure_caps) already fixed this
+# correlation bug at PM-sizing time — pre-bet, in the candidate-recs feed. The
+# fix here is the LEDGER-side analogue: compute_dashboard_metrics reads
+# data/wca.db for bets ALREADY placed, and its worst_case independently summed
+# every nested rung's stake with no team-grouping at all (a gap #183 doesn't
+# touch, since it only ever sizes candidates before they're bet).
+# ---------------------------------------------------------------------------
+
+def test_nested_advancement_worst_case_capped_at_max_rung_not_summed():
+    """Two nested-stage advancement bets on the same team, both underdogs:
+    worst_case must be -max(stakes), NOT -(sum(stakes))."""
+    bets = [
+        {"match_desc": "Morocco SF (advancement)", "selection": "reach_SF",
+         "market": "advancement", "platform": "polymarket",
+         "decimal_odds": 4.0, "stake": 112.0, "model_prob": 0.30, "source": "model"},
+        {"match_desc": "Morocco Final (advancement)", "selection": "reach_Final",
+         "market": "advancement", "platform": "polymarket",
+         "decimal_odds": 10.0, "stake": 33.0, "model_prob": 0.12, "source": "model"},
+    ]
+    out = ed._currency_best_worst(bets)
+    # Naive independent sum would be -(112 + 33) = -145.
+    assert out["USD"]["worst_case"] == pytest.approx(-112.0)
+    assert out["USD"]["worst_case"] != pytest.approx(-145.0)
+
+
+def test_single_advancement_rung_worst_case_unaffected():
+    """A team with exactly ONE open advancement bet is untouched — the
+    nested-group cap (max of a 1-element list) equals the bet's own stake,
+    so single-rung teams see byte-identical worst_case to before this fix."""
+    bets = [
+        {"match_desc": "TeamX QF (advancement)", "selection": "reach_QF",
+         "market": "advancement", "platform": "polymarket",
+         "decimal_odds": 2.5, "stake": 65.5, "model_prob": 0.40, "source": "model"},
+    ]
+    out = ed._currency_best_worst(bets)
+    assert out["USD"]["worst_case"] == pytest.approx(-65.5)
+
+
+def test_nested_advancement_grouping_is_per_team_not_global():
+    """Two DIFFERENT teams, each with two nested rungs: each team's group is
+    capped independently — the cap must not leak across teams."""
+    bets = [
+        {"match_desc": "Morocco SF (advancement)", "selection": "reach_SF",
+         "market": "advancement", "platform": "polymarket",
+         "decimal_odds": 4.0, "stake": 112.0, "model_prob": 0.30, "source": "model"},
+        {"match_desc": "Morocco Final (advancement)", "selection": "reach_Final",
+         "market": "advancement", "platform": "polymarket",
+         "decimal_odds": 10.0, "stake": 33.0, "model_prob": 0.12, "source": "model"},
+        {"match_desc": "England QF (advancement)", "selection": "reach_QF",
+         "market": "advancement", "platform": "polymarket",
+         "decimal_odds": 2.2, "stake": 50.0, "model_prob": 0.45, "source": "model"},
+        {"match_desc": "England SF (advancement)", "selection": "reach_SF",
+         "market": "advancement", "platform": "polymarket",
+         "decimal_odds": 3.5, "stake": 40.0, "model_prob": 0.28, "source": "model"},
+    ]
+    out = ed._currency_best_worst(bets)
+    # Morocco's group caps at 112, England's group caps at 50 -> total -162,
+    # not the naive additive -(112+33+50+40) = -235.
+    assert out["USD"]["worst_case"] == pytest.approx(-162.0)
+
+
+def test_nested_advancement_group_ignores_non_advancement_market():
+    """Non-advancement bets (e.g. 1X2 singles) are never swept into a team's
+    nested-path group even if the team name happens to match."""
+    bets = [
+        {"match_desc": "Morocco SF (advancement)", "selection": "reach_SF",
+         "market": "advancement", "platform": "polymarket",
+         "decimal_odds": 4.0, "stake": 112.0, "model_prob": 0.30, "source": "model"},
+        {"match_desc": "Morocco vs Brazil", "selection": "Morocco",
+         "market": "Full-time result", "platform": "polymarket",
+         "decimal_odds": 3.0, "stake": 20.0, "model_prob": 0.30, "source": "model"},
+    ]
+    out = ed._currency_best_worst(bets)
+    # Nested group caps Morocco's advancement leg at 112; the 1X2 single is
+    # independent -> -112 - 20 = -132.
+    assert out["USD"]["worst_case"] == pytest.approx(-132.0)
+
+
+def test_advancement_free_bet_still_excluded_from_worst_case():
+    """A free-bet (offer) advancement leg contributes £0, unaffected by the
+    nested-path grouping change — it never entered the group in the first
+    place (the free-bet check runs before grouping)."""
+    bets = [
+        {"match_desc": "Morocco SF (advancement)", "selection": "reach_SF",
+         "market": "advancement", "platform": "polymarket",
+         "decimal_odds": 4.0, "stake": 112.0, "model_prob": 0.30, "source": "offer"},
+    ]
+    out = ed._currency_best_worst(bets)
+    assert out["USD"]["worst_case"] == 0.0
+
+
+def test_advancement_team_stage_parses_canonical_forms():
+    """_advancement_team_stage recognises the canonical selection/match_desc
+    forms used by build_advancement_futures + wca_pm_fire.py."""
+    bet = {"market": "advancement", "selection": "reach_SF",
+           "match_desc": "Morocco SF (advancement)"}
+    assert ed._advancement_team_stage(bet) == ("Morocco", ed._KO_STAGE_RANK["SF"])
+
+
+def test_advancement_team_stage_none_for_non_advancement_market():
+    bet = {"market": "Full-time result", "selection": "reach_SF",
+           "match_desc": "Morocco SF (advancement)"}
+    assert ed._advancement_team_stage(bet) is None
+
+
+def test_advancement_team_stage_none_when_unparseable():
+    """Ambiguous/unparseable match_desc -> None (falls back to independent
+    per-bet treatment; never mis-groups)."""
+    bet = {"market": "advancement", "selection": "reach_SF", "match_desc": ""}
+    assert ed._advancement_team_stage(bet) is None
+    bet2 = {"market": "advancement", "selection": "no_stage_here", "match_desc": "Morocco SF"}
+    assert ed._advancement_team_stage(bet2) is None

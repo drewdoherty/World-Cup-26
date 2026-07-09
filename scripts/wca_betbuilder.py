@@ -50,31 +50,39 @@ def _load_fixtures(preds_json: str):
 
 
 def _render_md(payloads, generated: str) -> str:
-    L = ["*Bet builder* — model fair odds (sportsbook markets; model-only)\n"]
+    # Percent convention (user ruling 2026-07-08): model probabilities shown
+    # as percentages — never decimal fair odds. These are MODEL-ONLY prices
+    # (no live sportsbook feed for SoT/cards/corners), so +EV is unverifiable
+    # here by construction and no EV marker is claimed.
+    L = ["*Bet builder* — model % (sportsbook markets; model-only — "
+         "no live prices, +EV unverifiable)\n"]
     for p in payloads:
         L.append(f"*{p['fixture']}*  (λ {p['lambda_home']:.2f}–{p['lambda_away']:.2f})")
-        # team totals: show goals + SoT lines compactly
+        # team totals: show goals + SoT lines compactly as P(over line)
         tt = {}
         for row in p["team_totals"]:
             tt.setdefault(row["subject"], {}).setdefault(row["market"], []).append(row)
         for team, markets in tt.items():
             goals = markets.get("team_total_goals", [])
             sot = markets.get("team_total_sot", [])
-            g = ", ".join(f"{r['line']:.1f}:{r['fair_over']}" for r in goals if r['fair_over'])
-            s = ", ".join(f"{r['line']:.1f}:{r['fair_over']}" for r in sot if r['fair_over'])
+            g = ", ".join(f"{r['line']:.1f}:{r['p_over'] * 100:.0f}%"
+                          for r in goals if r.get("p_over") is not None)
+            s = ", ".join(f"{r['line']:.1f}:{r['p_over'] * 100:.0f}%"
+                          for r in sot if r.get("p_over") is not None)
             L.append(f"  {team} goals O[{g}] · SoT O[{s}]")
-        # top scorers
+        # top scorers (model anytime %; structurally <25% -> NO CASH)
         for sc in p["player_to_score"][:4]:
-            fa = sc.get("fair_anytime")
-            L.append(f"  ⚽ {sc['subject']} anytime {fa if fa else '—'} "
-                     f"(p={sc['p_anytime']:.2f})")
+            pa = sc.get("p_anytime")
+            pa_str = f"{pa * 100:.0f}%" if pa is not None else "—"
+            L.append(f"  ⚽ {sc['subject']} anytime model {pa_str}")
         # player props (booked)
         booked = [pp for pp in p["player_props"] if pp["market"] == "player_to_be_booked"]
         for b in booked[:4]:
-            L.append(f"  🟨 {b['subject']} booked {b['fair']} (p={b['prob']:.2f})")
+            L.append(f"  🟨 {b['subject']} booked model {b['prob'] * 100:.0f}%")
         L.append("")
-    L.append("_Fair odds only — no margin. Compare to the book's price before "
-             "staking; SoT/cards/corners not on the exchange._")
+    L.append("_Model % only — no margin, no live book prices. Compare to the "
+             "book's implied % before staking; SoT/cards/corners not on the "
+             "exchange. Scorer legs <25% model are NO-CASH (free-bet only)._")
     return "\n".join(L)
 
 

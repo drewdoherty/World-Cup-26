@@ -112,6 +112,20 @@ jobs:
           # No ledger DB on CI: falls back to rung-0 sportsbook pool defaults.
           python scripts/wca_betrecs.py >> logs/betrecs.log 2>&1 || true
 
+      - name: Regenerate benchmarks feed (benchmarks_data.json)
+        env:
+          PYTHONPATH: src
+        # Pure offline JSON join over data/model_predictions_log.jsonl (just
+        # refreshed above by the card build) and data/processed/wc2026_results.json
+        # (refreshed by the clean-results step) — no ledger DB or live odds pull
+        # needed, so unlike site/data.json this is safe to build on CI too and
+        # gives the mini's publish job a mini-independent backup, same rationale
+        # as this workflow's other feeds. PREVIOUSLY wired into NO cron/CI/launchd
+        # job at all (found 2026-07 audit); site/benchmarks_data.json was a
+        # one-off hand-authored snapshot from 2026-06-27.
+        run: |
+          python scripts/build_benchmarks.py >> logs/benchmarks.log 2>&1 || true
+
       - name: Commit changes
         run: |
           git config user.email "bot@world-cup-alpha.local"
@@ -120,7 +134,8 @@ jobs:
                   data/model_predictions.json data/model_predictions_log.jsonl \
                   data/raw/martj42_cleaned.csv \
                   data/corrections.json data/corrections_review.json data/audit.json \
-                  site/data.json site/linemove.json site/scores_data.json site/forest_data.json site/bet_recs.json
+                  site/data.json site/linemove.json site/scores_data.json site/forest_data.json site/bet_recs.json \
+                  site/benchmarks_data.json
           git commit -m "Auto-sync: daily card + site data" || true
           # Retry around concurrent pushes (local daemons also push to main).
           # '-X theirs' keeps the freshly regenerated local copy for the

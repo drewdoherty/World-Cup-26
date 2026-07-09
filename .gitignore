@@ -42,3 +42,15 @@ data/archive/
 
 # host-local Polymarket exact-score cache (written by wca_scores_data / wca_forest_data)
 data/pm_exactscore_cache.json
+
+# PM order/fill lifecycle telemetry (wca.pm.filltelemetry) — append-only
+# runtime log written by the live trader/bot, never a tracked deliverable.
+data/pm_fill_log.jsonl
+
+# In-play monitor runtime artifacts (scripts/wca_pm_inplay_monitor.py /
+# wca_pm_inplay_ingest.py). NOTE data/pm_inplay_proposals.json IS tracked —
+# it is the git artifact relay. These are host-local runtime state only:
+data/pm_inplay_log.jsonl
+data/pm_inplay_pings.log
+data/.pm_inplay_ingested.json
+data/live_scores.json

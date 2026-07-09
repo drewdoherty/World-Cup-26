@@ -54,12 +54,34 @@ Canonical rule (user-confirmed 2026-07-07), key `(bucket_rank, -hours_out, -ev)`
 
 ## Display conventions (user-chosen, do not "improve")
 
-- `/card`: classic format — decimal odds, `model % / mkt %`, `[elo/dc]`,
-  stake in the pick's own pool currency, verbose CUT reasons, scorelines
-  appendix. NO bankroll-model footer.
+- **PERCENTAGES EVERYWHERE (user ruling 2026-07-08 — SUPERSEDES the
+  2026-07-03 "classic decimal" /card line, do not revert):** ALL bot
+  commands display odds as percentages (`model X% / mkt Y%`), never bare
+  decimal odds. Where a book's decimal price is the executable number it is
+  shown as its implied % with the venue tagged (`back 24.5% impl via
+  polymarket`). Polymarket's ¢ convention stays — ¢ IS a percent. Shared
+  helpers: `wca.displayfmt` (formatting only, no gate/sizing logic).
+  Scope: TRADE-DISPLAY surfaces. Ledger/accounting echoes (`/bets`,
+  `/settle`, betslip-ingest verification) keep the venue's booked decimal —
+  they reconcile against what the book shows, not a recommendation.
+- **+EV indicated everywhere (same ruling):** every displayed selection
+  carries its edge (pp for prob-gaps, % for EV-per-unit) plus an explicit
+  `✅+EV` / `❌−EV` marker (`EV?` when no live price — a missing price is
+  never dressed up as +EV), and the `wca.selection` ordering stays visible
+  (ML/MID/LS bucket tags, moneylines over longshots).
+- `/card`: percent format as above, `[elo/dc]` bracket, stake in the pick's
+  own pool currency, verbose CUT reasons, WATCH tier (near-threshold 0–2pp
+  rows + withheld-by-gate reason_code summary — display widened, gates
+  UNCHANGED), scorelines appendix. NO bankroll-model footer.
+- `/matchevents`: exotic event markets filtered to +EV MONEYLINE-bucket
+  (model ≥50% AND positive net edge) only; killed-for-cash markets (correct
+  score / scorer props / un-boosted SGMs) structurally excluded; model-only
+  rows labelled "+EV unverifiable", honest feed-missing hints.
+- `/goalscorers`: model % vs market implied % per scorer, <25% model legs
+  NO-CASH, and the −73.9% scorer-punt leak warning on every scorer surface.
 - `/pm` + Action Desk trade ideas: Polymarket ¢ convention, $ stakes,
   bucket-grouped (moneylines → mid → longshots), hours-out tags
-  (`site/pm_ideas.json` feed).
+  (`site/pm_ideas.json` feed), +EV markers per row.
 - 1X2 settles at 90 minutes; PM advancement includes ET+pens — the two must
   never be visually confusable; settlement basis is flagged on every surface.
 
@@ -112,7 +134,8 @@ before starting any task.
 
 - Betfair execution: NO-BUILD (ADR-003). Read-only CLV reference at most;
   Smarkets first if a GBP exchange is ever needed.
-- Sites: `site/` (8000) is primary; publish via the mini `publish` job;
-  site-analytics frozen pending consolidation (post-tournament).
+- Sites: localhost-ONLY — `site/` (8000) primary, `site-analytics/` (8001)
+  frozen pending consolidation (post-tournament); publish via the mini
+  `publish` job. Vercel REMOVED entirely 2026-07-08 (no hosted deploys).
 - Overhaul plan + gates: `docs/overhaul/PHASE1_DESIGN.md` (tournament track
   vs post-tournament track); rollback tag `pre-overhaul-2026-07-01`.

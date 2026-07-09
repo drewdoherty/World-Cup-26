@@ -42,6 +42,7 @@ from wca.selection import (
     hours_out as _sel_hours_out,
     longshot_no_cash,
 )
+from wca.displayfmt import bucket_tag, ev_marker, ev_str, implied_pct, pct
 from wca.snapshot_freshness import (
     DEFAULT_MAX_AGE_HOURS as _SNAPSHOT_MAX_AGE_HOURS,
     check_snapshot_freshness as _check_snapshot_freshness,
@@ -1635,8 +1636,11 @@ def _fmt_acca(i: int, a: Acca, mode: str, pm_alts: Dict[str, Any]) -> List[str]:
     """Format one acca into lines. Includes per-leg PM alternative if available."""
     lines: List[str] = []
     head = "*%s*" % (a.label or "Acca %d" % i)
-    lines.append("%s — *%s* @ *%.2f*  [%s]" % (
-        head, _fmt_legs_count(a), a.combined_odds,
+    # Percent convention (ruling 2026-07-08): combined price as its implied
+    # (break-even) %, the acca's model % next to it, EV marker on the header.
+    lines.append("%s — *%s* — combined impl *%s* vs model *%s* %s  [%s]" % (
+        head, _fmt_legs_count(a), implied_pct(a.combined_odds),
+        pct(a.model_prob), ev_marker(a.edge),
         {"add": "adds exposure", "hedge": "hedges book", "diversify": "diversifies"}.get(
             a.action, a.action)))
 
@@ -1644,20 +1648,22 @@ def _fmt_acca(i: int, a: Acca, mode: str, pm_alts: Dict[str, Any]) -> List[str]:
         pm = pm_alts.get(_make_sig(L))
         pm_str = ""
         if pm and _pm_matches_market(L.market, pm.get("question", "")):
-            pm_str = "  PM: %.3f" % pm["pm_odds"]
+            pm_str = "  PM: %s" % implied_pct(pm["pm_odds"])
         lines.append(
-            "   • %s — %s (%s) @ %.2f%s  [%.0f%% · %+.0f%%]" % (
-                L.fixture, L.selection, L.market, L.odds,
+            "   • [%s] %s — %s (%s) — mkt %s impl%s  [model %s · EV %s %s]" % (
+                bucket_tag(L.model_prob), L.fixture, L.selection, L.market,
+                implied_pct(L.odds),
                 " via %s" % L.book if L.book else "",
-                L.model_prob * 100, L.edge * 100) + pm_str)
+                pct(L.model_prob, 0), ev_str(L.edge, 0), ev_marker(L.edge))
+            + pm_str)
 
     if mode == "promo":
         lines.append("   _%s_" % a.note)
     else:
         existing_risk = 0.0  # shown in note
         lines.append(
-            "   model %.1f%% · net EV *%+.0f%%* · ¼-Kelly *£%.2f*" % (
-                a.model_prob * 100, a.edge * 100, a.stake))
+            "   model %s · net EV *%s* %s · ¼-Kelly *£%.2f*" % (
+                pct(a.model_prob), ev_str(a.edge, 0), ev_marker(a.edge), a.stake))
         if a.downside_gbp > 0:
             lines.append("   downside if all lose: £%.2f" % a.downside_gbp)
         lines.append("   _%s_" % a.note)
@@ -1708,8 +1714,9 @@ def format_accas(result: Dict[str, Any]) -> str:
             lines.append("*NO BET* — promo data stale/blocked. Verify manually.")
         elif mode in ("value", "low_win"):
             lines.append(
-                "NO BET — no +EV favourite legs at ≤%.0fx combined odds. "
-                "Try `/accas edge` for high-edge underdogs." % VALUE_MAX_COMBINED)
+                "NO BET — no +EV favourite legs at combined implied ≥%.0f%% "
+                "(≤%.0fx). Try `/accas edge` for high-edge underdogs."
+                % (100.0 / VALUE_MAX_COMBINED, VALUE_MAX_COMBINED))
         else:
             lines.append(
                 "NO BET — no qualifying accas cleared the +EV gate "

@@ -76,3 +76,20 @@ def test_markdown_generated_header_parsed(tmp_path):
     r = _run(ancestor, ours, theirs, "data/card_latest.md")
     assert r.returncode == 0
     assert "new card" in ours.read_text()
+
+
+def test_json_resolves_with_gitstyle_suffixless_tempfiles(tmp_path):
+    """Regression (2026-07-09): git hands the driver suffix-less temp files
+    (.merge_file_XXXXXX); dispatch must key off %P, not the temp suffix.
+    Before the fix every real JSON merge silently deferred to markers."""
+    ancestor = tmp_path / ".merge_file_a1B2c3"; ancestor.write_text("{}")
+    ours = tmp_path / ".merge_file_d4E5f6"
+    ours.write_text(json.dumps({"meta": {"generated": "2026-07-09 12:00:00 UTC"},
+                                "v": "ours"}))
+    theirs = tmp_path / ".merge_file_g7H8i9"
+    theirs.write_text(json.dumps({"meta": {"generated": "2026-07-09 11:00:00 UTC"},
+                                  "v": "theirs"}))
+    r = _run(ancestor, ours, theirs, "site/bet_recs.json")
+    assert r.returncode == 0, (
+        "driver must resolve, not defer: stderr=%s" % r.stderr)
+    assert json.loads(ours.read_text())["v"] == "ours"  # fresher side kept
