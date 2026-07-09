@@ -587,7 +587,7 @@ def resolve_pool_bankroll(
         out_fraction = FLAT_KELLY_FRACTION
         reason = (
             "%s%.0f (manual override) — ladder would set rung %d "
-            "(%s%.0f) from %d/%d settled-with-close bets, CLV %s%s"
+            "(%s%.0f) from %d/%d settled-with-close trades, CLV %s%s"
             % (
                 currency_symbol, bankroll, rung, currency_symbol,
                 ladder_bankroll, n_settled, next_threshold, clv_str,
@@ -616,7 +616,7 @@ def resolve_pool_bankroll(
         out_fraction = constrained_fraction
         reason = (
             "rung %d sizing-base %s%.0f (notional pool %s%.0f) — %d/%d "
-            "settled-with-close bets, CLV %s, Kelly fraction %.2f"
+            "settled-with-close trades, CLV %s, Kelly fraction %.2f"
             % (
                 rung, currency_symbol, bankroll, currency_symbol,
                 ladder_bankroll, n_settled, next_threshold, clv_str,
@@ -1852,8 +1852,8 @@ def format_card(recs: Sequence[Recommendation], pools: Sequence[PoolConfig]) -> 
     selection-rule bucket tag (ML/MID/LS, :mod:`wca.selection`).
     """
     if not recs:
-        return "*No +EV bets* on the current slate at the configured threshold."
-    lines = ["*World Cup Alpha — bet card* (%d picks)" % len(recs), ""]
+        return "*No +EV trades* on the current slate at the configured threshold."
+    lines = ["*World Cup Alpha — trade card* (%d picks)" % len(recs), ""]
     for i, r in enumerate(recs, 1):
         stake_str = "  ".join(
             "%s £%.2f" % (p.name, r.stakes.get(p.name, 0.0)) for p in pools
@@ -1917,7 +1917,7 @@ def format_ranked_card(
     lines: List[str] = []
     n_indicative = sum(1 for r in ranked.picks if r.indicative)
     n_staked = len(ranked.picks) - n_indicative
-    header = "*World Cup Alpha — bet card* (%d staked" % n_staked
+    header = "*World Cup Alpha — trade card* (%d staked" % n_staked
     if n_indicative:
         header += ", %d indicative" % n_indicative
     header += " picks, hit-prob ranked)"
@@ -1928,7 +1928,7 @@ def format_ranked_card(
     )
     lines.append("")
     if not ranked.picks:
-        lines.append("_No +EV bets clear the selection rule on the current slate._")
+        lines.append("_No +EV trades clear the selection rule on the current slate._")
     if n_indicative and n_staked == 0:
         lines.append(
             "_⚠ Every pick is single-source (Polymarket only) — INDICATIVE, "

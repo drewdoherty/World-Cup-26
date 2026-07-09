@@ -84,16 +84,16 @@ backtests, `docs/research/pm_preferences_backtest_2026-07-02.md`).
 
 ## Per-surface compliance table
 
-Every surface that ranks, selects, or sizes bets imports `wca.selection`.
+Every surface that ranks, selects, or sizes trades imports `wca.selection`.
 "Further-out" = the secondary key is applied (raw hours, or the stage-depth
 analogue for advancement). "Cash floor" = `longshot_no_cash` gates the stake.
 
 | Surface | File | Bucket sort | Further-out | Cash floor | Notes |
 | --- | --- | --- | --- | --- | --- |
 | PM proposer (reference) | `scripts/wca_pm_propose.py` | ✅ | ✅ | (sizing elsewhere) | The rule was extracted verbatim from here; now imports back. |
-| Bet card | `src/wca/card.py` (`rank_card`, `_cut_reason`) | ✅ | ✅ | ✅ | Keeps the hard `SELECTION_MIN_PROB=0.20` floor; `classify_outcome`/`_CATEGORY_PRIORITY` kept as DISPLAY labels only. |
+| Trade card | `src/wca/card.py` (`rank_card`, `_cut_reason`) | ✅ | ✅ | ✅ | Keeps the hard `SELECTION_MIN_PROB=0.20` floor; `classify_outcome`/`_CATEGORY_PRIORITY` kept as DISPLAY labels only. |
 | Advancement | `src/wca/advancement.py` (`compare_to_polymarket`, `_fee_adjusted_kelly_stake`) | ✅ | ✅ (stage depth) | ✅ | `bucket`/`no_cash` tags propagated into `advancement_data.json`. |
-| Bet recs | `scripts/wca_betrecs.py` (`match_singles`, `advancement_futures`) | ✅ | ✅ | ✅ | `build_event_props` (returns `[]`) and `build_guaranteed_arbs` (settlement-locked) EXEMPT. |
+| Trade recs | `scripts/wca_betrecs.py` (`match_singles`, `advancement_futures`) | ✅ | ✅ | ✅ | `build_event_props` (returns `[]`) and `build_guaranteed_arbs` (settlement-locked) EXEMPT. |
 | Next match / goalscorers | `src/wca/nextmatch.py` | ✅ (1X2 outcomes) | ✅ (goalscorer card) | ✅ | `/next` SCHEDULE stays soonest-first (it IS the next-match schedule); within-market scorer ranking by implied prob exempt; anytime-scorer legs gated to no-cash. |
 | Accas | `src/wca/accas.py` (`assemble_accas.rank_key`, cross-acca sort) | ✅ | ✅ (per-leg kickoff) | ✅ | Old accas-local `LONGSHOT_PROB=0.12` replaced by canonical `0.25`; `is_moneyline` market-TYPE flag replaced by `bucket_rank`. |
 | Testbook paper-trader | `src/wca/testbook/trader.py` (`run_paper_pass`) | ✅ | — | ✅ | Automated PM paper-trader; imports `wca.selection` so it can't drift. |

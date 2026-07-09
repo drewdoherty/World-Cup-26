@@ -1711,15 +1711,15 @@ def format_accas(result: Dict[str, Any]) -> str:
     # No accas
     if not accas:
         if promo_required and mode == "promo":
-            lines.append("*NO BET* — promo data stale/blocked. Verify manually.")
+            lines.append("*NO TRADE* — promo data stale/blocked. Verify manually.")
         elif mode in ("value", "low_win"):
             lines.append(
-                "NO BET — no +EV favourite legs at combined implied ≥%.0f%% "
+                "NO TRADE — no +EV favourite legs at combined implied ≥%.0f%% "
                 "(≤%.0fx). Try `/accas edge` for high-edge underdogs."
                 % (100.0 / VALUE_MAX_COMBINED, VALUE_MAX_COMBINED))
         else:
             lines.append(
-                "NO BET — no qualifying accas cleared the +EV gate "
+                "NO TRADE — no qualifying accas cleared the +EV gate "
                 "(or all overlap your book). Try `/accas longshot`.")
         # Unsupported markets hint
         if unsupported:

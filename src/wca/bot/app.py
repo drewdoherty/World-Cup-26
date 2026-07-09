@@ -131,9 +131,9 @@ def _feed_generated(path: str) -> Optional[str]:
 # and confusing to expose publicly; structure changes rarely.
 _TELEGRAM_COMMANDS = [
     {"command": "summary",     "description": "Portfolio P&L, ROI, CLV, bankroll by pool"},
-    {"command": "bets",        "description": "Open bets, stakes, max win / max loss by venue"},
+    {"command": "bets",        "description": "Open trades, stakes, max win / max loss by venue"},
     {"command": "clv",         "description": "Closing-line-value report"},
-    {"command": "card",        "description": "Today's recommended bet card"},
+    {"command": "card",        "description": "Today's recommended trade card"},
     {"command": "next",        "description": "Next match preview: winner, corners, scorers"},
     {"command": "goalscorers", "description": "Anytime + first-goalscorer recs, next 5 games"},
     {"command": "betbuilder",  "description": "Team totals + player SoT/cards/fouls model %"},
@@ -142,7 +142,7 @@ _TELEGRAM_COMMANDS = [
     {"command": "accas",       "description": "4+ leg accumulators, next 5 matches"},
     {"command": "today",       "description": "What to place right now — recs + PM ideas + boosts"},
     {"command": "pm",          "description": "Polymarket parked orders + trader status"},
-    {"command": "settle",      "description": "Settle a bet: /settle <id> <outcome> [odds]"},
+    {"command": "settle",      "description": "Settle a trade: /settle <id> <outcome> [odds]"},
     {"command": "boost",       "description": "Price a bookmaker boost vs the model"},
     {"command": "ping",        "description": "Liveness check"},
     {"command": "help",        "description": "Command list"},
@@ -151,9 +151,9 @@ _TELEGRAM_COMMANDS = [
 HELP_TEXT = (
     "*World Cup Alpha* — manager console\n\n"
     "/summary — portfolio P&L, ROI, CLV, bankroll by pool\n"
-    "/bets — open bets, stakes, max win / max loss by venue\n"
+    "/bets — open trades, stakes, max win / max loss by venue\n"
     "/clv — closing-line-value report\n"
-    "/card — today's recommended bet card\n"
+    "/card — today's recommended trade card\n"
     "/next — next match preview: winner, corners, scorers, scorelines\n"
     "/goalscorers — anytime + first-goalscorer recs, next 5 games\n"
     "/betbuilder — team totals + player SoT/cards/fouls model % (model-only; sportsbook markets)\n"
@@ -162,7 +162,7 @@ HELP_TEXT = (
     "/accas [value|edge|hedge|longshot|promo] — model accas; default=low-win favourites @ modest odds (edge=high-edge underdogs)\n"
     "/today — what to place right now (recs + PM ideas + boosts, freshness-stamped)\n"
     "/pm — Polymarket parked orders + trader status\n"
-    "/settle — settle a bet (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
+    "/settle — settle a trade (usage: `/settle <bet-id> <outcome> [closing-odds]`)\n"
     "/boost — price a bookmaker price-boost vs the model (usage below)\n"
     "/restart — restart the bot (admin; `/restart pull` redeploys first)\n"
     "/ping — liveness check\n"
@@ -176,7 +176,7 @@ HELP_TEXT = (
     "⚡ Or type it: "
     "`/boost <site> | <match> | <market> | <selection> | <odds> [was <odds>] [inplay]`\n"
     "e.g. `/boost bet365 | Brazil vs Morocco | Match Result | Brazil | 2.5 was 1.8`\n"
-    "Confirm a pushed bet with `Y BET-<id>`, decline with `N BET-<id>`.\n"
+    "Confirm a pushed trade with `Y BET-<id>`, decline with `N BET-<id>`.\n"
     "Execute a parked Polymarket order with `Y PM-<n>`, discard with `N PM-<n>`.\n"
     "Unfilled PM orders auto-redeem after 24h; `REDEEM ALL` or `REDEEM <order-id>` "
     "cancels them now and frees the pUSD."
@@ -197,7 +197,7 @@ def _authorized(chat_id: int | str, allowed: Optional[str]) -> bool:
 
 
 READ_ONLY_MSG = (
-    "🔒 Read-only: bets and order confirmations are admin-only in this chat. "
+    "🔒 Read-only: trades and order confirmations are admin-only in this chat. "
     "You can use /next, /goalscorers, /matchevents, /scores, /card, /summary, "
     "/bets, /clv, /ping."
 )
@@ -522,7 +522,7 @@ def handle_summary(db_path: str) -> str:
 
     lines = [
         "\U0001f4b0 *World Cup Alpha — portfolio*",
-        "Bets: %d (open %d / won %d / lost %d / void %d)"
+        "Trades: %d (open %d / won %d / lost %d / void %d)"
         % (s["total_bets"], s["open_bets"], s["won_bets"], s["lost_bets"], s["void_bets"]),
         "",
         "*P&L by book*",
@@ -578,13 +578,13 @@ def handle_bets(db_path: str) -> str:
     finally:
         con.close()
     if not rows:
-        return "*Open bets*\nNone — the book is flat."
+        return "*Open trades*\nNone — the book is flat."
 
     by_venue: Dict[str, List[Any]] = {}
     for r in rows:
         by_venue.setdefault(_venue_of(r["platform"]), []).append(r)
 
-    lines = ["\U0001f3af *Open bets* (%d)" % len(rows)]
+    lines = ["\U0001f3af *Open trades* (%d)" % len(rows)]
     grand_win = {}
     grand_loss = {}
     for venue in ("sportsbook", "polymarket", "polymarket-auto", "kalshi"):
@@ -652,7 +652,7 @@ def handle_clv(db_path: str) -> str:
 
     return (
         "*CLV report*\n"
-        "Bets with closing odds: %d\n"
+        "Trades with closing odds: %d\n"
         "Average CLV: %s\n"
         "Beat close: %s"
         % (d["n_bets"], pct(d["avg_clv"]), pct(d["pct_beat_close"]))
@@ -799,7 +799,7 @@ def handle_card(
     if not generated:
         return (
             "*Today's card*\n"
-            "NO BET — `%s` has no generation timestamp; "
+            "NO TRADE — `%s` has no generation timestamp; "
             "data age is unknown." % card_path
         )
     body = cached.get("text") or "(empty card)"
@@ -942,7 +942,7 @@ def handle_next(
     if not generated:
         return (
             "*Next match*\n"
-            "NO BET — `%s` has no generation timestamp; "
+            "NO TRADE — `%s` has no generation timestamp; "
             "data age is unknown." % next_path
         )
     body = cached.get("text") or "(empty preview)"
@@ -980,7 +980,7 @@ def handle_goalscorers(
     if not generated:
         return (
             "*Goalscorers*\n"
-            "NO BET — `%s` has no generation timestamp; "
+            "NO TRADE — `%s` has no generation timestamp; "
             "data age is unknown." % goalscorers_path
         )
     body = cached.get("text") or "(empty card)"
@@ -1026,7 +1026,7 @@ def handle_betbuilder(
     if not generated:
         return (
             "*Bet builder*\n"
-            "NO BET — `%s` has no generation timestamp; "
+            "NO TRADE — `%s` has no generation timestamp; "
             "data age is unknown." % betbuilder_path
         )
     body = cached.get("text") or "(empty card)"
@@ -1074,9 +1074,9 @@ def handle_settle(text: str, db_path: str) -> str:
         return (
             "Usage: `/settle <bet-id> <outcome> [closing-odds]`\n\n"
             "Examples:\n"
-            "`/settle 42 won 3.20` — bet 42 won at 3.20\n"
-            "`/settle 43 lost` — bet 43 lost\n"
-            "`/settle 44 void` — bet 44 voided"
+            "`/settle 42 won 3.20` — trade 42 won at 3.20\n"
+            "`/settle 43 lost` — trade 43 lost\n"
+            "`/settle 44 void` — trade 44 voided"
         )
 
     try:
@@ -1102,7 +1102,7 @@ def handle_settle(text: str, db_path: str) -> str:
         ).fetchone()
 
         if not row:
-            return f"No open bet with ID {bet_id}."
+            return f"No open trade with ID {bet_id}."
 
         stake = float(row["stake"] or 0.0)
         odds_backed = float(row["decimal_odds"] or 0.0)
@@ -1116,7 +1116,7 @@ def handle_settle(text: str, db_path: str) -> str:
             closing_odds = float(row["closing_odds"])
         if outcome in ("won", "lost") and closing_odds is None:
             return (
-                f"Outcome '{outcome}' needs closing odds and bet {bet_id} has "
+                f"Outcome '{outcome}' needs closing odds and trade {bet_id} has "
                 f"no auto-captured close yet. Try: `/settle {bet_id} {outcome} <odds>`"
             )
 
@@ -1154,7 +1154,7 @@ def handle_settle(text: str, db_path: str) -> str:
         con.commit()
 
         # Format reply
-        lines = [f"✅ Bet {bet_id} settled as *{outcome}*"]
+        lines = [f"✅ Trade {bet_id} settled as *{outcome}*"]
         if closing_odds:
             lines.append(f"Closing odds: {closing_odds:.2f}")
         lines.append(f"Realized P&L: {settled_pl:+.2f}")
@@ -1518,7 +1518,7 @@ def _format_extracted(bets: List[Any], tags: Optional[Dict[str, str]] = None) ->
     """
     from wca.bot.vision import currency_symbol
 
-    lines = ["*Parsed %d bet(s) from your slip:*" % len(bets)]
+    lines = ["*Parsed %d trade(s) from your slip:*" % len(bets)]
     for i, b in enumerate(bets, 1):
         sym = currency_symbol(getattr(b, "currency", None))
         odds = ("%.2f" % b.decimal_odds) if b.decimal_odds else "?"
@@ -1589,7 +1589,7 @@ def handle_photo(
     except Exception as exc:  # never crash the loop on a vision hiccup
         return "Vision error: %s" % exc
     if not bets:
-        return "No bets detected. Send a clearer screenshot of the full slip."
+        return "No trades detected. Send a clearer screenshot of the full slip."
     # Enrich with model data from the card (optional — silently skipped if not found)
     bets = _enrich_bets_from_card(bets, card_path=CARD_PATH)
     tags = resolve_tags(caption)
@@ -2460,7 +2460,7 @@ def handle_confirmation(
     if token.startswith("BET-"):
         # Stake placement against the ledger is wired with the card generator.
         action = "confirmed" if verb == "Y" else "declined"
-        return "Bet %s %s. (Ledger write pending card-generator wiring.)" % (token, action)
+        return "Trade %s %s. (Ledger write pending card-generator wiring.)" % (token, action)
 
     if token.startswith("PM-"):
         try:
@@ -2539,13 +2539,13 @@ def handle_today(db_path: str = "data/wca.db",
         except Exception:
             return "age unknown ⚠"
 
-    lines = ["📋 *Today — betting instructions* (cache-composed; ages shown)"]
+    lines = ["📋 *Today — trading instructions* (cache-composed; ages shown)"]
 
     recs = _load(recs_path)
     if recs:
         meta = recs.get("meta") or {}
         lines.append("")
-        lines.append("*1) Bet recs* — %s" % _age_str(meta.get("generated")))
+        lines.append("*1) Trade recs* — %s" % _age_str(meta.get("generated")))
         n_act = 0
         for section, label in (("match_singles", "1X2"),
                                ("advancement_futures", "ADV"),
@@ -2586,7 +2586,7 @@ def handle_today(db_path: str = "data/wca.db",
             lines.append("  _withheld: %s (stale/gated — see Action Desk)_" % wh)
     else:
         lines.append("")
-        lines.append("*1) Bet recs* — feed missing ⚠ (publish job?)")
+        lines.append("*1) Trade recs* — feed missing ⚠ (publish job?)")
 
     ideas = _load(ideas_path)
     if ideas:
@@ -3360,7 +3360,7 @@ def run(
                 try:
                     reply = handle_photo_confirmation(text, chat_id, db_path)
                 except Exception as exc:
-                    reply = "Error logging bets: %s" % exc
+                    reply = "Error logging trades: %s" % exc
             if reply is None:
                 try:
                     reply = dispatch(text, db_path)

@@ -25,7 +25,7 @@
   // ======================================================================
 
   var LEAD =
-    "We bet the 2026 World Cup as a disciplined quant. The training history is the " +
+    "We trade the 2026 World Cup as a disciplined quant. The training history is the " +
     "martj42 international-results dataset, but we never trust it raw: a cleaning " +
     "overlay corrects and back-fills fixtures, and a verification pipeline " +
     "cross-checks recent results against TWO independent feeds (ESPN + " +
@@ -39,7 +39,7 @@
     "Dixon-Coles + market are blended (market weighted 60% because it is hard to " +
     "beat). We line-shop the best price, keep only edges clearing 2%, and size at " +
     "fractional Kelly off a CLV-gated bankroll ladder (£1.5k→£2.5k→£5k). The " +
-    "system never places a bet — it emits a card; a human places it, screenshots " +
+    "system never places a trade — it emits a card; a human places it, screenshots " +
     "the slip, and a 15-command Telegram bot reads it via Claude vision into the " +
     "SQLite ledger after a yes. A snapshot daemon records the closing line so the " +
     "ledger can compute CLV — did we beat the close?";
@@ -107,7 +107,7 @@
             ["api", "gamma-api.polymarket.com"],
             ["filter", "tag_slug=soccer + WC keywords"],
             ["decode", "outcomes / outcomePrices → priceMap"],
-            ["note", "NOT in the bet-card blend"]
+            ["note", "NOT in the trade-card blend"]
           ],
           inputs: ["Gamma /events"],
           outputs: ["priceMap", "polymarket venue column"]
@@ -268,7 +268,7 @@
           params: [
             ["f_full", "(p·o−1)/(o−1)"],
             ["fraction", "0.25 (quarter Kelly)"],
-            ["per-bet cap", "0.05 (5%)"],
+            ["per-trade cap", "0.05 (5%)"],
             ["same-day cap", "0.05 (5%) scaled together"]
           ],
           inputs: ["edge", "pool bankroll"],
@@ -309,17 +309,17 @@
       n: "04",
       title: "Execution",
       tag: "human places",
-      blurb: "The system never auto-bets. A human places, the bot confirms to ledger.",
+      blurb: "The system never auto-trades. A human places, the bot confirms to ledger.",
       cards: [
         {
-          name: "Bet card",
+          name: "Trade card",
           role: "Ranked recommendations emitted for a human to place.",
           file: "scripts/wca_build_card.py",
           params: [
             ["pool", "main, bankroll = CLV-ladder rung (£1,500 at rung 0)"],
             ["sort", "edge descending"],
             ["sidecars", "scorelines, accas, goalscorers, next-match previews"],
-            ["never", "the system does not place bets"]
+            ["never", "the system does not place trades"]
           ],
           inputs: ["surviving picks + stakes"],
           outputs: ["formatted card → cache → bot / site"]
@@ -371,7 +371,7 @@
       n: "05",
       title: "Feedback",
       tag: "CLV / calibration / P&L",
-      blurb: "Ledger + reports turn settled bets into the north-star KPIs.",
+      blurb: "Ledger + reports turn settled trades into the north-star KPIs.",
       cards: [
         {
           name: "SQLite ledger",
@@ -430,8 +430,8 @@
       amt: "£1,500",
       sub: "rung 0 base",
       notes: [
-        "→ £2.5k at 50 settled-with-close bets (to-date CLV > 0)",
-        "→ £5k at 100 settled bets (CLV > 0); demote if rolling-50 CLV < 0"
+        "→ £2.5k at 50 settled-with-close trades (to-date CLV > 0)",
+        "→ £5k at 100 settled trades (CLV > 0); demote if rolling-50 CLV < 0"
       ]
     },
     {
@@ -452,15 +452,15 @@
 
   var MONEY_STEPS = [
     ["Pools", "sportsbook £ / polymarket $ / kalshi planned"],
-    ["Laddered Kelly + caps", "rung fraction (0.25→0.50) × CLV bankroll, 5% per-bet, 5% same-day"],
-    ["Bets", "human places, bot confirms to ledger"],
+    ["Laddered Kelly + caps", "rung fraction (0.25→0.50) × CLV bankroll, 5% per-trade, 5% same-day"],
+    ["Trades", "human places, bot confirms to ledger"],
     ["Settle", "win (o−1)·stake / loss −stake"],
     ["CLV feedback", "(odds_taken / closing_odds) − 1 → sets the next rung"]
   ];
 
   var KILL_RULE =
     "KILL RULE — real-money sportsbook pauses if CLV is negative after ~50 " +
-    "settled bets. Free / promo bets risk no cash: they count toward max win but " +
+    "settled trades. Free / promo bets risk no cash: they count toward max win but " +
     "contribute zero to max loss.";
 
   // Improvement map per stage (§9).

@@ -637,7 +637,7 @@
     if (!el) return;
     el.hidden = false;
     var msgEl = $("arb-nodata-msg");
-    if (msgEl) msgEl.textContent = msg || "BET RECS FEED UNAVAILABLE";
+    if (msgEl) msgEl.textContent = msg || "TRADE RECS FEED UNAVAILABLE";
   }
 
   function load() {
@@ -656,7 +656,7 @@
         try { renderFooter(data); } catch (e) { console.error("renderFooter failed", e); }
       })
       .catch(function () {
-        showNoData("BET RECS FEED UNAVAILABLE — run wca_betrecs.py to regenerate");
+        showNoData("TRADE RECS FEED UNAVAILABLE — run wca_betrecs.py to regenerate");
       });
   }
 

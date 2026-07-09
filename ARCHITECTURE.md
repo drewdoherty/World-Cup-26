@@ -501,7 +501,7 @@ Most scripts otherwise take `--db` defaulting to the literal `data/wca.db`. **DE
 
 | Tree | LOC | Shape | Feeds |
 |---|---|---|---|
-| `site/` | 9,844 | 8 nav pages: Bets (index), Scores & Markets, Event Markets (forest), Under The Hood (architecture), Promos, Action Desk (arb.html — nav label "Bet Recs"), Microstructure, Benchmarks (`site/index.html:19-28`) | 28 JSON: 16 top-level + 12 under `site/microstructure/` |
+| `site/` | 9,844 | 8 nav pages: Trades (index), Scores & Markets, Event Markets (forest), Under The Hood (architecture), Promos, Action Desk (arb.html — nav label "Trade Recs"), Microstructure, Benchmarks (`site/index.html:19-28`) | 28 JSON: 16 top-level + 12 under `site/microstructure/` |
 | `site-analytics/` | 2,958 | single page, served on localhost:8001 (was its own Vercel project until 2026-07-08) | 16 tracked JSON in `data/` (not 17); `analytics.js:1049-1063` fetches 13; **8 exclusive** to this tree (winrate, rigor, risk_pnl, predledger, venues_benchmark, market_intel, mc_futures, tracking_clv_benchmark) |
 | `site-lilac/` | 6,532 | single-page 6-tab terminal (Open Exposure, Scores & Markets, Visuals, Under The Hood, Tracking, Promos — index.html:379-385); data baked into one `const DATA` blob | builder `wca_lilac_ledger.py:205-227` loads 15+ feeds from site-analytics/data; `inject()` at :277-287 |
 

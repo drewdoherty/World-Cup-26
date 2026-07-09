@@ -107,12 +107,12 @@
       statTile("Model Picks", esc((s.model_1x2_correct || 0) + "/" + n), "modal 1X2 pick correct") +
       statTile("Market Picks", esc((s.market_1x2_correct || 0) + "/" + n), "closing favourite correct") +
       statTile("Brier 1X2", brierHtml, brierSub) +
-      statTile("Bet P/L",
+      statTile("Trade P/L",
         '<span class="' + plClass + '">' + esc(signed(bets.pl)) + '</span>',
         (bets.settled || 0) + " settled &middot; " + (bets.won || 0) + "W " + (bets.lost || 0) + "L &middot; all pools") +
       statTile("Avg CLV",
         '<span class="' + clvClass + '">' + esc(signedPct(bets.avg_clv)) + '</span>',
-        (bets.clv_count || 0) + " bets with captured close");
+        (bets.clv_count || 0) + " trades with captured close");
 
     $("stats-meta").textContent = n
       ? n + " fixture" + (n === 1 ? "" : "s") + " scored"
@@ -454,11 +454,11 @@
         b.pl !== null && b.pl !== undefined;
     });
     $("clv-meta").textContent = bets.length
-      ? bets.length + " settled bet" + (bets.length === 1 ? "" : "s") + " with close"
+      ? bets.length + " settled trade" + (bets.length === 1 ? "" : "s") + " with close"
       : "";
     if (!bets.length) {
       $("clv-pl").innerHTML =
-        '<div class="chart-empty">No settled bets with a captured closing line</div>';
+        '<div class="chart-empty">No settled trades with a captured closing line</div>';
       return;
     }
 
@@ -562,7 +562,7 @@
 
   // Hover text for one bet bar: market, selection, P/L (+ source/EV).
   function betTooltip(b) {
-    var lines = ["Bet #" + b.id];
+    var lines = ["Trade #" + b.id];
     if (b.match) lines.push(b.match);
     lines.push("market: " + (b.market || "—"));
     lines.push("selection: " + (b.selection || "—"));
@@ -579,7 +579,7 @@
   // up = profit, red down = loss; native <title> tooltip per bar.
   function pnlBarSVG(bets, emptyMsg) {
     if (!bets.length) {
-      return '<div class="empty">' + esc(emptyMsg || "no bets") + '</div>';
+      return '<div class="empty">' + esc(emptyMsg || "no trades") + '</div>';
     }
     var maxAbs = bets.reduce(function (m, b) {
       return Math.max(m, Math.abs(Number(b.pl) || 0));
@@ -620,7 +620,7 @@
       }
     });
     parts.push('<text class="tr-axis-title" x="' + (P.l + plotW / 2) +
-      '" y="' + (H - 3) + '" text-anchor="middle">Bet #</text>');
+      '" y="' + (H - 3) + '" text-anchor="middle">Trade #</text>');
     parts.push('</svg>');
     return parts.join("");
   }
@@ -640,7 +640,7 @@
     });
     _betData = bets;
     if (!bets.length) {
-      $("betpnl").innerHTML = '<div class="empty">No settled bets yet</div>';
+      $("betpnl").innerHTML = '<div class="empty">No settled trades yet</div>';
       $("betpnl-meta").textContent = "";
       return;
     }
@@ -659,12 +659,12 @@
         '<div class="rk-block">' +
           '<div class="rk-h">+EV model picks <span class="dim">(' + posEV.length +
             ' · ' + _plLabel(_sumPl(posEV)) + ')</span></div>' +
-          pnlBarSVG(posEV, "no +EV model bets") +
+          pnlBarSVG(posEV, "no +EV model trades") +
         '</div>' +
         '<div class="rk-block">' +
           '<div class="rk-h">−EV model picks <span class="dim">(' + negEV.length +
             ' · ' + _plLabel(_sumPl(negEV)) + ')</span></div>' +
-          pnlBarSVG(negEV, "no −EV model bets") +
+          pnlBarSVG(negEV, "no −EV model trades") +
         '</div>' +
       '</div>';
 
@@ -680,16 +680,16 @@
       }).join("") + '</select>';
     var sourceBlock =
       '<div class="rk-block" style="margin-top:14px">' +
-        '<div class="rk-h">P&amp;L by bet — source ' + sel +
+        '<div class="rk-h">P&amp;L by trade — source ' + sel +
           ' <span class="dim" id="betpnl-source-sum"></span></div>' +
         '<div id="betpnl-source-chart"></div>' +
       '</div>';
 
     $("betpnl").innerHTML = facets + sourceBlock +
-      '<div class="vt-note">Each bar is one settled bet (x = bet #), height = P/L ' +
+      '<div class="vt-note">Each bar is one settled trade (x = trade #), height = P/L ' +
       '(green profit, red loss). Hover a bar for market · selection · P/L. ' +
-      'The +EV / −EV split uses the model’s EV at placement (model-source bets only' +
-      (nullEV ? '; ' + nullEV + ' model bet' + (nullEV === 1 ? "" : "s") +
+      'The +EV / −EV split uses the model’s EV at placement (model-source trades only' +
+      (nullEV ? '; ' + nullEV + ' model trade' + (nullEV === 1 ? "" : "s") +
         ' had no recorded EV, omitted' : '') + ').</div>';
     $("betpnl-meta").textContent = bets.length + " settled · " + _plLabel(_sumPl(bets));
 
@@ -697,7 +697,7 @@
     function drawSource() {
       var s = dd.value;
       var arr = _betData.filter(function (b) { return b.source === s; });
-      $("betpnl-source-chart").innerHTML = pnlBarSVG(arr, "no " + s + " bets");
+      $("betpnl-source-chart").innerHTML = pnlBarSVG(arr, "no " + s + " trades");
       var sumEl = $("betpnl-source-sum");
       if (sumEl) sumEl.textContent = "(" + arr.length + " · " + _plLabel(_sumPl(arr)) + ")";
     }
@@ -750,7 +750,7 @@
   }
 
   function _retTip(label, ccy, p) {
-    var lines = [label + "  (bet " + p.n + ")"];
+    var lines = [label + "  (trade " + p.n + ")"];
     if (p.t != null) lines.push(_dayLabel(p.t));
     lines.push("return: " + _money(ccy, p.roi) + " per " + ccy + "1");
     lines.push("cum P/L: " + _money(ccy, p.pl) + "  /  wagered " + ccy + p.wag.toFixed(2));
@@ -767,7 +767,7 @@
     ];
     var all = [];
     series.forEach(function (s) { (acc[s.key].pts || []).forEach(function (p) { if (p.t != null) all.push(p); }); });
-    if (!all.length) return '<div class="empty">No settled bets yet</div>';
+    if (!all.length) return '<div class="empty">No settled trades yet</div>';
     var ts = all.map(function (p) { return p.t; });
     var tmin = Math.min.apply(null, ts), tmax = Math.max.apply(null, ts);
     if (tmax <= tmin) tmax = tmin + 1;
@@ -817,7 +817,7 @@
     }
     series.forEach(function (s, i) {
       var n = (acc[s.key].pts || []).length;
-      var lab = s.label + " — " + (n ? n + " bets" : "0 settled");
+      var lab = s.label + " — " + (n ? n + " trades" : "0 settled");
       var yo = P.t + 2 + i * 14;
       out.push('<rect x="' + (P.l + 6) + '" y="' + yo + '" width="9" height="9" fill="' + s.color + '"/>' +
         '<text x="' + (P.l + 19) + '" y="' + (yo + 9) + '" fill="#2A2440" font-size="10">' + esc(lab) + '</text>');
@@ -830,13 +830,13 @@
     var acc = _retSeries(d);
     var nsb = acc.sb.pts.length, npm = acc.pm.pts.length;
     if (!(nsb || npm)) {
-      $("retunit").innerHTML = '<div class="empty">No settled bets yet</div>';
+      $("retunit").innerHTML = '<div class="empty">No settled trades yet</div>';
       $("retunit-meta").textContent = "";
       return;
     }
     $("retunit").innerHTML = retChartSVG(acc) +
       '<div class="vt-note">Cumulative net return per &pound;1 / $1 staked (settled P/L &divide; stake) over the full ' +
-      'betting history, by venue. Full range, so 0 = break-even and the early small-sample sportsbook spike shows ' +
+      'trading history, by venue. Full range, so 0 = break-even and the early small-sample sportsbook spike shows ' +
       'in full before it mean-reverts toward the long-run figure. Hover a point for the running figure.</div>';
     $("retunit-meta").textContent = nsb + " £ · " + npm + " $ settled";
   }

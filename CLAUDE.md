@@ -54,6 +54,15 @@ Canonical rule (user-confirmed 2026-07-07), key `(bucket_rank, -hours_out, -ev)`
 
 ## Display conventions (user-chosen, do not "improve")
 
+- **"TRADE" NOT "BET" IN DISPLAY TEXT (user ruling 2026-07-08):** all
+  user-visible copy says trade/trades/trading — site labels and titles, bot
+  message templates and help descriptions, dashboards, docs prose about the
+  product. Wire format and identifiers are UNCHANGED: command names
+  (`/bets`, `/settle`, `Y BET-<id>`), JSON keys/filenames (`bet_recs.json`,
+  `bet_rec`, `n_bets`), the `bets` DB table, script/module names
+  (`wca_betrecs.py`), launchd labels. Venue brands (bet365, Betfair,
+  Sky Bet…), bookmaker product terms ("Bet Builder", "free bet", "betslip")
+  and ledger/accounting echoes stay verbatim.
 - **PERCENTAGES EVERYWHERE (user ruling 2026-07-08 — SUPERSEDES the
   2026-07-03 "classic decimal" /card line, do not revert):** ALL bot
   commands display odds as percentages (`model X% / mkt Y%`), never bare

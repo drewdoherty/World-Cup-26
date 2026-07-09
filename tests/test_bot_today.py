@@ -26,7 +26,7 @@ def test_today_composes_sections(tmp_path):
     _write(promos, {"promotions": [{"id": 1}, {"id": 2}]})
     out = app.handle_today("db-unused", recs_path=str(recs),
                            ideas_path=str(ideas), promos_path=str(promos))
-    assert "Bet recs" in out and "A vs B" in out and "stake $25.00" in out
+    assert "Trade recs" in out and "A vs B" in out and "stake $25.00" in out
     assert "PM trade ideas" in out and "[MONEYLINE] C vs D" in out
     assert "Y PM-<n>" in out
     assert "2 catalogued" in out
@@ -55,4 +55,4 @@ def test_today_stale_feed_is_marked(tmp_path):
 
 def test_dispatch_routes_today(tmp_path):
     out = app.dispatch("/today", str(tmp_path / "db.db"))
-    assert "Today — betting instructions" in out
+    assert "Today — trading instructions" in out
