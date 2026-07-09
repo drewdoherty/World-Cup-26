@@ -6,9 +6,14 @@ Runs ON THE DEV BOX (the MacBook).  It is a tiny stdlib ``http.server`` bound to
 localhost bet-recs page and forward it to the canonical fire path on the mini
 over SSH.
 
-  POST /place   {"rec_id": "...", "nonce": "..."}    (JSON body)
-      Header    X-WCA-Place-Token: <must equal env WCA_PLACE_TOKEN>
-  GET  /health  -> {"ok": true, ...}
+  POST /place        {"rec_id": "...", "nonce": "..."}    (JSON body)
+      Header         X-WCA-Place-Token: <must equal env WCA_PLACE_TOKEN>
+  POST /park-event   {"rec_id" | fixture+selection+family, "nonce"}
+      Fire a SIZED 02A Event-Market (PM) rec: re-validate from
+      site/event_market_recs.json, resolve the PM token, and PARK a PM-<n>
+      via the in-play relay (SSH->mini ingest, else git-artifact fallback).
+      NEVER places; the human's "Y PM-<n>" in @gamble1_bot is the only fire.
+  GET  /health       -> {"ok": true, ...}
 
 Guardrails (all enforced BEFORE any SSH):
   * bind 127.0.0.1 only; a non-loopback client is rejected 403.
@@ -44,6 +49,12 @@ import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, Optional, Tuple
 
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Make ``wca`` importable when this script is launched directly (dev box).
+_SRC = os.path.join(_REPO_ROOT, "src")
+if _SRC not in sys.path:
+    sys.path.insert(0, _SRC)
+
 # ---------------------------------------------------------------------------
 # Config (env-overridable; all have safe defaults)
 # ---------------------------------------------------------------------------
@@ -60,8 +71,19 @@ MINI_BET_RECS = os.environ.get("WCA_MINI_BET_RECS", "site/bet_recs.json")
 # Local copy of bet_recs.json for the dev-side pre-validation (defence in depth).
 LOCAL_BET_RECS = os.environ.get(
     "WCA_LOCAL_BET_RECS",
-    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                 "site", "bet_recs.json"),
+    os.path.join(_REPO_ROOT, "site", "bet_recs.json"),
+)
+
+# Local copy of the 02A event-market feed for /park-event re-validation.
+LOCAL_EVENT_RECS = os.environ.get(
+    "WCA_LOCAL_EVENT_RECS",
+    os.path.join(_REPO_ROOT, "site", "event_market_recs.json"),
+)
+
+# Read-only orderflow DB used to resolve null-token advancement rows.
+LOCAL_ORDERFLOW_DB = os.environ.get(
+    "WCA_LOCAL_ORDERFLOW_DB",
+    os.path.join(_REPO_ROOT, "data", "pm_orderflow.db"),
 )
 
 # Hard USD cap forwarded to the mini fire (the mini clamps to its own backstop).
@@ -180,6 +202,103 @@ def _fire_on_mini(rec_id: str, nonce: str) -> Dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# /park-event — FIRE a sized 02A Event-Market rec (park a PM-<n>, never place)
+#
+# Re-reads + re-validates the rec from site/event_market_recs.json (never the
+# client), resolves the PM token (feed first, then the read-only orderflow DB
+# for advancement rows), packages a pm_parked proposal, and ships it via the
+# EXISTING in-play relay (wca.inplay SshRelay -> mini ingest, else the git
+# artifact fallback).  The human's "Y PM-<n>" in @gamble1_bot is the only fire.
+# ---------------------------------------------------------------------------
+
+
+def _load_event_feed() -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    try:
+        with open(LOCAL_EVENT_RECS, "r", encoding="utf-8") as fh:
+            return json.load(fh), None
+    except Exception as exc:  # noqa: BLE001
+        return None, "could not read event_market_recs.json (%s)" % exc
+
+
+def _park_event(body: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate, resolve, and relay-park one event-market rec.
+
+    Returns a clean JSON dict (``ok`` carries the real outcome). Never raises;
+    a mini-unreachable relay is a complete answer (git-artifact fallback), not
+    a half-state.
+    """
+    from wca import eventfire
+
+    dry = _pm_dry_run_value() == "1"
+    nonce = str(body.get("nonce") or "").strip()
+    if not nonce:
+        return {"ok": False, "dry_run": dry, "message": "nonce required"}
+
+    feed, err = _load_event_feed()
+    if feed is None:
+        return {"ok": False, "dry_run": dry, "message": err}
+
+    rec = eventfire.find_rec(
+        feed,
+        rec_id=(str(body.get("rec_id")).strip() if body.get("rec_id") else None),
+        fixture=body.get("fixture"),
+        family=body.get("family"),
+        selection=body.get("selection"),
+    )
+    if rec is None:
+        return {"ok": False, "dry_run": dry,
+                "message": "rec not found in event_market_recs.json"}
+
+    reason = eventfire.validate_fireable(feed, rec)
+    if reason is not None:
+        return {"ok": False, "dry_run": dry, "message": "not fireable — %s" % reason}
+
+    from pathlib import Path
+    token_id, tok_reason = eventfire.resolve_token(
+        rec, orderflow_db=Path(LOCAL_ORDERFLOW_DB))
+    if token_id is None:
+        return {"ok": False, "dry_run": dry, "message": tok_reason}
+
+    proposal = eventfire.build_proposal(feed, rec, token_id, nonce=nonce)
+
+    # Ship via the SAME in-play relay the monitor uses: SSH to the mini when
+    # reachable (instant PM-<n>), else the git-artifact fallback (fireable
+    # after the ~5-min autopull; the mini ingest DMs the PM-<n> then).
+    from wca import inplay
+
+    ssh = inplay.SshRelay()
+    git = inplay.GitArtifactRelay(_REPO_ROOT)
+    relay = inplay.select_relay(ssh, git)
+    res = relay.park(proposal)
+
+    settle = proposal["settlement_basis"]
+    settle_lbl = "ET+pens" if settle in ("ET+pens", "advance") else "90 min"
+    price_c = round(proposal["price"] * 100, 1)
+    if not res.ok:
+        return {
+            "ok": False, "dry_run": dry, "relay": res.relay,
+            "message": "park failed via %s: %s" % (res.relay, res.detail),
+        }
+    if res.pm_token:  # synchronous (ssh) — PM-<n> known now
+        return {
+            "ok": True, "dry_run": dry, "relay": res.relay,
+            "pm_tag": res.pm_token, "settlement": settle_lbl,
+            "message": ("%s — %s %s $%s @ %s¢ [settles %s]. Approve with Y %s"
+                        % (res.pm_token, proposal["match_desc"],
+                           proposal["outcome"], proposal["size_usd"],
+                           price_c, settle_lbl, res.pm_token)),
+        }
+    # git-artifact fallback — parked to origin/main; fireable after mini sync.
+    return {
+        "ok": True, "dry_run": dry, "relay": res.relay, "pm_tag": None,
+        "settlement": settle_lbl, "pending_sync": True,
+        "message": ("parked to origin/main via git relay — %s. The mini's "
+                    "ingest will DM the fireable PM-<n> after autopull (~≤6min)."
+                    % res.detail),
+    }
+
+
+# ---------------------------------------------------------------------------
 # HTTP handler
 # ---------------------------------------------------------------------------
 
@@ -217,19 +336,21 @@ class _Handler(BaseHTTPRequestHandler):
                 "dry_run": _pm_dry_run_value() == "1",
                 "mini_host": MINI_HOST,
                 "max_usd": MAX_USD,
+                "endpoints": ["/place", "/park-event"],
                 "token_configured": bool(os.environ.get("WCA_PLACE_TOKEN")),
             })
             return
         self._send_json(404, {"ok": False, "message": "not found"})
 
     def do_POST(self) -> None:  # noqa: N802
-        if self.path.split("?", 1)[0] != "/place":
+        path = self.path.split("?", 1)[0]
+        if path not in ("/place", "/park-event"):
             self._send_json(404, {"ok": False, "message": "not found"})
             return
+        # Shared guardrails (BOTH endpoints): loopback-only, then token gate.
         if not self._is_loopback():
             self._send_json(403, {"ok": False, "message": "loopback only"})
             return
-
         expected = os.environ.get("WCA_PLACE_TOKEN")
         got = self.headers.get("X-WCA-Place-Token")
         if not expected or not got or got != expected:
@@ -244,6 +365,11 @@ class _Handler(BaseHTTPRequestHandler):
             self._send_json(400, {"ok": False, "message": "bad JSON body (%s)" % exc})
             return
 
+        if path == "/park-event":
+            self._handle_park_event(body)
+            return
+
+        # --- /place (UNCHANGED) ---------------------------------------------
         rec_id = str(body.get("rec_id") or "").strip()
         nonce = str(body.get("nonce") or "").strip()
         if not rec_id or not nonce:
@@ -259,6 +385,24 @@ class _Handler(BaseHTTPRequestHandler):
         # Always 200 at the transport layer for a well-formed request; the JSON
         # ``ok`` field carries the real outcome so the UI never has to parse HTTP
         # status for business logic. A refusal is still a clean, complete answer.
+        self._send_json(200, result)
+
+    def _handle_park_event(self, body: Dict[str, Any]) -> None:
+        """POST /park-event — park a fireable 02A event-market rec (never fires)."""
+        nonce = str(body.get("nonce") or "").strip()
+        has_id = bool(str(body.get("rec_id") or "").strip())
+        has_pair = bool(str(body.get("fixture") or "").strip()
+                        and str(body.get("selection") or "").strip())
+        if not nonce or not (has_id or has_pair):
+            self._send_json(400, {
+                "ok": False,
+                "message": "nonce and (rec_id OR fixture+selection) required"})
+            return
+        try:
+            result = _park_event(body)
+        except Exception as exc:  # noqa: BLE001 — never a half-state / 500
+            result = {"ok": False, "dry_run": _pm_dry_run_value() == "1",
+                      "message": "park-event failed cleanly: %s" % exc}
         self._send_json(200, result)
 
 
