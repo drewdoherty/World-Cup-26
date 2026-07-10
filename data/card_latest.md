@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-10T10:44:10 -->
+<!-- generated: 2026-07-10T11:20:37 -->
 *World Cup Alpha — trade card* (0 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
@@ -23,7 +23,7 @@ _No +EV trades clear the selection rule on the current slate._
     2-0  9.7%  back at impl <= 9.5%
     3-1  6.7%  back at impl <= 6.5%
     3-0  5.9%  back at impl <= 5.8%
-    O/U 2.5: over 57.1% / under 42.9%   BTTS 56.9%
+    O/U 2.5: over 57.1% / under 42.9%   BTTS 57.0%
 
 *Norway vs England*
     xG: 0.96-1.68
