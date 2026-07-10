@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-10T07:43:59 -->
+<!-- generated: 2026-07-10T08:20:24 -->
 ⚽ *Next match* — Spain vs Belgium
 Kickoff 2026-07-10 19:00:00+00:00
 
 *Winner* (model blend)
-  Spain          model 58.7% · mkt 59.2% (matchbook)  EV -0.7% ❌−EV
-  Belgium        model 17.2% · mkt 16.1% (matchbook)  EV +6.4% ✅+EV  (<25% model — NO CASH)
-  Draw           model 24.1% · mkt 25.0% (betfair_ex_uk)  EV -3.6% ❌−EV  (<25% model — NO CASH)
+  Spain          model 58.9% · mkt 59.2% (matchbook)  EV -0.5% ❌−EV
+  Belgium        model 17.1% · mkt 16.1% (matchbook)  EV +6.0% ✅+EV  (<25% model — NO CASH)
+  Draw           model 24.0% · mkt 24.4% (Smarkets)  EV -1.4% ❌−EV  (<25% model — NO CASH)
 
 *Corners* (model, exp 9.0)
   O/U 8.5: over 54.2% / under 45.8% (model only — no live corners feed, +EV unverifiable)
@@ -20,5 +20,5 @@ _top anytime, mkt implied % (both teams — add squad to split + FGS; no model p
   Victor Munoz         mkt 28% (Betfair)
 
 *Scorelines* (top 6)
-1-1 11.3% | 2-1 10.8% | 1-0 9.8% | 2-0 9.6% | 3-1 6.6% | 3-0 5.9%
+1-1 11.3% | 2-1 10.8% | 1-0 9.9% | 2-0 9.6% | 3-1 6.6% | 3-0 5.9%
   O/U 2.5: over 57.0% / under 43.0%   BTTS 57.0%
