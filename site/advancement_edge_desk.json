@@ -6,7 +6,7 @@
  "freshness": {
   "checks": [
    {
-    "age_secs": 2605.0,
+    "age_secs": 4627.0,
     "max_age_secs": 10800,
     "name": "advancement",
     "pass": true,
@@ -21,19 +21,19 @@
     "pass": true,
     "reason": null,
     "source": "site/bet_recs.json",
-    "stamp": "2026-07-10 10:30:12 UTC"
+    "stamp": "2026-07-10 11:03:54 UTC"
    },
    {
-    "age_secs": 46.0,
+    "age_secs": 31.0,
     "max_age_secs": 10800,
     "name": "scores_markets",
     "pass": true,
     "reason": null,
     "source": "site/scores_markets.json",
-    "stamp": "2026-07-10 10:29:27 UTC"
+    "stamp": "2026-07-10 11:03:24 UTC"
    },
    {
-    "age_secs": 1791.0,
+    "age_secs": 3813.0,
     "max_age_secs": 21600,
     "name": "pm_ideas",
     "pass": true,
@@ -42,16 +42,16 @@
     "stamp": "2026-07-10T10:00:22Z"
    },
    {
-    "age_secs": 1986.0,
+    "age_secs": 348.1,
     "max_age_secs": 86400,
     "name": "orderflow",
     "pass": true,
     "reason": null,
     "source": "site/microstructure/orderflow.json",
-    "stamp": "2026-07-10T09:57:07.001341+00:00"
+    "stamp": "2026-07-10T10:58:06.945661+00:00"
    },
    {
-    "age_secs": 3253.0,
+    "age_secs": 5275.0,
     "max_age_secs": 50400,
     "name": "advancement_model",
     "pass": true,
@@ -72,7 +72,7 @@
   "pass": true
  },
  "meta": {
-  "advancement_model_age_hours": 0.9,
+  "advancement_model_age_hours": 1.47,
   "advancement_model_generated": "2026-07-10 09:36 UTC",
   "caveats": [
    "SHADOW-ONLY: decision-support feed; no verdict here is a trade instruction and nothing is wired to execution.",
@@ -97,7 +97,7 @@
    "site/pm_ideas.json": 21600,
    "site/scores_markets.json": 10800
   },
-  "generated_at": "2026-07-10T10:30:13Z",
+  "generated_at": "2026-07-10T11:03:55Z",
   "n_advancement_legs_without_pm_quote": 5,
   "n_by_verdict": {
    "DO_NOT_TRADE": 3,
@@ -138,10 +138,10 @@
   "shadow_only": true,
   "sources": {
    "site/advancement_data.json": "2026-07-10 09:46:48 UTC",
-   "site/bet_recs.json": "2026-07-10 10:30:12 UTC",
-   "site/microstructure/orderflow.json": "2026-07-10T09:57:07.001341+00:00",
+   "site/bet_recs.json": "2026-07-10 11:03:54 UTC",
+   "site/microstructure/orderflow.json": "2026-07-10T10:58:06.945661+00:00",
    "site/pm_ideas.json": "2026-07-10T10:00:22Z",
-   "site/scores_markets.json": "2026-07-10 10:29:27 UTC"
+   "site/scores_markets.json": "2026-07-10 11:03:24 UTC"
   },
   "verdict_enum": [
    "SHADOW_ADD",
@@ -3194,7 +3194,7 @@
    "bet_rec": null,
    "book_edge": 0.004,
    "book_edge_source": "bet_recs.withheld[argentina_vs_switzerland_home_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 1.7473,
+   "book_price_decimal": 1.7471,
    "book_price_source": "bet_recs.withheld[argentina_vs_switzerland_home_1x2].price (decimal book odds)",
    "bucket": "moneyline",
    "edge_adj": null,
@@ -3276,13 +3276,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "Argentina vs Switzerland \u00b7 home \u00b7 settles at 90 min",
-   "model_prob": 0.5763,
+   "model_prob": 0.5764,
    "model_source": "bet_recs.withheld[argentina_vs_switzerland_home_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.5763,
+   "position_prob": 0.5764,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -3305,14 +3305,14 @@
   },
   {
    "bet_rec": null,
-   "book_edge": 0.0059,
+   "book_edge": 0.0061,
    "book_edge_source": "bet_recs.withheld[norway_vs_england_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 1.9413,
+   "book_price_decimal": 1.945,
    "book_price_source": "bet_recs.withheld[norway_vs_england_away_1x2].price (decimal book odds)",
    "bucket": "moneyline",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": 0.0114,
+   "ev_net": 0.0119,
    "fixture": "Norway vs England",
    "gates": {
     "clv_history": {
@@ -3322,7 +3322,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge +0.0059 not above the 0.02 threshold"
+     "reason": "book edge +0.0061 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": true,
@@ -3389,13 +3389,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "Norway vs England \u00b7 away \u00b7 settles at 90 min",
-   "model_prob": 0.521,
+   "model_prob": 0.5202,
    "model_source": "bet_recs.withheld[norway_vs_england_away_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.521,
+   "position_prob": 0.5202,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -3412,20 +3412,20 @@
    "team": "England",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:0.0059<0.0200"
+    "withheld by bet_recs: edge_below_floor:0.0061<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:0.0059<0.0200"
+   "withheld_reason": "edge_below_floor:0.0061<0.0200"
   },
   {
    "bet_rec": null,
-   "book_edge": -0.006,
+   "book_edge": -0.0063,
    "book_edge_source": "bet_recs.withheld[spain_vs_belgium_home_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 1.6758,
+   "book_price_decimal": 1.6693,
    "book_price_source": "bet_recs.withheld[spain_vs_belgium_home_1x2].price (decimal book odds)",
    "bucket": "moneyline",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.01,
+   "ev_net": -0.0105,
    "fixture": "Spain vs Belgium",
    "gates": {
     "clv_history": {
@@ -3435,7 +3435,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge -0.0060 not above the 0.02 threshold"
+     "reason": "book edge -0.0063 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": true,
@@ -3502,13 +3502,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "Spain vs Belgium \u00b7 home \u00b7 settles at 90 min",
-   "model_prob": 0.5907,
+   "model_prob": 0.5928,
    "model_source": "bet_recs.withheld[spain_vs_belgium_home_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.5907,
+   "position_prob": 0.5928,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -3525,15 +3525,15 @@
    "team": "Spain",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:-0.0060<0.0200"
+    "withheld by bet_recs: edge_below_floor:-0.0063<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:-0.0060<0.0200"
+   "withheld_reason": "edge_below_floor:-0.0063<0.0200"
   },
   {
    "bet_rec": null,
    "book_edge": -0.0056,
    "book_edge_source": "bet_recs.withheld[argentina_vs_switzerland_draw_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 3.7723,
+   "book_price_decimal": 3.772,
    "book_price_source": "bet_recs.withheld[argentina_vs_switzerland_draw_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
@@ -3644,14 +3644,14 @@
   },
   {
    "bet_rec": null,
-   "book_edge": -0.0023,
+   "book_edge": -0.0026,
    "book_edge_source": "bet_recs.withheld[norway_vs_england_draw_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 3.8716,
+   "book_price_decimal": 3.852,
    "book_price_source": "bet_recs.withheld[norway_vs_england_draw_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.009,
+   "ev_net": -0.01,
    "fixture": "Norway vs England",
    "gates": {
     "clv_history": {
@@ -3661,7 +3661,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge -0.0023 not above the 0.02 threshold"
+     "reason": "book edge -0.0026 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": true,
@@ -3728,13 +3728,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "Norway vs England \u00b7 draw \u00b7 settles at 90 min",
-   "model_prob": 0.256,
+   "model_prob": 0.257,
    "model_source": "bet_recs.withheld[norway_vs_england_draw_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.256,
+   "position_prob": 0.257,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -3751,20 +3751,20 @@
    "team": "Draw",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:-0.0023<0.0200"
+    "withheld by bet_recs: edge_below_floor:-0.0026<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:-0.0023<0.0200"
+   "withheld_reason": "edge_below_floor:-0.0026<0.0200"
   },
   {
    "bet_rec": null,
    "book_edge": 0.0016,
    "book_edge_source": "bet_recs.withheld[argentina_vs_switzerland_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 6.1503,
+   "book_price_decimal": 6.1532,
    "book_price_source": "bet_recs.withheld[argentina_vs_switzerland_away_1x2].price (decimal book odds)",
    "bucket": "longshot",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": 0.01,
+   "ev_net": 0.0101,
    "fixture": "Argentina vs Switzerland",
    "gates": {
     "clv_history": {
@@ -3870,14 +3870,14 @@
   },
   {
    "bet_rec": null,
-   "book_edge": -0.0036,
+   "book_edge": -0.0035,
    "book_edge_source": "bet_recs.withheld[norway_vs_england_home_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 4.413,
+   "book_price_decimal": 4.4198,
    "book_price_source": "bet_recs.withheld[norway_vs_england_home_1x2].price (decimal book odds)",
    "bucket": "longshot",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.0157,
+   "ev_net": -0.0155,
    "fixture": "Norway vs England",
    "gates": {
     "clv_history": {
@@ -3887,7 +3887,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge -0.0036 not above the 0.02 threshold"
+     "reason": "book edge -0.0035 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": true,
@@ -3954,13 +3954,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "Norway vs England \u00b7 home \u00b7 settles at 90 min",
-   "model_prob": 0.223,
+   "model_prob": 0.2227,
    "model_source": "bet_recs.withheld[norway_vs_england_home_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.223,
+   "position_prob": 0.2227,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -3977,20 +3977,20 @@
    "team": "Norway",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:-0.0036<0.0200"
+    "withheld by bet_recs: edge_below_floor:-0.0035<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:-0.0036<0.0200"
+   "withheld_reason": "edge_below_floor:-0.0035<0.0200"
   },
   {
    "bet_rec": null,
-   "book_edge": 0.0051,
+   "book_edge": 0.0052,
    "book_edge_source": "bet_recs.withheld[spain_vs_belgium_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 6.0597,
+   "book_price_decimal": 6.0956,
    "book_price_source": "bet_recs.withheld[spain_vs_belgium_away_1x2].price (decimal book odds)",
    "bucket": "longshot",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": 0.0309,
+   "ev_net": 0.0319,
    "fixture": "Spain vs Belgium",
    "gates": {
     "clv_history": {
@@ -4000,7 +4000,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge +0.0051 not above the 0.02 threshold"
+     "reason": "book edge +0.0052 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": true,
@@ -4067,13 +4067,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "Spain vs Belgium \u00b7 away \u00b7 settles at 90 min",
-   "model_prob": 0.1701,
+   "model_prob": 0.1693,
    "model_source": "bet_recs.withheld[spain_vs_belgium_away_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.1701,
+   "position_prob": 0.1693,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -4096,14 +4096,14 @@
   },
   {
    "bet_rec": null,
-   "book_edge": 0.0009,
+   "book_edge": 0.0011,
    "book_edge_source": "bet_recs.withheld[spain_vs_belgium_draw_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 4.1974,
+   "book_price_decimal": 4.2216,
    "book_price_source": "bet_recs.withheld[spain_vs_belgium_draw_1x2].price (decimal book odds)",
    "bucket": "longshot",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": 0.0037,
+   "ev_net": 0.0045,
    "fixture": "Spain vs Belgium",
    "gates": {
     "clv_history": {
@@ -4113,7 +4113,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge +0.0009 not above the 0.02 threshold"
+     "reason": "book edge +0.0011 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": true,
@@ -4180,13 +4180,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "Spain vs Belgium \u00b7 draw \u00b7 settles at 90 min",
-   "model_prob": 0.2391,
+   "model_prob": 0.2379,
    "model_source": "bet_recs.withheld[spain_vs_belgium_draw_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.2391,
+   "position_prob": 0.2379,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
