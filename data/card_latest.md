@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-10T02:53:50 -->
+<!-- generated: 2026-07-10T03:30:01 -->
 *World Cup Alpha — trade card* (0 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
@@ -9,7 +9,7 @@ _No +EV trades clear the selection rule on the current slate._
   x [LS] Argentina vs Switzerland — Switzerland — back 16.1% impl (model 16.6%, EV +2.8% ✅+EV): below 20% hit-probability floor (model 16.6%) — too unlikely to return PnL even at +2.8% EV
 
 *— WATCH (near-threshold, below the +2% EV floor — NOT staked, 1) —*
-  ~ [ML] Norway vs England — England — back 51.8% impl via betfair (model 52.3% / mkt 51.7%, EV +0.9% ✅+EV)
+  ~ [ML] Norway vs England — England — back 51.8% impl via betfair (model 52.2% / mkt 51.6%, EV +0.7% ✅+EV)
 
 *— REFERENCE, NOT SIZED (model prices only) —*
 *World Cup Alpha — scorelines* (3 fixtures)
@@ -31,8 +31,8 @@ _No +EV trades clear the selection rule on the current slate._
     0-2  9.9%  back at impl <= 9.7%
     1-2  8.8%  back at impl <= 8.6%
     0-0  7.9%  back at impl <= 7.7%
-    1-0  6.9%  back at impl <= 6.7%
-    O/U 2.5: over 49.3% / under 50.7%   BTTS 50.4%
+    1-0  6.9%  back at impl <= 6.8%
+    O/U 2.5: over 49.3% / under 50.7%   BTTS 50.3%
 
 *Argentina vs Switzerland*
     xG: 1.81-0.91
