@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-10 09:56:15 UTC",
+    "generated": "2026-07-10 10:30:12 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 1403,
-      "advancement_secs": 140350,
+      "model_secs": 1369,
+      "advancement_secs": 2604,
       "price_secs": null,
-      "promo_secs": 75492,
+      "promo_secs": 1368,
       "exposure_secs": null
     },
     "coverage": {
@@ -50,12 +50,169 @@
       "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($4106).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
-    "actionable_count": 0,
-    "withheld_count": 38
+    "actionable_count": 4,
+    "withheld_count": 29
   },
   "match_singles": [],
   "event_props": [],
-  "advancement_futures": [],
+  "advancement_futures": [
+    {
+      "id": "england_sf_pm",
+      "team": "England",
+      "group": "L",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.7123,
+      "pm_price": 0.655,
+      "pm_fee": 0.0068,
+      "price": 1.5111,
+      "edge_adj": 0.0456,
+      "ev_net": 0.0505,
+      "stake": 136.39,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2604,
+        "price_secs": 2604
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "path_capped": true,
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Norway",
+      "match_round": "Quarter-finals",
+      "match_1x2": {
+        "team_win": 0.505,
+        "draw": 0.276,
+        "opp_win": 0.219
+      }
+    },
+    {
+      "id": "spain_win_pm",
+      "team": "Spain",
+      "group": "H",
+      "stage": "win",
+      "market": "advancement",
+      "selection": "reach_win",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.2582,
+      "pm_price": 0.1685,
+      "pm_fee": 0.0042,
+      "price": 5.7903,
+      "edge_adj": 0.085,
+      "ev_net": 0.0855,
+      "stake": 40.31,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2604,
+        "price_secs": 2604
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "path_capped": true,
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Belgium",
+      "match_round": "Quarter-finals",
+      "match_1x2": {
+        "team_win": 0.559,
+        "draw": 0.249,
+        "opp_win": 0.192
+      }
+    },
+    {
+      "id": "spain_final_pm",
+      "team": "Spain",
+      "group": "H",
+      "stage": "Final",
+      "market": "advancement",
+      "selection": "reach_Final",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.4249,
+      "pm_price": 0.305,
+      "pm_fee": 0.0064,
+      "price": 3.2117,
+      "edge_adj": 0.1085,
+      "ev_net": 0.1135,
+      "stake": 62.23,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2604,
+        "price_secs": 2604
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "path_capped": true,
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Belgium",
+      "match_round": "Quarter-finals",
+      "match_1x2": {
+        "team_win": 0.559,
+        "draw": 0.249,
+        "opp_win": 0.192
+      }
+    },
+    {
+      "id": "belgium_sf_pm",
+      "team": "Belgium",
+      "group": "G",
+      "stage": "SF",
+      "market": "advancement",
+      "selection": "reach_SF",
+      "venue": "polymarket",
+      "currency": "USD",
+      "model_prob": 0.3,
+      "pm_price": 0.2575,
+      "pm_fee": 0.0057,
+      "price": 3.7989,
+      "edge_adj": 0.0363,
+      "ev_net": 0.0368,
+      "stake": 49.12,
+      "action_label": "ADD",
+      "ages": {
+        "model_secs": 2604,
+        "price_secs": 2604
+      },
+      "stale": false,
+      "stale_reason": null,
+      "tags": [
+        "model",
+        "advancement",
+        "polymarket"
+      ],
+      "path_capped": true,
+      "market_kind": "advancement",
+      "market_label": "Advance \u00b7 incl. ET+pens",
+      "opponent": "Spain",
+      "match_round": "Quarter-finals",
+      "match_1x2": {
+        "team_win": 0.192,
+        "draw": 0.249,
+        "opp_win": 0.559
+      }
+    }
+  ],
   "guaranteed_arbs": [],
   "withheld": [
     {
@@ -66,13 +223,13 @@
       "market": "1X2",
       "selection": "home",
       "team": "Spain",
-      "model_prob": 0.5904,
-      "price": 1.6771,
-      "edge": -0.0059,
-      "ev_net": -0.0099,
+      "model_prob": 0.5907,
+      "price": 1.6758,
+      "edge": -0.006,
+      "ev_net": -0.01,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "edge_below_floor:-0.0059<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0060<0.0200",
       "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
@@ -85,10 +242,10 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.2387,
-      "price": 4.2049,
+      "model_prob": 0.2391,
+      "price": 4.1974,
       "edge": 0.0009,
-      "ev_net": 0.0039,
+      "ev_net": 0.0037,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "longshot filter: prob 24% < 25% (minnow risk)",
@@ -104,10 +261,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Belgium",
-      "model_prob": 0.1709,
-      "price": 6.0275,
-      "edge": 0.005,
-      "ev_net": 0.0302,
+      "model_prob": 0.1701,
+      "price": 6.0597,
+      "edge": 0.0051,
+      "ev_net": 0.0309,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "model_prob 17% < floor 20%",
@@ -305,86 +462,6 @@
       ]
     },
     {
-      "id": "spain_win_pm",
-      "team": "Spain",
-      "group": "H",
-      "stage": "win",
-      "market": "advancement",
-      "selection": "reach_win",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.2582,
-      "pm_price": 0.1875,
-      "pm_fee": 0.0046,
-      "price": 5.2064,
-      "edge_adj": 0.0656,
-      "ev_net": 0.0661,
-      "stake": 84.01,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 140350,
-        "price_secs": 140350
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Belgium",
-      "match_round": "Quarter-finals",
-      "match_1x2": {
-        "team_win": 0.559,
-        "draw": 0.249,
-        "opp_win": 0.192
-      },
-      "withheld_reason": "advancement model stale (>24h)",
-      "reason_code": "stale_advancement"
-    },
-    {
-      "id": "spain_final_pm",
-      "team": "Spain",
-      "group": "H",
-      "stage": "Final",
-      "market": "advancement",
-      "selection": "reach_Final",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.4249,
-      "pm_price": 0.355,
-      "pm_fee": 0.0069,
-      "price": 2.7634,
-      "edge_adj": 0.058,
-      "ev_net": 0.063,
-      "stake": 101.38,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 140350,
-        "price_secs": 140350
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Belgium",
-      "match_round": "Quarter-finals",
-      "match_1x2": {
-        "team_win": 0.559,
-        "draw": 0.249,
-        "opp_win": 0.192
-      },
-      "withheld_reason": "advancement model stale (>24h)",
-      "reason_code": "stale_advancement"
-    },
-    {
       "id": "spain_sf_pm",
       "team": "Spain",
       "group": "H",
@@ -394,10 +471,10 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.6999,
-      "pm_price": 0.755,
-      "ev_net": -0.0606,
+      "pm_price": 0.745,
+      "ev_net": -0.0508,
       "stake": 0.0,
-      "withheld_reason": "edge_below_floor:-0.0606<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0508<0.0200",
       "reason_code": "edge_below_floor"
     },
     {
@@ -410,10 +487,10 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.4323,
-      "pm_price": 0.4055,
-      "ev_net": 0.0196,
+      "pm_price": 0.4085,
+      "ev_net": 0.0166,
       "stake": 0.0,
-      "withheld_reason": "edge_below_floor:0.0196<0.0200",
+      "withheld_reason": "edge_below_floor:0.0166<0.0200",
       "reason_code": "edge_below_floor"
     },
     {
@@ -442,8 +519,8 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.2284,
-      "pm_price": 0.1945,
-      "ev_net": 0.0292,
+      "pm_price": 0.1875,
+      "ev_net": 0.0363,
       "stake": 0.0,
       "withheld_reason": "model-prob longshot (23% < 25%) \u2014 no cash (free-bet/lottery only)",
       "reason_code": "longshot_no_cash"
@@ -458,10 +535,10 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.1925,
-      "pm_price": 0.3255,
-      "ev_net": -0.1396,
+      "pm_price": 0.3855,
+      "ev_net": -0.2001,
       "stake": 0.0,
-      "withheld_reason": "edge_below_floor:-0.1396<0.0200",
+      "withheld_reason": "edge_below_floor:-0.2001<0.0200",
       "reason_code": "edge_below_floor"
     },
     {
@@ -474,26 +551,10 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.3554,
-      "pm_price": 0.535,
-      "ev_net": -0.1871,
+      "pm_price": 0.665,
+      "ev_net": -0.3163,
       "stake": 0.0,
-      "withheld_reason": "edge_below_floor:-0.1871<0.0200",
-      "reason_code": "edge_below_floor"
-    },
-    {
-      "id": "france_sf_pm",
-      "team": "France",
-      "group": "I",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.7023,
-      "pm_price": 0.785,
-      "ev_net": -0.0878,
-      "stake": 0.0,
-      "withheld_reason": "edge_below_floor:-0.0878<0.0200",
+      "withheld_reason": "edge_below_floor:-0.3163<0.0200",
       "reason_code": "edge_below_floor"
     },
     {
@@ -506,51 +567,11 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.3779,
-      "pm_price": 0.385,
-      "ev_net": -0.0142,
+      "pm_price": 0.375,
+      "ev_net": -0.0041,
       "stake": 0.0,
-      "withheld_reason": "edge_below_floor:-0.0142<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0041<0.0200",
       "reason_code": "edge_below_floor"
-    },
-    {
-      "id": "england_sf_pm",
-      "team": "England",
-      "group": "L",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.7123,
-      "pm_price": 0.655,
-      "pm_fee": 0.0068,
-      "price": 1.5111,
-      "edge_adj": 0.0456,
-      "ev_net": 0.0505,
-      "stake": 153.32,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 140350,
-        "price_secs": 140350
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Norway",
-      "match_round": "Quarter-finals",
-      "match_1x2": {
-        "team_win": 0.505,
-        "draw": 0.276,
-        "opp_win": 0.219
-      },
-      "withheld_reason": "advancement model stale (>24h)",
-      "reason_code": "stale_advancement"
     },
     {
       "id": "england_win_pm",
@@ -562,51 +583,11 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.1799,
-      "pm_price": 0.1585,
-      "ev_net": 0.0174,
+      "pm_price": 0.1595,
+      "ev_net": 0.0164,
       "stake": 0.0,
-      "withheld_reason": "edge_below_floor:0.0174<0.0200",
+      "withheld_reason": "edge_below_floor:0.0164<0.0200",
       "reason_code": "edge_below_floor"
-    },
-    {
-      "id": "belgium_sf_pm",
-      "team": "Belgium",
-      "group": "G",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.3,
-      "pm_price": 0.253,
-      "pm_fee": 0.0057,
-      "price": 3.8659,
-      "edge_adj": 0.0403,
-      "ev_net": 0.0413,
-      "stake": 57.22,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 140350,
-        "price_secs": 140350
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "Spain",
-      "match_round": "Quarter-finals",
-      "match_1x2": {
-        "team_win": 0.192,
-        "draw": 0.249,
-        "opp_win": 0.559
-      },
-      "withheld_reason": "advancement model stale (>24h)",
-      "reason_code": "stale_advancement"
     },
     {
       "id": "belgium_win_pm",
@@ -618,8 +599,8 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.0517,
-      "pm_price": 0.0245,
-      "ev_net": 0.0265,
+      "pm_price": 0.0215,
+      "ev_net": 0.0296,
       "stake": 0.0,
       "withheld_reason": "model-prob longshot (5% < 25%) \u2014 no cash (free-bet/lottery only)",
       "reason_code": "longshot_no_cash"
@@ -634,83 +615,11 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.1261,
-      "pm_price": 0.0665,
-      "ev_net": 0.0577,
+      "pm_price": 0.0515,
+      "ev_net": 0.0731,
       "stake": 0.0,
       "withheld_reason": "model-prob longshot (13% < 25%) \u2014 no cash (free-bet/lottery only)",
       "reason_code": "longshot_no_cash"
-    },
-    {
-      "id": "morocco_sf_pm",
-      "team": "Morocco",
-      "group": "C",
-      "stage": "SF",
-      "market": "advancement",
-      "selection": "reach_SF",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.2977,
-      "pm_price": 0.2235,
-      "pm_fee": 0.0052,
-      "price": 4.3724,
-      "edge_adj": 0.0685,
-      "ev_net": 0.069,
-      "stake": 91.81,
-      "action_label": "ADD",
-      "ages": {
-        "model_secs": 140350,
-        "price_secs": 140350
-      },
-      "stale": true,
-      "stale_reason": "advancement model stale (>24h)",
-      "tags": [
-        "model",
-        "advancement",
-        "polymarket"
-      ],
-      "market_kind": "advancement",
-      "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "France",
-      "match_round": "Quarter-finals",
-      "match_1x2": {
-        "team_win": 0.189,
-        "draw": 0.281,
-        "opp_win": 0.53
-      },
-      "withheld_reason": "advancement model stale (>24h)",
-      "reason_code": "stale_advancement"
-    },
-    {
-      "id": "morocco_win_pm",
-      "team": "Morocco",
-      "group": "C",
-      "stage": "win",
-      "market": "advancement",
-      "selection": "reach_win",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.0343,
-      "pm_price": 0.0305,
-      "ev_net": 0.0029,
-      "stake": 0.0,
-      "withheld_reason": "edge_below_floor:0.0029<0.0200",
-      "reason_code": "edge_below_floor"
-    },
-    {
-      "id": "morocco_final_pm",
-      "team": "Morocco",
-      "group": "C",
-      "stage": "Final",
-      "market": "advancement",
-      "selection": "reach_Final",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.0936,
-      "pm_price": 0.0785,
-      "ev_net": 0.0129,
-      "stake": 0.0,
-      "withheld_reason": "edge_below_floor:0.0129<0.0200",
-      "reason_code": "edge_below_floor"
     },
     {
       "id": "switzerland_sf_pm",
@@ -722,26 +631,10 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.2674,
-      "pm_price": 0.2605,
-      "ev_net": 0.0011,
+      "pm_price": 0.2625,
+      "ev_net": -0.0009,
       "stake": 0.0,
-      "withheld_reason": "edge_below_floor:0.0011<0.0200",
-      "reason_code": "edge_below_floor"
-    },
-    {
-      "id": "switzerland_win_pm",
-      "team": "Switzerland",
-      "group": "B",
-      "stage": "win",
-      "market": "advancement",
-      "selection": "reach_win",
-      "venue": "polymarket",
-      "currency": "USD",
-      "model_prob": 0.0301,
-      "pm_price": 0.0215,
-      "ev_net": 0.008,
-      "stake": 0.0,
-      "withheld_reason": "edge_below_floor:0.0080<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0009<0.0200",
       "reason_code": "edge_below_floor"
     },
     {
@@ -754,8 +647,8 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.0984,
-      "pm_price": 0.0705,
-      "ev_net": 0.0259,
+      "pm_price": 0.0725,
+      "ev_net": 0.0239,
       "stake": 0.0,
       "withheld_reason": "model-prob longshot (10% < 25%) \u2014 no cash (free-bet/lottery only)",
       "reason_code": "longshot_no_cash"
@@ -770,10 +663,10 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.0248,
-      "pm_price": 0.0595,
-      "ev_net": -0.0364,
+      "pm_price": 0.0605,
+      "ev_net": -0.0374,
       "stake": 0.0,
-      "withheld_reason": "edge_below_floor:-0.0364<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0374<0.0200",
       "reason_code": "edge_below_floor"
     },
     {
@@ -786,10 +679,10 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.0914,
-      "pm_price": 0.1395,
-      "ev_net": -0.0517,
+      "pm_price": 0.1635,
+      "ev_net": -0.0762,
       "stake": 0.0,
-      "withheld_reason": "edge_below_floor:-0.0517<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0762<0.0200",
       "reason_code": "edge_below_floor"
     },
     {
@@ -802,10 +695,10 @@
       "venue": "polymarket",
       "currency": "USD",
       "model_prob": 0.2878,
-      "pm_price": 0.345,
-      "ev_net": -0.064,
+      "pm_price": 0.355,
+      "ev_net": -0.0741,
       "stake": 0.0,
-      "withheld_reason": "edge_below_floor:-0.0640<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0741<0.0200",
       "reason_code": "edge_below_floor"
     }
   ]
