@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-10T06:31:22 -->
+<!-- generated: 2026-07-10T07:07:46 -->
 *World Cup Alpha — trade card* (0 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
@@ -17,12 +17,12 @@ _No +EV trades clear the selection rule on the current slate._
 *Spain vs Belgium*
     xG: 1.94-1.04
     1-1  11.3%  back at impl <= 11.1%
-    2-1  10.8%  back at impl <= 10.5%
+    2-1  10.8%  back at impl <= 10.6%
     1-0  9.8%  back at impl <= 9.6%
     2-0  9.6%  back at impl <= 9.4%
     3-1  6.6%  back at impl <= 6.5%
     3-0  5.9%  back at impl <= 5.8%
-    O/U 2.5: over 57.0% / under 43.0%   BTTS 57.1%
+    O/U 2.5: over 57.0% / under 43.0%   BTTS 57.0%
 
 *Norway vs England*
     xG: 0.97-1.68
