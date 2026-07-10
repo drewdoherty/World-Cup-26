@@ -1,16 +1,14 @@
-<!-- generated: 2026-07-10T15:34:49 -->
+<!-- generated: 2026-07-10T16:11:19 -->
 *World Cup Alpha — trade card* (0 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
 _No +EV trades clear the selection rule on the current slate._
 
-*— CUT (excluded from staking, 1) —*
-  x [LS] Argentina vs Switzerland — Switzerland — back 15.6% impl (model 16.4%, EV +5.1% ✅+EV): below 20% hit-probability floor (model 16.4%) — too unlikely to return PnL even at +5.1% EV
-
-*— WATCH (near-threshold, below the +2% EV floor — NOT staked, 3) —*
-  ~ [ML] Norway vs England — England — back 51.3% impl via betfair (model 51.7% / mkt 51.1%, EV +0.9% ✅+EV)
+*— WATCH (near-threshold, below the +2% EV floor — NOT staked, 4) —*
+  ~ [ML] Norway vs England — England — back 51.3% impl via betfair (model 51.8% / mkt 51.1%, EV +1.0% ✅+EV)
   ~ [ML] Argentina vs Switzerland — Argentina — back 57.5% impl via smarkets (model 57.7% / mkt 57.3%, EV +0.3% ✅+EV)
-  ~ [LS] Spain vs Belgium — Belgium — back 16.1% impl via betfair (model 16.6% / mkt 16.1%, EV +1.6% ✅+EV)
+  ~ [LS] Argentina vs Switzerland — Switzerland — back 16.1% impl via betfair (model 16.4% / mkt 16.3%, EV +1.8% ✅+EV)
+  ~ [LS] Spain vs Belgium — Belgium — back 16.1% impl via betfair (model 16.7% / mkt 16.1%, EV +1.8% ✅+EV)
 
 *— REFERENCE, NOT SIZED (model prices only) —*
 *World Cup Alpha — scorelines* (3 fixtures)
