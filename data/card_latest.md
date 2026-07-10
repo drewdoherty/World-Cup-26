@@ -1,29 +1,29 @@
-<!-- generated: 2026-07-10T12:33:08 -->
+<!-- generated: 2026-07-10T13:09:23 -->
 *World Cup Alpha — trade card* (0 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
 _No +EV trades clear the selection rule on the current slate._
 
-*— CUT (excluded from staking, 2) —*
+*— CUT (excluded from staking, 1) —*
   x [LS] Argentina vs Switzerland — Switzerland — back 15.6% impl (model 16.4%, EV +5.1% ✅+EV): below 20% hit-probability floor (model 16.4%) — too unlikely to return PnL even at +5.1% EV
-  x [LS] Spain vs Belgium — Belgium — back 16.1% impl (model 16.9%, EV +4.8% ✅+EV): below 20% hit-probability floor (model 16.9%) — too unlikely to return PnL even at +4.8% EV
 
-*— WATCH (near-threshold, below the +2% EV floor — NOT staked, 2) —*
-  ~ [ML] Norway vs England — England — back 51.5% impl via betfair (model 52.0% / mkt 51.4%, EV +0.8% ✅+EV)
+*— WATCH (near-threshold, below the +2% EV floor — NOT staked, 3) —*
+  ~ [ML] Norway vs England — England — back 51.3% impl via betfair (model 51.9% / mkt 51.3%, EV +1.3% ✅+EV)
   ~ [ML] Argentina vs Switzerland — Argentina — back 57.5% impl via smarkets (model 57.6% / mkt 57.2%, EV +0.3% ✅+EV)
+  ~ [LS] Spain vs Belgium — Belgium — back 16.1% impl via betfair (model 16.7% / mkt 16.2%, EV +1.9% ✅+EV)
 
 *— REFERENCE, NOT SIZED (model prices only) —*
 *World Cup Alpha — scorelines* (3 fixtures)
 
 *Spain vs Belgium*
-    xG: 1.94-1.03
-    1-1  11.3%  back at impl <= 11.1%
-    2-1  10.8%  back at impl <= 10.6%
-    1-0  9.9%  back at impl <= 9.7%
+    xG: 1.95-1.03
+    1-1  11.2%  back at impl <= 11.0%
+    2-1  10.9%  back at impl <= 10.7%
+    1-0  10.0%  back at impl <= 9.8%
     2-0  9.7%  back at impl <= 9.5%
-    3-1  6.6%  back at impl <= 6.5%
-    3-0  5.9%  back at impl <= 5.8%
-    O/U 2.5: over 57.0% / under 43.0%   BTTS 57.0%
+    3-1  6.7%  back at impl <= 6.5%
+    3-0  6.0%  back at impl <= 5.8%
+    O/U 2.5: over 57.1% / under 42.9%   BTTS 56.9%
 
 *Norway vs England*
     xG: 0.97-1.68
