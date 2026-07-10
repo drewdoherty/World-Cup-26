@@ -1,39 +1,32 @@
-<!-- generated: 2026-07-09T12:32:36 -->
-⚽ *Goalscorers* — next 4 games
-_anytime + first · best book / Polymarket; ¼-Kelly £ stake on most likely + best EV_
+<!-- generated: 2026-07-10T07:36:56 -->
+⚽ *Goalscorers* — next 3 games
+_anytime + first · model % vs best book/PM implied %; ¼-Kelly £ stake only on ≥25% model legs · further-out fixtures first (wca.selection)_
+_⚠ scorer punts: documented −73.9% leak — <25% model legs are NO-CASH (free-bet/lottery only)_
+_no model-priced scorer rows this build — market implied % only (3 fixtures), +EV unverifiable on these_
 
 *Argentina vs Switzerland*  _Jul 12 01:00Z_
-_top anytime (both teams — add squad to split + FGS)_
-  Lionel Messi          2.06 (Betfair)  imp 49%
-  Julian Alvarez        2.75 (William Hill)  imp 36%
-  Lautaro Martinez      2.75 (William Hill)  imp 36%
-  Jose Manuel Alberto   3.00 (William Hill)  imp 33%
-  Nicolas Paz Martinez  4.00 (William Hill)  imp 25%
-  Breel Embolo          4.40 (Betfair)  imp 23%
+_top anytime, mkt implied % (both teams — add squad to split + FGS; no model price, +EV unverifiable)_
+  Lionel Messi         mkt 49% (Betfair)
+  Julian Alvarez       mkt 36% (William Hill)
+  Lautaro Martinez     mkt 36% (William Hill)
+  Jose Manuel Alberto  mkt 35% (William Hill)
+  Nicolas Paz Martinez mkt 25% (William Hill)
+  Giuliano Simeone     mkt 23% (William Hill)
 
 *Norway vs England*  _Jul 11 21:00Z_
-_top anytime (both teams — add squad to split + FGS)_
-  Ollie Watkins         2.20 (William Hill)  imp 45%
-  Harry Kane            2.22 (Betfair)  imp 45%
-  Ivan Toney            2.30 (William Hill)  imp 43%
-  Erling Braut Haaland  2.44 (Betfair)  imp 41%
-  Jude Bellingham       3.50 (Betfair)  imp 29%
-  Marcus Rashford       3.50 (William Hill)  imp 29%
+_top anytime, mkt implied % (both teams — add squad to split + FGS; no model price, +EV unverifiable)_
+  Harry Kane           mkt 45% (Betfair)
+  Erling Braut Haaland mkt 42% (Betfair)
+  Ivan Toney           mkt 40% (Betfair)
+  Ollie Watkins        mkt 39% (Betfair)
+  Marcus Rashford      mkt 29% (William Hill)
+  Jude Bellingham      mkt 28% (Betfair)
 
 *Spain vs Belgium*  _Jul 10 19:00Z_
-_top anytime (both teams — add squad to split + FGS)_
-  Borja Iglesias        2.20 (William Hill)  imp 45%
-  Mikel Oyarzabal       2.50 (Betfair)  imp 40%
-  Lamine Yamal          2.82 (Betfair)  imp 35%
-  Nico Williams         3.25 (William Hill)  imp 31%
-  Ferran Torres Garcia  3.30 (Betfair)  imp 30%
-  Victor Munoz          3.60 (William Hill)  imp 28%
-
-*France vs Morocco*  _Jul 09 20:00Z_
-_top anytime (both teams — add squad to split + FGS)_
-  Kylian Mbappe         1.96 (Betfair)  imp 51%
-  Jean-Philippe Mateta  2.90 (William Hill)  imp 34%
-  Marcus Thuram         2.90 (William Hill)  imp 34%
-  Bradley Barcola       3.50 (Betfair)  imp 29%
-  Ousmane Dembele       3.65 (Betfair)  imp 27%
-  Michael Olise         4.00 (Betfair)  imp 25%
+_top anytime, mkt implied % (both teams — add squad to split + FGS; no model price, +EV unverifiable)_
+  Borja Iglesias       mkt 38% (Betfair)
+  Mikel Oyarzabal      mkt 38% (Betfair)
+  Lamine Yamal         mkt 34% (Betfair)
+  Nico Williams        mkt 31% (William Hill)
+  Ferran Torres Garcia mkt 30% (Betfair)
+  Victor Munoz         mkt 28% (Betfair)

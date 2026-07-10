@@ -1,9 +1,13 @@
 {
   "meta": {
+<<<<<<< Updated upstream
     "generated": "2026-07-10 09:38:37 UTC",
     "source": "scripts/wca_event_markets.py (live Gamma+CLOB snapshot)",
     "signal_rule": "|model - market| >= 2pp: green = model above market (BACK), red = market above model (LAY / back the complement)",
     "settlement_note": "90-min rows settle on the 90'+stoppage score; 'Team to Advance' rows settle ET+pens and sit in their own section"
+=======
+    "generated": "2026-07-10 09:55:51 UTC"
+>>>>>>> Stashed changes
   },
   "fixtures": [
     {
@@ -15,6 +19,7 @@
           "note": "settles on the 90'+stoppage score"
         },
         {
+<<<<<<< Updated upstream
           "label": "Spain",
           "model": 0.588915,
           "market": 0.59625,
@@ -60,6 +65,21 @@
           "ask": 0.165,
           "captured_utc": "2026-07-10T09:38:37Z",
           "dimmed": true
+=======
+          "label": "Home",
+          "model": 0.590353,
+          "market": 0.5952380952380952
+        },
+        {
+          "label": "Draw",
+          "model": 0.238734,
+          "market": 0.24390243902439027
+        },
+        {
+          "label": "Away",
+          "model": 0.170913,
+          "market": 0.16666666666666666
+>>>>>>> Stashed changes
         },
         {
           "section": "Goals O/U",
@@ -67,6 +87,7 @@
           "note": "fair value = 40% DC grid + 60% market (2026-07-08 calibration: grid ties market on Brier); under-side signals are display-only"
         },
         {
+<<<<<<< Updated upstream
           "label": "Over 0.5",
           "model": 0.938808,
           "market": 0.93625,
@@ -105,6 +126,16 @@
             "market_ref": 0.77625,
             "market_weight": 0.6
           }
+=======
+          "label": "Over",
+          "model": 0.5710000000000001,
+          "market": null
+        },
+        {
+          "label": "Under",
+          "model": 0.429,
+          "market": null
+>>>>>>> Stashed changes
         },
         {
           "label": "Over 2.5",
@@ -210,6 +241,7 @@
           "dimmed": true
         },
         {
+<<<<<<< Updated upstream
           "label": "Over 7.5",
           "model": 0.009054,
           "market": 0.0075,
@@ -1881,6 +1913,31 @@
           "bid": 0.14,
           "ask": 0.15,
           "captured_utc": "2026-07-10T09:38:37Z"
+=======
+          "label": "2-1",
+          "model": 0.10800000000000001,
+          "market": null
+        },
+        {
+          "label": "1-0",
+          "model": 0.099,
+          "market": null
+        },
+        {
+          "label": "2-0",
+          "model": 0.096,
+          "market": null
+        },
+        {
+          "label": "3-1",
+          "model": 0.066,
+          "market": null
+        },
+        {
+          "label": "3-0",
+          "model": 0.059000000000000004,
+          "market": null
+>>>>>>> Stashed changes
         }
       ],
       "has_market": true,
@@ -1906,6 +1963,7 @@
           "note": "settles on the 90'+stoppage score"
         },
         {
+<<<<<<< Updated upstream
           "label": "Norway",
           "model": 0.222989,
           "market": 0.22875,
@@ -1950,6 +2008,21 @@
           "bid": 0.52,
           "ask": 0.5225,
           "captured_utc": "2026-07-10T09:38:37Z"
+=======
+          "label": "Home",
+          "model": 0.223046,
+          "market": 0.22727272727272727
+        },
+        {
+          "label": "Draw",
+          "model": 0.255957,
+          "market": 0.2631578947368421
+        },
+        {
+          "label": "Away",
+          "model": 0.520997,
+          "market": 0.5154639175257733
+>>>>>>> Stashed changes
         },
         {
           "section": "Goals O/U",
@@ -1957,6 +2030,7 @@
           "note": "fair value = 40% DC grid + 60% market (2026-07-08 calibration: grid ties market on Brier); under-side signals are display-only"
         },
         {
+<<<<<<< Updated upstream
           "label": "Over 0.5",
           "model": 0.933278,
           "market": 0.94125,
@@ -1995,6 +2069,16 @@
             "market_ref": 0.79125,
             "market_weight": 0.6
           }
+=======
+          "label": "Over",
+          "model": 0.493,
+          "market": null
+        },
+        {
+          "label": "Under",
+          "model": 0.507,
+          "market": null
+>>>>>>> Stashed changes
         },
         {
           "label": "Over 2.5",
@@ -2018,6 +2102,7 @@
           "warning": "under-signal: DC under-calls historically unreliable (33% win, -34.9% ROI, n=21) — display only, never staked"
         },
         {
+<<<<<<< Updated upstream
           "label": "Over 3.5",
           "model": 0.310584,
           "market": 0.33375,
@@ -2058,6 +2143,16 @@
             "market_weight": 0.6
           },
           "dimmed": true
+=======
+          "label": "Yes",
+          "model": 0.504,
+          "market": null
+        },
+        {
+          "label": "No",
+          "model": 0.496,
+          "market": null
+>>>>>>> Stashed changes
         },
         {
           "label": "Over 5.5",
@@ -2102,6 +2197,7 @@
           "dimmed": true
         },
         {
+<<<<<<< Updated upstream
           "label": "Over 7.5",
           "model": 0.008142,
           "market": 0.0095,
@@ -3744,6 +3840,35 @@
         ]
       },
       "kickoff": "2026-07-11T21:00:00+00:00"
+=======
+          "label": "0-1",
+          "model": 0.10400000000000001,
+          "market": null
+        },
+        {
+          "label": "0-2",
+          "model": 0.098,
+          "market": null
+        },
+        {
+          "label": "1-2",
+          "model": 0.087,
+          "market": null
+        },
+        {
+          "label": "0-0",
+          "model": 0.079,
+          "market": null
+        },
+        {
+          "label": "1-0",
+          "model": 0.069,
+          "market": null
+        }
+      ],
+      "kickoff": "2026-07-11T21:00:00+00:00",
+      "has_market": true
+>>>>>>> Stashed changes
     },
     {
       "fixture": "Argentina vs Switzerland",
@@ -3754,6 +3879,7 @@
           "note": "settles on the 90'+stoppage score"
         },
         {
+<<<<<<< Updated upstream
           "label": "Argentina",
           "model": 0.576322,
           "market": 0.57375,
@@ -3767,10 +3893,16 @@
           "bid": 0.5725,
           "ask": 0.575,
           "captured_utc": "2026-07-10T09:38:37Z"
+=======
+          "label": "Home",
+          "model": 0.576322,
+          "market": 0.5780346820809249
+>>>>>>> Stashed changes
         },
         {
           "label": "Draw",
           "model": 0.259453,
+<<<<<<< Updated upstream
           "market": 0.26875,
           "family": "1x2",
           "settlement": "90min",
@@ -3798,6 +3930,14 @@
           "ask": 0.1625,
           "captured_utc": "2026-07-10T09:38:37Z",
           "dimmed": true
+=======
+          "market": 0.27027027027027023
+        },
+        {
+          "label": "Away",
+          "model": 0.164226,
+          "market": 0.15625
+>>>>>>> Stashed changes
         },
         {
           "section": "Goals O/U",
@@ -3805,6 +3945,7 @@
           "note": "fair value = 40% DC grid + 60% market (2026-07-08 calibration: grid ties market on Brier); under-side signals are display-only"
         },
         {
+<<<<<<< Updated upstream
           "label": "Over 0.5",
           "model": 0.913342,
           "market": 0.90625,
@@ -3843,6 +3984,16 @@
             "market_ref": 0.6925,
             "market_weight": 0.6
           }
+=======
+          "label": "Over",
+          "model": 0.509,
+          "market": null
+        },
+        {
+          "label": "Under",
+          "model": 0.491,
+          "market": null
+>>>>>>> Stashed changes
         },
         {
           "label": "Over 2.5",
@@ -3865,6 +4016,7 @@
           }
         },
         {
+<<<<<<< Updated upstream
           "label": "Over 3.5",
           "model": 0.248857,
           "market": 0.21875,
@@ -3905,6 +4057,16 @@
             "market_weight": 0.6
           },
           "dimmed": true
+=======
+          "label": "Yes",
+          "model": 0.516,
+          "market": null
+        },
+        {
+          "label": "No",
+          "model": 0.484,
+          "market": null
+>>>>>>> Stashed changes
         },
         {
           "label": "Over 5.5",
@@ -3928,6 +4090,7 @@
           "dimmed": true
         },
         {
+<<<<<<< Updated upstream
           "label": "Over 6.5",
           "model": 0.016455,
           "market": 0.013,
@@ -3947,6 +4110,11 @@
             "market_weight": 0.6
           },
           "dimmed": true
+=======
+          "label": "1-1",
+          "model": 0.124,
+          "market": null
+>>>>>>> Stashed changes
         },
         {
           "label": "Over 7.5",
@@ -4311,6 +4479,7 @@
         },
         {
           "label": "0-0",
+<<<<<<< Updated upstream
           "model": 0.087266,
           "market": 0.095,
           "family": "exact_score",
@@ -5575,6 +5744,19 @@
         ]
       },
       "kickoff": "2026-07-12T01:00:00+00:00"
+=======
+          "model": 0.076,
+          "market": null
+        },
+        {
+          "label": "3-0",
+          "model": 0.064,
+          "market": null
+        }
+      ],
+      "kickoff": "2026-07-12T01:00:00+00:00",
+      "has_market": true
+>>>>>>> Stashed changes
     }
   ]
 }
