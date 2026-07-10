@@ -1,44 +1,44 @@
-<!-- generated: 2026-07-10T04:42:26 -->
+<!-- generated: 2026-07-10T05:18:40 -->
 *World Cup Alpha — trade card* (0 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
 _No +EV trades clear the selection rule on the current slate._
 
 *— CUT (excluded from staking, 2) —*
-  x [LS] Spain vs Belgium — Belgium — back 16.7% impl (model 17.3%, EV +3.8% ✅+EV): below 20% hit-probability floor (model 17.3%) — too unlikely to return PnL even at +3.8% EV
-  x [LS] Argentina vs Switzerland — Switzerland — back 16.1% impl (model 16.7%, EV +3.3% ✅+EV): below 20% hit-probability floor (model 16.7%) — too unlikely to return PnL even at +3.3% EV
+  x [LS] Spain vs Belgium — Belgium — back 16.7% impl (model 17.3%, EV +3.9% ✅+EV): below 20% hit-probability floor (model 17.3%) — too unlikely to return PnL even at +3.9% EV
+  x [LS] Argentina vs Switzerland — Switzerland — back 16.1% impl (model 16.6%, EV +2.8% ✅+EV): below 20% hit-probability floor (model 16.6%) — too unlikely to return PnL even at +2.8% EV
 
 *— WATCH (near-threshold, below the +2% EV floor — NOT staked, 1) —*
-  ~ [ML] Norway vs England — England — back 51.8% impl via betfair (model 52.2% / mkt 51.6%, EV +0.7% ✅+EV)
+  ~ [ML] Norway vs England — England — back 51.8% impl via betfair (model 52.1% / mkt 51.5%, EV +0.5% ✅+EV)
 
 *— REFERENCE, NOT SIZED (model prices only) —*
 *World Cup Alpha — scorelines* (3 fixtures)
 
 *Spain vs Belgium*
     xG: 1.93-1.04
-    1-1  11.4%  back at impl <= 11.2%
+    1-1  11.3%  back at impl <= 11.1%
     2-1  10.7%  back at impl <= 10.5%
     1-0  9.8%  back at impl <= 9.6%
     2-0  9.6%  back at impl <= 9.4%
     3-1  6.6%  back at impl <= 6.4%
-    3-0  5.9%  back at impl <= 5.7%
-    O/U 2.5: over 56.9% / under 43.1%   BTTS 57.1%
+    3-0  5.9%  back at impl <= 5.8%
+    O/U 2.5: over 57.0% / under 43.0%   BTTS 57.1%
 
 *Norway vs England*
-    xG: 0.96-1.69
-    1-1  12.2%  back at impl <= 12.0%
-    0-1  10.5%  back at impl <= 10.3%
-    0-2  9.9%  back at impl <= 9.7%
-    1-2  8.8%  back at impl <= 8.6%
+    xG: 0.97-1.68
+    1-1  12.2%  back at impl <= 11.9%
+    0-1  10.4%  back at impl <= 10.2%
+    0-2  9.8%  back at impl <= 9.7%
+    1-2  8.7%  back at impl <= 8.6%
     0-0  7.9%  back at impl <= 7.7%
     1-0  6.9%  back at impl <= 6.8%
-    O/U 2.5: over 49.3% / under 50.7%   BTTS 50.3%
+    O/U 2.5: over 49.3% / under 50.7%   BTTS 50.4%
 
 *Argentina vs Switzerland*
     xG: 1.81-0.91
     1-1  12.4%  back at impl <= 12.1%
     1-0  11.2%  back at impl <= 10.9%
-    2-0  10.6%  back at impl <= 10.3%
+    2-0  10.6%  back at impl <= 10.4%
     2-1  9.9%  back at impl <= 9.7%
     0-0  7.6%  back at impl <= 7.5%
     3-0  6.3%  back at impl <= 6.2%
