@@ -1,14 +1,16 @@
-<!-- generated: 2026-07-10T14:58:23 -->
+<!-- generated: 2026-07-10T15:34:49 -->
 *World Cup Alpha — trade card* (0 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
 _No +EV trades clear the selection rule on the current slate._
 
-*— WATCH (near-threshold, below the +2% EV floor — NOT staked, 4) —*
-  ~ [ML] Norway vs England — England — back 51.0% impl via smarkets (model 51.8% / mkt 51.1%, EV +1.5% ✅+EV)
-  ~ [ML] Argentina vs Switzerland — Argentina — back 57.5% impl via betfair (model 57.6% / mkt 57.2%, EV +0.3% ✅+EV)
-  ~ [LS] Spain vs Belgium — Belgium — back 16.1% impl via betfair (model 16.8% / mkt 16.2%, EV +1.9% ✅+EV)
-  ~ [LS] Argentina vs Switzerland — Switzerland — back 16.1% impl via betfair (model 16.4% / mkt 16.3%, EV +1.8% ✅+EV)
+*— CUT (excluded from staking, 1) —*
+  x [LS] Argentina vs Switzerland — Switzerland — back 15.6% impl (model 16.4%, EV +5.1% ✅+EV): below 20% hit-probability floor (model 16.4%) — too unlikely to return PnL even at +5.1% EV
+
+*— WATCH (near-threshold, below the +2% EV floor — NOT staked, 3) —*
+  ~ [ML] Norway vs England — England — back 51.3% impl via betfair (model 51.7% / mkt 51.1%, EV +0.9% ✅+EV)
+  ~ [ML] Argentina vs Switzerland — Argentina — back 57.5% impl via smarkets (model 57.7% / mkt 57.3%, EV +0.3% ✅+EV)
+  ~ [LS] Spain vs Belgium — Belgium — back 16.1% impl via betfair (model 16.6% / mkt 16.1%, EV +1.6% ✅+EV)
 
 *— REFERENCE, NOT SIZED (model prices only) —*
 *World Cup Alpha — scorelines* (3 fixtures)
@@ -18,7 +20,7 @@ _No +EV trades clear the selection rule on the current slate._
     1-1  11.1%  back at impl <= 10.9%
     2-1  10.9%  back at impl <= 10.7%
     1-0  10.0%  back at impl <= 9.8%
-    2-0  9.7%  back at impl <= 9.6%
+    2-0  9.8%  back at impl <= 9.6%
     3-1  6.7%  back at impl <= 6.6%
     3-0  6.0%  back at impl <= 5.9%
     O/U 2.5: over 57.2% / under 42.8%   BTTS 56.9%
@@ -39,6 +41,6 @@ _No +EV trades clear the selection rule on the current slate._
     1-0  11.2%  back at impl <= 11.0%
     2-0  10.6%  back at impl <= 10.4%
     2-1  9.9%  back at impl <= 9.7%
-    0-0  7.6%  back at impl <= 7.5%
+    0-0  7.6%  back at impl <= 7.4%
     3-0  6.4%  back at impl <= 6.2%
     O/U 2.5: over 50.9% / under 49.1%   BTTS 51.6%
