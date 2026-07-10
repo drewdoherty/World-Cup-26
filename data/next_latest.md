@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-10T19:48:50 -->
+<!-- generated: 2026-07-10T20:25:02 -->
 ⚽ *Next match* — Norway vs England
 Kickoff 2026-07-11 21:00:00+00:00
 
 *Winner* (model blend)
-  England        model 51.9% · mkt 51.8% (betfair_ex_uk)  EV +0.1% ✅+EV (below +2% gate)  $1.42
-  Draw           model 25.4% · mkt 26.0% (betfair_ex_uk)  EV -2.2% ❌−EV
-  Norway         model 22.7% · mkt 23.3% (betfair_ex_uk)  EV -2.3% ❌−EV  (<25% model — NO CASH)
+  England        model 51.9% · mkt 51.5% (betfair_ex_uk)  EV +0.6% ✅+EV (below +2% gate)  $6.98
+  Draw           model 25.5% · mkt 26.0% (betfair_ex_uk)  EV -1.8% ❌−EV
+  Norway         model 22.6% · mkt 23.3% (betfair_ex_uk)  EV -2.6% ❌−EV  (<25% model — NO CASH)
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.8)
@@ -21,5 +21,5 @@ _top anytime, mkt implied % (both teams — add squad to split + FGS; no model p
   Jorgen Strand Larsen mkt 27% (William Hill)
 
 *Scorelines* (top 6)
-1-1 12.1% | 0-1 10.4% | 0-2 9.8% | 1-2 8.7% | 0-0 7.8% | 1-0 7.1%
-  O/U 2.5: over 49.4% / under 50.6%   BTTS 50.3%
+1-1 12.1% | 0-1 10.4% | 0-2 9.8% | 1-2 8.7% | 0-0 7.8% | 1-0 7.0%
+  O/U 2.5: over 49.3% / under 50.7%   BTTS 50.4%
