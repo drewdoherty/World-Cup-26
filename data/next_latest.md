@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-10T03:30:01 -->
+<!-- generated: 2026-07-10T04:06:13 -->
 ⚽ *Next match* — Spain vs Belgium
 Kickoff 2026-07-10 19:00:00+00:00
 
