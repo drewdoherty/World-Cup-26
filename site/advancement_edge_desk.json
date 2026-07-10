@@ -6,11 +6,11 @@
  "freshness": {
   "checks": [
    {
-    "age_secs": 16973.0,
+    "age_secs": 19011.0,
     "max_age_secs": 10800,
     "name": "advancement",
     "pass": false,
-    "reason": "stale: 4.7h old > 3.0h max",
+    "reason": "stale: 5.3h old > 3.0h max",
     "source": "site/advancement_data.json",
     "stamp": "2026-07-10 09:46:48 UTC"
    },
@@ -21,37 +21,37 @@
     "pass": true,
     "reason": null,
     "source": "site/bet_recs.json",
-    "stamp": "2026-07-10 14:29:40 UTC"
+    "stamp": "2026-07-10 15:03:38 UTC"
    },
    {
-    "age_secs": 27.0,
+    "age_secs": 34.0,
     "max_age_secs": 10800,
     "name": "scores_markets",
     "pass": true,
     "reason": null,
     "source": "site/scores_markets.json",
-    "stamp": "2026-07-10 14:29:14 UTC"
+    "stamp": "2026-07-10 15:03:05 UTC"
    },
    {
-    "age_secs": 16159.0,
+    "age_secs": 1841.0,
     "max_age_secs": 21600,
     "name": "pm_ideas",
     "pass": true,
     "reason": null,
     "source": "site/pm_ideas.json",
-    "stamp": "2026-07-10T10:00:22Z"
+    "stamp": "2026-07-10T14:32:58Z"
    },
    {
-    "age_secs": 1697.0,
+    "age_secs": 74.3,
     "max_age_secs": 86400,
     "name": "orderflow",
     "pass": true,
     "reason": null,
     "source": "site/microstructure/orderflow.json",
-    "stamp": "2026-07-10T14:01:23.955312+00:00"
+    "stamp": "2026-07-10T15:02:24.697891+00:00"
    },
    {
-    "age_secs": 17621.0,
+    "age_secs": 19659.0,
     "max_age_secs": 50400,
     "name": "advancement_model",
     "pass": true,
@@ -72,7 +72,7 @@
   "pass": false
  },
  "meta": {
-  "advancement_model_age_hours": 4.89,
+  "advancement_model_age_hours": 5.46,
   "advancement_model_generated": "2026-07-10 09:36 UTC",
   "caveats": [
    "SHADOW-ONLY: decision-support feed; no verdict here is a trade instruction and nothing is wired to execution.",
@@ -84,7 +84,7 @@
    "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
    "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal.",
    "orderflow history truncated for n=361 markets (data-api 3k-row cap) \u2014 flow aggregates there are incomplete; buy-pressure/share numbers are context only",
-   "freshness gate FAILED for site/advancement_data.json \u2014 stale: 4.7h old > 3.0h max"
+   "freshness gate FAILED for site/advancement_data.json \u2014 stale: 5.3h old > 3.0h max"
   ],
   "edge_gate": {
    "min_edge_adj": 0.02,
@@ -98,7 +98,7 @@
    "site/pm_ideas.json": 21600,
    "site/scores_markets.json": 10800
   },
-  "generated_at": "2026-07-10T14:29:41Z",
+  "generated_at": "2026-07-10T15:03:39Z",
   "n_advancement_legs_without_pm_quote": 5,
   "n_by_verdict": {
    "DO_NOT_TRADE": 17,
@@ -139,10 +139,10 @@
   "shadow_only": true,
   "sources": {
    "site/advancement_data.json": "2026-07-10 09:46:48 UTC",
-   "site/bet_recs.json": "2026-07-10 14:29:40 UTC",
-   "site/microstructure/orderflow.json": "2026-07-10T14:01:23.955312+00:00",
-   "site/pm_ideas.json": "2026-07-10T10:00:22Z",
-   "site/scores_markets.json": "2026-07-10 14:29:14 UTC"
+   "site/bet_recs.json": "2026-07-10 15:03:38 UTC",
+   "site/microstructure/orderflow.json": "2026-07-10T15:02:24.697891+00:00",
+   "site/pm_ideas.json": "2026-07-10T14:32:58Z",
+   "site/scores_markets.json": "2026-07-10 15:03:05 UTC"
   },
   "verdict_enum": [
    "SHADOW_ADD",
@@ -175,7 +175,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -313,7 +313,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -431,7 +431,7 @@
    "team": "Norway",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -451,7 +451,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -609,7 +609,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -727,7 +727,7 @@
    "team": "Norway",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -747,7 +747,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -885,7 +885,7 @@
    "team": "Norway",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -913,7 +913,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1051,7 +1051,7 @@
    "team": "England",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -1079,7 +1079,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1204,20 +1204,8 @@
    "position_prob": 0.2582,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 6.4,
-      "match": "Spain vs Belgium",
-      "model_c": 17.0,
-      "price_c": 16.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 7.66
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -1229,7 +1217,7 @@
    "team": "Spain",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -1257,7 +1245,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1382,20 +1370,8 @@
    "position_prob": 0.4249,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 6.4,
-      "match": "Spain vs Belgium",
-      "model_c": 17.0,
-      "price_c": 16.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 7.66
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -1407,7 +1383,7 @@
    "team": "Spain",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -1427,7 +1403,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1552,20 +1528,8 @@
    "position_prob": 0.4323,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 2.7,
-      "match": "Argentina vs Switzerland",
-      "model_c": 16.4,
-      "price_c": 16.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 3.21
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -1577,7 +1541,7 @@
    "team": "Argentina",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -1597,7 +1561,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1735,7 +1699,7 @@
    "team": "England",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -1763,7 +1727,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1888,20 +1852,8 @@
    "position_prob": 0.3,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 6.4,
-      "match": "Spain vs Belgium",
-      "model_c": 17.0,
-      "price_c": 16.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 7.66
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -1913,7 +1865,7 @@
    "team": "Belgium",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -1933,7 +1885,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -2058,20 +2010,8 @@
    "position_prob": 0.3001,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 6.4,
-      "match": "Spain vs Belgium",
-      "model_c": 17.0,
-      "price_c": 16.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 7.66
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -2083,7 +2023,7 @@
    "team": "Spain",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -2103,7 +2043,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -2228,20 +2168,8 @@
    "position_prob": 0.2674,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 2.7,
-      "match": "Argentina vs Switzerland",
-      "model_c": 16.4,
-      "price_c": 16.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 3.21
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -2253,7 +2181,7 @@
    "team": "Switzerland",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -2273,7 +2201,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -2398,20 +2326,8 @@
    "position_prob": 0.2674,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 2.7,
-      "match": "Argentina vs Switzerland",
-      "model_c": 16.4,
-      "price_c": 16.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 3.21
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -2423,7 +2339,7 @@
    "team": "Argentina",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -2443,7 +2359,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": false,
@@ -2568,20 +2484,8 @@
    "position_prob": 0.2284,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 2.7,
-      "match": "Argentina vs Switzerland",
-      "model_c": 16.4,
-      "price_c": 16.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 3.21
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -2593,7 +2497,7 @@
    "team": "Argentina",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -2613,7 +2517,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": false,
@@ -2718,20 +2622,8 @@
    "position_prob": 0.0517,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 6.4,
-      "match": "Spain vs Belgium",
-      "model_c": 17.0,
-      "price_c": 16.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 7.66
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -2743,7 +2635,7 @@
    "team": "Belgium",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -2763,7 +2655,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": false,
@@ -2881,7 +2773,7 @@
    "team": "England",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -2901,7 +2793,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": false,
@@ -3006,20 +2898,8 @@
    "position_prob": 0.1261,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 6.4,
-      "match": "Spain vs Belgium",
-      "model_c": 17.0,
-      "price_c": 16.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 7.66
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -3031,7 +2911,7 @@
    "team": "Belgium",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
@@ -3051,7 +2931,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
     },
     "min_prob_cash": {
      "pass": false,
@@ -3156,20 +3036,8 @@
    "position_prob": 0.0984,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
-    "ideas": [
-     {
-      "bucket": "longshot",
-      "ev_pct": 2.7,
-      "match": "Argentina vs Switzerland",
-      "model_c": 16.4,
-      "price_c": 16.0,
-      "selection": "Yes",
-      "settlement_basis": "1X2_90min",
-      "side": "BUY",
-      "size_usd": 3.21
-     }
-    ],
-    "n": 1,
+    "ideas": [],
+    "n": 0,
     "reason": null
    },
    "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
@@ -3181,7 +3049,7 @@
    "team": "Switzerland",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 4.7h old > 3.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 5.3h old > 3.0h max)"
    ]
   },
   {
