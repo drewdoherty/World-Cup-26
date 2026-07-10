@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-10T02:17:39 -->
+<!-- generated: 2026-07-10T02:53:50 -->
 *World Cup Alpha — trade card* (0 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
 _No +EV trades clear the selection rule on the current slate._
 
 *— CUT (excluded from staking, 2) —*
-  x [LS] Spain vs Belgium — Belgium — back 16.7% impl (model 17.3%, EV +3.6% ✅+EV): below 20% hit-probability floor (model 17.3%) — too unlikely to return PnL even at +3.6% EV
+  x [LS] Spain vs Belgium — Belgium — back 16.7% impl (model 17.3%, EV +3.9% ✅+EV): below 20% hit-probability floor (model 17.3%) — too unlikely to return PnL even at +3.9% EV
   x [LS] Argentina vs Switzerland — Switzerland — back 16.1% impl (model 16.6%, EV +2.8% ✅+EV): below 20% hit-probability floor (model 16.6%) — too unlikely to return PnL even at +2.8% EV
 
 *— WATCH (near-threshold, below the +2% EV floor — NOT staked, 1) —*
