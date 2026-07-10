@@ -1,24 +1,25 @@
-<!-- generated: 2026-07-10T18:36:30 -->
-⚽ *Next match* — Spain vs Belgium
-Kickoff 2026-07-10 19:00:00+00:00
+<!-- generated: 2026-07-10T19:12:38 -->
+⚽ *Next match* — Norway vs England
+Kickoff 2026-07-11 21:00:00+00:00
 
 *Winner* (model blend)
-  Spain          model 58.3% · mkt 58.5% (betfair_ex_uk)  EV -0.2% ❌−EV
-  Belgium        model 17.6% · mkt 17.2% (betfair_ex_uk)  EV +1.8% ✅+EV (below +2% gate)  (<25% model — NO CASH)
-  Draw           model 24.1% · mkt 25.0% (betfair_ex_uk)  EV -3.6% ❌−EV  (<25% model — NO CASH)
+  England        model 51.8% · mkt 51.5% (betfair_ex_uk)  EV +0.6% ✅+EV (below +2% gate)  $6.63
+  Draw           model 25.5% · mkt 26.0% (betfair_ex_uk)  EV -1.8% ❌−EV
+  Norway         model 22.7% · mkt 23.3% (betfair_ex_uk)  EV -2.6% ❌−EV  (<25% model — NO CASH)
+  _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
-*Corners* (model, exp 9.0)
-  O/U 8.5: over 54.2% / under 45.8% (model only — no live corners feed, +EV unverifiable)
+*Corners* (model, exp 8.8)
+  O/U 8.5: over 50.7% / under 49.3% (model only — no live corners feed, +EV unverifiable)
 
 *Top goalscorers* — from the cached /goalscorers card (as of 2026-07-10T16:20:46)
 _top anytime, mkt implied % (both teams — add squad to split + FGS; no model price, +EV unverifiable)_
-  Mikel Oyarzabal      mkt 42% (Betfair)
-  Borja Iglesias       mkt 38% (Betfair)
-  Lamine Yamal         mkt 34% (Betfair)
-  Nico Williams        mkt 31% (William Hill)
-  Ferran Torres Garcia mkt 30% (Betfair)
-  Victor Munoz         mkt 27% (Betfair)
+  Harry Kane           mkt 47% (Betfair)
+  Ollie Watkins        mkt 45% (Betfair)
+  Ivan Toney           mkt 42% (William Hill)
+  Erling Braut Haaland mkt 42% (Betfair)
+  Marcus Rashford      mkt 29% (William Hill)
+  Jorgen Strand Larsen mkt 27% (William Hill)
 
 *Scorelines* (top 6)
-1-1 11.3% | 2-1 10.7% | 1-0 9.8% | 2-0 9.5% | 3-1 6.6% | 3-0 5.8%
-  O/U 2.5: over 56.9% / under 43.1%   BTTS 57.1%
+1-1 12.1% | 0-1 10.4% | 0-2 9.8% | 1-2 8.7% | 0-0 7.8% | 1-0 7.0%
+  O/U 2.5: over 49.3% / under 50.7%   BTTS 50.4%
