@@ -1,16 +1,16 @@
-<!-- generated: 2026-07-10T04:06:13 -->
+<!-- generated: 2026-07-10T04:42:26 -->
 ⚽ *Next match* — Spain vs Belgium
 Kickoff 2026-07-10 19:00:00+00:00
 
 *Winner* (model blend)
   Spain          model 58.5% · mkt 59.2% (betfair_ex_uk)  EV -1.2% ❌−EV
-  Belgium        model 17.3% · mkt 16.7% (betfair_ex_uk)  EV +3.9% ✅+EV  (<25% model — NO CASH)
-  Draw           model 24.2% · mkt 25.0% (betfair_ex_uk)  EV -3.1% ❌−EV  (<25% model — NO CASH)
+  Belgium        model 17.3% · mkt 16.7% (betfair_ex_uk)  EV +3.8% ✅+EV  (<25% model — NO CASH)
+  Draw           model 24.2% · mkt 25.0% (betfair_ex_uk)  EV -3.2% ❌−EV  (<25% model — NO CASH)
 
 *Corners* (model, exp 9.0)
   O/U 8.5: over 54.2% / under 45.8% (model only — no live corners feed, +EV unverifiable)
 
-*Top goalscorers* — from the cached /goalscorers card (as of 2026-07-10T01:24:12)
+*Top goalscorers* — from the cached /goalscorers card (as of 2026-07-10T04:30:44)
 _top anytime, mkt implied % (both teams — add squad to split + FGS; no model price, +EV unverifiable)_
   Borja Iglesias       mkt 45% (William Hill)
   Mikel Oyarzabal      mkt 39% (Betfair)
