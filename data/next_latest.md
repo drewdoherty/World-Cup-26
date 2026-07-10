@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-10T01:04:51 -->
+<!-- generated: 2026-07-10T01:41:16 -->
 ⚽ *Next match* — Spain vs Belgium
 Kickoff 2026-07-10 19:00:00+00:00
 
@@ -10,7 +10,7 @@ Kickoff 2026-07-10 19:00:00+00:00
 *Corners* (model, exp 9.0)
   O/U 8.5: over 54.2% / under 45.8% (model only — no live corners feed, +EV unverifiable)
 
-*Top goalscorers* — from the cached /goalscorers card (as of 2026-07-09T22:17:52)
+*Top goalscorers* — from the cached /goalscorers card (as of 2026-07-10T01:24:12)
 _top anytime, mkt implied % (both teams — add squad to split + FGS; no model price, +EV unverifiable)_
   Borja Iglesias       mkt 45% (William Hill)
   Mikel Oyarzabal      mkt 39% (Betfair)
