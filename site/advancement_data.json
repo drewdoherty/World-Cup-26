@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated": "2026-07-08 18:57:05 UTC",
-    "model_generated": "2026-07-08 18:56 UTC",
+    "generated": "2026-07-10 09:46:48 UTC",
+    "model_generated": "2026-07-10 09:36 UTC",
     "stages": [
       "R32",
       "R16",
@@ -10,9 +10,9 @@
       "Final",
       "win"
     ],
-    "n_pm_markets": 24,
+    "n_pm_markets": 19,
     "n_ko_pinned": 24,
-    "n_state_stale": 0
+    "n_state_stale": 2
   },
   "teams": [
     {
@@ -47,22 +47,53 @@
       },
       "pm": {
         "win": {
-          "pm": 0.1875,
-          "edge_adj": 0.0656,
+          "pm": 0.1685,
+          "edge_adj": 0.085,
           "side": "YES",
-          "ask": 0.188
+          "ask": 0.169,
+          "stake_usd": 40.31,
+          "path_scale": 0.3931
         },
         "Final": {
-          "pm": 0.355,
-          "edge_adj": 0.058,
+          "pm": 0.305,
+          "edge_adj": 0.1085,
           "side": "YES",
-          "ask": 0.36
+          "ask": 0.31,
+          "stake_usd": 62.23,
+          "path_scale": 0.3931
         },
         "SF": {
-          "pm": 0.755,
-          "edge_adj": 0.0445,
+          "pm": 0.745,
+          "edge_adj": 0.0343,
           "side": "NO",
-          "ask": 0.25
+          "ask": 0.26,
+          "stake_usd": 46.64,
+          "path_scale": 1.0
+        }
+      },
+      "path_exposure": {
+        "YES": {
+          "total_stake_usd": 102.53,
+          "total_stake_precap_usd": 260.84,
+          "cap_usd": 102.53,
+          "cap_stage": "win",
+          "scale": 0.3931,
+          "scaling_applied": true,
+          "stages": [
+            "Final",
+            "win"
+          ]
+        },
+        "NO": {
+          "total_stake_usd": 46.64,
+          "total_stake_precap_usd": 46.64,
+          "cap_usd": 46.64,
+          "cap_stage": "SF",
+          "scale": 1.0,
+          "scaling_applied": false,
+          "stages": [
+            "SF"
+          ]
         }
       }
     },
@@ -98,22 +129,41 @@
       },
       "pm": {
         "Final": {
-          "pm": 0.4055,
-          "edge_adj": 0.0181,
+          "pm": 0.4085,
+          "edge_adj": 0.016,
           "side": "YES",
-          "ask": 0.407
+          "ask": 0.409,
+          "stake_usd": 27.42,
+          "path_scale": 1.0
         },
         "SF": {
           "pm": 0.735,
           "edge_adj": -0.0085,
           "side": "NO",
-          "ask": 0.27
+          "ask": 0.27,
+          "stake_usd": 0.0,
+          "path_scale": 1.0
         },
         "win": {
-          "pm": 0.1945,
-          "edge_adj": 0.0287,
+          "pm": 0.1875,
+          "edge_adj": 0.0358,
           "side": "YES",
-          "ask": 0.195
+          "ask": 0.188,
+          "stake_usd": 0.0,
+          "path_scale": 1.0
+        }
+      },
+      "path_exposure": {
+        "YES": {
+          "total_stake_usd": 27.42,
+          "total_stake_precap_usd": 27.42,
+          "cap_usd": 27.42,
+          "cap_stage": "Final",
+          "scale": 1.0,
+          "scaling_applied": false,
+          "stages": [
+            "Final"
+          ]
         }
       }
     },
@@ -149,24 +199,37 @@
       },
       "pm": {
         "win": {
-          "pm": 0.3255,
-          "edge_adj": 0.1259,
+          "pm": 0.3855,
+          "edge_adj": 0.1854,
           "side": "NO",
-          "ask": 0.675
+          "ask": 0.615,
+          "stake_usd": 79.8,
+          "path_scale": 0.5
         },
         "Final": {
-          "pm": 0.535,
-          "edge_adj": 0.1671,
+          "pm": 0.665,
+          "edge_adj": 0.2979,
           "side": "NO",
-          "ask": 0.47
-        },
-        "SF": {
-          "pm": 0.785,
-          "edge_adj": 0.0726,
-          "side": "NO",
-          "ask": 0.22
+          "ask": 0.34,
+          "stake_usd": 79.8,
+          "path_scale": 0.5
         }
-      }
+      },
+      "path_exposure": {
+        "NO": {
+          "total_stake_usd": 159.6,
+          "total_stake_precap_usd": 319.2,
+          "cap_usd": 159.6,
+          "cap_stage": "Final",
+          "scale": 0.5,
+          "scaling_applied": true,
+          "stages": [
+            "Final",
+            "win"
+          ]
+        }
+      },
+      "state_stale_reason": "state-stale: earlier-round tie unsettled in sim (France vs Morocco, kicked off 2026-07-09)"
     },
     {
       "team": "England",
@@ -199,23 +262,42 @@
         "group_winner": 0.2919
       },
       "pm": {
-        "Final": {
-          "pm": 0.385,
-          "edge_adj": -0.005,
-          "side": "NO",
-          "ask": 0.62
-        },
         "SF": {
           "pm": 0.655,
           "edge_adj": 0.0456,
           "side": "YES",
-          "ask": 0.66
+          "ask": 0.66,
+          "stake_usd": 136.39,
+          "path_scale": 1.0
+        },
+        "Final": {
+          "pm": 0.375,
+          "edge_adj": -0.0092,
+          "side": "YES",
+          "ask": 0.38,
+          "stake_usd": 0.0,
+          "path_scale": 1.0
         },
         "win": {
-          "pm": 0.1585,
-          "edge_adj": 0.0169,
+          "pm": 0.1595,
+          "edge_adj": 0.0159,
           "side": "YES",
-          "ask": 0.159
+          "ask": 0.16,
+          "stake_usd": 0.0,
+          "path_scale": 1.0
+        }
+      },
+      "path_exposure": {
+        "YES": {
+          "total_stake_usd": 136.39,
+          "total_stake_precap_usd": 136.39,
+          "cap_usd": 136.39,
+          "cap_stage": "SF",
+          "scale": 1.0,
+          "scaling_applied": false,
+          "stages": [
+            "SF"
+          ]
         }
       }
     },
@@ -251,22 +333,41 @@
       },
       "pm": {
         "SF": {
-          "pm": 0.253,
-          "edge_adj": 0.0403,
+          "pm": 0.2575,
+          "edge_adj": 0.0363,
           "side": "YES",
-          "ask": 0.254
+          "ask": 0.258,
+          "stake_usd": 49.12,
+          "path_scale": 1.0
         },
         "win": {
-          "pm": 0.0245,
-          "edge_adj": 0.026,
+          "pm": 0.0215,
+          "edge_adj": 0.0291,
           "side": "YES",
-          "ask": 0.025
+          "ask": 0.022,
+          "stake_usd": 0.0,
+          "path_scale": 1.0
         },
         "Final": {
-          "pm": 0.0665,
-          "edge_adj": 0.0572,
+          "pm": 0.0515,
+          "edge_adj": 0.0726,
           "side": "YES",
-          "ask": 0.067
+          "ask": 0.052,
+          "stake_usd": 0.0,
+          "path_scale": 1.0
+        }
+      },
+      "path_exposure": {
+        "YES": {
+          "total_stake_usd": 49.12,
+          "total_stake_precap_usd": 49.12,
+          "cap_usd": 49.12,
+          "cap_stage": "SF",
+          "scale": 1.0,
+          "scaling_applied": false,
+          "stages": [
+            "SF"
+          ]
         }
       }
     },
@@ -300,26 +401,8 @@
         "win": 0.0201,
         "group_winner": -0.2046
       },
-      "pm": {
-        "SF": {
-          "pm": 0.2235,
-          "edge_adj": 0.0685,
-          "side": "YES",
-          "ask": 0.224
-        },
-        "win": {
-          "pm": 0.0305,
-          "edge_adj": 0.0024,
-          "side": "YES",
-          "ask": 0.031
-        },
-        "Final": {
-          "pm": 0.0785,
-          "edge_adj": 0.0124,
-          "side": "YES",
-          "ask": 0.079
-        }
-      }
+      "pm": {},
+      "state_stale_reason": "state-stale: earlier-round tie unsettled in sim (France vs Morocco, kicked off 2026-07-09)"
     },
     {
       "team": "Switzerland",
@@ -353,22 +436,20 @@
       },
       "pm": {
         "SF": {
-          "pm": 0.2605,
-          "edge_adj": 0.0006,
+          "pm": 0.2625,
+          "edge_adj": -0.0024,
           "side": "YES",
-          "ask": 0.261
-        },
-        "win": {
-          "pm": 0.0215,
-          "edge_adj": 0.0075,
-          "side": "YES",
-          "ask": 0.022
+          "ask": 0.264,
+          "stake_usd": 0.0,
+          "path_scale": 1.0
         },
         "Final": {
-          "pm": 0.0705,
-          "edge_adj": 0.0254,
+          "pm": 0.0725,
+          "edge_adj": 0.0234,
           "side": "YES",
-          "ask": 0.071
+          "ask": 0.073,
+          "stake_usd": 0.0,
+          "path_scale": 1.0
         }
       }
     },
@@ -404,22 +485,43 @@
       },
       "pm": {
         "win": {
-          "pm": 0.0595,
-          "edge_adj": 0.0325,
+          "pm": 0.0605,
+          "edge_adj": 0.0335,
           "side": "NO",
-          "ask": 0.941
+          "ask": 0.94,
+          "stake_usd": 53.2,
+          "path_scale": 0.3333
         },
         "Final": {
-          "pm": 0.1395,
-          "edge_adj": 0.044,
+          "pm": 0.1635,
+          "edge_adj": 0.0675,
           "side": "NO",
-          "ask": 0.861
+          "ask": 0.837,
+          "stake_usd": 53.2,
+          "path_scale": 0.3333
         },
         "SF": {
-          "pm": 0.345,
-          "edge_adj": 0.0455,
+          "pm": 0.355,
+          "edge_adj": 0.0554,
           "side": "NO",
-          "ask": 0.66
+          "ask": 0.65,
+          "stake_usd": 53.2,
+          "path_scale": 0.3333
+        }
+      },
+      "path_exposure": {
+        "NO": {
+          "total_stake_usd": 159.6,
+          "total_stake_precap_usd": 478.8,
+          "cap_usd": 159.6,
+          "cap_stage": "SF",
+          "scale": 0.3333,
+          "scaling_applied": true,
+          "stages": [
+            "SF",
+            "Final",
+            "win"
+          ]
         }
       }
     },
