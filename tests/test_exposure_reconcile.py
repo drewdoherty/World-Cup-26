@@ -87,6 +87,28 @@ def test_reconcile_no_op_when_no_overlap():
     assert event_recs["recs"][0]["stake_usd"] == 96.61
 
 
+def test_reconcile_backfills_team_and_stage_on_legacy_rows():
+    # Rows built before the 2026-07-11 stamping fix have no team/tie_stage —
+    # only label + model_source. The live incident feed was exactly this
+    # shape; the reconciler must still catch the duplicate.
+    bet_recs = _bet_recs([
+        {"id": "england_sf_pm", "team": "England", "stage": "SF",
+         "stake": 136.39, "ev_net": 0.0505},
+    ])
+    event_recs = _event_recs([
+        {"fixture": "Norway vs England", "label": "England to advance",
+         "stake_usd": 96.61, "ev": 0.102169, "family": "advance",
+         "model_source": "advancement MC sim (2026-07-10 09:36 UTC, stage=SF)"},
+    ])
+
+    n = reconcile(bet_recs, event_recs)
+
+    assert n == 1
+    assert event_recs["recs"][0]["team"] == "England"
+    assert event_recs["recs"][0]["tie_stage"] == "SF"
+    assert bet_recs["withheld"][0]["reason_code"] == "dup_tie_exposure"
+
+
 def test_reconcile_ignores_non_advance_family_rows():
     bet_recs = _bet_recs([
         {"id": "england_sf_pm", "team": "England", "stage": "SF",

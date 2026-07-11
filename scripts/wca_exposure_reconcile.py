@@ -24,9 +24,10 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import tempfile
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(_ROOT, "src"))
@@ -36,6 +37,25 @@ from wca.tie_exposure import (  # noqa: E402
     find_cross_feed_duplicates,
     resolve_duplicate,
 )
+
+_STAGE_RE = re.compile(r"stage=(\w+)")
+_TEAM_SUFFIX = " to advance"
+
+
+def _backfill_legacy_fields(em_legs: List[Dict[str, Any]]) -> None:
+    """Derive ``team``/``tie_stage`` for rows built before those fields were
+    stamped at generation time (2026-07-11). Both are recoverable from
+    ``label`` ("<team> to advance") and ``model_source``
+    ("...stage=<stage>)"), so an older feed on disk still gets deduped
+    instead of silently skipped until it's next rebuilt.
+    """
+    for leg in em_legs:
+        if not leg.get("team") and leg.get("label", "").endswith(_TEAM_SUFFIX):
+            leg["team"] = leg["label"][: -len(_TEAM_SUFFIX)]
+        if not leg.get("tie_stage"):
+            m = _STAGE_RE.search(leg.get("model_source") or "")
+            if m:
+                leg["tie_stage"] = m.group(1)
 
 
 def _write_atomic(path: str, payload: Dict[str, Any]) -> None:
@@ -67,6 +87,7 @@ def reconcile(bet_recs: Dict[str, Any], event_recs: Dict[str, Any]) -> int:
     """Mutate ``bet_recs``/``event_recs`` in place. Returns count deduped."""
     em_legs = [r for r in (event_recs.get("recs") or []) if r.get("family") == "advance"]
     af_legs = list(bet_recs.get("advancement_futures") or [])
+    _backfill_legacy_fields(em_legs)
 
     dupes = find_cross_feed_duplicates(em_legs, af_legs)
     for dupe in dupes:
