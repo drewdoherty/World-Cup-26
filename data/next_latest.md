@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-11T16:02:10 -->
+<!-- generated: 2026-07-11T16:38:41 -->
 ⚽ *Next match* — Norway vs England
 Kickoff 2026-07-11 21:00:00+00:00
 
 *Winner* (model blend)
-  England        model 50.3% · mkt 49.5% (betfair_ex_uk)  EV +1.6% ✅+EV (below +2% gate)  $16.90
-  Draw           model 25.4% · mkt 26.0% (Smarkets)  EV -2.2% ❌−EV
-  Norway         model 24.3% · mkt 25.0% (betfair_ex_uk)  EV -2.8% ❌−EV  (<25% model — NO CASH)
+  England        model 50.3% · mkt 49.5% (matchbook)  EV +1.7% ✅+EV (below +2% gate)  $17.85
+  Draw           model 25.4% · mkt 26.0% (betfair_ex_uk)  EV -2.1% ❌−EV
+  Norway         model 24.2% · mkt 25.0% (betfair_ex_uk)  EV -3.0% ❌−EV  (<25% model — NO CASH)
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.8)

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-11 16:37:35 UTC"
+    "generated": "2026-07-11 17:11:40 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -15,7 +15,7 @@
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0572,
+        "prob": 0.0569,
         "results": [
           "Norway",
           "Argentina",
@@ -24,7 +24,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0401,
+        "prob": 0.0399,
         "results": [
           "Norway",
           "Argentina",
@@ -33,7 +33,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0424,
+        "prob": 0.0422,
         "results": [
           "Norway",
           "Argentina",
@@ -51,7 +51,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0182,
+        "prob": 0.0183,
         "results": [
           "Norway",
           "Draw",
@@ -62,7 +62,7 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.0572,
+        "prob": 0.0569,
         "results": [
           "Norway",
           "Argentina",
@@ -71,7 +71,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0401,
+        "prob": 0.0399,
         "results": [
           "Norway",
           "Argentina",
@@ -80,7 +80,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0424,
+        "prob": 0.0422,
         "results": [
           "Norway",
           "Argentina",
@@ -119,7 +119,7 @@
       "results": [
         {
           "outcome": "Norway",
-          "prob": 0.2431,
+          "prob": 0.2425,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -130,14 +130,14 @@
             "outcome": "Norway",
             "best_venue": "smarkets",
             "best_odds": 4.0,
-            "model_prob": 0.2431,
-            "ev_pct": -2.8,
+            "model_prob": 0.2425,
+            "ev_pct": -3.0,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.254,
+          "prob": 0.2542,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -147,15 +147,15 @@
             "available": true,
             "outcome": "Draw",
             "best_venue": "smarkets",
-            "best_odds": 3.85,
-            "model_prob": 0.254,
-            "ev_pct": -2.2,
+            "best_odds": 3.9,
+            "model_prob": 0.2542,
+            "ev_pct": -0.9,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "England",
-          "prob": 0.5029,
+          "prob": 0.5034,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -164,11 +164,11 @@
           "plug": {
             "available": true,
             "outcome": "England",
-            "best_venue": "matchbook",
-            "best_odds": 2.02,
-            "model_prob": 0.5029,
-            "ev_pct": 1.6,
-            "recommendation": "PLUG: +EV to back (1.6% edge) \u2014 fills the gap and adds value"
+            "best_venue": "smarkets",
+            "best_odds": 2.0,
+            "model_prob": 0.5034,
+            "ev_pct": 0.7,
+            "recommendation": "PLUG: +EV to back (0.7% edge) \u2014 fills the gap and adds value"
           }
         }
       ],
@@ -196,7 +196,7 @@
       "results": [
         {
           "outcome": "Argentina",
-          "prob": 0.5745,
+          "prob": 0.5733,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -205,7 +205,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2613,
+          "prob": 0.2622,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -214,7 +214,7 @@
         },
         {
           "outcome": "Switzerland",
-          "prob": 0.1642,
+          "prob": 0.1645,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -277,45 +277,45 @@
     {
       "fixture": "Norway vs England",
       "outcome": "England",
-      "prob": 0.5029,
+      "prob": 0.5034,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "England",
-        "best_venue": "matchbook",
-        "best_odds": 2.02,
-        "model_prob": 0.5029,
-        "ev_pct": 1.6,
-        "recommendation": "PLUG: +EV to back (1.6% edge) \u2014 fills the gap and adds value"
+        "best_venue": "smarkets",
+        "best_odds": 2.0,
+        "model_prob": 0.5034,
+        "ev_pct": 0.7,
+        "recommendation": "PLUG: +EV to back (0.7% edge) \u2014 fills the gap and adds value"
       }
     },
     {
       "fixture": "Norway vs England",
       "outcome": "Draw",
-      "prob": 0.254,
+      "prob": 0.2542,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Draw",
         "best_venue": "smarkets",
-        "best_odds": 3.85,
-        "model_prob": 0.254,
-        "ev_pct": -2.2,
+        "best_odds": 3.9,
+        "model_prob": 0.2542,
+        "ev_pct": -0.9,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
     {
       "fixture": "Norway vs England",
       "outcome": "Norway",
-      "prob": 0.2431,
+      "prob": 0.2425,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Norway",
         "best_venue": "smarkets",
         "best_odds": 4.0,
-        "model_prob": 0.2431,
-        "ev_pct": -2.8,
+        "model_prob": 0.2425,
+        "ev_pct": -3.0,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     }
