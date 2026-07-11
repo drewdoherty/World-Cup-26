@@ -765,6 +765,12 @@ def build_fixture(fx: Dict[str, Any], matrix, lam_check: Dict[str, Any],
                      "note": ("ADVANCEMENT settlement (includes ET + penalties) "
                               "— NOT a 90-minute market; model = advancement MC sim")})
         ph, pa, note = advance_model_probs(adv_model, home, away)
+        # Same (team, stage) may also be priced by wca_betrecs.py's
+        # advancement-futures market — a DIFFERENT PM instrument for the
+        # exact same real-world event (reaching this tie's next stage).
+        # Stamp the stage explicitly so wca_exposure_reconcile.py can key on
+        # it without re-parsing model_source (2026-07-11 tie-exposure dedup).
+        tie_stage = note.split("=", 1)[1] if note.startswith("stage=") else None
         outcomes = PM._parse_json_array(advance_market.get("outcomes")) or []
         for idx, oname in enumerate(outcomes[:2]):
             side = "home" if canonical(str(oname)) == canonical(home) else "away"
@@ -779,9 +785,13 @@ def build_fixture(fx: Dict[str, Any], matrix, lam_check: Dict[str, Any],
                        quote=quote, captured_utc=captured_utc)
             rows.append(row)
             if model is not None and quote:
+                n_before = len(cands)
                 # No lay side: the complement IS the other team's BACK row.
                 _push_candidates(cands, fx, row, quote,
                                  "%s NOT to advance" % oname, include_lay=False)
+                for c in cands[n_before:]:
+                    c["team"] = str(oname)
+                    c["tie_stage"] = tie_stage
 
     # ---- families with no production model (market only) ------------------------
     for kind, section in _UNPRICEABLE_SECTIONS:
