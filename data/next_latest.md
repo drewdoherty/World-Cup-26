@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-11T09:43:58 -->
+<!-- generated: 2026-07-11T10:20:12 -->
 ⚽ *Next match* — Norway vs England
 Kickoff 2026-07-11 21:00:00+00:00
 
