@@ -1,9 +1,9 @@
-<!-- generated: 2026-07-11T01:15:48 -->
+<!-- generated: 2026-07-11T01:51:59 -->
 ⚽ *Next match* — Norway vs England
 Kickoff 2026-07-11 21:00:00+00:00
 
 *Winner* (model blend)
-  England        model 51.8% · mkt 51.5% (betfair_ex_uk)  EV +0.4% ✅+EV (below +2% gate)  $5.15
+  England        model 51.8% · mkt 51.5% (betfair_ex_uk)  EV +0.4% ✅+EV (below +2% gate)  $5.10
   Draw           model 25.5% · mkt 26.0% (betfair_ex_uk)  EV -1.7% ❌−EV
   Norway         model 22.7% · mkt 23.3% (betfair_ex_uk)  EV -2.4% ❌−EV  (<25% model — NO CASH)
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
@@ -11,12 +11,12 @@ Kickoff 2026-07-11 21:00:00+00:00
 *Corners* (model, exp 8.8)
   O/U 8.5: over 50.7% / under 49.3% (model only — no live corners feed, +EV unverifiable)
 
-*Top goalscorers* — from the cached /goalscorers card (as of 2026-07-10T22:33:29)
+*Top goalscorers* — from the cached /goalscorers card (as of 2026-07-11T01:39:40)
 _top anytime, mkt implied % (both teams — add squad to split + FGS; no model price, +EV unverifiable)_
-  Harry Kane           mkt 48% (Betfair)
+  Harry Kane           mkt 49% (Betfair)
   Ollie Watkins        mkt 45% (Betfair)
   Erling Braut Haaland mkt 43% (Betfair)
-  Ivan Toney           mkt 39% (Betfair)
+  Ivan Toney           mkt 40% (Betfair)
   Jorgen Strand Larsen mkt 27% (William Hill)
   Jude Bellingham      mkt 25% (Betfair)
 
