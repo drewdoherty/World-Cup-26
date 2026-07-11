@@ -1,18 +1,19 @@
-<!-- generated: 2026-07-11T07:18:18 -->
+<!-- generated: 2026-07-11T07:54:41 -->
 *World Cup Alpha — trade card* (1 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
 *1. [MID·2ND-FAV] France vs Spain* — Spain — back *29.9%* impl via *betfair*
-    model 30.6% / mkt 30.1% (+0.7pp)  EV *+2.4%* ✅+EV  [elo 26% dc 35%]
-    stake: gbp £8.30  further-out (84h) — thin/soft market
+    model 30.5% / mkt 29.9% (+0.6pp)  EV *+2.0%* ✅+EV  [elo 26% dc 35%]
+    stake: gbp £7.00  further-out (83h) — thin/soft market
 
 *— CUT (excluded from staking, 1) —*
   x [LS] Argentina vs Switzerland — Switzerland — back 15.6% impl (model 16.4%, EV +4.9% ✅+EV): below 20% hit-probability floor (model 16.4%) — too unlikely to return PnL even at +4.9% EV
 
-*— WATCH (near-threshold, below the +2% EV floor — NOT staked, 1) —*
-  ~ [ML] Norway vs England — England — back 50.3% impl via betfair (model 50.8% / mkt 50.0%, EV +1.1% ✅+EV)
+*— WATCH (near-threshold, below the +2% EV floor — NOT staked, 2) —*
+  ~ [ML] Norway vs England — England — back 50.0% impl via smarkets (model 50.8% / mkt 50.0%, EV +1.6% ✅+EV)
+  ~ [MID] France vs Spain — France — back 41.0% impl via betfair (model 41.0% / mkt 41.0%, EV +0.1% ✅+EV)
 
-*Venue split (gbp):* betfair £8.30
+*Venue split (gbp):* betfair £7.00
 
 *— REFERENCE, NOT SIZED (model prices only) —*
 *World Cup Alpha — scorelines* (3 fixtures)
@@ -29,7 +30,7 @@ _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out firs
 
 *Argentina vs Switzerland*
     xG: 1.82-0.91
-    1-1  12.3%  back at impl <= 12.1%
+    1-1  12.4%  back at impl <= 12.1%
     1-0  11.2%  back at impl <= 11.0%
     2-0  10.6%  back at impl <= 10.4%
     2-1  9.9%  back at impl <= 9.7%
@@ -38,11 +39,11 @@ _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out firs
     O/U 2.5: over 50.9% / under 49.1%   BTTS 51.6%
 
 *France vs Spain*
-    xG: 1.54-1.34
+    xG: 1.55-1.34
     1-1  13.4%  back at impl <= 13.1%
-    2-1  9.0%  back at impl <= 8.9%
-    1-0  7.9%  back at impl <= 7.8%
-    1-2  7.1%  back at impl <= 7.0%
+    2-1  9.1%  back at impl <= 8.9%
+    1-0  8.0%  back at impl <= 7.8%
+    1-2  7.1%  back at impl <= 6.9%
     2-2  6.7%  back at impl <= 6.6%
     0-0  6.7%  back at impl <= 6.5%
     O/U 2.5: over 54.7% / under 45.3%   BTTS 59.9%
