@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-11T03:04:26 -->
+<!-- generated: 2026-07-11T03:40:36 -->
 ⚽ *Next match* — Norway vs England
 Kickoff 2026-07-11 21:00:00+00:00
 
 *Winner* (model blend)
-  England        model 51.4% · mkt 50.8% (betfair_ex_uk)  EV +1.2% ✅+EV (below +2% gate)  $13.54
-  Draw           model 25.6% · mkt 26.0% (betfair_ex_uk)  EV -1.3% ❌−EV
-  Norway         model 23.0% · mkt 23.8% (betfair_ex_uk)  EV -3.4% ❌−EV  (<25% model — NO CASH)
+  England        model 51.3% · mkt 50.8% (betfair_ex_uk)  EV +1.1% ✅+EV (below +2% gate)  $11.97
+  Draw           model 25.6% · mkt 26.0% (betfair_ex_uk)  EV -1.5% ❌−EV
+  Norway         model 23.1% · mkt 23.8% (betfair_ex_uk)  EV -2.9% ❌−EV  (<25% model — NO CASH)
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.8)
@@ -21,5 +21,5 @@ _top anytime, mkt implied % (both teams — add squad to split + FGS; no model p
   Jude Bellingham      mkt 25% (Betfair)
 
 *Scorelines* (top 6)
-1-1 12.2% | 0-1 10.3% | 0-2 9.7% | 1-2 8.6% | 0-0 7.9% | 1-0 7.1%
+1-1 12.2% | 0-1 10.3% | 0-2 9.7% | 1-2 8.6% | 0-0 7.9% | 1-0 7.2%
   O/U 2.5: over 49.3% / under 50.7%   BTTS 50.4%
