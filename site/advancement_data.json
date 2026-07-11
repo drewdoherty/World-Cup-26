@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated": "2026-07-10 09:46:48 UTC",
-    "model_generated": "2026-07-10 09:36 UTC",
+    "generated": "2026-07-11 15:50:11 UTC",
+    "model_generated": "2026-07-11 15:48 UTC",
     "stages": [
       "R32",
       "R16",
@@ -10,9 +10,9 @@
       "Final",
       "win"
     ],
-    "n_pm_markets": 19,
+    "n_pm_markets": 15,
     "n_ko_pinned": 24,
-    "n_state_stale": 2
+    "n_state_stale": 4
   },
   "teams": [
     {
@@ -47,55 +47,37 @@
       },
       "pm": {
         "win": {
-          "pm": 0.1685,
-          "edge_adj": 0.085,
+          "pm": 0.2095,
+          "edge_adj": 0.0432,
           "side": "YES",
-          "ask": 0.169,
-          "stake_usd": 40.31,
-          "path_scale": 0.3931
+          "ask": 0.21,
+          "stake_usd": 44.36,
+          "path_scale": 0.8076
         },
         "Final": {
-          "pm": 0.305,
-          "edge_adj": 0.1085,
+          "pm": 0.405,
+          "edge_adj": 0.0076,
           "side": "YES",
-          "ask": 0.31,
-          "stake_usd": 62.23,
-          "path_scale": 0.3931
-        },
-        "SF": {
-          "pm": 0.745,
-          "edge_adj": 0.0343,
-          "side": "NO",
-          "ask": 0.26,
-          "stake_usd": 46.64,
-          "path_scale": 1.0
+          "ask": 0.41,
+          "stake_usd": 10.57,
+          "path_scale": 0.8076
         }
       },
       "path_exposure": {
         "YES": {
-          "total_stake_usd": 102.53,
-          "total_stake_precap_usd": 260.84,
-          "cap_usd": 102.53,
+          "total_stake_usd": 54.92,
+          "total_stake_precap_usd": 68.0,
+          "cap_usd": 54.92,
           "cap_stage": "win",
-          "scale": 0.3931,
+          "scale": 0.8076,
           "scaling_applied": true,
           "stages": [
             "Final",
             "win"
           ]
-        },
-        "NO": {
-          "total_stake_usd": 46.64,
-          "total_stake_precap_usd": 46.64,
-          "cap_usd": 46.64,
-          "cap_stage": "SF",
-          "scale": 1.0,
-          "scaling_applied": false,
-          "stages": [
-            "SF"
-          ]
         }
-      }
+      },
+      "state_stale_reason": "state-stale: earlier-round tie unsettled in sim (Spain vs Belgium, kicked off 2026-07-10)"
     },
     {
       "team": "Argentina",
@@ -129,40 +111,51 @@
       },
       "pm": {
         "Final": {
-          "pm": 0.4085,
-          "edge_adj": 0.016,
+          "pm": 0.4145,
+          "edge_adj": 0.01,
           "side": "YES",
-          "ask": 0.409,
-          "stake_usd": 27.42,
+          "ask": 0.415,
+          "stake_usd": 17.3,
           "path_scale": 1.0
         },
         "SF": {
-          "pm": 0.735,
-          "edge_adj": -0.0085,
+          "pm": 0.755,
+          "edge_adj": 0.0118,
           "side": "NO",
-          "ask": 0.27,
-          "stake_usd": 0.0,
+          "ask": 0.25,
+          "stake_usd": 15.78,
           "path_scale": 1.0
         },
         "win": {
-          "pm": 0.1875,
-          "edge_adj": 0.0358,
+          "pm": 0.1765,
+          "edge_adj": 0.047,
           "side": "YES",
-          "ask": 0.188,
+          "ask": 0.177,
           "stake_usd": 0.0,
           "path_scale": 1.0
         }
       },
       "path_exposure": {
         "YES": {
-          "total_stake_usd": 27.42,
-          "total_stake_precap_usd": 27.42,
-          "cap_usd": 27.42,
+          "total_stake_usd": 17.3,
+          "total_stake_precap_usd": 17.3,
+          "cap_usd": 17.3,
           "cap_stage": "Final",
           "scale": 1.0,
           "scaling_applied": false,
           "stages": [
             "Final"
+          ]
+        },
+        "NO": {
+          "total_stake_usd": 15.78,
+          "total_stake_precap_usd": 15.78,
+          "cap_usd": 15.78,
+          "cap_stage": "SF",
+          "scale": 1.0,
+          "scaling_applied": false,
+          "stages": [
+            "SF"
           ]
         }
       }
@@ -199,18 +192,18 @@
       },
       "pm": {
         "win": {
-          "pm": 0.3855,
-          "edge_adj": 0.1854,
+          "pm": 0.3815,
+          "edge_adj": 0.1814,
           "side": "NO",
-          "ask": 0.615,
+          "ask": 0.619,
           "stake_usd": 79.8,
           "path_scale": 0.5
         },
         "Final": {
-          "pm": 0.665,
-          "edge_adj": 0.2979,
+          "pm": 0.595,
+          "edge_adj": 0.2273,
           "side": "NO",
-          "ask": 0.34,
+          "ask": 0.41,
           "stake_usd": 79.8,
           "path_scale": 0.5
         }
@@ -263,11 +256,11 @@
       },
       "pm": {
         "SF": {
-          "pm": 0.655,
-          "edge_adj": 0.0456,
+          "pm": 0.645,
+          "edge_adj": 0.0555,
           "side": "YES",
-          "ask": 0.66,
-          "stake_usd": 136.39,
+          "ask": 0.65,
+          "stake_usd": 159.6,
           "path_scale": 1.0
         },
         "Final": {
@@ -279,19 +272,19 @@
           "path_scale": 1.0
         },
         "win": {
-          "pm": 0.1595,
-          "edge_adj": 0.0159,
+          "pm": 0.1445,
+          "edge_adj": 0.0312,
           "side": "YES",
-          "ask": 0.16,
+          "ask": 0.145,
           "stake_usd": 0.0,
           "path_scale": 1.0
         }
       },
       "path_exposure": {
         "YES": {
-          "total_stake_usd": 136.39,
-          "total_stake_precap_usd": 136.39,
-          "cap_usd": 136.39,
+          "total_stake_usd": 159.6,
+          "total_stake_precap_usd": 159.6,
+          "cap_usd": 159.6,
           "cap_stage": "SF",
           "scale": 1.0,
           "scaling_applied": false,
@@ -331,45 +324,8 @@
         "win": 0.0122,
         "group_winner": 0.3414
       },
-      "pm": {
-        "SF": {
-          "pm": 0.2575,
-          "edge_adj": 0.0363,
-          "side": "YES",
-          "ask": 0.258,
-          "stake_usd": 49.12,
-          "path_scale": 1.0
-        },
-        "win": {
-          "pm": 0.0215,
-          "edge_adj": 0.0291,
-          "side": "YES",
-          "ask": 0.022,
-          "stake_usd": 0.0,
-          "path_scale": 1.0
-        },
-        "Final": {
-          "pm": 0.0515,
-          "edge_adj": 0.0726,
-          "side": "YES",
-          "ask": 0.052,
-          "stake_usd": 0.0,
-          "path_scale": 1.0
-        }
-      },
-      "path_exposure": {
-        "YES": {
-          "total_stake_usd": 49.12,
-          "total_stake_precap_usd": 49.12,
-          "cap_usd": 49.12,
-          "cap_stage": "SF",
-          "scale": 1.0,
-          "scaling_applied": false,
-          "stages": [
-            "SF"
-          ]
-        }
-      }
+      "pm": {},
+      "state_stale_reason": "state-stale: earlier-round tie unsettled in sim (Spain vs Belgium, kicked off 2026-07-10)"
     },
     {
       "team": "Morocco",
@@ -436,20 +392,33 @@
       },
       "pm": {
         "SF": {
-          "pm": 0.2625,
-          "edge_adj": -0.0024,
+          "pm": 0.2505,
+          "edge_adj": 0.0108,
           "side": "YES",
-          "ask": 0.264,
-          "stake_usd": 0.0,
+          "ask": 0.251,
+          "stake_usd": 14.44,
           "path_scale": 1.0
         },
         "Final": {
-          "pm": 0.0725,
-          "edge_adj": 0.0234,
+          "pm": 0.0635,
+          "edge_adj": 0.0326,
           "side": "YES",
-          "ask": 0.073,
+          "ask": 0.064,
           "stake_usd": 0.0,
           "path_scale": 1.0
+        }
+      },
+      "path_exposure": {
+        "YES": {
+          "total_stake_usd": 14.44,
+          "total_stake_precap_usd": 14.44,
+          "cap_usd": 14.44,
+          "cap_stage": "SF",
+          "scale": 1.0,
+          "scaling_applied": false,
+          "stages": [
+            "SF"
+          ]
         }
       }
     },
@@ -485,26 +454,26 @@
       },
       "pm": {
         "win": {
-          "pm": 0.0605,
-          "edge_adj": 0.0335,
+          "pm": 0.0575,
+          "edge_adj": 0.0306,
           "side": "NO",
-          "ask": 0.94,
+          "ask": 0.943,
           "stake_usd": 53.2,
           "path_scale": 0.3333
         },
         "Final": {
-          "pm": 0.1635,
-          "edge_adj": 0.0675,
+          "pm": 0.1575,
+          "edge_adj": 0.0597,
           "side": "NO",
-          "ask": 0.837,
+          "ask": 0.845,
           "stake_usd": 53.2,
           "path_scale": 0.3333
         },
         "SF": {
-          "pm": 0.355,
-          "edge_adj": 0.0554,
+          "pm": 0.365,
+          "edge_adj": 0.0653,
           "side": "NO",
-          "ask": 0.65,
+          "ask": 0.64,
           "stake_usd": 53.2,
           "path_scale": 0.3333
         }
