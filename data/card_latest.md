@@ -1,28 +1,28 @@
-<!-- generated: 2026-07-11T06:42:05 -->
+<!-- generated: 2026-07-11T07:18:18 -->
 *World Cup Alpha — trade card* (1 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
 *1. [MID·2ND-FAV] France vs Spain* — Spain — back *29.9%* impl via *betfair*
     model 30.6% / mkt 30.1% (+0.7pp)  EV *+2.4%* ✅+EV  [elo 26% dc 35%]
-    stake: gbp £8.44  further-out (84h) — thin/soft market
+    stake: gbp £8.30  further-out (84h) — thin/soft market
 
 *— CUT (excluded from staking, 1) —*
-  x [LS] Argentina vs Switzerland — Switzerland — back 15.6% impl (model 16.4%, EV +5.1% ✅+EV): below 20% hit-probability floor (model 16.4%) — too unlikely to return PnL even at +5.1% EV
+  x [LS] Argentina vs Switzerland — Switzerland — back 15.6% impl (model 16.4%, EV +4.9% ✅+EV): below 20% hit-probability floor (model 16.4%) — too unlikely to return PnL even at +4.9% EV
 
 *— WATCH (near-threshold, below the +2% EV floor — NOT staked, 1) —*
-  ~ [ML] Norway vs England — England — back 50.0% impl via smarkets (model 50.7% / mkt 49.9%, EV +1.5% ✅+EV)
+  ~ [ML] Norway vs England — England — back 50.3% impl via betfair (model 50.8% / mkt 50.0%, EV +1.1% ✅+EV)
 
-*Venue split (gbp):* betfair £8.44
+*Venue split (gbp):* betfair £8.30
 
 *— REFERENCE, NOT SIZED (model prices only) —*
 *World Cup Alpha — scorelines* (3 fixtures)
 
 *Norway vs England*
     xG: 0.99-1.66
-    1-1  12.2%  back at impl <= 11.9%
+    1-1  12.1%  back at impl <= 11.9%
     0-1  10.2%  back at impl <= 10.0%
     0-2  9.6%  back at impl <= 9.4%
-    1-2  8.5%  back at impl <= 8.3%
+    1-2  8.5%  back at impl <= 8.4%
     0-0  7.8%  back at impl <= 7.7%
     1-0  7.4%  back at impl <= 7.2%
     O/U 2.5: over 49.3% / under 50.7%   BTTS 50.4%
@@ -35,7 +35,7 @@ _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out firs
     2-1  9.9%  back at impl <= 9.7%
     0-0  7.6%  back at impl <= 7.4%
     3-0  6.4%  back at impl <= 6.2%
-    O/U 2.5: over 51.0% / under 49.0%   BTTS 51.6%
+    O/U 2.5: over 50.9% / under 49.1%   BTTS 51.6%
 
 *France vs Spain*
     xG: 1.54-1.34
