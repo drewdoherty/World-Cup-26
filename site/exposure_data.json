@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-12 03:56:12 UTC"
+    "generated": "2026-07-12 04:29:52 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -9,52 +9,74 @@
     "p_profit": 0,
     "p_loss": 0,
     "p_big_win": 0,
-    "n_scenarios": 3
+    "n_scenarios": 9
   },
   "correlation": {
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.4146,
+        "prob": 0.15,
         "results": [
-          "France"
+          "France",
+          "England"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.2869,
+        "prob": 0.1248,
         "results": [
+          "France",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.2985,
+        "prob": 0.14,
         "results": [
-          "Spain"
+          "France",
+          "Argentina"
+        ]
+      },
+      {
+        "pnl": 0.0,
+        "prob": 0.104,
+        "results": [
+          "Draw",
+          "England"
+        ]
+      },
+      {
+        "pnl": 0.0,
+        "prob": 0.0865,
+        "results": [
+          "Draw",
+          "Draw"
         ]
       }
     ],
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.4146,
+        "prob": 0.15,
         "results": [
-          "France"
+          "France",
+          "England"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.2869,
+        "prob": 0.1248,
         "results": [
+          "France",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.2985,
+        "prob": 0.14,
         "results": [
-          "Spain"
+          "France",
+          "Argentina"
         ]
       }
     ],
@@ -65,7 +87,14 @@
     "cap_fraction": 0.05,
     "cap_abs": 150.0,
     "n_over_exposed": 0,
-    "fixtures": [],
+    "fixtures": [
+      {
+        "fixture": "England vs Argentina",
+        "has_lambdas": false,
+        "n_bets": 1,
+        "note": "no lambdas persisted \u2014 legacy 1X2-only exposure used"
+      }
+    ],
     "slate": {
       "ev": 0.0,
       "best": 0.0,
@@ -82,7 +111,7 @@
       "results": [
         {
           "outcome": "France",
-          "prob": 0.4146,
+          "prob": 0.4148,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -91,7 +120,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2869,
+          "prob": 0.2876,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -100,7 +129,7 @@
         },
         {
           "outcome": "Spain",
-          "prob": 0.2985,
+          "prob": 0.2976,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -116,9 +145,102 @@
         "worst_outcome": "France",
         "n_blindspots": 0
       }
+    },
+    {
+      "fixture": "England vs Argentina",
+      "kickoff": null,
+      "results": [
+        {
+          "outcome": "England",
+          "prob": 0.3617,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": false,
+            "note": "no live market price found for this outcome"
+          }
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.3009,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": false,
+            "note": "no live market price found for this outcome"
+          }
+        },
+        {
+          "outcome": "Argentina",
+          "prob": 0.3374,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": false,
+            "note": "no live market price found for this outcome"
+          }
+        }
+      ],
+      "events": [
+        {
+          "type": "Win Only Market",
+          "selection": "England",
+          "stake": 10.0,
+          "potential_profit": 2.9,
+          "free": true,
+          "odds": 1.29
+        }
+      ],
+      "summary": {
+        "max_win": 0.0,
+        "stake_at_risk": 0,
+        "best_outcome": "England",
+        "worst_outcome": "England",
+        "n_blindspots": 3
+      }
     }
   ],
-  "blindspots": [],
+  "blindspots": [
+    {
+      "fixture": "England vs Argentina",
+      "outcome": "England",
+      "prob": 0.3617,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": false,
+        "note": "no live market price found for this outcome"
+      }
+    },
+    {
+      "fixture": "England vs Argentina",
+      "outcome": "Argentina",
+      "prob": 0.3374,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": false,
+        "note": "no live market price found for this outcome"
+      }
+    },
+    {
+      "fixture": "England vs Argentina",
+      "outcome": "Draw",
+      "prob": 0.3009,
+      "net_pnl": 0.0,
+      "plug": {
+        "available": false,
+        "note": "no live market price found for this outcome"
+      }
+    }
+  ],
   "unmapped": [
     "Algeria v Austria / Austria",
     "Cape Verde v Saudi Arabia / The Draw",
@@ -457,15 +579,6 @@
       "free": true,
       "odds": 3.75,
       "match": "Brazil v Japan"
-    },
-    {
-      "type": "Win Only Market",
-      "selection": "England",
-      "stake": 10.0,
-      "profit": 2.9000000000000004,
-      "free": true,
-      "odds": 1.29,
-      "match": "England"
     },
     {
       "type": "Anytime Goalscorer or Assist",
