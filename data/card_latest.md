@@ -1,15 +1,15 @@
-<!-- generated: 2026-07-12T02:54:58 -->
+<!-- generated: 2026-07-12T03:31:08 -->
 *World Cup Alpha — trade card* (1 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
 *1. [MID·LONGSHOT] France vs Spain* — Spain — back *29.0%* impl via *betfair*
-    model 29.9% / mkt 29.2% (+0.9pp)  EV *+3.1%* ✅+EV  [elo 26% dc 35%]
-    stake: gbp £10.23  further-out (64h) — thin/soft market
+    model 29.9% / mkt 29.2% (+0.9pp)  EV *+3.0%* ✅+EV  [elo 26% dc 35%]
+    stake: gbp £9.99  further-out (63h) — thin/soft market
 
 *— WATCH (near-threshold, below the +2% EV floor — NOT staked, 1) —*
-  ~ [MID] France vs Spain — France — back 41.3% impl via betfair (model 41.4% / mkt 41.5%, EV +0.2% ✅+EV)
+  ~ [MID] France vs Spain — France — back 41.3% impl via betfair (model 41.5% / mkt 41.6%, EV +0.3% ✅+EV)
 
-*Venue split (gbp):* betfair £10.23
+*Venue split (gbp):* betfair £9.99
 
 *— REFERENCE, NOT SIZED (model prices only) —*
 *World Cup Alpha — scorelines* (1 fixtures)
