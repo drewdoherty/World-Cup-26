@@ -1,0 +1,1279 @@
+{
+ "schema_version": 1,
+ "generated_at": "2026-07-09T18:58:38Z",
+ "monitor_only": true,
+ "execution": "NONE \u2014 no execution scaffold this cycle (watcher-only verdict); go/no-go criteria for ever adding one: docs/research/hl_venue_recon_2026-07-09.md",
+ "allowed_statuses": [
+  "XV_WATCH",
+  "XV_ARB_CANDIDATE",
+  "XV_MISMATCHED_SETTLEMENT",
+  "XV_NO_DATA"
+ ],
+ "n_snapshots": 1,
+ "sources": {
+  "mode": "offline-replay:/private/tmp/claude-501/-Users-andrewdoherty-Desktop-Coding-World-Cup-Alpha/19292ef9-aa7e-4309-9492-85a190de4422/scratchpad/hlrecon",
+  "hl_info": "https://api.hyperliquid.xyz/info",
+  "pm_clob_book": "https://clob.polymarket.com/book",
+  "pm_gamma": "https://gamma-api.polymarket.com/events?slug=world-cup-winner|world-cup-nation-to-reach-semifinals",
+  "pair_map": "wca.hl.xvenue (pinned 2026-07-09 recon; raw capture 18:13-18:15 UTC; load-bearing books preserved in tests/fixtures/hl_xvenue/)",
+  "history_file": "data/hl_xvenue_history.jsonl"
+ },
+ "fee_model": {
+  "pm_taker_fee": "0.03 * p * (1-p) per share, taker-only (PM sports fee; parity with wca.advancement.PM_TAKER_FEE_COEF)",
+  "hl_trading_fee_per_share": 0.0,
+  "hl_settlement_fee_assumed": 0.0,
+  "hl_settlement_fee_verified": false
+ },
+ "summary": {
+  "n_pairs": 16,
+  "by_status": {
+   "XV_WATCH": 14,
+   "XV_ARB_CANDIDATE": 1,
+   "XV_MISMATCHED_SETTLEMENT": 1,
+   "XV_NO_DATA": 0
+  }
+ },
+ "pairs": [
+  {
+   "pair_id": "champion:Argentina",
+   "kind": "champion",
+   "team": "Argentina",
+   "hl": {
+    "outcome_id": 173,
+    "yes_side": 0,
+    "settlement_basis": "HL question 32 '2026 World Cup Champion': Yes iff FIFA officially declares the team champion; ET+pens valid; No settles EARLY on mathematical elimination (observed live: outcome 172 Algeria); ALL outcomes No on cancellation/co-champions/no champion declared by 2026-10-14 23:59 UTC. Deadline exists only in description text (no machine-readable expiry field).",
+    "yes_bid": 0.19377,
+    "yes_bid_sz": 259.0,
+    "yes_ask": 0.19495,
+    "yes_ask_sz": 63.0,
+    "no_ask": 0.80622,
+    "no_ask_sz": 1548.0,
+    "book_time_ms": 1783620850380
+   },
+   "pm": {
+    "market_id": "558938",
+    "token_yes": "18812649149814341758733697580460697418474693998558159483117100240528657629879",
+    "token_no": "115428153746996892211798999366308897078723117634059783423375188043903703749062",
+    "slug": "world-cup-winner",
+    "settlement_basis": "PM 'world-cup-winner' (event 30615, negRisk): Yes iff the team wins the 2026 FIFA World Cup; immediate No on elimination; resolves to 'Other' if cancelled/not completed by October 13, 2026 11:59 PM (no timezone stated in description).",
+    "yes_bid": 0.195,
+    "yes_bid_sz": 17474.29,
+    "yes_ask": 0.196,
+    "yes_ask_sz": 350266.32,
+    "no_ask": 0.805,
+    "no_ask_sz": 17474.29,
+    "book_timestamp_ms": 1783620814250
+   },
+   "event_date": null,
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": 5e-05,
+    "buy_pm_sell_hl": -0.00223
+   },
+   "mid_gap_hl_minus_pm": -0.00114,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.00466,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 36.1,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "co_champion_both_legs_zero",
+      "detail": "Co-champions: HL resolves all-No (explicit in question-32 description) while PM is silent (UMA) and may resolve the team Yes -> HL Yes pays 0 AND PM No pays 0."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": -0.00695,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 39.3,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "deadline_gap_sliver_negligible",
+      "detail": "Champion declared between PM's 2026-10-13 deadline (no TZ stated) and HL's 2026-10-14 23:59 UTC -> collects 0. Remote (<24h window after a ~3-month postponement); caveat only."
+     }
+    }
+   },
+   "status": "XV_WATCH",
+   "status_reason": "no fee-surviving cross; best direction -0.00466/share"
+  },
+  {
+   "pair_id": "champion:Belgium",
+   "kind": "champion",
+   "team": "Belgium",
+   "hl": {
+    "outcome_id": 176,
+    "yes_side": 0,
+    "settlement_basis": "HL question 32 '2026 World Cup Champion': Yes iff FIFA officially declares the team champion; ET+pens valid; No settles EARLY on mathematical elimination (observed live: outcome 172 Algeria); ALL outcomes No on cancellation/co-champions/no champion declared by 2026-10-14 23:59 UTC. Deadline exists only in description text (no machine-readable expiry field).",
+    "yes_bid": 0.02101,
+    "yes_bid_sz": 1398.0,
+    "yes_ask": 0.02592,
+    "yes_ask_sz": 832.0,
+    "no_ask": 0.97899,
+    "no_ask_sz": 1398.0,
+    "book_time_ms": 1783620856816
+   },
+   "pm": {
+    "market_id": "558946",
+    "token_yes": "30815807067456631524510535002617106205417832891402132396713720656146245200000",
+    "token_no": "71145888994888153292442623019750517622535407476309461406574461229898137896934",
+    "slug": "world-cup-winner",
+    "settlement_basis": "PM 'world-cup-winner' (event 30615, negRisk): Yes iff the team wins the 2026 FIFA World Cup; immediate No on elimination; resolves to 'Other' if cancelled/not completed by October 13, 2026 11:59 PM (no timezone stated in description).",
+    "yes_bid": 0.024,
+    "yes_bid_sz": 3012121.8,
+    "yes_ask": 0.025,
+    "yes_ask_sz": 919764.84,
+    "no_ask": 0.976,
+    "no_ask_sz": 3012121.8,
+    "book_timestamp_ms": 1783620805156
+   },
+   "event_date": null,
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": -0.00192,
+    "buy_pm_sell_hl": -0.00399
+   },
+   "mid_gap_hl_minus_pm": -0.00104,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.00262,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 51.7,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "co_champion_both_legs_zero",
+      "detail": "Co-champions: HL resolves all-No (explicit in question-32 description) while PM is silent (UMA) and may resolve the team Yes -> HL Yes pays 0 AND PM No pays 0."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": -0.00472,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 54.4,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "deadline_gap_sliver_negligible",
+      "detail": "Champion declared between PM's 2026-10-13 deadline (no TZ stated) and HL's 2026-10-14 23:59 UTC -> collects 0. Remote (<24h window after a ~3-month postponement); caveat only."
+     }
+    }
+   },
+   "status": "XV_WATCH",
+   "status_reason": "no fee-surviving cross; best direction -0.00262/share"
+  },
+  {
+   "pair_id": "champion:England",
+   "kind": "champion",
+   "team": "England",
+   "hl": {
+    "outcome_id": 188,
+    "yes_side": 0,
+    "settlement_basis": "HL question 32 '2026 World Cup Champion': Yes iff FIFA officially declares the team champion; ET+pens valid; No settles EARLY on mathematical elimination (observed live: outcome 172 Algeria); ALL outcomes No on cancellation/co-champions/no champion declared by 2026-10-14 23:59 UTC. Deadline exists only in description text (no machine-readable expiry field).",
+    "yes_bid": 0.15702,
+    "yes_bid_sz": 78.0,
+    "yes_ask": 0.16121,
+    "yes_ask_sz": 41.0,
+    "no_ask": 0.84298,
+    "no_ask_sz": 78.0,
+    "book_time_ms": 1783620862732
+   },
+   "pm": {
+    "market_id": "558935",
+    "token_yes": "115556263888245616435851357148058235707004733438163639091106356867234218207169",
+    "token_no": "77121637225348873006259930776623502125079210522997384841464684944292365296940",
+    "slug": "world-cup-winner",
+    "settlement_basis": "PM 'world-cup-winner' (event 30615, negRisk): Yes iff the team wins the 2026 FIFA World Cup; immediate No on elimination; resolves to 'Other' if cancelled/not completed by October 13, 2026 11:59 PM (no timezone stated in description).",
+    "yes_bid": 0.16,
+    "yes_bid_sz": 474196.57,
+    "yes_ask": 0.161,
+    "yes_ask_sz": 339140.44,
+    "no_ask": 0.84,
+    "no_ask_sz": 474196.57,
+    "book_timestamp_ms": 1783620806118
+   },
+   "event_date": null,
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": -0.00121,
+    "buy_pm_sell_hl": -0.00398
+   },
+   "mid_gap_hl_minus_pm": -0.00138,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.00524,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 51.7,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "co_champion_both_legs_zero",
+      "detail": "Co-champions: HL resolves all-No (explicit in question-32 description) while PM is silent (UMA) and may resolve the team Yes -> HL Yes pays 0 AND PM No pays 0."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": -0.00803,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 59.8,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "deadline_gap_sliver_negligible",
+      "detail": "Champion declared between PM's 2026-10-13 deadline (no TZ stated) and HL's 2026-10-14 23:59 UTC -> collects 0. Remote (<24h window after a ~3-month postponement); caveat only."
+     }
+    }
+   },
+   "status": "XV_WATCH",
+   "status_reason": "no fee-surviving cross; best direction -0.00524/share"
+  },
+  {
+   "pair_id": "champion:France",
+   "kind": "champion",
+   "team": "France",
+   "hl": {
+    "outcome_id": 189,
+    "yes_side": 0,
+    "settlement_basis": "HL question 32 '2026 World Cup Champion': Yes iff FIFA officially declares the team champion; ET+pens valid; No settles EARLY on mathematical elimination (observed live: outcome 172 Algeria); ALL outcomes No on cancellation/co-champions/no champion declared by 2026-10-14 23:59 UTC. Deadline exists only in description text (no machine-readable expiry field).",
+    "yes_bid": 0.32071,
+    "yes_bid_sz": 93597.0,
+    "yes_ask": 0.32082,
+    "yes_ask_sz": 623.0,
+    "no_ask": 0.67929,
+    "no_ask_sz": 93597.0,
+    "book_time_ms": 1783620869166
+   },
+   "pm": {
+    "market_id": "558936",
+    "token_yes": "108233603819467706476318984012158651931658302669301887462181073562758483842092",
+    "token_no": "32270411694523539495262303868629477861017829722282576458031815333486368239544",
+    "slug": "world-cup-winner",
+    "settlement_basis": "PM 'world-cup-winner' (event 30615, negRisk): Yes iff the team wins the 2026 FIFA World Cup; immediate No on elimination; resolves to 'Other' if cancelled/not completed by October 13, 2026 11:59 PM (no timezone stated in description).",
+    "yes_bid": 0.318,
+    "yes_bid_sz": 12384.53,
+    "yes_ask": 0.319,
+    "yes_ask_sz": 91804.74,
+    "no_ask": 0.682,
+    "no_ask_sz": 12384.53,
+    "book_timestamp_ms": 1783620810055
+   },
+   "event_date": null,
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": -0.00282,
+    "buy_pm_sell_hl": 0.00171
+   },
+   "mid_gap_hl_minus_pm": 0.00226,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.00933,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 59.1,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "co_champion_both_legs_zero",
+      "detail": "Co-champions: HL resolves all-No (explicit in question-32 description) while PM is silent (UMA) and may resolve the team Yes -> HL Yes pays 0 AND PM No pays 0."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": -0.00481,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 61.8,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "deadline_gap_sliver_negligible",
+      "detail": "Champion declared between PM's 2026-10-13 deadline (no TZ stated) and HL's 2026-10-14 23:59 UTC -> collects 0. Remote (<24h window after a ~3-month postponement); caveat only."
+     }
+    }
+   },
+   "status": "XV_WATCH",
+   "status_reason": "no fee-surviving cross; best direction -0.00481/share"
+  },
+  {
+   "pair_id": "champion:Morocco",
+   "kind": "champion",
+   "team": "Morocco",
+   "hl": {
+    "outcome_id": 199,
+    "yes_side": 0,
+    "settlement_basis": "HL question 32 '2026 World Cup Champion': Yes iff FIFA officially declares the team champion; ET+pens valid; No settles EARLY on mathematical elimination (observed live: outcome 172 Algeria); ALL outcomes No on cancellation/co-champions/no champion declared by 2026-10-14 23:59 UTC. Deadline exists only in description text (no machine-readable expiry field).",
+    "yes_bid": 0.031,
+    "yes_bid_sz": 300000.0,
+    "yes_ask": 0.035,
+    "yes_ask_sz": 1120.0,
+    "no_ask": 0.969,
+    "no_ask_sz": 300000.0,
+    "book_time_ms": 1783620875088
+   },
+   "pm": {
+    "market_id": "558963",
+    "token_yes": "69910730841487615802736046038473620030754616421912831175284551372639933569112",
+    "token_no": "64291832879722161879651094688874074984529456778901604558632306686248535158725",
+    "slug": "world-cup-winner",
+    "settlement_basis": "PM 'world-cup-winner' (event 30615, negRisk): Yes iff the team wins the 2026 FIFA World Cup; immediate No on elimination; resolves to 'Other' if cancelled/not completed by October 13, 2026 11:59 PM (no timezone stated in description).",
+    "yes_bid": 0.033,
+    "yes_bid_sz": 10719.43,
+    "yes_ask": 0.034,
+    "yes_ask_sz": 18113.59,
+    "no_ask": 0.967,
+    "no_ask_sz": 10719.43,
+    "book_timestamp_ms": 1783620819635
+   },
+   "event_date": null,
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": -0.002,
+    "buy_pm_sell_hl": -0.003
+   },
+   "mid_gap_hl_minus_pm": -0.0005,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.00296,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 54.2,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "co_champion_both_legs_zero",
+      "detail": "Co-champions: HL resolves all-No (explicit in question-32 description) while PM is silent (UMA) and may resolve the team Yes -> HL Yes pays 0 AND PM No pays 0."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": -0.00399,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 58.8,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "deadline_gap_sliver_negligible",
+      "detail": "Champion declared between PM's 2026-10-13 deadline (no TZ stated) and HL's 2026-10-14 23:59 UTC -> collects 0. Remote (<24h window after a ~3-month postponement); caveat only."
+     }
+    }
+   },
+   "status": "XV_WATCH",
+   "status_reason": "no fee-surviving cross; best direction -0.00296/share"
+  },
+  {
+   "pair_id": "champion:Norway",
+   "kind": "champion",
+   "team": "Norway",
+   "hl": {
+    "outcome_id": 202,
+    "yes_side": 0,
+    "settlement_basis": "HL question 32 '2026 World Cup Champion': Yes iff FIFA officially declares the team champion; ET+pens valid; No settles EARLY on mathematical elimination (observed live: outcome 172 Algeria); ALL outcomes No on cancellation/co-champions/no champion declared by 2026-10-14 23:59 UTC. Deadline exists only in description text (no machine-readable expiry field).",
+    "yes_bid": 0.064,
+    "yes_bid_sz": 249600.0,
+    "yes_ask": 0.0646,
+    "yes_ask_sz": 527.0,
+    "no_ask": 0.936,
+    "no_ask_sz": 249600.0,
+    "book_time_ms": 1783620881693
+   },
+   "pm": {
+    "market_id": "558951",
+    "token_yes": "60447443643099453130956385288904175887233107411078568881602330835010340506057",
+    "token_no": "111538579557239934343870815626480092245052857494675784434731223739153238373070",
+    "slug": "world-cup-winner",
+    "settlement_basis": "PM 'world-cup-winner' (event 30615, negRisk): Yes iff the team wins the 2026 FIFA World Cup; immediate No on elimination; resolves to 'Other' if cancelled/not completed by October 13, 2026 11:59 PM (no timezone stated in description).",
+    "yes_bid": 0.059,
+    "yes_bid_sz": 523632.09,
+    "yes_ask": 0.06,
+    "yes_ask_sz": 87086.63,
+    "no_ask": 0.941,
+    "no_ask_sz": 523632.09,
+    "book_timestamp_ms": 1783620817853
+   },
+   "event_date": null,
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": -0.0056,
+    "buy_pm_sell_hl": 0.004
+   },
+   "mid_gap_hl_minus_pm": 0.0048,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.00727,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 63.2,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "co_champion_both_legs_zero",
+      "detail": "Co-champions: HL resolves all-No (explicit in question-32 description) while PM is silent (UMA) and may resolve the team Yes -> HL Yes pays 0 AND PM No pays 0."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": 0.00231,
+     "executable": {
+      "shares": 249600.0,
+      "cost_usd": 249268.57,
+      "pm_fees_usd": 428.6,
+      "profit_usd": 331.4268,
+      "ret_on_cost_pct": 0.133,
+      "levels": [
+       {
+        "hl_px": 0.936,
+        "pm_px": 0.06,
+        "pm_fee": 0.001692,
+        "shares": 87086.63,
+        "margin_per_share": 0.002308
+       },
+       {
+        "hl_px": 0.936,
+        "pm_px": 0.061,
+        "pm_fee": 0.001718,
+        "shares": 86657.93,
+        "margin_per_share": 0.001282
+       },
+       {
+        "hl_px": 0.936,
+        "pm_px": 0.062,
+        "pm_fee": 0.001745,
+        "shares": 75855.44,
+        "margin_per_share": 0.000255
+       }
+      ]
+     },
+     "leg_skew_seconds": 66.7,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "deadline_gap_sliver_negligible",
+      "detail": "Champion declared between PM's 2026-10-13 deadline (no TZ stated) and HL's 2026-10-14 23:59 UTC -> collects 0. Remote (<24h window after a ~3-month postponement); caveat only."
+     }
+    }
+   },
+   "status": "XV_ARB_CANDIDATE",
+   "status_reason": "dir2_buy_pm_yes_buy_hl_no: +0.00231/share after PM taker fee (HL fee 0, settlement fee UNVERIFIED assumed 0), executable 249600.00 shares for $331.4268 profit. Monitor-only: legs captured 66.7s apart \u2014 simultaneous fill unproven."
+  },
+  {
+   "pair_id": "champion:Spain",
+   "kind": "champion",
+   "team": "Spain",
+   "hl": {
+    "outcome_id": 212,
+    "yes_side": 0,
+    "settlement_basis": "HL question 32 '2026 World Cup Champion': Yes iff FIFA officially declares the team champion; ET+pens valid; No settles EARLY on mathematical elimination (observed live: outcome 172 Algeria); ALL outcomes No on cancellation/co-champions/no champion declared by 2026-10-14 23:59 UTC. Deadline exists only in description text (no machine-readable expiry field).",
+    "yes_bid": 0.19145,
+    "yes_bid_sz": 338.0,
+    "yes_ask": 0.19165,
+    "yes_ask_sz": 303.0,
+    "no_ask": 0.80855,
+    "no_ask_sz": 338.0,
+    "book_time_ms": 1783620887756
+   },
+   "pm": {
+    "market_id": "558934",
+    "token_yes": "4394372887385518214471608448209527405727552777602031099972143344338178308080",
+    "token_no": "112680630004798425069810935278212000865453267506345451433803052322987302357330",
+    "slug": "world-cup-winner",
+    "settlement_basis": "PM 'world-cup-winner' (event 30615, negRisk): Yes iff the team wins the 2026 FIFA World Cup; immediate No on elimination; resolves to 'Other' if cancelled/not completed by October 13, 2026 11:59 PM (no timezone stated in description).",
+    "yes_bid": 0.193,
+    "yes_bid_sz": 245430.87,
+    "yes_ask": 0.194,
+    "yes_ask_sz": 26757.31,
+    "no_ask": 0.807,
+    "no_ask_sz": 245430.87,
+    "book_timestamp_ms": 1783620794955
+   },
+   "event_date": null,
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": 0.00135,
+    "buy_pm_sell_hl": -0.00255
+   },
+   "mid_gap_hl_minus_pm": -0.00195,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.00332,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 79.3,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "co_champion_both_legs_zero",
+      "detail": "Co-champions: HL resolves all-No (explicit in question-32 description) while PM is silent (UMA) and may resolve the team Yes -> HL Yes pays 0 AND PM No pays 0."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": -0.00724,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 96.0,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "deadline_gap_sliver_negligible",
+      "detail": "Champion declared between PM's 2026-10-13 deadline (no TZ stated) and HL's 2026-10-14 23:59 UTC -> collects 0. Remote (<24h window after a ~3-month postponement); caveat only."
+     }
+    }
+   },
+   "status": "XV_WATCH",
+   "status_reason": "no fee-surviving cross; best direction -0.00332/share"
+  },
+  {
+   "pair_id": "champion:Switzerland",
+   "kind": "champion",
+   "team": "Switzerland",
+   "hl": {
+    "outcome_id": 214,
+    "yes_side": 0,
+    "settlement_basis": "HL question 32 '2026 World Cup Champion': Yes iff FIFA officially declares the team champion; ET+pens valid; No settles EARLY on mathematical elimination (observed live: outcome 172 Algeria); ALL outcomes No on cancellation/co-champions/no champion declared by 2026-10-14 23:59 UTC. Deadline exists only in description text (no machine-readable expiry field).",
+    "yes_bid": 0.01501,
+    "yes_bid_sz": 6652.0,
+    "yes_ask": 0.02101,
+    "yes_ask_sz": 150000.0,
+    "no_ask": 0.98499,
+    "no_ask_sz": 6652.0,
+    "book_time_ms": 1783620894233
+   },
+   "pm": {
+    "market_id": "558974",
+    "token_yes": "62131913648515148266463816694306031394539656598501514114816028349608560215534",
+    "token_no": "45315272750116791836504013666029583517532908319286234834610455739871173419179",
+    "slug": "world-cup-winner",
+    "settlement_basis": "PM 'world-cup-winner' (event 30615, negRisk): Yes iff the team wins the 2026 FIFA World Cup; immediate No on elimination; resolves to 'Other' if cancelled/not completed by October 13, 2026 11:59 PM (no timezone stated in description).",
+    "yes_bid": 0.02,
+    "yes_bid_sz": 1972348.99,
+    "yes_ask": 0.021,
+    "yes_ask_sz": 684277.39,
+    "no_ask": 0.98,
+    "no_ask_sz": 1972348.99,
+    "book_timestamp_ms": 1783620821247
+   },
+   "event_date": null,
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": -0.00101,
+    "buy_pm_sell_hl": -0.00599
+   },
+   "mid_gap_hl_minus_pm": -0.00249,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.0016,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 73.0,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "co_champion_both_legs_zero",
+      "detail": "Co-champions: HL resolves all-No (explicit in question-32 description) while PM is silent (UMA) and may resolve the team Yes -> HL Yes pays 0 AND PM No pays 0."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": -0.00661,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 76.8,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "deadline_gap_sliver_negligible",
+      "detail": "Champion declared between PM's 2026-10-13 deadline (no TZ stated) and HL's 2026-10-14 23:59 UTC -> collects 0. Remote (<24h window after a ~3-month postponement); caveat only."
+     }
+    }
+   },
+   "status": "XV_WATCH",
+   "status_reason": "no fee-surviving cross; best direction -0.00160/share"
+  },
+  {
+   "pair_id": "qf:France",
+   "kind": "qf",
+   "team": "France",
+   "hl": {
+    "outcome_id": 761,
+    "yes_side": 0,
+    "settlement_basis": "HL QF match winner: resolves to the team FIFA declares winner of the quarterfinal; 'Game results after regular time, extra time, and penalties, if applicable, are all valid' (verbatim); walkover/forfeit/admin decision valid; resolves 0.5/share to BOTH sides if cancelled/no winner/no result by 2026-07-26 23:59 UTC. No Draw side.",
+    "yes_bid": 0.77478,
+    "yes_bid_sz": 442.0,
+    "yes_ask": 0.77485,
+    "yes_ask_sz": 248.0,
+    "no_ask": 0.22522,
+    "no_ask_sz": 442.0,
+    "book_time_ms": 1783620902299
+   },
+   "pm": {
+    "market_id": "2419357",
+    "token_yes": "100129780550616595145553750912141386610721021591799769049531023014005791181112",
+    "token_no": "11833328785598556491835740107930911499139397624320250850272538944203363112935",
+    "slug": "world-cup-nation-to-reach-semifinals",
+    "settlement_basis": "PM 'world-cup-nation-to-reach-semifinals' (event 551781, separate binary markets, NOT negRisk): Yes iff the team reaches the semifinals (advancement basis, ET+pens inclusive \u2014 winning the QF == reaching SF); No if cancelled/postponed past July 25, 2026 11:59 PM ET.",
+    "yes_bid": 0.77,
+    "yes_bid_sz": 4645.23,
+    "yes_ask": 0.78,
+    "yes_ask_sz": 55861.96,
+    "no_ask": 0.23,
+    "no_ask_sz": 4645.23,
+    "book_timestamp_ms": 1783620832150
+   },
+   "event_date": "2026-07-09",
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": -0.00485,
+    "buy_pm_sell_hl": -0.00522
+   },
+   "mid_gap_hl_minus_pm": -0.00018,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.01016,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 70.1,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "cancellation_windfall_1_5",
+      "detail": "Cancellation/no result by the deadlines: HL pays 0.5/share + PM reach-SF No pays 1.0 -> collects 1.5 (windfall)."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": -0.01037,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 74.4,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "cancellation_toxic_0_5",
+      "detail": "Cancellation/no result: PM reach-SF Yes pays 0 + HL pays 0.5 -> collects 0.5 on ~1.0 cost. Also a winner declared inside the ~20h HL(Jul 26 23:59 UTC)/PM(Jul 25 23:59 ET) deadline gap collects 0."
+     }
+    }
+   },
+   "status": "XV_WATCH",
+   "status_reason": "no fee-surviving cross; best direction -0.01016/share"
+  },
+  {
+   "pair_id": "qf:Morocco",
+   "kind": "qf",
+   "team": "Morocco",
+   "hl": {
+    "outcome_id": 761,
+    "yes_side": 1,
+    "settlement_basis": "HL QF match winner: resolves to the team FIFA declares winner of the quarterfinal; 'Game results after regular time, extra time, and penalties, if applicable, are all valid' (verbatim); walkover/forfeit/admin decision valid; resolves 0.5/share to BOTH sides if cancelled/no winner/no result by 2026-07-26 23:59 UTC. No Draw side.",
+    "yes_bid": 0.22515,
+    "yes_bid_sz": 248.0,
+    "yes_ask": 0.22522,
+    "yes_ask_sz": 442.0,
+    "no_ask": 0.77485,
+    "no_ask_sz": 248.0,
+    "book_time_ms": 1783620906595
+   },
+   "pm": {
+    "market_id": "2419334",
+    "token_yes": "47854818125142579705136730484306012843275003274878888606842114188142707548341",
+    "token_no": "49255480439312539444144499647289034096071265497094624211295651547224031778875",
+    "slug": "world-cup-nation-to-reach-semifinals",
+    "settlement_basis": "PM 'world-cup-nation-to-reach-semifinals' (event 551781, separate binary markets, NOT negRisk): Yes iff the team reaches the semifinals (advancement basis, ET+pens inclusive \u2014 winning the QF == reaching SF); No if cancelled/postponed past July 25, 2026 11:59 PM ET.",
+    "yes_bid": 0.225,
+    "yes_bid_sz": 5418.21,
+    "yes_ask": 0.226,
+    "yes_ask_sz": 226.76,
+    "no_ask": 0.775,
+    "no_ask_sz": 5418.21,
+    "book_timestamp_ms": 1783620823901
+   },
+   "event_date": "2026-07-09",
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": -0.00022,
+    "buy_pm_sell_hl": -0.00085
+   },
+   "mid_gap_hl_minus_pm": -0.00032,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.00545,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 82.7,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "cancellation_windfall_1_5",
+      "detail": "Cancellation/no result by the deadlines: HL pays 0.5/share + PM reach-SF No pays 1.0 -> collects 1.5 (windfall)."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": -0.0061,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 78.4,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "cancellation_toxic_0_5",
+      "detail": "Cancellation/no result: PM reach-SF Yes pays 0 + HL pays 0.5 -> collects 0.5 on ~1.0 cost. Also a winner declared inside the ~20h HL(Jul 26 23:59 UTC)/PM(Jul 25 23:59 ET) deadline gap collects 0."
+     }
+    }
+   },
+   "status": "XV_WATCH",
+   "status_reason": "no fee-surviving cross; best direction -0.00545/share"
+  },
+  {
+   "pair_id": "qf:Norway",
+   "kind": "qf",
+   "team": "Norway",
+   "hl": {
+    "outcome_id": 778,
+    "yes_side": 0,
+    "settlement_basis": "HL QF match winner: resolves to the team FIFA declares winner of the quarterfinal; 'Game results after regular time, extra time, and penalties, if applicable, are all valid' (verbatim); walkover/forfeit/admin decision valid; resolves 0.5/share to BOTH sides if cancelled/no winner/no result by 2026-07-26 23:59 UTC. No Draw side.",
+    "yes_bid": 0.35055,
+    "yes_bid_sz": 184.0,
+    "yes_ask": 0.35211,
+    "yes_ask_sz": 15000.0,
+    "no_ask": 0.64945,
+    "no_ask_sz": 184.0,
+    "book_time_ms": 1783620910886
+   },
+   "pm": {
+    "market_id": "2419359",
+    "token_yes": "62948040058811530738851582948100508585678711039782457351344064638643339400332",
+    "token_no": "94507404587911363782429002685350140819700646734600625387531572421599373278903",
+    "slug": "world-cup-nation-to-reach-semifinals",
+    "settlement_basis": "PM 'world-cup-nation-to-reach-semifinals' (event 551781, separate binary markets, NOT negRisk): Yes iff the team reaches the semifinals (advancement basis, ET+pens inclusive \u2014 winning the QF == reaching SF); No if cancelled/postponed past July 25, 2026 11:59 PM ET.",
+    "yes_bid": 0.34,
+    "yes_bid_sz": 28136.82,
+    "yes_ask": 0.35,
+    "yes_ask_sz": 675.75,
+    "no_ask": 0.66,
+    "no_ask_sz": 28136.82,
+    "book_timestamp_ms": 1783620831022
+   },
+   "event_date": "2026-07-11",
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": -0.01211,
+    "buy_pm_sell_hl": 0.00055
+   },
+   "mid_gap_hl_minus_pm": 0.00633,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.01884,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 76.6,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "cancellation_windfall_1_5",
+      "detail": "Cancellation/no result by the deadlines: HL pays 0.5/share + PM reach-SF No pays 1.0 -> collects 1.5 (windfall)."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": -0.00628,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 83.1,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "cancellation_toxic_0_5",
+      "detail": "Cancellation/no result: PM reach-SF Yes pays 0 + HL pays 0.5 -> collects 0.5 on ~1.0 cost. Also a winner declared inside the ~20h HL(Jul 26 23:59 UTC)/PM(Jul 25 23:59 ET) deadline gap collects 0."
+     }
+    }
+   },
+   "status": "XV_WATCH",
+   "status_reason": "no fee-surviving cross; best direction -0.00628/share"
+  },
+  {
+   "pair_id": "qf:England",
+   "kind": "qf",
+   "team": "England",
+   "hl": {
+    "outcome_id": 778,
+    "yes_side": 1,
+    "settlement_basis": "HL QF match winner: resolves to the team FIFA declares winner of the quarterfinal; 'Game results after regular time, extra time, and penalties, if applicable, are all valid' (verbatim); walkover/forfeit/admin decision valid; resolves 0.5/share to BOTH sides if cancelled/no winner/no result by 2026-07-26 23:59 UTC. No Draw side.",
+    "yes_bid": 0.64789,
+    "yes_bid_sz": 15000.0,
+    "yes_ask": 0.64945,
+    "yes_ask_sz": 184.0,
+    "no_ask": 0.35211,
+    "no_ask_sz": 15000.0,
+    "book_time_ms": 1783620914114
+   },
+   "pm": {
+    "market_id": "2419369",
+    "token_yes": "55294405439268844550383434100266469978217752464671073044130093830763750964730",
+    "token_no": "43180050312134890928476684764665203164471123431180683307338020007956622756559",
+    "slug": "world-cup-nation-to-reach-semifinals",
+    "settlement_basis": "PM 'world-cup-nation-to-reach-semifinals' (event 551781, separate binary markets, NOT negRisk): Yes iff the team reaches the semifinals (advancement basis, ET+pens inclusive \u2014 winning the QF == reaching SF); No if cancelled/postponed past July 25, 2026 11:59 PM ET.",
+    "yes_bid": 0.65,
+    "yes_bid_sz": 20612.91,
+    "yes_ask": 0.66,
+    "yes_ask_sz": 31356.94,
+    "no_ask": 0.35,
+    "no_ask_sz": 20612.91,
+    "book_timestamp_ms": 1783620835884
+   },
+   "event_date": "2026-07-11",
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": 0.00055,
+    "buy_pm_sell_hl": -0.01211
+   },
+   "mid_gap_hl_minus_pm": -0.00633,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.00628,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 78.2,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "cancellation_windfall_1_5",
+      "detail": "Cancellation/no result by the deadlines: HL pays 0.5/share + PM reach-SF No pays 1.0 -> collects 1.5 (windfall)."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": -0.01884,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 75.0,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "cancellation_toxic_0_5",
+      "detail": "Cancellation/no result: PM reach-SF Yes pays 0 + HL pays 0.5 -> collects 0.5 on ~1.0 cost. Also a winner declared inside the ~20h HL(Jul 26 23:59 UTC)/PM(Jul 25 23:59 ET) deadline gap collects 0."
+     }
+    }
+   },
+   "status": "XV_WATCH",
+   "status_reason": "no fee-surviving cross; best direction -0.00628/share"
+  },
+  {
+   "pair_id": "qf:Spain",
+   "kind": "qf",
+   "team": "Spain",
+   "hl": {
+    "outcome_id": 779,
+    "yes_side": 0,
+    "settlement_basis": "HL QF match winner: resolves to the team FIFA declares winner of the quarterfinal; 'Game results after regular time, extra time, and penalties, if applicable, are all valid' (verbatim); walkover/forfeit/admin decision valid; resolves 0.5/share to BOTH sides if cancelled/no winner/no result by 2026-07-26 23:59 UTC. No Draw side.",
+    "yes_bid": 0.736,
+    "yes_bid_sz": 69.0,
+    "yes_ask": 0.738,
+    "yes_ask_sz": 101.0,
+    "no_ask": 0.264,
+    "no_ask_sz": 69.0,
+    "book_time_ms": 1783620917336
+   },
+   "pm": {
+    "market_id": "2419353",
+    "token_yes": "94114201224211049031571044475406189237583412588859764322595606591995897942500",
+    "token_no": "100938009931263211789902925967068115839559588497892683689528715549774223922226",
+    "slug": "world-cup-nation-to-reach-semifinals",
+    "settlement_basis": "PM 'world-cup-nation-to-reach-semifinals' (event 551781, separate binary markets, NOT negRisk): Yes iff the team reaches the semifinals (advancement basis, ET+pens inclusive \u2014 winning the QF == reaching SF); No if cancelled/postponed past July 25, 2026 11:59 PM ET.",
+    "yes_bid": 0.74,
+    "yes_bid_sz": 40171.96,
+    "yes_ask": 0.75,
+    "yes_ask_sz": 51465.37,
+    "no_ask": 0.26,
+    "no_ask_sz": 40171.96,
+    "book_timestamp_ms": 1783620829942
+   },
+   "event_date": "2026-07-10",
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": 0.002,
+    "buy_pm_sell_hl": -0.014
+   },
+   "mid_gap_hl_minus_pm": -0.008,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.00377,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 86.4,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "cancellation_windfall_1_5",
+      "detail": "Cancellation/no result by the deadlines: HL pays 0.5/share + PM reach-SF No pays 1.0 -> collects 1.5 (windfall)."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": -0.01963,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 90.6,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "cancellation_toxic_0_5",
+      "detail": "Cancellation/no result: PM reach-SF Yes pays 0 + HL pays 0.5 -> collects 0.5 on ~1.0 cost. Also a winner declared inside the ~20h HL(Jul 26 23:59 UTC)/PM(Jul 25 23:59 ET) deadline gap collects 0."
+     }
+    }
+   },
+   "status": "XV_WATCH",
+   "status_reason": "no fee-surviving cross; best direction -0.00377/share"
+  },
+  {
+   "pair_id": "qf:Belgium",
+   "kind": "qf",
+   "team": "Belgium",
+   "hl": {
+    "outcome_id": 779,
+    "yes_side": 1,
+    "settlement_basis": "HL QF match winner: resolves to the team FIFA declares winner of the quarterfinal; 'Game results after regular time, extra time, and penalties, if applicable, are all valid' (verbatim); walkover/forfeit/admin decision valid; resolves 0.5/share to BOTH sides if cancelled/no winner/no result by 2026-07-26 23:59 UTC. No Draw side.",
+    "yes_bid": 0.262,
+    "yes_bid_sz": 101.0,
+    "yes_ask": 0.264,
+    "yes_ask_sz": 69.0,
+    "no_ask": 0.738,
+    "no_ask_sz": 101.0,
+    "book_time_ms": 1783620920551
+   },
+   "pm": {
+    "market_id": "2419349",
+    "token_yes": "69308688490171395576850307939004739703133311275309901259098144580114964835504",
+    "token_no": "27465305808830027478748264338548566113121667931960602026884841681314319912671",
+    "slug": "world-cup-nation-to-reach-semifinals",
+    "settlement_basis": "PM 'world-cup-nation-to-reach-semifinals' (event 551781, separate binary markets, NOT negRisk): Yes iff the team reaches the semifinals (advancement basis, ET+pens inclusive \u2014 winning the QF == reaching SF); No if cancelled/postponed past July 25, 2026 11:59 PM ET.",
+    "yes_bid": 0.255,
+    "yes_bid_sz": 5550.0,
+    "yes_ask": 0.256,
+    "yes_ask_sz": 44.29,
+    "no_ask": 0.745,
+    "no_ask_sz": 5550.0,
+    "book_timestamp_ms": 1783620827813
+   },
+   "event_date": "2026-07-10",
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": -0.009,
+    "buy_pm_sell_hl": 0.006
+   },
+   "mid_gap_hl_minus_pm": 0.0075,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.0147,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 91.5,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "cancellation_windfall_1_5",
+      "detail": "Cancellation/no result by the deadlines: HL pays 0.5/share + PM reach-SF No pays 1.0 -> collects 1.5 (windfall)."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": 0.00029,
+     "executable": {
+      "shares": 44.29,
+      "cost_usd": 44.28,
+      "pm_fees_usd": 0.25,
+      "profit_usd": 0.0127,
+      "ret_on_cost_pct": 0.0286,
+      "levels": [
+       {
+        "hl_px": 0.738,
+        "pm_px": 0.256,
+        "pm_fee": 0.005714,
+        "shares": 44.29,
+        "margin_per_share": 0.000286
+       }
+      ]
+     },
+     "leg_skew_seconds": 89.5,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "cancellation_toxic_0_5",
+      "detail": "Cancellation/no result: PM reach-SF Yes pays 0 + HL pays 0.5 -> collects 0.5 on ~1.0 cost. Also a winner declared inside the ~20h HL(Jul 26 23:59 UTC)/PM(Jul 25 23:59 ET) deadline gap collects 0."
+     }
+    }
+   },
+   "status": "XV_MISMATCHED_SETTLEMENT",
+   "status_reason": "dir2_buy_pm_yes_buy_hl_no shows +0.00029/share but its settlement-divergence tail is gated (cancellation_toxic_0_5) \u2014 never an arb candidate."
+  },
+  {
+   "pair_id": "qf:Argentina",
+   "kind": "qf",
+   "team": "Argentina",
+   "hl": {
+    "outcome_id": 788,
+    "yes_side": 0,
+    "settlement_basis": "HL QF match winner: resolves to the team FIFA declares winner of the quarterfinal; 'Game results after regular time, extra time, and penalties, if applicable, are all valid' (verbatim); walkover/forfeit/admin decision valid; resolves 0.5/share to BOTH sides if cancelled/no winner/no result by 2026-07-26 23:59 UTC. No Draw side.",
+    "yes_bid": 0.73179,
+    "yes_bid_sz": 598.0,
+    "yes_ask": 0.7375,
+    "yes_ask_sz": 15000.0,
+    "no_ask": 0.26821,
+    "no_ask_sz": 598.0,
+    "book_time_ms": 1783620923725
+   },
+   "pm": {
+    "market_id": "2419361",
+    "token_yes": "89536067333293473447901433413782685510126736303748247526034263106383356680639",
+    "token_no": "15579232773398251307282915471792114310844694494654532312907387009654692860923",
+    "slug": "world-cup-nation-to-reach-semifinals",
+    "settlement_basis": "PM 'world-cup-nation-to-reach-semifinals' (event 551781, separate binary markets, NOT negRisk): Yes iff the team reaches the semifinals (advancement basis, ET+pens inclusive \u2014 winning the QF == reaching SF); No if cancelled/postponed past July 25, 2026 11:59 PM ET.",
+    "yes_bid": 0.73,
+    "yes_bid_sz": 9926.03,
+    "yes_ask": 0.74,
+    "yes_ask_sz": 8041.49,
+    "no_ask": 0.27,
+    "no_ask_sz": 9926.03,
+    "book_timestamp_ms": 1783620832002
+   },
+   "event_date": "2026-07-11",
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": -0.0075,
+    "buy_pm_sell_hl": -0.00821
+   },
+   "mid_gap_hl_minus_pm": -0.00035,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.01341,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 91.7,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "cancellation_windfall_1_5",
+      "detail": "Cancellation/no result by the deadlines: HL pays 0.5/share + PM reach-SF No pays 1.0 -> collects 1.5 (windfall)."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": -0.01398,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 95.5,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "cancellation_toxic_0_5",
+      "detail": "Cancellation/no result: PM reach-SF Yes pays 0 + HL pays 0.5 -> collects 0.5 on ~1.0 cost. Also a winner declared inside the ~20h HL(Jul 26 23:59 UTC)/PM(Jul 25 23:59 ET) deadline gap collects 0."
+     }
+    }
+   },
+   "status": "XV_WATCH",
+   "status_reason": "no fee-surviving cross; best direction -0.01341/share"
+  },
+  {
+   "pair_id": "qf:Switzerland",
+   "kind": "qf",
+   "team": "Switzerland",
+   "hl": {
+    "outcome_id": 788,
+    "yes_side": 1,
+    "settlement_basis": "HL QF match winner: resolves to the team FIFA declares winner of the quarterfinal; 'Game results after regular time, extra time, and penalties, if applicable, are all valid' (verbatim); walkover/forfeit/admin decision valid; resolves 0.5/share to BOTH sides if cancelled/no winner/no result by 2026-07-26 23:59 UTC. No Draw side.",
+    "yes_bid": 0.2625,
+    "yes_bid_sz": 15000.0,
+    "yes_ask": 0.26821,
+    "yes_ask_sz": 598.0,
+    "no_ask": 0.7375,
+    "no_ask_sz": 15000.0,
+    "book_time_ms": 1783620927504
+   },
+   "pm": {
+    "market_id": "2419328",
+    "token_yes": "103493863332754371201759692475592619819800488748318590025773806305338466147803",
+    "token_no": "4143069696891676731364438152594194190773290479243220062827397216866200244953",
+    "slug": "world-cup-nation-to-reach-semifinals",
+    "settlement_basis": "PM 'world-cup-nation-to-reach-semifinals' (event 551781, separate binary markets, NOT negRisk): Yes iff the team reaches the semifinals (advancement basis, ET+pens inclusive \u2014 winning the QF == reaching SF); No if cancelled/postponed past July 25, 2026 11:59 PM ET.",
+    "yes_bid": 0.259,
+    "yes_bid_sz": 5720.0,
+    "yes_ask": 0.26,
+    "yes_ask_sz": 4543.3,
+    "no_ask": 0.741,
+    "no_ask_sz": 5720.0,
+    "book_timestamp_ms": 1783620823900
+   },
+   "event_date": "2026-07-11",
+   "raw_cross_pre_fee": {
+    "buy_hl_sell_pm": -0.00921,
+    "buy_pm_sell_hl": 0.0025
+   },
+   "mid_gap_hl_minus_pm": 0.00585,
+   "directions": {
+    "dir1_buy_hl_yes_buy_pm_no": {
+     "edge_per_share_at_best": -0.01497,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 103.6,
+     "settlement_tail": {
+      "gated": false,
+      "tail": "cancellation_windfall_1_5",
+      "detail": "Cancellation/no result by the deadlines: HL pays 0.5/share + PM reach-SF No pays 1.0 -> collects 1.5 (windfall)."
+     }
+    },
+    "dir2_buy_pm_yes_buy_hl_no": {
+     "edge_per_share_at_best": -0.00327,
+     "executable": {
+      "shares": 0.0,
+      "cost_usd": 0.0,
+      "pm_fees_usd": 0.0,
+      "profit_usd": 0.0,
+      "ret_on_cost_pct": null,
+      "levels": []
+     },
+     "leg_skew_seconds": 99.8,
+     "settlement_tail": {
+      "gated": true,
+      "tail": "cancellation_toxic_0_5",
+      "detail": "Cancellation/no result: PM reach-SF Yes pays 0 + HL pays 0.5 -> collects 0.5 on ~1.0 cost. Also a winner declared inside the ~20h HL(Jul 26 23:59 UTC)/PM(Jul 25 23:59 ET) deadline gap collects 0."
+     }
+    }
+   },
+   "status": "XV_WATCH",
+   "status_reason": "no fee-surviving cross; best direction -0.00327/share"
+  }
+ ],
+ "caveats": [
+  "n=1 cross-venue snapshot(s) so far \u2014 existence evidence only, not frequency/persistence/fillability",
+  "MONITOR-ONLY feed. Statuses are watch-labels, never trade instructions; no execution scaffold exists for Hyperliquid (watcher-only verdict, 2026-07-09 recon) and the venue has no price-capture/CLV/settlement automation yet \u2014 the CLAUDE.md live-money gate is NOT cleared.",
+  "HL settlement fee UNVERIFIED: outcome.xyz docs reserve a fee deducted from settlement payouts; no captured market spec or fill proves it zero for these markets. Edges assume 0 \u2014 confirm before believing any edge (nearly every branch collects via HL settlement).",
+  "HL trading fees are 'currently zero for initial testing' with no announced end date; 5 of 502 observed fills carried 1.5bp BUILDER-code fees (direct API orders without a builder code pay 0). Re-check userFills each session.",
+  "HL REST l2Book truncates at 20 levels/side; deep-book sizes are lower bounds when a ladder extends past the snapshot window.",
+  "Cross-venue legs are captured sequentially over REST (tens of seconds of skew); a positive edge here proves touching/crossing quotes existed, NOT that both legs were simultaneously fillable.",
+  "PM per-match 1X2 markets are structurally excluded: 3-way, 90-minute settlement \u2014 they NEVER pair with HL's 2-way ET+pens QF markets.",
+  "HL QF books are merged dual books (side1 == 1 - side0 structurally): no intra-HL arb can exist (mint/merge at $1, fee zero).",
+  "offline replay of dumped books \u2014 book timestamps inside rows are the CAPTURE times, not generated_at"
+ ]
+}
