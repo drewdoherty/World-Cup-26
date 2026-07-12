@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-11T23:53:55 -->
+<!-- generated: 2026-07-12T00:30:17 -->
 ⚽ *Next match* — Argentina vs Switzerland
 Kickoff 2026-07-12 01:00:00+00:00
 
 *Winner* (model blend)
-  Argentina      model 57.3% · mkt 57.1% (matchbook)  EV +0.2% ✅+EV (below +2% gate)  $2.86
-  Draw           model 26.4% · mkt 27.4% (betfair_ex_uk)  EV -3.5% ❌−EV
-  Switzerland    model 16.3% · mkt 15.6% (betfair_ex_uk)  EV +4.4% ✅+EV  (<25% model — NO CASH)
+  Argentina      model 57.5% · mkt 57.1% (betfair_ex_uk)  EV +0.6% ✅+EV (below +2% gate)  $8.04
+  Draw           model 26.8% · mkt 28.6% (betfair_ex_uk)  EV -6.2% ❌−EV
+  Switzerland    model 15.7% · mkt 14.7% (betfair_ex_uk)  EV +7.1% ✅+EV  (<25% model — NO CASH)
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.8)
@@ -21,5 +21,5 @@ _top anytime, mkt implied % (both teams — add squad to split + FGS; no model p
   Giovani Lo Celso     mkt 19% (Betfair)
 
 *Scorelines* (top 6)
-1-1 12.6% | 1-0 11.1% | 2-0 10.5% | 2-1 9.8% | 0-0 7.7% | 3-0 6.3%
-  O/U 2.5: over 50.7% / under 49.3%   BTTS 51.7%
+1-1 12.8% | 1-0 11.2% | 2-0 10.6% | 2-1 9.9% | 0-0 7.9% | 3-0 6.3%
+  O/U 2.5: over 50.6% / under 49.4%   BTTS 51.8%
