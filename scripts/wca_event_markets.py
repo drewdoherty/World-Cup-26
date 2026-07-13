@@ -57,6 +57,8 @@ import sys
 import warnings
 from typing import Any, Dict, List, Optional, Tuple
 
+import requests
+
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
 _SRC = os.path.join(_ROOT, "src")
@@ -214,10 +216,23 @@ def fetch_soccer_events() -> List[Dict[str, Any]]:
     events: List[Dict[str, Any]] = []
     offset, limit = 0, 100
     while True:
-        page = PM._get("/events", params={
-            "limit": limit, "offset": offset,
-            "tag_slug": "soccer", "closed": "false",
-        })
+        try:
+            page = PM._get("/events", params={
+                "limit": limit, "offset": offset,
+                "tag_slug": "soccer", "closed": "false",
+            })
+        except requests.HTTPError as exc:
+            # Gamma's /events paginator has an undocumented offset ceiling
+            # (observed: offset=2000 -> 200, offset=2100 -> 422, stable/
+            # reproducible, 2026-07-13) — same class of limit already known
+            # on the data-api /trades endpoint (caps at offset 3000). Past
+            # it every subsequent page 422s too, so read it as "no more
+            # results" and keep what's already collected, matching the fix
+            # in wca.data.polymarket.find_world_cup_markets.
+            status = exc.response.status_code if exc.response is not None else None
+            if status == 422:
+                break
+            raise
         if not isinstance(page, list):
             page = page.get("data", page.get("events", [])) or []
         if not page:
@@ -765,12 +780,6 @@ def build_fixture(fx: Dict[str, Any], matrix, lam_check: Dict[str, Any],
                      "note": ("ADVANCEMENT settlement (includes ET + penalties) "
                               "— NOT a 90-minute market; model = advancement MC sim")})
         ph, pa, note = advance_model_probs(adv_model, home, away)
-        # Same (team, stage) may also be priced by wca_betrecs.py's
-        # advancement-futures market — a DIFFERENT PM instrument for the
-        # exact same real-world event (reaching this tie's next stage).
-        # Stamp the stage explicitly so wca_exposure_reconcile.py can key on
-        # it without re-parsing model_source (2026-07-11 tie-exposure dedup).
-        tie_stage = note.split("=", 1)[1] if note.startswith("stage=") else None
         outcomes = PM._parse_json_array(advance_market.get("outcomes")) or []
         for idx, oname in enumerate(outcomes[:2]):
             side = "home" if canonical(str(oname)) == canonical(home) else "away"
@@ -785,13 +794,9 @@ def build_fixture(fx: Dict[str, Any], matrix, lam_check: Dict[str, Any],
                        quote=quote, captured_utc=captured_utc)
             rows.append(row)
             if model is not None and quote:
-                n_before = len(cands)
                 # No lay side: the complement IS the other team's BACK row.
                 _push_candidates(cands, fx, row, quote,
                                  "%s NOT to advance" % oname, include_lay=False)
-                for c in cands[n_before:]:
-                    c["team"] = str(oname)
-                    c["tie_stage"] = tie_stage
 
     # ---- families with no production model (market only) ------------------------
     for kind, section in _UNPRICEABLE_SECTIONS:
