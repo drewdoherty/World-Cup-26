@@ -29,7 +29,12 @@
     var teams = {};
     snaps.forEach(function (s) { Object.keys(s.probs || {}).forEach(function (t) { teams[t] = true; }); });
     var latest = snaps[snaps.length - 1].probs || {};
-    var ordered = Object.keys(teams).sort(function (a, b) { return (latest[b] || 0) - (latest[a] || 0); }).slice(0, 12);
+    // Show the REMAINING teams only (latest P > 0) rather than a fixed
+    // top-12 slice — a fixed slice pads the table with eliminated 0%
+    // teams once the field has narrowed (2026-07-13).
+    var ordered = Object.keys(teams)
+      .filter(function (t) { return (latest[t] || 0) > 0; })
+      .sort(function (a, b) { return (latest[b] || 0) - (latest[a] || 0); });
     var head = "<tr><th>team</th>" + snaps.map(function (s) { return "<th>" + (s.label || s.date || "") + "</th>"; }).join("") + "<th>&Delta;</th></tr>";
     var rows = ordered.map(function (t) {
       var cells = snaps.map(function (s) {

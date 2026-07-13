@@ -38,7 +38,8 @@
     "fixture's books are Shin-de-vigged to a market consensus, then Elo + " +
     "Dixon-Coles + market are blended (market weighted 60% because it is hard to " +
     "beat). We line-shop the best price, keep only edges clearing 2%, and size at " +
-    "fractional Kelly off a CLV-gated bankroll ladder (£1.5k→£2.5k→£5k). The " +
+    "fractional Kelly off one combined bankroll (GBP sportsbook venues + Polymarket, " +
+    "FX'd) with a CLV-gated ladder. The " +
     "system never places a trade — it emits a card; a human places it, screenshots " +
     "the slip, and a 15-command Telegram bot reads it via Claude vision into the " +
     "SQLite ledger after a yes. A snapshot daemon records the closing line so the " +
@@ -422,37 +423,30 @@
     ["3", "Bankroll", "lagging, noisy at this sample size"]
   ];
 
-  // Money flow: pools + checkpoints, sizing, kill rule.
+  // Money flow: ONE combined bankroll (refreshed 2026-07-13 — this used to
+  // show three separate pools incl. a "planned" Kalshi pool; the sizing
+  // model consolidated onto a single pot per src/wca/markets/bankroll.py
+  // and no Kalshi client was ever built).
   var POOLS = [
     {
       cls: "sportsbook",
-      name: "Sportsbook",
-      amt: "£1,500",
-      sub: "rung 0 base",
-      notes: [
-        "→ £2.5k at 50 settled-with-close trades (to-date CLV > 0)",
-        "→ £5k at 100 settled trades (CLV > 0); demote if rolling-50 CLV < 0"
-      ]
+      name: "Sportsbook (GBP)",
+      amt: "£3,000",
+      sub: "combined base ± realised P&L",
+      notes: ["same pot as Polymarket below, FX'd — never sized as a separate £3,000"]
     },
     {
       cls: "polymarket",
-      name: "Polymarket",
-      amt: "$1,310",
-      sub: "actual USD",
-      notes: ["price feed is scores-page enrichment only"]
-    },
-    {
-      cls: "kalshi",
-      name: "Kalshi",
-      amt: "—",
-      sub: "planned",
-      notes: ["pool plumbed through venue rollups, client TBD"]
+      name: "Polymarket (USD)",
+      amt: "$1.33 = £1",
+      sub: "project FX rate",
+      notes: ["quarter-Kelly of the ONE combined bankroll, expressed in USD"]
     }
   ];
 
   var MONEY_STEPS = [
-    ["Pools", "sportsbook £ / polymarket $ / kalshi planned"],
-    ["Laddered Kelly + caps", "rung fraction (0.25→0.50) × CLV bankroll, 5% per-trade, 5% same-day"],
+    ["Pool", "one combined bankroll, GBP-denominated, FX'd for Polymarket"],
+    ["Laddered Kelly + caps", "quarter-Kelly of the combined total, 5% per-trade, 5% same-day"],
     ["Trades", "human places, bot confirms to ledger"],
     ["Settle", "win (o−1)·stake / loss −stake"],
     ["CLV feedback", "(odds_taken / closing_odds) − 1 → sets the next rung"]
@@ -463,49 +457,52 @@
     "settled trades. Free / promo bets risk no cash: they count toward max win but " +
     "contribute zero to max loss.";
 
-  // Improvement map per stage (§9).
+  // Improvement map per stage (§9). Refreshed 2026-07-13 against current
+  // code (was showing Kalshi as a live "next" item and Monte Carlo
+  // advancement as unshipped — both stale; see git history for evidence).
   var IMPROVE = [
     {
       stage: "Ingestion",
       items: [
         "SHIPPED: cleaning overlay + 2-source (ESPN + TheSportsDB) verification → martj42_cleaned.csv, 3×/day CI.",
-        "Kalshi client mirroring the Polymarket reader — lights up the third pool.",
-        "Betfair exchange as a sharper CLV reference and eventual execution venue.",
-        "Totals / correct-score market ingestion (get_odds already parses outcome_point)."
+        "SHIPPED: Hyperliquid HIP-4 cross-venue monitor vs Polymarket (src/wca/hl/*) — read-only, watcher-only; emits watch labels, never trades.",
+        "REMOVED: the Kalshi third-pool plan — sizing consolidated onto one combined bankroll (see Money Flow); no Kalshi client was built.",
+        "Betfair exchange as a sharper CLV reference — still NO-BUILD per ADR-003 (standing decision); read-only reference at most.",
+        "Totals / correct-score market ingestion (get_odds already parses outcome_point) — still unused."
       ]
     },
     {
       stage: "Modeling",
       items: [
-        "Player-level ratings → lineup-aware DC inputs (biggest accuracy lever).",
+        "SHIPPED: shrink-to-market — the blended prob is shrunk toward the de-vigged market reference before it drives edge/EV/sizing (kill-switch WCA_SHRINK_LIVE, promoted from shadow to LIVE 2026-07-09).",
+        "SHIPPED: player-level rate infra (players.db) feeding bet-builder leg pricing. Next: fold it into the main 1X2/DC blend, not just bet-builder legs — the biggest remaining accuracy lever.",
         "SHIPPED (opt-in, off): venue/altitude-aware host advantage — co-host dilution + Azteca altitude tax. Next: altitude/heat into the DC log-mean too.",
-        "SHIPPED (opt-in, off): structural socio-economic shrinkage prior for low-data minnows (Klement / Hoffmann-Ging-Ramasamy) — holdout inconclusive, awaits live 2026 minnow data.",
-        "SHIPPED: walk-forward half-life backtest + blend-fit holdout (fitted ≈ 0.10/0.30/0.60 prior, no decision-grade lift) + structural-bias tests.",
-        "Next: re-fit blend/xi as 2026 results accumulate; arb the new cleaned-data signal into the prior."
+        "SHIPPED (opt-in, off): structural socio-economic shrinkage prior for low-data minnows — holdout inconclusive, awaits live 2026 minnow data.",
+        "SHIPPED: walk-forward half-life backtest + blend-fit holdout (fitted ≈ 0.10/0.30/0.60 prior, no decision-grade lift) + structural-bias tests."
       ]
     },
     {
       stage: "Decision",
       items: [
         "SHIPPED: CLV-gated ladder wired into build_card — rung sets bankroll AND Kelly fraction.",
+        "SHIPPED: sizing now acts on the shrunk (market-anchored) blend, not the raw one — see Modeling.",
         "Gap left: apply the rung-0 longshot filter (odds>10) and arb-exemption inside build_card.",
-        "Promo / boost EV models (2-Up, super-sub) — needs goal-timing distributions.",
-        "Middling detection on top of the existing cross-book arbitrage scan."
+        "Promo / boost EV models (2-Up, super-sub) — needs goal-timing distributions."
       ]
     },
     {
       stage: "Bankroll & ledger",
       items: [
-        "Auto-populate closing_odds from odds_snapshots — closes the CLV loop, no manual entry.",
-        "Finish pushed-bet ledger write (Y BET-<id> currently ack-only)."
+        "SHIPPED: auto-populate closing_odds from odds_snapshots (closecapture.py) — closes the CLV loop, no manual entry.",
+        "Gap left: pushed-bet ledger write is still ack-only for `Y BET-<id>` (PM-<n> orders already write a real ledger confirm)."
       ]
     },
     {
       stage: "In-play / surfaces",
       items: [
-        "In-play models fed by the 3-min in-game snapshots (live 1X2 / next-goal).",
-        "Real correct-score book prices into the scores page (drop approx_1x2).",
-        "Tournament Monte Carlo with an Elo/DC prob_fn to price outright / advancement."
+        "SHIPPED: tournament Monte Carlo advancement sim (site/advancement_data.json) now live-prices outright/advancement and drives the Team-to-Advance markets end to end.",
+        "In-play models fed by the 3-min in-game snapshots (live 1X2 / next-goal) — still planned.",
+        "Real correct-score book prices into the scores page (drop approx_1x2) — still planned."
       ]
     }
   ];
