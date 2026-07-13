@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-12T14:23:31 -->
+<!-- generated: 2026-07-13T16:06:09 -->
 ⚽ *Next match* — France vs Spain
 Kickoff 2026-07-14 19:00:00+00:00
 
 *Winner* (model blend)
-  Spain          model 30.0% · mkt 29.0% (matchbook)  EV +3.5% ✅+EV  $15.53
-  France         model 41.3% · mkt 41.3% (betfair_ex_uk)  EV -0.1% ❌−EV
-  Draw           model 28.7% · mkt 29.9% (betfair_ex_uk)  EV -3.8% ❌−EV
+  Spain          model 30.2% · mkt 29.4% (matchbook)  EV +2.6% ✅+EV  $11.88
+  France         model 41.1% · mkt 41.0% (betfair_ex_uk)  EV +0.2% ✅+EV (below +2% gate)  $1.79
+  Draw           model 28.7% · mkt 29.9% (betfair_ex_uk)  EV -3.7% ❌−EV
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 9.0)
@@ -21,5 +21,5 @@ _top anytime, mkt implied % (both teams — add squad to split + FGS; no model p
   Borja Iglesias       mkt 26% (Betfair)
 
 *Scorelines* (top 6)
-1-1 13.4% | 2-1 9.1% | 1-0 8.0% | 1-2 7.0% | 2-2 6.7% | 0-0 6.7%
+1-1 13.5% | 2-1 9.1% | 1-0 8.0% | 1-2 7.0% | 2-2 6.8% | 0-0 6.7%
   O/U 2.5: over 54.6% / under 45.4%   BTTS 59.9%
