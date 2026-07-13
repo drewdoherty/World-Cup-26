@@ -6,11 +6,11 @@
  "freshness": {
   "checks": [
    {
-    "age_secs": 20717.0,
+    "age_secs": 22748.0,
     "max_age_secs": 10800,
     "name": "advancement",
     "pass": false,
-    "reason": "stale: 5.8h old > 3.0h max",
+    "reason": "stale: 6.3h old > 3.0h max",
     "source": "site/advancement_data.json",
     "stamp": "2026-07-13 16:39:50 UTC"
    },
@@ -21,7 +21,7 @@
     "pass": true,
     "reason": null,
     "source": "site/bet_recs.json",
-    "stamp": "2026-07-13 22:25:06 UTC"
+    "stamp": "2026-07-13 22:58:57 UTC"
    },
    {
     "age_secs": 33.0,
@@ -30,19 +30,19 @@
     "pass": true,
     "reason": null,
     "source": "site/scores_markets.json",
-    "stamp": "2026-07-13 22:24:34 UTC"
+    "stamp": "2026-07-13 22:58:25 UTC"
    },
    {
-    "age_secs": 20701.0,
+    "age_secs": 22732.0,
     "max_age_secs": 21600,
     "name": "pm_ideas",
-    "pass": true,
-    "reason": null,
+    "pass": false,
+    "reason": "stale: 6.3h old > 6.0h max",
     "source": "site/pm_ideas.json",
     "stamp": "2026-07-13T16:40:06Z"
    },
    {
-    "age_secs": 698.3,
+    "age_secs": 2729.3,
     "max_age_secs": 86400,
     "name": "orderflow",
     "pass": true,
@@ -51,7 +51,7 @@
     "stamp": "2026-07-13T22:13:28.698656+00:00"
    },
    {
-    "age_secs": 21907.0,
+    "age_secs": 23938.0,
     "max_age_secs": 50400,
     "name": "advancement_model",
     "pass": true,
@@ -72,7 +72,7 @@
   "pass": false
  },
  "meta": {
-  "advancement_model_age_hours": 6.09,
+  "advancement_model_age_hours": 6.65,
   "advancement_model_generated": "2026-07-13 16:20 UTC",
   "caveats": [
    "SHADOW-ONLY: decision-support feed; no verdict here is a trade instruction and nothing is wired to execution.",
@@ -84,7 +84,8 @@
    "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
    "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal.",
    "orderflow history truncated for n=361 markets (data-api 3k-row cap) \u2014 flow aggregates there are incomplete; buy-pressure/share numbers are context only",
-   "freshness gate FAILED for site/advancement_data.json \u2014 stale: 5.8h old > 3.0h max"
+   "freshness gate FAILED for site/advancement_data.json \u2014 stale: 6.3h old > 3.0h max",
+   "freshness gate FAILED for site/pm_ideas.json \u2014 stale: 6.3h old > 6.0h max"
   ],
   "edge_gate": {
    "min_edge_adj": 0.02,
@@ -98,7 +99,7 @@
    "site/pm_ideas.json": 21600,
    "site/scores_markets.json": 10800
   },
-  "generated_at": "2026-07-13T22:25:07Z",
+  "generated_at": "2026-07-13T22:58:58Z",
   "n_advancement_legs_without_pm_quote": 0,
   "n_by_verdict": {
    "DO_NOT_TRADE": 0,
@@ -139,10 +140,10 @@
   "shadow_only": true,
   "sources": {
    "site/advancement_data.json": "2026-07-13 16:39:50 UTC",
-   "site/bet_recs.json": "2026-07-13 22:25:06 UTC",
+   "site/bet_recs.json": "2026-07-13 22:58:57 UTC",
    "site/microstructure/orderflow.json": "2026-07-13T22:13:28.698656+00:00",
    "site/pm_ideas.json": "2026-07-13T16:40:06Z",
-   "site/scores_markets.json": "2026-07-13 22:24:34 UTC"
+   "site/scores_markets.json": "2026-07-13 22:58:25 UTC"
   },
   "verdict_enum": [
    "SHADOW_ADD",
@@ -175,7 +176,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.8h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 6.3h old > 3.0h max); site/pm_ideas.json (stale: 6.3h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -313,7 +314,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.8h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 6.3h old > 3.0h max); site/pm_ideas.json (stale: 6.3h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -463,7 +464,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.8h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 6.3h old > 3.0h max); site/pm_ideas.json (stale: 6.3h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -621,7 +622,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.8h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 6.3h old > 3.0h max); site/pm_ideas.json (stale: 6.3h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -779,7 +780,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.8h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 6.3h old > 3.0h max); site/pm_ideas.json (stale: 6.3h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -949,7 +950,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.8h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 6.3h old > 3.0h max); site/pm_ideas.json (stale: 6.3h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1119,7 +1120,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.8h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 6.3h old > 3.0h max); site/pm_ideas.json (stale: 6.3h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1277,7 +1278,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 5.8h old > 3.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 6.3h old > 3.0h max); site/pm_ideas.json (stale: 6.3h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
