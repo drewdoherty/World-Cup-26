@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-13T17:27:22 -->
+<!-- generated: 2026-07-13T18:03:31 -->
 ⚽ *Next match* — France vs Spain
 Kickoff 2026-07-14 19:00:00+00:00
 
 *Winner* (model blend)
-  Spain          model 31.8% · mkt 30.3% (betfair_ex_uk)  EV +5.0% ✅+EV  $23.54
-  Draw           model 29.1% · mkt 29.9% (betfair_ex_uk)  EV -2.4% ❌−EV
-  France         model 39.0% · mkt 40.3% (Smarkets)  EV -3.2% ❌−EV
+  Spain          model 31.8% · mkt 29.9% (matchbook)  EV +6.5% ✅+EV  $30.24
+  France         model 39.0% · mkt 40.0% (betfair_ex_uk)  EV -2.6% ❌−EV
+  Draw           model 29.2% · mkt 30.3% (betfair_ex_uk)  EV -3.5% ❌−EV
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.6)
@@ -21,5 +21,5 @@ _top anytime, mkt implied % (both teams — add squad to split + FGS; no model p
   Ousmane Dembele      mkt 26% (Betfair)
 
 *Scorelines* (top 6)
-1-1 13.9% | 1-0 10.9% | 2-1 9.3% | 0-0 8.9% | 0-1 7.8% | 2-0 6.6%
+1-1 13.9% | 1-0 10.8% | 2-1 9.3% | 0-0 8.9% | 0-1 7.8% | 2-0 6.6%
   O/U 2.5: over 46.1% / under 53.9%   BTTS 52.5%

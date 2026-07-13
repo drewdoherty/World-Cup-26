@@ -6,7 +6,7 @@
  "freshness": {
   "checks": [
    {
-    "age_secs": 4538.0,
+    "age_secs": 6557.0,
     "max_age_secs": 10800,
     "name": "advancement",
     "pass": true,
@@ -15,25 +15,25 @@
     "stamp": "2026-07-13 16:39:50 UTC"
    },
    {
-    "age_secs": 1.0,
+    "age_secs": 0.0,
     "max_age_secs": 10800,
     "name": "bet_recs",
     "pass": true,
     "reason": null,
     "source": "site/bet_recs.json",
-    "stamp": "2026-07-13 17:55:27 UTC"
+    "stamp": "2026-07-13 18:29:07 UTC"
    },
    {
-    "age_secs": 30.0,
+    "age_secs": 29.0,
     "max_age_secs": 10800,
     "name": "scores_markets",
     "pass": true,
     "reason": null,
     "source": "site/scores_markets.json",
-    "stamp": "2026-07-13 17:54:58 UTC"
+    "stamp": "2026-07-13 18:28:38 UTC"
    },
    {
-    "age_secs": 4522.0,
+    "age_secs": 6541.0,
     "max_age_secs": 21600,
     "name": "pm_ideas",
     "pass": true,
@@ -42,16 +42,16 @@
     "stamp": "2026-07-13T16:40:06Z"
    },
    {
-    "age_secs": 2804.7,
+    "age_secs": 1166.1,
     "max_age_secs": 86400,
     "name": "orderflow",
     "pass": true,
     "reason": null,
     "source": "site/microstructure/orderflow.json",
-    "stamp": "2026-07-13T17:08:43.252335+00:00"
+    "stamp": "2026-07-13T18:09:40.902187+00:00"
    },
    {
-    "age_secs": 5728.0,
+    "age_secs": 7747.0,
     "max_age_secs": 50400,
     "name": "advancement_model",
     "pass": true,
@@ -72,7 +72,7 @@
   "pass": true
  },
  "meta": {
-  "advancement_model_age_hours": 1.59,
+  "advancement_model_age_hours": 2.15,
   "advancement_model_generated": "2026-07-13 16:20 UTC",
   "caveats": [
    "SHADOW-ONLY: decision-support feed; no verdict here is a trade instruction and nothing is wired to execution.",
@@ -97,7 +97,7 @@
    "site/pm_ideas.json": 21600,
    "site/scores_markets.json": 10800
   },
-  "generated_at": "2026-07-13T17:55:28Z",
+  "generated_at": "2026-07-13T18:29:07Z",
   "n_advancement_legs_without_pm_quote": 0,
   "n_by_verdict": {
    "DO_NOT_TRADE": 0,
@@ -138,10 +138,10 @@
   "shadow_only": true,
   "sources": {
    "site/advancement_data.json": "2026-07-13 16:39:50 UTC",
-   "site/bet_recs.json": "2026-07-13 17:55:27 UTC",
-   "site/microstructure/orderflow.json": "2026-07-13T17:08:43.252335+00:00",
+   "site/bet_recs.json": "2026-07-13 18:29:07 UTC",
+   "site/microstructure/orderflow.json": "2026-07-13T18:09:40.902187+00:00",
    "site/pm_ideas.json": "2026-07-13T16:40:06Z",
-   "site/scores_markets.json": "2026-07-13 17:54:58 UTC"
+   "site/scores_markets.json": "2026-07-13 18:28:38 UTC"
   },
   "verdict_enum": [
    "SHADOW_ADD",
@@ -1431,14 +1431,14 @@
   },
   {
    "bet_rec": null,
-   "book_edge": 0.0167,
+   "book_edge": 0.0171,
    "book_edge_source": "bet_recs.withheld[england_vs_argentina_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 3.161,
+   "book_price_decimal": 3.1786,
    "book_price_source": "bet_recs.withheld[england_vs_argentina_away_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": 0.0528,
+   "ev_net": 0.0542,
    "fixture": "England vs Argentina",
    "gates": {
     "clv_history": {
@@ -1448,7 +1448,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge +0.0167 not above the 0.02 threshold"
+     "reason": "book edge +0.0171 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": true,
@@ -1515,13 +1515,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "England vs Argentina \u00b7 away \u00b7 settles at 90 min",
-   "model_prob": 0.3331,
+   "model_prob": 0.3317,
    "model_source": "bet_recs.withheld[england_vs_argentina_away_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.3331,
+   "position_prob": 0.3317,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1538,20 +1538,20 @@
    "team": "Argentina",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:0.0167<0.0200"
+    "withheld by bet_recs: edge_below_floor:0.0171<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:0.0167<0.0200"
+   "withheld_reason": "edge_below_floor:0.0171<0.0200"
   },
   {
    "bet_rec": null,
-   "book_edge": -0.007,
+   "book_edge": -0.0071,
    "book_edge_source": "bet_recs.withheld[england_vs_argentina_draw_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 3.0831,
+   "book_price_decimal": 3.0752,
    "book_price_source": "bet_recs.withheld[england_vs_argentina_draw_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.0214,
+   "ev_net": -0.0219,
    "fixture": "England vs Argentina",
    "gates": {
     "clv_history": {
@@ -1561,7 +1561,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge -0.0070 not above the 0.02 threshold"
+     "reason": "book edge -0.0071 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": true,
@@ -1628,13 +1628,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "England vs Argentina \u00b7 draw \u00b7 settles at 90 min",
-   "model_prob": 0.3174,
+   "model_prob": 0.3181,
    "model_source": "bet_recs.withheld[england_vs_argentina_draw_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.3174,
+   "position_prob": 0.3181,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1651,20 +1651,20 @@
    "team": "Draw",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:-0.0070<0.0200"
+    "withheld by bet_recs: edge_below_floor:-0.0071<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:-0.0070<0.0200"
+   "withheld_reason": "edge_below_floor:-0.0071<0.0200"
   },
   {
    "bet_rec": null,
-   "book_edge": -0.0098,
+   "book_edge": -0.0099,
    "book_edge_source": "bet_recs.withheld[england_vs_argentina_home_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 2.7832,
+   "book_price_decimal": 2.7761,
    "book_price_source": "bet_recs.withheld[england_vs_argentina_home_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.0272,
+   "ev_net": -0.0276,
    "fixture": "England vs Argentina",
    "gates": {
     "clv_history": {
@@ -1674,7 +1674,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge -0.0098 not above the 0.02 threshold"
+     "reason": "book edge -0.0099 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": true,
@@ -1741,13 +1741,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "England vs Argentina \u00b7 home \u00b7 settles at 90 min",
-   "model_prob": 0.3495,
+   "model_prob": 0.3503,
    "model_source": "bet_recs.withheld[england_vs_argentina_home_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.3495,
+   "position_prob": 0.3503,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1764,20 +1764,20 @@
    "team": "England",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:-0.0098<0.0200"
+    "withheld by bet_recs: edge_below_floor:-0.0099<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:-0.0098<0.0200"
+   "withheld_reason": "edge_below_floor:-0.0099<0.0200"
   },
   {
    "bet_rec": null,
-   "book_edge": -0.0027,
+   "book_edge": -0.003,
    "book_edge_source": "bet_recs.withheld[france_vs_spain_draw_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 3.4,
+   "book_price_decimal": 3.3865,
    "book_price_source": "bet_recs.withheld[france_vs_spain_draw_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.0093,
+   "ev_net": -0.0101,
    "fixture": "France vs Spain",
    "gates": {
     "clv_history": {
@@ -1787,7 +1787,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge -0.0027 not above the 0.02 threshold"
+     "reason": "book edge -0.0030 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": true,
@@ -1854,13 +1854,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "France vs Spain \u00b7 draw \u00b7 settles at 90 min",
-   "model_prob": 0.2914,
+   "model_prob": 0.2923,
    "model_source": "bet_recs.withheld[france_vs_spain_draw_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.2914,
+   "position_prob": 0.2923,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1877,20 +1877,20 @@
    "team": "Draw",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:-0.0027<0.0200"
+    "withheld by bet_recs: edge_below_floor:-0.0030<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:-0.0027<0.0200"
+   "withheld_reason": "edge_below_floor:-0.0030<0.0200"
   },
   {
    "bet_rec": null,
-   "book_edge": -0.0189,
+   "book_edge": -0.0187,
    "book_edge_source": "bet_recs.withheld[france_vs_spain_home_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 2.4429,
+   "book_price_decimal": 2.4492,
    "book_price_source": "bet_recs.withheld[france_vs_spain_home_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.0461,
+   "ev_net": -0.0457,
    "fixture": "France vs Spain",
    "gates": {
     "clv_history": {
@@ -1900,7 +1900,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge -0.0189 not above the 0.02 threshold"
+     "reason": "book edge -0.0187 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": true,
@@ -1967,13 +1967,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "France vs Spain \u00b7 home \u00b7 settles at 90 min",
-   "model_prob": 0.3905,
+   "model_prob": 0.3896,
    "model_source": "bet_recs.withheld[france_vs_spain_home_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.3905,
+   "position_prob": 0.3896,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1990,9 +1990,9 @@
    "team": "France",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:-0.0189<0.0200"
+    "withheld by bet_recs: edge_below_floor:-0.0187<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:-0.0189<0.0200"
+   "withheld_reason": "edge_below_floor:-0.0187<0.0200"
   }
  ]
 }
