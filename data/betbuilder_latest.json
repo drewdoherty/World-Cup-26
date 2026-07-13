@@ -1,20 +1,20 @@
 {
-  "generated": "2026-07-10T10:07:23",
+  "generated": "2026-07-13T16:49:17",
   "fixtures": [
     {
-      "fixture": "Argentina vs Switzerland",
-      "lambda_home": 1.801,
-      "lambda_away": 0.9341,
+      "fixture": "England vs Argentina",
+      "lambda_home": 1.1067,
+      "lambda_away": 1.2564,
       "team_totals": [
         {
           "market": "team_total_goals",
-          "subject": "Argentina",
+          "subject": "England",
           "line": 0.5,
-          "mean": 1.801,
-          "p_over": 0.834872,
-          "p_under": 0.165128,
-          "fair_over": 1.198,
-          "fair_under": 6.056,
+          "mean": 1.1067,
+          "p_over": 0.669352,
+          "p_under": 0.330648,
+          "fair_over": 1.494,
+          "fair_under": 3.024,
           "venues": [
             "sportsbook",
             "exchange"
@@ -23,13 +23,13 @@
         },
         {
           "market": "team_total_goals",
-          "subject": "Argentina",
+          "subject": "England",
           "line": 1.5,
-          "mean": 1.801,
-          "p_over": 0.537471,
-          "p_under": 0.462529,
-          "fair_over": 1.861,
-          "fair_under": 2.162,
+          "mean": 1.1067,
+          "p_over": 0.303424,
+          "p_under": 0.696576,
+          "fair_over": 3.296,
+          "fair_under": 1.436,
           "venues": [
             "sportsbook",
             "exchange"
@@ -38,1582 +38,14 @@
         },
         {
           "market": "team_total_goals",
-          "subject": "Argentina",
+          "subject": "England",
           "line": 2.5,
-          "mean": 1.801,
-          "p_over": 0.269656,
-          "p_under": 0.730344,
-          "fair_over": 3.708,
-          "fair_under": 1.369,
-          "venues": [
-            "sportsbook",
-            "exchange"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_shots",
-          "subject": "Argentina",
-          "line": 8.5,
-          "mean": 18.3343,
-          "p_over": 0.965939,
-          "p_under": 0.034061,
-          "fair_over": 1.035,
-          "fair_under": 29.359,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_shots",
-          "subject": "Argentina",
-          "line": 10.5,
-          "mean": 18.3343,
-          "p_over": 0.915371,
-          "p_under": 0.084629,
-          "fair_over": 1.092,
-          "fair_under": 11.816,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_shots",
-          "subject": "Argentina",
-          "line": 12.5,
-          "mean": 18.3343,
-          "p_over": 0.832235,
-          "p_under": 0.167765,
-          "fair_over": 1.202,
-          "fair_under": 5.961,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_sot",
-          "subject": "Argentina",
-          "line": 2.5,
-          "mean": 7.9667,
-          "p_over": 0.949633,
-          "p_under": 0.050367,
-          "fair_over": 1.053,
-          "fair_under": 19.854,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_sot",
-          "subject": "Argentina",
-          "line": 3.5,
-          "mean": 7.9667,
-          "p_over": 0.892835,
-          "p_under": 0.107165,
-          "fair_over": 1.12,
-          "fair_under": 9.331,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_sot",
-          "subject": "Argentina",
-          "line": 4.5,
-          "mean": 7.9667,
-          "p_over": 0.812826,
-          "p_under": 0.187174,
-          "fair_over": 1.23,
-          "fair_under": 5.343,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_fouls",
-          "subject": "Argentina",
-          "line": 9.5,
-          "mean": 16.0,
-          "p_over": 0.903465,
-          "p_under": 0.096535,
-          "fair_over": 1.107,
-          "fair_under": 10.359,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_fouls",
-          "subject": "Argentina",
-          "line": 11.5,
-          "mean": 16.0,
-          "p_over": 0.799797,
-          "p_under": 0.200203,
-          "fair_over": 1.25,
-          "fair_under": 4.995,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_fouls",
-          "subject": "Argentina",
-          "line": 13.5,
-          "mean": 16.0,
-          "p_over": 0.660939,
-          "p_under": 0.339061,
-          "fair_over": 1.513,
-          "fair_under": 2.949,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_corners",
-          "subject": "Argentina",
-          "line": 3.5,
-          "mean": 5.7985,
-          "p_over": 0.820803,
-          "p_under": 0.179197,
-          "fair_over": 1.218,
-          "fair_under": 5.58,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_corners",
-          "subject": "Argentina",
-          "line": 4.5,
-          "mean": 5.7985,
-          "p_over": 0.678699,
-          "p_under": 0.321301,
-          "fair_over": 1.473,
-          "fair_under": 3.112,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_corners",
-          "subject": "Argentina",
-          "line": 5.5,
-          "mean": 5.7985,
-          "p_over": 0.517129,
-          "p_under": 0.482871,
-          "fair_over": 1.934,
-          "fair_under": 2.071,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_goals",
-          "subject": "Switzerland",
-          "line": 0.5,
-          "mean": 0.9341,
-          "p_over": 0.607066,
-          "p_under": 0.392934,
-          "fair_over": 1.647,
-          "fair_under": 2.545,
-          "venues": [
-            "sportsbook",
-            "exchange"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_goals",
-          "subject": "Switzerland",
-          "line": 1.5,
-          "mean": 0.9341,
-          "p_over": 0.240021,
-          "p_under": 0.759979,
-          "fair_over": 4.166,
-          "fair_under": 1.316,
-          "venues": [
-            "sportsbook",
-            "exchange"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_goals",
-          "subject": "Switzerland",
-          "line": 2.5,
-          "mean": 0.9341,
-          "p_over": 0.06859,
-          "p_under": 0.93141,
-          "fair_over": 14.579,
-          "fair_under": 1.074,
-          "venues": [
-            "sportsbook",
-            "exchange"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_shots",
-          "subject": "Switzerland",
-          "line": 8.5,
-          "mean": 9.3744,
-          "p_over": 0.557524,
-          "p_under": 0.442476,
-          "fair_over": 1.794,
-          "fair_under": 2.26,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_shots",
-          "subject": "Switzerland",
-          "line": 10.5,
-          "mean": 9.3744,
-          "p_over": 0.351829,
-          "p_under": 0.648171,
-          "fair_over": 2.842,
-          "fair_under": 1.543,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_shots",
-          "subject": "Switzerland",
-          "line": 12.5,
-          "mean": 9.3744,
-          "p_over": 0.1944,
-          "p_under": 0.8056,
-          "fair_over": 5.144,
-          "fair_under": 1.241,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_sot",
-          "subject": "Switzerland",
-          "line": 2.5,
-          "mean": 2.6493,
-          "p_over": 0.473008,
-          "p_under": 0.526992,
-          "fair_over": 2.114,
-          "fair_under": 1.898,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_sot",
-          "subject": "Switzerland",
-          "line": 3.5,
-          "mean": 2.6493,
-          "p_over": 0.282699,
-          "p_under": 0.717301,
-          "fair_over": 3.537,
-          "fair_under": 1.394,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_sot",
-          "subject": "Switzerland",
-          "line": 4.5,
-          "mean": 2.6493,
-          "p_over": 0.152858,
-          "p_under": 0.847142,
-          "fair_over": 6.542,
-          "fair_under": 1.18,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_fouls",
-          "subject": "Switzerland",
-          "line": 9.5,
-          "mean": 15.125,
-          "p_over": 0.87465,
-          "p_under": 0.12535,
-          "fair_over": 1.143,
-          "fair_under": 7.978,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_fouls",
-          "subject": "Switzerland",
-          "line": 11.5,
-          "mean": 15.125,
-          "p_over": 0.752377,
-          "p_under": 0.247623,
-          "fair_over": 1.329,
-          "fair_under": 4.038,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_fouls",
-          "subject": "Switzerland",
-          "line": 13.5,
-          "mean": 15.125,
-          "p_over": 0.598909,
-          "p_under": 0.401091,
-          "fair_over": 1.67,
-          "fair_under": 2.493,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_corners",
-          "subject": "Switzerland",
-          "line": 3.5,
-          "mean": 3.0074,
-          "p_over": 0.354378,
-          "p_under": 0.645622,
-          "fair_over": 2.822,
-          "fair_under": 1.549,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_corners",
-          "subject": "Switzerland",
-          "line": 4.5,
-          "mean": 3.0074,
-          "p_over": 0.188816,
-          "p_under": 0.811184,
-          "fair_over": 5.296,
-          "fair_under": 1.233,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_corners",
-          "subject": "Switzerland",
-          "line": 5.5,
-          "mean": 3.0074,
-          "p_over": 0.088122,
-          "p_under": 0.911878,
-          "fair_over": 11.348,
-          "fair_under": 1.097,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        }
-      ],
-      "match_cards": [
-        {
-          "market": "match_total_cards",
-          "subject": "Argentina vs Switzerland",
-          "line": 3.5,
-          "mean": 3.29,
-          "p_over": 0.409371,
-          "p_under": 0.590629,
-          "fair_over": 2.443,
-          "fair_under": 1.693,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "match_total_cards",
-          "subject": "Argentina vs Switzerland",
-          "line": 4.5,
-          "mean": 3.29,
-          "p_over": 0.248975,
-          "p_under": 0.751025,
-          "fair_over": 4.016,
-          "fair_under": 1.332,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "match_total_cards",
-          "subject": "Argentina vs Switzerland",
-          "line": 5.5,
-          "mean": 3.29,
-          "p_over": 0.138658,
-          "p_under": 0.861342,
-          "fair_over": 7.212,
-          "fair_under": 1.161,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        }
-      ],
-      "player_to_score": [
-        {
-          "market": "player_to_score",
-          "subject": "Lionel Messi",
-          "team": "Argentina",
-          "p_anytime": 0.331993,
-          "p_first": 0.137937,
-          "p_two_plus": 0.062481,
-          "fair_anytime": 3.012,
-          "fair_first": 7.25,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
-          "subject": "Lautaro Martinez",
-          "team": "Argentina",
-          "p_anytime": 0.397589,
-          "p_first": 0.173274,
-          "p_two_plus": 0.092278,
-          "fair_anytime": 2.515,
-          "fair_first": 5.771,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
-          "subject": "Julian Alvarez",
-          "team": "Argentina",
-          "p_anytime": 0.194376,
-          "p_first": 0.073895,
-          "p_two_plus": 0.02025,
-          "fair_anytime": 5.145,
-          "fair_first": 13.533,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
-          "subject": "Rodrigo De Paul",
-          "team": "Argentina",
-          "p_anytime": 0.115275,
-          "p_first": 0.041874,
-          "p_two_plus": 0.006915,
-          "fair_anytime": 8.675,
-          "fair_first": 23.881,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
-          "subject": "Breel Embolo",
-          "team": "Switzerland",
-          "p_anytime": 0.159942,
-          "p_first": 0.059586,
-          "p_two_plus": 0.013533,
-          "fair_anytime": 6.252,
-          "fair_first": 16.783,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
-          "subject": "Xherdan Shaqiri",
-          "team": "Switzerland",
-          "p_anytime": 0.078834,
-          "p_first": 0.028074,
-          "p_two_plus": 0.003192,
-          "fair_anytime": 12.685,
-          "fair_first": 35.62,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
-          "subject": "Haris Seferovic",
-          "team": "Switzerland",
-          "p_anytime": 0.073415,
-          "p_first": 0.026069,
-          "p_two_plus": 0.002763,
-          "fair_anytime": 13.621,
-          "fair_first": 38.36,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
-          "subject": "Ruben Vargas",
-          "team": "Switzerland",
-          "p_anytime": 0.072638,
-          "p_first": 0.025782,
-          "p_two_plus": 0.002704,
-          "fair_anytime": 13.767,
-          "fair_first": 38.786,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        }
-      ],
-      "player_props": [
-        {
-          "market": "player_shots_on_target",
-          "subject": "Lionel Messi",
-          "line": 0.5,
-          "mean": 0.747,
-          "p_over": 0.495826,
-          "p_under": 0.504174,
-          "fair_over": 2.017,
-          "fair_under": 1.983,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Lionel Messi",
-          "line": 1.5,
-          "mean": 0.747,
-          "p_over": 0.178491,
-          "p_under": 0.821509,
-          "fair_over": 5.603,
-          "fair_under": 1.217,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Lionel Messi",
-          "line": 2.5,
-          "mean": 0.747,
-          "p_over": 0.053656,
-          "p_under": 0.946344,
-          "fair_over": 18.637,
-          "fair_under": 1.057,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Lionel Messi",
-          "line": 0.5,
-          "mean": 1.0667,
-          "p_over": 0.625355,
-          "p_under": 0.374645,
-          "fair_over": 1.599,
-          "fair_under": 2.669,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Lionel Messi",
-          "line": 1.5,
-          "mean": 1.0667,
-          "p_over": 0.286054,
-          "p_under": 0.713946,
-          "fair_over": 3.496,
-          "fair_under": 1.401,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Lionel Messi",
-          "line": 2.5,
-          "mean": 1.0667,
-          "p_over": 0.106801,
-          "p_under": 0.893199,
-          "fair_over": 9.363,
-          "fair_under": 1.12,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Lionel Messi",
-          "prob": 0.147856,
-          "fair": 6.763,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Lautaro Martinez",
-          "line": 0.5,
-          "mean": 0.7936,
-          "p_over": 0.515181,
-          "p_under": 0.484819,
-          "fair_over": 1.941,
-          "fair_under": 2.063,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Lautaro Martinez",
-          "line": 1.5,
-          "mean": 0.7936,
-          "p_over": 0.194114,
-          "p_under": 0.805886,
-          "fair_over": 5.152,
-          "fair_under": 1.241,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Lautaro Martinez",
-          "line": 2.5,
-          "mean": 0.7936,
-          "p_over": 0.061224,
-          "p_under": 0.938776,
-          "fair_over": 16.334,
-          "fair_under": 1.065,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Lautaro Martinez",
-          "line": 0.5,
-          "mean": 1.1333,
-          "p_over": 0.645878,
-          "p_under": 0.354122,
-          "fair_over": 1.548,
-          "fair_under": 2.824,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Lautaro Martinez",
-          "line": 1.5,
-          "mean": 1.1333,
-          "p_over": 0.308305,
-          "p_under": 0.691695,
-          "fair_over": 3.244,
-          "fair_under": 1.446,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Lautaro Martinez",
-          "line": 2.5,
-          "mean": 1.1333,
-          "p_over": 0.120588,
-          "p_under": 0.879412,
-          "fair_over": 8.293,
-          "fair_under": 1.137,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Lautaro Martinez",
-          "prob": 0.156335,
-          "fair": 6.397,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Julian Alvarez",
-          "line": 0.5,
-          "mean": 0.747,
-          "p_over": 0.495826,
-          "p_under": 0.504174,
-          "fair_over": 2.017,
-          "fair_under": 1.983,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Julian Alvarez",
-          "line": 1.5,
-          "mean": 0.747,
-          "p_over": 0.178491,
-          "p_under": 0.821509,
-          "fair_over": 5.603,
-          "fair_under": 1.217,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Julian Alvarez",
-          "line": 2.5,
-          "mean": 0.747,
-          "p_over": 0.053656,
-          "p_under": 0.946344,
-          "fair_over": 18.637,
-          "fair_under": 1.057,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Julian Alvarez",
-          "line": 0.5,
-          "mean": 1.0667,
-          "p_over": 0.625355,
-          "p_under": 0.374645,
-          "fair_over": 1.599,
-          "fair_under": 2.669,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Julian Alvarez",
-          "line": 1.5,
-          "mean": 1.0667,
-          "p_over": 0.286054,
-          "p_under": 0.713946,
-          "fair_over": 3.496,
-          "fair_under": 1.401,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Julian Alvarez",
-          "line": 2.5,
-          "mean": 1.0667,
-          "p_over": 0.106801,
-          "p_under": 0.893199,
-          "fair_over": 9.363,
-          "fair_under": 1.12,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Julian Alvarez",
-          "prob": 0.147856,
-          "fair": 6.763,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Rodrigo De Paul",
-          "line": 0.5,
-          "mean": 0.7936,
-          "p_over": 0.515181,
-          "p_under": 0.484819,
-          "fair_over": 1.941,
-          "fair_under": 2.063,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Rodrigo De Paul",
-          "line": 1.5,
-          "mean": 0.7936,
-          "p_over": 0.194114,
-          "p_under": 0.805886,
-          "fair_over": 5.152,
-          "fair_under": 1.241,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Rodrigo De Paul",
-          "line": 2.5,
-          "mean": 0.7936,
-          "p_over": 0.061224,
-          "p_under": 0.938776,
-          "fair_over": 16.334,
-          "fair_under": 1.065,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Rodrigo De Paul",
-          "line": 0.5,
-          "mean": 1.1333,
-          "p_over": 0.645878,
-          "p_under": 0.354122,
-          "fair_over": 1.548,
-          "fair_under": 2.824,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Rodrigo De Paul",
-          "line": 1.5,
-          "mean": 1.1333,
-          "p_over": 0.308305,
-          "p_under": 0.691695,
-          "fair_over": 3.244,
-          "fair_under": 1.446,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Rodrigo De Paul",
-          "line": 2.5,
-          "mean": 1.1333,
-          "p_over": 0.120588,
-          "p_under": 0.879412,
-          "fair_over": 8.293,
-          "fair_under": 1.137,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Rodrigo De Paul",
-          "prob": 0.156335,
-          "fair": 6.397,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Breel Embolo",
-          "line": 0.5,
-          "mean": 0.5072,
-          "p_over": 0.379691,
-          "p_under": 0.620309,
-          "fair_over": 2.634,
-          "fair_under": 1.612,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Breel Embolo",
-          "line": 1.5,
-          "mean": 0.5072,
-          "p_over": 0.100469,
-          "p_under": 0.899531,
-          "fair_over": 9.953,
+          "mean": 1.1067,
+          "p_over": 0.100937,
+          "p_under": 0.899063,
+          "fair_over": 9.907,
           "fair_under": 1.112,
           "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Breel Embolo",
-          "line": 2.5,
-          "mean": 0.5072,
-          "p_over": 0.021915,
-          "p_under": 0.978085,
-          "fair_over": 45.632,
-          "fair_under": 1.022,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Breel Embolo",
-          "line": 0.5,
-          "mean": 1.0667,
-          "p_over": 0.625355,
-          "p_under": 0.374645,
-          "fair_over": 1.599,
-          "fair_under": 2.669,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Breel Embolo",
-          "line": 1.5,
-          "mean": 1.0667,
-          "p_over": 0.286054,
-          "p_under": 0.713946,
-          "fair_over": 3.496,
-          "fair_under": 1.401,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Breel Embolo",
-          "line": 2.5,
-          "mean": 1.0667,
-          "p_over": 0.106801,
-          "p_under": 0.893199,
-          "fair_over": 9.363,
-          "fair_under": 1.12,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Breel Embolo",
-          "prob": 0.147856,
-          "fair": 6.763,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Xherdan Shaqiri",
-          "line": 0.5,
-          "mean": 0.2853,
-          "p_over": 0.240877,
-          "p_under": 0.759123,
-          "fair_over": 4.152,
-          "fair_under": 1.317,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Xherdan Shaqiri",
-          "line": 1.5,
-          "mean": 0.2853,
-          "p_over": 0.038713,
-          "p_under": 0.961287,
-          "fair_over": 25.831,
-          "fair_under": 1.04,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Xherdan Shaqiri",
-          "line": 2.5,
-          "mean": 0.2853,
-          "p_over": 0.005064,
-          "p_under": 0.994936,
-          "fair_over": 197.459,
-          "fair_under": 1.005,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Xherdan Shaqiri",
-          "line": 0.5,
-          "mean": 0.9333,
-          "p_over": 0.579994,
-          "p_under": 0.420006,
-          "fair_over": 1.724,
-          "fair_under": 2.381,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Xherdan Shaqiri",
-          "line": 1.5,
-          "mean": 0.9333,
-          "p_over": 0.240759,
-          "p_under": 0.759241,
-          "fair_over": 4.154,
-          "fair_under": 1.317,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Xherdan Shaqiri",
-          "line": 2.5,
-          "mean": 0.9333,
-          "p_over": 0.080927,
-          "p_under": 0.919073,
-          "fair_over": 12.357,
-          "fair_under": 1.088,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Xherdan Shaqiri",
-          "prob": 0.110118,
-          "fair": 9.081,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Haris Seferovic",
-          "line": 0.5,
-          "mean": 0.4121,
-          "p_over": 0.324454,
-          "p_under": 0.675546,
-          "fair_over": 3.082,
-          "fair_under": 1.48,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Haris Seferovic",
-          "line": 1.5,
-          "mean": 0.4121,
-          "p_over": 0.072059,
-          "p_under": 0.927941,
-          "fair_over": 13.878,
-          "fair_under": 1.078,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Haris Seferovic",
-          "line": 2.5,
-          "mean": 0.4121,
-          "p_over": 0.013122,
-          "p_under": 0.986878,
-          "fair_over": 76.208,
-          "fair_under": 1.013,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Haris Seferovic",
-          "line": 0.5,
-          "mean": 0.8667,
-          "p_over": 0.554927,
-          "p_under": 0.445073,
-          "fair_over": 1.802,
-          "fair_under": 2.247,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Haris Seferovic",
-          "line": 1.5,
-          "mean": 0.8667,
-          "p_over": 0.217881,
-          "p_under": 0.782119,
-          "fair_over": 4.59,
-          "fair_under": 1.279,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Haris Seferovic",
-          "line": 2.5,
-          "mean": 0.8667,
-          "p_over": 0.068991,
-          "p_under": 0.931009,
-          "fair_over": 14.495,
-          "fair_under": 1.074,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Haris Seferovic",
-          "prob": 0.121905,
-          "fair": 8.203,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Ruben Vargas",
-          "line": 0.5,
-          "mean": 0.2153,
-          "p_over": 0.189155,
-          "p_under": 0.810845,
-          "fair_over": 5.287,
-          "fair_under": 1.233,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Ruben Vargas",
-          "line": 1.5,
-          "mean": 0.2153,
-          "p_over": 0.023518,
-          "p_under": 0.976482,
-          "fair_over": 42.521,
-          "fair_under": 1.024,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Ruben Vargas",
-          "line": 2.5,
-          "mean": 0.2153,
-          "p_over": 0.00237,
-          "p_under": 0.99763,
-          "fair_over": 421.923,
-          "fair_under": 1.002,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Ruben Vargas",
-          "line": 0.5,
-          "mean": 1.0,
-          "p_over": 0.603431,
-          "p_under": 0.396569,
-          "fair_over": 1.657,
-          "fair_under": 2.522,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Ruben Vargas",
-          "line": 1.5,
-          "mean": 1.0,
-          "p_over": 0.263514,
-          "p_under": 0.736486,
-          "fair_over": 3.795,
-          "fair_under": 1.358,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Ruben Vargas",
-          "line": 2.5,
-          "mean": 1.0,
-          "p_over": 0.093556,
-          "p_under": 0.906444,
-          "fair_over": 10.689,
-          "fair_under": 1.103,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Ruben Vargas",
-          "prob": 0.232091,
-          "fair": 4.309,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        }
-      ],
-      "notes": "SoT/cards/corners/fouls are sportsbook-only; values are model fair odds. Player markets use players.db rates when present, else tournament priors.",
-      "kickoff": "2026-07-12 01:00:00+00:00"
-    },
-    {
-      "fixture": "Norway vs England",
-      "lambda_home": 0.8873,
-      "lambda_away": 1.7983,
-      "team_totals": [
-        {
-          "market": "team_total_goals",
-          "subject": "Norway",
-          "line": 0.5,
-          "mean": 0.8873,
-          "p_over": 0.588215,
-          "p_under": 0.411785,
-          "fair_over": 1.7,
-          "fair_under": 2.428,
-          "venues": [
-            "sportsbook",
-            "exchange"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_goals",
-          "subject": "Norway",
-          "line": 1.5,
-          "mean": 0.8873,
-          "p_over": 0.222857,
-          "p_under": 0.777143,
-          "fair_over": 4.487,
-          "fair_under": 1.287,
-          "venues": [
-            "sportsbook",
-            "exchange"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_goals",
-          "subject": "Norway",
-          "line": 2.5,
-          "mean": 0.8873,
-          "p_over": 0.060775,
-          "p_under": 0.939225,
-          "fair_over": 16.454,
-          "fair_under": 1.065,
-          "venues": [
-            "sportsbook",
-            "exchange"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_shots",
-          "subject": "Norway",
-          "line": 8.5,
-          "mean": 9.532,
-          "p_over": 0.57353,
-          "p_under": 0.42647,
-          "fair_over": 1.744,
-          "fair_under": 2.345,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "team_total_shots",
-          "subject": "Norway",
-          "line": 10.5,
-          "mean": 9.532,
-          "p_over": 0.367769,
-          "p_under": 0.632231,
-          "fair_over": 2.719,
-          "fair_under": 1.582,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "team_total_shots",
-          "subject": "Norway",
-          "line": 12.5,
-          "mean": 9.532,
-          "p_over": 0.206858,
-          "p_under": 0.793142,
-          "fair_over": 4.834,
-          "fair_under": 1.261,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "team_total_sot",
-          "subject": "Norway",
-          "line": 2.5,
-          "mean": 3.3362,
-          "p_over": 0.606223,
-          "p_under": 0.393777,
-          "fair_over": 1.65,
-          "fair_under": 2.54,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "team_total_sot",
-          "subject": "Norway",
-          "line": 3.5,
-          "mean": 3.3362,
-          "p_over": 0.415129,
-          "p_under": 0.584871,
-          "fair_over": 2.409,
-          "fair_under": 1.71,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "team_total_sot",
-          "subject": "Norway",
-          "line": 4.5,
-          "mean": 3.3362,
-          "p_over": 0.260091,
-          "p_under": 0.739909,
-          "fair_over": 3.845,
-          "fair_under": 1.352,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "team_total_fouls",
-          "subject": "Norway",
-          "line": 9.5,
-          "mean": 11.5,
-          "p_over": 0.6607,
-          "p_under": 0.3393,
-          "fair_over": 1.514,
-          "fair_under": 2.947,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "team_total_fouls",
-          "subject": "Norway",
-          "line": 11.5,
-          "mean": 11.5,
-          "p_over": 0.467284,
-          "p_under": 0.532716,
-          "fair_over": 2.14,
-          "fair_under": 1.877,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "team_total_fouls",
-          "subject": "Norway",
-          "line": 13.5,
-          "mean": 11.5,
-          "p_over": 0.294139,
-          "p_under": 0.705861,
-          "fair_over": 3.4,
-          "fair_under": 1.417,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "team_total_corners",
-          "subject": "Norway",
-          "line": 3.5,
-          "mean": 2.893,
-          "p_over": 0.329174,
-          "p_under": 0.670826,
-          "fair_over": 3.038,
-          "fair_under": 1.491,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_corners",
-          "subject": "Norway",
-          "line": 4.5,
-          "mean": 2.893,
-          "p_over": 0.170007,
-          "p_under": 0.829993,
-          "fair_over": 5.882,
-          "fair_under": 1.205,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_corners",
-          "subject": "Norway",
-          "line": 5.5,
-          "mean": 2.893,
-          "p_over": 0.076767,
-          "p_under": 0.923233,
-          "fair_over": 13.026,
-          "fair_under": 1.083,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_goals",
-          "subject": "England",
-          "line": 0.5,
-          "mean": 1.7983,
-          "p_over": 0.834416,
-          "p_under": 0.165584,
-          "fair_over": 1.198,
-          "fair_under": 6.039,
-          "venues": [
-            "sportsbook",
-            "exchange"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_goals",
-          "subject": "England",
-          "line": 1.5,
-          "mean": 1.7983,
-          "p_over": 0.536651,
-          "p_under": 0.463349,
-          "fair_over": 1.863,
-          "fair_under": 2.158,
-          "venues": [
-            "sportsbook",
-            "exchange"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_goals",
-          "subject": "England",
-          "line": 2.5,
-          "mean": 1.7983,
-          "p_over": 0.268918,
-          "p_under": 0.731082,
-          "fair_over": 3.719,
-          "fair_under": 1.368,
-          "venues": [
             "sportsbook",
             "exchange"
           ],
@@ -1623,11 +55,11 @@
           "market": "team_total_shots",
           "subject": "England",
           "line": 8.5,
-          "mean": 16.3895,
-          "p_over": 0.938077,
-          "p_under": 0.061923,
-          "fair_over": 1.066,
-          "fair_under": 16.149,
+          "mean": 12.1889,
+          "p_over": 0.785986,
+          "p_under": 0.214014,
+          "fair_over": 1.272,
+          "fair_under": 4.673,
           "venues": [
             "sportsbook"
           ],
@@ -1637,11 +69,11 @@
           "market": "team_total_shots",
           "subject": "England",
           "line": 10.5,
-          "mean": 16.3895,
-          "p_over": 0.859281,
-          "p_under": 0.140719,
-          "fair_over": 1.164,
-          "fair_under": 7.106,
+          "mean": 12.1889,
+          "p_over": 0.617068,
+          "p_under": 0.382932,
+          "fair_over": 1.621,
+          "fair_under": 2.611,
           "venues": [
             "sportsbook"
           ],
@@ -1651,11 +83,11 @@
           "market": "team_total_shots",
           "subject": "England",
           "line": 12.5,
-          "mean": 16.3895,
-          "p_over": 0.743541,
-          "p_under": 0.256459,
-          "fair_over": 1.345,
-          "fair_under": 3.899,
+          "mean": 12.1889,
+          "p_over": 0.438177,
+          "p_under": 0.561823,
+          "fair_over": 2.282,
+          "fair_under": 1.78,
           "venues": [
             "sportsbook"
           ],
@@ -1665,11 +97,11 @@
           "market": "team_total_sot",
           "subject": "England",
           "line": 2.5,
-          "mean": 5.7963,
-          "p_over": 0.869713,
-          "p_under": 0.130287,
-          "fair_over": 1.15,
-          "fair_under": 7.675,
+          "mean": 4.3107,
+          "p_over": 0.744964,
+          "p_under": 0.255036,
+          "fair_over": 1.342,
+          "fair_under": 3.921,
           "venues": [
             "sportsbook"
           ],
@@ -1679,11 +111,11 @@
           "market": "team_total_sot",
           "subject": "England",
           "line": 3.5,
-          "mean": 5.7963,
-          "p_over": 0.75666,
-          "p_under": 0.24334,
-          "fair_over": 1.322,
-          "fair_under": 4.109,
+          "mean": 4.3107,
+          "p_over": 0.579425,
+          "p_under": 0.420575,
+          "fair_over": 1.726,
+          "fair_under": 2.378,
           "venues": [
             "sportsbook"
           ],
@@ -1693,11 +125,11 @@
           "market": "team_total_sot",
           "subject": "England",
           "line": 4.5,
-          "mean": 5.7963,
-          "p_over": 0.623798,
-          "p_under": 0.376202,
-          "fair_over": 1.603,
-          "fair_under": 2.658,
+          "mean": 4.3107,
+          "p_over": 0.418595,
+          "p_under": 0.581405,
+          "fair_over": 2.389,
+          "fair_under": 1.72,
           "venues": [
             "sportsbook"
           ],
@@ -1749,11 +181,11 @@
           "market": "team_total_corners",
           "subject": "England",
           "line": 3.5,
-          "mean": 5.8634,
-          "p_over": 0.827073,
-          "p_under": 0.172927,
-          "fair_over": 1.209,
-          "fair_under": 5.783,
+          "mean": 3.9501,
+          "p_over": 0.552507,
+          "p_under": 0.447493,
+          "fair_over": 1.81,
+          "fair_under": 2.235,
           "venues": [
             "sportsbook"
           ],
@@ -1763,11 +195,11 @@
           "market": "team_total_corners",
           "subject": "England",
           "line": 4.5,
-          "mean": 5.8634,
-          "p_over": 0.687656,
-          "p_under": 0.312344,
-          "fair_over": 1.454,
-          "fair_under": 3.202,
+          "mean": 3.9501,
+          "p_over": 0.361597,
+          "p_under": 0.638403,
+          "fair_over": 2.766,
+          "fair_under": 1.566,
           "venues": [
             "sportsbook"
           ],
@@ -1777,11 +209,224 @@
           "market": "team_total_corners",
           "subject": "England",
           "line": 5.5,
-          "mean": 5.8634,
-          "p_over": 0.527481,
-          "p_under": 0.472519,
-          "fair_over": 1.896,
-          "fair_under": 2.116,
+          "mean": 3.9501,
+          "p_over": 0.21069,
+          "p_under": 0.78931,
+          "fair_over": 4.746,
+          "fair_under": 1.267,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "team_total_goals",
+          "subject": "Argentina",
+          "line": 0.5,
+          "mean": 1.2564,
+          "p_over": 0.715332,
+          "p_under": 0.284668,
+          "fair_over": 1.398,
+          "fair_under": 3.513,
+          "venues": [
+            "sportsbook",
+            "exchange"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "team_total_goals",
+          "subject": "Argentina",
+          "line": 1.5,
+          "mean": 1.2564,
+          "p_over": 0.357666,
+          "p_under": 0.642334,
+          "fair_over": 2.796,
+          "fair_under": 1.557,
+          "venues": [
+            "sportsbook",
+            "exchange"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "team_total_goals",
+          "subject": "Argentina",
+          "line": 2.5,
+          "mean": 1.2564,
+          "p_over": 0.132975,
+          "p_under": 0.867025,
+          "fair_over": 7.52,
+          "fair_under": 1.153,
+          "venues": [
+            "sportsbook",
+            "exchange"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "team_total_shots",
+          "subject": "Argentina",
+          "line": 8.5,
+          "mean": 14.6376,
+          "p_over": 0.894793,
+          "p_under": 0.105207,
+          "fair_over": 1.118,
+          "fair_under": 9.505,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_shots",
+          "subject": "Argentina",
+          "line": 10.5,
+          "mean": 14.6376,
+          "p_over": 0.781787,
+          "p_under": 0.218213,
+          "fair_over": 1.279,
+          "fair_under": 4.583,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_shots",
+          "subject": "Argentina",
+          "line": 12.5,
+          "mean": 14.6376,
+          "p_over": 0.634546,
+          "p_under": 0.365454,
+          "fair_over": 1.576,
+          "fair_under": 2.736,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_sot",
+          "subject": "Argentina",
+          "line": 2.5,
+          "mean": 6.3604,
+          "p_over": 0.898733,
+          "p_under": 0.101267,
+          "fair_over": 1.113,
+          "fair_under": 9.875,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_sot",
+          "subject": "Argentina",
+          "line": 3.5,
+          "mean": 6.3604,
+          "p_over": 0.80339,
+          "p_under": 0.19661,
+          "fair_over": 1.245,
+          "fair_under": 5.086,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_sot",
+          "subject": "Argentina",
+          "line": 4.5,
+          "mean": 6.3604,
+          "p_over": 0.684951,
+          "p_under": 0.315049,
+          "fair_over": 1.46,
+          "fair_under": 3.174,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_fouls",
+          "subject": "Argentina",
+          "line": 9.5,
+          "mean": 16.0,
+          "p_over": 0.903465,
+          "p_under": 0.096535,
+          "fair_over": 1.107,
+          "fair_under": 10.359,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_fouls",
+          "subject": "Argentina",
+          "line": 11.5,
+          "mean": 16.0,
+          "p_over": 0.799797,
+          "p_under": 0.200203,
+          "fair_over": 1.25,
+          "fair_under": 4.995,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_fouls",
+          "subject": "Argentina",
+          "line": 13.5,
+          "mean": 16.0,
+          "p_over": 0.660939,
+          "p_under": 0.339061,
+          "fair_over": 1.513,
+          "fair_under": 2.949,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_corners",
+          "subject": "Argentina",
+          "line": 3.5,
+          "mean": 4.4845,
+          "p_over": 0.648694,
+          "p_under": 0.351306,
+          "fair_over": 1.542,
+          "fair_under": 2.847,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "team_total_corners",
+          "subject": "Argentina",
+          "line": 4.5,
+          "mean": 4.4845,
+          "p_over": 0.462604,
+          "p_under": 0.537396,
+          "fair_over": 2.162,
+          "fair_under": 1.861,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "team_total_corners",
+          "subject": "Argentina",
+          "line": 5.5,
+          "mean": 4.4845,
+          "p_over": 0.296592,
+          "p_under": 0.703408,
+          "fair_over": 3.372,
+          "fair_under": 1.422,
           "venues": [
             "sportsbook"
           ],
@@ -1791,7 +436,7 @@
       "match_cards": [
         {
           "market": "match_total_cards",
-          "subject": "Norway vs England",
+          "subject": "England vs Argentina",
           "line": 3.5,
           "mean": 3.29,
           "p_over": 0.409371,
@@ -1805,7 +450,7 @@
         },
         {
           "market": "match_total_cards",
-          "subject": "Norway vs England",
+          "subject": "England vs Argentina",
           "line": 4.5,
           "mean": 3.29,
           "p_over": 0.248975,
@@ -1819,7 +464,7 @@
         },
         {
           "market": "match_total_cards",
-          "subject": "Norway vs England",
+          "subject": "England vs Argentina",
           "line": 5.5,
           "mean": 3.29,
           "p_over": 0.138658,
@@ -1835,73 +480,13 @@
       "player_to_score": [
         {
           "market": "player_to_score",
-          "subject": "Erling Haaland",
-          "team": "Norway",
-          "p_anytime": 0.345462,
-          "p_first": 0.147057,
-          "p_two_plus": 0.068052,
-          "fair_anytime": 2.895,
-          "fair_first": 6.8,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
-          "subject": "Martin Odegaard",
-          "team": "Norway",
-          "p_anytime": 0.089275,
-          "p_first": 0.032447,
-          "p_two_plus": 0.004109,
-          "fair_anytime": 11.201,
-          "fair_first": 30.819,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
-          "subject": "Alexander Sorloth",
-          "team": "Norway",
-          "p_anytime": 0.078477,
-          "p_first": 0.028357,
-          "p_two_plus": 0.003163,
-          "fair_anytime": 12.743,
-          "fair_first": 35.264,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
-          "subject": "Mohamed Elyounoussi",
-          "team": "Norway",
-          "p_anytime": 0.057235,
-          "p_first": 0.02045,
-          "p_two_plus": 0.00167,
-          "fair_anytime": 17.472,
-          "fair_first": 48.9,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
           "subject": "Harry Kane",
           "team": "England",
-          "p_anytime": 0.469066,
-          "p_first": 0.219677,
-          "p_two_plus": 0.132923,
-          "fair_anytime": 2.132,
-          "fair_first": 4.552,
+          "p_anytime": 0.355626,
+          "p_first": 0.168467,
+          "p_two_plus": 0.072439,
+          "fair_anytime": 2.812,
+          "fair_first": 5.936,
           "venues": [
             "sportsbook",
             "polymarket"
@@ -1912,11 +497,11 @@
           "market": "player_to_score",
           "subject": "Phil Foden",
           "team": "England",
-          "p_anytime": 0.192629,
-          "p_first": 0.074243,
-          "p_two_plus": 0.019874,
-          "fair_anytime": 5.191,
-          "fair_first": 13.469,
+          "p_anytime": 0.115321,
+          "p_first": 0.04697,
+          "p_two_plus": 0.006921,
+          "fair_anytime": 8.671,
+          "fair_first": 21.29,
           "venues": [
             "sportsbook",
             "polymarket"
@@ -1927,11 +512,11 @@
           "market": "player_to_score",
           "subject": "Bukayo Saka",
           "team": "England",
-          "p_anytime": 0.192629,
-          "p_first": 0.074243,
-          "p_two_plus": 0.019874,
-          "fair_anytime": 5.191,
-          "fair_first": 13.469,
+          "p_anytime": 0.115321,
+          "p_first": 0.04697,
+          "p_two_plus": 0.006921,
+          "fair_anytime": 8.671,
+          "fair_first": 21.29,
           "venues": [
             "sportsbook",
             "polymarket"
@@ -1942,11 +527,71 @@
           "market": "player_to_score",
           "subject": "Marcus Rashford",
           "team": "England",
-          "p_anytime": 0.149412,
-          "p_first": 0.05615,
-          "p_two_plus": 0.011764,
-          "fair_anytime": 6.693,
-          "fair_first": 17.809,
+          "p_anytime": 0.088506,
+          "p_first": 0.035524,
+          "p_two_plus": 0.004038,
+          "fair_anytime": 11.299,
+          "fair_first": 28.15,
+          "venues": [
+            "sportsbook",
+            "polymarket"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "player_to_score",
+          "subject": "Lionel Messi",
+          "team": "Argentina",
+          "p_anytime": 0.235025,
+          "p_first": 0.1027,
+          "p_two_plus": 0.030079,
+          "fair_anytime": 4.255,
+          "fair_first": 9.737,
+          "venues": [
+            "sportsbook",
+            "polymarket"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "player_to_score",
+          "subject": "Lautaro Martinez",
+          "team": "Argentina",
+          "p_anytime": 0.325416,
+          "p_first": 0.150904,
+          "p_two_plus": 0.05986,
+          "fair_anytime": 3.073,
+          "fair_first": 6.627,
+          "venues": [
+            "sportsbook",
+            "polymarket"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "player_to_score",
+          "subject": "Julian Alvarez",
+          "team": "Argentina",
+          "p_anytime": 0.1337,
+          "p_first": 0.055018,
+          "p_two_plus": 0.009365,
+          "fair_anytime": 7.479,
+          "fair_first": 18.176,
+          "venues": [
+            "sportsbook",
+            "polymarket"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "player_to_score",
+          "subject": "Rodrigo De Paul",
+          "team": "Argentina",
+          "p_anytime": 0.078111,
+          "p_first": 0.031177,
+          "p_two_plus": 0.003133,
+          "fair_anytime": 12.802,
+          "fair_first": 32.075,
           "venues": [
             "sportsbook",
             "polymarket"
@@ -1957,389 +602,13 @@
       "player_props": [
         {
           "market": "player_shots_on_target",
-          "subject": "Erling Haaland",
-          "line": 0.5,
-          "mean": 0.5251,
-          "p_over": 0.389465,
-          "p_under": 0.610535,
-          "fair_over": 2.568,
-          "fair_under": 1.638,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Erling Haaland",
-          "line": 1.5,
-          "mean": 0.5251,
-          "p_over": 0.106054,
-          "p_under": 0.893946,
-          "fair_over": 9.429,
-          "fair_under": 1.119,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Erling Haaland",
-          "line": 2.5,
-          "mean": 0.5251,
-          "p_over": 0.02383,
-          "p_under": 0.97617,
-          "fair_over": 41.964,
-          "fair_under": 1.024,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Erling Haaland",
-          "line": 0.5,
-          "mean": 1.1333,
-          "p_over": 0.645878,
-          "p_under": 0.354122,
-          "fair_over": 1.548,
-          "fair_under": 2.824,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Erling Haaland",
-          "line": 1.5,
-          "mean": 1.1333,
-          "p_over": 0.308305,
-          "p_under": 0.691695,
-          "fair_over": 3.244,
-          "fair_under": 1.446,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Erling Haaland",
-          "line": 2.5,
-          "mean": 1.1333,
-          "p_over": 0.120588,
-          "p_under": 0.879412,
-          "fair_over": 8.293,
-          "fair_under": 1.137,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Erling Haaland",
-          "prob": 0.156335,
-          "fair": 6.397,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Martin Odegaard",
-          "line": 0.5,
-          "mean": 0.5251,
-          "p_over": 0.389465,
-          "p_under": 0.610535,
-          "fair_over": 2.568,
-          "fair_under": 1.638,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Martin Odegaard",
-          "line": 1.5,
-          "mean": 0.5251,
-          "p_over": 0.106054,
-          "p_under": 0.893946,
-          "fair_over": 9.429,
-          "fair_under": 1.119,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Martin Odegaard",
-          "line": 2.5,
-          "mean": 0.5251,
-          "p_over": 0.02383,
-          "p_under": 0.97617,
-          "fair_over": 41.964,
-          "fair_under": 1.024,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Martin Odegaard",
-          "line": 0.5,
-          "mean": 1.1333,
-          "p_over": 0.645878,
-          "p_under": 0.354122,
-          "fair_over": 1.548,
-          "fair_under": 2.824,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Martin Odegaard",
-          "line": 1.5,
-          "mean": 1.1333,
-          "p_over": 0.308305,
-          "p_under": 0.691695,
-          "fair_over": 3.244,
-          "fair_under": 1.446,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Martin Odegaard",
-          "line": 2.5,
-          "mean": 1.1333,
-          "p_over": 0.120588,
-          "p_under": 0.879412,
-          "fair_over": 8.293,
-          "fair_under": 1.137,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Martin Odegaard",
-          "prob": 0.156335,
-          "fair": 6.397,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Alexander Sorloth",
-          "line": 0.5,
-          "mean": 0.4016,
-          "p_over": 0.317967,
-          "p_under": 0.682033,
-          "fair_over": 3.145,
-          "fair_under": 1.466,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Alexander Sorloth",
-          "line": 1.5,
-          "mean": 0.4016,
-          "p_over": 0.069064,
-          "p_under": 0.930936,
-          "fair_over": 14.479,
-          "fair_under": 1.074,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Alexander Sorloth",
-          "line": 2.5,
-          "mean": 0.4016,
-          "p_over": 0.012293,
-          "p_under": 0.987707,
-          "fair_over": 81.35,
-          "fair_under": 1.012,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Alexander Sorloth",
-          "line": 0.5,
-          "mean": 0.8667,
-          "p_over": 0.554927,
-          "p_under": 0.445073,
-          "fair_over": 1.802,
-          "fair_under": 2.247,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Alexander Sorloth",
-          "line": 1.5,
-          "mean": 0.8667,
-          "p_over": 0.217881,
-          "p_under": 0.782119,
-          "fair_over": 4.59,
-          "fair_under": 1.279,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Alexander Sorloth",
-          "line": 2.5,
-          "mean": 0.8667,
-          "p_over": 0.068991,
-          "p_under": 0.931009,
-          "fair_over": 14.495,
-          "fair_under": 1.074,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Alexander Sorloth",
-          "prob": 0.121905,
-          "fair": 8.203,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Mohamed Elyounoussi",
-          "line": 0.5,
-          "mean": 0.4634,
-          "p_over": 0.354953,
-          "p_under": 0.645047,
-          "fair_over": 2.817,
-          "fair_under": 1.55,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Mohamed Elyounoussi",
-          "line": 1.5,
-          "mean": 0.4634,
-          "p_over": 0.087092,
-          "p_under": 0.912908,
-          "fair_over": 11.482,
-          "fair_under": 1.095,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Mohamed Elyounoussi",
-          "line": 2.5,
-          "mean": 0.4634,
-          "p_over": 0.017572,
-          "p_under": 0.982428,
-          "fair_over": 56.909,
-          "fair_under": 1.018,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Mohamed Elyounoussi",
-          "line": 0.5,
-          "mean": 1.0,
-          "p_over": 0.603431,
-          "p_under": 0.396569,
-          "fair_over": 1.657,
-          "fair_under": 2.522,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Mohamed Elyounoussi",
-          "line": 1.5,
-          "mean": 1.0,
-          "p_over": 0.263514,
-          "p_under": 0.736486,
-          "fair_over": 3.795,
-          "fair_under": 1.358,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Mohamed Elyounoussi",
-          "line": 2.5,
-          "mean": 1.0,
-          "p_over": 0.093556,
-          "p_under": 0.906444,
-          "fair_over": 10.689,
-          "fair_under": 1.103,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Mohamed Elyounoussi",
-          "prob": 0.139292,
-          "fair": 7.179,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
           "subject": "Harry Kane",
           "line": 0.5,
-          "mean": 1.3824,
-          "p_over": 0.694968,
-          "p_under": 0.305032,
-          "fair_over": 1.439,
-          "fair_under": 3.278,
+          "mean": 1.0281,
+          "p_over": 0.599468,
+          "p_under": 0.400532,
+          "fair_over": 1.668,
+          "fair_under": 2.497,
           "venues": [
             "sportsbook"
           ],
@@ -2349,11 +618,11 @@
           "market": "player_shots_on_target",
           "subject": "Harry Kane",
           "line": 1.5,
-          "mean": 1.3824,
-          "p_over": 0.381598,
-          "p_under": 0.618402,
-          "fair_over": 2.621,
-          "fair_under": 1.617,
+          "mean": 1.0281,
+          "p_over": 0.271889,
+          "p_under": 0.728111,
+          "fair_over": 3.678,
+          "fair_under": 1.373,
           "venues": [
             "sportsbook"
           ],
@@ -2363,11 +632,11 @@
           "market": "player_shots_on_target",
           "subject": "Harry Kane",
           "line": 2.5,
-          "mean": 1.3824,
-          "p_over": 0.180389,
-          "p_under": 0.819611,
-          "fair_over": 5.544,
-          "fair_under": 1.22,
+          "mean": 1.0281,
+          "p_over": 0.104443,
+          "p_under": 0.895557,
+          "fair_over": 9.575,
+          "fair_under": 1.117,
           "venues": [
             "sportsbook"
           ],
@@ -2429,11 +698,11 @@
           "market": "player_shots_on_target",
           "subject": "Phil Foden",
           "line": 0.5,
-          "mean": 0.8026,
-          "p_over": 0.518805,
-          "p_under": 0.481195,
-          "fair_over": 1.928,
-          "fair_under": 2.078,
+          "mean": 0.5969,
+          "p_over": 0.426712,
+          "p_under": 0.573288,
+          "fair_over": 2.343,
+          "fair_under": 1.744,
           "venues": [
             "sportsbook"
           ],
@@ -2443,11 +712,11 @@
           "market": "player_shots_on_target",
           "subject": "Phil Foden",
           "line": 1.5,
-          "mean": 0.8026,
-          "p_over": 0.197128,
-          "p_under": 0.802872,
-          "fair_over": 5.073,
-          "fair_under": 1.246,
+          "mean": 0.5969,
+          "p_over": 0.128942,
+          "p_under": 0.871058,
+          "fair_over": 7.755,
+          "fair_under": 1.148,
           "venues": [
             "sportsbook"
           ],
@@ -2457,11 +726,11 @@
           "market": "player_shots_on_target",
           "subject": "Phil Foden",
           "line": 2.5,
-          "mean": 0.8026,
-          "p_over": 0.062728,
-          "p_under": 0.937272,
-          "fair_over": 15.942,
-          "fair_under": 1.067,
+          "mean": 0.5969,
+          "p_over": 0.032277,
+          "p_under": 0.967723,
+          "fair_over": 30.982,
+          "fair_under": 1.033,
           "venues": [
             "sportsbook"
           ],
@@ -2523,11 +792,11 @@
           "market": "player_shots_on_target",
           "subject": "Bukayo Saka",
           "line": 0.5,
-          "mean": 1.7636,
-          "p_over": 0.768009,
-          "p_under": 0.231991,
-          "fair_over": 1.302,
-          "fair_under": 4.311,
+          "mean": 1.3116,
+          "p_over": 0.678376,
+          "p_under": 0.321624,
+          "fair_over": 1.474,
+          "fair_under": 3.109,
           "venues": [
             "sportsbook"
           ],
@@ -2537,11 +806,11 @@
           "market": "player_shots_on_target",
           "subject": "Bukayo Saka",
           "line": 1.5,
-          "mean": 1.7636,
-          "p_over": 0.484065,
-          "p_under": 0.515935,
-          "fair_over": 2.066,
-          "fair_under": 1.938,
+          "mean": 1.3116,
+          "p_over": 0.360706,
+          "p_under": 0.639294,
+          "fair_over": 2.772,
+          "fair_under": 1.564,
           "venues": [
             "sportsbook"
           ],
@@ -2551,11 +820,11 @@
           "market": "player_shots_on_target",
           "subject": "Bukayo Saka",
           "line": 2.5,
-          "mean": 1.7636,
-          "p_over": 0.266857,
-          "p_under": 0.733143,
-          "fair_over": 3.747,
-          "fair_under": 1.364,
+          "mean": 1.3116,
+          "p_over": 0.164602,
+          "p_under": 0.835398,
+          "fair_over": 6.075,
+          "fair_under": 1.197,
           "venues": [
             "sportsbook"
           ],
@@ -2617,11 +886,11 @@
           "market": "player_shots_on_target",
           "subject": "Marcus Rashford",
           "line": 0.5,
-          "mean": 1.9744,
-          "p_over": 0.799055,
-          "p_under": 0.200945,
-          "fair_over": 1.251,
-          "fair_under": 4.976,
+          "mean": 1.4683,
+          "p_over": 0.713698,
+          "p_under": 0.286302,
+          "fair_over": 1.401,
+          "fair_under": 3.493,
           "venues": [
             "sportsbook"
           ],
@@ -2631,11 +900,11 @@
           "market": "player_shots_on_target",
           "subject": "Marcus Rashford",
           "line": 1.5,
-          "mean": 1.9744,
-          "p_over": 0.533429,
-          "p_under": 0.466571,
-          "fair_over": 1.875,
-          "fair_under": 2.143,
+          "mean": 1.4683,
+          "p_over": 0.406193,
+          "p_under": 0.593807,
+          "fair_over": 2.462,
+          "fair_under": 1.684,
           "venues": [
             "sportsbook"
           ],
@@ -2645,11 +914,11 @@
           "market": "player_shots_on_target",
           "subject": "Marcus Rashford",
           "line": 2.5,
-          "mean": 1.9744,
-          "p_over": 0.313975,
-          "p_under": 0.686025,
-          "fair_over": 3.185,
-          "fair_under": 1.458,
+          "mean": 1.4683,
+          "p_over": 0.199771,
+          "p_under": 0.800229,
+          "fair_over": 5.006,
+          "fair_under": 1.25,
           "venues": [
             "sportsbook"
           ],
@@ -2706,25 +975,614 @@
             "sportsbook"
           ],
           "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Lionel Messi",
+          "line": 0.5,
+          "mean": 0.5963,
+          "p_over": 0.426427,
+          "p_under": 0.573573,
+          "fair_over": 2.345,
+          "fair_under": 1.743,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Lionel Messi",
+          "line": 1.5,
+          "mean": 0.5963,
+          "p_over": 0.128757,
+          "p_under": 0.871243,
+          "fair_over": 7.767,
+          "fair_under": 1.148,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Lionel Messi",
+          "line": 2.5,
+          "mean": 0.5963,
+          "p_over": 0.032205,
+          "p_under": 0.967795,
+          "fair_over": 31.051,
+          "fair_under": 1.033,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Lionel Messi",
+          "line": 0.5,
+          "mean": 1.0667,
+          "p_over": 0.625355,
+          "p_under": 0.374645,
+          "fair_over": 1.599,
+          "fair_under": 2.669,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Lionel Messi",
+          "line": 1.5,
+          "mean": 1.0667,
+          "p_over": 0.286054,
+          "p_under": 0.713946,
+          "fair_over": 3.496,
+          "fair_under": 1.401,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Lionel Messi",
+          "line": 2.5,
+          "mean": 1.0667,
+          "p_over": 0.106801,
+          "p_under": 0.893199,
+          "fair_over": 9.363,
+          "fair_under": 1.12,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_to_be_booked",
+          "subject": "Lionel Messi",
+          "prob": 0.147856,
+          "fair": 6.763,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Lautaro Martinez",
+          "line": 0.5,
+          "mean": 0.6336,
+          "p_over": 0.44466,
+          "p_under": 0.55534,
+          "fair_over": 2.249,
+          "fair_under": 1.801,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Lautaro Martinez",
+          "line": 1.5,
+          "mean": 0.6336,
+          "p_over": 0.140903,
+          "p_under": 0.859097,
+          "fair_over": 7.097,
+          "fair_under": 1.164,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Lautaro Martinez",
+          "line": 2.5,
+          "mean": 0.6336,
+          "p_over": 0.037061,
+          "p_under": 0.962939,
+          "fair_over": 26.983,
+          "fair_under": 1.038,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Lautaro Martinez",
+          "line": 0.5,
+          "mean": 1.1333,
+          "p_over": 0.645878,
+          "p_under": 0.354122,
+          "fair_over": 1.548,
+          "fair_under": 2.824,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Lautaro Martinez",
+          "line": 1.5,
+          "mean": 1.1333,
+          "p_over": 0.308305,
+          "p_under": 0.691695,
+          "fair_over": 3.244,
+          "fair_under": 1.446,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Lautaro Martinez",
+          "line": 2.5,
+          "mean": 1.1333,
+          "p_over": 0.120588,
+          "p_under": 0.879412,
+          "fair_over": 8.293,
+          "fair_under": 1.137,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_to_be_booked",
+          "subject": "Lautaro Martinez",
+          "prob": 0.156335,
+          "fair": 6.397,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Julian Alvarez",
+          "line": 0.5,
+          "mean": 0.5963,
+          "p_over": 0.426427,
+          "p_under": 0.573573,
+          "fair_over": 2.345,
+          "fair_under": 1.743,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Julian Alvarez",
+          "line": 1.5,
+          "mean": 0.5963,
+          "p_over": 0.128757,
+          "p_under": 0.871243,
+          "fair_over": 7.767,
+          "fair_under": 1.148,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Julian Alvarez",
+          "line": 2.5,
+          "mean": 0.5963,
+          "p_over": 0.032205,
+          "p_under": 0.967795,
+          "fair_over": 31.051,
+          "fair_under": 1.033,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Julian Alvarez",
+          "line": 0.5,
+          "mean": 1.0667,
+          "p_over": 0.625355,
+          "p_under": 0.374645,
+          "fair_over": 1.599,
+          "fair_under": 2.669,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Julian Alvarez",
+          "line": 1.5,
+          "mean": 1.0667,
+          "p_over": 0.286054,
+          "p_under": 0.713946,
+          "fair_over": 3.496,
+          "fair_under": 1.401,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Julian Alvarez",
+          "line": 2.5,
+          "mean": 1.0667,
+          "p_over": 0.106801,
+          "p_under": 0.893199,
+          "fair_over": 9.363,
+          "fair_under": 1.12,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_to_be_booked",
+          "subject": "Julian Alvarez",
+          "prob": 0.147856,
+          "fair": 6.763,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Rodrigo De Paul",
+          "line": 0.5,
+          "mean": 0.6336,
+          "p_over": 0.44466,
+          "p_under": 0.55534,
+          "fair_over": 2.249,
+          "fair_under": 1.801,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Rodrigo De Paul",
+          "line": 1.5,
+          "mean": 0.6336,
+          "p_over": 0.140903,
+          "p_under": 0.859097,
+          "fair_over": 7.097,
+          "fair_under": 1.164,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Rodrigo De Paul",
+          "line": 2.5,
+          "mean": 0.6336,
+          "p_over": 0.037061,
+          "p_under": 0.962939,
+          "fair_over": 26.983,
+          "fair_under": 1.038,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Rodrigo De Paul",
+          "line": 0.5,
+          "mean": 1.1333,
+          "p_over": 0.645878,
+          "p_under": 0.354122,
+          "fair_over": 1.548,
+          "fair_under": 2.824,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Rodrigo De Paul",
+          "line": 1.5,
+          "mean": 1.1333,
+          "p_over": 0.308305,
+          "p_under": 0.691695,
+          "fair_over": 3.244,
+          "fair_under": 1.446,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Rodrigo De Paul",
+          "line": 2.5,
+          "mean": 1.1333,
+          "p_over": 0.120588,
+          "p_under": 0.879412,
+          "fair_over": 8.293,
+          "fair_under": 1.137,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_to_be_booked",
+          "subject": "Rodrigo De Paul",
+          "prob": 0.156335,
+          "fair": 6.397,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
         }
       ],
       "notes": "SoT/cards/corners/fouls are sportsbook-only; values are model fair odds. Player markets use players.db rates when present, else tournament priors.",
-      "kickoff": "2026-07-11 21:00:00+00:00"
+      "kickoff": "2026-07-15 19:00:00+00:00"
     },
     {
-      "fixture": "Spain vs Belgium",
-      "lambda_home": 1.839,
-      "lambda_away": 1.1212,
+      "fixture": "France vs Spain",
+      "lambda_home": 1.1439,
+      "lambda_away": 1.4037,
       "team_totals": [
+        {
+          "market": "team_total_goals",
+          "subject": "France",
+          "line": 0.5,
+          "mean": 1.1439,
+          "p_over": 0.681416,
+          "p_under": 0.318584,
+          "fair_over": 1.468,
+          "fair_under": 3.139,
+          "venues": [
+            "sportsbook",
+            "exchange"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "team_total_goals",
+          "subject": "France",
+          "line": 1.5,
+          "mean": 1.1439,
+          "p_over": 0.316997,
+          "p_under": 0.683003,
+          "fair_over": 3.155,
+          "fair_under": 1.464,
+          "venues": [
+            "sportsbook",
+            "exchange"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "team_total_goals",
+          "subject": "France",
+          "line": 2.5,
+          "mean": 1.1439,
+          "p_over": 0.108574,
+          "p_under": 0.891426,
+          "fair_over": 9.21,
+          "fair_under": 1.122,
+          "venues": [
+            "sportsbook",
+            "exchange"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "team_total_shots",
+          "subject": "France",
+          "line": 8.5,
+          "mean": 12.1983,
+          "p_over": 0.78655,
+          "p_under": 0.21345,
+          "fair_over": 1.271,
+          "fair_under": 4.685,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_shots",
+          "subject": "France",
+          "line": 10.5,
+          "mean": 12.1983,
+          "p_over": 0.617842,
+          "p_under": 0.382158,
+          "fair_over": 1.619,
+          "fair_under": 2.617,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_shots",
+          "subject": "France",
+          "line": 12.5,
+          "mean": 12.1983,
+          "p_over": 0.439008,
+          "p_under": 0.560992,
+          "fair_over": 2.278,
+          "fair_under": 1.783,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_sot",
+          "subject": "France",
+          "line": 2.5,
+          "mean": 4.3473,
+          "p_over": 0.749144,
+          "p_under": 0.250856,
+          "fair_over": 1.335,
+          "fair_under": 3.986,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_sot",
+          "subject": "France",
+          "line": 3.5,
+          "mean": 4.3473,
+          "p_over": 0.584856,
+          "p_under": 0.415144,
+          "fair_over": 1.71,
+          "fair_under": 2.409,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_sot",
+          "subject": "France",
+          "line": 4.5,
+          "mean": 4.3473,
+          "p_over": 0.424328,
+          "p_under": 0.575672,
+          "fair_over": 2.357,
+          "fair_under": 1.737,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_fouls",
+          "subject": "France",
+          "line": 9.5,
+          "mean": 12.4286,
+          "p_over": 0.73253,
+          "p_under": 0.26747,
+          "fair_over": 1.365,
+          "fair_under": 3.739,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_fouls",
+          "subject": "France",
+          "line": 11.5,
+          "mean": 12.4286,
+          "p_over": 0.552722,
+          "p_under": 0.447278,
+          "fair_over": 1.809,
+          "fair_under": 2.236,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_fouls",
+          "subject": "France",
+          "line": 13.5,
+          "mean": 12.4286,
+          "p_over": 0.37496,
+          "p_under": 0.62504,
+          "fair_over": 2.667,
+          "fair_under": 1.6,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "team_total_corners",
+          "subject": "France",
+          "line": 3.5,
+          "mean": 3.8698,
+          "p_over": 0.536833,
+          "p_under": 0.463167,
+          "fair_over": 1.863,
+          "fair_under": 2.159,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "team_total_corners",
+          "subject": "France",
+          "line": 4.5,
+          "mean": 3.8698,
+          "p_over": 0.346261,
+          "p_under": 0.653739,
+          "fair_over": 2.888,
+          "fair_under": 1.53,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "team_total_corners",
+          "subject": "France",
+          "line": 5.5,
+          "mean": 3.8698,
+          "p_over": 0.198552,
+          "p_under": 0.801448,
+          "fair_over": 5.036,
+          "fair_under": 1.248,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "model"
+        },
         {
           "market": "team_total_goals",
           "subject": "Spain",
           "line": 0.5,
-          "mean": 1.839,
-          "p_over": 0.841017,
-          "p_under": 0.158983,
-          "fair_over": 1.189,
-          "fair_under": 6.29,
+          "mean": 1.4037,
+          "p_over": 0.754324,
+          "p_under": 0.245676,
+          "fair_over": 1.326,
+          "fair_under": 4.07,
           "venues": [
             "sportsbook",
             "exchange"
@@ -2735,11 +1593,11 @@
           "market": "team_total_goals",
           "subject": "Spain",
           "line": 1.5,
-          "mean": 1.839,
-          "p_over": 0.548655,
-          "p_under": 0.451345,
-          "fair_over": 1.823,
-          "fair_under": 2.216,
+          "mean": 1.4037,
+          "p_over": 0.409458,
+          "p_under": 0.590542,
+          "fair_over": 2.442,
+          "fair_under": 1.693,
           "venues": [
             "sportsbook",
             "exchange"
@@ -2750,11 +1608,11 @@
           "market": "team_total_goals",
           "subject": "Spain",
           "line": 2.5,
-          "mean": 1.839,
-          "p_over": 0.279833,
-          "p_under": 0.720167,
-          "fair_over": 3.574,
-          "fair_under": 1.389,
+          "mean": 1.4037,
+          "p_over": 0.167407,
+          "p_under": 0.832593,
+          "fair_over": 5.973,
+          "fair_under": 1.201,
           "venues": [
             "sportsbook",
             "exchange"
@@ -2765,11 +1623,11 @@
           "market": "team_total_shots",
           "subject": "Spain",
           "line": 8.5,
-          "mean": 19.4771,
-          "p_over": 0.976062,
-          "p_under": 0.023938,
-          "fair_over": 1.025,
-          "fair_under": 41.775,
+          "mean": 16.3822,
+          "p_over": 0.937937,
+          "p_under": 0.062063,
+          "fair_over": 1.066,
+          "fair_under": 16.113,
           "venues": [
             "sportsbook"
           ],
@@ -2779,11 +1637,11 @@
           "market": "team_total_shots",
           "subject": "Spain",
           "line": 10.5,
-          "mean": 19.4771,
-          "p_over": 0.937645,
-          "p_under": 0.062355,
-          "fair_over": 1.067,
-          "fair_under": 16.037,
+          "mean": 16.3822,
+          "p_over": 0.859014,
+          "p_under": 0.140986,
+          "fair_over": 1.164,
+          "fair_under": 7.093,
           "venues": [
             "sportsbook"
           ],
@@ -2793,11 +1651,11 @@
           "market": "team_total_shots",
           "subject": "Spain",
           "line": 12.5,
-          "mean": 19.4771,
-          "p_over": 0.870701,
-          "p_under": 0.129299,
-          "fair_over": 1.148,
-          "fair_under": 7.734,
+          "mean": 16.3822,
+          "p_over": 0.743141,
+          "p_under": 0.256859,
+          "fair_over": 1.346,
+          "fair_under": 3.893,
           "venues": [
             "sportsbook"
           ],
@@ -2807,11 +1665,11 @@
           "market": "team_total_sot",
           "subject": "Spain",
           "line": 2.5,
-          "mean": 6.5431,
-          "p_over": 0.906608,
-          "p_under": 0.093392,
-          "fair_over": 1.103,
-          "fair_under": 10.708,
+          "mean": 5.5034,
+          "p_over": 0.85135,
+          "p_under": 0.14865,
+          "fair_over": 1.175,
+          "fair_under": 6.727,
           "venues": [
             "sportsbook"
           ],
@@ -2821,11 +1679,11 @@
           "market": "team_total_sot",
           "subject": "Spain",
           "line": 3.5,
-          "mean": 6.5431,
-          "p_over": 0.816541,
-          "p_under": 0.183459,
-          "fair_over": 1.225,
-          "fair_under": 5.451,
+          "mean": 5.5034,
+          "p_over": 0.728344,
+          "p_under": 0.271656,
+          "fair_over": 1.373,
+          "fair_under": 3.681,
           "venues": [
             "sportsbook"
           ],
@@ -2835,11 +1693,11 @@
           "market": "team_total_sot",
           "subject": "Spain",
           "line": 4.5,
-          "mean": 6.5431,
-          "p_over": 0.702795,
-          "p_under": 0.297205,
-          "fair_over": 1.423,
-          "fair_under": 3.365,
+          "mean": 5.5034,
+          "p_over": 0.588319,
+          "p_under": 0.411681,
+          "fair_over": 1.7,
+          "fair_under": 2.429,
           "venues": [
             "sportsbook"
           ],
@@ -2891,11 +1749,11 @@
           "market": "team_total_corners",
           "subject": "Spain",
           "line": 3.5,
-          "mean": 5.6101,
-          "p_over": 0.801513,
-          "p_under": 0.198487,
-          "fair_over": 1.248,
-          "fair_under": 5.038,
+          "mean": 4.7489,
+          "p_over": 0.690685,
+          "p_under": 0.309315,
+          "fair_over": 1.448,
+          "fair_under": 3.233,
           "venues": [
             "sportsbook"
           ],
@@ -2905,11 +1763,11 @@
           "market": "team_total_corners",
           "subject": "Spain",
           "line": 4.5,
-          "mean": 5.6101,
-          "p_over": 0.651707,
-          "p_under": 0.348293,
-          "fair_over": 1.534,
-          "fair_under": 2.871,
+          "mean": 4.7489,
+          "p_over": 0.510718,
+          "p_under": 0.489282,
+          "fair_over": 1.958,
+          "fair_under": 2.044,
           "venues": [
             "sportsbook"
           ],
@@ -2919,224 +1777,11 @@
           "market": "team_total_corners",
           "subject": "Spain",
           "line": 5.5,
-          "mean": 5.6101,
-          "p_over": 0.486577,
-          "p_under": 0.513423,
-          "fair_over": 2.055,
-          "fair_under": 1.948,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_goals",
-          "subject": "Belgium",
-          "line": 0.5,
-          "mean": 1.1212,
-          "p_over": 0.674109,
-          "p_under": 0.325891,
-          "fair_over": 1.483,
-          "fair_under": 3.069,
-          "venues": [
-            "sportsbook",
-            "exchange"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_goals",
-          "subject": "Belgium",
-          "line": 1.5,
-          "mean": 1.1212,
-          "p_over": 0.308722,
-          "p_under": 0.691278,
-          "fair_over": 3.239,
-          "fair_under": 1.447,
-          "venues": [
-            "sportsbook",
-            "exchange"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_goals",
-          "subject": "Belgium",
-          "line": 2.5,
-          "mean": 1.1212,
-          "p_over": 0.103888,
-          "p_under": 0.896112,
-          "fair_over": 9.626,
-          "fair_under": 1.116,
-          "venues": [
-            "sportsbook",
-            "exchange"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_shots",
-          "subject": "Belgium",
-          "line": 8.5,
-          "mean": 12.8458,
-          "p_over": 0.822218,
-          "p_under": 0.177782,
-          "fair_over": 1.216,
-          "fair_under": 5.625,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_shots",
-          "subject": "Belgium",
-          "line": 10.5,
-          "mean": 12.8458,
-          "p_over": 0.668228,
-          "p_under": 0.331772,
-          "fair_over": 1.496,
-          "fair_under": 3.014,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_shots",
-          "subject": "Belgium",
-          "line": 12.5,
-          "mean": 12.8458,
-          "p_over": 0.494875,
-          "p_under": 0.505125,
-          "fair_over": 2.021,
-          "fair_under": 1.98,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_sot",
-          "subject": "Belgium",
-          "line": 2.5,
-          "mean": 4.1322,
-          "p_over": 0.723582,
-          "p_under": 0.276418,
-          "fair_over": 1.382,
-          "fair_under": 3.618,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_sot",
-          "subject": "Belgium",
-          "line": 3.5,
-          "mean": 4.1322,
-          "p_over": 0.552124,
-          "p_under": 0.447876,
-          "fair_over": 1.811,
-          "fair_under": 2.233,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_sot",
-          "subject": "Belgium",
-          "line": 4.5,
-          "mean": 4.1322,
-          "p_over": 0.390269,
-          "p_under": 0.609731,
-          "fair_over": 2.562,
-          "fair_under": 1.64,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_fouls",
-          "subject": "Belgium",
-          "line": 9.5,
-          "mean": 13.7,
-          "p_over": 0.810922,
-          "p_under": 0.189078,
-          "fair_over": 1.233,
-          "fair_under": 5.289,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_fouls",
-          "subject": "Belgium",
-          "line": 11.5,
-          "mean": 13.7,
-          "p_over": 0.656884,
-          "p_under": 0.343116,
-          "fair_over": 1.522,
-          "fair_under": 2.914,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_fouls",
-          "subject": "Belgium",
-          "line": 13.5,
-          "mean": 13.7,
-          "p_over": 0.485071,
-          "p_under": 0.514929,
-          "fair_over": 2.062,
-          "fair_under": 1.942,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "players.db"
-        },
-        {
-          "market": "team_total_corners",
-          "subject": "Belgium",
-          "line": 3.5,
-          "mean": 3.4204,
-          "p_over": 0.4443,
-          "p_under": 0.5557,
-          "fair_over": 2.251,
-          "fair_under": 1.8,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_corners",
-          "subject": "Belgium",
-          "line": 4.5,
-          "mean": 3.4204,
-          "p_over": 0.261676,
-          "p_under": 0.738324,
-          "fair_over": 3.822,
-          "fair_under": 1.354,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "team_total_corners",
-          "subject": "Belgium",
-          "line": 5.5,
-          "mean": 3.4204,
-          "p_over": 0.135936,
-          "p_under": 0.864064,
-          "fair_over": 7.356,
-          "fair_under": 1.157,
+          "mean": 4.7489,
+          "p_over": 0.341198,
+          "p_under": 0.658802,
+          "fair_over": 2.931,
+          "fair_under": 1.518,
           "venues": [
             "sportsbook"
           ],
@@ -3146,7 +1791,7 @@
       "match_cards": [
         {
           "market": "match_total_cards",
-          "subject": "Spain vs Belgium",
+          "subject": "France vs Spain",
           "line": 3.5,
           "mean": 3.29,
           "p_over": 0.409371,
@@ -3160,7 +1805,7 @@
         },
         {
           "market": "match_total_cards",
-          "subject": "Spain vs Belgium",
+          "subject": "France vs Spain",
           "line": 4.5,
           "mean": 3.29,
           "p_over": 0.248975,
@@ -3174,7 +1819,7 @@
         },
         {
           "market": "match_total_cards",
-          "subject": "Spain vs Belgium",
+          "subject": "France vs Spain",
           "line": 5.5,
           "mean": 3.29,
           "p_over": 0.138658,
@@ -3190,13 +1835,73 @@
       "player_to_score": [
         {
           "market": "player_to_score",
+          "subject": "Kylian Mbappe",
+          "team": "France",
+          "p_anytime": 0.357954,
+          "p_first": 0.160313,
+          "p_two_plus": 0.073467,
+          "fair_anytime": 2.794,
+          "fair_first": 6.238,
+          "venues": [
+            "sportsbook",
+            "polymarket"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "player_to_score",
+          "subject": "Antoine Griezmann",
+          "team": "France",
+          "p_anytime": 0.1206,
+          "p_first": 0.046497,
+          "p_two_plus": 0.007584,
+          "fair_anytime": 8.292,
+          "fair_first": 21.507,
+          "venues": [
+            "sportsbook",
+            "polymarket"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "player_to_score",
+          "subject": "Ousmane Dembele",
+          "team": "France",
+          "p_anytime": 0.105402,
+          "p_first": 0.040298,
+          "p_two_plus": 0.005761,
+          "fair_anytime": 9.488,
+          "fair_first": 24.815,
+          "venues": [
+            "sportsbook",
+            "polymarket"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "player_to_score",
+          "subject": "Marcus Thuram",
+          "team": "France",
+          "p_anytime": 0.128103,
+          "p_first": 0.049597,
+          "p_two_plus": 0.00858,
+          "fair_anytime": 7.806,
+          "fair_first": 20.162,
+          "venues": [
+            "sportsbook",
+            "polymarket"
+          ],
+          "source": "model"
+        },
+        {
+          "market": "player_to_score",
           "subject": "Alvaro Morata",
           "team": "Spain",
-          "p_anytime": 0.277053,
-          "p_first": 0.103917,
-          "p_two_plus": 0.042515,
-          "fair_anytime": 3.609,
-          "fair_first": 9.623,
+          "p_anytime": 0.212829,
+          "p_first": 0.086583,
+          "p_two_plus": 0.024451,
+          "fair_anytime": 4.699,
+          "fair_first": 11.55,
           "venues": [
             "sportsbook",
             "polymarket"
@@ -3207,11 +1912,11 @@
           "market": "player_to_score",
           "subject": "Ferran Torres",
           "team": "Spain",
-          "p_anytime": 0.152866,
-          "p_first": 0.053139,
-          "p_two_plus": 0.012329,
-          "fair_anytime": 6.542,
-          "fair_first": 18.818,
+          "p_anytime": 0.115183,
+          "p_first": 0.044275,
+          "p_two_plus": 0.006904,
+          "fair_anytime": 8.682,
+          "fair_first": 22.586,
           "venues": [
             "sportsbook",
             "polymarket"
@@ -3222,11 +1927,11 @@
           "market": "player_to_score",
           "subject": "Dani Olmo",
           "team": "Spain",
-          "p_anytime": 0.174447,
-          "p_first": 0.061406,
-          "p_two_plus": 0.016187,
-          "fair_anytime": 5.732,
-          "fair_first": 16.285,
+          "p_anytime": 0.131867,
+          "p_first": 0.051162,
+          "p_two_plus": 0.009104,
+          "fair_anytime": 7.583,
+          "fair_first": 19.546,
           "venues": [
             "sportsbook",
             "polymarket"
@@ -3237,71 +1942,11 @@
           "market": "player_to_score",
           "subject": "Lamine Yamal",
           "team": "Spain",
-          "p_anytime": 0.209445,
-          "p_first": 0.075281,
-          "p_two_plus": 0.023649,
-          "fair_anytime": 4.775,
-          "fair_first": 13.284,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
-          "subject": "Romelu Lukaku",
-          "team": "Belgium",
-          "p_anytime": 0.31444,
-          "p_first": 0.120926,
-          "p_two_plus": 0.055628,
-          "fair_anytime": 3.18,
-          "fair_first": 8.27,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
-          "subject": "Leandro Trossard",
-          "team": "Belgium",
-          "p_anytime": 0.110527,
-          "p_first": 0.037518,
-          "p_two_plus": 0.006346,
-          "fair_anytime": 9.048,
-          "fair_first": 26.654,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
-          "subject": "Lois Openda",
-          "team": "Belgium",
-          "p_anytime": 0.131666,
-          "p_first": 0.045222,
-          "p_two_plus": 0.009076,
-          "fair_anytime": 7.595,
-          "fair_first": 22.113,
-          "venues": [
-            "sportsbook",
-            "polymarket"
-          ],
-          "source": "model"
-        },
-        {
-          "market": "player_to_score",
-          "subject": "Yannick Carrasco",
-          "team": "Belgium",
-          "p_anytime": 0.075436,
-          "p_first": 0.025123,
-          "p_two_plus": 0.00292,
-          "fair_anytime": 13.256,
-          "fair_first": 39.804,
+          "p_anytime": 0.159168,
+          "p_first": 0.062723,
+          "p_two_plus": 0.013398,
+          "fair_anytime": 6.283,
+          "fair_first": 15.943,
           "venues": [
             "sportsbook",
             "polymarket"
@@ -3312,13 +1957,389 @@
       "player_props": [
         {
           "market": "player_shots_on_target",
+          "subject": "Kylian Mbappe",
+          "line": 0.5,
+          "mean": 0.6005,
+          "p_over": 0.428517,
+          "p_under": 0.571483,
+          "fair_over": 2.334,
+          "fair_under": 1.75,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Kylian Mbappe",
+          "line": 1.5,
+          "mean": 0.6005,
+          "p_over": 0.130117,
+          "p_under": 0.869883,
+          "fair_over": 7.685,
+          "fair_under": 1.15,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Kylian Mbappe",
+          "line": 2.5,
+          "mean": 0.6005,
+          "p_over": 0.032736,
+          "p_under": 0.967264,
+          "fair_over": 30.547,
+          "fair_under": 1.034,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Kylian Mbappe",
+          "line": 0.5,
+          "mean": 1.1333,
+          "p_over": 0.645878,
+          "p_under": 0.354122,
+          "fair_over": 1.548,
+          "fair_under": 2.824,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Kylian Mbappe",
+          "line": 1.5,
+          "mean": 1.1333,
+          "p_over": 0.308305,
+          "p_under": 0.691695,
+          "fair_over": 3.244,
+          "fair_under": 1.446,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Kylian Mbappe",
+          "line": 2.5,
+          "mean": 1.1333,
+          "p_over": 0.120588,
+          "p_under": 0.879412,
+          "fair_over": 8.293,
+          "fair_under": 1.137,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_to_be_booked",
+          "subject": "Kylian Mbappe",
+          "prob": 0.156335,
+          "fair": 6.397,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Antoine Griezmann",
+          "line": 0.5,
+          "mean": 0.7498,
+          "p_over": 0.497046,
+          "p_under": 0.502954,
+          "fair_over": 2.012,
+          "fair_under": 1.988,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Antoine Griezmann",
+          "line": 1.5,
+          "mean": 0.7498,
+          "p_over": 0.179452,
+          "p_under": 0.820548,
+          "fair_over": 5.573,
+          "fair_under": 1.219,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Antoine Griezmann",
+          "line": 2.5,
+          "mean": 0.7498,
+          "p_over": 0.05411,
+          "p_under": 0.94589,
+          "fair_over": 18.481,
+          "fair_under": 1.057,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Antoine Griezmann",
+          "line": 0.5,
+          "mean": 1.0667,
+          "p_over": 0.625355,
+          "p_under": 0.374645,
+          "fair_over": 1.599,
+          "fair_under": 2.669,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Antoine Griezmann",
+          "line": 1.5,
+          "mean": 1.0667,
+          "p_over": 0.286054,
+          "p_under": 0.713946,
+          "fair_over": 3.496,
+          "fair_under": 1.401,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Antoine Griezmann",
+          "line": 2.5,
+          "mean": 1.0667,
+          "p_over": 0.106801,
+          "p_under": 0.893199,
+          "fair_over": 9.363,
+          "fair_under": 1.12,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_to_be_booked",
+          "subject": "Antoine Griezmann",
+          "prob": 0.066475,
+          "fair": 15.043,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Ousmane Dembele",
+          "line": 0.5,
+          "mean": 0.5652,
+          "p_over": 0.410622,
+          "p_under": 0.589378,
+          "fair_over": 2.435,
+          "fair_under": 1.697,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Ousmane Dembele",
+          "line": 1.5,
+          "mean": 0.5652,
+          "p_over": 0.118739,
+          "p_under": 0.881261,
+          "fair_over": 8.422,
+          "fair_under": 1.135,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Ousmane Dembele",
+          "line": 2.5,
+          "mean": 0.5652,
+          "p_over": 0.028395,
+          "p_under": 0.971605,
+          "fair_over": 35.218,
+          "fair_under": 1.029,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Ousmane Dembele",
+          "line": 0.5,
+          "mean": 1.0667,
+          "p_over": 0.625355,
+          "p_under": 0.374645,
+          "fair_over": 1.599,
+          "fair_under": 2.669,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Ousmane Dembele",
+          "line": 1.5,
+          "mean": 1.0667,
+          "p_over": 0.286054,
+          "p_under": 0.713946,
+          "fair_over": 3.496,
+          "fair_under": 1.401,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Ousmane Dembele",
+          "line": 2.5,
+          "mean": 1.0667,
+          "p_over": 0.106801,
+          "p_under": 0.893199,
+          "fair_over": 9.363,
+          "fair_under": 1.12,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_to_be_booked",
+          "subject": "Ousmane Dembele",
+          "prob": 0.147856,
+          "fair": 6.763,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Marcus Thuram",
+          "line": 0.5,
+          "mean": 0.5652,
+          "p_over": 0.410622,
+          "p_under": 0.589378,
+          "fair_over": 2.435,
+          "fair_under": 1.697,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Marcus Thuram",
+          "line": 1.5,
+          "mean": 0.5652,
+          "p_over": 0.118739,
+          "p_under": 0.881261,
+          "fair_over": 8.422,
+          "fair_under": 1.135,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_shots_on_target",
+          "subject": "Marcus Thuram",
+          "line": 2.5,
+          "mean": 0.5652,
+          "p_over": 0.028395,
+          "p_under": 0.971605,
+          "fair_over": 35.218,
+          "fair_under": 1.029,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Marcus Thuram",
+          "line": 0.5,
+          "mean": 1.0667,
+          "p_over": 0.625355,
+          "p_under": 0.374645,
+          "fair_over": 1.599,
+          "fair_under": 2.669,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Marcus Thuram",
+          "line": 1.5,
+          "mean": 1.0667,
+          "p_over": 0.286054,
+          "p_under": 0.713946,
+          "fair_over": 3.496,
+          "fair_under": 1.401,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_fouls",
+          "subject": "Marcus Thuram",
+          "line": 2.5,
+          "mean": 1.0667,
+          "p_over": 0.106801,
+          "p_under": 0.893199,
+          "fair_over": 9.363,
+          "fair_under": 1.12,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "prior"
+        },
+        {
+          "market": "player_to_be_booked",
+          "subject": "Marcus Thuram",
+          "prob": 0.352595,
+          "fair": 2.836,
+          "venues": [
+            "sportsbook"
+          ],
+          "source": "players.db"
+        },
+        {
+          "market": "player_shots_on_target",
           "subject": "Alvaro Morata",
           "line": 0.5,
-          "mean": 0.7574,
-          "p_over": 0.500257,
-          "p_under": 0.499743,
-          "fair_over": 1.999,
-          "fair_under": 2.001,
+          "mean": 0.6371,
+          "p_over": 0.446318,
+          "p_under": 0.553682,
+          "fair_over": 2.241,
+          "fair_under": 1.806,
           "venues": [
             "sportsbook"
           ],
@@ -3328,11 +2349,11 @@
           "market": "player_shots_on_target",
           "subject": "Alvaro Morata",
           "line": 1.5,
-          "mean": 0.7574,
-          "p_over": 0.181998,
-          "p_under": 0.818002,
-          "fair_over": 5.495,
-          "fair_under": 1.222,
+          "mean": 0.6371,
+          "p_over": 0.142039,
+          "p_under": 0.857961,
+          "fair_over": 7.04,
+          "fair_under": 1.166,
           "venues": [
             "sportsbook"
           ],
@@ -3342,11 +2363,11 @@
           "market": "player_shots_on_target",
           "subject": "Alvaro Morata",
           "line": 2.5,
-          "mean": 0.7574,
-          "p_over": 0.055321,
-          "p_under": 0.944679,
-          "fair_over": 18.076,
-          "fair_under": 1.059,
+          "mean": 0.6371,
+          "p_over": 0.037528,
+          "p_under": 0.962472,
+          "fair_over": 26.647,
+          "fair_under": 1.039,
           "venues": [
             "sportsbook"
           ],
@@ -3408,11 +2429,11 @@
           "market": "player_shots_on_target",
           "subject": "Ferran Torres",
           "line": 0.5,
-          "mean": 0.7101,
-          "p_over": 0.479861,
-          "p_under": 0.520139,
-          "fair_over": 2.084,
-          "fair_under": 1.923,
+          "mean": 0.5973,
+          "p_over": 0.426885,
+          "p_under": 0.573115,
+          "fair_over": 2.343,
+          "fair_under": 1.745,
           "venues": [
             "sportsbook"
           ],
@@ -3422,11 +2443,11 @@
           "market": "player_shots_on_target",
           "subject": "Ferran Torres",
           "line": 1.5,
-          "mean": 0.7101,
-          "p_over": 0.166194,
-          "p_under": 0.833806,
-          "fair_over": 6.017,
-          "fair_under": 1.199,
+          "mean": 0.5973,
+          "p_over": 0.129055,
+          "p_under": 0.870945,
+          "fair_over": 7.749,
+          "fair_under": 1.148,
           "venues": [
             "sportsbook"
           ],
@@ -3436,11 +2457,11 @@
           "market": "player_shots_on_target",
           "subject": "Ferran Torres",
           "line": 2.5,
-          "mean": 0.7101,
-          "p_over": 0.047972,
-          "p_under": 0.952028,
-          "fair_over": 20.845,
-          "fair_under": 1.05,
+          "mean": 0.5973,
+          "p_over": 0.032321,
+          "p_under": 0.967679,
+          "fair_over": 30.94,
+          "fair_under": 1.033,
           "venues": [
             "sportsbook"
           ],
@@ -3502,11 +2523,11 @@
           "market": "player_shots_on_target",
           "subject": "Dani Olmo",
           "line": 0.5,
-          "mean": 0.7574,
-          "p_over": 0.500257,
-          "p_under": 0.499743,
-          "fair_over": 1.999,
-          "fair_under": 2.001,
+          "mean": 0.6371,
+          "p_over": 0.446318,
+          "p_under": 0.553682,
+          "fair_over": 2.241,
+          "fair_under": 1.806,
           "venues": [
             "sportsbook"
           ],
@@ -3516,11 +2537,11 @@
           "market": "player_shots_on_target",
           "subject": "Dani Olmo",
           "line": 1.5,
-          "mean": 0.7574,
-          "p_over": 0.181998,
-          "p_under": 0.818002,
-          "fair_over": 5.495,
-          "fair_under": 1.222,
+          "mean": 0.6371,
+          "p_over": 0.142039,
+          "p_under": 0.857961,
+          "fair_over": 7.04,
+          "fair_under": 1.166,
           "venues": [
             "sportsbook"
           ],
@@ -3530,11 +2551,11 @@
           "market": "player_shots_on_target",
           "subject": "Dani Olmo",
           "line": 2.5,
-          "mean": 0.7574,
-          "p_over": 0.055321,
-          "p_under": 0.944679,
-          "fair_over": 18.076,
-          "fair_under": 1.059,
+          "mean": 0.6371,
+          "p_over": 0.037528,
+          "p_under": 0.962472,
+          "fair_over": 26.647,
+          "fair_under": 1.039,
           "venues": [
             "sportsbook"
           ],
@@ -3596,11 +2617,11 @@
           "market": "player_shots_on_target",
           "subject": "Lamine Yamal",
           "line": 0.5,
-          "mean": 0.8048,
-          "p_over": 0.519664,
-          "p_under": 0.480336,
-          "fair_over": 1.924,
-          "fair_under": 2.082,
+          "mean": 0.6769,
+          "p_over": 0.464934,
+          "p_under": 0.535066,
+          "fair_over": 2.151,
+          "fair_under": 1.869,
           "venues": [
             "sportsbook"
           ],
@@ -3610,11 +2631,11 @@
           "market": "player_shots_on_target",
           "subject": "Lamine Yamal",
           "line": 1.5,
-          "mean": 0.8048,
-          "p_over": 0.197846,
-          "p_under": 0.802154,
-          "fair_over": 5.054,
-          "fair_under": 1.247,
+          "mean": 0.6769,
+          "p_over": 0.155168,
+          "p_under": 0.844832,
+          "fair_over": 6.445,
+          "fair_under": 1.184,
           "venues": [
             "sportsbook"
           ],
@@ -3624,11 +2645,11 @@
           "market": "player_shots_on_target",
           "subject": "Lamine Yamal",
           "line": 2.5,
-          "mean": 0.8048,
-          "p_over": 0.063088,
-          "p_under": 0.936912,
-          "fair_over": 15.851,
-          "fair_under": 1.067,
+          "mean": 0.6769,
+          "p_over": 0.043084,
+          "p_under": 0.956916,
+          "fair_over": 23.21,
+          "fair_under": 1.045,
           "venues": [
             "sportsbook"
           ],
@@ -3685,386 +2706,10 @@
             "sportsbook"
           ],
           "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Romelu Lukaku",
-          "line": 0.5,
-          "mean": 0.5589,
-          "p_over": 0.407372,
-          "p_under": 0.592628,
-          "fair_over": 2.455,
-          "fair_under": 1.687,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Romelu Lukaku",
-          "line": 1.5,
-          "mean": 0.5589,
-          "p_over": 0.116737,
-          "p_under": 0.883263,
-          "fair_over": 8.566,
-          "fair_under": 1.132,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Romelu Lukaku",
-          "line": 2.5,
-          "mean": 0.5589,
-          "p_over": 0.027655,
-          "p_under": 0.972345,
-          "fair_over": 36.16,
-          "fair_under": 1.028,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Romelu Lukaku",
-          "line": 0.5,
-          "mean": 1.0667,
-          "p_over": 0.625355,
-          "p_under": 0.374645,
-          "fair_over": 1.599,
-          "fair_under": 2.669,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Romelu Lukaku",
-          "line": 1.5,
-          "mean": 1.0667,
-          "p_over": 0.286054,
-          "p_under": 0.713946,
-          "fair_over": 3.496,
-          "fair_under": 1.401,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Romelu Lukaku",
-          "line": 2.5,
-          "mean": 1.0667,
-          "p_over": 0.106801,
-          "p_under": 0.893199,
-          "fair_over": 9.363,
-          "fair_under": 1.12,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Romelu Lukaku",
-          "prob": 0.147856,
-          "fair": 6.763,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Leandro Trossard",
-          "line": 0.5,
-          "mean": 0.5589,
-          "p_over": 0.407372,
-          "p_under": 0.592628,
-          "fair_over": 2.455,
-          "fair_under": 1.687,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Leandro Trossard",
-          "line": 1.5,
-          "mean": 0.5589,
-          "p_over": 0.116737,
-          "p_under": 0.883263,
-          "fair_over": 8.566,
-          "fair_under": 1.132,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Leandro Trossard",
-          "line": 2.5,
-          "mean": 0.5589,
-          "p_over": 0.027655,
-          "p_under": 0.972345,
-          "fair_over": 36.16,
-          "fair_under": 1.028,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Leandro Trossard",
-          "line": 0.5,
-          "mean": 1.0667,
-          "p_over": 0.625355,
-          "p_under": 0.374645,
-          "fair_over": 1.599,
-          "fair_under": 2.669,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Leandro Trossard",
-          "line": 1.5,
-          "mean": 1.0667,
-          "p_over": 0.286054,
-          "p_under": 0.713946,
-          "fair_over": 3.496,
-          "fair_under": 1.401,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Leandro Trossard",
-          "line": 2.5,
-          "mean": 1.0667,
-          "p_over": 0.106801,
-          "p_under": 0.893199,
-          "fair_over": 9.363,
-          "fair_under": 1.12,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Leandro Trossard",
-          "prob": 0.147856,
-          "fair": 6.763,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Lois Openda",
-          "line": 0.5,
-          "mean": 0.524,
-          "p_over": 0.388854,
-          "p_under": 0.611146,
-          "fair_over": 2.572,
-          "fair_under": 1.636,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Lois Openda",
-          "line": 1.5,
-          "mean": 0.524,
-          "p_over": 0.1057,
-          "p_under": 0.8943,
-          "fair_over": 9.461,
-          "fair_under": 1.118,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Lois Openda",
-          "line": 2.5,
-          "mean": 0.524,
-          "p_over": 0.023707,
-          "p_under": 0.976293,
-          "fair_over": 42.182,
-          "fair_under": 1.024,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Lois Openda",
-          "line": 0.5,
-          "mean": 1.0,
-          "p_over": 0.603431,
-          "p_under": 0.396569,
-          "fair_over": 1.657,
-          "fair_under": 2.522,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Lois Openda",
-          "line": 1.5,
-          "mean": 1.0,
-          "p_over": 0.263514,
-          "p_under": 0.736486,
-          "fair_over": 3.795,
-          "fair_under": 1.358,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Lois Openda",
-          "line": 2.5,
-          "mean": 1.0,
-          "p_over": 0.093556,
-          "p_under": 0.906444,
-          "fair_over": 10.689,
-          "fair_under": 1.103,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Lois Openda",
-          "prob": 0.139292,
-          "fair": 7.179,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Yannick Carrasco",
-          "line": 0.5,
-          "mean": 0.524,
-          "p_over": 0.388854,
-          "p_under": 0.611146,
-          "fair_over": 2.572,
-          "fair_under": 1.636,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Yannick Carrasco",
-          "line": 1.5,
-          "mean": 0.524,
-          "p_over": 0.1057,
-          "p_under": 0.8943,
-          "fair_over": 9.461,
-          "fair_under": 1.118,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_shots_on_target",
-          "subject": "Yannick Carrasco",
-          "line": 2.5,
-          "mean": 0.524,
-          "p_over": 0.023707,
-          "p_under": 0.976293,
-          "fair_over": 42.182,
-          "fair_under": 1.024,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Yannick Carrasco",
-          "line": 0.5,
-          "mean": 1.0,
-          "p_over": 0.603431,
-          "p_under": 0.396569,
-          "fair_over": 1.657,
-          "fair_under": 2.522,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Yannick Carrasco",
-          "line": 1.5,
-          "mean": 1.0,
-          "p_over": 0.263514,
-          "p_under": 0.736486,
-          "fair_over": 3.795,
-          "fair_under": 1.358,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_fouls",
-          "subject": "Yannick Carrasco",
-          "line": 2.5,
-          "mean": 1.0,
-          "p_over": 0.093556,
-          "p_under": 0.906444,
-          "fair_over": 10.689,
-          "fair_under": 1.103,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
-        },
-        {
-          "market": "player_to_be_booked",
-          "subject": "Yannick Carrasco",
-          "prob": 0.139292,
-          "fair": 7.179,
-          "venues": [
-            "sportsbook"
-          ],
-          "source": "prior"
         }
       ],
       "notes": "SoT/cards/corners/fouls are sportsbook-only; values are model fair odds. Player markets use players.db rates when present, else tournament priors.",
-      "kickoff": "2026-07-10 19:00:00+00:00"
+      "kickoff": "2026-07-14 19:00:00+00:00"
     }
   ]
 }
