@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-14 18:39:38 UTC"
+    "generated": "2026-07-14 19:13:26 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -15,7 +15,7 @@
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.1253,
+        "prob": 0.1243,
         "results": [
           "France",
           "England"
@@ -23,7 +23,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1161,
+        "prob": 0.1152,
         "results": [
           "France",
           "Draw"
@@ -31,7 +31,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1205,
+        "prob": 0.119,
         "results": [
           "France",
           "Argentina"
@@ -39,7 +39,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1085,
+        "prob": 0.1093,
         "results": [
           "Draw",
           "England"
@@ -47,7 +47,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1005,
+        "prob": 0.1012,
         "results": [
           "Draw",
           "Draw"
@@ -57,7 +57,7 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.1253,
+        "prob": 0.1243,
         "results": [
           "France",
           "England"
@@ -65,7 +65,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1161,
+        "prob": 0.1152,
         "results": [
           "France",
           "Draw"
@@ -73,7 +73,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1205,
+        "prob": 0.119,
         "results": [
           "France",
           "Argentina"
@@ -107,11 +107,11 @@
   "fixtures": [
     {
       "fixture": "France vs Spain",
-      "kickoff": "2026-07-14T19:00:00+00:00",
+      "kickoff": null,
       "results": [
         {
           "outcome": "France",
-          "prob": 0.3619,
+          "prob": 0.3585,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -120,7 +120,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.3133,
+          "prob": 0.3151,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -129,7 +129,7 @@
         },
         {
           "outcome": "Spain",
-          "prob": 0.3247,
+          "prob": 0.3264,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -152,7 +152,7 @@
       "results": [
         {
           "outcome": "England",
-          "prob": 0.3463,
+          "prob": 0.3467,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -161,16 +161,16 @@
           "plug": {
             "available": true,
             "outcome": "England",
-            "best_venue": "matchbook",
+            "best_venue": "smarkets",
             "best_odds": 2.86,
-            "model_prob": 0.3463,
-            "ev_pct": -1.0,
+            "model_prob": 0.3467,
+            "ev_pct": -0.8,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.3208,
+          "prob": 0.3212,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -179,16 +179,16 @@
           "plug": {
             "available": true,
             "outcome": "Draw",
-            "best_venue": "smarkets",
+            "best_venue": "betfred_uk",
             "best_odds": 3.0,
-            "model_prob": 0.3208,
-            "ev_pct": -3.8,
+            "model_prob": 0.3212,
+            "ev_pct": -3.6,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Argentina",
-          "prob": 0.3329,
+          "prob": 0.332,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -197,11 +197,11 @@
           "plug": {
             "available": true,
             "outcome": "Argentina",
-            "best_venue": "matchbook",
+            "best_venue": "smarkets",
             "best_odds": 3.15,
-            "model_prob": 0.3329,
-            "ev_pct": 4.9,
-            "recommendation": "PLUG: +EV to back (4.9% edge) \u2014 fills the gap and adds value"
+            "model_prob": 0.332,
+            "ev_pct": 4.6,
+            "recommendation": "PLUG: +EV to back (4.6% edge) \u2014 fills the gap and adds value"
           }
         }
       ],
@@ -228,45 +228,45 @@
     {
       "fixture": "England vs Argentina",
       "outcome": "England",
-      "prob": 0.3463,
+      "prob": 0.3467,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "England",
-        "best_venue": "matchbook",
+        "best_venue": "smarkets",
         "best_odds": 2.86,
-        "model_prob": 0.3463,
-        "ev_pct": -1.0,
+        "model_prob": 0.3467,
+        "ev_pct": -0.8,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
     {
       "fixture": "England vs Argentina",
       "outcome": "Argentina",
-      "prob": 0.3329,
+      "prob": 0.332,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Argentina",
-        "best_venue": "matchbook",
+        "best_venue": "smarkets",
         "best_odds": 3.15,
-        "model_prob": 0.3329,
-        "ev_pct": 4.9,
-        "recommendation": "PLUG: +EV to back (4.9% edge) \u2014 fills the gap and adds value"
+        "model_prob": 0.332,
+        "ev_pct": 4.6,
+        "recommendation": "PLUG: +EV to back (4.6% edge) \u2014 fills the gap and adds value"
       }
     },
     {
       "fixture": "England vs Argentina",
       "outcome": "Draw",
-      "prob": 0.3208,
+      "prob": 0.3212,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Draw",
-        "best_venue": "smarkets",
+        "best_venue": "betfred_uk",
         "best_odds": 3.0,
-        "model_prob": 0.3208,
-        "ev_pct": -3.8,
+        "model_prob": 0.3212,
+        "ev_pct": -3.6,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     }
