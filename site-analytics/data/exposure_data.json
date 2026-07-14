@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-13 16:11:09 UTC"
+    "generated": "2026-07-14 10:50:02 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -15,7 +15,7 @@
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.1491,
+        "prob": 0.1338,
         "results": [
           "France",
           "England"
@@ -23,7 +23,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1278,
+        "prob": 0.1223,
         "results": [
           "France",
           "Draw"
@@ -31,7 +31,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1351,
+        "prob": 0.1267,
         "results": [
           "France",
           "Argentina"
@@ -39,7 +39,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1037,
+        "prob": 0.1032,
         "results": [
           "Draw",
           "England"
@@ -47,7 +47,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0889,
+        "prob": 0.0943,
         "results": [
           "Draw",
           "Draw"
@@ -57,7 +57,7 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.1491,
+        "prob": 0.1338,
         "results": [
           "France",
           "England"
@@ -65,7 +65,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1278,
+        "prob": 0.1223,
         "results": [
           "France",
           "Draw"
@@ -73,7 +73,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1351,
+        "prob": 0.1267,
         "results": [
           "France",
           "Argentina"
@@ -107,11 +107,11 @@
   "fixtures": [
     {
       "fixture": "France vs Spain",
-      "kickoff": null,
+      "kickoff": "2026-07-14T19:00:00+00:00",
       "results": [
         {
           "outcome": "France",
-          "prob": 0.412,
+          "prob": 0.3828,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -120,7 +120,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2866,
+          "prob": 0.2953,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -129,7 +129,7 @@
         },
         {
           "outcome": "Spain",
-          "prob": 0.3015,
+          "prob": 0.3219,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -148,45 +148,60 @@
     },
     {
       "fixture": "England vs Argentina",
-      "kickoff": null,
+      "kickoff": "2026-07-15T19:00:00+00:00",
       "results": [
         {
           "outcome": "England",
-          "prob": 0.362,
+          "prob": 0.3497,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
           "blindspot": true,
           "live": [],
           "plug": {
-            "available": false,
-            "note": "no live market price found for this outcome"
+            "available": true,
+            "outcome": "England",
+            "best_venue": "smarkets",
+            "best_odds": 2.76,
+            "model_prob": 0.3497,
+            "ev_pct": -3.5,
+            "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.3101,
+          "prob": 0.3195,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
           "blindspot": true,
           "live": [],
           "plug": {
-            "available": false,
-            "note": "no live market price found for this outcome"
+            "available": true,
+            "outcome": "Draw",
+            "best_venue": "smarkets",
+            "best_odds": 3.0,
+            "model_prob": 0.3195,
+            "ev_pct": -4.1,
+            "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Argentina",
-          "prob": 0.3279,
+          "prob": 0.3309,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
           "blindspot": true,
           "live": [],
           "plug": {
-            "available": false,
-            "note": "no live market price found for this outcome"
+            "available": true,
+            "outcome": "Argentina",
+            "best_venue": "smarkets",
+            "best_odds": 3.2,
+            "model_prob": 0.3309,
+            "ev_pct": 5.9,
+            "recommendation": "PLUG: +EV to back (5.9% edge) \u2014 fills the gap and adds value"
           }
         }
       ],
@@ -213,31 +228,46 @@
     {
       "fixture": "England vs Argentina",
       "outcome": "England",
-      "prob": 0.362,
+      "prob": 0.3497,
       "net_pnl": 0.0,
       "plug": {
-        "available": false,
-        "note": "no live market price found for this outcome"
+        "available": true,
+        "outcome": "England",
+        "best_venue": "smarkets",
+        "best_odds": 2.76,
+        "model_prob": 0.3497,
+        "ev_pct": -3.5,
+        "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
     {
       "fixture": "England vs Argentina",
       "outcome": "Argentina",
-      "prob": 0.3279,
+      "prob": 0.3309,
       "net_pnl": 0.0,
       "plug": {
-        "available": false,
-        "note": "no live market price found for this outcome"
+        "available": true,
+        "outcome": "Argentina",
+        "best_venue": "smarkets",
+        "best_odds": 3.2,
+        "model_prob": 0.3309,
+        "ev_pct": 5.9,
+        "recommendation": "PLUG: +EV to back (5.9% edge) \u2014 fills the gap and adds value"
       }
     },
     {
       "fixture": "England vs Argentina",
       "outcome": "Draw",
-      "prob": 0.3101,
+      "prob": 0.3195,
       "net_pnl": 0.0,
       "plug": {
-        "available": false,
-        "note": "no live market price found for this outcome"
+        "available": true,
+        "outcome": "Draw",
+        "best_venue": "smarkets",
+        "best_odds": 3.0,
+        "model_prob": 0.3195,
+        "ev_pct": -4.1,
+        "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     }
   ],

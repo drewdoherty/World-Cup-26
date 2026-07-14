@@ -1,16 +1,16 @@
 {
   "meta": {
-    "generated": "2026-07-13 16:10:44 UTC"
+    "generated": "2026-07-14 10:49:38 UTC"
   },
   "summary": {
-    "fixtures_complete": 96,
-    "model_1x2_correct": 62,
-    "market_1x2_correct": 51,
-    "model_brier": 0.4381,
-    "market_brier": 0.4237,
-    "model_logloss": 0.7602,
-    "market_logloss": 0.7362,
-    "top6_hits": 52,
+    "fixtures_complete": 100,
+    "model_1x2_correct": 66,
+    "market_1x2_correct": 55,
+    "model_brier": 0.4309,
+    "market_brier": 0.4166,
+    "model_logloss": 0.7512,
+    "market_logloss": 0.7276,
+    "top6_hits": 55,
     "bets": {
       "settled": 131,
       "won": 42,
@@ -9667,41 +9667,457 @@
       },
       "picks": [],
       "pending": false
+    },
+    {
+      "fixture": "France vs Morocco",
+      "date": "2026-07-09",
+      "kickoff": "2026-07-09T20:00:00Z",
+      "score": "2-0",
+      "outcome": "home",
+      "home_goals": 2,
+      "away_goals": 0,
+      "card_generated": "2026-07-09 19:45:53 UTC",
+      "model_1x2": {
+        "home": 0.6025,
+        "draw": 0.2508,
+        "away": 0.1467
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.6059,
+        "draw": 0.2444,
+        "away": 0.1497
+      },
+      "market_source": "closing_devig",
+      "market_books": 20,
+      "model_pick": "home",
+      "market_pick": "home",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.6025,
+      "market_prob_outcome": 0.6059,
+      "result_edge": -0.0034,
+      "brier_model": 0.2425,
+      "brier_market": 0.2375,
+      "logloss_model": 0.5067,
+      "logloss_market": 0.501,
+      "top_scoreline": {
+        "score": "1-0",
+        "prob": 17.5,
+        "hit": false
+      },
+      "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "1-0",
+          "prob": 17.5
+        },
+        {
+          "score": "2-0",
+          "prob": 13.0
+        },
+        {
+          "score": "1-1",
+          "prob": 11.4
+        },
+        {
+          "score": "0-0",
+          "prob": 10.3
+        },
+        {
+          "score": "2-1",
+          "prob": 10.1
+        },
+        {
+          "score": "3-0",
+          "prob": 6.2
+        }
+      ],
+      "home_standing": {
+        "team": "France",
+        "group": "I",
+        "played": 3,
+        "won": 3,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 10,
+        "ga": 2,
+        "gd": 8,
+        "points": 9,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Morocco",
+        "group": "C",
+        "played": 3,
+        "won": 2,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 6,
+        "ga": 3,
+        "gd": 3,
+        "points": 7,
+        "position": 2
+      },
+      "ou25": {
+        "model_over": 0.395,
+        "actual_over": false,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.408,
+        "actual": false,
+        "hit": true
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "Spain vs Belgium",
+      "date": "2026-07-10",
+      "kickoff": "2026-07-10T19:00:00Z",
+      "score": "2-1",
+      "outcome": "home",
+      "home_goals": 2,
+      "away_goals": 1,
+      "card_generated": "2026-07-10 18:55:50 UTC",
+      "model_1x2": {
+        "home": 0.5834,
+        "draw": 0.2411,
+        "away": 0.1755
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.5781,
+        "draw": 0.2454,
+        "away": 0.1764
+      },
+      "market_source": "closing_devig",
+      "market_books": 20,
+      "model_pick": "home",
+      "market_pick": "home",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.5834,
+      "market_prob_outcome": 0.5781,
+      "result_edge": 0.0053,
+      "brier_model": 0.2625,
+      "brier_market": 0.2693,
+      "logloss_model": 0.5389,
+      "logloss_market": 0.548,
+      "top_scoreline": {
+        "score": "1-1",
+        "prob": 11.3,
+        "hit": false
+      },
+      "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "1-1",
+          "prob": 11.3
+        },
+        {
+          "score": "2-1",
+          "prob": 10.7
+        },
+        {
+          "score": "1-0",
+          "prob": 9.8
+        },
+        {
+          "score": "2-0",
+          "prob": 9.5
+        },
+        {
+          "score": "3-1",
+          "prob": 6.6
+        },
+        {
+          "score": "3-0",
+          "prob": 5.8
+        }
+      ],
+      "home_standing": {
+        "team": "Spain",
+        "group": "H",
+        "played": 3,
+        "won": 2,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 5,
+        "ga": 0,
+        "gd": 5,
+        "points": 7,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Belgium",
+        "group": "G",
+        "played": 3,
+        "won": 1,
+        "drawn": 2,
+        "lost": 0,
+        "gf": 6,
+        "ga": 2,
+        "gd": 4,
+        "points": 5,
+        "position": 1
+      },
+      "ou25": {
+        "model_over": 0.569,
+        "actual_over": true,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.571,
+        "actual": true,
+        "hit": true
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "Argentina vs Switzerland",
+      "date": "2026-07-11",
+      "kickoff": "2026-07-12T01:00:00Z",
+      "score": "3-1",
+      "outcome": "home",
+      "home_goals": 3,
+      "away_goals": 1,
+      "card_generated": "2026-07-12T00:30:17",
+      "model_1x2": {
+        "home": 0.5746,
+        "draw": 0.268,
+        "away": 0.1574
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.552,
+        "draw": 0.286,
+        "away": 0.162
+      },
+      "market_source": "closing_devig",
+      "market_books": 20,
+      "model_pick": "home",
+      "market_pick": "home",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.5746,
+      "market_prob_outcome": 0.552,
+      "result_edge": 0.0226,
+      "brier_model": 0.2775,
+      "brier_market": 0.3088,
+      "logloss_model": 0.5541,
+      "logloss_market": 0.5942,
+      "top_scoreline": {
+        "score": "1-1",
+        "prob": 12.8,
+        "hit": false
+      },
+      "top6_hit": false,
+      "scorelines": [
+        {
+          "score": "1-1",
+          "prob": 12.8
+        },
+        {
+          "score": "1-0",
+          "prob": 11.2
+        },
+        {
+          "score": "2-0",
+          "prob": 10.6
+        },
+        {
+          "score": "2-1",
+          "prob": 9.9
+        },
+        {
+          "score": "0-0",
+          "prob": 7.9
+        },
+        {
+          "score": "3-0",
+          "prob": 6.3
+        }
+      ],
+      "home_standing": {
+        "team": "Argentina",
+        "group": "J",
+        "played": 3,
+        "won": 3,
+        "drawn": 0,
+        "lost": 0,
+        "gf": 8,
+        "ga": 1,
+        "gd": 7,
+        "points": 9,
+        "position": 1
+      },
+      "away_standing": {
+        "team": "Switzerland",
+        "group": "B",
+        "played": 3,
+        "won": 2,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 7,
+        "ga": 3,
+        "gd": 4,
+        "points": 7,
+        "position": 1
+      },
+      "ou25": {
+        "model_over": 0.506,
+        "actual_over": true,
+        "hit": true
+      },
+      "btts": {
+        "model": 0.518,
+        "actual": true,
+        "hit": true
+      },
+      "picks": [],
+      "pending": false
+    },
+    {
+      "fixture": "Norway vs England",
+      "date": "2026-07-11",
+      "kickoff": "2026-07-11T21:01:00Z",
+      "score": "1-2",
+      "outcome": "away",
+      "home_goals": 1,
+      "away_goals": 2,
+      "card_generated": "2026-07-11T20:52:09",
+      "model_1x2": {
+        "home": 0.2156,
+        "draw": 0.2495,
+        "away": 0.5349
+      },
+      "model_source": "card_build",
+      "market_1x2": {
+        "home": 0.2261,
+        "draw": 0.2525,
+        "away": 0.5214
+      },
+      "market_source": "closing_devig",
+      "market_books": 20,
+      "model_pick": "away",
+      "market_pick": "away",
+      "model_correct": true,
+      "market_correct": true,
+      "model_prob_outcome": 0.5349,
+      "market_prob_outcome": 0.5214,
+      "result_edge": 0.0135,
+      "brier_model": 0.325,
+      "brier_market": 0.3439,
+      "logloss_model": 0.6257,
+      "logloss_market": 0.6513,
+      "top_scoreline": {
+        "score": "1-1",
+        "prob": 11.9,
+        "hit": false
+      },
+      "top6_hit": true,
+      "scorelines": [
+        {
+          "score": "1-1",
+          "prob": 11.9
+        },
+        {
+          "score": "0-1",
+          "prob": 10.7
+        },
+        {
+          "score": "0-2",
+          "prob": 10.1
+        },
+        {
+          "score": "1-2",
+          "prob": 9.0
+        },
+        {
+          "score": "0-0",
+          "prob": 7.7
+        },
+        {
+          "score": "1-0",
+          "prob": 6.7
+        }
+      ],
+      "home_standing": {
+        "team": "Norway",
+        "group": "I",
+        "played": 3,
+        "won": 2,
+        "drawn": 0,
+        "lost": 1,
+        "gf": 8,
+        "ga": 7,
+        "gd": 1,
+        "points": 6,
+        "position": 2
+      },
+      "away_standing": {
+        "team": "England",
+        "group": "L",
+        "played": 3,
+        "won": 2,
+        "drawn": 1,
+        "lost": 0,
+        "gf": 6,
+        "ga": 2,
+        "gd": 4,
+        "points": 7,
+        "position": 1
+      },
+      "ou25": {
+        "model_over": 0.496,
+        "actual_over": true,
+        "hit": false
+      },
+      "btts": {
+        "model": 0.501,
+        "actual": true,
+        "hit": true
+      },
+      "picks": [],
+      "pending": false
     }
   ],
   "pending": [
     {
-      "fixture": "England vs Argentina",
+      "fixture": "France vs Spain",
       "date": null,
-      "kickoff": null,
+      "kickoff": "2026-07-14T19:00:00+00:00",
       "model_1x2": {
-        "home": 0.362,
-        "draw": 0.3101,
-        "away": 0.3279
+        "home": 0.3828,
+        "draw": 0.2953,
+        "away": 0.3219
       },
       "model_source": "card_build",
       "model_pick": "home",
       "top_scoreline": {
         "score": "1-1",
-        "prob": 14.6
+        "prob": 14.1
       },
       "picks": [],
       "pending": true
     },
     {
-      "fixture": "France vs Spain",
+      "fixture": "England vs Argentina",
       "date": null,
-      "kickoff": null,
+      "kickoff": "2026-07-15T19:00:00+00:00",
       "model_1x2": {
-        "home": 0.412,
-        "draw": 0.2866,
-        "away": 0.3015
+        "home": 0.3497,
+        "draw": 0.3195,
+        "away": 0.3309
       },
       "model_source": "card_build",
       "model_pick": "home",
       "top_scoreline": {
         "score": "1-1",
-        "prob": 13.4
+        "prob": 15.1
       },
       "picks": [],
       "pending": true

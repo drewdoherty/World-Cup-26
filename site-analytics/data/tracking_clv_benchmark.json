@@ -8,7 +8,7 @@
       "hi_edge": -0.05,
       "lo_edge": -1.0,
       "n": 96,
-      "placebo_clv": -0.458276
+      "placebo_clv": -0.457537
     },
     {
       "bucket": "-5..-2%",
@@ -18,37 +18,37 @@
       "hi_edge": -0.02,
       "lo_edge": -0.05,
       "n": 405,
-      "placebo_clv": -0.133181
+      "placebo_clv": -0.135336
     },
     {
       "bucket": "-2..0%",
-      "clv_hi": 0.03709,
-      "clv_lo": 0.02998,
-      "clv_mean": 0.033535,
+      "clv_hi": 0.035694,
+      "clv_lo": 0.029071,
+      "clv_mean": 0.032382,
       "hi_edge": 0.0,
       "lo_edge": -0.02,
-      "n": 1384,
-      "placebo_clv": 0.266876
+      "n": 1508,
+      "placebo_clv": 0.24535
     },
     {
       "bucket": "0..2%",
-      "clv_hi": -0.002263,
-      "clv_lo": -0.020134,
-      "clv_mean": -0.011199,
+      "clv_hi": -0.002352,
+      "clv_lo": -0.019866,
+      "clv_mean": -0.011109,
       "hi_edge": 0.02,
       "lo_edge": 0.0,
-      "n": 1521,
-      "placebo_clv": 0.752392
+      "n": 1553,
+      "placebo_clv": 0.733993
     },
     {
       "bucket": "2..5%",
-      "clv_hi": -0.050996,
-      "clv_lo": -0.126161,
-      "clv_mean": -0.088578,
+      "clv_hi": -0.051137,
+      "clv_lo": -0.122429,
+      "clv_mean": -0.086783,
       "hi_edge": 0.05,
       "lo_edge": 0.02,
-      "n": 551,
-      "placebo_clv": 0.797173
+      "n": 581,
+      "placebo_clv": 0.76408
     },
     {
       "bucket": ">5%",
@@ -58,12 +58,12 @@
       "hi_edge": 1.0,
       "lo_edge": 0.05,
       "n": 30,
-      "placebo_clv": -0.099058
+      "placebo_clv": -0.098684
     }
   ],
   "by_market": [
     {
-      "clv_median": -0.005261,
+      "clv_median": -0.00544,
       "hist": [
         {
           "count": 82,
@@ -71,7 +71,7 @@
           "lo": -0.363073
         },
         {
-          "count": 1214,
+          "count": 1276,
           "hi": 0.102686,
           "lo": -0.130194
         },
@@ -107,10 +107,10 @@
         }
       ],
       "leg": "home",
-      "n": 1329
+      "n": 1391
     },
     {
-      "clv_median": 0.021651,
+      "clv_median": 0.021859,
       "hist": [
         {
           "count": 322,
@@ -118,7 +118,7 @@
           "lo": -0.620927
         },
         {
-          "count": 1005,
+          "count": 1067,
           "hi": 0.551094,
           "lo": -0.034916
         },
@@ -154,13 +154,13 @@
         }
       ],
       "leg": "draw",
-      "n": 1329
+      "n": 1391
     },
     {
-      "clv_median": -0.014765,
+      "clv_median": -0.013511,
       "hist": [
         {
-          "count": 1320,
+          "count": 1382,
           "hi": 0.569748,
           "lo": -0.349654
         },
@@ -201,7 +201,7 @@
         }
       ],
       "leg": "away",
-      "n": 1329
+      "n": 1391
     }
   ],
   "by_odds_bucket": [
@@ -217,13 +217,13 @@
     },
     {
       "bucket": "2.0-3.0",
-      "clv_median": -0.055192,
-      "n": 348
+      "clv_median": -0.03628,
+      "n": 410
     },
     {
       "bucket": "3.0-5.0",
-      "clv_median": 0.016614,
-      "n": 1673
+      "clv_median": 0.017905,
+      "n": 1797
     },
     {
       "bucket": "5.0+",
@@ -233,47 +233,47 @@
   ],
   "coverage_by_market": {
     "away": {
-      "clv_n": 1329,
-      "coverage_pct": 58.32,
-      "n": 2279
+      "clv_n": 1391,
+      "coverage_pct": 59.42,
+      "n": 2341
     },
     "draw": {
-      "clv_n": 1329,
-      "coverage_pct": 58.32,
-      "n": 2279
+      "clv_n": 1391,
+      "coverage_pct": 59.42,
+      "n": 2341
     },
     "home": {
-      "clv_n": 1329,
-      "coverage_pct": 58.32,
-      "n": 2279
+      "clv_n": 1391,
+      "coverage_pct": 59.42,
+      "n": 2341
     }
   },
   "headline": {
     "beat_rate": {
-      "hi": 0.47625,
-      "lo": 0.44532,
-      "n": 3987,
-      "p": 0.460747
+      "hi": 0.493482,
+      "lo": 0.463184,
+      "n": 4173,
+      "p": 0.478313
     },
-    "brier_skill": -0.012253,
-    "clv_median": -0.004212,
-    "clv_trimmed_mean": -0.00234,
-    "coverage_pct": 58.32,
-    "drift_beta": -2.040564,
-    "lead_rate": 0.539253,
-    "placebo_drift_beta": 14.118923,
-    "placebo_null": 0.481962
+    "brier_skill": -0.014868,
+    "clv_median": -0.003173,
+    "clv_trimmed_mean": -0.002069,
+    "coverage_pct": 59.42,
+    "drift_beta": -2.043291,
+    "lead_rate": 0.521687,
+    "placebo_drift_beta": 13.963039,
+    "placebo_null": 0.486744
   },
   "meta": {
-    "generated": "2026-07-13T16:06:39Z",
-    "n_legs": 6837,
-    "n_with_close": 3987
+    "generated": "2026-07-14T10:19:58Z",
+    "n_legs": 7023,
+    "n_with_close": 4173
   },
   "note": "Full model book (every home/draw/away leg of every build) scored fair-vs-fair against the de-vigged consensus close: clv_odds = p_close/p_model - 1. beat_rate excludes pushes and no-close legs from numerator AND denominator (Wilson 95%). placebo_null = beat-rate under within-build label-shuffle (skill-free baseline vs the real close, absorbs consensus overround; beat THIS, not 0.50). clv_odds is right-skewed so headline uses median + 10% trimmed mean. Market legs never pooled. Small sample: read n and coverage.",
   "placed_vs_passed": {
     "passed": {
-      "clv_median": -0.003539,
-      "n": 3925
+      "clv_median": -0.002349,
+      "n": 4111
     },
     "placed": {
       "clv_median": -0.170701,
