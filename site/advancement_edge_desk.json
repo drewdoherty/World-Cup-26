@@ -6,13 +6,13 @@
  "freshness": {
   "checks": [
    {
-    "age_secs": 65415.0,
+    "age_secs": 928.0,
     "max_age_secs": 10800,
     "name": "advancement",
-    "pass": false,
-    "reason": "stale: 18.2h old > 3.0h max",
+    "pass": true,
+    "reason": null,
     "source": "site/advancement_data.json",
-    "stamp": "2026-07-13 16:39:50 UTC"
+    "stamp": "2026-07-14 11:02:31 UTC"
    },
    {
     "age_secs": 1.0,
@@ -21,28 +21,28 @@
     "pass": true,
     "reason": null,
     "source": "site/bet_recs.json",
-    "stamp": "2026-07-14 10:50:04 UTC"
+    "stamp": "2026-07-14 11:17:58 UTC"
    },
    {
-    "age_secs": 33.0,
+    "age_secs": 31.0,
     "max_age_secs": 10800,
     "name": "scores_markets",
     "pass": true,
     "reason": null,
     "source": "site/scores_markets.json",
-    "stamp": "2026-07-14 10:49:32 UTC"
+    "stamp": "2026-07-14 11:17:28 UTC"
    },
    {
-    "age_secs": 65399.0,
+    "age_secs": 67073.0,
     "max_age_secs": 21600,
     "name": "pm_ideas",
     "pass": false,
-    "reason": "stale: 18.2h old > 6.0h max",
+    "reason": "stale: 18.6h old > 6.0h max",
     "source": "site/pm_ideas.json",
     "stamp": "2026-07-13T16:40:06Z"
    },
    {
-    "age_secs": 1514.6,
+    "age_secs": 3188.6,
     "max_age_secs": 86400,
     "name": "orderflow",
     "pass": true,
@@ -51,13 +51,13 @@
     "stamp": "2026-07-14T10:24:50.392780+00:00"
    },
    {
-    "age_secs": 66605.0,
+    "age_secs": 1139.0,
     "max_age_secs": 50400,
     "name": "advancement_model",
-    "pass": false,
-    "reason": "stale: 18.5h old > 14.0h max",
+    "pass": true,
+    "reason": null,
     "source": "site/advancement_data.json (meta.model_generated)",
-    "stamp": "2026-07-13 16:20 UTC"
+    "stamp": "2026-07-14 10:59 UTC"
    },
    {
     "age_secs": null,
@@ -72,8 +72,8 @@
   "pass": false
  },
  "meta": {
-  "advancement_model_age_hours": 18.5,
-  "advancement_model_generated": "2026-07-13 16:20 UTC",
+  "advancement_model_age_hours": 0.32,
+  "advancement_model_generated": "2026-07-14 10:59 UTC",
   "caveats": [
    "SHADOW-ONLY: decision-support feed; no verdict here is a trade instruction and nothing is wired to execution.",
    "Settlement bases must never be confused: PM advancement includes extra time + penalties; 1X2 settles at 90 minutes. Every embedded 90-minute number in this feed is tagged 1X2_90min.",
@@ -84,9 +84,7 @@
    "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
    "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal.",
    "orderflow history truncated for n=361 markets (data-api 3k-row cap) \u2014 flow aggregates there are incomplete; buy-pressure/share numbers are context only",
-   "freshness gate FAILED for site/advancement_data.json \u2014 stale: 18.2h old > 3.0h max",
-   "freshness gate FAILED for site/pm_ideas.json \u2014 stale: 18.2h old > 6.0h max",
-   "freshness gate FAILED for site/advancement_data.json (meta.model_generated) \u2014 stale: 18.5h old > 14.0h max"
+   "freshness gate FAILED for site/pm_ideas.json \u2014 stale: 18.6h old > 6.0h max"
   ],
   "edge_gate": {
    "min_edge_adj": 0.02,
@@ -100,17 +98,17 @@
    "site/pm_ideas.json": 21600,
    "site/scores_markets.json": 10800
   },
-  "generated_at": "2026-07-14T10:50:05Z",
+  "generated_at": "2026-07-14T11:17:59Z",
   "n_advancement_legs_without_pm_quote": 0,
   "n_by_verdict": {
-   "DO_NOT_TRADE": 0,
+   "DO_NOT_TRADE": 8,
    "SHADOW_ADD": 0,
    "WATCH": 0,
-   "WITHHOLD": 13
+   "WITHHOLD": 5
   },
   "n_pm_markets": 8,
   "n_rows": 13,
-  "n_withheld_excluded_uninformative": 13,
+  "n_withheld_excluded_uninformative": 9,
   "orderflow_hot": {
    "hot_threshold": 0.8582,
    "mean_buy_pressure": 0.7777,
@@ -140,11 +138,11 @@
   "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
   "shadow_only": true,
   "sources": {
-   "site/advancement_data.json": "2026-07-13 16:39:50 UTC",
-   "site/bet_recs.json": "2026-07-14 10:50:04 UTC",
+   "site/advancement_data.json": "2026-07-14 11:02:31 UTC",
+   "site/bet_recs.json": "2026-07-14 11:17:58 UTC",
    "site/microstructure/orderflow.json": "2026-07-14T10:24:50.392780+00:00",
    "site/pm_ideas.json": "2026-07-13T16:40:06Z",
-   "site/scores_markets.json": "2026-07-14 10:49:32 UTC"
+   "site/scores_markets.json": "2026-07-14 11:17:28 UTC"
   },
   "verdict_enum": [
    "SHADOW_ADD",
@@ -177,7 +175,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 18.2h old > 3.0h max); site/pm_ideas.json (stale: 18.2h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 18.5h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -207,8 +205,8 @@
     },
     "state_freshness": {
      "note": "sim conditioning set covers every kicked-off tie for this team (data/advancement_sim_pins.json sidecar; stamped by scripts/wca_advancement_data.py)",
-     "pass": false,
-     "reason": "state-stale: earlier-round tie unsettled in sim (France vs Morocco, kicked off 2026-07-09)"
+     "pass": true,
+     "reason": null
     }
    },
    "group": "I",
@@ -246,7 +244,7 @@
    "leg_state": "undecided",
    "market": "advancement",
    "market_label": "Win tournament \u00b7 incl. ET+pens",
-   "model_prob": 0.2236,
+   "model_prob": 0.2256,
    "model_source": "advancement_data.teams[France].model[win]",
    "orderflow": {
     "avg_trade_usd": 447.0,
@@ -277,9 +275,9 @@
     "usd": 217507586.0
    },
    "origin": "advancement_data",
-   "pm_price": 0.3885,
+   "pm_price": 0.3905,
    "pm_price_source": "advancement_data.teams[France].pm[win].pm (YES mid)",
-   "position_prob": 0.7764,
+   "position_prob": 0.7744,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
    "related_pm_ideas": {
     "ideas": [],
@@ -293,15 +291,15 @@
    "side_source": "feed",
    "stage": "win",
    "team": "France",
-   "verdict": "WITHHOLD",
+   "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "state-stale: earlier-round tie unsettled in sim (France vs Morocco, kicked off 2026-07-09)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
    ]
   },
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.0083,
+   "edge_adj": 0.0137,
    "edge_source": "advancement_data.teams[England].pm[win].edge_adj (fee-adjusted edge of the feed-emitted side)",
    "gates": {
     "clv_history": {
@@ -311,11 +309,11 @@
     "edge": {
      "note": "threshold 0.02 replicated from scripts/wca_betrecs.py MIN_EDGE",
      "pass": false,
-     "reason": "near_threshold_edge: +0.0083 inside the 0.02 actionable threshold (scripts/wca_betrecs.py MIN_EDGE)"
+     "reason": "near_threshold_edge: +0.0137 inside the 0.02 actionable threshold (scripts/wca_betrecs.py MIN_EDGE)"
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 18.2h old > 3.0h max); site/pm_ideas.json (stale: 18.2h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 18.5h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -345,8 +343,8 @@
     },
     "state_freshness": {
      "note": "sim conditioning set covers every kicked-off tie for this team (data/advancement_sim_pins.json sidecar; stamped by scripts/wca_advancement_data.py)",
-     "pass": false,
-     "reason": "state-stale: earlier-round tie unsettled in sim (Norway vs England, kicked off 2026-07-11)"
+     "pass": true,
+     "reason": null
     }
    },
    "group": "L",
@@ -384,7 +382,7 @@
    "leg_state": "undecided",
    "market": "advancement",
    "market_label": "Win tournament \u00b7 incl. ET+pens",
-   "model_prob": 0.2016,
+   "model_prob": 0.1972,
    "model_source": "advancement_data.teams[England].model[win]",
    "orderflow": {
     "avg_trade_usd": 447.0,
@@ -415,9 +413,9 @@
     "usd": 217507586.0
    },
    "origin": "advancement_data",
-   "pm_price": 0.2155,
+   "pm_price": 0.2165,
    "pm_price_source": "advancement_data.teams[England].pm[win].pm (YES mid)",
-   "position_prob": 0.7984,
+   "position_prob": 0.8028,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
    "related_pm_ideas": {
     "ideas": [
@@ -443,15 +441,15 @@
    "side_source": "feed",
    "stage": "win",
    "team": "England",
-   "verdict": "WITHHOLD",
+   "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "state-stale: earlier-round tie unsettled in sim (Norway vs England, kicked off 2026-07-11)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
    ]
   },
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.1371,
+   "edge_adj": 0.1316,
    "edge_source": "advancement_data.teams[France].pm[Final].edge_adj (fee-adjusted edge of the feed-emitted side)",
    "gates": {
     "clv_history": {
@@ -465,7 +463,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 18.2h old > 3.0h max); site/pm_ideas.json (stale: 18.2h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 18.5h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -495,8 +493,8 @@
     },
     "state_freshness": {
      "note": "sim conditioning set covers every kicked-off tie for this team (data/advancement_sim_pins.json sidecar; stamped by scripts/wca_advancement_data.py)",
-     "pass": false,
-     "reason": "state-stale: earlier-round tie unsettled in sim (France vs Morocco, kicked off 2026-07-09)"
+     "pass": true,
+     "reason": null
     }
    },
    "group": "I",
@@ -554,7 +552,7 @@
    "leg_state": "undecided",
    "market": "advancement",
    "market_label": "Advance \u00b7 incl. ET+pens",
-   "model_prob": 0.4456,
+   "model_prob": 0.4511,
    "model_source": "advancement_data.teams[France].model[Final]",
    "orderflow": {
     "avg_trade_usd": 101.59,
@@ -587,7 +585,7 @@
    "origin": "advancement_data",
    "pm_price": 0.595,
    "pm_price_source": "advancement_data.teams[France].pm[Final].pm (YES mid)",
-   "position_prob": 0.5544,
+   "position_prob": 0.5489,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
    "related_pm_ideas": {
     "ideas": [],
@@ -601,15 +599,23 @@
    "side_source": "feed",
    "stage": "Final",
    "team": "France",
-   "verdict": "WITHHOLD",
+   "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "state-stale: earlier-round tie unsettled in sim (France vs Morocco, kicked off 2026-07-09)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
    ]
   },
   {
-   "bet_rec": null,
+   "bet_rec": {
+    "action_label": "ADD",
+    "currency": "USD",
+    "ev_net": 0.1367,
+    "id": "spain_final_pm",
+    "pm_fee": 0.0072,
+    "source": "bet_recs.advancement_futures[spain_final_pm]",
+    "stake": 65.71
+   },
    "bucket": "moneyline",
-   "edge_adj": 0.1371,
+   "edge_adj": 0.1316,
    "edge_source": "advancement_data.teams[Spain].pm[Final].edge_adj (fee-adjusted edge of the feed-emitted side)",
    "gates": {
     "clv_history": {
@@ -623,7 +629,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 18.2h old > 3.0h max); site/pm_ideas.json (stale: 18.2h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 18.5h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -653,8 +659,8 @@
     },
     "state_freshness": {
      "note": "sim conditioning set covers every kicked-off tie for this team (data/advancement_sim_pins.json sidecar; stamped by scripts/wca_advancement_data.py)",
-     "pass": false,
-     "reason": "state-stale: earlier-round tie unsettled in sim (Spain vs Belgium, kicked off 2026-07-10)"
+     "pass": true,
+     "reason": null
     }
    },
    "group": "H",
@@ -712,7 +718,7 @@
    "leg_state": "undecided",
    "market": "advancement",
    "market_label": "Advance \u00b7 incl. ET+pens",
-   "model_prob": 0.5544,
+   "model_prob": 0.5489,
    "model_source": "advancement_data.teams[Spain].model[Final]",
    "orderflow": {
     "avg_trade_usd": 101.59,
@@ -745,7 +751,7 @@
    "origin": "advancement_data",
    "pm_price": 0.405,
    "pm_price_source": "advancement_data.teams[Spain].pm[Final].pm (YES mid)",
-   "position_prob": 0.5544,
+   "position_prob": 0.5489,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
     "ideas": [],
@@ -759,15 +765,23 @@
    "side_source": "feed",
    "stage": "Final",
    "team": "Spain",
-   "verdict": "WITHHOLD",
+   "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "state-stale: earlier-round tie unsettled in sim (Spain vs Belgium, kicked off 2026-07-10)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
    ]
   },
   {
-   "bet_rec": null,
+   "bet_rec": {
+    "action_label": "ADD",
+    "currency": "USD",
+    "ev_net": 0.0879,
+    "id": "argentina_final_pm",
+    "pm_fee": 0.0074,
+    "source": "bet_recs.advancement_futures[argentina_final_pm]",
+    "stake": 65.87
+   },
    "bucket": "moneyline",
-   "edge_adj": 0.075,
+   "edge_adj": 0.0874,
    "edge_source": "advancement_data.teams[Argentina].pm[Final].edge_adj (fee-adjusted edge of the feed-emitted side)",
    "gates": {
     "clv_history": {
@@ -781,7 +795,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 18.2h old > 3.0h max); site/pm_ideas.json (stale: 18.2h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 18.5h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -811,8 +825,8 @@
     },
     "state_freshness": {
      "note": "sim conditioning set covers every kicked-off tie for this team (data/advancement_sim_pins.json sidecar; stamped by scripts/wca_advancement_data.py)",
-     "pass": false,
-     "reason": "state-stale: earlier-round tie unsettled in sim (Argentina vs Switzerland, kicked off 2026-07-11)"
+     "pass": true,
+     "reason": null
     }
    },
    "group": "J",
@@ -870,7 +884,7 @@
    "leg_state": "undecided",
    "market": "advancement",
    "market_label": "Advance \u00b7 incl. ET+pens",
-   "model_prob": 0.5344,
+   "model_prob": 0.5438,
    "model_source": "advancement_data.teams[Argentina].model[Final]",
    "orderflow": {
     "avg_trade_usd": 101.59,
@@ -901,9 +915,9 @@
     "usd": 3573235.66
    },
    "origin": "advancement_data",
-   "pm_price": 0.4515,
+   "pm_price": 0.4485,
    "pm_price_source": "advancement_data.teams[Argentina].pm[Final].pm (YES mid)",
-   "position_prob": 0.5344,
+   "position_prob": 0.5438,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
     "ideas": [
@@ -929,15 +943,15 @@
    "side_source": "feed",
    "stage": "Final",
    "team": "Argentina",
-   "verdict": "WITHHOLD",
+   "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "state-stale: earlier-round tie unsettled in sim (Argentina vs Switzerland, kicked off 2026-07-11)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
    ]
   },
   {
    "bet_rec": null,
    "bucket": "moneyline",
-   "edge_adj": 0.0669,
+   "edge_adj": 0.0764,
    "edge_source": "advancement_data.teams[England].pm[Final].edge_adj (fee-adjusted edge of the feed-emitted side)",
    "gates": {
     "clv_history": {
@@ -951,7 +965,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 18.2h old > 3.0h max); site/pm_ideas.json (stale: 18.2h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 18.5h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -981,8 +995,8 @@
     },
     "state_freshness": {
      "note": "sim conditioning set covers every kicked-off tie for this team (data/advancement_sim_pins.json sidecar; stamped by scripts/wca_advancement_data.py)",
-     "pass": false,
-     "reason": "state-stale: earlier-round tie unsettled in sim (Norway vs England, kicked off 2026-07-11)"
+     "pass": true,
+     "reason": null
     }
    },
    "group": "L",
@@ -1040,7 +1054,7 @@
    "leg_state": "undecided",
    "market": "advancement",
    "market_label": "Advance \u00b7 incl. ET+pens",
-   "model_prob": 0.4656,
+   "model_prob": 0.4561,
    "model_source": "advancement_data.teams[England].model[Final]",
    "orderflow": {
     "avg_trade_usd": 101.59,
@@ -1073,7 +1087,7 @@
    "origin": "advancement_data",
    "pm_price": 0.545,
    "pm_price_source": "advancement_data.teams[England].pm[Final].pm (YES mid)",
-   "position_prob": 0.5344,
+   "position_prob": 0.5439,
    "position_prob_source": "= 1 - model_prob (derived; NO side)",
    "related_pm_ideas": {
     "ideas": [
@@ -1099,173 +1113,23 @@
    "side_source": "feed",
    "stage": "Final",
    "team": "England",
-   "verdict": "WITHHOLD",
+   "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "state-stale: earlier-round tie unsettled in sim (Norway vs England, kicked off 2026-07-11)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
    ]
   },
   {
-   "bet_rec": null,
+   "bet_rec": {
+    "action_label": "ADD",
+    "currency": "USD",
+    "ev_net": 0.0929,
+    "id": "argentina_win_pm",
+    "pm_fee": 0.0043,
+    "source": "bet_recs.advancement_futures[argentina_win_pm]",
+    "stake": 46.29
+   },
    "bucket": "mid",
-   "edge_adj": 0.0985,
-   "edge_source": "advancement_data.teams[Spain].pm[win].edge_adj (fee-adjusted edge of the feed-emitted side)",
-   "gates": {
-    "clv_history": {
-     "pass": false,
-     "reason": "BLOCKED: durable PM/odds price history for advancement markets is stale/missing and no CLV stamping / price capture exists for them (no fixed close; convergence metrics still COLLECTING). Live-money gate: a market without price capture + CLV stamping does not get real money \u2014 ANY real-money upgrade first needs price/CLV capture restored. This desk is SHADOW-ONLY until that plumbing ships."
-    },
-    "edge": {
-     "note": "threshold 0.02 replicated from scripts/wca_betrecs.py MIN_EDGE",
-     "pass": true,
-     "reason": null
-    },
-    "freshness": {
-     "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 18.2h old > 3.0h max); site/pm_ideas.json (stale: 18.2h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 18.5h old > 14.0h max)"
-    },
-    "min_prob_cash": {
-     "pass": true,
-     "reason": null
-    },
-    "orderflow": {
-     "note": "contextual only \u2014 may upgrade confidence, must never turn a negative model edge into a trade",
-     "pass": true,
-     "reason": null
-    },
-    "price_present": {
-     "pass": true,
-     "reason": null
-    },
-    "projection": {
-     "pass": false,
-     "reason": "deciding Final tie (Spain vs Argentina) is PROJECTED \u2014 the pairing is a model projection, not a fixed fixture"
-    },
-    "settlement": {
-     "note": "model advancement prob vs PM advancement quote \u2014 same settlement basis (ET+pens). Embedded 90-min splits are tagged 1X2_90min and are context only, never compared with PM advancement prices as if they settle the same.",
-     "pass": true,
-     "reason": null
-    },
-    "side_attribution": {
-     "pass": true,
-     "reason": null
-    },
-    "state_freshness": {
-     "note": "sim conditioning set covers every kicked-off tie for this team (data/advancement_sim_pins.json sidecar; stamped by scripts/wca_advancement_data.py)",
-     "pass": false,
-     "reason": "state-stale: earlier-round tie unsettled in sim (Spain vs Belgium, kicked off 2026-07-10)"
-    }
-   },
-   "group": "H",
-   "group_context": {
-    "projected_tie": false,
-    "reason": null,
-    "tied_with": []
-   },
-   "knockout_context": {
-    "deciding_tie": {
-     "away": "Argentina",
-     "date": null,
-     "ft": null,
-     "home": "Spain",
-     "match_no": 104,
-     "model_split_90min": {
-      "basis": "1X2_90min",
-      "draw": 0.3002,
-      "opp_win": 0.3257,
-      "team_win": 0.3741
-     },
-     "opponent": "Argentina",
-     "played": false,
-     "round": "Final",
-     "scoreline_orientation": "home-away",
-     "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
-     "tie_status": "projected",
-     "top_scoreline": "1-1",
-     "top_scoreline_prob": 0.141
-    },
-    "deciding_tie_reason": null,
-    "next_match": {
-     "away": "Spain",
-     "date": "2026-07-14",
-     "ft": null,
-     "home": "France",
-     "match_no": 101,
-     "model_split_90min": {
-      "basis": "1X2_90min",
-      "draw": 0.2992,
-      "opp_win": 0.3248,
-      "team_win": 0.376
-     },
-     "opponent": "France",
-     "played": false,
-     "round": "Semi-finals",
-     "scoreline_orientation": "home-away",
-     "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
-     "tie_status": "real",
-     "top_scoreline": "1-1",
-     "top_scoreline_prob": 0.139
-    },
-    "next_match_reason": null
-   },
-   "leg_state": "undecided",
-   "market": "advancement",
-   "market_label": "Win tournament \u00b7 incl. ET+pens",
-   "model_prob": 0.3135,
-   "model_source": "advancement_data.teams[Spain].model[win]",
-   "orderflow": {
-    "avg_trade_usd": 447.0,
-    "buy_pressure": 0.573,
-    "category": "winner",
-    "dumb_usd_share": 0.0157,
-    "honesty_notes": [
-     "Taker-side data only: data-api /trades names the taker wallet on each fill; maker identities (resting orders, market makers) are never seen, so buy_pressure and all wallet stats describe aggressive flow only.",
-     "The trades API hard-caps history at 3,000 rows offset per market; 361 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
-     "Open-position marks are LAST-TRADE prints, not order-book mids \u2014 thin tokens can carry stale or manipulated marks into mtm_pnl and ROI.",
-     "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
-     "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal."
-    ],
-    "hot": false,
-    "latency": {
-     "first30s_usd_share": 1.0,
-     "median_move_cents": 6.3,
-     "median_reprice_s": 0.0,
-     "n_jumps": 1,
-     "p90_reprice_s": 0.0
-    },
-    "n_trades": 486591,
-    "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
-    "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
-    "reason": null,
-    "signal_level": "category",
-    "smart_usd_share": 0.022,
-    "usd": 217507586.0
-   },
-   "origin": "advancement_data",
-   "pm_price": 0.2095,
-   "pm_price_source": "advancement_data.teams[Spain].pm[win].pm (YES mid)",
-   "position_prob": 0.3135,
-   "position_prob_source": "= model_prob",
-   "related_pm_ideas": {
-    "ideas": [],
-    "n": 0,
-    "reason": null
-   },
-   "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
-   "side": "YES",
-   "side_confidence": "explicit",
-   "side_note": "explicit side emitted by advancement_data (pm[stage].side)",
-   "side_source": "feed",
-   "stage": "win",
-   "team": "Spain",
-   "verdict": "WITHHOLD",
-   "verdict_reasons": [
-    "state-stale: earlier-round tie unsettled in sim (Spain vs Belgium, kicked off 2026-07-10)"
-   ]
-  },
-  {
-   "bet_rec": null,
-   "bucket": "mid",
-   "edge_adj": 0.0851,
+   "edge_adj": 0.0924,
    "edge_source": "advancement_data.teams[Argentina].pm[win].edge_adj (fee-adjusted edge of the feed-emitted side)",
    "gates": {
     "clv_history": {
@@ -1279,7 +1143,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 18.2h old > 3.0h max); site/pm_ideas.json (stale: 18.2h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 18.5h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1309,8 +1173,8 @@
     },
     "state_freshness": {
      "note": "sim conditioning set covers every kicked-off tie for this team (data/advancement_sim_pins.json sidecar; stamped by scripts/wca_advancement_data.py)",
-     "pass": false,
-     "reason": "state-stale: earlier-round tie unsettled in sim (Argentina vs Switzerland, kicked off 2026-07-11)"
+     "pass": true,
+     "reason": null
     }
    },
    "group": "J",
@@ -1368,7 +1232,7 @@
    "leg_state": "undecided",
    "market": "advancement",
    "market_label": "Win tournament \u00b7 incl. ET+pens",
-   "model_prob": 0.2614,
+   "model_prob": 0.2707,
    "model_source": "advancement_data.teams[Argentina].model[win]",
    "orderflow": {
     "avg_trade_usd": 447.0,
@@ -1399,9 +1263,9 @@
     "usd": 217507586.0
    },
    "origin": "advancement_data",
-   "pm_price": 0.1715,
+   "pm_price": 0.1735,
    "pm_price_source": "advancement_data.teams[Argentina].pm[win].pm (YES mid)",
-   "position_prob": 0.2614,
+   "position_prob": 0.2707,
    "position_prob_source": "= model_prob",
    "related_pm_ideas": {
     "ideas": [
@@ -1427,16 +1291,182 @@
    "side_source": "feed",
    "stage": "win",
    "team": "Argentina",
-   "verdict": "WITHHOLD",
+   "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "state-stale: earlier-round tie unsettled in sim (Argentina vs Switzerland, kicked off 2026-07-11)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
+   ]
+  },
+  {
+   "bet_rec": {
+    "action_label": "ADD",
+    "currency": "USD",
+    "ev_net": 0.088,
+    "id": "spain_win_pm",
+    "pm_fee": 0.005,
+    "source": "bet_recs.advancement_futures[spain_win_pm]",
+    "stake": 45.99
+   },
+   "bucket": "mid",
+   "edge_adj": 0.0875,
+   "edge_source": "advancement_data.teams[Spain].pm[win].edge_adj (fee-adjusted edge of the feed-emitted side)",
+   "gates": {
+    "clv_history": {
+     "pass": false,
+     "reason": "BLOCKED: durable PM/odds price history for advancement markets is stale/missing and no CLV stamping / price capture exists for them (no fixed close; convergence metrics still COLLECTING). Live-money gate: a market without price capture + CLV stamping does not get real money \u2014 ANY real-money upgrade first needs price/CLV capture restored. This desk is SHADOW-ONLY until that plumbing ships."
+    },
+    "edge": {
+     "note": "threshold 0.02 replicated from scripts/wca_betrecs.py MIN_EDGE",
+     "pass": true,
+     "reason": null
+    },
+    "freshness": {
+     "pass": false,
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
+    },
+    "min_prob_cash": {
+     "pass": true,
+     "reason": null
+    },
+    "orderflow": {
+     "note": "contextual only \u2014 may upgrade confidence, must never turn a negative model edge into a trade",
+     "pass": true,
+     "reason": null
+    },
+    "price_present": {
+     "pass": true,
+     "reason": null
+    },
+    "projection": {
+     "pass": false,
+     "reason": "deciding Final tie (Spain vs Argentina) is PROJECTED \u2014 the pairing is a model projection, not a fixed fixture"
+    },
+    "settlement": {
+     "note": "model advancement prob vs PM advancement quote \u2014 same settlement basis (ET+pens). Embedded 90-min splits are tagged 1X2_90min and are context only, never compared with PM advancement prices as if they settle the same.",
+     "pass": true,
+     "reason": null
+    },
+    "side_attribution": {
+     "pass": true,
+     "reason": null
+    },
+    "state_freshness": {
+     "note": "sim conditioning set covers every kicked-off tie for this team (data/advancement_sim_pins.json sidecar; stamped by scripts/wca_advancement_data.py)",
+     "pass": true,
+     "reason": null
+    }
+   },
+   "group": "H",
+   "group_context": {
+    "projected_tie": false,
+    "reason": null,
+    "tied_with": []
+   },
+   "knockout_context": {
+    "deciding_tie": {
+     "away": "Argentina",
+     "date": null,
+     "ft": null,
+     "home": "Spain",
+     "match_no": 104,
+     "model_split_90min": {
+      "basis": "1X2_90min",
+      "draw": 0.3002,
+      "opp_win": 0.3257,
+      "team_win": 0.3741
+     },
+     "opponent": "Argentina",
+     "played": false,
+     "round": "Final",
+     "scoreline_orientation": "home-away",
+     "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
+     "tie_status": "projected",
+     "top_scoreline": "1-1",
+     "top_scoreline_prob": 0.141
+    },
+    "deciding_tie_reason": null,
+    "next_match": {
+     "away": "Spain",
+     "date": "2026-07-14",
+     "ft": null,
+     "home": "France",
+     "match_no": 101,
+     "model_split_90min": {
+      "basis": "1X2_90min",
+      "draw": 0.2992,
+      "opp_win": 0.3248,
+      "team_win": 0.376
+     },
+     "opponent": "France",
+     "played": false,
+     "round": "Semi-finals",
+     "scoreline_orientation": "home-away",
+     "settlement_basis": "1X2_90min (context only \u2014 never compare with PM advancement, which includes ET+pens)",
+     "tie_status": "real",
+     "top_scoreline": "1-1",
+     "top_scoreline_prob": 0.139
+    },
+    "next_match_reason": null
+   },
+   "leg_state": "undecided",
+   "market": "advancement",
+   "market_label": "Win tournament \u00b7 incl. ET+pens",
+   "model_prob": 0.3065,
+   "model_source": "advancement_data.teams[Spain].model[win]",
+   "orderflow": {
+    "avg_trade_usd": 447.0,
+    "buy_pressure": 0.573,
+    "category": "winner",
+    "dumb_usd_share": 0.0157,
+    "honesty_notes": [
+     "Taker-side data only: data-api /trades names the taker wallet on each fill; maker identities (resting orders, market makers) are never seen, so buy_pressure and all wallet stats describe aggressive flow only.",
+     "The trades API hard-caps history at 3,000 rows offset per market; 361 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
+     "Open-position marks are LAST-TRADE prints, not order-book mids \u2014 thin tokens can carry stale or manipulated marks into mtm_pnl and ROI.",
+     "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
+     "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal."
+    ],
+    "hot": false,
+    "latency": {
+     "first30s_usd_share": 1.0,
+     "median_move_cents": 6.3,
+     "median_reprice_s": 0.0,
+     "n_jumps": 1,
+     "p90_reprice_s": 0.0
+    },
+    "n_trades": 486591,
+    "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
+    "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
+    "reason": null,
+    "signal_level": "category",
+    "smart_usd_share": 0.022,
+    "usd": 217507586.0
+   },
+   "origin": "advancement_data",
+   "pm_price": 0.2135,
+   "pm_price_source": "advancement_data.teams[Spain].pm[win].pm (YES mid)",
+   "position_prob": 0.3065,
+   "position_prob_source": "= model_prob",
+   "related_pm_ideas": {
+    "ideas": [],
+    "n": 0,
+    "reason": null
+   },
+   "settlement_basis": "PM advancement includes ET+pens; 1X2 is 90 minutes only",
+   "side": "YES",
+   "side_confidence": "explicit",
+   "side_note": "explicit side emitted by advancement_data (pm[stage].side)",
+   "side_source": "feed",
+   "stage": "win",
+   "team": "Spain",
+   "verdict": "DO_NOT_TRADE",
+   "verdict_reasons": [
+    "stale/missing inputs: site/pm_ideas.json (stale: 18.6h old > 6.0h max)"
    ]
   },
   {
    "bet_rec": null,
    "book_edge": 0.0173,
    "book_edge_source": "bet_recs.withheld[england_vs_argentina_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 3.1889,
+   "book_price_decimal": 3.1899,
    "book_price_source": "bet_recs.withheld[england_vs_argentina_away_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
@@ -1518,13 +1548,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "England vs Argentina \u00b7 away \u00b7 settles at 90 min",
-   "model_prob": 0.3309,
+   "model_prob": 0.3308,
    "model_source": "bet_recs.withheld[england_vs_argentina_away_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.3309,
+   "position_prob": 0.3308,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1547,14 +1577,14 @@
   },
   {
    "bet_rec": null,
-   "book_edge": -0.0075,
+   "book_edge": -0.0076,
    "book_edge_source": "bet_recs.withheld[england_vs_argentina_draw_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 3.0585,
+   "book_price_decimal": 3.0548,
    "book_price_source": "bet_recs.withheld[england_vs_argentina_draw_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.0229,
+   "ev_net": -0.0231,
    "fixture": "England vs Argentina",
    "gates": {
     "clv_history": {
@@ -1564,7 +1594,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge -0.0075 not above the 0.02 threshold"
+     "reason": "book edge -0.0076 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": false,
@@ -1631,13 +1661,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "England vs Argentina \u00b7 draw \u00b7 settles at 90 min",
-   "model_prob": 0.3195,
+   "model_prob": 0.3198,
    "model_source": "bet_recs.withheld[england_vs_argentina_draw_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.3195,
+   "position_prob": 0.3198,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1654,20 +1684,20 @@
    "team": "Draw",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:-0.0075<0.0200"
+    "withheld by bet_recs: edge_below_floor:-0.0076<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:-0.0075<0.0200"
+   "withheld_reason": "edge_below_floor:-0.0076<0.0200"
   },
   {
    "bet_rec": null,
-   "book_edge": -0.0098,
+   "book_edge": -0.0097,
    "book_edge_source": "bet_recs.withheld[england_vs_argentina_home_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 2.7821,
+   "book_price_decimal": 2.7843,
    "book_price_source": "bet_recs.withheld[england_vs_argentina_home_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.0272,
+   "ev_net": -0.0271,
    "fixture": "England vs Argentina",
    "gates": {
     "clv_history": {
@@ -1677,7 +1707,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge -0.0098 not above the 0.02 threshold"
+     "reason": "book edge -0.0097 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": false,
@@ -1744,13 +1774,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "England vs Argentina \u00b7 home \u00b7 settles at 90 min",
-   "model_prob": 0.3497,
+   "model_prob": 0.3494,
    "model_source": "bet_recs.withheld[england_vs_argentina_home_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.3497,
+   "position_prob": 0.3494,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1767,20 +1797,20 @@
    "team": "England",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:-0.0098<0.0200"
+    "withheld by bet_recs: edge_below_floor:-0.0097<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:-0.0098<0.0200"
+   "withheld_reason": "edge_below_floor:-0.0097<0.0200"
   },
   {
    "bet_rec": null,
    "book_edge": -0.0037,
    "book_edge_source": "bet_recs.withheld[france_vs_spain_draw_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 3.3445,
+   "book_price_decimal": 3.3451,
    "book_price_source": "bet_recs.withheld[france_vs_spain_draw_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.0125,
+   "ev_net": -0.0124,
    "fixture": "France vs Spain",
    "gates": {
     "clv_history": {
@@ -1857,13 +1887,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "France vs Spain \u00b7 draw \u00b7 settles at 90 min",
-   "model_prob": 0.2953,
+   "model_prob": 0.2952,
    "model_source": "bet_recs.withheld[france_vs_spain_draw_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.2953,
+   "position_prob": 0.2952,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1886,14 +1916,14 @@
   },
   {
    "bet_rec": null,
-   "book_edge": -0.017,
+   "book_edge": -0.0173,
    "book_edge_source": "bet_recs.withheld[france_vs_spain_home_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 2.5015,
+   "book_price_decimal": 2.4913,
    "book_price_source": "bet_recs.withheld[france_vs_spain_home_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.0424,
+   "ev_net": -0.0431,
    "fixture": "France vs Spain",
    "gates": {
     "clv_history": {
@@ -1903,7 +1933,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge -0.0170 not above the 0.02 threshold"
+     "reason": "book edge -0.0173 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": false,
@@ -1970,13 +2000,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "France vs Spain \u00b7 home \u00b7 settles at 90 min",
-   "model_prob": 0.3828,
+   "model_prob": 0.3841,
    "model_source": "bet_recs.withheld[france_vs_spain_home_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.3828,
+   "position_prob": 0.3841,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1993,9 +2023,9 @@
    "team": "France",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:-0.0170<0.0200"
+    "withheld by bet_recs: edge_below_floor:-0.0173<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:-0.0170<0.0200"
+   "withheld_reason": "edge_below_floor:-0.0173<0.0200"
   }
  ]
 }
