@@ -6,7 +6,7 @@
  "freshness": {
   "checks": [
    {
-    "age_secs": 6987.0,
+    "age_secs": 9009.0,
     "max_age_secs": 10800,
     "name": "advancement",
     "pass": true,
@@ -21,7 +21,7 @@
     "pass": true,
     "reason": null,
     "source": "site/bet_recs.json",
-    "stamp": "2026-07-14 12:58:57 UTC"
+    "stamp": "2026-07-14 13:32:39 UTC"
    },
    {
     "age_secs": 31.0,
@@ -30,28 +30,28 @@
     "pass": true,
     "reason": null,
     "source": "site/scores_markets.json",
-    "stamp": "2026-07-14 12:58:27 UTC"
+    "stamp": "2026-07-14 13:32:09 UTC"
    },
    {
-    "age_secs": 73132.0,
+    "age_secs": 75154.0,
     "max_age_secs": 21600,
     "name": "pm_ideas",
     "pass": false,
-    "reason": "stale: 20.3h old > 6.0h max",
+    "reason": "stale: 20.9h old > 6.0h max",
     "source": "site/pm_ideas.json",
     "stamp": "2026-07-13T16:40:06Z"
    },
    {
-    "age_secs": 1936.7,
+    "age_secs": 303.2,
     "max_age_secs": 86400,
     "name": "orderflow",
     "pass": true,
     "reason": null,
     "source": "site/microstructure/orderflow.json",
-    "stamp": "2026-07-14T12:26:41.316661+00:00"
+    "stamp": "2026-07-14T13:27:36.814266+00:00"
    },
    {
-    "age_secs": 7198.0,
+    "age_secs": 9220.0,
     "max_age_secs": 50400,
     "name": "advancement_model",
     "pass": true,
@@ -72,7 +72,7 @@
   "pass": false
  },
  "meta": {
-  "advancement_model_age_hours": 2.0,
+  "advancement_model_age_hours": 2.56,
   "advancement_model_generated": "2026-07-14 10:59 UTC",
   "caveats": [
    "SHADOW-ONLY: decision-support feed; no verdict here is a trade instruction and nothing is wired to execution.",
@@ -84,7 +84,7 @@
    "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
    "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal.",
    "orderflow history truncated for n=361 markets (data-api 3k-row cap) \u2014 flow aggregates there are incomplete; buy-pressure/share numbers are context only",
-   "freshness gate FAILED for site/pm_ideas.json \u2014 stale: 20.3h old > 6.0h max"
+   "freshness gate FAILED for site/pm_ideas.json \u2014 stale: 20.9h old > 6.0h max"
   ],
   "edge_gate": {
    "min_edge_adj": 0.02,
@@ -98,7 +98,7 @@
    "site/pm_ideas.json": 21600,
    "site/scores_markets.json": 10800
   },
-  "generated_at": "2026-07-14T12:58:58Z",
+  "generated_at": "2026-07-14T13:32:40Z",
   "n_advancement_legs_without_pm_quote": 0,
   "n_by_verdict": {
    "DO_NOT_TRADE": 8,
@@ -139,10 +139,10 @@
   "shadow_only": true,
   "sources": {
    "site/advancement_data.json": "2026-07-14 11:02:31 UTC",
-   "site/bet_recs.json": "2026-07-14 12:58:57 UTC",
-   "site/microstructure/orderflow.json": "2026-07-14T12:26:41.316661+00:00",
+   "site/bet_recs.json": "2026-07-14 13:32:39 UTC",
+   "site/microstructure/orderflow.json": "2026-07-14T13:27:36.814266+00:00",
    "site/pm_ideas.json": "2026-07-13T16:40:06Z",
-   "site/scores_markets.json": "2026-07-14 12:58:27 UTC"
+   "site/scores_markets.json": "2026-07-14 13:32:09 UTC"
   },
   "verdict_enum": [
    "SHADOW_ADD",
@@ -175,7 +175,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -293,7 +293,7 @@
    "team": "France",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
    ]
   },
   {
@@ -313,7 +313,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -443,7 +443,7 @@
    "team": "England",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
    ]
   },
   {
@@ -463,7 +463,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -601,7 +601,7 @@
    "team": "France",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
    ]
   },
   {
@@ -629,7 +629,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -767,7 +767,7 @@
    "team": "Spain",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
    ]
   },
   {
@@ -795,7 +795,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -945,7 +945,7 @@
    "team": "Argentina",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
    ]
   },
   {
@@ -965,7 +965,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1115,7 +1115,7 @@
    "team": "England",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
    ]
   },
   {
@@ -1143,7 +1143,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1293,7 +1293,7 @@
    "team": "Argentina",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
    ]
   },
   {
@@ -1321,7 +1321,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+     "reason": "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1459,7 +1459,7 @@
    "team": "Spain",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/pm_ideas.json (stale: 20.3h old > 6.0h max)"
+    "stale/missing inputs: site/pm_ideas.json (stale: 20.9h old > 6.0h max)"
    ]
   },
   {
@@ -1803,14 +1803,14 @@
   },
   {
    "bet_rec": null,
-   "book_edge": -0.0046,
+   "book_edge": -0.0052,
    "book_edge_source": "bet_recs.withheld[france_vs_spain_draw_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 3.2946,
+   "book_price_decimal": 3.265,
    "book_price_source": "bet_recs.withheld[france_vs_spain_draw_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.0153,
+   "ev_net": -0.0169,
    "fixture": "France vs Spain",
    "gates": {
     "clv_history": {
@@ -1820,7 +1820,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge -0.0046 not above the 0.02 threshold"
+     "reason": "book edge -0.0052 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": false,
@@ -1887,13 +1887,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "France vs Spain \u00b7 draw \u00b7 settles at 90 min",
-   "model_prob": 0.2989,
+   "model_prob": 0.3011,
    "model_source": "bet_recs.withheld[france_vs_spain_draw_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.2989,
+   "position_prob": 0.3011,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1910,20 +1910,20 @@
    "team": "Draw",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:-0.0046<0.0200"
+    "withheld by bet_recs: edge_below_floor:-0.0052<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:-0.0046<0.0200"
+   "withheld_reason": "edge_below_floor:-0.0052<0.0200"
   },
   {
    "bet_rec": null,
-   "book_edge": -0.0174,
+   "book_edge": -0.0169,
    "book_edge_source": "bet_recs.withheld[france_vs_spain_home_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 2.4875,
+   "book_price_decimal": 2.5024,
    "book_price_source": "bet_recs.withheld[france_vs_spain_home_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.0433,
+   "ev_net": -0.0424,
    "fixture": "France vs Spain",
    "gates": {
     "clv_history": {
@@ -1933,7 +1933,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge -0.0174 not above the 0.02 threshold"
+     "reason": "book edge -0.0169 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": false,
@@ -2000,13 +2000,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "France vs Spain \u00b7 home \u00b7 settles at 90 min",
-   "model_prob": 0.3846,
+   "model_prob": 0.3827,
    "model_source": "bet_recs.withheld[france_vs_spain_home_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.3846,
+   "position_prob": 0.3827,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -2023,9 +2023,9 @@
    "team": "France",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:-0.0174<0.0200"
+    "withheld by bet_recs: edge_below_floor:-0.0169<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:-0.0174<0.0200"
+   "withheld_reason": "edge_below_floor:-0.0169<0.0200"
   }
  ]
 }
