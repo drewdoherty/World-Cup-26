@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-14 17:32:07 UTC",
+    "generated": "2026-07-14 18:05:53 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 1862,
-      "advancement_secs": 23376,
+      "model_secs": 1705,
+      "advancement_secs": 25402,
       "price_secs": null,
-      "promo_secs": 372283,
+      "promo_secs": 374309,
       "exposure_secs": null
     },
     "coverage": {
@@ -50,52 +50,10 @@
       "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($4106).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
-    "actionable_count": 1,
-    "withheld_count": 18
+    "actionable_count": 0,
+    "withheld_count": 19
   },
-  "match_singles": [
-    {
-      "id": "france_vs_spain_away_1x2",
-      "fixture": "France vs Spain",
-      "kickoff": "2026-07-14 19:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "market_kind": "result_90",
-      "market_label": "90-min 1X2 (+ stoppage)",
-      "selection": "away",
-      "team": "Spain",
-      "venue": "smarkets",
-      "currency": "GBP",
-      "model_prob": 0.3235,
-      "price": 3.2974,
-      "price_source": "devig_consensus",
-      "edge": 0.0203,
-      "ev_net": 0.0669,
-      "stake": 23.75,
-      "action_label": "ADD",
-      "current_exposure": {
-        "fixture_open": false
-      },
-      "proposed_risk": {
-        "stake": 23.75,
-        "max_loss": 23.75
-      },
-      "promo": null,
-      "promo_status": null,
-      "ages": {
-        "model_secs": 1862,
-        "price_secs": 1862,
-        "exposure_secs": null
-      },
-      "stale": false,
-      "stale_reason": null,
-      "tags": [
-        "model",
-        "1X2",
-        "devig_price"
-      ]
-    }
-  ],
+  "match_singles": [],
   "event_props": [],
   "advancement_futures": [],
   "guaranteed_arbs": [],
@@ -108,13 +66,13 @@
       "market": "1X2",
       "selection": "home",
       "team": "France",
-      "model_prob": 0.3736,
-      "price": 2.5756,
-      "edge": -0.0147,
-      "ev_net": -0.0377,
+      "model_prob": 0.3656,
+      "price": 2.6441,
+      "edge": -0.0126,
+      "ev_net": -0.0334,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "edge_below_floor:-0.0147<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0126<0.0200",
       "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
@@ -127,13 +85,32 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.3029,
-      "price": 3.2418,
-      "edge": -0.0056,
-      "ev_net": -0.0182,
+      "model_prob": 0.306,
+      "price": 3.2008,
+      "edge": -0.0064,
+      "ev_net": -0.0205,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "edge_below_floor:-0.0056<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0064<0.0200",
+      "reason_code": "edge_below_floor",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "france_vs_spain_away_1x2",
+      "fixture": "France vs Spain",
+      "kickoff": "2026-07-14 19:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "away",
+      "team": "Spain",
+      "model_prob": 0.3284,
+      "price": 3.2323,
+      "edge": 0.0191,
+      "ev_net": 0.0616,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "edge_below_floor:0.0191<0.0200",
       "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
@@ -146,13 +123,13 @@
       "market": "1X2",
       "selection": "home",
       "team": "England",
-      "model_prob": 0.3497,
-      "price": 2.7812,
-      "edge": -0.0098,
-      "ev_net": -0.0273,
+      "model_prob": 0.3468,
+      "price": 2.8098,
+      "edge": -0.0091,
+      "ev_net": -0.0255,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "edge_below_floor:-0.0098<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0091<0.0200",
       "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
@@ -165,13 +142,13 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.3184,
-      "price": 3.0712,
-      "edge": -0.0072,
-      "ev_net": -0.0221,
+      "model_prob": 0.3212,
+      "price": 3.0386,
+      "edge": -0.0079,
+      "ev_net": -0.024,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "edge_below_floor:-0.0072<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0079<0.0200",
       "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
@@ -184,10 +161,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Argentina",
-      "model_prob": 0.3319,
-      "price": 3.1762,
+      "model_prob": 0.332,
+      "price": 3.1746,
       "edge": 0.017,
-      "ev_net": 0.054,
+      "ev_net": 0.0539,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "edge_below_floor:0.0170<0.0200",
@@ -288,8 +265,8 @@
       "stake": 65.71,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 23376,
-        "price_secs": 23376
+        "model_secs": 25402,
+        "price_secs": 25402
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -329,8 +306,8 @@
       "stake": 45.99,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 23376,
-        "price_secs": 23376
+        "model_secs": 25402,
+        "price_secs": 25402
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -370,8 +347,8 @@
       "stake": 65.87,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 23376,
-        "price_secs": 23376
+        "model_secs": 25402,
+        "price_secs": 25402
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",
@@ -411,8 +388,8 @@
       "stake": 46.29,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 23376,
-        "price_secs": 23376
+        "model_secs": 25402,
+        "price_secs": 25402
       },
       "stale": true,
       "stale_reason": "advancement feed stale (>6h) \u2014 teams may be eliminated; re-run before acting",

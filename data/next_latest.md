@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-14T17:01:05 -->
+<!-- generated: 2026-07-14T17:37:28 -->
 ⚽ *Next match* — France vs Spain
 Kickoff 2026-07-14 19:00:00+00:00
 
 *Winner* (model blend)
-  Spain          model 32.4% · mkt 30.3% (matchbook)  EV +6.8% ✅+EV  $31.94
-  Draw           model 30.3% · mkt 30.3% (sport888)  EV -0.1% ❌−EV
-  France         model 37.4% · mkt 38.2% (betfair_ex_uk)  EV -2.1% ❌−EV
+  Spain          model 32.8% · mkt 30.8% (betfair_ex_uk)  EV +6.7% ✅+EV  $32.51
+  Draw           model 30.6% · mkt 30.3% (sport888)  EV +1.0% ✅+EV (below +2% gate)  $4.64
+  France         model 36.6% · mkt 37.6% (betfair_ex_uk)  EV -2.8% ❌−EV
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.6)
@@ -21,5 +21,5 @@ _top anytime, mkt implied % (both teams — add squad to split + FGS; no model p
   Mikel Oyarzabal      mkt 26% (Betfair)
 
 *Scorelines* (top 6)
-1-1 14.4% | 1-0 10.4% | 0-0 9.2% | 2-1 8.9% | 0-1 8.0% | 1-2 6.7%
-  O/U 2.5: over 45.7% / under 54.3%   BTTS 52.8%
+1-1 14.6% | 1-0 10.2% | 0-0 9.3% | 2-1 8.7% | 0-1 8.1% | 1-2 6.8%
+  O/U 2.5: over 45.6% / under 54.4%   BTTS 52.8%
