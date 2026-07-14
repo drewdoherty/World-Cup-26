@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-14 01:13:42 UTC"
+    "generated": "2026-07-14 01:47:20 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -15,7 +15,7 @@
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.1352,
+        "prob": 0.135,
         "results": [
           "France",
           "England"
@@ -23,7 +23,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1229,
+        "prob": 0.1227,
         "results": [
           "France",
           "Draw"
@@ -31,7 +31,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1272,
+        "prob": 0.127,
         "results": [
           "France",
           "Argentina"
@@ -39,7 +39,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1028,
+        "prob": 0.1027,
         "results": [
           "Draw",
           "England"
@@ -47,7 +47,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0934,
+        "prob": 0.0933,
         "results": [
           "Draw",
           "Draw"
@@ -57,7 +57,7 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.1352,
+        "prob": 0.135,
         "results": [
           "France",
           "England"
@@ -65,7 +65,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1229,
+        "prob": 0.1227,
         "results": [
           "France",
           "Draw"
@@ -73,7 +73,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1272,
+        "prob": 0.127,
         "results": [
           "France",
           "Argentina"
@@ -111,7 +111,7 @@
       "results": [
         {
           "outcome": "France",
-          "prob": 0.3852,
+          "prob": 0.3847,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -120,7 +120,7 @@
         },
         {
           "outcome": "Draw",
-          "prob": 0.2928,
+          "prob": 0.2927,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -129,7 +129,7 @@
         },
         {
           "outcome": "Spain",
-          "prob": 0.322,
+          "prob": 0.3226,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -161,10 +161,10 @@
           "plug": {
             "available": true,
             "outcome": "England",
-            "best_venue": "matchbook",
-            "best_odds": 2.78,
+            "best_venue": "smarkets",
+            "best_odds": 2.76,
             "model_prob": 0.351,
-            "ev_pct": -2.4,
+            "ev_pct": -3.1,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
@@ -188,7 +188,7 @@
         },
         {
           "outcome": "Argentina",
-          "prob": 0.3301,
+          "prob": 0.33,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -197,9 +197,9 @@
           "plug": {
             "available": true,
             "outcome": "Argentina",
-            "best_venue": "betfair_ex_uk",
+            "best_venue": "matchbook",
             "best_odds": 3.2,
-            "model_prob": 0.3301,
+            "model_prob": 0.33,
             "ev_pct": 5.6,
             "recommendation": "PLUG: +EV to back (5.6% edge) \u2014 fills the gap and adds value"
           }
@@ -233,24 +233,24 @@
       "plug": {
         "available": true,
         "outcome": "England",
-        "best_venue": "matchbook",
-        "best_odds": 2.78,
+        "best_venue": "smarkets",
+        "best_odds": 2.76,
         "model_prob": 0.351,
-        "ev_pct": -2.4,
+        "ev_pct": -3.1,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
     {
       "fixture": "England vs Argentina",
       "outcome": "Argentina",
-      "prob": 0.3301,
+      "prob": 0.33,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Argentina",
-        "best_venue": "betfair_ex_uk",
+        "best_venue": "matchbook",
         "best_odds": 3.2,
-        "model_prob": 0.3301,
+        "model_prob": 0.33,
         "ev_pct": 5.6,
         "recommendation": "PLUG: +EV to back (5.6% edge) \u2014 fills the gap and adds value"
       }
