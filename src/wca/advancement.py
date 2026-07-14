@@ -47,7 +47,7 @@ World Cup Group <X> Winner                  group_position 1st  finished 1st in 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, FrozenSet, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Dict, FrozenSet, List, Mapping, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -94,6 +94,17 @@ HOST_NATIONS: Tuple[str, ...] = ("United States", "Mexico", "Canada")
 
 # Stage ordering used for reporting / monotonicity, best (easiest) first.
 STAGE_ORDER: Tuple[str, ...] = ("R32", "R16", "QF", "SF", "F", "win")
+
+# A tie played AT stage s sends its winner to _NEXT_STAGE[s]. Used by the
+# bracket-consistency validator (:func:`stage_prob_consistency`).
+_NEXT_STAGE: Dict[str, str] = dict(zip(STAGE_ORDER[:-1], STAGE_ORDER[1:]))
+
+# Default tolerance for :func:`stage_prob_consistency`. MC noise on a reach
+# probability at 20k sims is ~±0.7pp at p=0.5 (2σ binomial), and the per-tie
+# complementarity sum is exact in a correctly-conditioned sim (one of the two
+# participants advances in EVERY sim path), so ±2pp is generous — a violation
+# means the sim's bracket conditioning is broken, not sampling noise.
+CONSISTENCY_DEFAULT_TOLERANCE: float = 0.02
 
 # Strictly NESTED advancement chain for one team: win ⊂ F ⊂ SF ⊂ QF ⊂ R16 ⊂ R32
 # (reaching a deeper stage implies reaching every shallower one). Group-winner
@@ -606,6 +617,7 @@ def knockout_state_staleness(
     results_path: Optional[str] = None,
     results_json_path: Optional[str] = None,
     now: Optional[pd.Timestamp] = None,
+    propagate: bool = True,
 ) -> Dict[str, str]:
     """Map team -> withheld-reason for teams whose KO state the sim has NOT settled.
 
@@ -627,13 +639,31 @@ def knockout_state_staleness(
       NA rows are NOT flagged (date-only granularity: kickoff may still be
       ahead).
 
+    Transitive contamination — ONE bracket hop (fix 2026-07-13, ``propagate``,
+    default ON): the sim pins knockout ties by TEAM-PAIR
+    (``tournament2026._play_ko``: ``self._fixed_ko.get(frozenset((ta, tb)))``),
+    so a pin only binds in sim branches where BOTH recorded participants
+    actually arrive at the tie. When a team's own kicked-off tie IS pinned but
+    its pinned opponent is direct-flagged (the opponent's arrival path is
+    unresolved), the pin silently un-anchors in the branches where a different
+    opponent shows up — observed live 2026-07-13: with R16 Morocco–Netherlands
+    unpinned (stale shootouts.csv), sim branches where Netherlands advanced
+    produced a France–Netherlands QF, France's pinned QF win did not apply, and
+    France showed P(SF)=0.5691 (Argentina 0.72) despite both having already
+    won their QFs — and neither carried a flag. Such teams now get a distinct
+    ``state-stale (propagated)`` reason. Propagation is conservative: one hop,
+    only along knockout ties present in the kicked-off evidence set (never
+    invented bracket structure), and only FROM direct flags (a propagated flag
+    does not itself propagate).
+
     ``pinned=None`` means the sim's conditioning set is UNKNOWN (e.g. a legacy
     cache without pin metadata) and is treated as empty — fail closed.
 
     Returns
     -------
     ``{team: reason}`` for every affected team (canonical names); empty when the
-    sim's state is complete.
+    sim's state is complete. Direct reasons win over propagated ones when a
+    team qualifies for both.
     """
     grp = groups if groups is not None else WC2026_GROUPS
     team_to_group = {t: g for g, ts in grp.items() for t in ts}
@@ -677,21 +707,202 @@ def knockout_state_staleness(
     for c in _played_wc2026_json_rows(results_json_path):
         kicked_off.append((c["home"], c["away"], c.get("when")))
 
-    out: Dict[str, str] = {}
+    direct: Dict[str, str] = {}
+    direct_detail: Dict[str, str] = {}
+    pinned_kicked_off: List[Tuple[str, str]] = []
     for home, away, when in kicked_off:
         gh, ga = team_to_group.get(home), team_to_group.get(away)
         if gh is None or ga is None or gh == ga:
             continue  # not a knockout tie between 2026 teams
         if frozenset((home, away)) in pinned_pairs:
-            continue  # settled in the sim's conditioning set
+            # Settled in the sim's conditioning set — no direct flag, but keep
+            # the tie as a propagation edge: the pair-keyed pin only binds in
+            # sim branches where BOTH recorded participants actually arrive.
+            pinned_kicked_off.append((home, away))
+            continue
         date_s = when.strftime("%Y-%m-%d") if pd.notna(when) else "date unknown"
-        reason = (
-            "state-stale: earlier-round tie unsettled in sim "
-            "(%s vs %s, kicked off %s)" % (home, away, date_s)
-        )
-        out.setdefault(home, reason)
-        out.setdefault(away, reason)
+        detail = "%s vs %s, kicked off %s" % (home, away, date_s)
+        reason = "state-stale: earlier-round tie unsettled in sim (%s)" % detail
+        direct.setdefault(home, reason)
+        direct.setdefault(away, reason)
+        direct_detail.setdefault(home, detail)
+        direct_detail.setdefault(away, detail)
+
+    out: Dict[str, str] = dict(direct)
+    if propagate:
+        # One bracket hop (fix 2026-07-13, the France case): a pinned tie whose
+        # pinned opponent is direct-flagged un-anchors in the sim branches where
+        # that opponent's unresolved path sends someone else to the tie, so the
+        # team's own probabilities are contaminated too. Direct reasons win;
+        # propagation never chains (only `direct` membership is consulted).
+        for home, away in pinned_kicked_off:
+            for team, opp in ((home, away), (away, home)):
+                if opp in direct and team not in out:
+                    out[team] = (
+                        "state-stale (propagated): pinned tie vs %s, but %s's "
+                        "own path is unsettled in sim (%s)"
+                        % (opp, opp, direct_detail[opp])
+                    )
     return out
+
+
+def _sim_stage_probs(
+    sim: Union[pd.DataFrame, Sequence[Mapping[str, Any]]],
+) -> Dict[str, Any]:
+    """Normalise sim output to ``{team: row}`` (row supports ``.get(col)``).
+
+    Accepts the :func:`run_advancement` DataFrame (indexed by team) or a
+    sequence of record dicts carrying ``team`` plus the ``P(R32)``..``P(win)``
+    columns (the shape cached in ``data/advancement_current_vs_pretournament
+    .json`` by ``scripts/wca_advancement_data.py``).
+    """
+    if isinstance(sim, pd.DataFrame):
+        return {str(t): sim.loc[t] for t in sim.index}
+    return {str(r.get("team")): r for r in sim}
+
+
+def _stage_prob(probs: Mapping[str, Any], team: str, col: str) -> float:
+    """``P(col)`` for ``team``, 0.0 when the team/column is missing or NaN.
+
+    A real bracket participant missing from the sim output contributes 0 and
+    therefore FAILS the complementarity sum — which is correct: the sim not
+    knowing a team that is actually in the bracket IS an inconsistency.
+    """
+    row = probs.get(str(team))
+    if row is None:
+        return 0.0
+    try:
+        v = row.get(col)
+    except AttributeError:
+        return 0.0
+    if v is None or pd.isna(v):
+        return 0.0
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def stage_prob_consistency(
+    sim: Union[pd.DataFrame, Sequence[Mapping[str, Any]]],
+    bracket_ties: Sequence[Any],
+    tolerance: float = CONSISTENCY_DEFAULT_TOLERANCE,
+    alive_teams: Optional[Sequence[str]] = None,
+    check_win_sum: bool = True,
+) -> Dict[str, Any]:
+    """Validate the sim output against the REAL bracket's complementarity laws.
+
+    Second line of defence behind :func:`knockout_state_staleness` (fix
+    2026-07-13). The staleness gate reasons about the sim's INPUTS (which
+    kicked-off ties are pinned); this validator checks the sim's OUTPUT
+    directly, so it catches any conditioning failure — including ones the
+    input-side gate cannot see. Live incident it exists for: with R16
+    Morocco–Netherlands missing from the pin set (stale
+    ``data/raw/shootouts.csv``), France's pinned QF win silently failed to
+    apply in sim branches where Netherlands advanced, so P(France reach SF)
+    printed 0.5691 despite France having ALREADY won its QF in reality — and
+    the SF-tie sums over the sim output expose exactly that.
+
+    Invariants checked (both exact in a correctly-conditioned sim, so the
+    default ±``tolerance`` of 0.02 is generous — see
+    :data:`CONSISTENCY_DEFAULT_TOLERANCE`):
+
+    * **Per undecided tie**: for a knockout tie between two KNOWN real teams
+      that has not yet been played, exactly one of the two advances in every
+      sim path, so their P(next stage) must sum to 1.0.
+    * **Terminal win-sum**: every sim crowns one champion, and with correct
+      conditioning that champion is always a still-alive team, so P(win)
+      summed over the alive set must be 1.0 (contamination leaks champion
+      mass to eliminated/phantom teams and drives the sum BELOW 1).
+
+    Parameters
+    ----------
+    sim:
+        :func:`run_advancement` DataFrame or the cached record dicts (see
+        :func:`_sim_stage_probs`).
+    bracket_ties:
+        The currently-undecided knockout ties, each either a tuple
+        ``(team_a, team_b, stage)`` or a mapping ``{"teams": (a, b),
+        "stage": s}`` where ``stage`` is the round the tie is PLAYED at
+        (``"R32"``/``"R16"``/``"QF"``/``"SF"``/``"F"``); the winner reaches
+        :data:`_NEXT_STAGE` [stage]. Team names must match the sim's index
+        (canonical names). An unknown stage raises ``ValueError``.
+    tolerance:
+        Max absolute deviation of each sum from 1.0.
+    alive_teams:
+        The full set of not-yet-eliminated teams for the win-sum check. When
+        ``None`` it defaults to the union of ``bracket_ties`` participants —
+        only correct when the undecided ties cover EVERY alive team (e.g. all
+        frontier-round ties undecided). Mid-round, pass the real alive set,
+        or ``check_win_sum=False`` when it cannot be determined.
+    check_win_sum:
+        Set False to skip the terminal win-sum check (e.g. when the alive set
+        is indeterminable because a played tie's winner is unknown).
+
+    Returns
+    -------
+    ``{"ok", "tolerance", "checked_ties", "ties", "win_sum", "failures"}`` —
+    ``ties`` is one ``{"teams", "stage", "next_stage", "sum", "ok"}`` entry
+    per checked tie; ``win_sum`` is ``{"check": "win_sum", "teams", "sum",
+    "ok"}`` or ``None`` when skipped; ``failures`` lists the failed entries;
+    ``ok`` is True iff nothing failed (trivially True with no ties). Pure:
+    no I/O, deterministic.
+    """
+    probs = _sim_stage_probs(sim)
+    ties: List[Dict[str, Any]] = []
+    failures: List[Dict[str, Any]] = []
+
+    for tie in bracket_ties:
+        if isinstance(tie, Mapping):
+            teams = [str(t) for t in (tie.get("teams") or ())]
+            stage = str(tie.get("stage"))
+        else:
+            teams = [str(t) for t in tie[:-1]]
+            stage = str(tie[-1])
+        if len(teams) != 2:
+            raise ValueError("bracket tie needs exactly two teams: %r" % (tie,))
+        nxt = _NEXT_STAGE.get(stage)
+        if nxt is None:
+            raise ValueError("unknown knockout stage %r in tie %r" % (stage, tie))
+        col = _STAGE_COL[nxt]
+        s = sum(_stage_prob(probs, t, col) for t in teams)
+        entry = {
+            "teams": teams,
+            "stage": stage,
+            "next_stage": nxt,
+            "sum": round(float(s), 4),
+            "ok": bool(abs(s - 1.0) <= tolerance),
+        }
+        ties.append(entry)
+        if not entry["ok"]:
+            failures.append(entry)
+
+    win_sum: Optional[Dict[str, Any]] = None
+    if check_win_sum:
+        alive = (
+            [str(t) for t in alive_teams]
+            if alive_teams is not None
+            else sorted({t for e in ties for t in e["teams"]})
+        )
+        if alive:
+            s = sum(_stage_prob(probs, t, _STAGE_COL["win"]) for t in alive)
+            win_sum = {
+                "check": "win_sum",
+                "teams": alive,
+                "sum": round(float(s), 4),
+                "ok": bool(abs(s - 1.0) <= tolerance),
+            }
+            if not win_sum["ok"]:
+                failures.append(win_sum)
+
+    return {
+        "ok": not failures,
+        "tolerance": float(tolerance),
+        "checked_ties": len(ties),
+        "ties": ties,
+        "win_sum": win_sum,
+        "failures": failures,
+    }
 
 
 def run_advancement(
