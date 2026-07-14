@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated": "2026-07-13 16:39:50 UTC",
-    "model_generated": "2026-07-13 16:20 UTC",
+    "generated": "2026-07-14 11:02:31 UTC",
+    "model_generated": "2026-07-14 10:59 UTC",
     "stages": [
       "R32",
       "R16",
@@ -11,8 +11,8 @@
       "win"
     ],
     "n_pm_markets": 8,
-    "n_ko_pinned": 24,
-    "n_state_stale": 8
+    "n_ko_pinned": 28,
+    "n_state_stale": 0
   },
   "teams": [
     {
@@ -23,8 +23,8 @@
         "R16": 1.0,
         "QF": 1.0,
         "SF": 1.0,
-        "Final": 0.5544,
-        "win": 0.3135,
+        "Final": 0.5489,
+        "win": 0.3065,
         "group_winner": 1.0
       },
       "bucket": {
@@ -37,47 +37,46 @@
         "group_winner": "moneyline"
       },
       "delta": {
-        "R32": 0.0077,
-        "R16": 0.243,
-        "QF": 0.4611,
-        "SF": 0.5814,
-        "Final": 0.2735,
-        "win": 0.1365,
-        "group_winner": 0.2191
+        "R32": 0.0091,
+        "R16": 0.2433,
+        "QF": 0.4593,
+        "SF": 0.5775,
+        "Final": 0.2666,
+        "win": 0.1302,
+        "group_winner": 0.2159
       },
       "pm": {
         "Final": {
           "pm": 0.405,
-          "edge_adj": 0.1371,
+          "edge_adj": 0.1316,
           "side": "YES",
           "ask": 0.41,
-          "stake_usd": 70.16,
-          "path_scale": 0.4396
+          "stake_usd": 65.71,
+          "path_scale": 0.4117
         },
         "win": {
-          "pm": 0.2095,
-          "edge_adj": 0.0985,
+          "pm": 0.2135,
+          "edge_adj": 0.0875,
           "side": "YES",
-          "ask": 0.21,
-          "stake_usd": 55.03,
-          "path_scale": 0.4396
+          "ask": 0.214,
+          "stake_usd": 45.99,
+          "path_scale": 0.4117
         }
       },
       "path_exposure": {
         "YES": {
-          "total_stake_usd": 125.19,
-          "total_stake_precap_usd": 284.79,
-          "cap_usd": 125.19,
+          "total_stake_usd": 111.7,
+          "total_stake_precap_usd": 271.3,
+          "cap_usd": 111.7,
           "cap_stage": "win",
-          "scale": 0.4396,
+          "scale": 0.4117,
           "scaling_applied": true,
           "stages": [
             "Final",
             "win"
           ]
         }
-      },
-      "state_stale_reason": "state-stale: earlier-round tie unsettled in sim (Spain vs Belgium, kicked off 2026-07-10)"
+      }
     },
     {
       "team": "Argentina",
@@ -87,8 +86,8 @@
         "R16": 1.0,
         "QF": 1.0,
         "SF": 1.0,
-        "Final": 0.5344,
-        "win": 0.2614,
+        "Final": 0.5438,
+        "win": 0.2707,
         "group_winner": 1.0
       },
       "bucket": {
@@ -101,47 +100,46 @@
         "group_winner": "moneyline"
       },
       "delta": {
-        "R32": 0.0108,
-        "R16": 0.3064,
-        "QF": 0.4531,
-        "SF": 0.6125,
-        "Final": 0.2968,
-        "win": 0.123,
-        "group_winner": 0.2063
+        "R32": 0.0097,
+        "R16": 0.2901,
+        "QF": 0.4368,
+        "SF": 0.5931,
+        "Final": 0.2928,
+        "win": 0.1197,
+        "group_winner": 0.195
       },
       "pm": {
         "Final": {
-          "pm": 0.4515,
-          "edge_adj": 0.075,
+          "pm": 0.4485,
+          "edge_adj": 0.0874,
           "side": "YES",
-          "ask": 0.452,
-          "stake_usd": 59.07,
-          "path_scale": 0.427
+          "ask": 0.449,
+          "stake_usd": 65.87,
+          "path_scale": 0.4127
         },
         "win": {
-          "pm": 0.1715,
-          "edge_adj": 0.0851,
+          "pm": 0.1735,
+          "edge_adj": 0.0924,
           "side": "YES",
-          "ask": 0.172,
-          "stake_usd": 44.02,
-          "path_scale": 0.427
+          "ask": 0.174,
+          "stake_usd": 46.29,
+          "path_scale": 0.4127
         }
       },
       "path_exposure": {
         "YES": {
-          "total_stake_usd": 103.09,
-          "total_stake_precap_usd": 241.42,
-          "cap_usd": 103.09,
+          "total_stake_usd": 112.16,
+          "total_stake_precap_usd": 271.76,
+          "cap_usd": 112.16,
           "cap_stage": "win",
-          "scale": 0.427,
+          "scale": 0.4127,
           "scaling_applied": true,
           "stages": [
             "Final",
             "win"
           ]
         }
-      },
-      "state_stale_reason": "state-stale: earlier-round tie unsettled in sim (Argentina vs Switzerland, kicked off 2026-07-11)"
+      }
     },
     {
       "team": "France",
@@ -151,8 +149,8 @@
         "R16": 1.0,
         "QF": 1.0,
         "SF": 1.0,
-        "Final": 0.4456,
-        "win": 0.2236,
+        "Final": 0.4511,
+        "win": 0.2256,
         "group_winner": 1.0
       },
       "bucket": {
@@ -165,26 +163,26 @@
         "group_winner": "moneyline"
       },
       "delta": {
-        "R32": 0.0225,
-        "R16": 0.2499,
-        "QF": 0.4946,
-        "SF": 0.6593,
-        "Final": 0.245,
-        "win": 0.1088,
-        "group_winner": 0.2909
+        "R32": 0.0204,
+        "R16": 0.2438,
+        "QF": 0.4856,
+        "SF": 0.6452,
+        "Final": 0.2416,
+        "win": 0.1077,
+        "group_winner": 0.2825
       },
       "pm": {
         "win": {
-          "pm": 0.3885,
+          "pm": 0.3905,
           "edge_adj": 0.1573,
           "side": "NO",
-          "ask": 0.612,
+          "ask": 0.61,
           "stake_usd": 79.8,
           "path_scale": 0.5
         },
         "Final": {
           "pm": 0.595,
-          "edge_adj": 0.1371,
+          "edge_adj": 0.1316,
           "side": "NO",
           "ask": 0.41,
           "stake_usd": 79.8,
@@ -204,8 +202,7 @@
             "win"
           ]
         }
-      },
-      "state_stale_reason": "state-stale: earlier-round tie unsettled in sim (France vs Morocco, kicked off 2026-07-09)"
+      }
     },
     {
       "team": "England",
@@ -215,8 +212,8 @@
         "R16": 1.0,
         "QF": 1.0,
         "SF": 1.0,
-        "Final": 0.4656,
-        "win": 0.2016,
+        "Final": 0.4561,
+        "win": 0.1972,
         "group_winner": 1.0
       },
       "bucket": {
@@ -229,47 +226,46 @@
         "group_winner": "moneyline"
       },
       "delta": {
-        "R32": 0.0201,
-        "R16": 0.284,
-        "QF": 0.4957,
-        "SF": 0.7014,
-        "Final": 0.2922,
-        "win": 0.1077,
-        "group_winner": 0.2917
+        "R32": 0.0195,
+        "R16": 0.2719,
+        "QF": 0.4863,
+        "SF": 0.6953,
+        "Final": 0.2822,
+        "win": 0.1038,
+        "group_winner": 0.2891
       },
       "pm": {
         "win": {
-          "pm": 0.2155,
-          "edge_adj": 0.0083,
+          "pm": 0.2165,
+          "edge_adj": 0.0137,
           "side": "NO",
-          "ask": 0.785,
-          "stake_usd": 30.1,
-          "path_scale": 0.7599
+          "ask": 0.784,
+          "stake_usd": 44.65,
+          "path_scale": 0.6882
         },
         "Final": {
           "pm": 0.545,
-          "edge_adj": 0.0669,
+          "edge_adj": 0.0764,
           "side": "NO",
           "ask": 0.46,
-          "stake_usd": 95.3,
-          "path_scale": 0.7599
+          "stake_usd": 98.54,
+          "path_scale": 0.6882
         }
       },
       "path_exposure": {
         "NO": {
-          "total_stake_usd": 125.4,
-          "total_stake_precap_usd": 165.01,
-          "cap_usd": 125.4,
+          "total_stake_usd": 143.19,
+          "total_stake_precap_usd": 208.08,
+          "cap_usd": 143.19,
           "cap_stage": "Final",
-          "scale": 0.7599,
+          "scale": 0.6882,
           "scaling_applied": true,
           "stages": [
             "Final",
             "win"
           ]
         }
-      },
-      "state_stale_reason": "state-stale: earlier-round tie unsettled in sim (Norway vs England, kicked off 2026-07-11)"
+      }
     },
     {
       "team": "Mexico",
@@ -293,13 +289,13 @@
         "group_winner": "moneyline"
       },
       "delta": {
-        "R32": 0.1046,
-        "R16": 0.4556,
-        "QF": -0.2289,
-        "SF": -0.081,
-        "Final": -0.029,
-        "win": -0.0093,
-        "group_winner": 0.4791
+        "R32": 0.1014,
+        "R16": 0.4526,
+        "QF": -0.2303,
+        "SF": -0.0832,
+        "Final": -0.0294,
+        "win": -0.0097,
+        "group_winner": 0.4741
       },
       "pm": {}
     },
@@ -325,13 +321,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.5736,
-        "R16": -0.1362,
-        "QF": -0.0302,
-        "SF": -0.004,
-        "Final": -0.0005,
+        "R32": 0.5685,
+        "R16": -0.138,
+        "QF": -0.0314,
+        "SF": -0.0052,
+        "Final": -0.0011,
         "win": -0.0001,
-        "group_winner": -0.082
+        "group_winner": -0.0842
       },
       "pm": {}
     },
@@ -357,13 +353,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.6933,
-        "R16": -0.3186,
-        "QF": -0.1037,
-        "SF": -0.0263,
-        "Final": -0.0069,
-        "win": -0.0018,
-        "group_winner": -0.1937
+        "R32": -0.6921,
+        "R16": -0.3241,
+        "QF": -0.108,
+        "SF": -0.0256,
+        "Final": -0.0063,
+        "win": -0.0014,
+        "group_winner": -0.1943
       },
       "pm": {}
     },
@@ -389,13 +385,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.7093,
-        "R16": -0.3336,
-        "QF": -0.1101,
-        "SF": -0.0305,
-        "Final": -0.008,
-        "win": -0.0019,
-        "group_winner": -0.2034
+        "R32": -0.6999,
+        "R16": -0.3294,
+        "QF": -0.1155,
+        "SF": -0.0307,
+        "Final": -0.0073,
+        "win": -0.0012,
+        "group_winner": -0.1956
       },
       "pm": {}
     },
@@ -421,13 +417,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.204,
-        "R16": 0.6734,
-        "QF": -0.0886,
-        "SF": -0.0176,
-        "Final": -0.004,
-        "win": -0.0013,
-        "group_winner": -0.2502
+        "R32": 0.2032,
+        "R16": 0.6664,
+        "QF": -0.0934,
+        "SF": -0.0188,
+        "Final": -0.0036,
+        "win": -0.0006,
+        "group_winner": -0.2621
       },
       "pm": {}
     },
@@ -453,13 +449,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.3532,
-        "R16": -0.2283,
+        "R32": 0.3578,
+        "R16": -0.2255,
         "QF": -0.0522,
-        "SF": -0.0079,
-        "Final": -0.0015,
-        "win": -0.0003,
-        "group_winner": -0.1366
+        "SF": -0.0077,
+        "Final": -0.0014,
+        "win": -0.0004,
+        "group_winner": -0.1391
       },
       "pm": {}
     },
@@ -485,13 +481,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.2899,
-        "R16": -0.0637,
-        "QF": -0.0089,
-        "SF": -0.0009,
-        "Final": -0.0001,
+        "R32": -0.3017,
+        "R16": -0.0654,
+        "QF": -0.0104,
+        "SF": -0.001,
+        "Final": -0.0002,
         "win": 0.0,
-        "group_winner": -0.0359
+        "group_winner": -0.0396
       },
       "pm": {}
     },
@@ -517,16 +513,15 @@
         "group_winner": "moneyline"
       },
       "delta": {
-        "R32": 0.0421,
-        "R16": 0.372,
-        "QF": 0.7101,
-        "SF": -0.1116,
-        "Final": -0.0428,
-        "win": -0.0157,
-        "group_winner": 0.4227
+        "R32": 0.0479,
+        "R16": 0.391,
+        "QF": 0.727,
+        "SF": -0.1002,
+        "Final": -0.0386,
+        "win": -0.0134,
+        "group_winner": 0.4408
       },
-      "pm": {},
-      "state_stale_reason": "state-stale: earlier-round tie unsettled in sim (Argentina vs Switzerland, kicked off 2026-07-11)"
+      "pm": {}
     },
     {
       "team": "Brazil",
@@ -550,13 +545,13 @@
         "group_winner": "moneyline"
       },
       "delta": {
-        "R32": 0.0101,
-        "R16": 0.2584,
-        "QF": -0.5508,
-        "SF": -0.3632,
-        "Final": -0.2243,
-        "win": -0.1293,
-        "group_winner": 0.2692
+        "R32": 0.0091,
+        "R16": 0.2526,
+        "QF": -0.5648,
+        "SF": -0.3747,
+        "Final": -0.2294,
+        "win": -0.1376,
+        "group_winner": 0.2599
       },
       "pm": {}
     },
@@ -582,16 +577,15 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.0996,
-        "R16": 0.5544,
-        "QF": 0.7519,
-        "SF": -0.1042,
-        "Final": -0.0406,
-        "win": -0.0152,
-        "group_winner": -0.2037
+        "R32": 0.1036,
+        "R16": 0.5597,
+        "QF": 0.7572,
+        "SF": -0.1022,
+        "Final": -0.0418,
+        "win": -0.0143,
+        "group_winner": -0.1966
       },
-      "pm": {},
-      "state_stale_reason": "state-stale: earlier-round tie unsettled in sim (France vs Morocco, kicked off 2026-07-09)"
+      "pm": {}
     },
     {
       "team": "Haiti",
@@ -615,13 +609,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.1229,
-        "R16": -0.0131,
-        "QF": -0.0018,
-        "SF": -0.0003,
+        "R32": -0.127,
+        "R16": -0.0141,
+        "QF": -0.0016,
+        "SF": -0.0002,
         "Final": 0.0,
         "win": 0.0,
-        "group_winner": -0.0049
+        "group_winner": -0.0053
       },
       "pm": {}
     },
@@ -647,13 +641,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.6565,
-        "R16": -0.2161,
-        "QF": -0.0742,
-        "SF": -0.0215,
-        "Final": -0.0052,
-        "win": -0.0011,
-        "group_winner": -0.0605
+        "R32": -0.6511,
+        "R16": -0.2133,
+        "QF": -0.0705,
+        "SF": -0.019,
+        "Final": -0.0046,
+        "win": -0.0009,
+        "group_winner": -0.058
       },
       "pm": {}
     },
@@ -679,13 +673,13 @@
         "group_winner": "moneyline"
       },
       "delta": {
-        "R32": 0.2902,
-        "R16": 0.6703,
-        "QF": -0.1041,
-        "SF": -0.0276,
-        "Final": -0.0073,
-        "win": -0.0018,
-        "group_winner": 0.7174
+        "R32": 0.2887,
+        "R16": 0.6649,
+        "QF": -0.1103,
+        "SF": -0.0283,
+        "Final": -0.0069,
+        "win": -0.0017,
+        "group_winner": 0.709
       },
       "pm": {}
     },
@@ -711,13 +705,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.3209,
-        "R16": 0.6779,
-        "QF": -0.1049,
-        "SF": -0.0318,
-        "Final": -0.0086,
-        "win": -0.0022,
-        "group_winner": -0.2407
+        "R32": 0.318,
+        "R16": 0.6692,
+        "QF": -0.1123,
+        "SF": -0.0327,
+        "Final": -0.0088,
+        "win": -0.002,
+        "group_winner": -0.244
       },
       "pm": {}
     },
@@ -743,13 +737,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.3448,
-        "R16": -0.3004,
-        "QF": -0.0996,
-        "SF": -0.0288,
-        "Final": -0.0076,
-        "win": -0.0018,
-        "group_winner": -0.216
+        "R32": 0.3397,
+        "R16": -0.3014,
+        "QF": -0.0959,
+        "SF": -0.0277,
+        "Final": -0.0073,
+        "win": -0.0021,
+        "group_winner": -0.2134
       },
       "pm": {}
     },
@@ -775,13 +769,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.7274,
-        "R16": -0.3696,
-        "QF": -0.1318,
-        "SF": -0.0418,
-        "Final": -0.0131,
-        "win": -0.003,
-        "group_winner": -0.2607
+        "R32": -0.717,
+        "R16": -0.358,
+        "QF": -0.1293,
+        "SF": -0.0422,
+        "Final": -0.0121,
+        "win": -0.0026,
+        "group_winner": -0.2516
       },
       "pm": {}
     },
@@ -807,13 +801,13 @@
         "group_winner": "moneyline"
       },
       "delta": {
-        "R32": 0.0156,
-        "R16": -0.6852,
-        "QF": -0.3444,
-        "SF": -0.1951,
-        "Final": -0.0905,
-        "win": -0.04,
-        "group_winner": 0.3701
+        "R32": 0.0152,
+        "R16": -0.6839,
+        "QF": -0.3387,
+        "SF": -0.1937,
+        "Final": -0.0903,
+        "win": -0.0394,
+        "group_winner": 0.3698
       },
       "pm": {}
     },
@@ -839,13 +833,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.0673,
-        "R16": -0.0057,
+        "R32": -0.0696,
+        "R16": -0.0061,
         "QF": -0.0003,
         "SF": 0.0,
         "Final": 0.0,
         "win": 0.0,
-        "group_winner": -0.0027
+        "group_winner": -0.0024
       },
       "pm": {}
     },
@@ -871,13 +865,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.1872,
-        "R16": -0.3367,
-        "QF": -0.1019,
-        "SF": -0.0286,
-        "Final": -0.0076,
-        "win": -0.0014,
-        "group_winner": -0.1394
+        "R32": 0.1854,
+        "R16": -0.3412,
+        "QF": -0.1047,
+        "SF": -0.0306,
+        "Final": -0.0086,
+        "win": -0.0016,
+        "group_winner": -0.1411
       },
       "pm": {}
     },
@@ -903,13 +897,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.0865,
-        "R16": -0.4667,
-        "QF": -0.1736,
-        "SF": -0.0693,
-        "Final": -0.0238,
-        "win": -0.0075,
-        "group_winner": -0.228
+        "R32": 0.0916,
+        "R16": -0.4677,
+        "QF": -0.1721,
+        "SF": -0.0652,
+        "Final": -0.0213,
+        "win": -0.0066,
+        "group_winner": -0.2263
       },
       "pm": {}
     },
@@ -935,13 +929,13 @@
         "group_winner": "moneyline"
       },
       "delta": {
-        "R32": 0.0573,
-        "R16": -0.5352,
-        "QF": -0.3831,
-        "SF": -0.2104,
-        "Final": -0.1047,
-        "win": -0.0525,
-        "group_winner": 0.3892
+        "R32": 0.0622,
+        "R16": -0.5241,
+        "QF": -0.3745,
+        "SF": -0.1973,
+        "Final": -0.1005,
+        "win": -0.0461,
+        "group_winner": 0.4002
       },
       "pm": {}
     },
@@ -967,13 +961,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.2467,
-        "R16": -0.2631,
-        "QF": -0.1326,
-        "SF": -0.0498,
-        "Final": -0.017,
-        "win": -0.005,
-        "group_winner": -0.2026
+        "R32": 0.2355,
+        "R16": -0.2728,
+        "QF": -0.1359,
+        "SF": -0.0495,
+        "Final": -0.0159,
+        "win": -0.0046,
+        "group_winner": -0.2107
       },
       "pm": {}
     },
@@ -999,13 +993,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.3213,
-        "R16": -0.2077,
-        "QF": -0.0915,
-        "SF": -0.0333,
+        "R32": 0.3284,
+        "R16": -0.205,
+        "QF": -0.0935,
+        "SF": -0.0323,
         "Final": -0.01,
-        "win": -0.0022,
-        "group_winner": -0.1452
+        "win": -0.0029,
+        "group_winner": -0.1426
       },
       "pm": {}
     },
@@ -1031,13 +1025,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.3301,
-        "R16": -0.0626,
-        "QF": -0.0179,
-        "SF": -0.0033,
-        "Final": -0.0004,
-        "win": -0.0002,
-        "group_winner": -0.0415
+        "R32": -0.3286,
+        "R16": -0.0616,
+        "QF": -0.0163,
+        "SF": -0.0039,
+        "Final": -0.0006,
+        "win": -0.0001,
+        "group_winner": -0.0469
       },
       "pm": {}
     },
@@ -1063,16 +1057,15 @@
         "group_winner": "moneyline"
       },
       "delta": {
-        "R32": 0.0321,
-        "R16": 0.2938,
-        "QF": 0.5511,
-        "SF": -0.1938,
-        "Final": -0.0927,
-        "win": -0.0392,
-        "group_winner": 0.3387
+        "R32": 0.0365,
+        "R16": 0.3016,
+        "QF": 0.5664,
+        "SF": -0.1858,
+        "Final": -0.0866,
+        "win": -0.0345,
+        "group_winner": 0.3603
       },
-      "pm": {},
-      "state_stale_reason": "state-stale: earlier-round tie unsettled in sim (Spain vs Belgium, kicked off 2026-07-10)"
+      "pm": {}
     },
     {
       "team": "Egypt",
@@ -1096,13 +1089,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.2542,
-        "R16": 0.6625,
-        "QF": -0.1052,
-        "SF": -0.029,
+        "R32": 0.2499,
+        "R16": 0.6565,
+        "QF": -0.1038,
+        "SF": -0.0279,
         "Final": -0.0073,
-        "win": -0.0015,
-        "group_winner": -0.147
+        "win": -0.0016,
+        "group_winner": -0.1573
       },
       "pm": {}
     },
@@ -1128,13 +1121,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.793,
-        "R16": -0.3896,
-        "QF": -0.1353,
-        "SF": -0.0403,
+        "R32": -0.7969,
+        "R16": -0.3967,
+        "QF": -0.1373,
+        "SF": -0.0394,
         "Final": -0.0119,
-        "win": -0.0025,
-        "group_winner": -0.1767
+        "win": -0.0024,
+        "group_winner": -0.1869
       },
       "pm": {}
     },
@@ -1160,13 +1153,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.19,
-        "R16": -0.0372,
-        "QF": -0.0048,
-        "SF": -0.0006,
-        "Final": 0.0,
+        "R32": -0.1938,
+        "R16": -0.0381,
+        "QF": -0.0042,
+        "SF": -0.0007,
+        "Final": -0.0001,
         "win": 0.0,
-        "group_winner": -0.0149
+        "group_winner": -0.0162
       },
       "pm": {}
     },
@@ -1192,13 +1185,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.6764,
-        "R16": -0.0629,
-        "QF": -0.014,
-        "SF": -0.0024,
-        "Final": -0.0003,
+        "R32": 0.6724,
+        "R16": -0.0614,
+        "QF": -0.0135,
+        "SF": -0.002,
+        "Final": -0.0002,
         "win": 0.0,
-        "group_winner": -0.0172
+        "group_winner": -0.0162
       },
       "pm": {}
     },
@@ -1224,13 +1217,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.3173,
-        "R16": -0.059,
-        "QF": -0.012,
-        "SF": -0.0019,
+        "R32": -0.3201,
+        "R16": -0.0612,
+        "QF": -0.0123,
+        "SF": -0.0024,
         "Final": -0.0003,
-        "win": 0.0,
-        "group_winner": -0.0151
+        "win": -0.0001,
+        "group_winner": -0.0168
       },
       "pm": {}
     },
@@ -1256,13 +1249,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.8901,
-        "R16": -0.387,
-        "QF": -0.2041,
-        "SF": -0.0979,
-        "Final": -0.0381,
+        "R32": -0.8869,
+        "R16": -0.3751,
+        "QF": -0.1974,
+        "SF": -0.0958,
+        "Final": -0.0379,
         "win": -0.012,
-        "group_winner": -0.1868
+        "group_winner": -0.183
       },
       "pm": {}
     },
@@ -1288,13 +1281,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.3128,
-        "R16": -0.2776,
-        "QF": -0.1009,
-        "SF": -0.0313,
-        "Final": -0.008,
-        "win": -0.0019,
-        "group_winner": -0.1079
+        "R32": 0.3065,
+        "R16": -0.2801,
+        "QF": -0.0975,
+        "SF": -0.0322,
+        "Final": -0.0083,
+        "win": -0.0021,
+        "group_winner": -0.1098
       },
       "pm": {}
     },
@@ -1320,13 +1313,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.1853,
-        "R16": -0.0328,
-        "QF": -0.0054,
-        "SF": -0.0003,
-        "Final": -0.0001,
+        "R32": -0.1906,
+        "R16": -0.0352,
+        "QF": -0.0056,
+        "SF": -0.0004,
+        "Final": 0.0,
         "win": 0.0,
-        "group_winner": -0.0123
+        "group_winner": -0.0152
       },
       "pm": {}
     },
@@ -1352,16 +1345,15 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.1818,
-        "R16": 0.5974,
-        "QF": 0.8284,
-        "SF": -0.0751,
-        "Final": -0.0259,
-        "win": -0.0086,
-        "group_winner": -0.1707
+        "R32": 0.1999,
+        "R16": 0.6122,
+        "QF": 0.8357,
+        "SF": -0.069,
+        "Final": -0.0237,
+        "win": -0.0073,
+        "group_winner": -0.1576
       },
-      "pm": {},
-      "state_stale_reason": "state-stale: earlier-round tie unsettled in sim (Norway vs England, kicked off 2026-07-11)"
+      "pm": {}
     },
     {
       "team": "Algeria",
@@ -1385,13 +1377,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.3115,
-        "R16": -0.201,
-        "QF": -0.0708,
-        "SF": -0.0205,
-        "Final": -0.0048,
-        "win": -0.0009,
-        "group_winner": -0.0824
+        "R32": 0.3118,
+        "R16": -0.2011,
+        "QF": -0.0705,
+        "SF": -0.0221,
+        "Final": -0.0052,
+        "win": -0.0011,
+        "group_winner": -0.081
       },
       "pm": {}
     },
@@ -1417,13 +1409,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.2279,
-        "R16": -0.2646,
-        "QF": -0.1104,
-        "SF": -0.0413,
-        "Final": -0.0123,
-        "win": -0.0034,
-        "group_winner": -0.1142
+        "R32": 0.2347,
+        "R16": -0.255,
+        "QF": -0.1077,
+        "SF": -0.0377,
+        "Final": -0.0112,
+        "win": -0.0026,
+        "group_winner": -0.1049
       },
       "pm": {}
     },
@@ -1449,13 +1441,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.1931,
-        "R16": -0.029,
-        "QF": -0.0041,
-        "SF": -0.0004,
-        "Final": -0.0001,
+        "R32": -0.1915,
+        "R16": -0.0316,
+        "QF": -0.0055,
+        "SF": -0.0007,
+        "Final": 0.0,
         "win": 0.0,
-        "group_winner": -0.0097
+        "group_winner": -0.0091
       },
       "pm": {}
     },
@@ -1481,13 +1473,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.0347,
-        "R16": 0.3131,
-        "QF": -0.4295,
-        "SF": -0.2355,
-        "Final": -0.1211,
-        "win": -0.0588,
-        "group_winner": -0.5664
+        "R32": 0.0364,
+        "R16": 0.3207,
+        "QF": -0.426,
+        "SF": -0.2311,
+        "Final": -0.1149,
+        "win": -0.0529,
+        "group_winner": -0.5637
       },
       "pm": {}
     },
@@ -1513,13 +1505,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.6412,
-        "R16": -0.078,
-        "QF": -0.0176,
-        "SF": -0.0034,
+        "R32": 0.6367,
+        "R16": -0.0805,
+        "QF": -0.0191,
+        "SF": -0.0046,
         "Final": -0.0006,
         "win": -0.0001,
-        "group_winner": -0.0336
+        "group_winner": -0.0357
       },
       "pm": {}
     },
@@ -1545,13 +1537,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.3033,
-        "R16": -0.061,
-        "QF": -0.0132,
+        "R32": -0.3094,
+        "R16": -0.0622,
+        "QF": -0.0129,
         "SF": -0.0022,
-        "Final": -0.0003,
-        "win": 0.0,
-        "group_winner": -0.0261
+        "Final": -0.0001,
+        "win": -0.0001,
+        "group_winner": -0.0263
       },
       "pm": {}
     },
@@ -1577,13 +1569,13 @@
         "group_winner": "moneyline"
       },
       "delta": {
-        "R32": 0.0636,
-        "R16": 0.3931,
-        "QF": -0.346,
+        "R32": 0.0604,
+        "R16": 0.3867,
+        "QF": -0.3498,
         "SF": -0.1898,
-        "Final": -0.0921,
-        "win": -0.0413,
-        "group_winner": 0.626
+        "Final": -0.0937,
+        "win": -0.0439,
+        "group_winner": 0.6258
       },
       "pm": {}
     },
@@ -1609,13 +1601,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.1068,
-        "R16": -0.4502,
-        "QF": -0.2079,
-        "SF": -0.0945,
-        "Final": -0.0375,
-        "win": -0.0125,
-        "group_winner": -0.2382
+        "R32": 0.1088,
+        "R16": -0.4395,
+        "QF": -0.1976,
+        "SF": -0.0906,
+        "Final": -0.0344,
+        "win": -0.0118,
+        "group_winner": -0.2355
       },
       "pm": {}
     },
@@ -1641,13 +1633,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": 0.5983,
-        "R16": -0.0839,
-        "QF": -0.0199,
+        "R32": 0.598,
+        "R16": -0.0855,
+        "QF": -0.0216,
         "SF": -0.0037,
         "Final": -0.0004,
-        "win": -0.0001,
-        "group_winner": -0.0324
+        "win": 0.0,
+        "group_winner": -0.034
       },
       "pm": {}
     },
@@ -1673,13 +1665,13 @@
         "group_winner": "longshot"
       },
       "delta": {
-        "R32": -0.2915,
-        "R16": -0.0491,
-        "QF": -0.0094,
-        "SF": -0.0014,
-        "Final": -0.0003,
-        "win": -0.0001,
-        "group_winner": -0.0211
+        "R32": -0.2907,
+        "R16": -0.0486,
+        "QF": -0.0098,
+        "SF": -0.0013,
+        "Final": -0.0002,
+        "win": 0.0,
+        "group_winner": -0.0195
       },
       "pm": {}
     }
