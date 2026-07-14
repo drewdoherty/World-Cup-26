@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-13T22:53:57 -->
+<!-- generated: 2026-07-13T23:30:20 -->
 ⚽ *Next match* — France vs Spain
 Kickoff 2026-07-14 19:00:00+00:00
 
