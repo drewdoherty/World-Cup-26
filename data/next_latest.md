@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-14T10:58:37 -->
+<!-- generated: 2026-07-14T11:34:44 -->
 ⚽ *Next match* — France vs Spain
 Kickoff 2026-07-14 19:00:00+00:00
 
 *Winner* (model blend)
-  Spain          model 32.1% · mkt 29.9% (betfair_ex_uk)  EV +7.4% ✅+EV  $34.27
+  Spain          model 32.0% · mkt 29.9% (betfair_ex_uk)  EV +7.3% ✅+EV  $33.93
   Draw           model 29.5% · mkt 30.3% (betfair_ex_uk)  EV -2.6% ❌−EV
-  France         model 38.4% · mkt 40.3% (betfair_ex_uk)  EV -4.7% ❌−EV
+  France         model 38.4% · mkt 40.0% (matchbook)  EV -3.9% ❌−EV
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.6)
