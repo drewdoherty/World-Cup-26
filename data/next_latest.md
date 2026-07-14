@@ -1,25 +1,25 @@
-<!-- generated: 2026-07-14T16:24:45 -->
+<!-- generated: 2026-07-14T17:01:05 -->
 ⚽ *Next match* — France vs Spain
 Kickoff 2026-07-14 19:00:00+00:00
 
 *Winner* (model blend)
-  Spain          model 31.7% · mkt 29.4% (unibet_uk)  EV +7.7% ✅+EV  $35.03
-  Draw           model 30.4% · mkt 30.8% (sport888)  EV -1.2% ❌−EV
-  France         model 37.9% · mkt 38.8% (betfair_ex_uk)  EV -2.2% ❌−EV
+  Spain          model 32.4% · mkt 30.3% (matchbook)  EV +6.8% ✅+EV  $31.94
+  Draw           model 30.3% · mkt 30.3% (sport888)  EV -0.1% ❌−EV
+  France         model 37.4% · mkt 38.2% (betfair_ex_uk)  EV -2.1% ❌−EV
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 8.6)
   O/U 8.5: over 48.9% / under 51.1% (model only — no live corners feed, +EV unverifiable)
 
-*Top goalscorers* — from the cached /goalscorers card (as of 2026-07-14T13:52:29)
+*Top goalscorers* — from the cached /goalscorers card (as of 2026-07-14T16:58:36)
 _top anytime, mkt implied % (both teams — add squad to split + FGS; no model price, +EV unverifiable)_
   Kylian Mbappe        mkt 44% (Betfair)
-  Marcus Thuram        mkt 30% (Betfair)
+  Marcus Thuram        mkt 30% (William Hill)
   Jean-Philippe Mateta mkt 29% (Betfair)
-  Mikel Oyarzabal      mkt 28% (Betfair)
+  Lamine Yamal         mkt 27% (Betfair)
   Borja Iglesias       mkt 27% (Betfair)
-  Lamine Yamal         mkt 26% (Betfair)
+  Mikel Oyarzabal      mkt 26% (Betfair)
 
 *Scorelines* (top 6)
-1-1 14.5% | 1-0 10.5% | 0-0 9.3% | 2-1 9.1% | 0-1 7.8% | 1-2 6.6%
+1-1 14.4% | 1-0 10.4% | 0-0 9.2% | 2-1 8.9% | 0-1 8.0% | 1-2 6.7%
   O/U 2.5: over 45.7% / under 54.3%   BTTS 52.8%
