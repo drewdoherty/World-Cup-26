@@ -488,7 +488,24 @@ def find_world_cup_markets(include_closed: bool = False) -> List[Dict[str, Any]]
         if not include_closed:
             params["closed"] = "false"
 
-        data = _get("/events", params=params)
+        try:
+            data = _get("/events", params=params)
+        except requests.HTTPError as exc:
+            # Gamma's /events paginator has an undocumented offset ceiling
+            # (observed: offset=2000 -> 200, offset=2100 -> 422, stable/
+            # reproducible, 2026-07-13) — the same class of limit already
+            # known on the data-api /trades endpoint (caps at offset 3000).
+            # Past it, every subsequent page 422s too, so this is "no more
+            # results", not a transient error: stop paginating and return
+            # what's already collected rather than discarding it.
+            status = exc.response.status_code if exc.response is not None else None
+            if status == 422:
+                logger.info(
+                    "gamma /events offset ceiling hit at offset=%d (422) — "
+                    "stopping pagination with %d event(s) collected",
+                    offset, len(results))
+                break
+            raise
         if isinstance(data, list):
             page = data
         else:

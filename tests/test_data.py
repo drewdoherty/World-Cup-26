@@ -186,6 +186,36 @@ class TestFindWorldCupMarkets:
         assert "3" not in ids  # non-WC filtered out
         assert len(ids) == len(set(ids)), "Duplicates found"
 
+    def test_stops_gracefully_on_gamma_offset_ceiling_422(self, monkeypatch: Any) -> None:
+        """Gamma's /events paginator 422s past an undocumented offset ceiling.
+
+        Observed live 2026-07-13: offset=2000 -> 200, offset=2100 -> 422,
+        every page after also 422s. That must read as "no more results" and
+        return what was already collected, not discard the whole fetch.
+        """
+        import requests as _requests
+
+        from wca.data import polymarket
+
+        page1 = [
+            {"id": "1", "slug": "wc-group-a", "title": "World Cup Group A Winner", "markets": []},
+        ]
+
+        def mock_get(*args, **kwargs):
+            call_count[0] += 1
+            if call_count[0] == 1:
+                return _make_response(page1)
+            resp = _make_response({}, status_code=422)
+            error = _requests.HTTPError("422 Client Error", response=resp)
+            resp.raise_for_status = MagicMock(side_effect=error)
+            return resp
+
+        call_count = [0]
+        monkeypatch.setattr(polymarket.requests, "get", mock_get)
+        markets = polymarket.find_world_cup_markets()
+
+        assert [m["id"] for m in markets] == ["1"]
+
 
 class TestResolvePlayerAnytimeToken:
     """Resolve a player's Polymarket 1+ goals (anytime) token from an event."""
