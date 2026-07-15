@@ -174,7 +174,11 @@
     if (!IS_LOCAL || !r) return "";
     var isPm = String(r.venue || "").toLowerCase() === "polymarket";
     var isAdd = String(r.action_label || "") === "ADD";
-    if (!isPm || !isAdd || r.stale || !r.id) {
+    // Side guard (2026-07-14): the one-click fire path resolves and buys the
+    // YES token only — a NO-side advancement rec must never grow a Place
+    // button (the server and the mini's wca_pm_fire refuse it too).
+    var isYes = String(r.side || "YES").toUpperCase() === "YES";
+    if (!isPm || !isAdd || r.stale || !r.id || !isYes) {
       return '<td data-label="Place"><span class="wca-place-note">&mdash;</span></td>';
     }
     return '<td data-label="Place">' +
@@ -422,14 +426,24 @@
           + (r.match_round ? ' <span class="dim">' + esc(r.match_round) + "</span>" : "")
         : "—";
       var split = matchSplit(r.match_1x2);
+      // Side-aware position (2026-07-14): a NO row's EV/stake are for BUYING
+      // NO, so Model % / PM Price show the POSITION's prob (1 - reach) and
+      // buy price, and the stage badge carries an explicit NO tag — a fade
+      // must never read as backing the team to advance. YES rows unchanged.
+      var isNo = String(r.side || "YES").toUpperCase() === "NO";
+      var posProb = (isNo && r.position_prob != null) ? r.position_prob : r.model_prob;
+      var posPrice = (isNo && r.position_price != null) ? r.position_price : r.pm_price;
+      var noBadge = isNo
+        ? ' <span class="arb-badge badge-market" title="NO side — pays if the team does NOT reach this stage (position prob = 1 − reach prob)">NO</span>'
+        : "";
       return "<tr>" +
         '<td data-label="Team"><strong>' + esc(r.team || "") + '</strong> <span class="dim">' + esc(r.group || "") + "</span></td>" +
         '<td data-label="Market">' + mktBadge + "</td>" +
-        '<td data-label="Stage"><span class="arb-badge badge-market">' + esc(r.stage || "") + "</span></td>" +
+        '<td data-label="Stage"><span class="arb-badge badge-market">' + esc(r.stage || "") + "</span>" + noBadge + "</td>" +
         '<td data-label="Opponent (next KO)">' + opp + "</td>" +
         '<td data-label="90′ 1X2 (W/D/L)" class="r" title="model 90-minute result for the next KO tie — a draw here goes to ET/pens">' + split + "</td>" +
-        '<td data-label="Model %" class="r">' + pct(r.model_prob) + "</td>" +
-        '<td data-label="PM Price" class="r num">' + priceStr(r.pm_price) + "</td>" +
+        '<td data-label="Model %" class="r"' + (isNo ? ' title="prob of the NO position (1 − reach prob ' + pct(r.model_prob) + ')"' : "") + '>' + pct(posProb) + "</td>" +
+        '<td data-label="PM Price" class="r num"' + (isNo ? ' title="NO buy price (YES mid ' + priceStr(r.pm_price) + ')"' : "") + '>' + priceStr(posPrice) + "</td>" +
         '<td data-label="PM Fee" class="r dim">' + pct(r.pm_fee, 2) + "</td>" +
         '<td data-label="Net EV" class="r ' + evClass(r.ev_net) + '">' + signPct(r.ev_net) + "</td>" +
         '<td data-label="Stake ($)" class="r">' + usd(r.stake) + "</td>" +

@@ -461,6 +461,122 @@ class TestAdvancementFutures:
         assert evs == sorted(evs, reverse=True)
 
 
+class TestPositionAwareBucketing:
+    """Fix 2026-07-14: bucket / cash-floor / Kelly must key on the prob of the
+    SIDE ACTUALLY HELD (wca.selection.position_prob), not the team's raw
+    YES/reach prob. Live bug case: France win, model YES 0.2256, priced side
+    NO -> the NO position is a 0.7744 moneyline-strength holding, but the old
+    code bucketed + cash-gated it on the raw 0.2256 YES prob (wrongly
+    longshot-blocked a 77% position)."""
+
+    def test_no_side_below_25pct_yes_prob_is_moneyline_not_longshot_blocked(self):
+        adv = {
+            "meta": {"generated": "2099-12-31 20:00:00 UTC", "stages": ["win"], "n_pm_markets": 12},
+            "teams": [{
+                "team": "France", "group": "A",
+                "model": {"win": 0.2256},
+                "pm": {"win": {"pm": 0.22, "edge_adj": 0.157, "side": "NO", "ask": 0.60}},
+                "delta": {},
+            }],
+        }
+        recs, withheld = br.build_advancement_futures(adv, _pm_pool(), adv_age_secs=10)
+        assert not any(w.get("reason_code") == br.REASON_LONGSHOT_NO_CASH for w in withheld)
+        assert len(recs) == 1
+        rec = recs[0]
+        assert rec["side"] == "NO"
+        assert rec["model_prob"] == pytest.approx(0.2256)
+        assert rec["position_prob"] == pytest.approx(0.7744, abs=1e-4)
+        assert rec["position_bucket"] == "moneyline"
+        assert rec["stake"] > 0
+
+    def test_yes_side_below_25pct_is_still_longshot_blocked(self):
+        """Control: a genuine YES-side longshot (no side-flip) is unaffected —
+        byte-identical to the pre-fix behaviour."""
+        adv = {
+            "meta": {"generated": "2099-12-31 20:00:00 UTC", "stages": ["win"], "n_pm_markets": 12},
+            "teams": [{
+                "team": "LongshotTeam", "group": "A",
+                "model": {"win": 0.17},
+                "pm": {"win": {"pm": 0.08, "edge_adj": 0.05, "side": "YES"}},
+                "delta": {},
+            }],
+        }
+        recs, withheld = br.build_advancement_futures(adv, _pm_pool(), adv_age_secs=10)
+        assert recs == []
+        rows = [w for w in withheld if w.get("reason_code") == br.REASON_LONGSHOT_NO_CASH]
+        assert rows
+        assert rows[0]["side"] == "YES"
+        assert rows[0]["position_prob"] == pytest.approx(0.17)
+
+    def test_no_side_moneyline_sorts_ahead_of_yes_side_mid(self):
+        """Canonical desk ordering (bucket_rank PRIMARY): the NO-side 0.7744
+        moneyline position must outrank a YES-side 0.30 mid position, even
+        though the mid position's raw model_prob (0.30) is numerically
+        greater than the moneyline position's raw model_prob (0.2256)."""
+        adv = {
+            "meta": {"generated": "2099-12-31 20:00:00 UTC", "stages": ["win"], "n_pm_markets": 12},
+            "teams": [
+                {"team": "MidTeam", "group": "A", "model": {"win": 0.30},
+                 "pm": {"win": {"pm": 0.20, "edge_adj": 0.09, "side": "YES"}},
+                 "delta": {}},
+                {"team": "France", "group": "A", "model": {"win": 0.2256},
+                 "pm": {"win": {"pm": 0.22, "edge_adj": 0.157, "side": "NO", "ask": 0.60}},
+                 "delta": {}},
+            ],
+        }
+        recs, _ = br.build_advancement_futures(adv, _pm_pool(), adv_age_secs=10)
+        teams_in_order = [r["team"] for r in recs]
+        assert teams_in_order.index("France") < teams_in_order.index("MidTeam")
+
+    def test_no_side_ev_and_kelly_priced_off_the_no_ask(self):
+        """The NO row's EV/Kelly use the executable NO buy price the feed's
+        edge_adj was computed against (pm[stage].ask) — so ev_net reproduces
+        edge_adj — while the wire ``pm_price`` field stays the YES mid
+        verbatim (wca_pm_fire's price-sanity band and legacy consumers read
+        it as the YES quote) and the NO buy ships additively as
+        ``position_price``. Exact live numbers: France win, 2026-07-14."""
+        adv = {
+            "meta": {"generated": "2099-12-31 20:00:00 UTC", "stages": ["win"], "n_pm_markets": 8},
+            "teams": [{
+                "team": "France", "group": "I",
+                "model": {"win": 0.2256},
+                "pm": {"win": {"pm": 0.3905, "edge_adj": 0.1573, "side": "NO",
+                               "ask": 0.61}},
+                "delta": {},
+            }],
+        }
+        recs, _ = br.build_advancement_futures(adv, _pm_pool(), adv_age_secs=10)
+        assert len(recs) == 1
+        rec = recs[0]
+        assert rec["pm_price"] == pytest.approx(0.3905)      # YES mid, verbatim
+        assert rec["position_price"] == pytest.approx(0.61)  # NO buy (ask)
+        # ev = (1 - 0.2256) - 0.61 - fee(0.61) = +0.1573 — matches the feed's
+        # edge_adj because both price the same side at the same ask.
+        expected_ev = (1 - 0.2256) - 0.61 - br._pm_fee(0.61)
+        assert rec["ev_net"] == pytest.approx(expected_ev, abs=1e-4)
+        assert rec["ev_net"] == pytest.approx(rec["edge_adj"], abs=1e-3)
+
+    def test_path_cap_applies_to_no_side_rungs(self):
+        """The feed's per-rung path-capped ``stake_usd`` is a hard ceiling
+        for NO rungs too — the pre-fix YES-only filter existed only because
+        the loop could never size a NO position at all. Without this, France
+        NO win + NO Final would re-stack a jointly-capped correlated path."""
+        adv = {
+            "meta": {"generated": "2099-12-31 20:00:00 UTC", "stages": ["win"], "n_pm_markets": 8},
+            "teams": [{
+                "team": "France", "group": "I",
+                "model": {"win": 0.2256},
+                "pm": {"win": {"pm": 0.3905, "edge_adj": 0.1573, "side": "NO",
+                               "ask": 0.61, "stake_usd": 10.0, "path_scale": 0.5}},
+                "delta": {},
+            }],
+        }
+        recs, _ = br.build_advancement_futures(adv, _pm_pool(), adv_age_secs=10)
+        assert len(recs) == 1
+        assert recs[0]["stake"] == pytest.approx(10.0)   # kelly would be far larger
+        assert recs[0].get("path_capped") is True
+
+
 # ---------------------------------------------------------------------------
 # Section 9: Kelly edge cases
 # ---------------------------------------------------------------------------

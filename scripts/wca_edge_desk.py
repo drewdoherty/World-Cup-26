@@ -95,6 +95,7 @@ from wca.selection import (  # noqa: E402
     LONGSHOT_PROB,
     PROB_BUCKETS,
     longshot_no_cash,
+    position_prob as _canonical_position_prob,
     prob_bucket,
 )
 
@@ -408,7 +409,10 @@ def _side_attribution(model_prob, pm_price, edge_adj):
     capped at WATCH (never SHADOW_ADD).
     """
     side = "YES" if model_prob >= pm_price else "NO"
-    position_prob = round(model_prob if side == "YES" else 1.0 - model_prob, 4)
+    # Routed through the canonical wca.selection helper (fix 2026-07-14) —
+    # was a local re-implementation of the identical YES->p / NO->1-p rule;
+    # no behavior change, just one fewer place the formula can drift.
+    position_prob = round(_canonical_position_prob(model_prob, side), 4)
     confidence = "derived"
     reason = None
     if edge_adj is not None and edge_adj > 0:
@@ -1119,9 +1123,11 @@ def build_feed(advancement, bet_recs, pm_ideas, orderflow, scores_markets, *,
             feed_side = quote.get("side")
             if feed_side in ("YES", "NO"):
                 side_source = "feed"
+                # Canonical helper (fix 2026-07-14) — was a local
+                # re-implementation of the identical YES->p / NO->1-p rule;
+                # no behavior change.
                 side_info = (feed_side,
-                             round(prob if feed_side == "YES"
-                                   else 1.0 - prob, 4),
+                             round(_canonical_position_prob(prob, feed_side), 4),
                              "explicit", None)
                 edge_src = ("advancement_data.teams[%s].pm[%s].edge_adj "
                             "(fee-adjusted edge of the feed-emitted side)"
@@ -1144,16 +1150,26 @@ def build_feed(advancement, bet_recs, pm_ideas, orderflow, scores_markets, *,
         if (team, stage) in seen:
             continue
         model_prob = br.get("model_prob")
-        side_info = ("YES",
-                     round(model_prob, 4) if model_prob is not None else None,
+        # bet_recs advancement rows are SIDED since 2026-07-14 (side-aware
+        # position bucketing): read the row's own side + position_prob
+        # (already the flipped prob of the side held — do NOT flip again via
+        # position_prob(); model_prob stays the raw reach prob). A missing
+        # side/position_prob is a legacy YES-only feed where position ==
+        # model_prob — the exact pre-fix behaviour.
+        br_side = br.get("side") if br.get("side") in ("YES", "NO") else "YES"
+        br_pos = br.get("position_prob")
+        if br_pos is None:
+            br_pos = model_prob
+        side_info = (br_side,
+                     round(br_pos, 4) if br_pos is not None else None,
                      "explicit", None)
         rows.append(_build_adv_row(
             team, None, stage, origin="bet_recs",
             model_prob=model_prob, pm_price=br.get("pm_price"),
             edge_adj=br.get("edge_adj"),
             pm_src="bet_recs.advancement_futures[%s].pm_price" % br.get("id"),
-            edge_src="bet_recs.advancement_futures[%s].edge_adj (YES buy)"
-                     % br.get("id"),
+            edge_src="bet_recs.advancement_futures[%s].edge_adj (%s buy)"
+                     % (br.get("id"), br_side),
             side_info=side_info, side_source="bet_recs", br=br, **common))
 
     n_withheld_excluded = 0

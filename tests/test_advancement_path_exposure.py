@@ -435,17 +435,34 @@ def test_betrecs_uncapped_when_feed_lacks_stake_usd():
     assert all("path_capped" not in r for r in recs)
 
 
-def test_betrecs_never_caps_yes_rec_with_no_side_feed_stake():
-    # A NO-side feed rung's stake is a DIFFERENT exposure: it must never cap
-    # this builder's YES sizing (contrived fixture: YES ev clears the gate
-    # while the feed marks the rung NO with a tiny NO-side stake).
+def test_betrecs_caps_the_side_the_feed_priced_even_when_no():
+    # REWRITTEN for the 2026-07-14 side-aware fix. The pre-fix version of
+    # this test pinned "a NO-side feed rung's stake must never cap this
+    # builder's YES sizing" — an invariant that existed only because the
+    # loop priced YES unconditionally, even when the feed said the edge was
+    # on NO. The builder now sizes the SIDE THE FEED PRICED, so the feed's
+    # per-rung path-capped ``stake_usd`` is a hard ceiling for that SAME
+    # (team, side) exposure — NO included. Reduces only.
     adv = _adv_feed_two_rungs(40.0, 25.0)
-    adv["teams"][0]["pm"]["SF"]["side"] = "NO"
-    adv["teams"][0]["pm"]["SF"]["stake_usd"] = 1.0
+    # NO-favoured SF market: position pays 1 - 0.55 = 0.45 at a 0.32 NO ask
+    # (ev = 0.45 - 0.32 - fee = +0.1235 clears the 2pp floor); the feed's
+    # path-capped NO rung stake is a deliberately tiny $1.
+    adv["teams"][0]["pm"]["SF"] = {"pm": 0.70, "edge_adj": 0.1235,
+                                   "side": "NO", "ask": 0.32,
+                                   "stake_usd": 1.0, "path_scale": 0.5}
     recs, _ = br.build_advancement_futures(adv, _pm_pool(), adv_age_secs=10)
     by_stage = {r["stage"]: r for r in recs}
-    assert by_stage["SF"]["stake"] > 1.0
-    assert "path_capped" not in by_stage["SF"]
+    sf = by_stage["SF"]
+    assert sf["side"] == "NO"
+    assert sf["position_prob"] == pytest.approx(0.45)
+    assert sf["position_price"] == pytest.approx(0.32)
+    # Its own independent ¼-Kelly would be far larger; the feed's NO-side
+    # rung stake caps the identical NO-side position the builder just sized.
+    assert sf["stake"] == pytest.approx(1.0)
+    assert sf["path_capped"] is True
+    # The untouched YES Final rung keeps its own YES-side feed cap.
+    assert by_stage["Final"]["side"] == "YES"
+    assert by_stage["Final"]["stake"] <= 25.0 + 1e-9
 
 
 def test_betrecs_zero_feed_stake_drops_rec_conservatively():

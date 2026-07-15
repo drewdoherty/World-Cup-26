@@ -43,6 +43,15 @@ is **category-conditional** (see the 2026-07-09 refinement below).
    (dimmed). The cash floor is a strict `< 0.25` (a model prob of exactly
    `0.25` is a stakeable `mid`, not a longshot). **Unchanged by 2026-07-09.**
 
+**Sided positions (clarified 2026-07-14).** For a SIDED position (Polymarket
+YES/NO, exchange back/lay) the "MODEL probability" in items 1 and 4 is the
+probability of the **position actually held** — `position_prob(model_prob,
+side)` (`NO`/`lay` → `1 - model_prob`). Buying NO on a market whose YES
+outcome the model rates 0.2256 is a 0.7744 **moneyline** position and is
+cash-eligible; a YES/back position at 0.17 is still a no-cash longshot. Live
+bug this encodes against: the 2026-07-14 build bucketed France-win (side NO,
+position 0.7744) as "longshot" off the raw YES prob and zero-staked it.
+
 ---
 
 ## The 2026-07-09 category-conditional refinement
@@ -117,6 +126,7 @@ backtests, `docs/research/pm_preferences_backtest_2026-07-02.md`).
 | `prob_bucket(model_prob)` | `"moneyline"` / `"mid"` / `"longshot"`. |
 | `bucket_rank(model_prob)` | Sortable int `0` / `1` / `2` (lower ranks higher). PRIMARY key. |
 | `longshot_no_cash(model_prob)` | `True` when `model < 0.25` → free-bet/lottery only. Applied at the SIZING step, kept SEPARATE from the sort. |
+| `position_prob(model_prob, side)` | **The probability the POSITION HELD pays out (2026-07-14).** `YES`/`back`/`None` → `model_prob`; `NO`/`lay` → `1 - model_prob`; anything else raises. Bucket + cash floor key on THIS for sided positions (Polymarket YES/NO, exchange back/lay) — buying NO on a 22.56% YES outcome is a 77.44% moneyline position, not a longshot. `None` prob returns `None` (fails safe → longshot / no-cash). |
 | `MARKET_MATCH` / `MARKET_FUTURES` | Market-category constants (`"match"` / `"futures"`). Match = hours-out neutral; futures = further-out-first. |
 | `resolve_market_kind(*hints)` | Resolve category from hints (explicit `market_kind`, `settlement`, `market`, `family`, `stage`). Explicit constant wins; else a futures marker substring; else the SAFE DEFAULT `MARKET_MATCH`. |
 | `hours_out(p, kick_by_match, now_dt)` | Continuous raw hours to kickoff (0.0 unknown). Never bucketed. Whether it feeds the sort is decided by `hours_out_term`. |

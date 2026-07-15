@@ -33,6 +33,7 @@ from wca.selection import (
     hours_out,
     hours_out_term,
     longshot_no_cash,
+    position_prob,
     preference_sort_key,
     prob_bucket,
     resolve_market_kind,
@@ -93,6 +94,57 @@ class TestLongshotNoCash:
     )
     def test_no_cash_predicate(self, prob, no_cash):
         assert longshot_no_cash(prob) is no_cash
+
+
+# ---------------------------------------------------------------------------
+# position_prob (2026-07-14) — the bucket/cash-floor probability must be the
+# POSITION HELD, not the market's headline/YES outcome. YES/back positions
+# pass model_prob through unchanged; NO/lay positions flip it (1 - p).
+# ---------------------------------------------------------------------------
+
+class TestPositionProb:
+    @pytest.mark.parametrize("side", ["YES", "yes", "Yes", "back", "BACK", None, ""])
+    def test_yes_and_back_sides_pass_through(self, side):
+        assert position_prob(0.65, side) == 0.65
+
+    @pytest.mark.parametrize("side", ["NO", "no", "No", "lay", "LAY"])
+    def test_no_and_lay_sides_flip(self, side):
+        assert position_prob(0.65, side) == pytest.approx(0.35)
+
+    def test_france_win_example(self):
+        # Live bug case (site/advancement_data.json, 2026-07-14 10:59 UTC):
+        # France win — model YES 0.2256, priced side NO -> the POSITION held
+        # is a 0.7744 moneyline-strength holding, not a 0.2256 longshot.
+        p_yes = 0.2256
+        p_position = position_prob(p_yes, "NO")
+        assert p_position == pytest.approx(0.7744)
+        assert prob_bucket(p_yes) == "longshot"          # raw YES prob: wrong bucket
+        assert prob_bucket(p_position) == "moneyline"    # position held: correct bucket
+        assert longshot_no_cash(p_yes) is True           # raw YES prob: wrongly no-cash
+        assert longshot_no_cash(p_position) is False     # position held: correctly cash-eligible
+
+    def test_boundary_0_25_and_0_50_survive_the_flip(self):
+        # A YES prob of 0.75 flips to a NO position prob of exactly 0.25 —
+        # still the inclusive-lower-bound MID boundary, not longshot.
+        assert position_prob(0.75, "NO") == pytest.approx(0.25)
+        assert prob_bucket(position_prob(0.75, "NO")) == "mid"
+        assert longshot_no_cash(position_prob(0.75, "NO")) is False
+        # A YES prob of 0.50 flips to a NO position prob of exactly 0.50 —
+        # still the inclusive-lower-bound MONEYLINE boundary.
+        assert position_prob(0.50, "NO") == pytest.approx(0.50)
+        assert prob_bucket(position_prob(0.50, "NO")) == "moneyline"
+
+    def test_none_model_prob_returns_none(self):
+        # Fails safe downstream: prob_bucket(None) -> longshot,
+        # longshot_no_cash(None) -> True. Never invent a 1.0 NO-side prob.
+        assert position_prob(None, "NO") is None
+        assert position_prob(None, "YES") is None
+
+    def test_unknown_side_raises(self):
+        with pytest.raises(ValueError):
+            position_prob(0.5, "MAYBE")
+        with pytest.raises(ValueError):
+            position_prob(0.5, "back_and_lay")
 
 
 # ---------------------------------------------------------------------------

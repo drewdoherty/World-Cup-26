@@ -102,7 +102,13 @@
       Object.keys(STAGE_OUT).forEach(function (st) {
         var mp = model[st];
         if (mp == null) return;
-        var br = bucketRank(bkt[st], mp);
+        // Bucket by the POSITION HELD (src/wca/selection.py position_prob,
+        // 2026-07-14): a PM-priced stage carries the feed's side-aware
+        // position_bucket (NO on a 22% reach prob is a 78% moneyline-strength
+        // position, not a longshot); unpriced stages keep the reach bucket.
+        var pb = (pm[st] && pm[st].position_bucket != null)
+          ? pm[st].position_bucket : null;
+        var br = (pb != null) ? bucketRank(pb, null) : bucketRank(bkt[st], mp);
         var ea = (pm[st] && pm[st].edge_adj != null) ? Number(pm[st].edge_adj) : -1;
         var cand = [br, -(STAGE_OUT[st] || 0), -ea];
         if (best === null || tupLess(cand, best)) best = cand;
@@ -152,14 +158,18 @@
         var mp = (t.model && t.model[s[0]] != null) ? Number(t.model[s[0]]) : null;
         var bkt = (t.bucket && t.bucket[s[0]] != null) ? t.bucket[s[0]] : null;
         // No-cash <25c longshot flag — keyed off the prob of the SIDE that would
-        // actually be taken (mirrors server-side longshot_no_cash on sim_prob):
-        // back = buy Yes (model prob) when model >= mid, else fade = buy No
-        // (1 - model prob). When there's no PM market, fall back to the reach
-        // (Yes) bucket tag so a bare model longshot still greys.
+        // actually be taken (mirrors server-side longshot_no_cash on sim_prob).
+        // Prefer the feed's explicit side-aware position_bucket (2026-07-14 —
+        // never re-derive the side from sign(model - mid) when the builder
+        // has named it; the sign test mis-attributes against a stale-print
+        // mid). Fallbacks for older feeds: derive from the mid when priced,
+        // else the reach (Yes) bucket tag so a bare model longshot still greys.
         var qmid = (pmObj && pmObj.pm != null) ? Number(pmObj.pm) : null;
         var sideProb = mp;
         if (mp != null && qmid != null && mp < qmid) sideProb = 1 - mp;
-        var ls = (qmid != null) ? isLongshot(null, sideProb) : isLongshot(bkt, mp);
+        var ls = (pmObj && pmObj.position_bucket != null)
+          ? (pmObj.position_bucket === "longshot")
+          : ((qmid != null) ? isLongshot(null, sideProb) : isLongshot(bkt, mp));
         var cbg, txt, title;
         if (kellyMode) {
           var q = (pmObj && pmObj.pm != null) ? Number(pmObj.pm) : null;

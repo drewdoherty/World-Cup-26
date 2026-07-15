@@ -68,3 +68,41 @@ def test_direct_mode_still_executes(tmp_path, monkeypatch):
                         execute_fn=_execute)
     assert calls, "direct mode must execute"
     assert out["ok"] is True and not out.get("parked")
+
+
+def test_no_side_rec_is_refused_before_any_resolution(tmp_path, monkeypatch):
+    """Side guard (2026-07-14): bet_recs advancement rows are SIDED now
+    (side-aware position bucketing). This fire path re-resolves the rec's
+    team+stage to the YES token only, so firing a NO-side rec would buy the
+    exact WRONG side of the recommendation — it must be refused up front:
+    never resolved, never parked, never executed."""
+    monkeypatch.delenv("WCA_FIRE_MODE", raising=False)
+
+    def _never_resolve(rec, find_markets=None):
+        raise AssertionError("NO-side rec must be refused before resolution")
+
+    monkeypatch.setattr(fire_mod, "_resolve_live_market", _never_resolve)
+    rec = _rec()
+    rec.update({"side": "NO", "position_prob": 0.55, "position_bucket": "moneyline",
+                "position_price": 0.60})
+    out = fire_mod.fire(rec=rec, rec_id="belgium_qf_pm", nonce="n-no-side",
+                        max_usd=100.0, db_path=str(tmp_path / "wca.db"))
+    assert out["ok"] is False
+    assert "YES" in out["message"]  # names the constraint (YES token only)
+
+
+def test_explicit_yes_side_rec_still_parks(tmp_path, monkeypatch):
+    """A rec that explicitly stamps side=YES behaves exactly like the legacy
+    side-less rec (the guard only refuses non-YES)."""
+    monkeypatch.delenv("WCA_FIRE_MODE", raising=False)
+    monkeypatch.setattr(fire_mod, "_resolve_live_market",
+                        lambda rec, find_markets=None: _resolved())
+    import wca.bot.app as app
+    monkeypatch.setattr(app, "push_parked_order", lambda p: "PM-9 Belgium QF $40")
+    monkeypatch.setattr(app, "_alert_admin", lambda text: True)
+    rec = _rec()
+    rec.update({"side": "YES", "position_prob": 0.45, "position_bucket": "mid",
+                "position_price": 0.30})
+    out = fire_mod.fire(rec=rec, rec_id="belgium_qf_pm", nonce="n-yes-side",
+                        max_usd=100.0, db_path=str(tmp_path / "wca.db"))
+    assert out["ok"] is True and out.get("parked") is True

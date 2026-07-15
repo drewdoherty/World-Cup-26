@@ -137,8 +137,9 @@ def _write_pins(ko_pinned, path=PINS_JSON):
 
 
 def _pm_by_team_stage(sim_df):
-    """``{team: {stage: {pm, edge_adj, side, ask, stake_usd, path_scale}}}``
-    from the live PM markets, plus the per-team path-exposure blocks.
+    """``{team: {stage: {pm, edge_adj, side, ask, position_prob,
+    position_bucket, stake_usd, path_scale}}}`` from the live PM markets, plus
+    the per-team path-exposure blocks.
 
     ``pm`` is the YES mid; ``edge_adj`` is the fee-adjusted edge of whichever
     side (YES/NO) the sim favours — so ``side`` names that side explicitly and
@@ -148,6 +149,17 @@ def _pm_by_team_stage(sim_df):
     against a stale-print mid (the Edge Desk's HIGH-2
     ``side_attribution_uncertain`` guard existed for exactly that) — emit it
     at the source instead. Additive fields: pm/edge_adj are unchanged.
+
+    ``position_prob`` / ``position_bucket`` (fix 2026-07-14) carry the model
+    probability of the SIDE HELD (``AdvancementEdge.sim_prob`` — the YES prob
+    for YES, ``1 - YES prob`` for NO; wca.selection.position_prob) and its
+    canonical wca.selection bucket. The desk rule buckets and cash-gates on
+    the POSITION HELD, so a NO position must never be bucketed by the team's
+    raw reach prob (France win 2026-07-14: model YES 0.2256 -> raw bucket
+    "longshot", while the recommended NO position is a 0.7744
+    moneyline-strength holding). The top-level per-team ``bucket`` map stays
+    the RAW per-stage reach-prob bucket for stages with no PM side (model
+    matrix display); PM-sided consumers must use ``position_bucket``.
 
     ``stake_usd`` / ``path_scale`` (fix 2026-07-08) carry the SIZING SOURCE's
     path-capped ¼-Kelly stake per rung: one team's nested advancement rungs
@@ -178,6 +190,13 @@ def _pm_by_team_stage(sim_df):
             "edge_adj": round(float(e["fee_adj_edge"]), 4),
             "side": str(e["side"]),
             "ask": round(float(e["pm_price"]), 4),
+            # Side-aware position (fix 2026-07-14): sim_prob IS the prob of
+            # the side held (1 - reach prob for NO) and ``bucket`` its
+            # canonical wca.selection bucket — forwarded from the sizing
+            # source so no consumer re-buckets a NO position by the raw
+            # YES/reach prob.
+            "position_prob": round(float(e["sim_prob"]), 4),
+            "position_bucket": str(e["bucket"]),
             "stake_usd": round(float(e["stake"]), 2),
             "path_scale": round(float(e["path_scale"]), 4),
         }
@@ -276,9 +295,13 @@ def main(argv=None) -> int:
     for r in recs:
         t = r["team"]
         model = {st: r.get(col) for st, col in _COL.items()}
-        # Canonical model-prob bucket per stage (wca.selection): drives the
-        # server-side no-cash gate + greying in adv_edge_matrix.js so the client
-        # never has to re-derive the <25c longshot floor.
+        # Canonical model-prob bucket per stage (wca.selection). NOTE
+        # (2026-07-14): this map buckets the RAW reach/YES prob — correct for
+        # the model matrix and for stages with no PM side, but NOT for a
+        # PM-sided position (a NO side flips the payout prob). PM-sided
+        # consumers (adv_edge_matrix.js greying, wca_betrecs, the Edge Desk)
+        # must use pm[stage]["position_bucket"] instead; this map is kept
+        # as-is so its meaning never silently changes under consumers.
         bucket = {st: adv.prob_bucket(model.get(st)) for st in model}
         delta = {st: r[col + "_delta"] for st, col in _COL.items()
                  if (col + "_delta") in r}

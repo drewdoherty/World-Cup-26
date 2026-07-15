@@ -29,6 +29,10 @@ def _sim_df():
         {"team": "Morocco", "group": "C", "P(SF)": 0.55},
         {"team": "Brazil", "group": "C", "P(SF)": 0.30},
         {"team": "Netherlands", "group": "F", "P(SF)": 0.45},
+        # The live position-bucketing bug case (2026-07-14), transposed to
+        # SF: reach prob 0.2256 -> raw bucket "longshot", but the priced side
+        # is NO -> a 0.7744 moneyline-strength POSITION.
+        {"team": "France", "group": "I", "P(SF)": 0.2256},
     ]
     return mod._records_to_simdf(recs)
 
@@ -49,6 +53,9 @@ _EVENTS = [{
         # WRONG. The feed must name the side so consumers never re-derive it.
         {"groupItemTitle": "Netherlands", "bestAsk": 0.40,
          "priceMap": {"Yes": 0.50}},
+        # France (position-bucketing regression): mid 0.395, NO ask = 1 - bid
+        # = 0.61; NO edge = 0.7744 - 0.61 - 0.03*0.61*0.39 = +0.157263.
+        {"groupItemTitle": "France", "bestBid": 0.39, "bestAsk": 0.40},
     ],
 }]
 
@@ -57,7 +64,7 @@ def test_pm_block_emits_side_and_ask(monkeypatch):
     monkeypatch.setattr(mod.polymarket, "find_world_cup_markets",
                         lambda include_closed=False: _EVENTS)
     out, n, path_exposure = mod._pm_by_team_stage(_sim_df())
-    assert n == 3
+    assert n == 4
 
     yes = out["Morocco"]["SF"]
     assert {k: yes[k] for k in ("pm", "edge_adj", "side", "ask")} == {
@@ -67,11 +74,20 @@ def test_pm_block_emits_side_and_ask(monkeypatch):
     assert {k: no[k] for k in ("pm", "edge_adj", "side", "ask")} == {
         "pm": 0.65, "edge_adj": 0.3331, "side": "NO", "ask": 0.36}
 
+    # Side-aware position (fix 2026-07-14): every pm entry carries the model
+    # prob of the SIDE HELD and its canonical wca.selection bucket, so no
+    # consumer ever re-buckets a NO position by the raw YES/reach prob.
+    assert yes["position_prob"] == 0.55
+    assert yes["position_bucket"] == "moneyline"
+    assert no["position_prob"] == 0.70          # 1 - P(SF)=0.30 for the NO side
+    assert no["position_bucket"] == "moneyline"
+
     # Legacy consumers: pm is still the YES mid and edge_adj the better-side
     # fee-adjusted edge — the new keys are strictly additive (stake_usd /
     # path_scale carry the sizing source's path-capped ¼-Kelly per rung).
     for entry in (yes, no):
         assert set(entry) == {"pm", "edge_adj", "side", "ask",
+                              "position_prob", "position_bucket",
                               "stake_usd", "path_scale"}
         assert entry["stake_usd"] > 0.0
         # Single staked rung per (team, side) family here — never scaled.
@@ -86,6 +102,27 @@ def test_pm_block_emits_side_and_ask(monkeypatch):
     no_blk = path_exposure["Brazil"]["NO"]
     assert no_blk["scaling_applied"] is False
     assert no_blk["total_stake_usd"] == no_blk["cap_usd"]
+
+
+def test_pm_block_position_bucket_for_no_side_longshot_reach_prob(monkeypatch):
+    """THE live bug case (site/advancement_data.json, model 2026-07-14): a
+    team whose RAW reach prob is a <25% longshot but whose priced side is NO
+    is a >75% moneyline-strength POSITION — the pm entry must say so
+    explicitly (position_prob/position_bucket), because the top-level
+    per-team ``bucket`` map keeps bucketing the raw reach prob."""
+    monkeypatch.setattr(mod.polymarket, "find_world_cup_markets",
+                        lambda include_closed=False: _EVENTS)
+    out, _, _ = mod._pm_by_team_stage(_sim_df())
+    row = out["France"]["SF"]
+    assert row["side"] == "NO"
+    assert row["ask"] == 0.61                      # NO ask = 1 - bestBid
+    assert row["edge_adj"] == 0.1573
+    assert row["position_prob"] == 0.7744          # 1 - 0.2256
+    assert row["position_bucket"] == "moneyline"   # NOT "longshot"
+    # The raw reach prob is still a longshot by the canonical rule — the two
+    # buckets MUST diverge here; that divergence is the whole fix.
+    from wca.selection import prob_bucket
+    assert prob_bucket(0.2256) == "longshot"
 
 
 def test_pm_block_names_side_in_stale_print_scenario(monkeypatch):
