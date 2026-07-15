@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-15 03:06:17 UTC"
+    "generated": "2026-07-15 03:39:59 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -15,21 +15,21 @@
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.3429,
+        "prob": 0.343,
         "results": [
           "England"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.3244,
+        "prob": 0.3245,
         "results": [
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.3327,
+        "prob": 0.3325,
         "results": [
           "Argentina"
         ]
@@ -38,21 +38,21 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.3429,
+        "prob": 0.343,
         "results": [
           "England"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.3244,
+        "prob": 0.3245,
         "results": [
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.3327,
+        "prob": 0.3325,
         "results": [
           "Argentina"
         ]
@@ -89,7 +89,7 @@
       "results": [
         {
           "outcome": "England",
-          "prob": 0.3429,
+          "prob": 0.343,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -98,16 +98,16 @@
           "plug": {
             "available": true,
             "outcome": "England",
-            "best_venue": "smarkets",
-            "best_odds": 2.84,
-            "model_prob": 0.3429,
-            "ev_pct": -2.6,
+            "best_venue": "betfair_ex_uk",
+            "best_odds": 2.86,
+            "model_prob": 0.343,
+            "ev_pct": -1.9,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.3244,
+          "prob": 0.3245,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -118,14 +118,14 @@
             "outcome": "Draw",
             "best_venue": "betfred_uk",
             "best_odds": 3.0,
-            "model_prob": 0.3244,
-            "ev_pct": -2.7,
+            "model_prob": 0.3245,
+            "ev_pct": -2.6,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Argentina",
-          "prob": 0.3327,
+          "prob": 0.3325,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -136,9 +136,9 @@
             "outcome": "Argentina",
             "best_venue": "smarkets",
             "best_odds": 3.15,
-            "model_prob": 0.3327,
-            "ev_pct": 4.8,
-            "recommendation": "PLUG: +EV to back (4.8% edge) \u2014 fills the gap and adds value"
+            "model_prob": 0.3325,
+            "ev_pct": 4.7,
+            "recommendation": "PLUG: +EV to back (4.7% edge) \u2014 fills the gap and adds value"
           }
         }
       ],
@@ -165,45 +165,45 @@
     {
       "fixture": "England vs Argentina",
       "outcome": "England",
-      "prob": 0.3429,
+      "prob": 0.343,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "England",
-        "best_venue": "smarkets",
-        "best_odds": 2.84,
-        "model_prob": 0.3429,
-        "ev_pct": -2.6,
+        "best_venue": "betfair_ex_uk",
+        "best_odds": 2.86,
+        "model_prob": 0.343,
+        "ev_pct": -1.9,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
     {
       "fixture": "England vs Argentina",
       "outcome": "Argentina",
-      "prob": 0.3327,
+      "prob": 0.3325,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Argentina",
         "best_venue": "smarkets",
         "best_odds": 3.15,
-        "model_prob": 0.3327,
-        "ev_pct": 4.8,
-        "recommendation": "PLUG: +EV to back (4.8% edge) \u2014 fills the gap and adds value"
+        "model_prob": 0.3325,
+        "ev_pct": 4.7,
+        "recommendation": "PLUG: +EV to back (4.7% edge) \u2014 fills the gap and adds value"
       }
     },
     {
       "fixture": "England vs Argentina",
       "outcome": "Draw",
-      "prob": 0.3244,
+      "prob": 0.3245,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Draw",
         "best_venue": "betfred_uk",
         "best_odds": 3.0,
-        "model_prob": 0.3244,
-        "ev_pct": -2.7,
+        "model_prob": 0.3245,
+        "ev_pct": -2.6,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     }
