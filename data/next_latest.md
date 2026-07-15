@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-15T07:30:34 -->
+<!-- generated: 2026-07-15T08:07:05 -->
 ⚽ *Next match* — England vs Argentina
 Kickoff 2026-07-15 19:00:00+00:00
 

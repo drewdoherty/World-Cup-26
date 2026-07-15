@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-15T07:30:34 -->
+<!-- generated: 2026-07-15T08:07:05 -->
 *World Cup Alpha — trade card* (1 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
