@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-15 18:24:45 UTC"
+    "generated": "2026-07-15 18:58:40 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -15,21 +15,21 @@
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.3491,
+        "prob": 0.3508,
         "results": [
           "England"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.3212,
+        "prob": 0.3193,
         "results": [
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.3297,
+        "prob": 0.3299,
         "results": [
           "Argentina"
         ]
@@ -38,21 +38,21 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.3491,
+        "prob": 0.3508,
         "results": [
           "England"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.3212,
+        "prob": 0.3193,
         "results": [
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.3297,
+        "prob": 0.3299,
         "results": [
           "Argentina"
         ]
@@ -89,7 +89,7 @@
       "results": [
         {
           "outcome": "England",
-          "prob": 0.3491,
+          "prob": 0.3508,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -99,15 +99,15 @@
             "available": true,
             "outcome": "England",
             "best_venue": "smarkets",
-            "best_odds": 2.78,
-            "model_prob": 0.3491,
-            "ev_pct": -3.0,
-            "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
+            "best_odds": 2.9,
+            "model_prob": 0.3508,
+            "ev_pct": 1.7,
+            "recommendation": "PLUG: +EV to back (1.7% edge) \u2014 fills the gap and adds value"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.3212,
+          "prob": 0.3193,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -117,15 +117,15 @@
             "available": true,
             "outcome": "Draw",
             "best_venue": "smarkets",
-            "best_odds": 3.0,
-            "model_prob": 0.3212,
-            "ev_pct": -3.6,
-            "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
+            "best_odds": 2.9,
+            "model_prob": 0.3193,
+            "ev_pct": -7.4,
+            "recommendation": "LEAVE UNHEDGED: plugging costs 7.4% EV \u2014 take the variance"
           }
         },
         {
           "outcome": "Argentina",
-          "prob": 0.3297,
+          "prob": 0.3299,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -136,9 +136,9 @@
             "outcome": "Argentina",
             "best_venue": "smarkets",
             "best_odds": 3.2,
-            "model_prob": 0.3297,
-            "ev_pct": 5.5,
-            "recommendation": "PLUG: +EV to back (5.5% edge) \u2014 fills the gap and adds value"
+            "model_prob": 0.3299,
+            "ev_pct": 5.6,
+            "recommendation": "PLUG: +EV to back (5.6% edge) \u2014 fills the gap and adds value"
           }
         }
       ],
@@ -165,46 +165,46 @@
     {
       "fixture": "England vs Argentina",
       "outcome": "England",
-      "prob": 0.3491,
+      "prob": 0.3508,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "England",
         "best_venue": "smarkets",
-        "best_odds": 2.78,
-        "model_prob": 0.3491,
-        "ev_pct": -3.0,
-        "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
+        "best_odds": 2.9,
+        "model_prob": 0.3508,
+        "ev_pct": 1.7,
+        "recommendation": "PLUG: +EV to back (1.7% edge) \u2014 fills the gap and adds value"
       }
     },
     {
       "fixture": "England vs Argentina",
       "outcome": "Argentina",
-      "prob": 0.3297,
+      "prob": 0.3299,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Argentina",
         "best_venue": "smarkets",
         "best_odds": 3.2,
-        "model_prob": 0.3297,
-        "ev_pct": 5.5,
-        "recommendation": "PLUG: +EV to back (5.5% edge) \u2014 fills the gap and adds value"
+        "model_prob": 0.3299,
+        "ev_pct": 5.6,
+        "recommendation": "PLUG: +EV to back (5.6% edge) \u2014 fills the gap and adds value"
       }
     },
     {
       "fixture": "England vs Argentina",
       "outcome": "Draw",
-      "prob": 0.3212,
+      "prob": 0.3193,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Draw",
         "best_venue": "smarkets",
-        "best_odds": 3.0,
-        "model_prob": 0.3212,
-        "ev_pct": -3.6,
-        "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
+        "best_odds": 2.9,
+        "model_prob": 0.3193,
+        "ev_pct": -7.4,
+        "recommendation": "LEAVE UNHEDGED: plugging costs 7.4% EV \u2014 take the variance"
       }
     }
   ],
