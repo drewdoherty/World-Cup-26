@@ -1,9 +1,9 @@
-<!-- generated: 2026-07-15T16:34:27 -->
+<!-- generated: 2026-07-15T17:10:49 -->
 ⚽ *Next match* — England vs Argentina
 Kickoff 2026-07-15 19:00:00+00:00
 
 *Winner* (model blend)
-  Argentina      model 33.0% · mkt 31.2% (betfair_ex_uk)  EV +5.6% ✅+EV  $27.56
+  Argentina      model 33.0% · mkt 31.2% (betfair_ex_uk)  EV +5.5% ✅+EV  $27.27
   England        model 34.8% · mkt 36.0% (betfair_ex_uk)  EV -3.2% ❌−EV
   Draw           model 32.2% · mkt 33.3% (betfair_ex_uk)  EV -3.4% ❌−EV
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
@@ -22,4 +22,4 @@ _top anytime, mkt implied % (both teams — add squad to split + FGS; no model p
 
 *Scorelines* (top 6)
 1-1 15.2% | 0-0 11.1% | 1-0 10.7% | 0-1 9.5% | 2-1 7.9% | 1-2 6.9%
-  O/U 2.5: over 41.0% / under 59.0%   BTTS 49.3%
+  O/U 2.5: over 40.9% / under 59.1%   BTTS 49.3%
