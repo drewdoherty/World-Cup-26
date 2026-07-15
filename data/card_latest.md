@@ -1,12 +1,12 @@
-<!-- generated: 2026-07-14T23:03:19 -->
+<!-- generated: 2026-07-14T23:39:46 -->
 *World Cup Alpha — trade card* (1 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
-*1. [MID·LONGSHOT] England vs Argentina* — Argentina — back *31.2%* impl via *smarkets*
-    model 33.1% / mkt 31.4% (+1.9pp)  EV *+6.0%* ✅+EV  [elo 43% dc 39%]
-    stake: gbp £22.14
+*1. [MID·LONGSHOT] England vs Argentina* — Argentina — back *31.7%* impl via *betfair*
+    model 33.1% / mkt 31.4% (+1.4pp)  EV *+4.3%* ✅+EV  [elo 43% dc 39%]
+    stake: gbp £16.38
 
-*Venue split (gbp):* smarkets £22.14
+*Venue split (gbp):* betfair £16.38
 
 *— REFERENCE, NOT SIZED (model prices only) —*
 *World Cup Alpha — scorelines* (1 fixtures)
