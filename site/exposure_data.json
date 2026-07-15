@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-15 20:40:16 UTC"
+    "generated": "2026-07-15 21:14:03 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -15,21 +15,21 @@
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.6226,
+        "prob": 0.0404,
         "results": [
           "England"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.2716,
+        "prob": 0.1631,
         "results": [
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.1059,
+        "prob": 0.7965,
         "results": [
           "Argentina"
         ]
@@ -38,21 +38,21 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.6226,
+        "prob": 0.0404,
         "results": [
           "England"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.2716,
+        "prob": 0.1631,
         "results": [
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.1059,
+        "prob": 0.7965,
         "results": [
           "Argentina"
         ]
@@ -99,38 +99,34 @@
       "results": [
         {
           "outcome": "England",
-          "prob": 0.6226,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": true,
-          "live": [],
-          "plug": {
-            "available": false,
-            "note": "no live market price found for this outcome"
-          }
-        },
-        {
-          "outcome": "Draw",
-          "prob": 0.2716,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": true,
-          "live": [],
-          "plug": {
-            "available": false,
-            "note": "no live market price found for this outcome"
-          }
-        },
-        {
-          "outcome": "Argentina",
-          "prob": 0.1059,
+          "prob": 0.0404,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
           "blindspot": false,
           "live": []
+        },
+        {
+          "outcome": "Draw",
+          "prob": 0.1631,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": false,
+          "live": []
+        },
+        {
+          "outcome": "Argentina",
+          "prob": 0.7965,
+          "direct_pnl": 0.0,
+          "acca_ev": 0.0,
+          "net_pnl": 0.0,
+          "blindspot": true,
+          "live": [],
+          "plug": {
+            "available": false,
+            "note": "no live market price found for this outcome"
+          }
         }
       ],
       "events": [
@@ -148,25 +144,15 @@
         "stake_at_risk": 0,
         "best_outcome": "England",
         "worst_outcome": "England",
-        "n_blindspots": 2
+        "n_blindspots": 1
       }
     }
   ],
   "blindspots": [
     {
       "fixture": "England vs Argentina",
-      "outcome": "England",
-      "prob": 0.6226,
-      "net_pnl": 0.0,
-      "plug": {
-        "available": false,
-        "note": "no live market price found for this outcome"
-      }
-    },
-    {
-      "fixture": "England vs Argentina",
-      "outcome": "Draw",
-      "prob": 0.2716,
+      "outcome": "Argentina",
+      "prob": 0.7965,
       "net_pnl": 0.0,
       "plug": {
         "available": false,
