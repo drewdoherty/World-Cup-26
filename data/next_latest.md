@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-16T20:07:33 -->
+<!-- generated: 2026-07-16T20:44:10 -->
 ⚽ *Next match* — France vs England
 Kickoff 2026-07-18 21:00:00+00:00
 
@@ -10,9 +10,9 @@ Kickoff 2026-07-18 21:00:00+00:00
 *Corners* (model, exp 8.8)
   O/U 8.5: over 51.2% / under 48.8% (model only — no live corners feed, +EV unverifiable)
 
-*Top goalscorers* — from the cached /goalscorers card (as of 2026-07-16T17:09:51)
+*Top goalscorers* — from the cached /goalscorers card (as of 2026-07-16T20:16:24)
 _top anytime, mkt implied % (both teams — add squad to split + FGS; no model price, +EV unverifiable)_
-  Kylian Mbappe        mkt 54% (Betfair)
+  Kylian Mbappe        mkt 53% (Betfair)
   Jean-Philippe Mateta mkt 37% (William Hill)
   Harry Kane           mkt 37% (Betfair)
   Ousmane Dembele      mkt 33% (Betfair)
