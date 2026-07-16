@@ -1,10 +1,10 @@
-<!-- generated: 2026-07-16T18:54:49 -->
+<!-- generated: 2026-07-16T19:31:09 -->
 ⚽ *Next match* — France vs England
 Kickoff 2026-07-18 21:00:00+00:00
 
 *Winner* (model blend)
-  France         model 50.1% · mkt 50.8% (betfair_ex_uk)  EV -1.3% ❌−EV
-  Draw           model 24.9% · mkt 24.4% (betano_uk)  EV +2.2% ✅+EV  (<25% model — NO CASH)
+  France         model 50.2% · mkt 50.8% (betfair_ex_uk)  EV -1.1% ❌−EV
+  Draw           model 24.8% · mkt 24.4% (betano_uk)  EV +1.8% ✅+EV (below +2% gate)  (<25% model — NO CASH)
   England        model 25.0% · mkt 25.0% (betfair_ex_uk)  EV -0.1% ❌−EV  (<25% model — NO CASH)
 
 *Corners* (model, exp 8.8)
@@ -20,5 +20,5 @@ _top anytime, mkt implied % (both teams — add squad to split + FGS; no model p
   Marcus Thuram        mkt 29% (Betfair)
 
 *Scorelines* (top 6)
-1-1 11.9% | 1-0 10.6% | 2-1 10.2% | 2-0 8.7% | 0-0 6.8% | 0-1 6.3%
-  O/U 2.5: over 51.8% / under 48.2%   BTTS 54.6%
+1-1 11.8% | 1-0 10.6% | 2-1 10.3% | 2-0 8.7% | 0-0 6.7% | 0-1 6.3%
+  O/U 2.5: over 51.8% / under 48.2%   BTTS 54.5%
