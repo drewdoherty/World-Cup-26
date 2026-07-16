@@ -6,43 +6,43 @@
  "freshness": {
   "checks": [
    {
-    "age_secs": 184076.0,
+    "age_secs": 186110.0,
     "max_age_secs": 10800,
     "name": "advancement",
     "pass": false,
-    "reason": "stale: 51.1h old > 3.0h max",
+    "reason": "stale: 51.7h old > 3.0h max",
     "source": "site/advancement_data.json",
     "stamp": "2026-07-14 11:02:31 UTC"
    },
    {
-    "age_secs": 1.0,
+    "age_secs": 0.0,
     "max_age_secs": 10800,
     "name": "bet_recs",
     "pass": true,
     "reason": null,
     "source": "site/bet_recs.json",
-    "stamp": "2026-07-16 14:10:26 UTC"
+    "stamp": "2026-07-16 14:44:21 UTC"
    },
    {
-    "age_secs": 245.0,
+    "age_secs": 35.0,
     "max_age_secs": 10800,
     "name": "scores_markets",
     "pass": true,
     "reason": null,
     "source": "site/scores_markets.json",
-    "stamp": "2026-07-16 14:06:22 UTC"
+    "stamp": "2026-07-16 14:43:46 UTC"
    },
    {
-    "age_secs": 63293.0,
+    "age_secs": 65327.0,
     "max_age_secs": 21600,
     "name": "pm_ideas",
     "pass": false,
-    "reason": "stale: 17.6h old > 6.0h max",
+    "reason": "stale: 18.1h old > 6.0h max",
     "source": "site/pm_ideas.json",
     "stamp": "2026-07-15T20:35:34Z"
    },
    {
-    "age_secs": 402.2,
+    "age_secs": 2436.2,
     "max_age_secs": 86400,
     "name": "orderflow",
     "pass": true,
@@ -51,11 +51,11 @@
     "stamp": "2026-07-16T14:03:44.803164+00:00"
    },
    {
-    "age_secs": 184287.0,
+    "age_secs": 186321.0,
     "max_age_secs": 50400,
     "name": "advancement_model",
     "pass": false,
-    "reason": "stale: 51.2h old > 14.0h max",
+    "reason": "stale: 51.8h old > 14.0h max",
     "source": "site/advancement_data.json (meta.model_generated)",
     "stamp": "2026-07-14 10:59 UTC"
    },
@@ -72,7 +72,7 @@
   "pass": false
  },
  "meta": {
-  "advancement_model_age_hours": 51.19,
+  "advancement_model_age_hours": 51.76,
   "advancement_model_generated": "2026-07-14 10:59 UTC",
   "caveats": [
    "SHADOW-ONLY: decision-support feed; no verdict here is a trade instruction and nothing is wired to execution.",
@@ -84,9 +84,9 @@
    "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
    "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal.",
    "orderflow history truncated for n=361 markets (data-api 3k-row cap) \u2014 flow aggregates there are incomplete; buy-pressure/share numbers are context only",
-   "freshness gate FAILED for site/advancement_data.json \u2014 stale: 51.1h old > 3.0h max",
-   "freshness gate FAILED for site/pm_ideas.json \u2014 stale: 17.6h old > 6.0h max",
-   "freshness gate FAILED for site/advancement_data.json (meta.model_generated) \u2014 stale: 51.2h old > 14.0h max"
+   "freshness gate FAILED for site/advancement_data.json \u2014 stale: 51.7h old > 3.0h max",
+   "freshness gate FAILED for site/pm_ideas.json \u2014 stale: 18.1h old > 6.0h max",
+   "freshness gate FAILED for site/advancement_data.json (meta.model_generated) \u2014 stale: 51.8h old > 14.0h max"
   ],
   "edge_gate": {
    "min_edge_adj": 0.02,
@@ -100,7 +100,7 @@
    "site/pm_ideas.json": 21600,
    "site/scores_markets.json": 10800
   },
-  "generated_at": "2026-07-16T14:10:27Z",
+  "generated_at": "2026-07-16T14:44:21Z",
   "n_advancement_legs_without_pm_quote": 0,
   "n_by_verdict": {
    "DO_NOT_TRADE": 8,
@@ -141,10 +141,10 @@
   "shadow_only": true,
   "sources": {
    "site/advancement_data.json": "2026-07-14 11:02:31 UTC",
-   "site/bet_recs.json": "2026-07-16 14:10:26 UTC",
+   "site/bet_recs.json": "2026-07-16 14:44:21 UTC",
    "site/microstructure/orderflow.json": "2026-07-16T14:03:44.803164+00:00",
    "site/pm_ideas.json": "2026-07-15T20:35:34Z",
-   "site/scores_markets.json": "2026-07-16 14:06:22 UTC"
+   "site/scores_markets.json": "2026-07-16 14:43:46 UTC"
   },
   "verdict_enum": [
    "SHADOW_ADD",
@@ -177,7 +177,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -295,7 +295,7 @@
    "team": "France",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
    ]
   },
   {
@@ -315,7 +315,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -433,7 +433,7 @@
    "team": "England",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
    ]
   },
   {
@@ -453,7 +453,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -591,7 +591,7 @@
    "team": "France",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
    ]
   },
   {
@@ -611,7 +611,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -749,7 +749,7 @@
    "team": "Spain",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
    ]
   },
   {
@@ -769,7 +769,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -907,7 +907,7 @@
    "team": "Argentina",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
    ]
   },
   {
@@ -927,7 +927,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1065,7 +1065,7 @@
    "team": "England",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
    ]
   },
   {
@@ -1085,7 +1085,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1223,7 +1223,7 @@
    "team": "Argentina",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
    ]
   },
   {
@@ -1243,7 +1243,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1381,7 +1381,7 @@
    "team": "Spain",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 51.1h old > 3.0h max); site/pm_ideas.json (stale: 17.6h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.2h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 51.7h old > 3.0h max); site/pm_ideas.json (stale: 18.1h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 51.8h old > 14.0h max)"
    ]
   },
   {
