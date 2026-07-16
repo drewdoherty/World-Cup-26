@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-15 21:14:05 UTC",
+    "generated": "2026-07-16 14:10:26 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 1514,
-      "advancement_secs": 123094,
+      "model_secs": 496,
+      "advancement_secs": 184075,
       "price_secs": null,
-      "promo_secs": 472001,
+      "promo_secs": 532982,
       "exposure_secs": null
     },
     "coverage": {
@@ -51,7 +51,7 @@
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
     "actionable_count": 0,
-    "withheld_count": 16
+    "withheld_count": 19
   },
   "match_singles": [],
   "event_props": [],
@@ -59,58 +59,115 @@
   "guaranteed_arbs": [],
   "withheld": [
     {
-      "id": "england_vs_argentina_home_1x2",
-      "fixture": "England vs Argentina",
-      "kickoff": "2026-07-15 19:00:00+00:00",
+      "id": "france_vs_england_home_1x2",
+      "fixture": "France vs England",
+      "kickoff": "2026-07-18 21:00:00+00:00",
       "group": "",
       "market": "1X2",
       "selection": "home",
-      "team": "England",
-      "model_prob": 0.0404,
-      "price": 120.0048,
-      "edge": 0.032,
-      "ev_net": 3.8445,
+      "team": "France",
+      "model_prob": 0.5008,
+      "price": 1.9813,
+      "edge": -0.004,
+      "ev_net": -0.0078,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "model_prob 4% < floor 20%",
-      "reason_code": "below_min_prob",
+      "withheld_reason": "edge_below_floor:-0.0040<0.0200",
+      "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
     },
     {
-      "id": "england_vs_argentina_draw_1x2",
-      "fixture": "England vs Argentina",
-      "kickoff": "2026-07-15 19:00:00+00:00",
+      "id": "france_vs_england_draw_1x2",
+      "fixture": "France vs England",
+      "kickoff": "2026-07-18 21:00:00+00:00",
       "group": "",
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.1631,
-      "price": 7.0986,
-      "edge": 0.0222,
-      "ev_net": 0.1578,
+      "model_prob": 0.25,
+      "price": 4.0311,
+      "edge": 0.0019,
+      "ev_net": 0.0077,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "model_prob 16% < floor 20%",
-      "reason_code": "below_min_prob",
+      "withheld_reason": "longshot filter: prob 25% < 25% (minnow risk)",
+      "reason_code": "longshot_filter",
       "stale": false,
       "stale_reason": null
     },
     {
-      "id": "england_vs_argentina_away_1x2",
-      "fixture": "England vs Argentina",
-      "kickoff": "2026-07-15 19:00:00+00:00",
+      "id": "france_vs_england_away_1x2",
+      "fixture": "France vs England",
+      "kickoff": "2026-07-18 21:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "away",
+      "team": "England",
+      "model_prob": 0.2493,
+      "price": 4.0451,
+      "edge": 0.0021,
+      "ev_net": 0.0083,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "longshot filter: prob 25% < 25% (minnow risk)",
+      "reason_code": "longshot_filter",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "spain_vs_argentina_home_1x2",
+      "fixture": "Spain vs Argentina",
+      "kickoff": "2026-07-19 19:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "home",
+      "team": "Spain",
+      "model_prob": 0.4326,
+      "price": 2.3933,
+      "edge": 0.0148,
+      "ev_net": 0.0353,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "edge_below_floor:0.0148<0.0200",
+      "reason_code": "edge_below_floor",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "spain_vs_argentina_draw_1x2",
+      "fixture": "Spain vs Argentina",
+      "kickoff": "2026-07-19 19:00:00+00:00",
+      "group": "",
+      "market": "1X2",
+      "selection": "draw",
+      "team": "Draw",
+      "model_prob": 0.3029,
+      "price": 3.1702,
+      "edge": -0.0125,
+      "ev_net": -0.0396,
+      "stake": 0.0,
+      "currency": "GBP",
+      "withheld_reason": "edge_below_floor:-0.0125<0.0200",
+      "reason_code": "edge_below_floor",
+      "stale": false,
+      "stale_reason": null
+    },
+    {
+      "id": "spain_vs_argentina_away_1x2",
+      "fixture": "Spain vs Argentina",
+      "kickoff": "2026-07-19 19:00:00+00:00",
       "group": "",
       "market": "1X2",
       "selection": "away",
       "team": "Argentina",
-      "model_prob": 0.7965,
-      "price": 1.1754,
-      "edge": -0.0543,
-      "ev_net": -0.0638,
+      "model_prob": 0.2645,
+      "price": 3.7492,
+      "edge": -0.0023,
+      "ev_net": -0.0084,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "edge_below_floor:-0.0543<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0023<0.0200",
       "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
@@ -208,8 +265,8 @@
       "stake": 65.71,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 123094,
-        "price_secs": 123094
+        "model_secs": 184075,
+        "price_secs": 184075
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
@@ -249,8 +306,8 @@
       "stake": 45.99,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 123094,
-        "price_secs": 123094
+        "model_secs": 184075,
+        "price_secs": 184075
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
@@ -290,8 +347,8 @@
       "stake": 65.87,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 123094,
-        "price_secs": 123094
+        "model_secs": 184075,
+        "price_secs": 184075
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
@@ -331,8 +388,8 @@
       "stake": 46.29,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 123094,
-        "price_secs": 123094
+        "model_secs": 184075,
+        "price_secs": 184075
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
