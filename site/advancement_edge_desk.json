@@ -6,11 +6,11 @@
  "freshness": {
   "checks": [
    {
-    "age_secs": 208461.0,
+    "age_secs": 210486.0,
     "max_age_secs": 10800,
     "name": "advancement",
     "pass": false,
-    "reason": "stale: 57.9h old > 3.0h max",
+    "reason": "stale: 58.5h old > 3.0h max",
     "source": "site/advancement_data.json",
     "stamp": "2026-07-14 11:02:31 UTC"
    },
@@ -21,7 +21,7 @@
     "pass": true,
     "reason": null,
     "source": "site/bet_recs.json",
-    "stamp": "2026-07-16 20:56:51 UTC"
+    "stamp": "2026-07-16 21:30:36 UTC"
    },
    {
     "age_secs": 34.0,
@@ -30,32 +30,32 @@
     "pass": true,
     "reason": null,
     "source": "site/scores_markets.json",
-    "stamp": "2026-07-16 20:56:18 UTC"
+    "stamp": "2026-07-16 21:30:03 UTC"
    },
    {
-    "age_secs": 87678.0,
+    "age_secs": 89703.0,
     "max_age_secs": 21600,
     "name": "pm_ideas",
     "pass": false,
-    "reason": "stale: 24.4h old > 6.0h max",
+    "reason": "stale: 24.9h old > 6.0h max",
     "source": "site/pm_ideas.json",
     "stamp": "2026-07-15T20:35:34Z"
    },
    {
-    "age_secs": 2753.2,
+    "age_secs": 810.0,
     "max_age_secs": 86400,
     "name": "orderflow",
     "pass": true,
     "reason": null,
     "source": "site/microstructure/orderflow.json",
-    "stamp": "2026-07-16T20:10:58.801253+00:00"
+    "stamp": "2026-07-16T21:17:07.026244+00:00"
    },
    {
-    "age_secs": 208672.0,
+    "age_secs": 210697.0,
     "max_age_secs": 50400,
     "name": "advancement_model",
     "pass": false,
-    "reason": "stale: 58.0h old > 14.0h max",
+    "reason": "stale: 58.5h old > 14.0h max",
     "source": "site/advancement_data.json (meta.model_generated)",
     "stamp": "2026-07-14 10:59 UTC"
    },
@@ -72,21 +72,21 @@
   "pass": false
  },
  "meta": {
-  "advancement_model_age_hours": 57.96,
+  "advancement_model_age_hours": 58.53,
   "advancement_model_generated": "2026-07-14 10:59 UTC",
   "caveats": [
    "SHADOW-ONLY: decision-support feed; no verdict here is a trade instruction and nothing is wired to execution.",
    "Settlement bases must never be confused: PM advancement includes extra time + penalties; 1X2 settles at 90 minutes. Every embedded 90-minute number in this feed is tagged 1X2_90min.",
    "BLOCKED: durable PM/odds price history for advancement markets is stale/missing and no CLV stamping / price capture exists for them (no fixed close; convergence metrics still COLLECTING). Live-money gate: a market without price capture + CLV stamping does not get real money \u2014 ANY real-money upgrade first needs price/CLV capture restored. This desk is SHADOW-ONLY until that plumbing ships.",
    "Taker-side data only: data-api /trades names the taker wallet on each fill; maker identities (resting orders, market makers) are never seen, so buy_pressure and all wallet stats describe aggressive flow only.",
-   "The trades API hard-caps history at 3,000 rows offset per market; 361 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
+   "The trades API hard-caps history at 3,000 rows offset per market; 383 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
    "Open-position marks are LAST-TRADE prints, not order-book mids \u2014 thin tokens can carry stale or manipulated marks into mtm_pnl and ROI.",
    "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
    "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal.",
-   "orderflow history truncated for n=361 markets (data-api 3k-row cap) \u2014 flow aggregates there are incomplete; buy-pressure/share numbers are context only",
-   "freshness gate FAILED for site/advancement_data.json \u2014 stale: 57.9h old > 3.0h max",
-   "freshness gate FAILED for site/pm_ideas.json \u2014 stale: 24.4h old > 6.0h max",
-   "freshness gate FAILED for site/advancement_data.json (meta.model_generated) \u2014 stale: 58.0h old > 14.0h max"
+   "orderflow history truncated for n=383 markets (data-api 3k-row cap) \u2014 flow aggregates there are incomplete; buy-pressure/share numbers are context only",
+   "freshness gate FAILED for site/advancement_data.json \u2014 stale: 58.5h old > 3.0h max",
+   "freshness gate FAILED for site/pm_ideas.json \u2014 stale: 24.9h old > 6.0h max",
+   "freshness gate FAILED for site/advancement_data.json (meta.model_generated) \u2014 stale: 58.5h old > 14.0h max"
   ],
   "edge_gate": {
    "min_edge_adj": 0.02,
@@ -100,7 +100,7 @@
    "site/pm_ideas.json": 21600,
    "site/scores_markets.json": 10800
   },
-  "generated_at": "2026-07-16T20:56:52Z",
+  "generated_at": "2026-07-16T21:30:37Z",
   "n_advancement_legs_without_pm_quote": 0,
   "n_by_verdict": {
    "DO_NOT_TRADE": 8,
@@ -112,11 +112,11 @@
   "n_rows": 18,
   "n_withheld_excluded_uninformative": 9,
   "orderflow_hot": {
-   "hot_threshold": 0.8582,
-   "mean_buy_pressure": 0.7777,
+   "hot_threshold": 0.8449,
+   "mean_buy_pressure": 0.7712,
    "method": "hot = category buy_pressure >= cross-category mean + 1 sample sd within this orderflow feed (taker flow is structurally buy-heavy, so an absolute threshold over-tags)",
    "n_categories": 9,
-   "sd_buy_pressure": 0.0804
+   "sd_buy_pressure": 0.0737
   },
   "ordering": "bucket on the MODEL prob that the position pays out (moneyline>=50c, mid 25-50c, longshot <25c) primary; further-out stage first secondary (win > Final > SF > QF > R16 > R32 > group_winner); fee-adjusted edge desc as tiebreak only. Decided legs then withheld near-misses rank after the actionable tier. Render in feed order \u2014 do not re-sort.",
   "schema_version": 2,
@@ -141,10 +141,10 @@
   "shadow_only": true,
   "sources": {
    "site/advancement_data.json": "2026-07-14 11:02:31 UTC",
-   "site/bet_recs.json": "2026-07-16 20:56:51 UTC",
-   "site/microstructure/orderflow.json": "2026-07-16T20:10:58.801253+00:00",
+   "site/bet_recs.json": "2026-07-16 21:30:36 UTC",
+   "site/microstructure/orderflow.json": "2026-07-16T21:17:07.026244+00:00",
    "site/pm_ideas.json": "2026-07-15T20:35:34Z",
-   "site/scores_markets.json": "2026-07-16 20:56:18 UTC"
+   "site/scores_markets.json": "2026-07-16 21:30:03 UTC"
   },
   "verdict_enum": [
    "SHADOW_ADD",
@@ -177,7 +177,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -249,32 +249,32 @@
    "model_prob": 0.2256,
    "model_source": "advancement_data.teams[France].model[win]",
    "orderflow": {
-    "avg_trade_usd": 447.0,
-    "buy_pressure": 0.573,
+    "avg_trade_usd": 466.97,
+    "buy_pressure": 0.586,
     "category": "winner",
-    "dumb_usd_share": 0.0157,
+    "dumb_usd_share": 0.0228,
     "honesty_notes": [
      "Taker-side data only: data-api /trades names the taker wallet on each fill; maker identities (resting orders, market makers) are never seen, so buy_pressure and all wallet stats describe aggressive flow only.",
-     "The trades API hard-caps history at 3,000 rows offset per market; 361 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
+     "The trades API hard-caps history at 3,000 rows offset per market; 383 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
      "Open-position marks are LAST-TRADE prints, not order-book mids \u2014 thin tokens can carry stale or manipulated marks into mtm_pnl and ROI.",
      "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
      "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal."
     ],
     "hot": false,
     "latency": {
-     "first30s_usd_share": 1.0,
-     "median_move_cents": 6.3,
+     "first30s_usd_share": 0.8479,
+     "median_move_cents": 8.88,
      "median_reprice_s": 0.0,
-     "n_jumps": 1,
-     "p90_reprice_s": 0.0
+     "n_jumps": 15,
+     "p90_reprice_s": 103.0
     },
-    "n_trades": 486591,
+    "n_trades": 526046,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.022,
-    "usd": 217507586.0
+    "smart_usd_share": 0.0373,
+    "usd": 245648580.91
    },
    "origin": "advancement_data",
    "pm_price": 0.3905,
@@ -295,7 +295,7 @@
    "team": "France",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
    ]
   },
   {
@@ -315,7 +315,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -387,32 +387,32 @@
    "model_prob": 0.1972,
    "model_source": "advancement_data.teams[England].model[win]",
    "orderflow": {
-    "avg_trade_usd": 447.0,
-    "buy_pressure": 0.573,
+    "avg_trade_usd": 466.97,
+    "buy_pressure": 0.586,
     "category": "winner",
-    "dumb_usd_share": 0.0157,
+    "dumb_usd_share": 0.0228,
     "honesty_notes": [
      "Taker-side data only: data-api /trades names the taker wallet on each fill; maker identities (resting orders, market makers) are never seen, so buy_pressure and all wallet stats describe aggressive flow only.",
-     "The trades API hard-caps history at 3,000 rows offset per market; 361 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
+     "The trades API hard-caps history at 3,000 rows offset per market; 383 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
      "Open-position marks are LAST-TRADE prints, not order-book mids \u2014 thin tokens can carry stale or manipulated marks into mtm_pnl and ROI.",
      "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
      "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal."
     ],
     "hot": false,
     "latency": {
-     "first30s_usd_share": 1.0,
-     "median_move_cents": 6.3,
+     "first30s_usd_share": 0.8479,
+     "median_move_cents": 8.88,
      "median_reprice_s": 0.0,
-     "n_jumps": 1,
-     "p90_reprice_s": 0.0
+     "n_jumps": 15,
+     "p90_reprice_s": 103.0
     },
-    "n_trades": 486591,
+    "n_trades": 526046,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.022,
-    "usd": 217507586.0
+    "smart_usd_share": 0.0373,
+    "usd": 245648580.91
    },
    "origin": "advancement_data",
    "pm_price": 0.2165,
@@ -433,7 +433,7 @@
    "team": "England",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
    ]
   },
   {
@@ -453,7 +453,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -545,32 +545,32 @@
    "model_prob": 0.4511,
    "model_source": "advancement_data.teams[France].model[Final]",
    "orderflow": {
-    "avg_trade_usd": 101.59,
-    "buy_pressure": 0.827,
+    "avg_trade_usd": 104.07,
+    "buy_pressure": 0.7876,
     "category": "advancement_final",
-    "dumb_usd_share": 0.0081,
+    "dumb_usd_share": 0.0145,
     "honesty_notes": [
      "Taker-side data only: data-api /trades names the taker wallet on each fill; maker identities (resting orders, market makers) are never seen, so buy_pressure and all wallet stats describe aggressive flow only.",
-     "The trades API hard-caps history at 3,000 rows offset per market; 361 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
+     "The trades API hard-caps history at 3,000 rows offset per market; 383 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
      "Open-position marks are LAST-TRADE prints, not order-book mids \u2014 thin tokens can carry stale or manipulated marks into mtm_pnl and ROI.",
      "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
      "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal."
     ],
     "hot": false,
     "latency": {
-     "first30s_usd_share": 0.9084,
-     "median_move_cents": 8.93,
+     "first30s_usd_share": 0.815,
+     "median_move_cents": 9.6,
      "median_reprice_s": 0.0,
-     "n_jumps": 34,
-     "p90_reprice_s": 82.0
+     "n_jumps": 61,
+     "p90_reprice_s": 181.0
     },
-    "n_trades": 35173,
+    "n_trades": 48841,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.053,
-    "usd": 3573235.66
+    "smart_usd_share": 0.0504,
+    "usd": 5082978.11
    },
    "origin": "advancement_data",
    "pm_price": 0.595,
@@ -591,7 +591,7 @@
    "team": "France",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
    ]
   },
   {
@@ -611,7 +611,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -703,32 +703,32 @@
    "model_prob": 0.5489,
    "model_source": "advancement_data.teams[Spain].model[Final]",
    "orderflow": {
-    "avg_trade_usd": 101.59,
-    "buy_pressure": 0.827,
+    "avg_trade_usd": 104.07,
+    "buy_pressure": 0.7876,
     "category": "advancement_final",
-    "dumb_usd_share": 0.0081,
+    "dumb_usd_share": 0.0145,
     "honesty_notes": [
      "Taker-side data only: data-api /trades names the taker wallet on each fill; maker identities (resting orders, market makers) are never seen, so buy_pressure and all wallet stats describe aggressive flow only.",
-     "The trades API hard-caps history at 3,000 rows offset per market; 361 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
+     "The trades API hard-caps history at 3,000 rows offset per market; 383 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
      "Open-position marks are LAST-TRADE prints, not order-book mids \u2014 thin tokens can carry stale or manipulated marks into mtm_pnl and ROI.",
      "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
      "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal."
     ],
     "hot": false,
     "latency": {
-     "first30s_usd_share": 0.9084,
-     "median_move_cents": 8.93,
+     "first30s_usd_share": 0.815,
+     "median_move_cents": 9.6,
      "median_reprice_s": 0.0,
-     "n_jumps": 34,
-     "p90_reprice_s": 82.0
+     "n_jumps": 61,
+     "p90_reprice_s": 181.0
     },
-    "n_trades": 35173,
+    "n_trades": 48841,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.053,
-    "usd": 3573235.66
+    "smart_usd_share": 0.0504,
+    "usd": 5082978.11
    },
    "origin": "advancement_data",
    "pm_price": 0.405,
@@ -749,7 +749,7 @@
    "team": "Spain",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
    ]
   },
   {
@@ -769,7 +769,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -861,32 +861,32 @@
    "model_prob": 0.5438,
    "model_source": "advancement_data.teams[Argentina].model[Final]",
    "orderflow": {
-    "avg_trade_usd": 101.59,
-    "buy_pressure": 0.827,
+    "avg_trade_usd": 104.07,
+    "buy_pressure": 0.7876,
     "category": "advancement_final",
-    "dumb_usd_share": 0.0081,
+    "dumb_usd_share": 0.0145,
     "honesty_notes": [
      "Taker-side data only: data-api /trades names the taker wallet on each fill; maker identities (resting orders, market makers) are never seen, so buy_pressure and all wallet stats describe aggressive flow only.",
-     "The trades API hard-caps history at 3,000 rows offset per market; 361 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
+     "The trades API hard-caps history at 3,000 rows offset per market; 383 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
      "Open-position marks are LAST-TRADE prints, not order-book mids \u2014 thin tokens can carry stale or manipulated marks into mtm_pnl and ROI.",
      "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
      "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal."
     ],
     "hot": false,
     "latency": {
-     "first30s_usd_share": 0.9084,
-     "median_move_cents": 8.93,
+     "first30s_usd_share": 0.815,
+     "median_move_cents": 9.6,
      "median_reprice_s": 0.0,
-     "n_jumps": 34,
-     "p90_reprice_s": 82.0
+     "n_jumps": 61,
+     "p90_reprice_s": 181.0
     },
-    "n_trades": 35173,
+    "n_trades": 48841,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.053,
-    "usd": 3573235.66
+    "smart_usd_share": 0.0504,
+    "usd": 5082978.11
    },
    "origin": "advancement_data",
    "pm_price": 0.4485,
@@ -907,7 +907,7 @@
    "team": "Argentina",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
    ]
   },
   {
@@ -927,7 +927,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1019,32 +1019,32 @@
    "model_prob": 0.4561,
    "model_source": "advancement_data.teams[England].model[Final]",
    "orderflow": {
-    "avg_trade_usd": 101.59,
-    "buy_pressure": 0.827,
+    "avg_trade_usd": 104.07,
+    "buy_pressure": 0.7876,
     "category": "advancement_final",
-    "dumb_usd_share": 0.0081,
+    "dumb_usd_share": 0.0145,
     "honesty_notes": [
      "Taker-side data only: data-api /trades names the taker wallet on each fill; maker identities (resting orders, market makers) are never seen, so buy_pressure and all wallet stats describe aggressive flow only.",
-     "The trades API hard-caps history at 3,000 rows offset per market; 361 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
+     "The trades API hard-caps history at 3,000 rows offset per market; 383 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
      "Open-position marks are LAST-TRADE prints, not order-book mids \u2014 thin tokens can carry stale or manipulated marks into mtm_pnl and ROI.",
      "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
      "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal."
     ],
     "hot": false,
     "latency": {
-     "first30s_usd_share": 0.9084,
-     "median_move_cents": 8.93,
+     "first30s_usd_share": 0.815,
+     "median_move_cents": 9.6,
      "median_reprice_s": 0.0,
-     "n_jumps": 34,
-     "p90_reprice_s": 82.0
+     "n_jumps": 61,
+     "p90_reprice_s": 181.0
     },
-    "n_trades": 35173,
+    "n_trades": 48841,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.053,
-    "usd": 3573235.66
+    "smart_usd_share": 0.0504,
+    "usd": 5082978.11
    },
    "origin": "advancement_data",
    "pm_price": 0.545,
@@ -1065,7 +1065,7 @@
    "team": "England",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
    ]
   },
   {
@@ -1085,7 +1085,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1177,32 +1177,32 @@
    "model_prob": 0.2707,
    "model_source": "advancement_data.teams[Argentina].model[win]",
    "orderflow": {
-    "avg_trade_usd": 447.0,
-    "buy_pressure": 0.573,
+    "avg_trade_usd": 466.97,
+    "buy_pressure": 0.586,
     "category": "winner",
-    "dumb_usd_share": 0.0157,
+    "dumb_usd_share": 0.0228,
     "honesty_notes": [
      "Taker-side data only: data-api /trades names the taker wallet on each fill; maker identities (resting orders, market makers) are never seen, so buy_pressure and all wallet stats describe aggressive flow only.",
-     "The trades API hard-caps history at 3,000 rows offset per market; 361 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
+     "The trades API hard-caps history at 3,000 rows offset per market; 383 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
      "Open-position marks are LAST-TRADE prints, not order-book mids \u2014 thin tokens can carry stale or manipulated marks into mtm_pnl and ROI.",
      "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
      "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal."
     ],
     "hot": false,
     "latency": {
-     "first30s_usd_share": 1.0,
-     "median_move_cents": 6.3,
+     "first30s_usd_share": 0.8479,
+     "median_move_cents": 8.88,
      "median_reprice_s": 0.0,
-     "n_jumps": 1,
-     "p90_reprice_s": 0.0
+     "n_jumps": 15,
+     "p90_reprice_s": 103.0
     },
-    "n_trades": 486591,
+    "n_trades": 526046,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.022,
-    "usd": 217507586.0
+    "smart_usd_share": 0.0373,
+    "usd": 245648580.91
    },
    "origin": "advancement_data",
    "pm_price": 0.1735,
@@ -1223,7 +1223,7 @@
    "team": "Argentina",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
    ]
   },
   {
@@ -1243,7 +1243,7 @@
     },
     "freshness": {
      "pass": false,
-     "reason": "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+     "reason": "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
     },
     "min_prob_cash": {
      "pass": true,
@@ -1335,32 +1335,32 @@
    "model_prob": 0.3065,
    "model_source": "advancement_data.teams[Spain].model[win]",
    "orderflow": {
-    "avg_trade_usd": 447.0,
-    "buy_pressure": 0.573,
+    "avg_trade_usd": 466.97,
+    "buy_pressure": 0.586,
     "category": "winner",
-    "dumb_usd_share": 0.0157,
+    "dumb_usd_share": 0.0228,
     "honesty_notes": [
      "Taker-side data only: data-api /trades names the taker wallet on each fill; maker identities (resting orders, market makers) are never seen, so buy_pressure and all wallet stats describe aggressive flow only.",
-     "The trades API hard-caps history at 3,000 rows offset per market; 361 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
+     "The trades API hard-caps history at 3,000 rows offset per market; 383 markets hit that cap (listed in window.truncated_markets) and only carry a deep-history sweep of LARGE trades beyond it \u2014 so small-trade stats there are incomplete AND per-wallet PnL/ROI/win-rate can be missing legs entirely for wallets active in those markets. Leaderboard rows carry partial_history=true when affected; 0 wallets have had their complete history re-swept via the per-user endpoint and are exempt.",
      "Open-position marks are LAST-TRADE prints, not order-book mids \u2014 thin tokens can carry stale or manipulated marks into mtm_pnl and ROI.",
      "Jump detection is purely price-move based and is NOT attributed to specific match events (no goal-timestamp feed integrated); some 'jumps' are liquidity gaps rather than news.",
      "Smart/dumb cohorts are in-sample, WC-only performance ranks on small per-wallet samples with survivorship effects \u2014 treat as descriptive, not as a copy-trade signal."
     ],
     "hot": false,
     "latency": {
-     "first30s_usd_share": 1.0,
-     "median_move_cents": 6.3,
+     "first30s_usd_share": 0.8479,
+     "median_move_cents": 8.88,
      "median_reprice_s": 0.0,
-     "n_jumps": 1,
-     "p90_reprice_s": 0.0
+     "n_jumps": 15,
+     "p90_reprice_s": 103.0
     },
-    "n_trades": 486591,
+    "n_trades": 526046,
     "no_exact_join": "exact-market / per-team wallet signals are NOT provided: orderflow.json aggregates carry no defensible join key \u2014 omitted rather than faked",
     "note": "taker-side flow only; context \u2014 NEVER overrides the edge gate",
     "reason": null,
     "signal_level": "category",
-    "smart_usd_share": 0.022,
-    "usd": 217507586.0
+    "smart_usd_share": 0.0373,
+    "usd": 245648580.91
    },
    "origin": "advancement_data",
    "pm_price": 0.2135,
@@ -1381,19 +1381,19 @@
    "team": "Spain",
    "verdict": "DO_NOT_TRADE",
    "verdict_reasons": [
-    "stale/missing inputs: site/advancement_data.json (stale: 57.9h old > 3.0h max); site/pm_ideas.json (stale: 24.4h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.0h old > 14.0h max)"
+    "stale/missing inputs: site/advancement_data.json (stale: 58.5h old > 3.0h max); site/pm_ideas.json (stale: 24.9h old > 6.0h max); site/advancement_data.json (meta.model_generated) (stale: 58.5h old > 14.0h max)"
    ]
   },
   {
    "bet_rec": null,
    "book_edge": -0.0043,
    "book_edge_source": "bet_recs.withheld[france_vs_england_home_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 1.9754,
+   "book_price_decimal": 1.9746,
    "book_price_source": "bet_recs.withheld[france_vs_england_home_1x2].price (decimal book odds)",
    "bucket": "moneyline",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.0084,
+   "ev_net": -0.0085,
    "fixture": "France vs England",
    "gates": {
     "clv_history": {
@@ -1450,13 +1450,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "France vs England \u00b7 home \u00b7 settles at 90 min",
-   "model_prob": 0.502,
+   "model_prob": 0.5021,
    "model_source": "bet_recs.withheld[france_vs_england_home_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.502,
+   "position_prob": 0.5021,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1665,14 +1665,14 @@
   },
   {
    "bet_rec": null,
-   "book_edge": 0.0139,
+   "book_edge": 0.014,
    "book_edge_source": "bet_recs.withheld[spain_vs_argentina_home_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 2.3688,
+   "book_price_decimal": 2.3707,
    "book_price_source": "bet_recs.withheld[spain_vs_argentina_home_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": 0.0329,
+   "ev_net": 0.0331,
    "fixture": "Spain vs Argentina",
    "gates": {
     "clv_history": {
@@ -1682,7 +1682,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge +0.0139 not above the 0.02 threshold"
+     "reason": "book edge +0.0140 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": false,
@@ -1749,13 +1749,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "Spain vs Argentina \u00b7 home \u00b7 settles at 90 min",
-   "model_prob": 0.436,
+   "model_prob": 0.4358,
    "model_source": "bet_recs.withheld[spain_vs_argentina_home_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.436,
+   "position_prob": 0.4358,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1772,20 +1772,20 @@
    "team": "Spain",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:0.0139<0.0200"
+    "withheld by bet_recs: edge_below_floor:0.0140<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:0.0139<0.0200"
+   "withheld_reason": "edge_below_floor:0.0140<0.0200"
   },
   {
    "bet_rec": null,
-   "book_edge": -0.0016,
+   "book_edge": -0.0017,
    "book_edge_source": "bet_recs.withheld[spain_vs_argentina_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 3.7935,
+   "book_price_decimal": 3.785,
    "book_price_source": "bet_recs.withheld[spain_vs_argentina_away_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.0062,
+   "ev_net": -0.0066,
    "fixture": "Spain vs Argentina",
    "gates": {
     "clv_history": {
@@ -1795,7 +1795,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge -0.0016 not above the 0.02 threshold"
+     "reason": "book edge -0.0017 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": false,
@@ -1862,13 +1862,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "Spain vs Argentina \u00b7 away \u00b7 settles at 90 min",
-   "model_prob": 0.262,
+   "model_prob": 0.2625,
    "model_source": "bet_recs.withheld[spain_vs_argentina_away_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.262,
+   "position_prob": 0.2625,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1885,20 +1885,20 @@
    "team": "Argentina",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:-0.0016<0.0200"
+    "withheld by bet_recs: edge_below_floor:-0.0017<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:-0.0016<0.0200"
+   "withheld_reason": "edge_below_floor:-0.0017<0.0200"
   },
   {
    "bet_rec": null,
-   "book_edge": -0.0123,
+   "book_edge": -0.0122,
    "book_edge_source": "bet_recs.withheld[spain_vs_argentina_draw_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 3.1824,
+   "book_price_decimal": 3.1849,
    "book_price_source": "bet_recs.withheld[spain_vs_argentina_draw_1x2].price (decimal book odds)",
    "bucket": "mid",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": -0.039,
+   "ev_net": -0.0389,
    "fixture": "Spain vs Argentina",
    "gates": {
     "clv_history": {
@@ -1908,7 +1908,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge -0.0123 not above the 0.02 threshold"
+     "reason": "book edge -0.0122 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": false,
@@ -1975,13 +1975,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "Spain vs Argentina \u00b7 draw \u00b7 settles at 90 min",
-   "model_prob": 0.302,
+   "model_prob": 0.3018,
    "model_source": "bet_recs.withheld[spain_vs_argentina_draw_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.302,
+   "position_prob": 0.3018,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
@@ -1998,9 +1998,9 @@
    "team": "Draw",
    "verdict": "WITHHOLD",
    "verdict_reasons": [
-    "withheld by bet_recs: edge_below_floor:-0.0123<0.0200"
+    "withheld by bet_recs: edge_below_floor:-0.0122<0.0200"
    ],
-   "withheld_reason": "edge_below_floor:-0.0123<0.0200"
+   "withheld_reason": "edge_below_floor:-0.0122<0.0200"
   },
   {
    "bet_rec": null,
@@ -2192,12 +2192,12 @@
    "bet_rec": null,
    "book_edge": 0.0023,
    "book_edge_source": "bet_recs.withheld[france_vs_england_draw_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 4.0648,
+   "book_price_decimal": 4.0664,
    "book_price_source": "bet_recs.withheld[france_vs_england_draw_1x2].price (decimal book odds)",
    "bucket": "longshot",
    "edge_adj": null,
    "edge_source": null,
-   "ev_net": 0.0094,
+   "ev_net": 0.0095,
    "fixture": "France vs England",
    "gates": {
     "clv_history": {
@@ -2283,9 +2283,9 @@
   },
   {
    "bet_rec": null,
-   "book_edge": 0.0019,
+   "book_edge": 0.002,
    "book_edge_source": "bet_recs.withheld[france_vs_england_away_1x2].edge (book edge, NOT PM fee-adjusted)",
-   "book_price_decimal": 4.0363,
+   "book_price_decimal": 4.0378,
    "book_price_source": "bet_recs.withheld[france_vs_england_away_1x2].price (decimal book odds)",
    "bucket": "longshot",
    "edge_adj": null,
@@ -2300,7 +2300,7 @@
     "edge": {
      "note": "book edge from bet_recs.withheld \u2014 NOT a PM fee-adjusted edge",
      "pass": false,
-     "reason": "book edge +0.0019 not above the 0.02 threshold"
+     "reason": "book edge +0.0020 not above the 0.02 threshold"
     },
     "freshness": {
      "pass": false,
@@ -2347,13 +2347,13 @@
    "leg_state": null,
    "market": "1X2",
    "market_label": "France vs England \u00b7 away \u00b7 settles at 90 min",
-   "model_prob": 0.2497,
+   "model_prob": 0.2496,
    "model_source": "bet_recs.withheld[france_vs_england_away_1x2].model_prob",
    "orderflow": null,
    "origin": "bet_recs.withheld",
    "pm_price": null,
    "pm_price_source": null,
-   "position_prob": 0.2497,
+   "position_prob": 0.2496,
    "position_prob_source": "= model_prob (book selection)",
    "related_pm_ideas": {
     "ideas": [],
