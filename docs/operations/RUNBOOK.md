@@ -70,7 +70,12 @@ bash scripts/wca_worktree_cleanup.sh --force  # remove stale forked-DB worktrees
 - **Check health:** `ssh mini 'launchctl list | grep com.wca; tail -n 30 logs/bot.log'`
 - **Force a restart:** `ssh mini 'launchctl kickstart -k gui/$(id -u)/com.wca.bot'`
 - **Operate bets:** through the Telegram bot as today (`/today`, `/bets`, screenshot → `yes`, `Y PM-n`). All writes land in the mini's single ledger.
-- **Recover state:** backups in `data/backups/` (15-min rotation, 48 kept). Restore: `cp data/backups/wca_<ts>.db data/wca.db` then restart daemons.
+- **Recover state:** backups in `data/backups/` (15-min rotation, gzip'd, tiered
+  retention — all of the last 3h, then 1/day out to 7d, then 1/week out to 28d;
+  steady state ~3GB). Restore: `gunzip -k data/backups/wca_<ts>.db.gz && sqlite3
+  data/backups/wca_<ts>.db "PRAGMA integrity_check;"` (drop `.gz`/the integrity
+  check for a legacy uncompressed backup), then `cp data/backups/wca_<ts>.db
+  data/wca.db` and restart daemons.
 
 ## What still needs a human
 - Placing sportsbook bets and confirming `Y PM-n` (by design).
