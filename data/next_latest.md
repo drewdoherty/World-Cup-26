@@ -1,12 +1,11 @@
-<!-- generated: 2026-07-17T17:58:16 -->
+<!-- generated: 2026-07-17T18:34:34 -->
 ⚽ *Next match* — France vs England
 Kickoff 2026-07-18 21:00:00+00:00
 
 *Winner* (model blend)
-  France         model 50.2% · mkt 51.0% (betfair_ex_uk)  EV -1.6% ❌−EV
-  England        model 25.2% · mkt 25.0% (betfair_ex_uk)  EV +0.6% ✅+EV (below +2% gate)  $2.19
-  Draw           model 24.6% · mkt 24.4% (betano_uk)  EV +1.0% ✅+EV (below +2% gate)  (<25% model — NO CASH)
-  _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
+  France         model 50.3% · mkt 50.8% (betfair_ex_uk)  EV -0.9% ❌−EV
+  Draw           model 24.8% · mkt 24.4% (betano_uk)  EV +1.6% ✅+EV (below +2% gate)  (<25% model — NO CASH)
+  England        model 24.9% · mkt 25.0% (betfair_ex_uk)  EV -0.2% ❌−EV  (<25% model — NO CASH)
 
 *Corners* (model, exp 8.8)
   O/U 8.5: over 51.2% / under 48.8% (model only — no live corners feed, +EV unverifiable)
@@ -21,5 +20,5 @@ _top anytime, mkt implied % (both teams — add squad to split + FGS; no model p
   Ollie Watkins        mkt 29% (Betfair)
 
 *Scorelines* (top 6)
-1-1 11.7% | 1-0 10.7% | 2-1 10.3% | 2-0 8.7% | 0-0 6.7% | 0-1 6.3%
-  O/U 2.5: over 51.9% / under 48.1%   BTTS 54.5%
+1-1 11.8% | 1-0 10.7% | 2-1 10.3% | 2-0 8.7% | 0-0 6.7% | 0-1 6.3%
+  O/U 2.5: over 51.8% / under 48.2%   BTTS 54.5%
