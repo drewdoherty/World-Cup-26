@@ -16,6 +16,7 @@ import base64
 import hashlib
 import hmac
 import sqlite3
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -120,6 +121,32 @@ def test_format_parked_order_includes_market_question():
 def test_push_parked_order_parks_and_renders():
     msg = app.push_parked_order(_proposal())
     assert "PM-1" in msg and 1 in app._PENDING_ORDERS
+
+
+def test_parked_timestamp_expiry_is_fail_closed():
+    now = datetime(2026, 7, 17, 12, tzinfo=timezone.utc)
+    fresh = (now - timedelta(hours=11)).isoformat()
+    stale = (now - timedelta(hours=13)).isoformat()
+    assert app._parked_ts_expired(fresh, now=now) is False
+    assert app._parked_ts_expired(stale, now=now) is True
+    assert app._parked_ts_expired("not-a-time", now=now) is True
+
+
+def test_parked_list_expires_old_database_rows(tmp_path, monkeypatch):
+    db = str(tmp_path / "parked.db")
+    monkeypatch.setenv("WCA_DB", db)
+    con = app._parked_conn(db)
+    con.execute(
+        "INSERT INTO pm_parked (proposal_json,status,ts_utc) VALUES (?, 'parked', ?)",
+        ('{"token_id":"old"}', "2026-06-20T17:44:42+00:00"),
+    )
+    con.commit()
+    con.close()
+
+    assert app._parked_list(db) == []
+    con = sqlite3.connect(db)
+    assert con.execute("SELECT status FROM pm_parked").fetchone()[0] == "expired"
+    con.close()
 
 
 # ---------------------------------------------------------------------------

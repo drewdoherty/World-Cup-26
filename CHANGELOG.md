@@ -5,6 +5,64 @@ overhaul operating rules (`docs/FABLE_OVERHAUL_PROMPT.md` §0.6). Entries are
 grouped by date; every entry states whether production / live-money behavior
 changed.
 
+## 2026-07-17 - Codex-first documentation reconciliation (no behavior change)
+
+**Production impact: none.** Documentation only; no code, data, site, ledger,
+deployment, or live-money behavior changed by this reconciliation.
+
+- Replaced the stale agent/conductor-only entry point with a Codex-first
+  `AGENTS.md` that preserves real-money, secret, ledger, settlement, and
+  MacBook/Mac-mini safety boundaries.
+- Rewrote `README.md` and `ARCHITECTURE.md` around current model, selection,
+  sizing, execution, event-forest, shadow-book, and cross-venue research paths.
+- Added `docs/OPERATIONS.md` as the current two-machine runbook and
+  `docs/CURRENT_STATE.md` as the dated home for tournament/runtime facts.
+- Retired stale June setup plans, Betfair/Kalshi build proposals, hosted-site
+  guidance, separate-bankroll descriptions, and historical live-position
+  advice from the owned documentation set.
+- Recorded the complete two-fixture event forest, the isolated multi-venue
+  shadow book, and generic HL/PM dominance bounds. The shadow service is
+  defined in the current branch but mini launchd activation was not verified;
+  dominance code remains concurrent/untracked research.
+- Replaced the June TODO with a verified closeout queue for the final two
+  fixtures, shadow settlement, full-forest durability, dominance-fee research,
+  and post-tournament simplification.
+
+## 2026-07-02 to 2026-07-13 - tournament operating baseline (behavior changed)
+
+**Production impact: yes, across model probabilities, selection/sizing, public
+feeds, display, and safety gates.** This entry consolidates the verified merged
+baseline that older continuation notes described across the combined-bankroll
+lineage and PRs #171-#198.
+
+- Centralized ranking and the no-cash floor in `src/wca/selection.py`:
+  moneyline `p >= 0.50`, mid `0.25 <= p < 0.50`, longshot `p < 0.25`; match
+  markets use EV within bucket while multi-week futures retain
+  further-out-first ordering.
+- Promoted shrink-to-market into the live card probability with
+  `WCA_SHRINK_LIVE=0` as a reversible kill switch; preserved raw probabilities
+  for calibration.
+- Corrected staking to one combined GBP 3,000 plus total-realised-P&L bankroll,
+  expressed in each venue currency at the fixed project FX rate and sized at
+  quarter Kelly. Nested same-team advancement rungs became one correlated path
+  exposure.
+- Added complete PM event-market discovery, fair pricing for supported
+  score-matrix families, honest market-only rows, governed recommendations,
+  and a PM-blind no-clobber guard. Fixed Gamma discovery past the pagination
+  ceiling on 2026-07-13.
+- Added duplicate same-tie exposure detection across ordinary and event-market
+  recommendation feeds.
+- Added PM advancement price capture and CLV relay, park-only in-play proposal
+  ingest, freshness/poison guards, and additive order/fill telemetry.
+- Standardized operator display on percentages, explicit EV markers, trade
+  terminology, `/matchevents`, and the `/card` watch tier. Wire identifiers and
+  ledger table names remained unchanged.
+- Removed hosted Vercel surfaces; localhost ports 8000 and 8001 became the only
+  supported dashboards.
+- Added the read-only Hyperliquid HIP-4 client and matched-settlement HL/PM
+  monitor. It remained shadow-only with no execution path and an unresolved HL
+  settlement fee.
+
 ## 2026-07-02 — Phase 0 amendments: external-review adjudication (no behavior change)
 
 **Production impact: none.** Documentation only, same branch/PR as Phase 0.

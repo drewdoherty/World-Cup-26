@@ -1,63 +1,103 @@
-# AGENTS.md — World Cup Alpha dev-conductor operating guide
+# AGENTS.md - Codex operating guide
 
-This repo is worked by a **swarm**: the in-repo dev-conductor
-(`src/wca/conductor/`, driven from the `@worldcupdevbot` Telegram chat) fans
-each `/task` out to a headless **Claude Code** agent. Every task gets its own
-git **worktree + branch off `main`**, runs the agent, commits, pushes, and
-opens a PR. The conductor is **PR-only and dry-run** — it never commits `main`
-and never places live bets (`PM_DRY_RUN=1`, `WCA_DB_PATH=data/dev.db`, the
-Polymarket key is stripped from the agent env).
+World Cup Alpha is a real-money football trading system. Codex is the primary
+interactive development agent for this repository. Read this file first, then
+`README.md`, `docs/CURRENT_STATE.md`, and `docs/OPERATIONS.md` before changing
+anything that can affect production, pricing, staking, feeds, or settlement.
 
-**Claude-only since 2026-06.** Codex was removed from the swarm (unreliable
-token accounting + auth, and everything routed to Claude in practice). Routing
-(`dispatcher.choose_engine`) always returns Claude; there is no `/codex`.
+`CLAUDE.md` remains as compatibility context for the separate Telegram
+conductor. It is not the Codex runbook. When old handoffs or agent-specific
+notes disagree with this file and the current code, verify the code and update
+the owned current docs rather than carrying the old claim forward.
 
-## 1. Root causes this guide closes
+## Safety invariants
 
-| Symptom | Real cause | Fix |
-|---|---|---|
-| every task "pushed — gh CLI not found" | conductor launched with a minimal PATH (launchd/cron/GUI) lacking `~/.local/bin`; `gh`/`claude` are installed but unresolved | PATH augmented for every agent + PR call (`config.agent_env`, `config.resolve_bin`); PR creation has a REST-API fallback (`runner._open_pr_via_api`, `scripts/gh_pr.sh`) |
-| prompt starting with `-`/`--` parsed as a flag | prompt passed as a CLI positional | prompt follows a `--` end-of-options marker in `runner.run_agent` |
-| same feature built twice in parallel → divergent, conflicting PRs | two tasks for one feature, each branched off `main` | one-feature-per-task + duplicate pre-flight (`manager.find_active_duplicate`) + the integration-branch rule below |
-| `/task "paste the output of #2"` produced nothing | tasks are **isolated** agents with no shared memory | the "tasks are isolated" rule below |
+1. **Mac mini is production.** Its checkout is `~/World-Cup-26`; its
+   `data/wca.db` is the canonical real-money ledger. The MacBook checkout and
+   local databases are development copies.
+2. **Never arm live execution from the MacBook.** Force `PM_DRY_RUN=1`, use
+   `WCA_DB_PATH=data/dev.db`, and remove signing keys from any spawned-agent
+   environment. Do not infer safety from an unchecked `.env` file.
+3. **Human confirmation remains mandatory.** Polymarket proposals are parked;
+   a human reviews `/pm` and confirms `Y PM-<n>`. Hyperliquid is research-only
+   and has no execution path.
+4. **Do not mutate the mini ledger during diagnosis.** Read it over SSH with
+   Python `sqlite3`, immediately set `PRAGMA query_only=ON`, and keep the
+   connection read-only. Back up before any human-approved repair.
+5. **Never expose secrets.** Do not print, paste, commit, or document private
+   keys, bot tokens, OAuth tokens, API credentials, or full `.env` contents.
+6. **Do not use stale position advice.** Re-read the canonical ledger and live
+   venue prices before discussing or taking any money action. Documentation
+   must not preserve old trim, sell, hedge, or cash-placement instructions.
+7. **Settlement bases are part of the contract.** A 90-minute 1X2 leg is not
+   interchangeable with an ET-and-penalties advancement leg. Cancellation,
+   postponement, deadline, and half-void clauses must also match before any
+   cross-venue result can be called an arbitrage.
 
-## 2. Operating rules (the swarm MUST follow these)
+## Protected behavior
 
-1. **One feature per task.** Follow-up is a second commit on the *same* branch, not a new task off `main`.
-2. **Check for duplicates before dispatch** via `ConductorManager.find_active_duplicate(task)`; cancel the original before re-running.
-3. **Tasks are isolated — no cross-task references.** An agent sees only its prompt + the repo. Put everything it needs *in the prompt*; never "continue task #N" or "paste output of #N".
-4. **Branch naming is fixed:** `conductor/claude-<slug>-<shortid>` (set in `manager._new_record_locked`).
-5. **Prompts are plain imperative text** — lead with a verb. (Leading `-`/`--` is handled, but keep it clean.)
-6. **Integration over parallel-merge.** When several related branches exist, create ONE `integrate/<topic>` branch off `main`, merge/cherry-pick the chosen branches into it, resolve conflicts once, get tests green, open one PR. Pick the *better* of any duplicate pair — never both.
-7. **Pre-flight file-overlap check.** Two tasks touching the same file (`src/wca/bot/app.py`, `src/wca/accas.py`, `scripts/wca_build_card.py`) must be serialized or merged into one task.
-8. **Every task must leave the tree green.** Run `pytest -q` in the worktree before push; a red suite is FAILED, not PUSHED.
+Treat these as human-approved-change surfaces:
 
-## 3. Concurrency
+- `src/wca/selection.py`: probability buckets, longshot cash floor, and
+  match-versus-futures ordering.
+- `src/wca/card.py` and `src/wca/markets/bankroll.py`: combined bankroll,
+  foreign-exchange conversion, Kelly sizing, and whole-book limits.
+- `src/wca/pm/trader.py` and `scripts/wca_pm_fire.py`: order, daily, cash-out,
+  and fire caps plus dry-run enforcement.
+- `src/wca/ledger/store.py`: canonical money-ledger writes and settlement.
 
-- **Sequential by default** (`max_parallel=1`): parallel runs raced the shared `.git` worktree registry. Opt into a swarm with `WCA_CONDUCTOR_MAX_PARALLEL>1` only when you understand the contention.
-- All work runs on Claude; a logged-out Claude is reported via `preflight()` / `/help`, not silently dropped.
+The current selection rule is model probability first: moneyline `>= 0.50`,
+mid `>= 0.25`, longshot `< 0.25`. Longshots receive no cash. Match markets use
+EV within a probability bucket; further-out-first is retained only for
+multi-week futures and advancement markets.
 
-## 4. Conductor-app setup (do this once, at the launch level)
+## Working rules
 
-Launch the conductor with a login-shell environment (or an explicit PATH) so installed CLIs resolve:
+- Start by checking the branch and dirty state. Other agents and scheduled
+  builders may be editing the same checkout; never revert changes you did not
+  make.
+- Use a `codex/<topic>` branch for code work. Do not commit directly to
+  `main`, self-merge, or push generated branch data over fresher `origin/main`
+  artifacts.
+- Keep one coherent feature per branch. Serialize work that touches shared
+  surfaces such as `src/wca/bot/app.py`, `src/wca/card.py`,
+  `scripts/wca_build_card.py`, or deployment scripts.
+- Prefer the existing source-of-truth modules over new parallel logic. Add an
+  abstraction only when it removes real duplication or establishes a tested
+  safety boundary.
+- Use structured parsers for JSON, CSV, SQLite, and API payloads. Never invent
+  a number to fill a missing field; preserve `null`/unknown and explain why.
+- Run focused tests while working and `./.venv/bin/pytest -q` before a code
+  push. Local green is the real gate even when CI is advisory or absent.
+- Verify the current branch immediately before committing. The Telegram
+  conductor and other sessions can create or switch worktrees independently.
+- Generated `site/*.json` and `data/*_latest.md` files are shared operational
+  artifacts. Use the installed `merge=freshest` driver and avoid hand-merging
+  generated JSON.
 
-```
-gh --version && gh auth status      # gh installed + authed (scopes: repo, workflow)
-claude --version                    # or set CLAUDE_BIN to the absolute path
-```
+## Research boundaries
 
-If started by launchd/cron/a GUI app, set in its plist/unit:
+- The **event forest** is the complete observable PM match-event universe.
+  Priceable and unpriceable rows both remain visible, with model provenance and
+  settlement basis attached. Its trade-rec subset is governed separately.
+- The **shadow book** uses only `data/shadow_book.db`; all stakes and P&L there
+  are simulated. It records observations, entries, and abstentions and cannot
+  sign or submit an order.
+- Hyperliquid/Polymarket dominance bounds are generic settlement-aware research.
+  Positive zero-fee margins remain `CANDIDATE_FEE_UNVERIFIED` until the HL
+  settlement fee and every settlement tail are verified.
 
-```
-PATH=/Users/<you>/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin
-```
+## Production topology
 
-or export `GH_BIN` / `CLAUDE_BIN` as absolute paths. The code augments PATH
-defensively (`config._augmented_path`), but fixing it at the launch level is
-the durable fix. For PR creation without `gh`, provide `GH_TOKEN`/`GITHUB_TOKEN`
-(the REST fallback and `scripts/gh_pr.sh` use it).
+- MacBook: development, local dashboards, PM access through NordVPN, and the
+  PM/HL public-data gateway.
+- Mac mini: production daemons, Telegram bots, canonical ledger, backups, and
+  primary site publisher.
+- GitHub `main`: code deploy bus and tracked-feed transport. The mini autopulls
+  every five minutes; new launchd definitions still require a human to run
+  `bash deploy/macmini/install.sh` on the mini.
+- Sites are localhost-only. There is no supported hosted deployment.
 
-## 5. Quick reference
-
-- Entry: `scripts/wca_conductor.py`; pipeline: `runner.py`; fan-out/cap/health/merge: `manager.py`; routing: `dispatcher.py`; safe env + PATH/bin resolution: `config.py`; auth probing: `health.py`.
-- PR fallback script: `scripts/gh_pr.sh`. Tests: `tests/test_conductor.py` (offline; the `runner._run` seam is patched).
+Operational commands, recovery steps, and verified caveats live in
+`docs/OPERATIONS.md`. The dated tournament snapshot lives in
+`docs/CURRENT_STATE.md`; update that file instead of adding live state here.

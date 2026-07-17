@@ -1,35 +1,35 @@
 {
   "meta": {
-    "generated": "2026-07-16 14:10:26 UTC",
+    "generated": "2026-07-17 13:04:22 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
-      "bankroll": 3264.014296992481,
+      "bankroll": 3134.032492481203,
       "rung": 0,
       "kelly_fraction": 0.25,
       "per_bet_cap": 0.05,
-      "max_stake": 163.2,
-      "n_settled": 27,
-      "clv_to_date": -0.018335811964298322,
-      "reason": "COMBINED-POOL \u00a33264 (\u00a33000 +177.10\u00a3 GBP P&L +115.60$ PM P&L at $1.33/\u00a3; user 2026-07-02) \u2014 ladder rung 0 (\u00a32000) for reference; 27/50 settled-with-close, CLV -0.0183",
+      "max_stake": 156.7,
+      "n_settled": 25,
+      "clv_to_date": 0.0034241984860852435,
+      "reason": "COMBINED-POOL \u00a33134 (\u00a33000 +101.34\u00a3 GBP P&L +43.49$ PM P&L at $1.33/\u00a3; user 2026-07-02) \u2014 ladder rung 0 (\u00a32000) for reference; 25/50 settled-with-close, CLV +0.0034",
       "currency": "GBP",
       "source": "ledger"
     },
     "pm_pool": {
-      "bankroll": 4105.6,
+      "bankroll": 3227.0,
       "kelly_fraction": 0.25,
       "per_bet_cap": 0.04,
-      "max_stake": 164.22,
+      "max_stake": 129.08,
       "currency": "USD",
-      "source": "ledger (realised $+115.60)"
+      "source": "cli-override"
     },
     "open_exposure": {
-      "ev": 0.14,
+      "ev": 0.0,
       "best_case": 0.0,
-      "worst_case": -795.96,
+      "worst_case": 0.0,
       "best_case_usd": 0.0,
-      "worst_case_usd": -1065.74,
+      "worst_case_usd": -199.48,
       "p_profit": null,
-      "n_open": 85,
+      "n_open": 2,
       "source": "ledger"
     },
     "fx": {
@@ -38,16 +38,16 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 496,
-      "advancement_secs": 184075,
+      "model_secs": 1254,
+      "advancement_secs": 266511,
       "price_secs": null,
-      "promo_secs": 532982,
+      "promo_secs": 615418,
       "exposure_secs": null
     },
     "coverage": {
       "match_singles": "1X2 from blended model (10%% Elo + 30%% DC + 60%% market) vs de-vigged consensus. Price = market-implied (no best-price pull). Top-3 per fixture by net EV. BTTS/totals: withheld \u2014 no live book price.",
       "event_props": "Corners/cards: calibrated but withheld \u2014 no live sportsbook price snapshot. Player scorer: withheld \u2014 player xG-share not yet wired.",
-      "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($4106).",
+      "advancement_futures": "Monte Carlo sim vs Polymarket advancement markets. PM taker fee (3% \u00d7 p \u00d7 (1-p)) applied. Quarter-Kelly on PM pool ($3227).",
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
     "actionable_count": 0,
@@ -66,13 +66,13 @@
       "market": "1X2",
       "selection": "home",
       "team": "France",
-      "model_prob": 0.5008,
-      "price": 1.9813,
-      "edge": -0.004,
-      "ev_net": -0.0078,
+      "model_prob": 0.4798,
+      "price": 1.9762,
+      "edge": -0.0262,
+      "ev_net": -0.0518,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "edge_below_floor:-0.0040<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0262<0.0200",
       "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
@@ -85,14 +85,14 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.25,
-      "price": 4.0311,
-      "edge": 0.0019,
-      "ev_net": 0.0077,
+      "model_prob": 0.2544,
+      "price": 4.07,
+      "edge": 0.0087,
+      "ev_net": 0.0354,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "longshot filter: prob 25% < 25% (minnow risk)",
-      "reason_code": "longshot_filter",
+      "withheld_reason": "edge_below_floor:0.0087<0.0200",
+      "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
     },
@@ -104,14 +104,14 @@
       "market": "1X2",
       "selection": "away",
       "team": "England",
-      "model_prob": 0.2493,
-      "price": 4.0451,
-      "edge": 0.0021,
-      "ev_net": 0.0083,
+      "model_prob": 0.2658,
+      "price": 4.0278,
+      "edge": 0.0175,
+      "ev_net": 0.0705,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "longshot filter: prob 25% < 25% (minnow risk)",
-      "reason_code": "longshot_filter",
+      "withheld_reason": "edge_below_floor:0.0175<0.0200",
+      "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
     },
@@ -123,13 +123,13 @@
       "market": "1X2",
       "selection": "home",
       "team": "Spain",
-      "model_prob": 0.4326,
-      "price": 2.3933,
-      "edge": 0.0148,
-      "ev_net": 0.0353,
+      "model_prob": 0.4144,
+      "price": 2.3802,
+      "edge": -0.0057,
+      "ev_net": -0.0136,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "edge_below_floor:0.0148<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0057<0.0200",
       "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
@@ -142,13 +142,13 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.3029,
-      "price": 3.1702,
-      "edge": -0.0125,
-      "ev_net": -0.0396,
+      "model_prob": 0.3068,
+      "price": 3.1941,
+      "edge": -0.0063,
+      "ev_net": -0.02,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "edge_below_floor:-0.0125<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0063<0.0200",
       "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
@@ -161,13 +161,13 @@
       "market": "1X2",
       "selection": "away",
       "team": "Argentina",
-      "model_prob": 0.2645,
-      "price": 3.7492,
-      "edge": -0.0023,
-      "ev_net": -0.0084,
+      "model_prob": 0.2787,
+      "price": 3.7481,
+      "edge": 0.0119,
+      "ev_net": 0.0448,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "edge_below_floor:-0.0023<0.0200",
+      "withheld_reason": "edge_below_floor:0.0119<0.0200",
       "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
@@ -265,8 +265,8 @@
       "stake": 65.71,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 184075,
-        "price_secs": 184075
+        "model_secs": 266511,
+        "price_secs": 266511
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
@@ -278,12 +278,12 @@
       "path_capped": true,
       "market_kind": "advancement",
       "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "France",
-      "match_round": "Semi-finals",
+      "opponent": "Argentina",
+      "match_round": "Final",
       "match_1x2": {
-        "team_win": 0.376,
+        "team_win": 0.387,
         "draw": 0.299,
-        "opp_win": 0.325
+        "opp_win": 0.314
       },
       "withheld_reason": "advancement model stale (>24h)",
       "reason_code": "stale_advancement"
@@ -306,8 +306,8 @@
       "stake": 45.99,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 184075,
-        "price_secs": 184075
+        "model_secs": 266511,
+        "price_secs": 266511
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
@@ -319,12 +319,12 @@
       "path_capped": true,
       "market_kind": "advancement",
       "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "France",
-      "match_round": "Semi-finals",
+      "opponent": "Argentina",
+      "match_round": "Final",
       "match_1x2": {
-        "team_win": 0.376,
+        "team_win": 0.387,
         "draw": 0.299,
-        "opp_win": 0.325
+        "opp_win": 0.314
       },
       "withheld_reason": "advancement model stale (>24h)",
       "reason_code": "stale_advancement"
@@ -347,8 +347,8 @@
       "stake": 65.87,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 184075,
-        "price_secs": 184075
+        "model_secs": 266511,
+        "price_secs": 266511
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
@@ -360,12 +360,12 @@
       "path_capped": true,
       "market_kind": "advancement",
       "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "England",
-      "match_round": "Semi-finals",
+      "opponent": "Spain",
+      "match_round": "Final",
       "match_1x2": {
-        "team_win": 0.399,
-        "draw": 0.304,
-        "opp_win": 0.297
+        "team_win": 0.314,
+        "draw": 0.299,
+        "opp_win": 0.387
       },
       "withheld_reason": "advancement model stale (>24h)",
       "reason_code": "stale_advancement"
@@ -388,8 +388,8 @@
       "stake": 46.29,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 184075,
-        "price_secs": 184075
+        "model_secs": 266511,
+        "price_secs": 266511
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
@@ -401,12 +401,12 @@
       "path_capped": true,
       "market_kind": "advancement",
       "market_label": "Advance \u00b7 incl. ET+pens",
-      "opponent": "England",
-      "match_round": "Semi-finals",
+      "opponent": "Spain",
+      "match_round": "Final",
       "match_1x2": {
-        "team_win": 0.399,
-        "draw": 0.304,
-        "opp_win": 0.297
+        "team_win": 0.314,
+        "draw": 0.299,
+        "opp_win": 0.387
       },
       "withheld_reason": "advancement model stale (>24h)",
       "reason_code": "stale_advancement"

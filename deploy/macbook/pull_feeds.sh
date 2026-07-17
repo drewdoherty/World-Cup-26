@@ -21,6 +21,10 @@ ts() { date -u +%FT%TZ; }
 
 # 1) all analytics feeds (8001)
 rsync -az --timeout=25 -e "$SSH" \
+  --exclude 'forest_data.json' \
+  --exclude 'event_market_recs.json' \
+  --exclude 'shadow_book.json' \
+  --exclude 'hl_xvenue.json' \
   "$MINI:$SRC/site-analytics/data/"*.json \
   "$REPO/site-analytics/data/" >>"$LOG" 2>&1
 rc1=$?

@@ -6,6 +6,7 @@ import os
 import socketserver
 
 PORT = int(os.environ.get("PORT", "8742"))
+BIND = os.environ.get("BIND", "127.0.0.1")
 SITE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "site")
 
 
@@ -16,6 +17,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        print("serving %s on :%d" % (SITE_DIR, PORT))
+    with socketserver.TCPServer((BIND, PORT), Handler) as httpd:
+        print("serving %s on %s:%d" % (SITE_DIR, BIND, PORT))
         httpd.serve_forever()

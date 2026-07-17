@@ -1754,6 +1754,7 @@ _PM_SEQ = {"n": 0}
 
 _PARKED_DB_ENV = "WCA_DB"
 _PARKED_DB_DEFAULT = "data/wca.db"
+_PARKED_MAX_AGE_HOURS = 12.0
 
 
 def _parked_db_path() -> str:
@@ -1774,6 +1775,31 @@ def _parked_conn(db_path: Optional[str] = None):
     return conn
 
 
+def _parked_ts_expired(
+    ts_utc: str,
+    *,
+    now: Optional[datetime] = None,
+    max_age_hours: float = _PARKED_MAX_AGE_HOURS,
+) -> bool:
+    """Whether a human-confirmation proposal is too old to execute safely.
+
+    PM proposals capture a specific order-book price.  They are deliberately
+    short lived: after 12 hours the price, fixture state, and even token can be
+    obsolete.  Malformed timestamps fail closed.
+    """
+    try:
+        parsed = datetime.fromisoformat(str(ts_utc).replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        current = now or datetime.now(timezone.utc)
+        if current.tzinfo is None:
+            current = current.replace(tzinfo=timezone.utc)
+        age = current.astimezone(timezone.utc) - parsed.astimezone(timezone.utc)
+        return age.total_seconds() > max_age_hours * 3600.0
+    except (TypeError, ValueError):
+        return True
+
+
 def _parked_load(n: int, db_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
     import json as _json
 
@@ -1781,10 +1807,14 @@ def _parked_load(n: int, db_path: Optional[str] = None) -> Optional[Dict[str, An
         conn = _parked_conn(db_path)
         try:
             row = conn.execute(
-                "SELECT proposal_json FROM pm_parked WHERE n=? "
+                "SELECT proposal_json, ts_utc FROM pm_parked WHERE n=? "
                 "AND status IN ('parked','failed')",
                 (n,),
             ).fetchone()
+            if row and _parked_ts_expired(row[1]):
+                conn.execute("UPDATE pm_parked SET status='expired' WHERE n=?", (n,))
+                conn.commit()
+                row = None
         finally:
             conn.close()
     except Exception:  # noqa: BLE001 - DB issues degrade to in-memory only
@@ -1811,13 +1841,26 @@ def _parked_list(db_path: Optional[str] = None) -> List[Any]:
         conn = _parked_conn(db_path)
         try:
             rows = conn.execute(
-                "SELECT n, proposal_json FROM pm_parked WHERE status='parked' ORDER BY n"
+                "SELECT n, proposal_json, ts_utc FROM pm_parked "
+                "WHERE status='parked' ORDER BY n"
             ).fetchall()
+            live_rows = []
+            expired = []
+            for n, proposal_json, ts_utc in rows:
+                if _parked_ts_expired(ts_utc):
+                    expired.append((n,))
+                else:
+                    live_rows.append((n, proposal_json))
+            if expired:
+                conn.executemany(
+                    "UPDATE pm_parked SET status='expired' WHERE n=?", expired
+                )
+                conn.commit()
         finally:
             conn.close()
     except Exception:  # noqa: BLE001
         return []
-    return [(n, _json.loads(pj)) for n, pj in rows]
+    return [(n, _json.loads(pj)) for n, pj in live_rows]
 
 
 def park_order(proposal: Dict[str, Any]) -> str:

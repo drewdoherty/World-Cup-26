@@ -1,179 +1,104 @@
-# World Cup Alpha: Shared TODO
+# World Cup Alpha - current work queue
 
-**Last updated:** 2026-06-18 | **Scope:** cross-session (main + feature/cross-venue-events) + cross-device (Drews-Mac-mini + dev MacBook)
+**Reconciled:** 2026-07-17. This queue contains verified open work only. It is
+not a live-position list and must never carry stale trade instructions.
 
-## 🏗️ Infrastructure & Coordination
+## Tournament closeout - P0
 
-- [ ] **Shared TODO discipline** — commit & push this file to `origin/main` after each update; all sessions/devices pull on startup
-- [ ] **Device sync verification** — Drews-Mac-mini (ops host) reaches origin over SSH; dev MacBook syncs via origin; git identity = user@world-cup-alpha.local where applicable
-- [ ] **Branch strategy** — `main` = live (auto-crons only, no feature branches). Feature branches (e.g. `feature/cross-venue-events`) commit work, collide-test against main via periodic git merge --no-ff, cherry-pick to main only when blessed. Track branch ownership in comment below.
+- [ ] After France vs England, ingest the authoritative result, rebuild the
+  card/scores/event feeds, and settle every shadow market supported by the
+  available structured match events. Leave ambiguous rows open.
+- [ ] After Spain vs Argentina, repeat the result/feed/shadow settlement cycle,
+  then publish the first shadow calibration and paper-P&L report. State sample
+  sizes and keep market-only exploration separate from model-backed entries.
+- [ ] Correct the final-pairing provenance mismatch: current primary feeds list
+  Spain vs Argentina as a fixed fixture, while the advancement edge-desk feed
+  can still label the same final as projected.
+- [ ] Verify closing-price capture and settlement on the canonical mini ledger
+  for both remaining fixtures. Do not settle from a MacBook database copy.
 
-## 🎯 P0: Betfair Exchange API Client
+## Event forest and shadow book - P0
 
-**Decision:** Adopt FREE Betfair Delayed Application Key as the PRIMARY pre-match odds source (reduce the-odds-api quota pressure).
+- [ ] Merge the shadow-book branch, then have a human run
+  `bash deploy/macmini/install.sh` on the Mac mini. Verify
+  `com.wca.shadowbook` exists and is cycling before calling it scheduled.
+- [ ] Give the complete event forest one durable PM-capable refresh path. The
+  primary publish script now preserves the full feed and can rebuild it only
+  when `WCA_EVENT_MARKETS=1`; GitHub workflows still invoke the legacy
+  `wca_forest_data.py` builder and can overwrite the complete forest.
+- [ ] Review and commit the concurrent MacBook `com.wca.research` job before
+  installing it. Replace its use of the MacBook `data/wca.db` and hard-coded
+  shadow bankroll with an explicit non-canonical/base input or a safe
+  read-only relay from the mini; local ledger P&L must not size research rows
+  as though it were current.
+- [ ] Run `scripts/wca_exposure_reconcile.py` after both bet-rec builders or
+  wire it into the publish chain so duplicate same-tie exposure cannot reappear.
+- [ ] Add automatic, auditable shadow settlement inputs for all supported
+  event families. Current structured settlement intentionally leaves labels
+  unresolved when the result feed lacks the required event detail.
+- [ ] Add log rotation for `logs/shadow_book.log` alongside the existing mini
+  log-hygiene work.
 
-- [ ] **Account setup** (one-time, manual)
-  - [ ] Register/verify Betfair account
-  - [ ] Create app key at developer.betfair.com → copy DELAYED key (free)
-  - [ ] Generate RSA 2048-bit self-signed client cert + private key
-  - [ ] Upload .crt to Betfair account security settings
-  - [ ] Save .key + .crt securely on Drews-Mac-mini, reference from `.env` (NOT committed)
+## Hyperliquid/Polymarket research - P0 before any promotion
 
-- [ ] **Environment setup**
-  - [ ] Uncomment `.env`: `BETFAIR_APP_KEY`, `BETFAIR_USERNAME`, `BETFAIR_PASSWORD`, `BETFAIR_CERT_PATH`, `BETFAIR_KEY_PATH`
-  - [ ] Mirror the pattern in `src/wca/data/theoddsapi.py`
+- [ ] Review and integrate `src/wca/hl/dominance.py` and its tests; the generic
+  dominance-bounds work is currently concurrent/untracked, not production.
+- [ ] Feed generic advancement-vs-1X2 dominance candidates into the shadow book
+  without weakening matched-settlement and staleness gates.
+- [ ] Verify the Hyperliquid settlement fee from an authoritative specification
+  or an observed settled fill. Until then, positive margins remain
+  `CANDIDATE_FEE_UNVERIFIED`.
+- [ ] Capture synchronized depth snapshots with bounded leg skew and retain
+  enough history to estimate persistence, fillability, fee drag, and adverse
+  selection. A single snapshot proves existence only.
+- [ ] Model every cancellation, postponement, deadline-gap, co-champion, and
+  half-void branch before classifying a basket as covered.
+- [ ] Keep Hyperliquid execution out of scope until price capture, CLV,
+  settlement automation, controls, and a human go/no-go review all exist.
 
-- [ ] **Build `src/wca/data/betfair.py`**
-  - [ ] Non-interactive certificate login (_login): POST to identitysso-cert.betfair.com/api/certlogin
-  - [ ] Session maintenance: keep_alive() before 12h/24h expiry, logout() on exit
-  - [ ] JSON-RPC caller to api.betfair.com/exchange/betting/json-rpc/v1
-  - [ ] Discovery: list_event_types(), list_competitions(), list_events(), list_market_catalogue()
-  - [ ] Pricing: list_market_book() with EX_BEST_OFFERS, parse runner prices → implied probs
-  - [ ] Fixture matching: canonicalise team names + kickoff-time window (±90 min)
-  - [ ] Return shape: DataFrames matching theoddsapi.py shape (market_id, home_odds, draw_odds, away_odds, etc.)
-  - [ ] Throttling: respect 200-point weight cap (EX_BEST_OFFERS = 5 pts), ~5 req/sec per market
+## Operations and data durability - P1
 
-- [ ] **Wire into pipeline**
-  - [ ] Odds-fetch layer: try Betfair first; fallback to theoddsapi.py only when no Betfair market matched or book is stale/empty
-  - [ ] Log source per price (Betfair or OddsAPI) — never fabricate
-  - [ ] Update CONFIG_MARKETS / EVENT_MARKETS / wca_event_ev.py to use Betfair for 1X2 + totals when available
+- [ ] Verify, without printing secret values, that the MacBook defaults to
+  `PM_DRY_RUN=1`, uses `data/dev.db`, and holds no unnecessary live signing
+  keys. Add a host-level live-mode gate if this cannot be guaranteed.
+- [ ] Verify the mini's off-box ledger backup. Local 15-minute rotating copies
+  are not disaster recovery; confirm the object-store mirror is configured and
+  test a restore.
+- [ ] Close durable price-history gaps. Advancement CLV relay exists, but PM
+  CLOB history and sportsbook close history are not yet complete end to end.
+- [ ] Keep match-day PM orderflow capture running while markets are open; the
+  upstream offset cap makes missed history unrecoverable.
+- [ ] Verify the `merge=freshest` driver on every active checkout after machine
+  or account changes.
+- [ ] Wire a recurring shootout/result-detail refresh if shadow settlement will
+  depend on scorer, corner, half, extra-time, or penalty events.
 
-- [ ] **Tests** (`tests/test_betfair.py`)
-  - [ ] Mock certlogin response, listMarketCatalogue payload, listMarketBook payload
-  - [ ] Canonical-name + kickoff-window matching
-  - [ ] Overround removal (prices → implied probs)
-  - [ ] Weight batching (≤40 marketIds per request with EX_BEST_OFFERS)
+## Model evidence - P1/P2
 
----
+- [ ] Graduate or kill F7 goal-blend only after out-of-sample CLV/calibration
+  evidence; do not promote from the present small sample.
+- [ ] Build an ET/penalties goal-rate and conditional shootout model. The
+  dominance identity accepts a conditional tie-win probability, but that does
+  not make the current estimate decision-grade.
+- [ ] Complete a full-slate prediction ledger and sharp-source weighting study
+  with look-ahead guards.
+- [ ] Revisit totals only with new evidence. Current under-side signals remain
+  display-only because the measured under calls were materially poor.
 
-## 🎯 P1: Historical Match Events Ingestion (Cards / Corners / SOT / Fouls / Possession)
+## Post-tournament simplification - P2
 
-**Decision:** Two-tier free combo (football-data.co.uk + StatsBomb).
+- [ ] Consolidate `site-analytics/` into the primary localhost surface, then
+  retire the duplicate serving/build path.
+- [ ] Replace tracked generated-feed transport before untracking daemon-written
+  `site/*.json` and `data/*_latest.md` artifacts.
+- [ ] Triage and remove stale remote branches and scratch worktrees only after
+  checking each for uncommitted work.
+- [ ] Plan repository-history cleanup for large generated artifacts after the
+  tournament; do not rewrite history during live operations.
 
-### Tier 1: football-data.co.uk CSV backbone
+## Standing non-goals
 
-- [ ] **Create `src/wca/data/matchevents.py`**
-  - [ ] Unified loader schema: match_id, source, competition, season, date, team, opponent, is_home, neutral, goals, shots, shots_on_target (SOT), corners, fouls, yellows, reds, possession, xg
-  - [ ] Missing fields → NaN (football-data has no possession/xg)
-  - [ ] Download main-league CSVs (E0-E3, EC, SC0-SC3, D1-D2, I1-I2, SP1-SP2, F1-F2, N1, B1, P1, T1, G1) from football-data.co.uk/mmz4281
-  - [ ] Fallback mirrors: footballcsv/cache.footballdata + jokecamp/FootballData (official site was returning ECONNREFUSED)
-  - [ ] Column mapping: HS/AS → shots, HST/AST → sot, HC/AC → corners, HF/AF → fouls, HY/AY → yellows, HR/AR → reds
-  - [ ] Split home/away rows into two team rows per match
-  - [ ] Skip extra-league country files (no stat columns in those CSVs)
-
-### Tier 2: StatsBomb international anchor
-
-- [ ] **Extend `src/wca/data/statsbomb.py`**
-  - [ ] Derive shots-on-target: classify Shot events with outcome in {Goal, Saved, Saved To Post} as on-target (freeze this mapping in docstring)
-  - [ ] Derive possession: each team's pass share of total (completed_pass events)
-  - [ ] Add helpers: get_sot(shot), get_possession(match_events)
-  - [ ] Broaden STATSBOMB_COMPETITIONS: add Euro 2024 (comp 55, season 282), Euro 2020 (55, 43), Copa 2024 (223, 282), AFCON 2023 (1267, 107) for richer international sample
-
-- [ ] **Build `scripts/wca_matchevents_data.py`**
-  - [ ] Load football-data CSVs + StatsBomb internationals
-  - [ ] Compute per-market baselines: corners mean/var, SOT mean/var, fouls, cards from football-data
-  - [ ] Compute international-vs-domestic adjustment factors (e.g., WC corners ÷ EPL corners) from StatsBomb
-  - [ ] Empirical-Bayes shrinkage: per-team priors = λ × baseline + (1-λ) × thin StatsBomb sample
-  - [ ] Output: data/processed/prop_priors.csv with corners, sot, fouls, cards, yellows, reds per team
-
-- [ ] **Wire into `src/wca/models/props.py`**
-  - [ ] CornersModel: read from prop_priors.csv instead of hard-coded 8.97; keep as validation check
-  - [ ] Add ShotsOnTargetModel (Negative Binomial, from prop_priors)
-  - [ ] Add/enhance CardsModel with team aggression factors from prop_priors
-  - [ ] Add FoulsModel (optional, for same-game acca correlation)
-
-- [ ] **Tests**
-  - [ ] football-data column mapping (HS/AS → shots, HST/AST → sot, etc.)
-  - [ ] SOT derivation on a known StatsBomb match
-  - [ ] Schema/NaN handling (missing fields = NaN, not 0)
-  - [ ] Unified loader returns two team rows per match
-  - [ ] **MEMORY rule**: every stat figure traces to a real fetched source, no placeholder numbers
-
-- [ ] **Documentation**
-  - [ ] docs/recon/: attribution (football-data.co.uk / J. Buchdahl, StatsBomb), licences, SOT outcome-name mapping decision
-
-**Post-research cost note:** All free. Defer API-Football ($19/mo) to 2026 in-tournament only (Opta is FIFA's exclusive live provider).
-
----
-
-## 🎯 P2: Expand Cross-Venue Acca Markets (Correlation-Aware, Multi-Leg Support)
-
-**Decision:** Tier-1 four are the core (1X2, Over/Under goals, Draw No Bet, BTTS); Tier-2 (Correct Score, Corners) as book-only upside/coverage.
-
-- [ ] **Extend `src/wca/accas.py`**
-  - [ ] Add DNB (Draw No Bet) legs, pulling from EVENT_MARKETS (already fetched by wca_event_ev.py)
-  - [ ] Add Over/Under goals at multiple lines (2.5, 1.5, 3.5, etc.), correlation-aware
-  - [ ] Correlation check: same-game legs (e.g., Home + Over 2.5 + BTTS-Yes) → derive joint prob from scoreline grid (models/scores.py), not naive product
-  - [ ] Tag every leg with arb.py settlement_key; only non-None keys are hedgeable (1x2_90min, dnb_90min, btts_90min, totals_<line>_90min)
-
-- [ ] **Book-only tiers** (Correct Score, Corners)
-  - [ ] Allow as upside/coverage legs but flag: "NO HEDGE KEY EXISTS" → never select as lay
-  - [ ] Correct Score already used in acca_coverage_optimizer.py SCORELINE_PUNTS; extend to general acca builder
-
-- [ ] **Hedge end-to-end wiring**
-  - [ ] 1X2: Betfair SB + lay on Betfair Exchange/Smarkets/Polymarket 3-way
-  - [ ] Over/Under + DNB + BTTS: same book → Betfair/Smarkets lay (per settlement_key) + Polymarket if liquid
-  - [ ] Route through arb.py find_cross_book_arbs() + find_pm_book_arbs() + rank_arbs()
-  - [ ] Net-of-commission edge (0.94 for Betfair until July, then 0.98; 0.98 for Smarkets; 0.97 for PM)
-
-- [ ] **Tier-3 exclusions** (defer until model/data improves)
-  - [ ] **Goalscorer**: use only for Betfred Double Delight/Hat-Trick Heaven promo EV via wca_price_scorers.py; no general acca support (npxG shares are estimated, not sourced)
-  - [ ] **Cards**: CardsModel needs team aggression/referee priors not yet injected (currently near base-rate); no hedge liquidity
-  - [ ] **SOT**: no model class exists (only a boosts.py string "unpriceable"); build from prop_priors, then add model
-  - [ ] **Outrights/Advancement**: settle on ET/pens (NOT 90-min) — NEVER mix with 90-min legs (documented fake-arb trap); keep on separate sim/tournament track
-
-- [ ] **Tests** (`tests/test_accas_extended.py`)
-  - [ ] Correlation check: same-game legs vs naive product
-  - [ ] Settlement-key tag enforcement (no None keys if hedging attempted)
-  - [ ] Commission net-out (0.94 / 0.98 / 0.97 per venue)
-
----
-
-## 🎯 P3: Model Diagnostics & Venue-Correlation Report
-
-- [ ] **Calibration & weak-spots analysis** (from `src/wca/ledger/reports.py`)
-  - [ ] Brier score: model vs market (target: model < market)
-  - [ ] Calibration bins: observed win-rate vs model prob (check for overconfidence in thin regions)
-  - [ ] Per-tournament consistency: halflife_backtest() per holdout (WC2018, WC2022, Euro2024, Copa2024)
-  - [ ] Per-team residual variance: which teams/regions are systematically mispredicted?
-
-- [ ] **Venue-correlation report** (historical bet recs vs actual book/PM movement)
-  - [ ] Rank bet recommendations by source (Polymarket, Betfair, Smarkets, Paddypower, Virgin, Betfred, bet365)
-  - [ ] For each venue: how often did model recs agree/disagree with closing line?
-  - [ ] CLV decomposition: which venues generated the most CLV? Which the least?
-  - [ ] Biases: does the model systematically overestimate favorites? Underestimate away teams? Etc.
-
-- [ ] **Compile and report**
-  - [ ] docs/research/model_diagnostics.md: calibration, per-tournament consistency, per-team residuals
-  - [ ] docs/research/venue_correlation.md: CLV by venue, model-vs-closing agreement matrix, systematic biases
-
----
-
-## 🛠️ Ledger & Site (AWAITING CONFIRM)
-
-- [ ] **Settle last 4 open bets as lost + fix 'unknown' venue**
-  - [ ] Verify exact bet IDs (never fabricate)
-  - [ ] Mark bets as lost (status='lost', settled_pl=-stake)
-  - [ ] Relabel 'unknown' → Betfair Sportsbook account 1
-  - [ ] Rebuild + push site
-
-**STATUS:** Awaiting your confirmation to proceed (instruction came via /model-command, not yet executed).
-
----
-
-## 🔄 Branch Ownership / Coordination
-
-| Branch | Owner | Focus | Status |
-|--------|-------|-------|--------|
-| `main` | auto-cron | live, clean | 88a3806 (Auto-clean) |
-| `feature/cross-venue-events` | Mac Mini (this session) | Betfair + events + accas | in-progress, NOT pushed |
-| Other session on main | [dev MacBook] | parallel work | TBD |
-
----
-
-## 📋 Decision Log
-
-- **Betfair**: FREE Delayed key (no paid Live key unless in-play is needed) — zero cost, unlimited quota, 1-180s latency acceptable for pre-match
-- **Historical events**: football-data.co.uk (50k+ matches, free, exact SOT/corners/fouls columns) + StatsBomb (free, international, derive SOT) — defer API-Football ($19/mo) to 2026 in-tournament if Opta blocks free coverage
-- **Cross-venue markets**: 1X2 / Over-Under / Draw-No-Bet / BTTS are the hedgeable core (all venues, all model-native, all settlement-keyed). Correct Score & Corners as book-only upside. Goalscorer (Betfred promo-only), Cards/SOT (weak models), Outrights (ET/pens incompatible) deferred.
-- **Shared TODO**: commit to origin/main after each sprint so all sessions/devices see the same work queue
+- Betfair execution remains a no-build decision; read-only reference data only.
+- No hosted dashboard deployment; localhost remains the supported surface.
+- No cash on correct scores, scorer props, unboosted same-game multiples, or
+  model probabilities below 25%.

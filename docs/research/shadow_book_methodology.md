@@ -75,6 +75,14 @@ sample. Market-only exploration is never combined with model-alpha results.
 - The database is `data/shadow_book.db`, separate from the live ledger.
 - No code path signs or submits an order.
 - Market settlement bases must match before a cross-venue pair is tradable.
+- Nested contracts use the generic identity in `wca.hl.dominance`: an HL
+  ET+pens advancement contract is the superset of PM team-win-in-90, with the
+  missing branch equal to `Draw90 AND wins ET/pens`. The engine uses directly
+  purchasable YES/NO legs rather than assuming short inventory.
+- A positive zero-fee dominance margin is only
+  `CANDIDATE_FEE_UNVERIFIED` until the HL settlement fee is observed or
+  authoritatively specified. It is never presented as guaranteed arbitrage
+  while that fee remains unknown.
 - Stale venue snapshots cannot create positions.
 - Forecast provenance and abstentions cannot be dropped.
 - Calibration cannot use the outcome of the observation being calibrated.
