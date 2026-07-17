@@ -247,6 +247,64 @@ def fetch_soccer_events() -> List[Dict[str, Any]]:
     return events
 
 
+def fetch_fixture_search_events(home: str, away: str) -> List[Dict[str, Any]]:
+    """Fetch newly-created fixture events missed by Gamma's offset ceiling.
+
+    The soccer catalogue is capped before some newly listed World Cup
+    fixtures.  Gamma's public-search endpoint indexes those events directly,
+    so use it as a targeted supplement rather than treating an empty match as
+    evidence that Polymarket has no market.
+    """
+    query = "%s %s" % (home, away)
+    result = PM._get("/public-search", params={"q": query})
+    candidates = result.get("events", []) if isinstance(result, dict) else []
+    out: List[Dict[str, Any]] = []
+    want = {canonical(home), canonical(away)}
+    seen = set()
+    main_slugs: List[str] = []
+    for raw in candidates:
+        if not isinstance(raw, dict):
+            continue
+        ev = dict(raw)
+        if not (ev.get("slug") or "").startswith("fifwc-"):
+            continue
+        teams = _title_teams(ev.get("title") or "")
+        if not teams or {canonical(teams[0]), canonical(teams[1])} != want:
+            continue
+        key = ev.get("id") or ev.get("slug")
+        if key in seen:
+            continue
+        seen.add(key)
+        ev["markets"] = [PM._parse_market_prices(m)
+                         for m in (ev.get("markets") or [])]
+        out.append(ev)
+        if not (ev.get("slug") or "").endswith(tuple(s for s, _ in EM.EVENT_KIND_SUFFIXES)):
+            main_slugs.append(ev["slug"])
+
+    # public-search often returns only the main event even though the related
+    # halftime, exact-score, corners, and player-props slugs already exist.
+    # Fetch those deterministic siblings directly.
+    for stem in main_slugs:
+        for suffix, _kind in EM.EVENT_KIND_SUFFIXES:
+            slug = stem + suffix
+            if slug in seen:
+                continue
+            try:
+                ev = PM._get("/events/slug/%s" % slug)
+            except Exception:
+                continue
+            if not isinstance(ev, dict):
+                continue
+            teams = _title_teams(ev.get("title") or "")
+            if not teams or {canonical(teams[0]), canonical(teams[1])} != want:
+                continue
+            ev["markets"] = [PM._parse_market_prices(m)
+                             for m in (ev.get("markets") or [])]
+            seen.add(slug)
+            out.append(ev)
+    return out
+
+
 def _title_teams(title: str) -> Optional[Tuple[str, str]]:
     """Parse "<Home> vs. <Away>[ - Suffix]" into the two team names."""
     head = (title or "").split(" - ")[0]
@@ -1048,6 +1106,28 @@ def main(argv=None) -> int:
         print("WARNING: Gamma fetch failed (%s) — market side will be "
               "'no PM market' everywhere" % exc)
         events = []
+
+    # Gamma's bulk /events pagination can stop before newly-created fixture
+    # slugs.  Search each requested fixture directly before concluding that it
+    # has no Polymarket markets.
+    existing_pairs = set()
+    for ev in events:
+        teams = _title_teams(ev.get("title") or "")
+        if teams:
+            existing_pairs.add(frozenset((canonical(teams[0]), canonical(teams[1]))))
+    for fx in fixtures:
+        pair = frozenset((canonical(fx["home"]), canonical(fx["away"])))
+        if pair in existing_pairs:
+            continue
+        try:
+            supplement = fetch_fixture_search_events(fx["home"], fx["away"])
+            events.extend(supplement)
+            if supplement:
+                print("  public-search %s vs %s: %d event(s)"
+                      % (fx["home"], fx["away"], len(supplement)))
+        except Exception as exc:  # noqa: BLE001
+            print("WARNING: fixture search failed for %s vs %s (%s)"
+                  % (fx["home"], fx["away"], exc))
 
     adv_model, adv_stamp = load_advancement_model(_ADV_PATH)
 

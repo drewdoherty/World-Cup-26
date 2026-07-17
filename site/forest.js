@@ -126,6 +126,11 @@
     }
     if (r.edge_pp != null) bits.push("edge " + (r.edge_pp >= 0 ? "+" : "") + num(r.edge_pp, 1) + "pp");
     if (r.signal) bits.push("signal: " + (r.signal === "back" ? "BACK" : "LAY / back the complement"));
+    var oneOffSize = r.one_off_size_usd > 0 ? r.one_off_size_usd : r.one_off_punt_size_usd;
+    if (oneOffSize > 0) {
+      bits.push("one-off size $" + num(oneOffSize, 2) +
+        " (" + (r.one_off_sizing || "indicative") + ")");
+    }
     if (r.warning) bits.push("WARNING: " + r.warning);
     if (r.settlement === "ET+pens") bits.push("settles ET+pens (advancement basis)");
     if (r.captured_utc) bits.push("captured " + r.captured_utc);
@@ -202,7 +207,10 @@
           (r.signal ? (r.signal === "back" ? " BACK" : " LAY") : "") + "</text>";
       } else if (xk != null) {
         g += "<text class='cx-tick' x='" + (W - 2) + "' y='" + (cy + 4) +
-          "' text-anchor='end' fill='var(--muted)'>no model</text>";
+          "' text-anchor='end' fill='var(--muted)'>no model" +
+          (r.one_off_size_usd > 0 ? " · QK $" + num(r.one_off_size_usd, 0) :
+            (r.one_off_punt_size_usd > 0 ? " · punt $" + num(r.one_off_punt_size_usd, 0) : "")) +
+          "</text>";
       } else {
         g += "<text class='cx-tick' x='" + (W - 2) + "' y='" + (cy + 4) +
           "' text-anchor='end' fill='var(--muted)'>no PM market</text>";

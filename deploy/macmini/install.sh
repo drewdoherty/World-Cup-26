@@ -62,6 +62,7 @@ cmd_for() {
     orderflow)    printf '%s\n' "$RUN1" orderflow    "/bin/bash" "$HERE/../../scripts/wca_orderflow_refresh.sh" ;;
     propcal)      printf '%s\n' "$RUN1" propcal      "$VENV_PY" scripts/wca_prop_calibration.py ;;
     pminplayingest) printf '%s\n' "$RUN1" pminplayingest "$VENV_PY" scripts/wca_pm_inplay_ingest.py --env .env ;;
+    shadowbook)   printf '%s\n' "/bin/bash" "$REPO_ROOT/scripts/wca_shadow_book_cycle.sh" ;;
     *) echo "unknown service $1" >&2; return 1 ;;
   esac
 }

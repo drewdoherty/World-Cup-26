@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light">
+<title>WORLD CUP ALPHA // SHADOW BOOK</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div id="app">
+  <header class="ticker">
+    <div class="brand"><span class="brand-mark">WCA</span><span class="brand-sub">WORLD CUP ALPHA</span></div>
+    <nav class="scores-nav">
+      <a class="scores-nav-link" href="./index.html">Trades</a>
+      <a class="scores-nav-link" href="./forest.html">Event Markets</a>
+      <span class="scores-nav-here">Shadow Book</span>
+      <a class="scores-nav-link" href="./arb.html">Trade Recs</a>
+      <a class="scores-nav-link" href="./benchmarks.html">Benchmarks</a>
+    </nav>
+  </header>
+  <main class="shadow-main">
+    <section class="panel">
+      <div class="panel-head"><span class="panel-label">Shadow Paper Book // Research Control Plane</span><span class="panel-meta" id="shadow-generated">loading</span></div>
+      <div class="panel-body">
+        <p class="shadow-intro">Every observable market becomes a forecast experiment. Model positions, controlled exploration, abstentions, and settlement-gated cross-venue pairs are stored separately. This book never reaches live execution.</p>
+        <div class="shadow-kpis" id="shadow-kpis"></div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><span class="panel-label">Open Experiments</span><span class="panel-meta">simulated fills only</span></div>
+      <div class="panel-body shadow-table-wrap"><table class="shadow-table"><thead><tr><th>Venue</th><th>Fixture / market</th><th>Family</th><th>Side</th><th>Price</th><th>Forecast</th><th>Stake</th><th>Basis</th></tr></thead><tbody id="shadow-positions"></tbody></table></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><span class="panel-label">Coverage &amp; Calibration</span><span class="panel-meta">prequential, settled observations only</span></div>
+      <div class="panel-body shadow-table-wrap"><table class="shadow-table"><thead><tr><th>Venue</th><th>Family</th><th>Source</th><th>N</th><th>Forecast</th><th>Actual</th><th>Brier</th><th>Log loss</th></tr></thead><tbody id="shadow-calibration"></tbody></table><div class="shadow-empty" id="shadow-cal-empty">Collecting outcomes. Calibration updates only after settlement.</div></div>
+    </section>
+    <section class="panel shadow-grid-2">
+      <div class="shadow-band"><h2>Decision Audit</h2><div id="shadow-decisions"></div></div>
+      <div class="shadow-band"><h2>Cross-Venue Audit</h2><div id="shadow-cross"></div></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><span class="panel-label">Learning Contract</span></div>
+      <div class="panel-body shadow-method">
+        <div><b>Forecast</b><span>Production model where available; otherwise market prior tagged as exploration.</span></div>
+        <div><b>Selection</b><span>Fee-adjusted quarter-Kelly for model edges; deterministic $1 coverage trials for unmodelled families.</span></div>
+        <div><b>Cross venue</b><span>Only matched settlement bases; stale books and toxic tails are recorded as abstentions.</span></div>
+        <div><b>Learning</b><span>Reliability-bin calibration by venue, family, and source; no outcome leakage into pre-match decisions.</span></div>
+        <div><b>Evaluation</b><span>Brier, calibration gap, coverage, P&amp;L, decision reasons, and family-level sample size.</span></div>
+      </div>
+    </section>
+  </main>
+  <footer class="foot"><span id="shadow-foot"></span><span class="foot-mark">SHADOW // NO LIVE EXECUTION</span></footer>
+</div>
+<script src="./shadow-book.js"></script>
+</body>
+</html>

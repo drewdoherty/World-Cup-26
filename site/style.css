@@ -1518,3 +1518,39 @@ main > .track-grid + .panel { margin-top: 12px; }
 @media (max-width: 640px) {
   .exposure-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* Shadow paper book ------------------------------------------------------ */
+.shadow-main { display: grid; gap: 12px; }
+.shadow-intro { margin: 0 0 12px; color: var(--text-dim); font-size: 11px; line-height: 1.6; }
+.shadow-kpis { display: grid; grid-template-columns: repeat(6, 1fr); border: 1px solid var(--border); }
+.shadow-kpis > div { padding: 12px; border-right: 1px solid var(--border); min-width: 0; }
+.shadow-kpis > div:last-child { border-right: 0; }
+.shadow-kpis span { display: block; color: var(--muted); font-size: 9px; margin-bottom: 6px; }
+.shadow-kpis strong { display: block; color: var(--text); font: 600 17px var(--mono); }
+.shadow-table-wrap { overflow-x: auto; }
+.shadow-table { width: 100%; border-collapse: collapse; font: 10px var(--mono); }
+.shadow-table th, .shadow-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+.shadow-table th { color: var(--muted); font-size: 9px; text-transform: uppercase; }
+.shadow-table td { color: var(--text-dim); }
+.shadow-table td.pos { color: var(--pos); font-weight: 700; }
+.shadow-table td.neg { color: var(--neg); font-weight: 700; }
+.shadow-grid-2 { display: grid; grid-template-columns: 1fr 1fr; }
+.shadow-band { padding: 14px; min-width: 0; }
+.shadow-band + .shadow-band { border-left: 1px solid var(--border); }
+.shadow-band h2 { margin: 0 0 10px; font: 600 11px var(--mono); color: var(--text); }
+.shadow-audit-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); font: 10px var(--mono); color: var(--text-dim); }
+.shadow-audit-row strong { color: var(--text); }
+.shadow-empty { padding: 10px 0; color: var(--muted); font: 10px var(--mono); }
+.shadow-method { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.shadow-method div { border-left: 2px solid var(--border-2); padding-left: 9px; }
+.shadow-method b { display: block; color: var(--accent); font: 600 10px var(--mono); margin-bottom: 5px; }
+.shadow-method span { display: block; color: var(--text-dim); font-size: 10px; line-height: 1.5; }
+@media (max-width: 900px) {
+  .shadow-kpis { grid-template-columns: repeat(3, 1fr); }
+  .shadow-kpis > div:nth-child(3) { border-right: 0; }
+  .shadow-method { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+  .shadow-grid-2, .shadow-method { grid-template-columns: 1fr; }
+  .shadow-band + .shadow-band { border-left: 0; border-top: 1px solid var(--border); }
+}
