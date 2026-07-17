@@ -1,10 +1,10 @@
-<!-- generated: 2026-07-17T14:57:06 -->
+<!-- generated: 2026-07-17T15:33:17 -->
 *World Cup Alpha — trade card* (1 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
 *1. [MID·FAV] Spain vs Argentina* — Spain — back *42.0%* impl via *smarkets*
     model 43.6% / mkt 42.3% (+1.6pp)  EV *+3.9%* ✅+EV  [elo 50% dc 49%]
-    stake: gbp £22.87  further-out (52h) — thin/soft market
+    stake: gbp £22.87  further-out (51h) — thin/soft market
 
 *— WATCH (near-threshold, below the +2% EV floor — NOT staked, 1) —*
   ~ [MID] France vs England — England — back 25.0% impl via betfair (model 25.1% / mkt 24.9%, EV +0.4% ✅+EV)
