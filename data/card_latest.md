@@ -1,29 +1,28 @@
-<!-- generated: 2026-07-18T19:57:51 -->
+<!-- generated: 2026-07-18T20:34:11 -->
 *World Cup Alpha — trade card* (1 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
-*1. [MID·FAV] Spain vs Argentina* — Spain — back *42.4%* impl via *smarkets*
-    model 43.6% / mkt 42.3% (+1.3pp)  EV *+3.0%* ✅+EV  [elo 50% dc 49%]
-    stake: gbp £17.94
+*1. [MID·FAV] Spain vs Argentina* — Spain — back *42.0%* impl via *smarkets*
+    model 43.6% / mkt 42.2% (+1.6pp)  EV *+3.8%* ✅+EV  [elo 50% dc 49%]
+    stake: gbp £22.51
 
-*— WATCH (near-threshold, below the +2% EV floor — NOT staked, 3) —*
-  ~ [MID] Spain vs Argentina — Argentina — back 26.0% impl via betfair (model 26.1% / mkt 26.2%, EV +0.4% ✅+EV)
-  ~ [LS] France vs England — England — back 22.2% impl via betfair (model 22.8% / mkt 22.3%, EV +1.3% ✅+EV)
-  ~ [LS] France vs England — Draw — back 22.7% impl via smarkets (model 23.1% / mkt 22.6%, EV +0.7% ✅+EV)
+*— WATCH (near-threshold, below the +2% EV floor — NOT staked, 2) —*
+  ~ [LS] France vs England — England — back 21.7% impl via betfair (model 22.3% / mkt 21.8%, EV +1.4% ✅+EV)
+  ~ [LS] France vs England — Draw — back 22.7% impl via betfair (model 23.1% / mkt 22.6%, EV +0.7% ✅+EV)
 
-*Venue split (gbp):* smarkets £17.94
+*Venue split (gbp):* smarkets £22.51
 
 *— REFERENCE, NOT SIZED (model prices only) —*
 *World Cup Alpha — scorelines* (2 fixtures)
 
 *France vs England*
-    xG: 1.69-1.07
-    1-0  11.5%  back at impl <= 11.3%
-    2-1  11.1%  back at impl <= 10.8%
-    1-1  11.0%  back at impl <= 10.7%
-    2-0  9.4%  back at impl <= 9.2%
-    0-0  6.2%  back at impl <= 6.1%
-    0-1  5.8%  back at impl <= 5.6%
+    xG: 1.70-1.06
+    1-0  11.6%  back at impl <= 11.4%
+    2-1  11.2%  back at impl <= 10.9%
+    1-1  11.0%  back at impl <= 10.8%
+    2-0  9.5%  back at impl <= 9.3%
+    0-0  6.3%  back at impl <= 6.1%
+    3-1  5.7%  back at impl <= 5.6%
     O/U 2.5: over 52.5% / under 47.5%   BTTS 54.0%
 
 *Spain vs Argentina*

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-18 20:19:21 UTC"
+    "generated": "2026-07-18 20:53:07 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -15,7 +15,7 @@
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.2362,
+        "prob": 0.2382,
         "results": [
           "France",
           "Spain"
@@ -23,7 +23,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.164,
+        "prob": 0.1654,
         "results": [
           "France",
           "Draw"
@@ -31,7 +31,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1411,
+        "prob": 0.1425,
         "results": [
           "France",
           "Argentina"
@@ -47,7 +47,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.0698,
+        "prob": 0.0699,
         "results": [
           "Draw",
           "Draw"
@@ -57,7 +57,7 @@
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.2362,
+        "prob": 0.2382,
         "results": [
           "France",
           "Spain"
@@ -65,7 +65,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.164,
+        "prob": 0.1654,
         "results": [
           "France",
           "Draw"
@@ -73,7 +73,7 @@
       },
       {
         "pnl": 0.0,
-        "prob": 0.1411,
+        "prob": 0.1425,
         "results": [
           "France",
           "Argentina"
@@ -111,7 +111,7 @@
       "results": [
         {
           "outcome": "France",
-          "prob": 0.5413,
+          "prob": 0.5461,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -120,16 +120,16 @@
           "plug": {
             "available": true,
             "outcome": "France",
-            "best_venue": "matchbook",
-            "best_odds": 1.81,
-            "model_prob": 0.5413,
-            "ev_pct": -2.0,
+            "best_venue": "unibet_uk",
+            "best_odds": 1.75,
+            "model_prob": 0.5461,
+            "ev_pct": -4.4,
             "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
           }
         },
         {
           "outcome": "Draw",
-          "prob": 0.2305,
+          "prob": 0.2306,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -138,16 +138,16 @@
           "plug": {
             "available": true,
             "outcome": "Draw",
-            "best_venue": "smarkets",
-            "best_odds": 4.4,
-            "model_prob": 0.2305,
-            "ev_pct": 1.4,
-            "recommendation": "PLUG: +EV to back (1.4% edge) \u2014 fills the gap and adds value"
+            "best_venue": "betfair_ex_uk",
+            "best_odds": 4.5,
+            "model_prob": 0.2306,
+            "ev_pct": 3.8,
+            "recommendation": "PLUG: +EV to back (3.8% edge) \u2014 fills the gap and adds value"
           }
         },
         {
           "outcome": "England",
-          "prob": 0.2282,
+          "prob": 0.2233,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -156,11 +156,11 @@
           "plug": {
             "available": true,
             "outcome": "England",
-            "best_venue": "smarkets",
-            "best_odds": 4.5,
-            "model_prob": 0.2282,
-            "ev_pct": 2.7,
-            "recommendation": "PLUG: +EV to back (2.7% edge) \u2014 fills the gap and adds value"
+            "best_venue": "betfair_ex_uk",
+            "best_odds": 4.8,
+            "model_prob": 0.2233,
+            "ev_pct": 7.2,
+            "recommendation": "PLUG: +EV to back (7.2% edge) \u2014 fills the gap and adds value"
           }
         }
       ],
@@ -188,7 +188,7 @@
       "results": [
         {
           "outcome": "Spain",
-          "prob": 0.4364,
+          "prob": 0.4362,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -206,7 +206,7 @@
         },
         {
           "outcome": "Argentina",
-          "prob": 0.2607,
+          "prob": 0.261,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -228,46 +228,46 @@
     {
       "fixture": "France vs England",
       "outcome": "France",
-      "prob": 0.5413,
+      "prob": 0.5461,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "France",
-        "best_venue": "matchbook",
-        "best_odds": 1.81,
-        "model_prob": 0.5413,
-        "ev_pct": -2.0,
+        "best_venue": "unibet_uk",
+        "best_odds": 1.75,
+        "model_prob": 0.5461,
+        "ev_pct": -4.4,
         "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
       }
     },
     {
       "fixture": "France vs England",
       "outcome": "Draw",
-      "prob": 0.2305,
+      "prob": 0.2306,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "Draw",
-        "best_venue": "smarkets",
-        "best_odds": 4.4,
-        "model_prob": 0.2305,
-        "ev_pct": 1.4,
-        "recommendation": "PLUG: +EV to back (1.4% edge) \u2014 fills the gap and adds value"
+        "best_venue": "betfair_ex_uk",
+        "best_odds": 4.5,
+        "model_prob": 0.2306,
+        "ev_pct": 3.8,
+        "recommendation": "PLUG: +EV to back (3.8% edge) \u2014 fills the gap and adds value"
       }
     },
     {
       "fixture": "France vs England",
       "outcome": "England",
-      "prob": 0.2282,
+      "prob": 0.2233,
       "net_pnl": 0.0,
       "plug": {
         "available": true,
         "outcome": "England",
-        "best_venue": "smarkets",
-        "best_odds": 4.5,
-        "model_prob": 0.2282,
-        "ev_pct": 2.7,
-        "recommendation": "PLUG: +EV to back (2.7% edge) \u2014 fills the gap and adds value"
+        "best_venue": "betfair_ex_uk",
+        "best_odds": 4.8,
+        "model_prob": 0.2233,
+        "ev_pct": 7.2,
+        "recommendation": "PLUG: +EV to back (7.2% edge) \u2014 fills the gap and adds value"
       }
     }
   ],
