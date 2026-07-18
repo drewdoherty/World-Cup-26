@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-18T11:30:10 -->
+<!-- generated: 2026-07-18T12:06:21 -->
 ⚽ *Next match* — France vs England
 Kickoff 2026-07-18 21:00:00+00:00
 
 *Winner* (model blend)
-  France         model 51.3% · mkt 51.8% (betfair_ex_uk)  EV -0.9% ❌−EV
+  France         model 51.2% · mkt 51.8% (betfair_ex_uk)  EV -1.2% ❌−EV
+  Draw           model 23.8% · mkt 23.8% (betfair_ex_uk)  EV +0.1% ✅+EV (below +2% gate)  (<25% model — NO CASH)
   England        model 25.0% · mkt 25.0% (betfair_ex_uk)  EV -0.2% ❌−EV  (<25% model — NO CASH)
-  Draw           model 23.7% · mkt 23.8% (betfair_ex_uk)  EV -0.4% ❌−EV  (<25% model — NO CASH)
 
 *Corners* (model, exp 8.8)
   O/U 8.5: over 51.2% / under 48.8% (model only — no live corners feed, +EV unverifiable)
@@ -20,5 +20,5 @@ _top anytime, mkt implied % (both teams — add squad to split + FGS; no model p
   Ousmane Dembele      mkt 27% (Betfair)
 
 *Scorelines* (top 6)
-1-1 11.3% | 1-0 10.9% | 2-1 10.5% | 2-0 8.9% | 0-0 6.4% | 0-1 6.3%
-  O/U 2.5: over 52.2% / under 47.8%   BTTS 54.2%
+1-1 11.3% | 1-0 10.9% | 2-1 10.5% | 2-0 8.9% | 0-0 6.5% | 0-1 6.3%
+  O/U 2.5: over 52.2% / under 47.8%   BTTS 54.3%
