@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-18 10:07:07 UTC",
+    "generated": "2026-07-18 10:41:02 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 1543,
-      "advancement_secs": 342276,
+      "model_secs": 1411,
+      "advancement_secs": 344311,
       "price_secs": null,
-      "promo_secs": 691183,
+      "promo_secs": 693218,
       "exposure_secs": null
     },
     "coverage": {
@@ -66,13 +66,13 @@
       "market": "1X2",
       "selection": "home",
       "team": "France",
-      "model_prob": 0.5107,
-      "price": 1.9388,
-      "edge": -0.0051,
-      "ev_net": -0.0099,
+      "model_prob": 0.5147,
+      "price": 1.9237,
+      "edge": -0.0052,
+      "ev_net": -0.01,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "edge_below_floor:-0.0051<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0052<0.0200",
       "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
@@ -85,10 +85,10 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.2388,
-      "price": 4.2342,
-      "edge": 0.0027,
-      "ev_net": 0.0112,
+      "model_prob": 0.2384,
+      "price": 4.2485,
+      "edge": 0.0031,
+      "ev_net": 0.013,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "longshot filter: prob 24% < 25% (minnow risk)",
@@ -104,14 +104,14 @@
       "market": "1X2",
       "selection": "away",
       "team": "England",
-      "model_prob": 0.2505,
-      "price": 4.0313,
-      "edge": 0.0024,
-      "ev_net": 0.0097,
+      "model_prob": 0.2469,
+      "price": 4.0852,
+      "edge": 0.0021,
+      "ev_net": 0.0087,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "edge_below_floor:0.0024<0.0200",
-      "reason_code": "edge_below_floor",
+      "withheld_reason": "longshot filter: prob 25% < 25% (minnow risk)",
+      "reason_code": "longshot_filter",
       "stale": false,
       "stale_reason": null
     },
@@ -265,8 +265,8 @@
       "stake": 65.71,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 342276,
-        "price_secs": 342276
+        "model_secs": 344311,
+        "price_secs": 344311
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
@@ -306,8 +306,8 @@
       "stake": 45.99,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 342276,
-        "price_secs": 342276
+        "model_secs": 344311,
+        "price_secs": 344311
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
@@ -347,8 +347,8 @@
       "stake": 65.87,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 342276,
-        "price_secs": 342276
+        "model_secs": 344311,
+        "price_secs": 344311
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
@@ -388,8 +388,8 @@
       "stake": 46.29,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 342276,
-        "price_secs": 342276
+        "model_secs": 344311,
+        "price_secs": 344311
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
