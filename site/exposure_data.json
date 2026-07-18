@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-18 20:53:07 UTC"
+    "generated": "2026-07-18 21:26:54 UTC"
   },
   "portfolio": {
     "ev": 0.0,
@@ -9,73 +9,51 @@
     "p_profit": 0,
     "p_loss": 0,
     "p_big_win": 0,
-    "n_scenarios": 9
+    "n_scenarios": 3
   },
   "correlation": {
     "worst_states": [
       {
         "pnl": 0.0,
-        "prob": 0.2382,
+        "prob": 0.4364,
         "results": [
-          "France",
           "Spain"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.1654,
+        "prob": 0.3029,
         "results": [
-          "France",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.1425,
+        "prob": 0.2607,
         "results": [
-          "France",
           "Argentina"
-        ]
-      },
-      {
-        "pnl": 0.0,
-        "prob": 0.1006,
-        "results": [
-          "Draw",
-          "Spain"
-        ]
-      },
-      {
-        "pnl": 0.0,
-        "prob": 0.0699,
-        "results": [
-          "Draw",
-          "Draw"
         ]
       }
     ],
     "best_states": [
       {
         "pnl": 0.0,
-        "prob": 0.2382,
+        "prob": 0.4364,
         "results": [
-          "France",
           "Spain"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.1654,
+        "prob": 0.3029,
         "results": [
-          "France",
           "Draw"
         ]
       },
       {
         "pnl": 0.0,
-        "prob": 0.1425,
+        "prob": 0.2607,
         "results": [
-          "France",
           "Argentina"
         ]
       }
@@ -87,14 +65,7 @@
     "cap_fraction": 0.05,
     "cap_abs": 150.0,
     "n_over_exposed": 0,
-    "fixtures": [
-      {
-        "fixture": "France vs England",
-        "has_lambdas": false,
-        "n_bets": 1,
-        "note": "no lambdas persisted \u2014 legacy 1X2-only exposure used"
-      }
-    ],
+    "fixtures": [],
     "slate": {
       "ev": 0.0,
       "best": 0.0,
@@ -106,89 +77,12 @@
   },
   "fixtures": [
     {
-      "fixture": "France vs England",
-      "kickoff": "2026-07-18T21:00:00+00:00",
-      "results": [
-        {
-          "outcome": "France",
-          "prob": 0.5461,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": true,
-          "live": [],
-          "plug": {
-            "available": true,
-            "outcome": "France",
-            "best_venue": "unibet_uk",
-            "best_odds": 1.75,
-            "model_prob": 0.5461,
-            "ev_pct": -4.4,
-            "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
-          }
-        },
-        {
-          "outcome": "Draw",
-          "prob": 0.2306,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": true,
-          "live": [],
-          "plug": {
-            "available": true,
-            "outcome": "Draw",
-            "best_venue": "betfair_ex_uk",
-            "best_odds": 4.5,
-            "model_prob": 0.2306,
-            "ev_pct": 3.8,
-            "recommendation": "PLUG: +EV to back (3.8% edge) \u2014 fills the gap and adds value"
-          }
-        },
-        {
-          "outcome": "England",
-          "prob": 0.2233,
-          "direct_pnl": 0.0,
-          "acca_ev": 0.0,
-          "net_pnl": 0.0,
-          "blindspot": true,
-          "live": [],
-          "plug": {
-            "available": true,
-            "outcome": "England",
-            "best_venue": "betfair_ex_uk",
-            "best_odds": 4.8,
-            "model_prob": 0.2233,
-            "ev_pct": 7.2,
-            "recommendation": "PLUG: +EV to back (7.2% edge) \u2014 fills the gap and adds value"
-          }
-        }
-      ],
-      "events": [
-        {
-          "type": "Win Only Market",
-          "selection": "England",
-          "stake": 10.0,
-          "potential_profit": 2.9,
-          "free": true,
-          "odds": 1.29
-        }
-      ],
-      "summary": {
-        "max_win": 0.0,
-        "stake_at_risk": 0,
-        "best_outcome": "France",
-        "worst_outcome": "France",
-        "n_blindspots": 3
-      }
-    },
-    {
       "fixture": "Spain vs Argentina",
       "kickoff": "2026-07-19T19:00:00+00:00",
       "results": [
         {
           "outcome": "Spain",
-          "prob": 0.4362,
+          "prob": 0.4364,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -206,7 +100,7 @@
         },
         {
           "outcome": "Argentina",
-          "prob": 0.261,
+          "prob": 0.2607,
           "direct_pnl": 0.0,
           "acca_ev": 0.0,
           "net_pnl": 0.0,
@@ -224,53 +118,7 @@
       }
     }
   ],
-  "blindspots": [
-    {
-      "fixture": "France vs England",
-      "outcome": "France",
-      "prob": 0.5461,
-      "net_pnl": 0.0,
-      "plug": {
-        "available": true,
-        "outcome": "France",
-        "best_venue": "unibet_uk",
-        "best_odds": 1.75,
-        "model_prob": 0.5461,
-        "ev_pct": -4.4,
-        "recommendation": "marginal: near-fair hedge; plug only if you want lower variance"
-      }
-    },
-    {
-      "fixture": "France vs England",
-      "outcome": "Draw",
-      "prob": 0.2306,
-      "net_pnl": 0.0,
-      "plug": {
-        "available": true,
-        "outcome": "Draw",
-        "best_venue": "betfair_ex_uk",
-        "best_odds": 4.5,
-        "model_prob": 0.2306,
-        "ev_pct": 3.8,
-        "recommendation": "PLUG: +EV to back (3.8% edge) \u2014 fills the gap and adds value"
-      }
-    },
-    {
-      "fixture": "France vs England",
-      "outcome": "England",
-      "prob": 0.2233,
-      "net_pnl": 0.0,
-      "plug": {
-        "available": true,
-        "outcome": "England",
-        "best_venue": "betfair_ex_uk",
-        "best_odds": 4.8,
-        "model_prob": 0.2233,
-        "ev_pct": 7.2,
-        "recommendation": "PLUG: +EV to back (7.2% edge) \u2014 fills the gap and adds value"
-      }
-    }
-  ],
+  "blindspots": [],
   "unmapped": [
     "Algeria v Austria / Austria",
     "Cape Verde v Saudi Arabia / The Draw",
@@ -609,6 +457,15 @@
       "free": true,
       "odds": 3.75,
       "match": "Brazil v Japan"
+    },
+    {
+      "type": "Win Only Market",
+      "selection": "England",
+      "stake": 10.0,
+      "profit": 2.9000000000000004,
+      "free": true,
+      "odds": 1.29,
+      "match": "England"
     },
     {
       "type": "Anytime Goalscorer or Assist",

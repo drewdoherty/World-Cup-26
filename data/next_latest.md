@@ -1,24 +1,25 @@
-<!-- generated: 2026-07-18T20:34:11 -->
-⚽ *Next match* — France vs England
-Kickoff 2026-07-18 21:00:00+00:00
+<!-- generated: 2026-07-18T21:10:28 -->
+⚽ *Next match* — Spain vs Argentina
+Kickoff 2026-07-19 19:00:00+00:00
 
 *Winner* (model blend)
-  France         model 54.6% · mkt 55.9% (betfair_ex_uk)  EV -2.2% ❌−EV
-  England        model 22.3% · mkt 21.7% (betfair_ex_uk)  EV +2.7% ✅+EV  (<25% model — NO CASH)
-  Draw           model 23.1% · mkt 22.7% (betfair_ex_uk)  EV +1.5% ✅+EV (below +2% gate)  (<25% model — NO CASH)
+  Spain          model 43.6% · mkt 41.7% (matchbook)  EV +4.7% ✅+EV  $36.76
+  Argentina      model 26.1% · mkt 26.0% (matchbook)  EV +0.4% ✅+EV (below +2% gate)  $1.43
+  Draw           model 30.3% · mkt 31.7% (betfair_ex_uk)  EV -4.6% ❌−EV
+  _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
-*Corners* (model, exp 8.8)
-  O/U 8.5: over 51.2% / under 48.8% (model only — no live corners feed, +EV unverifiable)
+*Corners* (model, exp 9.0)
+  O/U 8.5: over 53.9% / under 46.1% (model only — no live corners feed, +EV unverifiable)
 
 *Top goalscorers* — from the cached /goalscorers card (as of 2026-07-18T19:34:18)
 _top anytime, mkt implied % (both teams — add squad to split + FGS; no model price, +EV unverifiable)_
-  Kylian Mbappe        mkt 56% (Betfair)
-  Jean-Philippe Mateta mkt 39% (Betfair)
-  Harry Kane           mkt 38% (Betfair)
-  Ousmane Dembele      mkt 32% (Betfair)
-  Ivan Toney           mkt 30% (Betfair)
-  Marcus Thuram        mkt 28% (Betfair)
+  Borja Iglesias       mkt 34% (William Hill)
+  Lionel Messi         mkt 33% (Betfair)
+  Mikel Oyarzabal      mkt 32% (Betfair)
+  Ferran Torres Garcia mkt 24% (Betfair)
+  Jose Manuel Alberto  mkt 23% (Betfair)
+  Lamine Yamal         mkt 23% (Betfair)
 
 *Scorelines* (top 6)
-1-0 11.6% | 2-1 11.2% | 1-1 11.0% | 2-0 9.5% | 0-0 6.3% | 3-1 5.7%
-  O/U 2.5: over 52.5% / under 47.5%   BTTS 54.0%
+1-1 14.2% | 2-1 8.5% | 1-0 7.7% | 2-2 7.1% | 0-0 7.1% | 2-0 7.0%
+  O/U 2.5: over 54.3% / under 45.7%   BTTS 59.7%
