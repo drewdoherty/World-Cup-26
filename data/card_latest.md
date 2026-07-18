@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-18T03:38:44 -->
+<!-- generated: 2026-07-18T04:14:58 -->
 *World Cup Alpha — trade card* (1 staked picks, hit-prob ranked)
 _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out first, EV tiebreak — wca.selection_
 
@@ -20,7 +20,7 @@ _order: model-prob bucket (ML ≥50% > MID 25–50% > LS <25%), further-out firs
     1-0  10.9%  back at impl <= 10.6%
     2-1  10.4%  back at impl <= 10.2%
     2-0  8.9%  back at impl <= 8.7%
-    0-0  6.5%  back at impl <= 6.4%
+    0-0  6.6%  back at impl <= 6.4%
     0-1  6.2%  back at impl <= 6.1%
     O/U 2.5: over 52.1% / under 47.9%   BTTS 54.4%
 
