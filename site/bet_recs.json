@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-07-18 23:08:13 UTC",
+    "generated": "2026-07-18 23:42:09 UTC",
     "monitoring_only": true,
     "sportsbook_pool": {
       "bankroll": 3264.014296992481,
@@ -38,10 +38,10 @@
       "note": "currencies kept separate; FX disclosed for combined dashboard only"
     },
     "ages": {
-      "model_secs": 554,
-      "advancement_secs": 389142,
+      "model_secs": 419,
+      "advancement_secs": 391178,
       "price_secs": null,
-      "promo_secs": 738049,
+      "promo_secs": 740085,
       "exposure_secs": null
     },
     "coverage": {
@@ -51,70 +51,13 @@
       "guaranteed_arbs": "Settlement-safe cross-venue arbs (fee/FX-adjusted). Currently empty."
     },
     "actionable_count": 0,
-    "withheld_count": 19
+    "withheld_count": 16
   },
   "match_singles": [],
   "event_props": [],
   "advancement_futures": [],
   "guaranteed_arbs": [],
   "withheld": [
-    {
-      "id": "france_vs_england_home_1x2",
-      "fixture": "France vs England",
-      "kickoff": "2026-07-18 21:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "selection": "home",
-      "team": "France",
-      "model_prob": 0.0526,
-      "price": 1560.0624,
-      "edge": 0.052,
-      "ev_net": 81.0577,
-      "stake": 0.0,
-      "currency": "GBP",
-      "withheld_reason": "model_prob 5% < floor 20%",
-      "reason_code": "below_min_prob",
-      "stale": false,
-      "stale_reason": null
-    },
-    {
-      "id": "france_vs_england_draw_1x2",
-      "fixture": "France vs England",
-      "kickoff": "2026-07-18 21:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "selection": "draw",
-      "team": "Draw",
-      "model_prob": 0.0962,
-      "price": 14.073,
-      "edge": 0.0251,
-      "ev_net": 0.3533,
-      "stake": 0.0,
-      "currency": "GBP",
-      "withheld_reason": "model_prob 10% < floor 20%",
-      "reason_code": "below_min_prob",
-      "stale": false,
-      "stale_reason": null
-    },
-    {
-      "id": "france_vs_england_away_1x2",
-      "fixture": "France vs England",
-      "kickoff": "2026-07-18 21:00:00+00:00",
-      "group": "",
-      "market": "1X2",
-      "selection": "away",
-      "team": "England",
-      "model_prob": 0.8512,
-      "price": 1.0772,
-      "edge": -0.0771,
-      "ev_net": -0.083,
-      "stake": 0.0,
-      "currency": "GBP",
-      "withheld_reason": "edge_below_floor:-0.0771<0.0200",
-      "reason_code": "edge_below_floor",
-      "stale": false,
-      "stale_reason": null
-    },
     {
       "id": "spain_vs_argentina_home_1x2",
       "fixture": "Spain vs Argentina",
@@ -123,13 +66,13 @@
       "market": "1X2",
       "selection": "home",
       "team": "Spain",
-      "model_prob": 0.4369,
-      "price": 2.3625,
-      "edge": 0.0137,
-      "ev_net": 0.0323,
+      "model_prob": 0.4347,
+      "price": 2.3785,
+      "edge": 0.0142,
+      "ev_net": 0.0339,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "edge_below_floor:0.0137<0.0200",
+      "withheld_reason": "edge_below_floor:0.0142<0.0200",
       "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
@@ -142,13 +85,13 @@
       "market": "1X2",
       "selection": "draw",
       "team": "Draw",
-      "model_prob": 0.3013,
-      "price": 3.1905,
-      "edge": -0.0121,
-      "ev_net": -0.0386,
+      "model_prob": 0.3035,
+      "price": 3.163,
+      "edge": -0.0126,
+      "ev_net": -0.04,
       "stake": 0.0,
       "currency": "GBP",
-      "withheld_reason": "edge_below_floor:-0.0121<0.0200",
+      "withheld_reason": "edge_below_floor:-0.0126<0.0200",
       "reason_code": "edge_below_floor",
       "stale": false,
       "stale_reason": null
@@ -161,10 +104,10 @@
       "market": "1X2",
       "selection": "away",
       "team": "Argentina",
-      "model_prob": 0.2617,
-      "price": 3.7982,
+      "model_prob": 0.2618,
+      "price": 3.7964,
       "edge": -0.0016,
-      "ev_net": -0.0059,
+      "ev_net": -0.006,
       "stake": 0.0,
       "currency": "GBP",
       "withheld_reason": "edge_below_floor:-0.0016<0.0200",
@@ -265,8 +208,8 @@
       "stake": 65.71,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 389142,
-        "price_secs": 389142
+        "model_secs": 391178,
+        "price_secs": 391178
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
@@ -306,8 +249,8 @@
       "stake": 45.99,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 389142,
-        "price_secs": 389142
+        "model_secs": 391178,
+        "price_secs": 391178
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
@@ -347,8 +290,8 @@
       "stake": 65.87,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 389142,
-        "price_secs": 389142
+        "model_secs": 391178,
+        "price_secs": 391178
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
@@ -388,8 +331,8 @@
       "stake": 46.29,
       "action_label": "ADD",
       "ages": {
-        "model_secs": 389142,
-        "price_secs": 389142
+        "model_secs": 391178,
+        "price_secs": 391178
       },
       "stale": true,
       "stale_reason": "advancement model stale (>24h)",
