@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-18T07:16:31 -->
+<!-- generated: 2026-07-18T07:52:55 -->
 ⚽ *Next match* — France vs England
 Kickoff 2026-07-18 21:00:00+00:00
 
