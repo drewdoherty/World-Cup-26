@@ -1,9 +1,9 @@
-<!-- generated: 2026-07-18T10:53:56 -->
+<!-- generated: 2026-07-18T11:30:10 -->
 ⚽ *Next match* — France vs England
 Kickoff 2026-07-18 21:00:00+00:00
 
 *Winner* (model blend)
-  France         model 51.3% · mkt 52.1% (betfair_ex_uk)  EV -1.5% ❌−EV
+  France         model 51.3% · mkt 51.8% (betfair_ex_uk)  EV -0.9% ❌−EV
   England        model 25.0% · mkt 25.0% (betfair_ex_uk)  EV -0.2% ❌−EV  (<25% model — NO CASH)
   Draw           model 23.7% · mkt 23.8% (betfair_ex_uk)  EV -0.4% ❌−EV  (<25% model — NO CASH)
 
