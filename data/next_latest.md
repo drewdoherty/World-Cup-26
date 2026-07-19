@@ -1,11 +1,11 @@
-<!-- generated: 2026-07-19T00:11:30 -->
+<!-- generated: 2026-07-19T00:47:53 -->
 ⚽ *Next match* — Spain vs Argentina
 Kickoff 2026-07-19 19:00:00+00:00
 
 *Winner* (model blend)
-  Spain          model 43.4% · mkt 42.0% (betfair_ex_uk)  EV +3.4% ✅+EV  $26.38
-  Argentina      model 26.3% · mkt 26.7% (betfair_ex_uk)  EV -1.6% ❌−EV
-  Draw           model 30.3% · mkt 32.3% (betfair_ex_uk)  EV -6.0% ❌−EV
+  Spain          model 43.5% · mkt 41.7% (matchbook)  EV +4.3% ✅+EV  $33.49
+  Argentina      model 26.2% · mkt 26.3% (betfair_ex_uk)  EV -0.5% ❌−EV
+  Draw           model 30.4% · mkt 32.3% (betfair_ex_uk)  EV -5.9% ❌−EV
   _stake = ¼-Kelly @ £3264 pool, shown in $ at $1.33/£ (display only — settles in native currency)_
 
 *Corners* (model, exp 9.0)
@@ -21,5 +21,5 @@ _top anytime, mkt implied % (both teams — add squad to split + FGS; no model p
   Jose Manuel Alberto  mkt 23% (Betfair)
 
 *Scorelines* (top 6)
-1-1 14.2% | 2-1 8.5% | 1-0 7.6% | 2-2 7.1% | 0-0 7.1% | 2-0 7.0%
+1-1 14.2% | 2-1 8.5% | 1-0 7.7% | 2-2 7.1% | 0-0 7.1% | 2-0 7.0%
   O/U 2.5: over 54.3% / under 45.7%   BTTS 59.8%
