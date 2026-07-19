@@ -1,4 +1,4 @@
-<!-- generated: 2026-07-19T02:00:20 -->
+<!-- generated: 2026-07-19T02:36:39 -->
 ⚽ *Next match* — Spain vs Argentina
 Kickoff 2026-07-19 19:00:00+00:00
 
