@@ -7,8 +7,12 @@ on:
   # mini then just autopulls + serves. Polymarket is the always-on floor (no
   # creds); Betfair/TheOddsAPI best-price activate automatically once their
   # secrets are present in the repo's Actions secret store.
-  schedule:
-    - cron: '17 * * * *'   # hourly at :17 (offset from the :00 odds snapshot)
+  # PAUSED 2026-07-19: Actions runs are instant-failing repo-wide (no runner
+  # ever assigned, 2s to failure) — looks like an Actions minutes/spending
+  # limit hit. Re-enable the schedule block below once billing is confirmed
+  # clear. workflow_dispatch still works for manual runs.
+  # schedule:
+  #   - cron: '17 * * * *'   # hourly at :17 (offset from the :00 odds snapshot)
   workflow_dispatch:  # Allow manual trigger too
 
 # Serialize with the hourly job — both commit site data to main.

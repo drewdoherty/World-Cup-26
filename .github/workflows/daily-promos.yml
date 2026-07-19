@@ -1,11 +1,15 @@
 name: Daily Promo Sweep
 
 on:
-  schedule:
-    # ~8:47 AM UTC — 30 min after the daily card (08:17) so the model scores
-    # feed (site/scores_data.json) is fresh when boosts are priced. Offset
-    # minute so it never shares a trigger minute with the card or hourly jobs.
-    - cron: '47 8 * * *'
+  # PAUSED 2026-07-19: Actions runs are instant-failing repo-wide (no runner
+  # ever assigned, 2s to failure) — looks like an Actions minutes/spending
+  # limit hit. Re-enable the schedule block below once billing is confirmed
+  # clear. workflow_dispatch still works for manual runs.
+  # schedule:
+  #   # ~8:47 AM UTC — 30 min after the daily card (08:17) so the model scores
+  #   # feed (site/scores_data.json) is fresh when boosts are priced. Offset
+  #   # minute so it never shares a trigger minute with the card or hourly jobs.
+  #   - cron: '47 8 * * *'
   workflow_dispatch:  # Allow manual trigger
 
 # Serialize with the card / hourly jobs — all commit site data to main.

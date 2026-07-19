@@ -7,10 +7,14 @@ name: Clean Results Dataset
 # cleaned overlay. Disagreements land in data/corrections_review.json for a human.
 
 on:
-  schedule:
-    # Three times daily, each a few minutes before the card/odds jobs so the
-    # cleaned dataset is fresh when models fit. Offset minute avoids clashing.
-    - cron: '5 7,13,19 * * *'
+  # PAUSED 2026-07-19: Actions runs are instant-failing repo-wide (no runner
+  # ever assigned, 2s to failure) — looks like an Actions minutes/spending
+  # limit hit. Re-enable the schedule block below once billing is confirmed
+  # clear. workflow_dispatch still works for manual runs.
+  # schedule:
+  #   # Three times daily, each a few minutes before the card/odds jobs so the
+  #   # cleaned dataset is fresh when models fit. Offset minute avoids clashing.
+  #   - cron: '5 7,13,19 * * *'
   workflow_dispatch:
 
 # Serialize with the other jobs that push to main.

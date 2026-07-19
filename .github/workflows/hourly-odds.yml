@@ -1,9 +1,13 @@
 name: Hourly Odds Snapshot
 
 on:
-  schedule:
-    # Every hour at minute 0 (sync at the top of each hour)
-    - cron: '0 * * * *'
+  # PAUSED 2026-07-19: Actions runs are instant-failing repo-wide (no runner
+  # ever assigned, 2s to failure) — looks like an Actions minutes/spending
+  # limit hit. Re-enable the schedule block below once billing is confirmed
+  # clear. workflow_dispatch still works for manual runs.
+  # schedule:
+  #   # Every hour at minute 0 (sync at the top of each hour)
+  #   - cron: '0 * * * *'
   workflow_dispatch:
 
 # Serialize with the daily card job — both commit site data to main.

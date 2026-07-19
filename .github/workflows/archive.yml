@@ -9,9 +9,13 @@ name: Data Archival
 # it runs files-only (--no-ledger).
 
 on:
-  schedule:
-    # Daily at 04:17 UTC (off the top-of-hour to avoid the busy crons).
-    - cron: '17 4 * * *'
+  # PAUSED 2026-07-19: Actions runs are instant-failing repo-wide (no runner
+  # ever assigned, 2s to failure) — looks like an Actions minutes/spending
+  # limit hit. Re-enable the schedule block below once billing is confirmed
+  # clear. workflow_dispatch still works for manual runs.
+  # schedule:
+  #   # Daily at 04:17 UTC (off the top-of-hour to avoid the busy crons).
+  #   - cron: '17 4 * * *'
   workflow_dispatch:
 
 concurrency:
