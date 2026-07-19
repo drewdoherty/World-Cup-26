@@ -69,11 +69,11 @@ CLOB_HOST = "https://clob.polymarket.com"
 DATA_API_HOST = "https://data-api.polymarket.com"
 _TIMEOUT = 20
 
-# The USDC for this account sits in the Polymarket proxy (Gnosis Safe), never
-# the EOA.  When POLYMARKET_FUNDER is unset, callers that place LIVE orders must
-# fall back to this known proxy (with sig type 2) rather than the empty EOA.
+# The Polymarket trading account is the developer DepositWallet, never the
+# EOA or the separate deposit address. When POLYMARKET_FUNDER is unset, callers
+# must fall back to this known trading proxy rather than the empty EOA.
 # This is the single source of truth shared by the bot gate and the probe.
-KNOWN_PROXY_FUNDER = "0x40231C7f4FC2BBAB720ce9b669eAb4795fCBE191"
+KNOWN_PROXY_FUNDER = "0x86b4C55A4DF1FBea0F325E842434e0a537CAa549"
 
 
 def resolve_funder_from_env(env: Optional[Dict[str, str]] = None) -> Tuple[str, Optional[int], bool]:
@@ -81,7 +81,7 @@ def resolve_funder_from_env(env: Optional[Dict[str, str]] = None) -> Tuple[str, 
 
     Reads ``POLYMARKET_FUNDER`` / ``POLYMARKET_SIG_TYPE``.  When the funder is
     absent it falls back to :data:`KNOWN_PROXY_FUNDER` with signature type 2
-    (POLY_GNOSIS_SAFE) — *never* the empty EOA — and signals the fallback via
+    (POLY_1271) — *never* the empty EOA or deposit address — and signals the fallback via
     the third return value so the caller can warn.  Never reads or returns the
     private key.
     """
@@ -91,8 +91,8 @@ def resolve_funder_from_env(env: Optional[Dict[str, str]] = None) -> Tuple[str, 
     sig_type = int(st) if st else None
     if funder:
         return funder, sig_type, False
-    # No explicit funder: fall back to the known proxy (Gnosis safe), not the EOA.
-    return KNOWN_PROXY_FUNDER, (sig_type if sig_type is not None else SIG_TYPE_POLY_GNOSIS_SAFE), True
+    # No explicit funder: fall back to the known trading DepositWallet.
+    return KNOWN_PROXY_FUNDER, (sig_type if sig_type is not None else SIG_TYPE_POLY_1271), True
 
 # Re-export signing constants so callers can ``from wca.pm.trader import SIG_*``.
 SIG_TYPE_EOA = signing.SIG_EOA

@@ -364,6 +364,7 @@ def market_quote(market: Dict[str, Any], outcome_index: int,
                 "mid": float(book["mid"]),
                 "bid": book.get("bid"), "ask": book.get("ask"),
                 "price_source": "clob_mid",
+                "quote_basis": "independent_token_book",
             }
 
     def _f(v):
@@ -374,13 +375,13 @@ def market_quote(market: Dict[str, Any], outcome_index: int,
         return out if out == out else None
 
     bb, ba = _f(market.get("bestBid")), _f(market.get("bestAsk"))
-    if bb is not None and ba is not None and 0.0 < bb and ba < 1.0:
-        if outcome_index == 1:  # gamma bid/ask quote outcome[0]; mirror.
-            bb, ba = 1.0 - ba, 1.0 - bb
+    if (outcome_index == 0 and bb is not None and ba is not None
+            and 0.0 < bb and ba < 1.0):
         return {
             "token_id": token, "outcome": name,
             "mid": (bb + ba) / 2.0, "bid": bb, "ask": ba,
             "price_source": "gamma_mid",
+            "quote_basis": "gamma_primary_book",
         }
     prices = PM._parse_json_array(market.get("outcomePrices")) or []
     if outcome_index < len(prices):
@@ -390,8 +391,40 @@ def market_quote(market: Dict[str, Any], outcome_index: int,
                 "token_id": token, "outcome": name,
                 "mid": p, "bid": None, "ask": None,
                 "price_source": "gamma_outcome_price",
+                "quote_basis": "reference_only_non_executable",
             }
     return None
+
+
+def market_quote_pair(market: Dict[str, Any], outcome_index: int,
+                      *, use_clob: bool = True) -> Optional[Dict[str, Any]]:
+    """Selected outcome plus its independently quoted binary complement.
+
+    No complement is synthesized as ``1 - selected``.  For execution, the
+    second token must have its own CLOB bid/ask.  Gamma outcome prices may be
+    retained as a non-executable reference, but never become a limit price.
+    """
+    selected = market_quote(market, outcome_index, use_clob=use_clob)
+    if selected is None:
+        return None
+    tokens = PM._parse_json_array(market.get("clobTokenIds")) or []
+    outcomes = PM._parse_json_array(market.get("outcomes")) or []
+    if len(tokens) != 2 or outcome_index not in (0, 1):
+        return selected
+    other_index = 1 - outcome_index
+    other = market_quote(market, other_index, use_clob=use_clob)
+    if other is not None:
+        selected.update({
+            "complement_token_id": other.get("token_id"),
+            "complement_outcome": (str(outcomes[other_index])
+                                   if other_index < len(outcomes) else ""),
+            "complement_mid": other.get("mid"),
+            "complement_bid": other.get("bid"),
+            "complement_ask": other.get("ask"),
+            "complement_price_source": other.get("price_source"),
+            "complement_quote_basis": other.get("quote_basis"),
+        })
+    return selected
 
 
 # ---------------------------------------------------------------------------
@@ -473,11 +506,27 @@ def _row(label: str, model: Optional[float], market: Optional[float],
         row["market_null_reason"] = market_null_reason or "no PM market"
     if quote:
         row["token_id"] = quote.get("token_id")
+        row["outcome_token_id"] = quote.get("token_id")
         row["price_source"] = quote.get("price_source")
+        row["quote_basis"] = quote.get("quote_basis")
         if quote.get("bid") is not None:
             row["bid"] = round(float(quote["bid"]), 4)
         if quote.get("ask") is not None:
             row["ask"] = round(float(quote["ask"]), 4)
+        if quote.get("complement_token_id") is not None:
+            row["complement_token_id"] = quote.get("complement_token_id")
+        if quote.get("complement_outcome") is not None:
+            row["complement_outcome"] = quote.get("complement_outcome")
+        if quote.get("complement_mid") is not None:
+            row["complement_market"] = round(float(quote["complement_mid"]), 6)
+        if quote.get("complement_bid") is not None:
+            row["complement_bid"] = round(float(quote["complement_bid"]), 4)
+        if quote.get("complement_ask") is not None:
+            row["complement_ask"] = round(float(quote["complement_ask"]), 4)
+        if quote.get("complement_price_source") is not None:
+            row["complement_price_source"] = quote.get("complement_price_source")
+        if quote.get("complement_quote_basis") is not None:
+            row["complement_quote_basis"] = quote.get("complement_quote_basis")
         row["captured_utc"] = captured_utc
     if components:
         row["model_components"] = components
@@ -515,9 +564,8 @@ def _push_candidates(cands: List[Dict[str, Any]], fx: Dict[str, Any],
                      complement_label: str, *, include_lay: bool = True) -> None:
     """BACK + LAY candidates for a priced row (executable side prices).
 
-    BACK buys the row's outcome at its ask (fallback mid); LAY buys the
-    complement at ``1 - bid`` (the mirrored book price on a PM binary),
-    labelled with its own price source. Rows missing model or market are
+    BACK buys the row's outcome at its ask. LAY buys the independently traded
+    complement token at that token's own ask. Rows missing model or market are
     skipped — no invented numbers. ``include_lay=False`` suppresses the lay
     side where the complement is itself a listed outcome (Team to Advance —
     the other team's BACK row already covers it) or the family is killed for
@@ -527,7 +575,6 @@ def _push_candidates(cands: List[Dict[str, Any]], fx: Dict[str, Any],
         return
     q = float(row["model"])
     ask = quote.get("ask")
-    bid = quote.get("bid")
     # EXECUTABLE prices only — no mid fallbacks in the recs. A back needs a
     # real ask to lift; a lay needs a real bid to mirror (1-bid is the
     # complement's executable cost on a PM binary). One-sided junk books
@@ -540,12 +587,13 @@ def _push_candidates(cands: List[Dict[str, Any]], fx: Dict[str, Any],
             quote.get("token_id")))
     if not include_lay:
         return
-    if bid is not None and 0.0 < float(bid) < 1.0:
+    no_ask = quote.get("complement_ask")
+    no_token = quote.get("complement_token_id")
+    if no_ask is not None and no_token and 0.0 < float(no_ask) < 1.0:
         cands.append(_candidate(
-            fx, row, "lay", complement_label, 1.0 - q, 1.0 - float(bid),
-            "clob_mirror(1-bid)" if quote.get("price_source") == "clob_mid"
-            else "gamma_mirror(1-bid)",
-            None))
+            fx, row, "lay", complement_label, 1.0 - q, float(no_ask),
+            str(quote.get("complement_price_source") or "complement_book_ask"),
+            str(no_token)))
 
 
 # ---------------------------------------------------------------------------
@@ -572,7 +620,7 @@ def build_fixture(fx: Dict[str, Any], matrix, lam_check: Dict[str, Any],
     grid_src = "dc_grid_reconciled(card 1X2 blend)"
 
     def quote_for(market, idx):
-        return market_quote(market, idx, use_clob=use_clob)
+        return market_quote_pair(market, idx, use_clob=use_clob)
 
     # ---- 1X2 (main event) ---------------------------------------------------
     rows.append({"section": "1X2", "settlement": EM.SETTLE_90MIN,
@@ -980,10 +1028,14 @@ def make_scorer_pricer(matrix_by_fixture: Dict[str, Any]):
             scorers_by_team=scorers, rates_by_player=rates,
             markets=(PPM.MK_GOALS,), thresholds={PPM.MK_GOALS: (1,)})
 
+        quotes_by_label: Dict[str, Dict[str, Any]] = {}
+
         def _yes_quote(market):
-            q = market_quote(market, 0)
+            q = market_quote_pair(market, 0)
             if not q:
                 return None
+            label = str(market.get("groupItemTitle") or market.get("question") or "")
+            quotes_by_label[label] = q
             return {"token": q["token_id"],
                     "ask": q.get("ask") if q.get("ask") is not None else q.get("mid"),
                     "mid": q.get("mid"), "bid": q.get("bid"),
@@ -994,17 +1046,21 @@ def make_scorer_pricer(matrix_by_fixture: Dict[str, Any]):
         for r in sorted(joined, key=lambda r: -r.model_prob):
             if r.market_type != PPM.MK_GOALS or r.threshold != 1:
                 continue
+            quote = quotes_by_label.get(r.pm_label) or {
+                "token_id": r.token_id, "mid": r.pm_price,
+                "bid": None, "ask": r.pm_price,
+                "price_source": "clob_ask", "quote_basis": "yes_book_only",
+            }
             out.append(_row(
-                "%s anytime" % r.player, r.model_prob, r.pm_price,
+                "%s anytime" % r.player, r.model_prob,
+                quote.get("mid") if quote.get("mid") is not None else r.pm_price,
                 family="scorer_prop", settlement=EM.SETTLE_90MIN,
                 model_source=("playerprops (rate=%s, minutes=%s%s)"
                               % (r.rate_source, r.minutes_source,
                                  "" if os.path.exists(_PLAYERS_DB)
                                  else "; players.db absent on this box — "
                                       "structural priors, mini build upgrades")),
-                quote={"token_id": r.token_id, "mid": r.pm_price,
-                       "bid": None, "ask": r.pm_price,
-                       "price_source": "clob_ask"},
+                quote=quote,
                 captured_utc=captured_utc, dimmed=True))
         return out
 
@@ -1177,6 +1233,7 @@ def main(argv=None) -> int:
 
     # --- trade recs -------------------------------------------------------------
     from wca.markets import bankroll as pm_rule
+    from wca.pm.account import DEVELOPER_ADDRESS, read_account
 
     pnl = None
     try:
@@ -1194,14 +1251,20 @@ def main(argv=None) -> int:
                 con.close()
     except Exception:  # noqa: BLE001
         pnl = None
-    bankroll = pm_rule.pm_bankroll_usd(pnl or 0.0)
+    # Sizing must use the live developer proxy, not the historical GBP base
+    # rule.  Refuse to call it live capital if the public account read fails.
+    pm_snapshot = read_account(DEVELOPER_ADDRESS, now_utc=forest["meta"]["generated"])
+    bankroll = (float(pm_snapshot["balance_usd"])
+                if pm_snapshot.get("available") else 0.0)
 
     recs = EM.build_event_market_recs(all_cands, bankroll_usd=bankroll,
                                       now_dt=now.replace(tzinfo=None))
     recs["meta"]["generated"] = forest["meta"]["generated"]
     recs["meta"]["bankroll_source"] = (
-        "ledger realised PM P&L $%.2f applied" % pnl if pnl is not None
-        else "base (ledger unavailable on this box)")
+        "live developer proxy marked equity ($%.2f)" % bankroll
+        if pm_snapshot.get("available") else
+        "LIVE BALANCE UNAVAILABLE — sizing disabled")
+    recs["meta"]["polymarket_account"] = pm_snapshot
     recs["meta"]["n_candidates"] = len(all_cands)
     with open(args.out_recs, "w", encoding="utf-8") as fh:
         json.dump(recs, fh, indent=2, ensure_ascii=False)

@@ -40,6 +40,7 @@ import re
 from typing import Any, Dict, List, Optional
 
 from wca import dashboard
+from wca.pm import account as pm_account
 
 
 # ---------------------------------------------------------------------------
@@ -388,6 +389,9 @@ def live_pm_positions(
                 "cash_pnl": cash_pnl,
                 "pct_pnl": (cash_pnl / iv) if iv else None,
                 "notes": "live PM position (data-API)",
+                "pm_balance_usd": None,
+                "pm_quarter_kelly_usd": None,
+                "data_source": "polymarket-data-api",
             })
     return out or None
 
@@ -492,6 +496,8 @@ def build_site_data(
     card_path: str = "data/card_latest.md",
     now_utc: str = "",
     pm_positions: Optional[List[Dict[str, Any]]] = None,
+    pm_closed_positions: Optional[List[Dict[str, Any]]] = None,
+    pm_account_snapshot: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Build the full ``data.json`` payload for the static site.
 
@@ -526,6 +532,13 @@ def build_site_data(
             }
     """
     stats = dashboard.gather_stats(db_path)
+    pm_snapshot = pm_account_snapshot or {
+        "available": False, "address": pm_account.DEVELOPER_ADDRESS,
+        "balance_usd": None, "method": "not captured",
+    }
+    pm_balance = pm_snapshot.get("balance_usd")
+    pm_qk = (float(pm_balance) * 0.25
+             if pm_snapshot.get("available") and pm_balance is not None else None)
 
     by_venue = stats.get("by_venue") or {}
     # Normalise to plain dicts in canonical venue order.
@@ -638,6 +651,11 @@ def build_site_data(
     # USD-total open_stake + count, so the terminal shows the real book.
     if pm_positions is not None:
         positions = [p for p in positions if p.get("venue") != "polymarket"]
+        for row in pm_positions:
+            if row.get("pm_balance_usd") is None:
+                row["pm_balance_usd"] = pm_balance
+            if row.get("pm_quarter_kelly_usd") is None:
+                row["pm_quarter_kelly_usd"] = pm_qk
         positions = list(pm_positions) + positions
         pm_stake = sum(float(p.get("stake") or 0.0) for p in pm_positions)
         pm_n = len(pm_positions)
@@ -684,7 +702,18 @@ def build_site_data(
             "clv": _opt_num(b.get("clv")),
             "notes": b.get("notes"),
             "manual_override": b.get("manual_override"),
+            "pm_balance_usd": pm_balance if venue == "polymarket" else None,
+            "pm_quarter_kelly_usd": pm_qk if venue == "polymarket" else None,
+            "data_source": "ledger",
         })
+
+    # Resolved PM holdings are not reliably represented by the local ledger.
+    # When the public proxy feed succeeds, it replaces ledger PM rows so the
+    # site shows the account's actual resolved inventory and realized P&L.
+    if pm_closed_positions is not None:
+        closed_positions = [p for p in closed_positions
+                            if p.get("venue") != "polymarket"]
+        closed_positions = list(pm_closed_positions) + closed_positions
 
     # Realized P&L curves: cumulative settled P&L over settlement time, one
     # series for the sportsbook pool (GBP) and one for prediction markets
@@ -751,6 +780,7 @@ def build_site_data(
 
     return {
         "meta": {"generated": now_utc},
+        "polymarket_account": pm_snapshot,
         "totals": totals,
         "totals_by_currency": totals_by_currency,
         "venues": venues,
@@ -782,8 +812,16 @@ def write_site_data(
     ledger-only positions silently.
     """
     pm = live_pm_positions() if include_pm_live else None
+    snapshot = pm_account.read_account() if include_pm_live else {
+        "available": False, "address": pm_account.DEVELOPER_ADDRESS,
+        "balance_usd": None, "method": "not captured",
+    }
+    closed_pm = (pm_account.closed_positions(
+        pm_account.DEVELOPER_ADDRESS, balance=snapshot
+    ) if include_pm_live else None)
     data = build_site_data(
-        db_path, card_path=card_path, now_utc=now_utc, pm_positions=pm
+        db_path, card_path=card_path, now_utc=now_utc, pm_positions=pm,
+        pm_closed_positions=closed_pm, pm_account_snapshot=snapshot,
     )
 
     parent = os.path.dirname(os.path.abspath(out_path))

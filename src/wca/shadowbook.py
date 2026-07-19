@@ -67,6 +67,11 @@ CREATE TABLE IF NOT EXISTS shadow_observations (
     yes_price REAL NOT NULL,
     bid REAL,
     ask REAL,
+    no_price REAL,
+    no_bid REAL,
+    no_ask REAL,
+    no_instrument_id TEXT,
+    quote_basis TEXT NOT NULL DEFAULT 'legacy_yes_only',
     spread REAL,
     depth REAL,
     raw_forecast REAL,
@@ -104,6 +109,12 @@ CREATE TABLE IF NOT EXISTS shadow_positions (
     instrument_id TEXT,
     side TEXT NOT NULL,
     entry_price REAL NOT NULL,
+    market_prob_at_entry REAL,
+    entry_bid REAL,
+    entry_ask REAL,
+    execution_style TEXT NOT NULL DEFAULT 'legacy_mid_plus_fee',
+    fee_per_share REAL NOT NULL DEFAULT 0,
+    quote_basis TEXT NOT NULL DEFAULT 'legacy',
     stake_usd REAL NOT NULL,
     shares REAL NOT NULL,
     forecast_prob REAL,
@@ -141,6 +152,51 @@ def connect(path: str = "data/shadow_book.db") -> sqlite3.Connection:
     con = sqlite3.connect(path)
     con.row_factory = sqlite3.Row
     con.executescript(DDL)
+    obs_cols = {r[1] for r in con.execute("PRAGMA table_info(shadow_observations)")}
+    for name, decl in (
+        ("no_price", "REAL"), ("no_bid", "REAL"), ("no_ask", "REAL"),
+        ("no_instrument_id", "TEXT"),
+        ("quote_basis", "TEXT NOT NULL DEFAULT 'legacy_yes_only'"),
+    ):
+        if name not in obs_cols:
+            con.execute("ALTER TABLE shadow_observations ADD COLUMN %s %s" % (name, decl))
+    pos_cols = {r[1] for r in con.execute("PRAGMA table_info(shadow_positions)")}
+    for name, decl in (
+        ("market_prob_at_entry", "REAL"), ("entry_bid", "REAL"),
+        ("entry_ask", "REAL"),
+        ("execution_style", "TEXT NOT NULL DEFAULT 'legacy_mid_plus_fee'"),
+        ("fee_per_share", "REAL NOT NULL DEFAULT 0"),
+        ("quote_basis", "TEXT NOT NULL DEFAULT 'legacy'"),
+    ):
+        if name not in pos_cols:
+            con.execute("ALTER TABLE shadow_positions ADD COLUMN %s %s" % (name, decl))
+    # Early shadow runs copied the observation's YES token onto NO positions.
+    # That identifier represents the opposite tradable outcome. Clear only
+    # provably wrong values; an explicitly captured NO token is preserved.
+    con.execute(
+        """UPDATE shadow_positions
+           SET instrument_id=NULL
+           WHERE side='NO' AND instrument_id IS NOT NULL
+             AND instrument_id=(
+                 SELECT o.instrument_id FROM shadow_observations o
+                 WHERE o.id=shadow_positions.observation_id
+             )"""
+    )
+    con.execute(
+        """UPDATE shadow_positions
+           SET market_prob_at_entry=(
+                   SELECT o.yes_price FROM shadow_observations o
+                   WHERE o.id=shadow_positions.observation_id),
+               quote_basis='legacy_yes_book',
+               execution_style='legacy_mid_plus_fee'
+           WHERE side='YES' AND market_prob_at_entry IS NULL"""
+    )
+    con.execute(
+        """UPDATE shadow_positions
+           SET quote_basis='synthetic_1_minus_yes',
+               execution_style='legacy_mid_plus_fee'
+           WHERE side='NO' AND market_prob_at_entry IS NULL"""
+    )
     con.commit()
     return con
 
@@ -239,16 +295,23 @@ def _insert_observation(
     ask: Optional[float] = None,
     spread: Optional[float] = None,
     depth: Optional[float] = None,
+    no_price: Optional[float] = None,
+    no_bid: Optional[float] = None,
+    no_ask: Optional[float] = None,
+    no_instrument_id: Optional[str] = None,
+    quote_basis: str = "yes_book_only",
 ) -> int:
     cur = con.execute(
         """INSERT INTO shadow_observations(
                run_id,ts_utc,venue,fixture,market_key,family,selection,
-               settlement_basis,instrument_id,yes_price,bid,ask,spread,depth,
-               raw_forecast,calibrated_forecast,forecast_source,calibration_n)
-           VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+               settlement_basis,instrument_id,yes_price,bid,ask,no_price,no_bid,
+               no_ask,no_instrument_id,quote_basis,spread,depth,raw_forecast,
+               calibrated_forecast,forecast_source,calibration_n)
+           VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
         (run_id, ts_utc, venue, fixture, market_key, family, selection,
-         settlement, instrument_id, yes_price, bid, ask, spread, depth,
-         raw, calibrated, source, calibration_n),
+         settlement, instrument_id, yes_price, bid, ask, no_price, no_bid,
+         no_ask, no_instrument_id, quote_basis, spread, depth, raw, calibrated,
+         source, calibration_n),
     )
     return int(cur.lastrowid)
 
@@ -281,11 +344,16 @@ def _record_decision(
             """INSERT INTO shadow_positions(
                    decision_id,observation_id,venue,fixture,market_key,family,
                    selection,settlement_basis,instrument_id,side,entry_price,
-                   stake_usd,shares,forecast_prob)
-               VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                   market_prob_at_entry,entry_bid,entry_ask,execution_style,
+                   fee_per_share,quote_basis,stake_usd,shares,forecast_prob)
+               VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (decision_id, observation_id, position["venue"], position.get("fixture"),
              position["market_key"], position["family"], position["selection"],
              position["settlement"], position.get("instrument_id"), side, price,
+             position.get("market_prob"), position.get("bid"), position.get("ask"),
+             position.get("execution_style") or "marketable_limit",
+             position.get("fee_per_share") or 0.0,
+             position.get("quote_basis") or "independent_token_book",
              stake, stake / price, position.get("forecast")),
         )
     return decision_id
@@ -325,21 +393,44 @@ def ingest_forest(
                 selection=selection, settlement=settlement,
                 instrument_id=row.get("token_id"), yes_price=market,
                 raw=raw, calibrated=calibrated, source=source,
-                calibration_n=calib_n, spread=row.get("spread"),
+                calibration_n=calib_n, bid=row.get("bid"), ask=row.get("ask"),
+                spread=row.get("spread"),
+                no_price=row.get("complement_market"),
+                no_bid=row.get("complement_bid"),
+                no_ask=row.get("complement_ask"),
+                no_instrument_id=row.get("complement_token_id"),
+                quote_basis=("independent_binary_books"
+                             if row.get("complement_quote_basis") == "independent_token_book"
+                             else "yes_book_only"),
             )
             counts["observed"] += 1
 
             if raw_model is not None:
-                yes_cost = market + pm_fee(market)
-                no_market = 1.0 - market
-                no_cost = no_market + pm_fee(no_market)
-                yes_edge = calibrated - yes_cost
-                no_edge = (1.0 - calibrated) - no_cost
-                side, price, q, edge = (
-                    ("YES", yes_cost, calibrated, yes_edge)
-                    if yes_edge >= no_edge else
-                    ("NO", no_cost, 1.0 - calibrated, no_edge)
-                )
+                choices = []
+                yes_ask = row.get("ask")
+                if yes_ask is not None and 0.0 < float(yes_ask) < 1.0:
+                    fee = pm_fee(float(yes_ask))
+                    choices.append(("YES", float(yes_ask) + fee, calibrated,
+                                    calibrated - float(yes_ask) - fee,
+                                    market, row.get("bid"), float(yes_ask),
+                                    row.get("token_id"), fee))
+                no_ask = row.get("complement_ask")
+                no_mid = row.get("complement_market")
+                no_token = row.get("complement_token_id")
+                if (no_ask is not None and no_mid is not None and no_token
+                        and 0.0 < float(no_ask) < 1.0):
+                    fee = pm_fee(float(no_ask))
+                    choices.append(("NO", float(no_ask) + fee, 1.0 - calibrated,
+                                    (1.0 - calibrated) - float(no_ask) - fee,
+                                    float(no_mid), row.get("complement_bid"),
+                                    float(no_ask), no_token, fee))
+                if choices:
+                    (side, price, q, edge, side_market, side_bid, side_ask,
+                     side_token, fee_per_share) = max(choices, key=lambda x: x[3])
+                else:
+                    side, price, q, edge = None, 0.0, calibrated, -1.0
+                    side_market = side_bid = side_ask = side_token = None
+                    fee_per_share = 0.0
                 raw_stake = _quarter_kelly(
                     policy.bankroll_usd, policy.kelly_fraction, q, price)
                 stake = min(
@@ -347,7 +438,11 @@ def ingest_forest(
                     policy.max_position_usd,
                     max(0.0, policy.model_fixture_cap_usd - model_used),
                 )
-                if edge >= policy.min_edge and stake >= 0.25 and not _already_open(con, key, side):
+                if side is None:
+                    reason = "no_independent_executable_side_quote"
+                    action, stake = "abstain", 0.0
+                    counts["abstained"] += 1
+                elif edge >= policy.min_edge and stake >= 0.25 and not _already_open(con, key, side):
                     reason = "model_edge_after_fee"
                     action = "enter"
                     model_used += stake
@@ -368,7 +463,14 @@ def ingest_forest(
                         "venue": "polymarket", "fixture": fixture_name,
                         "market_key": key, "family": family,
                         "selection": selection, "settlement": settlement,
-                        "instrument_id": row.get("token_id"), "price": price,
+                        # ``token_id`` on a forest row is the YES token. Never
+                        # attach it to a NO position.
+                        "instrument_id": side_token,
+                        "price": price,
+                        "market_prob": side_market, "bid": side_bid,
+                        "ask": side_ask, "execution_style": "marketable_limit",
+                        "fee_per_share": fee_per_share,
+                        "quote_basis": "independent_token_book",
                         "forecast": q,
                     },
                 )
@@ -376,13 +478,26 @@ def ingest_forest(
 
             # Controlled coverage experiment: every otherwise-priceable family
             # is sampled, but the decision is explicitly tagged exploration.
-            if not (policy.min_price <= market <= policy.max_price):
+            selected_side = _deterministic_side(key)
+            selected_market = (market if selected_side == "YES"
+                               else row.get("complement_market"))
+            selected_bid = (row.get("bid") if selected_side == "YES"
+                            else row.get("complement_bid"))
+            selected_ask = (row.get("ask") if selected_side == "YES"
+                            else row.get("complement_ask"))
+            selected_token = (row.get("token_id") if selected_side == "YES"
+                              else row.get("complement_token_id"))
+            if selected_market is None or selected_ask is None or not selected_token:
+                action, reason, stake, side = (
+                    "abstain", "no_independent_executable_side_quote", 0.0, selected_side)
+                counts["abstained"] += 1
+            elif not (policy.min_price <= float(selected_market) <= policy.max_price):
                 action, reason, stake, side = "abstain", "extreme_price", 0.0, None
                 counts["abstained"] += 1
             elif exploration_used + policy.exploration_stake_usd <= policy.exploration_fixture_cap_usd:
                 action, reason = "enter", "coverage_exploration_no_model"
                 stake = policy.exploration_stake_usd
-                side = _deterministic_side(key)
+                side = selected_side
                 if _already_open(con, key, side):
                     action, reason, stake = "abstain", "already_open", 0.0
                     counts["abstained"] += 1
@@ -393,7 +508,12 @@ def ingest_forest(
             else:
                 action, reason, stake, side = "abstain", "exploration_fixture_cap", 0.0, None
                 counts["abstained"] += 1
-            chosen_price = market if side != "NO" else 1.0 - market
+            chosen_market = selected_market
+            chosen_ask = selected_ask
+            fee_per_share = (pm_fee(float(chosen_ask))
+                             if chosen_ask is not None else 0.0)
+            chosen_price = ((float(chosen_ask) + fee_per_share)
+                            if chosen_ask is not None else 0.0)
             chosen_q = calibrated if side != "NO" else 1.0 - calibrated
             _record_decision(
                 con, observation_id=obs_id, ts_utc=ts_utc, action=action,
@@ -403,8 +523,12 @@ def ingest_forest(
                     "venue": "polymarket", "fixture": fixture_name,
                     "market_key": key, "family": family,
                     "selection": selection, "settlement": settlement,
-                    "instrument_id": row.get("token_id"),
-                    "price": chosen_price + pm_fee(chosen_price),
+                    "instrument_id": selected_token,
+                    "price": chosen_price, "market_prob": chosen_market,
+                    "bid": selected_bid, "ask": selected_ask,
+                    "execution_style": "marketable_limit",
+                    "fee_per_share": fee_per_share,
+                    "quote_basis": "independent_token_book",
                     "forecast": chosen_q,
                 },
             )
@@ -764,11 +888,62 @@ def report(con: sqlite3.Connection) -> Dict[str, Any]:
         "calibration": _metric_rows(con),
         "decision_metrics": _decision_metrics(con),
         "open_positions": [dict(r) for r in con.execute(
-            "SELECT * FROM shadow_positions WHERE status='open' ORDER BY fixture,family,id LIMIT 500"
+            """SELECT p.*, d.exploration AS exploration,
+                      d.reason AS decision_reason,
+                      o.forecast_source AS forecast_source,
+                      o.yes_price AS entry_yes_reference,
+                      p.market_prob_at_entry AS outcome_market_prob_at_entry,
+                      p.entry_price AS entry_cost,
+                      cur.yes_price AS current_yes_market_prob,
+                      cur.no_price AS current_no_market_prob,
+                      CASE WHEN p.side='YES' THEN cur.yes_price
+                           ELSE cur.no_price END AS current_outcome_market_prob,
+                      CASE WHEN p.side='YES' THEN cur.bid
+                           ELSE cur.no_bid END AS current_side_bid,
+                      CASE WHEN p.side='YES' THEN cur.ask
+                           ELSE cur.no_ask END AS current_side_ask,
+                      CASE WHEN p.side='YES' THEN 1.0-cur.no_price
+                           ELSE 1.0-cur.yes_price END AS synthetic_parity_reference,
+                      CASE WHEN cur.no_price IS NOT NULL
+                           THEN cur.no_price-(1.0-cur.yes_price) END AS no_vs_parity,
+                      CASE WHEN cur.ask IS NOT NULL AND cur.no_ask IS NOT NULL
+                           THEN cur.ask+cur.no_ask END AS cross_both_asks,
+                      CASE WHEN cur.bid IS NOT NULL AND cur.no_bid IS NOT NULL
+                           THEN cur.bid+cur.no_bid END AS sell_both_bids,
+                      p.forecast_prob-
+                        CASE WHEN p.side='YES' THEN cur.yes_price
+                             ELSE cur.no_price END AS edge_vs_current_market,
+                      p.forecast_prob-
+                        CASE WHEN p.side='YES' THEN cur.ask ELSE cur.no_ask END-
+                        0.03*CASE WHEN p.side='YES' THEN cur.ask ELSE cur.no_ask END*
+                             (1.0-CASE WHEN p.side='YES' THEN cur.ask ELSE cur.no_ask END)
+                        AS taker_edge_at_ask,
+                      p.forecast_prob-
+                        CASE WHEN p.side='YES' THEN cur.bid ELSE cur.no_bid END
+                        AS passive_edge_at_bid_before_fill,
+                      cur.ts_utc AS current_quote_ts,
+                      cur.quote_basis AS current_quote_basis
+               FROM shadow_positions p
+               JOIN shadow_decisions d ON d.id=p.decision_id
+               JOIN shadow_observations o ON o.id=p.observation_id
+               LEFT JOIN shadow_observations cur ON cur.id=(
+                   SELECT MAX(o2.id) FROM shadow_observations o2
+                   WHERE o2.market_key=p.market_key)
+               WHERE p.status='open'
+               ORDER BY current_outcome_market_prob DESC,p.id LIMIT 500"""
         )],
         "recent_decisions": [dict(r) for r in con.execute(
-            """SELECT d.*,o.venue,o.fixture,o.family,o.selection,o.yes_price,
-                      o.calibrated_forecast,o.forecast_source
+            """SELECT d.*,o.venue,o.fixture,o.family,o.selection,
+                      o.yes_price AS yes_market_prob,
+                      o.no_price AS no_market_prob,
+                      CASE WHEN d.side='YES' THEN o.yes_price
+                           WHEN d.side='NO' THEN o.no_price
+                           ELSE NULL END AS outcome_market_prob,
+                      o.calibrated_forecast AS yes_forecast,
+                      CASE WHEN d.side='YES' THEN o.calibrated_forecast
+                           WHEN d.side='NO' THEN 1.0-o.calibrated_forecast
+                           ELSE NULL END AS outcome_forecast,
+                      o.forecast_source
                FROM shadow_decisions d JOIN shadow_observations o ON o.id=d.observation_id
                ORDER BY d.id DESC LIMIT 500"""
         )],

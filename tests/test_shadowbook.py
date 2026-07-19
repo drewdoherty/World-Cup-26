@@ -11,9 +11,17 @@ def _forest():
             "rows": [
                 {"section": "1X2"},
                 {"label": "France", "family": "1x2", "settlement": "90min",
-                 "market": 0.40, "model": 0.55, "token_id": "pm1"},
+                 "market": 0.40, "bid": 0.39, "ask": 0.41,
+                 "complement_market": 0.60, "complement_bid": 0.58,
+                 "complement_ask": 0.61, "model": 0.55,
+                 "token_id": "pm1", "complement_token_id": "pm1-no",
+                 "complement_quote_basis": "independent_token_book"},
                 {"label": "First corner France", "family": "corners", "settlement": "90min",
-                 "market": 0.51, "model": None, "token_id": "pm2"},
+                 "market": 0.51, "bid": 0.50, "ask": 0.52,
+                 "complement_market": 0.49, "complement_bid": 0.47,
+                 "complement_ask": 0.50, "model": None,
+                 "token_id": "pm2", "complement_token_id": "pm2-no",
+                 "complement_quote_basis": "independent_token_book"},
             ],
         }],
     }
@@ -54,6 +62,60 @@ def test_cycle_records_forecasts_abstentions_exploration_and_cross():
     assert report["summary"]["observations"] == 4  # 2 forest + 2 independent venue observations
     assert report["summary"]["positions"] >= 2
     assert len(report["cross_venue"]) == 2
+
+
+def test_report_probabilities_and_tokens_are_for_held_side():
+    con = S.connect(":memory:")
+    forest = _forest()
+    forest["fixtures"][0]["rows"][1].update(
+        {"market": 0.60, "bid": 0.59, "ask": 0.61,
+         "complement_market": 0.40, "complement_bid": 0.39,
+         "complement_ask": 0.41, "model": 0.20,
+         "token_id": "YES_TOKEN", "complement_token_id": "NO_TOKEN"})
+    S.run_cycle(con, forest=forest, ts_utc="2026-07-16T12:05:00Z")
+    row = next(p for p in S.report(con)["open_positions"]
+               if p["selection"] == "France")
+    assert row["side"] == "NO"
+    assert row["entry_yes_reference"] == 0.60
+    assert row["outcome_market_prob_at_entry"] == 0.40
+    assert row["current_outcome_market_prob"] == 0.40
+    assert row["forecast_prob"] == 0.80
+    assert row["entry_cost"] > row["outcome_market_prob_at_entry"]
+    assert row["instrument_id"] == "NO_TOKEN"
+    assert row["execution_style"] == "marketable_limit"
+
+
+def test_report_exposes_model_vs_market_only_provenance():
+    con = S.connect(":memory:")
+    S.run_cycle(con, forest=_forest(), ts_utc="2026-07-16T12:05:00Z")
+    rows = S.report(con)["open_positions"]
+    model = next(p for p in rows if p["selection"] == "France")
+    exploration = next(p for p in rows if p["selection"] == "First corner France")
+    assert model["exploration"] == 0
+    assert model["forecast_source"] == "production_model"
+    assert exploration["exploration"] == 1
+    assert exploration["forecast_source"] == "market_prior_exploration"
+
+
+def test_connect_clears_legacy_yes_token_from_no_position(tmp_path):
+    path = str(tmp_path / "shadow.db")
+    con = S.connect(path)
+    S.run_cycle(con, forest={"fixtures": []}, ts_utc="2026-07-16T12:00:00Z")
+    run_id = con.execute("SELECT id FROM shadow_runs").fetchone()[0]
+    obs = S._insert_observation(
+        con, run_id=run_id, ts_utc="t", venue="polymarket", fixture="A vs B",
+        market_key="k", family="x", selection="x", settlement="90min",
+        instrument_id="YES_TOKEN", yes_price=.7, raw=.2, calibrated=.2,
+        source="test", calibration_n=0)
+    S._record_decision(
+        con, observation_id=obs, ts_utc="t", action="enter", side="NO",
+        reason="test", edge=.1, stake=1, exploration=False,
+        policy=S.ShadowPolicy(), position={"venue":"polymarket","fixture":"A vs B",
+        "market_key":"k","family":"x","selection":"x","settlement":"90min",
+        "instrument_id":"YES_TOKEN","price":.3,"forecast":.8})
+    con.commit(); con.close()
+    con = S.connect(path)
+    assert con.execute("SELECT instrument_id FROM shadow_positions").fetchone()[0] is None
 
 
 def test_stale_hl_feed_fails_cross_positions_closed():

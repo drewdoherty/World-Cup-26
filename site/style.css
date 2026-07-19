@@ -1541,11 +1541,40 @@ main > .track-grid + .panel { margin-top: 12px; }
 .shadow-audit-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); font: 10px var(--mono); color: var(--text-dim); }
 .shadow-audit-row strong { color: var(--text); }
 .shadow-empty { padding: 10px 0; color: var(--muted); font: 10px var(--mono); }
+.shadow-buckets { margin-bottom: 14px; padding: 10px 12px; border: 1px solid var(--border); background: color-mix(in srgb, var(--panel) 82%, transparent); }
+.shadow-buckets .shadow-filter-title { margin-bottom: 7px; }
+.shadow-buckets #shadow-buckets-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.shadow-bucket { padding: 5px 8px; border: 1px solid var(--border-2); border-radius: 2px; background: var(--bg); color: var(--text-dim); font: 10px var(--mono); cursor: pointer; }
+.shadow-bucket strong { color: var(--accent); font-weight: 600; }
+.shadow-bucket:hover, .shadow-bucket.selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, var(--bg)); color: var(--text); }
+.shadow-sort { padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; text-transform: inherit; cursor: pointer; }
+.shadow-sort::after { content: " ↕"; color: var(--border-2); }
+.shadow-sort.active { color: var(--accent); }
+.shadow-sort.active::after { content: " " attr(aria-sort); font-size: 8px; }
+.shadow-filters { display: grid; grid-template-columns: minmax(300px, 0.8fr) minmax(520px, 1.6fr) auto; gap: 14px; align-items: end; margin-bottom: 14px; padding: 12px; border: 1px solid var(--border); background: color-mix(in srgb, var(--panel) 82%, transparent); font: 10px var(--mono); }
+.shadow-filter-group { min-width: 0; }
+.shadow-filter-title { display: block; width: 100%; margin-bottom: 8px; color: var(--accent); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+.shadow-filter-toggles { display: flex; flex-wrap: wrap; gap: 7px 12px; align-self: stretch; align-content: start; }
+.shadow-filter-toggles label { display: inline-flex; align-items: center; gap: 5px; color: var(--text-dim); white-space: nowrap; cursor: pointer; }
+.shadow-filter-chip { padding: 6px 8px; border: 1px solid var(--border-2); border-radius: 2px; background: var(--bg); transition: border-color .15s, color .15s, background .15s; }
+.shadow-filter-chip:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, var(--bg)); color: var(--text); }
+.shadow-filter-toggles input { accent-color: var(--accent); margin: 0; }
+.shadow-filter-ranges { display: flex; flex-wrap: wrap; align-items: center; gap: 7px 10px; }
+.shadow-filter-ranges label { display: inline-flex; align-items: center; gap: 5px; color: var(--text-dim); white-space: nowrap; }
+.shadow-filter-ranges input { width: 58px; box-sizing: border-box; padding: 5px 6px; border: 1px solid var(--border-2); border-radius: 2px; background: var(--bg); color: var(--text); font: 10px var(--mono); }
+.shadow-filter-ranges input:focus { outline: 1px solid var(--accent); }
+.shadow-filter-ranges button { padding: 6px 10px; border: 1px solid var(--border-2); border-radius: 2px; background: transparent; color: var(--accent); font: 600 10px var(--mono); cursor: pointer; }
+.shadow-filter-ranges #shadow-filter-apply { border-color: var(--accent); background: var(--accent); color: #fff; }
+.shadow-filter-ranges #shadow-filter-apply:hover { filter: brightness(1.08); }
+.shadow-filter-ranges button:hover { background: var(--border); }
+.shadow-filter-status { align-self: center; color: var(--muted); white-space: nowrap; }
 .shadow-method { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
 .shadow-method div { border-left: 2px solid var(--border-2); padding-left: 9px; }
 .shadow-method b { display: block; color: var(--accent); font: 600 10px var(--mono); margin-bottom: 5px; }
 .shadow-method span { display: block; color: var(--text-dim); font-size: 10px; line-height: 1.5; }
 @media (max-width: 900px) {
+  .shadow-filters { grid-template-columns: 1fr; align-items: start; }
+  .shadow-filter-status { justify-self: start; }
   .shadow-kpis { grid-template-columns: repeat(3, 1fr); }
   .shadow-kpis > div:nth-child(3) { border-right: 0; }
   .shadow-method { grid-template-columns: 1fr 1fr; }

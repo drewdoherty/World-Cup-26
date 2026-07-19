@@ -2,7 +2,7 @@
 """Add one-off indicative sizes to the event-market forest.
 
 This is deliberately an overlay, not a replacement for governed trade recs.
-Model rows use quarter-Kelly on a $3,227 reference bankroll, with conservative
+Model rows use quarter-Kelly on a live Polymarket marked-equity balance, with conservative
 per-position and per-fixture caps. Rows without a model probability receive a
 small discretionary-punt marker only; they are never described as +EV.
 """
@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -94,10 +95,20 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--in", dest="source", default="site/forest_data.json")
     parser.add_argument("--out", default="site/forest_data.json")
-    parser.add_argument("--bankroll", type=float, default=3227.0)
+    parser.add_argument("--bankroll", type=float, default=None,
+                        help="explicit offline balance; default reads the live developer proxy")
     args = parser.parse_args(argv)
+    bankroll = args.bankroll
+    if bankroll is None:
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+        from wca.pm.account import DEVELOPER_ADDRESS, read_account
+        snap = read_account(DEVELOPER_ADDRESS)
+        if not snap.get("available"):
+            raise SystemExit("live Polymarket balance unavailable; refusing to size")
+        bankroll = float(snap["balance_usd"])
+        print("live Polymarket marked equity: $%.2f (%s)" % (bankroll, snap.get("method")))
     source = json.loads(Path(args.source).read_text(encoding="utf-8"))
-    result = build_sizes(source, bankroll=args.bankroll)
+    result = build_sizes(source, bankroll=bankroll)
     Path(args.out).write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     print(args.out)
     return 0

@@ -24,13 +24,57 @@
     <section class="panel">
       <div class="panel-head"><span class="panel-label">Shadow Paper Book // Research Control Plane</span><span class="panel-meta" id="shadow-generated">loading</span></div>
       <div class="panel-body">
-        <p class="shadow-intro">Every observable market becomes a forecast experiment. Model positions, controlled exploration, abstentions, and settlement-gated cross-venue pairs are stored separately. This book never reaches live execution.</p>
+        <p class="shadow-intro">Every observable market becomes a forecast experiment. BUY YES means the listed outcome token; BUY NO means the separately traded complement token. Current %, bid, and ask come from that token's own order book. Parity ref is the non-executable arithmetic reference (1 minus the opposite midpoint); parity gap shows how the real NO book differs. Entry cost is the historical simulated fill including the recorded fee assumption. A passive limit at bid is not a position until filled; current shadow entries are marketable limits crossing the ask unless marked legacy. This book never reaches live execution.</p>
         <div class="shadow-kpis" id="shadow-kpis"></div>
       </div>
     </section>
     <section class="panel">
       <div class="panel-head"><span class="panel-label">Open Experiments</span><span class="panel-meta">simulated fills only</span></div>
-      <div class="panel-body shadow-table-wrap"><table class="shadow-table"><thead><tr><th>Venue</th><th>Fixture / market</th><th>Family</th><th>Side</th><th>Price</th><th>Forecast</th><th>Stake</th><th>Basis</th></tr></thead><tbody id="shadow-positions"></tbody></table></div>
+      <div class="panel-body">
+        <div class="shadow-filters" aria-label="Shadow book filters">
+          <div class="shadow-filter-group shadow-filter-toggles">
+            <span class="shadow-filter-title">Signals</span>
+            <label class="shadow-filter-chip"><input type="checkbox" id="filter-taker-positive"> <span>+ve taker edge</span></label>
+            <label class="shadow-filter-chip"><input type="checkbox" id="filter-passive-positive"> <span>+ve passive edge</span></label>
+            <label class="shadow-filter-chip"><input type="checkbox" id="filter-taker-negative"> <span>-ve taker edge</span></label>
+            <label class="shadow-filter-chip"><input type="checkbox" id="filter-independent"> <span>independent quotes</span></label>
+            <label class="shadow-filter-chip"><input type="checkbox" id="filter-marketable"> <span>marketable limits</span></label>
+            <label class="shadow-filter-chip"><input type="checkbox" id="filter-scorers"> <span>scorer props</span></label>
+          </div>
+          <div class="shadow-filter-group shadow-filter-ranges">
+            <span class="shadow-filter-title">Between filters</span>
+            <label>Current % <input id="range-current-min" inputmode="decimal" type="number" min="0" max="100" step="0.1" placeholder="min"><span>–</span><input id="range-current-max" inputmode="decimal" type="number" min="0" max="100" step="0.1" placeholder="max"></label>
+            <label>Ask % <input id="range-ask-min" inputmode="decimal" type="number" min="0" max="100" step="0.1" placeholder="min"><span>–</span><input id="range-ask-max" inputmode="decimal" type="number" min="0" max="100" step="0.1" placeholder="max"></label>
+            <label>Taker edge pp <input id="range-taker-min" inputmode="decimal" type="number" step="0.1" placeholder="min"><span>–</span><input id="range-taker-max" inputmode="decimal" type="number" step="0.1" placeholder="max"></label>
+            <label>Passive edge pp <input id="range-passive-min" inputmode="decimal" type="number" step="0.1" placeholder="min"><span>–</span><input id="range-passive-max" inputmode="decimal" type="number" step="0.1" placeholder="max"></label>
+            <label>Stake $ <input id="range-stake-min" inputmode="decimal" type="number" min="0" step="0.01" placeholder="min"><span>–</span><input id="range-stake-max" inputmode="decimal" type="number" min="0" step="0.01" placeholder="max"></label>
+            <button type="button" id="shadow-filter-apply">Apply filters</button>
+            <button type="button" id="shadow-filter-reset">Reset</button>
+          </div>
+          <div class="shadow-filter-status" id="shadow-filter-status" aria-live="polite">All rows</div>
+        </div>
+        <div class="shadow-buckets"><span class="shadow-filter-title">Buckets // click one to filter</span><div id="shadow-buckets-list"></div></div>
+        <div class="shadow-table-wrap"><table class="shadow-table"><thead><tr>
+          <th><button class="shadow-sort" data-sort="venue">Venue</button></th>
+          <th><button class="shadow-sort" data-sort="fixture">Fixture / market</button></th>
+          <th><button class="shadow-sort" data-sort="family">Family</button></th>
+          <th><button class="shadow-sort" data-sort="source">Source</button></th>
+          <th><button class="shadow-sort" data-sort="side">Held token</button></th>
+          <th><button class="shadow-sort" data-sort="current">Current %</button></th>
+          <th><button class="shadow-sort" data-sort="bid">Bid</button></th>
+          <th><button class="shadow-sort" data-sort="ask">Ask</button></th>
+          <th><button class="shadow-sort" data-sort="parity">Parity ref</button></th>
+          <th><button class="shadow-sort" data-sort="no_gap">NO gap</button></th>
+          <th><button class="shadow-sort" data-sort="pair_asks">YES+NO asks</button></th>
+          <th><button class="shadow-sort" data-sort="entry_cost">Entry cost</button></th>
+          <th><button class="shadow-sort" data-sort="execution">Execution</button></th>
+          <th><button class="shadow-sort" data-sort="forecast">Forecast</button></th>
+          <th><button class="shadow-sort" data-sort="taker">Taker edge</button></th>
+          <th><button class="shadow-sort" data-sort="passive">Passive edge*</button></th>
+          <th><button class="shadow-sort" data-sort="stake">Stake</button></th>
+          <th><button class="shadow-sort" data-sort="basis">Basis</button></th>
+        </tr></thead><tbody id="shadow-positions"></tbody></table><p class="shadow-empty">*Passive edge is conditional on a bid-side limit order filling; it is not earned merely by posting. Taker edge subtracts the configured 3% × p × (1−p) fee from a marketable limit crossing the ask.</p></div>
+      </div>
     </section>
     <section class="panel">
       <div class="panel-head"><span class="panel-label">Coverage &amp; Calibration</span><span class="panel-meta">prequential, settled observations only</span></div>
@@ -44,7 +88,7 @@
       <div class="panel-head"><span class="panel-label">Learning Contract</span></div>
       <div class="panel-body shadow-method">
         <div><b>Forecast</b><span>Production model where available; otherwise market prior tagged as exploration.</span></div>
-        <div><b>Selection</b><span>Fee-adjusted quarter-Kelly for model edges; deterministic $1 coverage trials for unmodelled families.</span></div>
+        <div><b>Selection</b><span>Fee-adjusted quarter-Kelly for production-model edges. Market-only rows are tagged separately because Kelly is undefined without an independent forecast probability.</span></div>
         <div><b>Cross venue</b><span>Only matched settlement bases; stale books and toxic tails are recorded as abstentions.</span></div>
         <div><b>Learning</b><span>Reliability-bin calibration by venue, family, and source; no outcome leakage into pre-match decisions.</span></div>
         <div><b>Evaluation</b><span>Brier, calibration gap, coverage, P&amp;L, decision reasons, and family-level sample size.</span></div>
@@ -53,6 +97,6 @@
   </main>
   <footer class="foot"><span id="shadow-foot"></span><span class="foot-mark">SHADOW // NO LIVE EXECUTION</span></footer>
 </div>
-<script src="./shadow-book.js"></script>
+<script src="./shadow-book.js?v=20260717-filters2"></script>
 </body>
 </html>

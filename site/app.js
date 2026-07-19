@@ -289,6 +289,14 @@
       ["Open Exposure", esc(openExp), ""]
     ].concat(retTicks.slice(1));
 
+    var pm = d.polymarket_account || {};
+    if (pm.available && pm.balance_usd != null) {
+      secondaryTicks.push(["PM Equity", esc(money(pm.balance_usd, "USD")), ""]);
+      secondaryTicks.push(["PM ¼-Kelly Ref", esc(money(Number(pm.balance_usd) * 0.25, "USD")), ""]);
+    } else {
+      secondaryTicks.push(["PM Equity", '<span class="warn">LIVE N/A</span>', ""]);
+    }
+
     // P&L by source (model / offer / punt), moved here from the venues panel.
     // Each currency leg is coloured by its own sign via moneyByCcyHTML.
     var ss = d.source_summary || {};
@@ -462,6 +470,10 @@
       // combined platforms map.
       var acct = (k === "sportsbook_1") ? "1" : (k === "sportsbook_2") ? "2" : null;
       var books = platformRows(pvk, amt, ccy, acct);
+      var pmMeta = (k === "polymarket" && d.polymarket_account && d.polymarket_account.available)
+        ? ' · PM equity ' + money(d.polymarket_account.balance_usd, "USD") +
+          ' · ¼-K ref ' + money(Number(d.polymarket_account.balance_usd) * 0.25, "USD")
+        : '';
       return '' +
         '<div class="venue-row">' +
           '<div class="venue-top">' +
@@ -473,7 +485,7 @@
               (frac * 100).toFixed(1) + '%;background:' + color + ';opacity:.75"></div>' +
           '</div>' +
           '<div class="venue-sub num">' + nb + ' trade' + (nb === 1 ? '' : 's') +
-            ' · open ' + money(v.open_stake || 0, ccy) + '</div>' +
+            ' · open ' + money(v.open_stake || 0, ccy) + pmMeta + '</div>' +
           books +
         '</div>';
     }).join("");
@@ -534,6 +546,10 @@
       // meaningful when both are present.
       var edge = (p.model_prob != null && p.market_prob_devig != null)
         ? (p.model_prob - p.market_prob_devig) : null;
+      var pmBal = (p.venue === "polymarket" && p.pm_balance_usd != null)
+        ? money(p.pm_balance_usd, "USD") : "—";
+      var pmQk = (p.venue === "polymarket" && p.pm_quarter_kelly_usd != null)
+        ? money(p.pm_quarter_kelly_usd, "USD") : "—";
       return '<tr title="' + esc(metaTitle(p)) + '" style="border-left:2px solid ' + col + '">' +
         '<td class="r num dim pos-id" data-label="ID">' +
           (p.id != null ? '#' + esc(p.id) : '—') + '</td>' +
@@ -550,6 +566,8 @@
           esc(edge == null ? '—' : pctSigned(edge, 1)) + '</td>' +
         '<td class="r num ' + evClass(p.ev) + '" data-label="EV">' +
           esc(p.ev === null || p.ev === undefined ? '—' : pct(p.ev, 1)) + '</td>' +
+        '<td class="r num pm-balance" data-label="PM balance">' + esc(pmBal) + '</td>' +
+        '<td class="r num pm-qk" data-label="PM ¼-K">' + esc(pmQk) + '</td>' +
         '<td class="pos-src" data-label="Source">' + sourceChip(p.source) + '</td>' +
         '<td data-label="Venue"><span class="pill book ' + venue + '" style="color:' + col +
           ';border-color:' + col + '">' + esc(p.platform || venue) +
@@ -565,7 +583,7 @@
           '<th>Date</th><th>Match</th><th>Market</th><th>Selection</th>' +
           '<th class="r">Odds</th><th class="r">Stake</th>' +
           '<th class="r">Model</th><th class="r">Mkt</th>' +
-          '<th class="r">Edge</th><th class="r">EV</th>' +
+          '<th class="r">Edge</th><th class="r">EV</th><th class="r">PM balance</th><th class="r">PM ¼-K</th>' +
           '<th>Source</th><th>Venue</th><th>Override</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
@@ -1254,6 +1272,10 @@
       var pl = Number(p.pl);
       var plCls = p.status === "void" ? "dim" : (pl >= 0 ? "pos" : "neg");
       var plTxt = p.status === "void" ? "void" : signedMoney(pl, p.currency);
+      var pmBal = (p.venue === "polymarket" && p.pm_balance_usd != null)
+        ? money(p.pm_balance_usd, "USD") : "—";
+      var pmQk = (p.venue === "polymarket" && p.pm_quarter_kelly_usd != null)
+        ? money(p.pm_quarter_kelly_usd, "USD") : "—";
       return '<tr title="' + esc(metaTitle(p)) +
           '" style="border-left:2px solid ' + bookColor(p.platform) + '">' +
         '<td class="r num dim pos-id" data-label="ID">' +
@@ -1271,6 +1293,8 @@
         '<td class="r num ' + plCls + '" data-label="P&L">' + esc(plTxt) + '</td>' +
         '<td class="r num ' + evClass(p.clv) + '" data-label="CLV">' +
           esc(p.clv === null || p.clv === undefined ? "—" : pct(p.clv, 1)) + '</td>' +
+        '<td class="r num pm-balance" data-label="PM balance">' + esc(pmBal) + '</td>' +
+        '<td class="r num pm-qk" data-label="PM ¼-K">' + esc(pmQk) + '</td>' +
         '<td class="pos-src" data-label="Source">' + sourceChip(p.source) + '</td>' +
         '<td data-label="Venue"><span class="pill book ' + esc(p.venue || "sportsbook") +
           '" style="color:' + bookColor(p.platform) + ';border-color:' +
@@ -1286,7 +1310,7 @@
           '<th>Settled</th><th>Match</th><th>Market</th><th>Selection</th>' +
           '<th class="r">Odds</th><th class="r">Stake</th>' +
           '<th class="r">Model</th><th class="r">EV</th>' +
-          '<th class="r">Close</th><th class="r">P&L</th><th class="r">CLV</th>' +
+          '<th class="r">Close</th><th class="r">P&L</th><th class="r">CLV</th><th class="r">PM balance</th><th class="r">PM ¼-K</th>' +
           '<th>Source</th><th>Venue</th><th>Override</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +

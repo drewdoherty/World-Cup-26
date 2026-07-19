@@ -102,6 +102,14 @@ def main(argv=None) -> int:
     )
     args = parser.parse_args(argv)
 
+    env_path = os.path.join(os.path.dirname(_HERE), ".env")
+    if os.path.exists(env_path):
+        for line in open(env_path, encoding="utf-8"):
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, value = line.split("=", 1)
+                os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
     now_utc = _now_utc_str()
     out_path = sitedata.write_site_data(
         args.db, out_path=args.out, card_path=args.card, now_utc=now_utc,
@@ -123,7 +131,11 @@ def main(argv=None) -> int:
         )
         print(lm_path)
 
-    data = sitedata.build_site_data(args.db, card_path=args.card, now_utc=now_utc)
+    # Reuse the exact payload just written. A second live API call here could
+    # race the public feed and make the summary disagree with data.json.
+    import json
+    with open(args.out, encoding="utf-8") as fh:
+        data = json.load(fh)
     totals = data["totals"]
 
     print(out_path)
@@ -139,6 +151,14 @@ def main(argv=None) -> int:
             fixtures=len(data["predictions"]),
         )
     )
+    pm = data.get("polymarket_account") or {}
+    if pm.get("available"):
+        bal = float(pm.get("balance_usd") or 0.0)
+        print("polymarket: address=%s balance=$%.2f quarter_kelly_ref=$%.2f source=%s" % (
+            pm.get("address"), bal, bal * 0.25, pm.get("source")))
+    else:
+        print("polymarket: LIVE BALANCE UNAVAILABLE for %s (%s)" % (
+            pm.get("address"), pm.get("method")))
     return 0
 
 

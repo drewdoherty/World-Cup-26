@@ -402,7 +402,7 @@ def test_v2_order_hash_is_deterministic_and_recovers(throwaway_key):
 
 def test_v2_maker_is_funder_for_sig_type_2(throwaway_key):
     """sig_type 2: maker = funder Safe, signer = EOA (the proxy-wallet fix)."""
-    proxy = "0x40231C7f4FC2BBAB720ce9b669eAb4795fCBE191"
+    proxy = "0x86b4C55A4DF1FBea0F325E842434e0a537CAa549"
     t = ClobTrader(
         throwaway_key, funder=proxy, signature_type=pmt.SIG_TYPE_POLY_GNOSIS_SAFE
     )
@@ -640,10 +640,10 @@ def test_forced_funder_marks_account_class_proven(throwaway_key):
 
 
 def test_resolve_funder_from_env_falls_back_to_proxy_not_eoa():
-    """No POLYMARKET_FUNDER -> known proxy + sig type 2, never the empty EOA."""
+    """No POLYMARKET_FUNDER -> known trading proxy + sig type 3, never deposit address."""
     funder, sig_type, used_fallback = pmt.resolve_funder_from_env(env={})
     assert funder == pmt.KNOWN_PROXY_FUNDER
-    assert sig_type == pmt.SIG_TYPE_POLY_GNOSIS_SAFE
+    assert sig_type == pmt.SIG_TYPE_POLY_1271
     assert used_fallback is True
 
 

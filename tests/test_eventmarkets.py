@@ -624,12 +624,36 @@ def test_feed_candidates_have_executable_prices():
         assert c["side"] in ("back", "lay")
         assert c["model_prob"] is not None
         assert c["settlement"] in (EM.SETTLE_90MIN, EM.SETTLE_ADVANCE)
-    # back sides use the ask, lay sides the mirrored 1-bid
+    # Back sides use the executable ask. With CLOB disabled, Gamma's second
+    # outcome is reference-only, so no fake ``1-bid`` LAY is emitted.
     back = next(c for c in cands if c["label"] == "France" and c["side"] == "back")
     assert back["price"] == pytest.approx(0.62)
-    lay = next(c for c in cands if c["label"] == "France" and c["side"] == "lay")
-    assert lay["price"] == pytest.approx(1.0 - 0.61)
-    assert lay["model_prob"] == pytest.approx(1.0 - 0.585262)
+    assert not any(c for c in cands
+                   if c["label"] == "France" and c["side"] == "lay")
+
+
+def test_lay_uses_independent_no_token_book_not_one_minus_yes(monkeypatch):
+    market = _pm_market("France", "Will France win?", ["Yes", "No"],
+                        [0.615, 0.385], ["YES_TOKEN", "NO_TOKEN"])
+
+    def fake_book(token):
+        return ({"mid": 0.615, "bid": 0.61, "ask": 0.62}
+                if token == "YES_TOKEN"
+                else {"mid": 0.375, "bid": 0.37, "ask": 0.38})
+
+    monkeypatch.setattr("wca.data.pm_clob_history.top_of_book", fake_book)
+    quote = script.market_quote_pair(market, 0, use_clob=True)
+    assert quote["complement_token_id"] == "NO_TOKEN"
+    assert quote["complement_ask"] == pytest.approx(0.38)
+    assert quote["complement_ask"] != pytest.approx(1.0 - quote["bid"])
+
+    row = script._row("France", 0.585262, quote["mid"], family="1x2",
+                      settlement=EM.SETTLE_90MIN, quote=quote)
+    cands = []
+    script._push_candidates(cands, _fx(), row, quote, "France — No")
+    lay = next(c for c in cands if c["side"] == "lay")
+    assert lay["price"] == pytest.approx(0.38)
+    assert lay["token_id"] == "NO_TOKEN"
 
 
 def test_load_upcoming_fixtures_filters_by_window(tmp_path):

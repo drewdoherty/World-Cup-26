@@ -208,7 +208,8 @@ class TestBuildSiteData:
         assert set(data.keys()) == {
             "meta", "totals", "totals_by_currency", "venues", "source_summary",
             "platforms", "platforms_by_account", "closed_positions", "pnl_series",
-            "clv", "positions", "dropped_open_bets", "predictions"
+            "clv", "positions", "dropped_open_bets", "predictions",
+            "polymarket_account"
         }
         assert data["meta"]["generated"] == "2026-06-11 15:00:00 UTC"
 
