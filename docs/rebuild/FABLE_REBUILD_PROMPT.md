@@ -73,6 +73,25 @@ system must be league-season-native, not tournament-native.
    duplication (one paper ledger only), the intel poller unless it earns its
    place, and the 48-team World Cup simulator (replace per §"Models").
 
+## Stack (user-decided)
+
+Python with **modern tooling**, not the legacy pip/launchd/stdlib setup:
+
+- **uv** for dependency management: lockfile-committed, reproducible on a
+  fresh machine with one command.
+- **One long-running FastAPI process** that serves the site (static pages +
+  typed JSON/API endpoints) AND hosts **APScheduler** for all periodic jobs:
+  odds/book polling, the canonical pricing pass, closing-line capture,
+  settlement checks, feed publishing. The bot process talks to it over
+  localhost HTTP.
+- **A single launchd plist** whose only job is `KeepAlive` on that process
+  (plus one for the bot). No per-job plists, no install.sh choreography.
+- **Crash-safety rule:** scheduler and app state must always be re-derivable
+  from SQLite on restart — jobs are idempotent, nothing money-relevant lives
+  only in memory. A respawn mid-cycle must be harmless.
+- SQLite stays as the store (WAL mode); no Postgres, no Docker, no queue —
+  single-trader write volume does not justify them.
+
 ## Sizing & risk (carry forward, restated)
 
 - ONE combined bankroll, starting figure supplied by the human at setup
@@ -199,7 +218,8 @@ kept, but merged:
    microstructure feeds (liquidity, order flow) into one page; discard the
    microstructure sub-pages that never drove a decision.
 
-Localhost-only, no hosted deploys, published by a local scheduled job.
+Localhost-only, no hosted deploys, served live by the FastAPI process (pages
+can read current in-process state plus SQLite, not only stale JSON snapshots).
 
 ## Build order
 
