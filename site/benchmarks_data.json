@@ -1,55 +1,55 @@
 {
   "meta": {
-    "generated": "2026-07-19T17:33:59.194538+00:00",
-    "n_matched": 79,
-    "n_results": 100,
-    "n_predictions": 84
+    "generated": "2026-07-21T16:50:31.180455+00:00",
+    "n_matched": 81,
+    "n_results": 104,
+    "n_predictions": 81
   },
   "metrics": {
     "model": {
-      "n": 79,
-      "brier": 0.2182,
-      "logloss": 0.7577,
-      "accuracy": 0.7468,
-      "bss": -0.013
+      "n": 81,
+      "brier": 0.2214,
+      "logloss": 0.7671,
+      "accuracy": 0.7284,
+      "bss": -0.0114
     },
     "elo": {
-      "n": 79,
-      "brier": 0.2286,
-      "logloss": 0.7944,
-      "accuracy": 0.6962,
-      "bss": -0.0613
+      "n": 81,
+      "brier": 0.2312,
+      "logloss": 0.8022,
+      "accuracy": 0.6914,
+      "bss": -0.0562
     },
     "dc": {
-      "n": 79,
-      "brier": 0.2265,
-      "logloss": 0.7802,
-      "accuracy": 0.7089,
-      "bss": -0.0515
+      "n": 81,
+      "brier": 0.2284,
+      "logloss": 0.7859,
+      "accuracy": 0.7037,
+      "bss": -0.0434
     },
     "market": {
-      "n": 79,
-      "brier": 0.2154,
-      "logloss": 0.7469,
-      "accuracy": 0.7215,
+      "n": 81,
+      "brier": 0.2189,
+      "logloss": 0.7573,
+      "accuracy": 0.7037,
       "bss": 0.0
     }
   },
   "goals_calibration": {
-    "n": 40,
-    "mean_lambda_home": 1.359,
-    "mean_lambda_away": 1.145,
-    "mean_actual_home": 1.525,
-    "mean_actual_away": 1.35,
-    "mean_lambda_total": 2.503,
-    "mean_actual_total": 2.875,
-    "calibration_factor_home": 1.1226,
-    "calibration_factor_away": 1.1794,
-    "calibration_factor_total": 1.1485,
-    "mean_ou25_pred": 0.4526,
-    "mean_ou25_actual": 0.575,
-    "ou_slope": 1.5787,
-    "ou_intercept": -0.1396,
+    "n": 42,
+    "mean_lambda_home": 1.356,
+    "mean_lambda_away": 1.153,
+    "mean_actual_home": 1.476,
+    "mean_actual_away": 1.381,
+    "mean_lambda_total": 2.509,
+    "mean_actual_total": 2.857,
+    "calibration_factor_home": 1.0885,
+    "calibration_factor_away": 1.1978,
+    "calibration_factor_total": 1.1387,
+    "mean_ou25_pred": 0.4542,
+    "mean_ou25_actual": 0.5714,
+    "ou_slope": 1.3628,
+    "ou_intercept": -0.0476,
     "scatter": [
       {
         "fixture": "Cape Verde vs Saudi Arabia",
@@ -570,27 +570,53 @@
         "p_over25": 0.505,
         "actual_over25": 1,
         "error_total": 0.304
+      },
+      {
+        "fixture": "France vs Spain",
+        "score": "0-2",
+        "lambda_home": 1.5,
+        "lambda_away": 1.408,
+        "lambda_total": 2.908,
+        "actual_home": 0,
+        "actual_away": 2,
+        "actual_total": 2,
+        "p_over25": 0.556,
+        "actual_over25": 0,
+        "error_total": -0.908
+      },
+      {
+        "fixture": "England vs Argentina",
+        "score": "1-2",
+        "lambda_home": 1.12,
+        "lambda_away": 1.226,
+        "lambda_total": 2.346,
+        "actual_home": 1,
+        "actual_away": 2,
+        "actual_total": 3,
+        "p_over25": 0.416,
+        "actual_over25": 1,
+        "error_total": 0.654
       }
     ],
     "dist_actual": [
-      0.075,
-      0.125,
-      0.225,
-      0.275,
-      0.075,
-      0.175,
-      0.05,
+      0.0714,
+      0.119,
+      0.2381,
+      0.2857,
+      0.0714,
+      0.1667,
+      0.0476,
       0.0,
       0.0
     ],
     "dist_expected": [
-      0.0887,
-      0.2081,
-      0.2505,
-      0.2062,
-      0.1307,
-      0.0679,
-      0.0302,
+      0.0881,
+      0.2074,
+      0.2503,
+      0.2066,
+      0.1312,
+      0.0683,
+      0.0303,
       0.0118,
       0.0041
     ],
@@ -607,10 +633,10 @@
     ]
   },
   "scoreline_accuracy": {
-    "n": 40,
-    "top1_rate": 0.15,
-    "top3_rate": 0.25,
-    "top6_rate": 0.675,
+    "n": 42,
+    "top1_rate": 0.1429,
+    "top3_rate": 0.2381,
+    "top6_rate": 0.6667,
     "per_match": [
       {
         "fixture": "Cape Verde vs Saudi Arabia",
@@ -1407,6 +1433,46 @@
           {
             "score": "1-1",
             "prob": 10.87
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "France vs Spain",
+        "score": "0-2",
+        "top3_preds": [
+          {
+            "score": "1-1",
+            "prob": 11.53
+          },
+          {
+            "score": "2-1",
+            "prob": 8.65
+          },
+          {
+            "score": "1-0",
+            "prob": 8.19
+          }
+        ],
+        "top1_hit": false,
+        "top3_hit": false
+      },
+      {
+        "fixture": "England vs Argentina",
+        "score": "1-2",
+        "top3_preds": [
+          {
+            "score": "1-1",
+            "prob": 13.15
+          },
+          {
+            "score": "0-1",
+            "prob": 11.74
+          },
+          {
+            "score": "1-0",
+            "prob": 10.72
           }
         ],
         "top1_hit": false,
@@ -4100,6 +4166,74 @@
       "model_correct": 1,
       "market_correct": 1,
       "model_edge_brier": 0.0102
+    },
+    {
+      "fixture": "France vs Spain",
+      "date": "2026-07-14",
+      "score": "0-2",
+      "outcome": "away",
+      "model": {
+        "away": 0.304,
+        "draw": 0.284,
+        "home": 0.412
+      },
+      "elo": {
+        "away": 0.256,
+        "draw": 0.279,
+        "home": 0.465
+      },
+      "dc": {
+        "away": 0.35,
+        "draw": 0.259,
+        "home": 0.391
+      },
+      "market": {
+        "away": 0.298,
+        "draw": 0.289,
+        "home": 0.413
+      },
+      "lambda_home": 1.5,
+      "lambda_away": 1.408,
+      "model_brier": 0.3677,
+      "market_brier": 0.3733,
+      "model_logloss": 1.1918,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": 0.0056
+    },
+    {
+      "fixture": "England vs Argentina",
+      "date": "2026-07-15",
+      "score": "1-2",
+      "outcome": "away",
+      "model": {
+        "away": 0.337,
+        "draw": 0.301,
+        "home": 0.362
+      },
+      "elo": {
+        "away": 0.425,
+        "draw": 0.287,
+        "home": 0.288
+      },
+      "dc": {
+        "away": 0.379,
+        "draw": 0.294,
+        "home": 0.327
+      },
+      "market": {
+        "away": 0.324,
+        "draw": 0.303,
+        "home": 0.373
+      },
+      "lambda_home": 1.12,
+      "lambda_away": 1.226,
+      "model_brier": 0.3302,
+      "market_brier": 0.3438,
+      "model_logloss": 1.0864,
+      "model_correct": 0,
+      "market_correct": 0,
+      "model_edge_brier": 0.0137
     }
   ],
   "calibration_bins": {
@@ -4118,21 +4252,21 @@
       },
       {
         "mid": 0.25,
-        "mean_pred": 0.2509,
-        "hit_rate": 0.16,
-        "n": 75
+        "mean_pred": 0.2513,
+        "hit_rate": 0.1579,
+        "n": 76
       },
       {
         "mid": 0.35,
-        "mean_pred": 0.3399,
-        "hit_rate": 0.3,
-        "n": 20
+        "mean_pred": 0.3376,
+        "hit_rate": 0.3333,
+        "n": 24
       },
       {
         "mid": 0.45,
-        "mean_pred": 0.4508,
-        "hit_rate": 0.6111,
-        "n": 18
+        "mean_pred": 0.4488,
+        "hit_rate": 0.5789,
+        "n": 19
       },
       {
         "mid": 0.55,
@@ -4180,9 +4314,9 @@
       },
       {
         "mid": 0.25,
-        "mean_pred": 0.259,
-        "hit_rate": 0.1875,
-        "n": 80
+        "mean_pred": 0.2598,
+        "hit_rate": 0.1905,
+        "n": 84
       },
       {
         "mid": 0.35,
@@ -4192,9 +4326,9 @@
       },
       {
         "mid": 0.45,
-        "mean_pred": 0.4483,
-        "hit_rate": 0.5455,
-        "n": 22
+        "mean_pred": 0.4481,
+        "hit_rate": 0.5417,
+        "n": 24
       },
       {
         "mid": 0.55,
@@ -4236,15 +4370,15 @@
       },
       {
         "mid": 0.25,
-        "mean_pred": 0.2534,
-        "hit_rate": 0.1429,
-        "n": 70
+        "mean_pred": 0.254,
+        "hit_rate": 0.1389,
+        "n": 72
       },
       {
         "mid": 0.35,
-        "mean_pred": 0.3326,
-        "hit_rate": 0.2647,
-        "n": 34
+        "mean_pred": 0.3357,
+        "hit_rate": 0.2895,
+        "n": 38
       },
       {
         "mid": 0.45,
@@ -4298,21 +4432,21 @@
       },
       {
         "mid": 0.25,
-        "mean_pred": 0.2461,
-        "hit_rate": 0.1806,
-        "n": 72
+        "mean_pred": 0.2474,
+        "hit_rate": 0.1892,
+        "n": 74
       },
       {
         "mid": 0.35,
-        "mean_pred": 0.353,
-        "hit_rate": 0.2727,
-        "n": 22
+        "mean_pred": 0.3506,
+        "hit_rate": 0.28,
+        "n": 25
       },
       {
         "mid": 0.45,
-        "mean_pred": 0.45,
-        "hit_rate": 0.6667,
-        "n": 12
+        "mean_pred": 0.4471,
+        "hit_rate": 0.6154,
+        "n": 13
       },
       {
         "mid": 0.55,
@@ -4351,22 +4485,22 @@
       "category": "Goals / xG",
       "severity": "medium",
       "title": "Model systematically under-predicts total goals",
-      "detail": "Expected avg 2.50 goals/match vs actual 2.88 (calibration factor 1.15x). WC 2018 avg was 2.64, WC 2022 was 2.69. Group stage WC 2026 is running hotter \u2014 consider raising DC attack priors or adding a WC-specific inflation parameter.",
-      "stat": "+14.9% goals vs model"
+      "detail": "Expected avg 2.51 goals/match vs actual 2.86 (calibration factor 1.14x). WC 2018 avg was 2.64, WC 2022 was 2.69. Group stage WC 2026 is running hotter \u2014 consider raising DC attack priors or adding a WC-specific inflation parameter.",
+      "stat": "+13.9% goals vs model"
     },
     {
       "category": "Over/Under",
       "severity": "high",
       "title": "O/U 2.5 fair prices are over-priced",
-      "detail": "Model predicted 45.3% of matches go Over 2.5 goals, actual rate is 57.5% (delta +12.2%). Recalibrate by applying the goals calibration factor to lambda before pricing O/U markets, or use an empirical WC-specific baseline rate.",
+      "detail": "Model predicted 45.4% of matches go Over 2.5 goals, actual rate is 57.1% (delta +11.7%). Recalibrate by applying the goals calibration factor to lambda before pricing O/U markets, or use an empirical WC-specific baseline rate.",
       "stat": "O2.5 actual 57% vs pred 45%"
     },
     {
       "category": "1X2 Prices",
       "severity": "high",
       "title": "Model performing worse than market consensus on 1X2",
-      "detail": "Brier Skill Score vs market = -0.013 (negative = worse than market). DC alone BSS = -0.051. The blend may need rebalancing. Review blend weights (currently 0.10 Elo + 0.30 DC + 0.60 Market) \u2014 increasing market weight or adding a Platt scaling pass on DC probabilities could improve calibration.",
-      "stat": "BSS -0.013"
+      "detail": "Brier Skill Score vs market = -0.011 (negative = worse than market). DC alone BSS = -0.043. The blend may need rebalancing. Review blend weights (currently 0.10 Elo + 0.30 DC + 0.60 Market) \u2014 increasing market weight or adding a Platt scaling pass on DC probabilities could improve calibration.",
+      "stat": "BSS -0.011"
     },
     {
       "category": "Uncertainty / Variance",
@@ -4397,8 +4531,8 @@
     "note": "Model corner/card priors are calibrated on WC18+22 StatsBomb data. WC2026 actuals are being tracked here in real-time to detect drift."
   },
   "wc26_summary": {
-    "matches": 79,
-    "avg_goals_per_match": 2.937,
-    "over25_rate": 0.557
+    "matches": 81,
+    "avg_goals_per_match": 2.926,
+    "over25_rate": 0.556
   }
 }
