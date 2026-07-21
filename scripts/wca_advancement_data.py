@@ -38,6 +38,19 @@ MODEL_JSON = "data/advancement_current_vs_pretournament.json"
 # did. A cache without the sidecar has unknown conditioning -> force a re-sim.
 PINS_JSON = "data/advancement_sim_pins.json"
 RESULTS_JSON = "data/processed/wc2026_results.json"
+# Real-bracket source for the sim-consistency validator (fix 2026-07-13).
+# DOCUMENTED CHOICE: site/scores_markets.json (built by
+# scripts/wca_scores_markets_data.py from the same results spine + shootouts
+# this script's sim conditioning uses, refreshed by the same publish job) —
+# a plain local file, NO new network calls. Its knockout rows carry exactly
+# what the validator needs: ``projected`` (False = both participants
+# determined by real results, never model-inferred) and ``ft`` (None = not
+# yet played), i.e. "two known real teams, not yet played".
+SCORES_JSON = "site/scores_markets.json"
+# scores_markets round list -> advancement.py stage code (round the tie is AT).
+_KO_ROUND_STAGE = (("r32_games", "R32"), ("r16_games", "R16"),
+                   ("qf_games", "QF"), ("sf_games", "SF"),
+                   ("final_games", "F"))
 # Progression stages shown on the chart x-axis (group winner kept separate).
 STAGES = ["R32", "R16", "QF", "SF", "Final", "win"]
 _COL = {
@@ -193,6 +206,146 @@ def _pm_by_team_stage(sim_df):
     return out, int(len(edges)), path_exposure
 
 
+def _undecided_bracket_ties(ko_pinned, scores_path=None):
+    """``(ties, alive_teams, can_check_win_sum)`` from the scores feed.
+
+    Reads :data:`SCORES_JSON` (see the constant for the documented
+    bracket-source choice) and returns:
+
+    * ``ties`` — ``(home, away, stage)`` for every NON-projected knockout row
+      with ``ft=None``: two known real teams, not yet played (canonical
+      names). Collected across ALL rounds, so a later-round tie whose feeders
+      are both decided is checked even while its own round is mid-play.
+    * ``alive_teams`` — non-projected R32 participants minus the losers of
+      every decided knockout tie (decisive scoreline -> lower side; drawn ->
+      the row's ``winner`` field, else the sim pin for that pair), or ``None``
+      when some decided tie's winner cannot be determined.
+    * ``can_check_win_sum`` — False exactly when ``alive_teams`` is ``None``
+      (a drawn, unpinned tie: the alive set is indeterminable, and the
+      state-staleness gate is already firing for that pair).
+
+    Raises on a missing/unreadable scores feed — the caller stamps ok=None.
+    """
+    from wca.data.teamnames import canonical
+
+    with open(scores_path or SCORES_JSON, encoding="utf-8") as fh:
+        d = json.load(fh)
+
+    ties = []
+    alive = set()
+    losers = set()
+    can_win_sum = True
+    for key, stage in _KO_ROUND_STAGE:
+        for g in d.get(key) or []:
+            if g.get("projected"):
+                continue  # model-inferred matchup, not a real bracket tie
+            home = canonical(str(g.get("home") or "").strip())
+            away = canonical(str(g.get("away") or "").strip())
+            if not home or not away:
+                continue
+            if stage == "R32":
+                alive.add(home)
+                alive.add(away)
+            ft = g.get("ft")
+            if not ft:
+                ties.append((home, away, stage))
+                continue
+            # Decided tie: prune the loser from the alive set.
+            try:
+                hg, ag = (int(x) for x in str(ft).split("-", 1))
+            except ValueError:
+                can_win_sum = False
+                continue
+            if hg > ag:
+                losers.add(away)
+            elif ag > hg:
+                losers.add(home)
+            else:
+                # Drawn 90' -> ET/pens: the row's winner field, else the pin.
+                w = g.get("winner") or (ko_pinned or {}).get(
+                    frozenset((home, away))
+                )
+                w = canonical(str(w)) if w else None
+                if w == home:
+                    losers.add(away)
+                elif w == away:
+                    losers.add(home)
+                else:
+                    can_win_sum = False  # winner unknown -> alive set unknown
+    alive -= losers
+    if not alive:
+        can_win_sum = False
+    return ties, (sorted(alive) if can_win_sum else None), can_win_sum
+
+
+def _consistency_block(sim_df, ko_pinned, scores_path=None):
+    """``meta.consistency`` block: {checked_ties, failures, ok, tolerance}.
+
+    Runs :func:`wca.advancement.stage_prob_consistency` over the undecided
+    real bracket ties. ``ok`` is ``None`` when the check could not run at all
+    (scores feed missing/unreadable) — distinct from ``True`` (checked,
+    clean) and ``False`` (checked, VIOLATED). A failed check never kills the
+    feed here: it is stamped + warned; whether the inconsistent build may
+    replace a consistent one is :func:`_refuse_inconsistent_overwrite`'s job.
+    """
+    try:
+        ties, alive, can_win = _undecided_bracket_ties(
+            ko_pinned, scores_path=scores_path
+        )
+        rep = adv.stage_prob_consistency(
+            sim_df, ties, alive_teams=alive, check_win_sum=can_win
+        )
+    except Exception as exc:  # noqa: BLE001 — the check must never kill the feed.
+        print("consistency check unavailable (%s); stamping ok=null" % exc,
+              file=sys.stderr)
+        return {"checked_ties": 0, "failures": [], "ok": None,
+                "tolerance": adv.CONSISTENCY_DEFAULT_TOLERANCE,
+                "error": str(exc)}
+    if rep["ok"] is False:
+        print(
+            "WARNING: ADVANCEMENT SIM CONSISTENCY CHECK FAILED — %d of %d "
+            "checked sums off 1.0 by more than %.3f: %s. The sim's bracket "
+            "conditioning is suspect (unpinned upstream tie? check "
+            "data/raw/shootouts.csv and %s); stage probabilities for these "
+            "teams are contaminated."
+            % (len(rep["failures"]), rep["checked_ties"] + (1 if rep["win_sum"] else 0),
+               rep["tolerance"],
+               "; ".join(
+                   "%s @%s sum=%.4f" % ("+".join(f.get("teams", [])),
+                                        f.get("stage", f.get("check", "?")),
+                                        f.get("sum", float("nan")))
+                   for f in rep["failures"]),
+               PINS_JSON),
+            file=sys.stderr,
+        )
+    return {"checked_ties": rep["checked_ties"], "failures": rep["failures"],
+            "ok": rep["ok"], "tolerance": rep["tolerance"]}
+
+
+def _refuse_inconsistent_overwrite(out_path, consistency):
+    """True when this build must NOT overwrite the existing feed.
+
+    Same bad-data-never-replaces-good-data principle as the PM-blind guard
+    below (2026-07-03): refuse ONLY the ok:true -> ok:false transition — an
+    existing feed that PASSED the consistency check is never clobbered by a
+    build that FAILS it, unless ``WCA_ALLOW_INCONSISTENT=1``. A new ``ok`` of
+    ``True``/``None`` (clean / could-not-check) never refuses, nor does an
+    existing feed without a passing consistency stamp.
+    """
+    if not consistency or consistency.get("ok") is not False:
+        return False
+    if os.environ.get("WCA_ALLOW_INCONSISTENT") == "1":
+        return False
+    try:
+        with open(out_path, "r", encoding="utf-8") as fh:
+            existing = json.load(fh)
+    except Exception:  # noqa: BLE001 — no/unreadable feed: write the honest one
+        return False
+    return (((existing.get("meta") or {}).get("consistency")) or {}).get(
+        "ok"
+    ) is True
+
+
 def _group_tables():
     try:
         results = json.load(open(RESULTS_JSON)).get("results", [])
@@ -272,6 +425,15 @@ def main(argv=None) -> int:
               % exc, file=sys.stderr)
         state_stale = {}
 
+    # Bracket-consistency validator (2026-07-13): output-side complement of the
+    # input-side staleness gate above — for every undecided real knockout tie
+    # the two teams' P(next stage) must sum to ~1, and P(win) over the alive
+    # set must sum to ~1. A violation means the sim's conditioning silently
+    # un-anchored (France showed P(SF)=0.5691 with its QF win pinned, because
+    # the upstream Morocco–Netherlands R16 was missing from the pin set).
+    # Stamped in meta + warned; never kills the feed (guard at write time).
+    consistency = _consistency_block(sim_df, ko_pinned)
+
     teams = []
     for r in recs:
         t = r["team"]
@@ -305,6 +467,7 @@ def main(argv=None) -> int:
             "n_pm_markets": n_pm,
             "n_ko_pinned": (None if ko_pinned is None else len(ko_pinned)),
             "n_state_stale": len(state_stale),
+            "consistency": consistency,
         },
         "teams": teams,
         "groups": groups,
@@ -329,6 +492,27 @@ def main(argv=None) -> int:
                 return 0
         except Exception:
             pass  # no existing/unreadable feed -> write the honest blind one
+
+    # NEVER clobber a CONSISTENT feed with an INCONSISTENT rebuild (2026-07-13,
+    # same principle as the PM-blind guard above): an existing feed whose
+    # meta.consistency.ok is true is kept when this build's check FAILED —
+    # the failure usually means THIS host's conditioning inputs (shootouts /
+    # results / pins) are stale, not that reality changed.
+    if _refuse_inconsistent_overwrite(args.out, consistency):
+        print(
+            "%s: rebuild FAILS the sim-consistency check (%d failure(s): %s) "
+            "but the existing feed passed it — KEEPING the existing feed. Fix "
+            "the sim conditioning (shootouts/results/pins) and rebuild, or "
+            "set WCA_ALLOW_INCONSISTENT=1 to force the overwrite."
+            % (args.out, len(consistency.get("failures") or []),
+               "; ".join(
+                   "%s @%s sum=%s" % ("+".join(f.get("teams", [])),
+                                      f.get("stage", f.get("check", "?")),
+                                      f.get("sum"))
+                   for f in (consistency.get("failures") or [])) or "n/a"),
+            file=sys.stderr,
+        )
+        return 0
 
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as fh:
