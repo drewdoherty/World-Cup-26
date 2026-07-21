@@ -686,6 +686,32 @@
       "score": "1-2",
       "outcome": "away",
       "kickoff_utc": "2026-07-11T21:01:00Z"
+    },
+    {
+      "date": "2026-07-14",
+      "fixture": "France vs Spain",
+      "score": "0-2",
+      "outcome": "away",
+      "kickoff_utc": "2026-07-14T19:00:00Z"
+    },
+    {
+      "date": "2026-07-15",
+      "fixture": "England vs Argentina",
+      "score": "1-2",
+      "outcome": "away",
+      "kickoff_utc": "2026-07-15T19:00:00Z"
+    },
+    {
+      "date": "2026-07-18",
+      "fixture": "France vs England",
+      "score": "4-6",
+      "outcome": "away"
+    },
+    {
+      "date": "2026-07-19",
+      "fixture": "Spain vs Argentina",
+      "score": "1-0",
+      "outcome": "home"
     }
   ],
   "_comment": "Auto-derived from data/raw/martj42_cleaned.csv by scripts/wca_build_wc2026_results.py. One row per PLAYED 2026 World Cup fixture (date>=2026-06-11, tournament contains 'World', numeric scores). outcome (home/draw/away) is computed from the score; fixture names are canonicalised. kickoff_utc is carried from a real source (the prior file or the model-predictions log) only — omitted, never invented, when unavailable; consumers fall back to date. Re-run this script to refresh; do not hand-edit."
