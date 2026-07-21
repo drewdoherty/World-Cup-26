@@ -384,8 +384,18 @@ class TestActionableOutputInvariance:
         }
         new_recs, new_withheld = br.build_advancement_futures(adv, _pm_pool(), adv_age_secs=10)
         old_recs, old_withheld = br_baseline.build_advancement_futures(adv, _pm_pool(), adv_age_secs=10)
-        assert new_recs == old_recs, (
-            "actionable advancement_futures changed by telemetry-only edit:\n"
+        # Side-aware position fields (fix 2026-07-14) are ADDITIVE on every
+        # actionable row: side / position_prob / position_bucket /
+        # position_price. Strip them so this pin keeps proving that every
+        # field the baseline emitted is untouched — this all-YES fixture must
+        # still match the baseline's gates, EV, stakes and ordering exactly.
+        _additive_2026_07_14 = {"side", "position_prob", "position_bucket",
+                                "position_price"}
+        stripped = [{k: v for k, v in r.items() if k not in _additive_2026_07_14}
+                    for r in new_recs]
+        assert stripped == old_recs, (
+            "actionable advancement_futures changed beyond the documented "
+            "additive side-aware fields:\n"
             "old=%r\nnew=%r" % (old_recs, new_recs)
         )
         assert len(new_withheld) >= len(old_withheld)

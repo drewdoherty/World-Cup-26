@@ -59,6 +59,11 @@ def find_cross_feed_duplicates(
     for leg in event_market_legs:
         if float(leg.get("stake_usd") or 0.0) <= 0.0:
             continue
+        # Side guard (2026-07-14): a lay/fade advance leg pays when the team
+        # does NOT advance — the OPPOSITE exposure to a backed futures rung,
+        # not the same bet. Never pair it. Missing side = legacy back leg.
+        if str(leg.get("side") or "back").strip().lower() == "lay":
+            continue
         key = same_bet_key(leg.get("team"), leg.get("tie_stage"))
         if key is None:
             continue
@@ -67,6 +72,14 @@ def find_cross_feed_duplicates(
     dupes: List[Dict[str, Any]] = []
     for leg in advancement_futures_legs:
         if float(leg.get("stake") or 0.0) <= 0.0:
+            continue
+        # Side guard (2026-07-14): advancement_futures rows are SIDED now
+        # (side-aware position bucketing). A NO-side rung pays when the team
+        # does NOT reach the stage — the OPPOSITE of an event-market "team to
+        # advance" back leg on the same (team, stage). Pairing them would
+        # zero one side of what is actually a partial hedge. Missing side =
+        # legacy YES-only feed.
+        if str(leg.get("side") or "YES").strip().upper() == "NO":
             continue
         key = same_bet_key(leg.get("team"), leg.get("stage"))
         if key is None:

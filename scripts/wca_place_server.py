@@ -121,6 +121,13 @@ def _load_and_validate(rec_id: str) -> Tuple[Optional[Dict[str, Any]], Optional[
                 return None, "rec is stale (%s)" % (r.get("stale_reason") or "stale")
             if str(r.get("venue")) != "polymarket":
                 return None, "rec venue is not polymarket"
+            # Mirror of wca_pm_fire._validate_rec's side guard (2026-07-14):
+            # the fire path buys the YES token only — refuse a NO-side rec
+            # here too rather than round-tripping to the mini to be refused.
+            if str(r.get("side") or "YES").strip().upper() != "YES":
+                return None, ("rec is NO-side — the fire path buys YES "
+                              "tokens only; trade NO positions via the "
+                              "bot's parked-order path")
             return r, None
     return None, "rec id %r not found in bet_recs" % rec_id
 

@@ -157,6 +157,43 @@ def longshot_no_cash(model_prob):
     return float(model_prob or 0.0) < LONGSHOT_PROB
 
 
+# Sides whose position pays out WITH the quoted outcome vs AGAINST it.
+_POSITION_SIDE_SAME = frozenset({"yes", "back"})
+_POSITION_SIDE_FLIP = frozenset({"no", "lay"})
+
+
+def position_prob(model_prob, side):
+    """Model probability that the POSITION ACTUALLY HELD pays out (2026-07-14).
+
+    THE RULE: the bucket (:func:`prob_bucket` / :func:`bucket_rank`) and the
+    cash floor (:func:`longshot_no_cash`) key on the probability of the
+    POSITION HELD, not on the market's headline/YES outcome. Buying NO on a
+    market whose YES outcome the model rates 0.2256 is a 0.7744 position —
+    moneyline bucket, cash-eligible; a YES/back position at 0.17 is still a
+    longshot (no cash). Every surface that buckets or cash-gates a SIDED
+    position (Polymarket YES/NO, exchange back/lay) must route the probability
+    through this helper before calling the bucket / cash-floor predicates.
+
+    * ``side`` in {"YES", "back"} (case-insensitive), or ``None``/"" (no side
+      concept — the outcome itself is the position) -> ``model_prob``.
+    * ``side`` in {"NO", "lay"} (case-insensitive) -> ``1 - model_prob``.
+    * any other side raises ``ValueError`` — a mistyped side silently treated
+      as YES/back would mislabel a real-money position.
+    * ``model_prob=None`` returns ``None``, which FAILS SAFE downstream
+      (``prob_bucket(None)`` -> longshot; ``longshot_no_cash(None)`` -> True)
+      instead of inventing a 1.0 NO-side probability from a missing input.
+    """
+    if model_prob is None:
+        return None
+    s = "" if side is None else str(side).strip().lower()
+    if not s or s in _POSITION_SIDE_SAME:
+        return float(model_prob)
+    if s in _POSITION_SIDE_FLIP:
+        return 1.0 - float(model_prob)
+    raise ValueError(
+        "position_prob: unknown side %r (expected YES/NO/back/lay)" % (side,))
+
+
 def resolve_market_kind(*hints):
     """Resolve a candidate's market category -> ``MARKET_MATCH`` / ``MARKET_FUTURES``.
 

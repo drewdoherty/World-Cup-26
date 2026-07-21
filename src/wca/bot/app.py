@@ -2559,12 +2559,26 @@ def handle_today(db_path: str = "data/wca.db",
                 # on every row. Feed order is preserved (the feed is already
                 # rule-sorted by wca_betrecs via wca.selection).
                 model_p = r.get("model_prob")
+                sel = r.get("selection") or r.get("stage") or "?"
+                # Side-aware position (fix 2026-07-14): a NO-side advancement
+                # row buckets/prices/EVs on the POSITION held (buy NO), so the
+                # bucket tag, model % and market ¢ must show the position's
+                # numbers (position_prob / position_price), never the raw
+                # reach prob next to a NO-side EV — and the selection is
+                # tagged NO so a fade never reads as backing the team.
+                # YES rows (and every non-advancement row) are unchanged.
+                is_no = str(r.get("side") or "YES").upper() == "NO"
+                if is_no:
+                    model_p = r.get("position_prob", model_p)
+                    sel = "NO %s (fade)" % sel
                 ev = r.get("ev_net") if r.get("ev_net") is not None else r.get("ev")
                 ev = float(ev) if ev is not None else None
                 # PM advancement rows carry pm_price as a probability -> ¢
                 # (¢ IS a percent); book rows carry a decimal price -> implied %.
                 if r.get("pm_price") is not None:
-                    mkt_str = "%.0f¢ (PM)" % (float(r["pm_price"]) * 100.0)
+                    px = (r.get("position_price", r["pm_price"]) if is_no
+                          else r["pm_price"])
+                    mkt_str = "%.0f¢ (PM)" % (float(px) * 100.0)
                 else:
                     mkt_str = implied_pct(r.get("price") or r.get("odds"))
                 lines.append(
@@ -2572,7 +2586,7 @@ def handle_today(db_path: str = "data/wca.db",
                     % (n_act + 1, label,
                        bucket_tag(model_p),
                        r.get("match") or r.get("fixture") or r.get("team") or "?",
-                       r.get("selection") or r.get("stage") or "?",
+                       sel,
                        pct(model_p) if model_p is not None else "?",
                        mkt_str,
                        ev_str(ev) if ev is not None else "?",

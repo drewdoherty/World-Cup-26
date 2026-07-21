@@ -116,6 +116,18 @@ def _validate_rec(rec: Dict[str, Any]) -> Optional[str]:
         return "rec is stale (%s) — refusing" % (rec.get("stale_reason") or "stale")
     if str(rec.get("venue")) != "polymarket":
         return "rec venue is %r, not 'polymarket' — refusing" % rec.get("venue")
+    # Side guard (2026-07-14): bet_recs advancement rows are SIDED now
+    # (side-aware position bucketing) — a NO-side rec recommends BUYING the
+    # NO token, but this fire path re-resolves the rec's team+stage to the
+    # YES token only (_yes_token_and_price) and would place the exact WRONG
+    # side of the recommendation. Fail closed; NO-side positions go through
+    # the bot's /pm parked-order path, which prices the sided token. A
+    # missing field is a legacy YES-only feed — allowed unchanged.
+    if str(rec.get("side") or "YES").strip().upper() != "YES":
+        return ("rec side is %r — this fire path resolves and buys the YES "
+                "token only; a NO-side advancement rec must be traded via "
+                "the bot's parked-order path (refusing rather than buying "
+                "the wrong side)" % rec.get("side"))
     if not rec.get("team") or not rec.get("stage"):
         return "rec missing team/stage — cannot re-resolve"
     return None

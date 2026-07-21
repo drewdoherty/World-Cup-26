@@ -99,3 +99,31 @@ def test_resolve_duplicate_ties_favour_event_market():
             "event_market": _em_leg("England", "SF", ev=0.05),
             "advancement_futures": _af_leg("England", "SF", ev_net=0.05)}
     assert resolve_duplicate(dupe) == "advancement_futures"
+
+
+def test_no_side_advancement_leg_is_not_deduped():
+    # Side guard (2026-07-14): a NO-side futures rung ("France does NOT reach
+    # SF") is the OPPOSITE exposure to the event-market "France to advance"
+    # back leg — a partial hedge, not the same bet. Zeroing either would be
+    # wrong; the pair must not be flagged.
+    em = [_em_leg("France", "SF", fixture="France vs Spain")]
+    af = [dict(_af_leg("France", "SF", id_="france_sf_pm"), side="NO")]
+    assert find_cross_feed_duplicates(em, af) == []
+
+
+def test_yes_side_and_legacy_advancement_legs_still_dedup():
+    em = [_em_leg("England", "SF")]
+    # Explicit YES side: same bet as the em back leg -> still flagged.
+    af_yes = [dict(_af_leg("England", "SF", id_="england_sf_pm"), side="YES")]
+    assert len(find_cross_feed_duplicates(em, af_yes)) == 1
+    # Legacy feed without a side field = YES throughout -> unchanged.
+    af_legacy = [_af_leg("England", "SF", id_="england_sf_pm")]
+    assert len(find_cross_feed_duplicates(em, af_legacy)) == 1
+
+
+def test_lay_side_event_market_leg_is_not_deduped():
+    # Mirror guard on the event-market side: a lay/fade advance leg pays when
+    # the team does NOT advance — never pair it with a backed futures rung.
+    em = [dict(_em_leg("England", "SF"), side="lay")]
+    af = [_af_leg("England", "SF", id_="england_sf_pm")]
+    assert find_cross_feed_duplicates(em, af) == []

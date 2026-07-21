@@ -54,6 +54,8 @@ from wca.selection import (  # noqa: E402  — canonical desk selection rule
     hours_out as _sel_hours_out,
     hours_out_term,
     longshot_no_cash,
+    position_prob,
+    prob_bucket,
 )
 
 # ---------------------------------------------------------------------------
@@ -918,10 +920,48 @@ def build_advancement_futures(
                 })
                 continue
 
-            # Fee-adjusted EV: back YES at pm_price, fee = PM_FEE_RATE×p×(1-p)
-            fee = _pm_fee(pm_price)
-            net_cost = pm_price + fee
-            ev = p_model - net_cost
+            # Side-aware position (fix 2026-07-14). The feed names the traded
+            # side per pm entry (YES/NO since 2026-07-07) and its edge_adj /
+            # ask / stake_usd belong to THAT side — bucket, cash floor, EV and
+            # Kelly must all key on the probability of the POSITION HELD
+            # (wca.selection.position_prob), never the raw YES/reach prob.
+            # Live bug this fixes (build 2026-07-14): France win — model YES
+            # 0.2256, side NO, edge_adj +0.157, feed stake $79.80 — the old
+            # YES-only maths computed ev = 0.2256 - (0.3905 + fee) = -0.172,
+            # withheld it at edge_below_floor, and would have longshot-blocked
+            # the 0.7744 moneyline-strength NO position anyway. Feeds without
+            # ``side`` (pre-2026-07-07) are YES throughout — identical maths
+            # to before.
+            side = pm_info.get("side")
+            side = side.strip().upper() if isinstance(side, str) else "YES"
+            if side not in ("YES", "NO"):
+                side = "YES"
+            p_position = position_prob(p_model, side)
+            # NOTE: the persisted ``selection`` field stays "reach_<STAGE>"
+            # verbatim for BOTH sides (unchanged, below) — exposure_dashboard's
+            # ``_SELECTION_STAGE_RE`` / tie_exposure / the fire-park path all
+            # pattern-match that literal string; renaming it for NO positions
+            # is a separate, riskier change (nested-path correlation direction
+            # flips on a NO leg) intentionally left out of this fix.
+
+            # Buy price of the POSITION. YES keeps the historical YES-mid
+            # basis (byte-identical to the pre-fix behaviour); NO uses the
+            # executable NO ask the feed's edge_adj was computed against
+            # (pm[stage].ask), falling back to the symmetric 1-mid for an
+            # older feed that lacks it (mirrors advancement._no_ask).
+            if side == "NO":
+                ask = pm_info.get("ask")
+                buy_price = (float(ask)
+                             if isinstance(ask, (int, float)) and 0.0 < float(ask) < 1.0
+                             else 1.0 - pm_price)
+            else:
+                buy_price = pm_price
+
+            # Fee-adjusted EV of the position: buy `side` at buy_price,
+            # fee = PM_FEE_RATE×p×(1-p).
+            fee = _pm_fee(buy_price)
+            net_cost = buy_price + fee
+            ev = p_position - net_cost
 
             # Resolved-market guard (2026-07-08): a YES quote pinned at ≥0.98
             # or ≤0.02 means the market has effectively settled — any "edge"
@@ -935,6 +975,7 @@ def build_advancement_futures(
                     "market": "advancement", "selection": "reach_%s" % stage,
                     "venue": "polymarket", "currency": "USD",
                     "model_prob": round(p_model, 4), "pm_price": round(pm_price, 4),
+                    "side": side, "position_prob": round(p_position, 4),
                     "ev_net": round(ev, 4), "stake": 0.0,
                     "withheld_reason": "resolved market (pm=%.2f) — outcome "
                                        "effectively decided; no tradable edge"
@@ -953,6 +994,7 @@ def build_advancement_futures(
                     "market": "advancement", "selection": "reach_%s" % stage,
                     "venue": "polymarket", "currency": "USD",
                     "model_prob": round(p_model, 4), "pm_price": round(pm_price, 4),
+                    "side": side, "position_prob": round(p_position, 4),
                     "ev_net": round(ev, 4), "stake": 0.0,
                     "withheld_reason": "edge_below_floor:%.4f<%.4f" % (ev, MIN_EDGE),
                     "reason_code": REASON_EDGE_BELOW_FLOOR,
@@ -966,6 +1008,7 @@ def build_advancement_futures(
                     "market": "advancement", "selection": "reach_%s" % stage,
                     "venue": "polymarket", "currency": "USD",
                     "model_prob": round(p_model, 4), "pm_price": round(pm_price, 4),
+                    "side": side, "position_prob": round(p_position, 4),
                     "ev_net": round(ev, 4), "stake": 0.0,
                     "withheld_reason": state_reason,
                     "reason_code": REASON_STATE_STALE,
@@ -976,23 +1019,37 @@ def build_advancement_futures(
             # 2026-07-07): a <25c model-prob advancement side is free-bet /
             # lottery only — never cash — so it is withheld from the actionable
             # feed even when +EV. (These sub-25c futures used to size a capped
-            # cash stake here; the REPLACE ruling zeroes them.)
-            if longshot_no_cash(p_model):
+            # cash stake here; the REPLACE ruling zeroes them.) FIX 2026-07-14:
+            # keys on ``p_position`` (the prob of the SIDE HELD), not the raw
+            # ``p_model`` YES/reach prob — a NO position on a <25% YES team is
+            # a >75% moneyline-strength holding, not a longshot (France win
+            # 2026-07-14: model YES 0.2256 -> NO position 0.7744; the old
+            # p_model gate wrongly zero-staked it. A YES/back position is
+            # unaffected: p_position == p_model there, byte-identical to
+            # before.
+            if longshot_no_cash(p_position):
                 withheld.append({
                     "id": "%s_%s_pm" % (team.lower().replace(" ", "_"), stage.lower()),
                     "team": team, "group": group, "stage": stage,
                     "market": "advancement", "selection": "reach_%s" % stage,
                     "venue": "polymarket", "currency": "USD",
                     "model_prob": round(p_model, 4), "pm_price": round(pm_price, 4),
+                    "side": side, "position_prob": round(p_position, 4),
                     "ev_net": round(ev, 4), "stake": 0.0,
-                    "withheld_reason": "model-prob longshot (%.0f%% < 25%%) — no cash "
-                                       "(free-bet/lottery only)" % (p_model * 100),
+                    "withheld_reason": "position-prob longshot (%.0f%% < 25%% on "
+                                       "the %s side) — no cash (free-bet/lottery "
+                                       "only)" % (p_position * 100, side),
                     "reason_code": REASON_LONGSHOT_NO_CASH,
                 })
                 continue
 
+            # Kelly on the POSITION's win prob (fix 2026-07-14): ``price`` is
+            # already the decimal price of the side actually bought
+            # (buy_price above), so the win-prob argument must match — the
+            # raw p_model would misprice a NO position's edge into the Kelly
+            # fraction. YES/back is unaffected (p_position == p_model there).
             price = 1.0 / net_cost if net_cost > 0 else 0.0
-            stake = _kelly_stake(p_model, price, bankroll, kelly_frac, PER_BET_CAP)
+            stake = _kelly_stake(p_position, price, bankroll, kelly_frac, PER_BET_CAP)
             stake = min(stake, max_stake)
 
             # Same-team nested-path exposure cap (fix 2026-07-08). One team's
@@ -1004,14 +1061,17 @@ def build_advancement_futures(
             # rung's ¼-Kelly); respect it here as a HARD per-rung ceiling so
             # this builder's independent re-derivation can never re-stack the
             # path (observed: Morocco SF $112 + Morocco Final $33 on one
-            # path). YES-side only — this loop only ever backs YES, and a
-            # NO-side feed stake is a different exposure (never co-capped).
-            # Older feeds without the field are unaffected. Reduces only.
+            # path). BOTH sides since the 2026-07-14 side-aware fix: this
+            # loop now sizes whichever side the feed priced, and the feed's
+            # ``stake_usd`` is path-capped per (team, side) family (France
+            # NO win $79.80 + NO Final $79.80 = one capped NO path) — the
+            # pre-fix ``side == "YES"`` filter only existed because the loop
+            # could never size a NO position at all. Older feeds without the
+            # field are unaffected. Reduces only.
             path_capped = False
             feed_rung_stake = pm_info.get("stake_usd")
             if (
-                pm_info.get("side") == "YES"
-                and isinstance(feed_rung_stake, (int, float))
+                isinstance(feed_rung_stake, (int, float))
                 and float(feed_rung_stake) < stake
             ):
                 stake = float(feed_rung_stake)
@@ -1026,6 +1086,7 @@ def build_advancement_futures(
                     "market": "advancement", "selection": "reach_%s" % stage,
                     "venue": "polymarket", "currency": "USD",
                     "model_prob": round(p_model, 4), "pm_price": round(pm_price, 4),
+                    "side": side, "position_prob": round(p_position, 4),
                     "ev_net": round(ev, 4), "stake": 0.0,
                     "withheld_reason": "stake rounded to zero (kelly=%.2f, bankroll=%.2f)" % (stake, bankroll),
                     "reason_code": REASON_ZERO_STAKE,
@@ -1063,6 +1124,20 @@ def build_advancement_futures(
                 "pm_fee": round(fee, 4),
                 "price": round(price, 4),
                 "edge_adj": round(edge_adj, 4),
+                # Side-aware position (fix 2026-07-14): the prob of the SIDE
+                # HELD (== model_prob for YES/back; 1-model_prob for NO/lay),
+                # its canonical wca.selection bucket — the desk ordering
+                # below sorts on THIS, never the raw model_prob/reach prob —
+                # and the buy price of that side (== pm_price for YES; the
+                # executable NO ask for NO) so display surfaces can pair the
+                # position's model % with the position's price, never a NO
+                # EV with a YES quote. ``pm_price`` itself stays the YES mid
+                # verbatim (wca_pm_fire's price-sanity band and every legacy
+                # consumer read it as the YES quote).
+                "side": side,
+                "position_prob": round(p_position, 4),
+                "position_bucket": prob_bucket(p_position),
+                "position_price": round(buy_price, 4),
                 "ev_net": round(ev, 4),
                 "stake": round(stake, 2),
                 "action_label": "ADD",
@@ -1092,7 +1167,7 @@ def build_advancement_futures(
                 actionable.append(rec)
 
     # Canonical desk ordering (wca.selection; user 2026-07-07):
-    #   1. model-prob bucket (moneyline > mid > longshot), ALWAYS;
+    #   1. POSITION-prob bucket (moneyline > mid > longshot), ALWAYS;
     #   2. further-out first — deeper knockout stage (higher = further out);
     #   3. EV descending breaks ties within a bucket + stage tier.
     # `_stage_further_out` is the inverse of the old nearest-first `_stage_order`:
@@ -1102,12 +1177,17 @@ def build_advancement_futures(
     # (the proven +6-7% early edge) via this stage-depth key — it never used
     # wca.selection.hours_out, so it is intentionally UNCHANGED (only match
     # markets had their hours-out term neutralised). Cf. `_singles_sort_key`.
+    # Bucket key fix (2026-07-14): keys on ``position_prob`` (every row above
+    # sets it), not the raw ``model_prob`` — a NO position on a <25% YES team
+    # is a moneyline-strength holding and must sort as one (France win
+    # 2026-07-14: model YES 22.56% -> NO position 77.44% -> moneyline, not
+    # longshot). YES/back rows are unaffected (position_prob == model_prob).
     _stage_further_out = {
         "group_winner": 0, "R32": 1, "R16": 2, "QF": 3, "SF": 4,
         "Final": 5, "win": 6,
     }
     actionable.sort(key=lambda r: (
-        bucket_rank(r["model_prob"]),
+        bucket_rank(r["position_prob"]),
         -_stage_further_out.get(r["stage"], 0),
         -r["ev_net"],
     ))
